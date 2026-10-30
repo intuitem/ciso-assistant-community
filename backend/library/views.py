@@ -6,7 +6,17 @@ import uuid
 import yaml
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
+from django.db.models import (
+    Case,
+    Exists,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from django.db import models
 from django.utils.timezone import now
 from django_filters.rest_framework import DjangoFilterBackend
@@ -34,6 +44,11 @@ from rest_framework.parsers import (
 from django.http import HttpResponse
 
 import django_filters as df
+from core.cel_service import (
+    validate_framework_expressions,
+    validate_quick_form_expressions,
+)
+from core.quick_form_apply import validate_on_accept_document
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
 from core.models import (
@@ -44,15 +59,20 @@ from core.models import (
     LoadedLibrary,
     Question,
     QuestionChoice,
+    QuickForm,
+    QuickFormPage,
+    QuickFormResponse,
     RequirementNode,
     StoredLibrary,
     match_urn,
 )
 from core.sandbox import SandboxTimeoutError, SandboxViolationError
-from core.views import BaseModelViewSet, GenericFilterSet
+from core.utils import yaml_safe_load
+from core.views import BaseModelViewSet, GenericFilterSet, SmartOrderingFilter
 from iam.models import RoleAssignment, Folder, Permission
 from library import builder
 from library import framework_editor as fw_editor
+from library import quick_form_editor as qf_editor
 from library.validators import validate_file_extension
 from .helpers import update_translations
 from .utils import LibraryImporter, preview_library
@@ -61,6 +81,7 @@ from .utils import LibraryImporter, preview_library
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .serializers import (
     LibraryDraftReadSerializer,
     LibraryDraftWriteSerializer,
@@ -185,7 +206,19 @@ class StoredLibraryViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "urn", "ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        return super().get_queryset().prefetch_related("filtering_labels")
+        qs = super().get_queryset().prefetch_related("filtering_labels")
+        if self.action != "list":
+            return qs
+        # `content` is the whole library (megabytes for the larger ones): the
+        # list reads it for presets only, so it is left behind and the preset
+        # check runs in SQL.
+        return qs.defer("content").annotate(
+            _is_preset=Case(
+                When(content__preset__isnull=False, then=Value(True)),
+                default=Value(False),
+                output_field=models.BooleanField(),
+            )
+        )
 
     def get_serializer_class(self, **kwargs):
         if self.action == "list":
@@ -296,7 +329,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         library_objects = lib.content  # We may need caching for this
-        if not (framework := library_objects.get("framework")):
+        if not (framework := StoredLibrary.framework_of(library_objects)):
             return Response(
                 data="This library doesn't contain any framework.",
                 status=HTTP_400_BAD_REQUEST,
@@ -704,6 +737,12 @@ class LoadedLibraryViewSet(BaseModelViewSet):
     lookup_value_regex = r"[\w.:-]+"
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
+    # Instantiating reads library content; the real gate is add_workflow on
+    # the TARGET folder, checked inside the action.
+    permission_overrides = {
+        "instantiate_workflows": "view_loadedlibrary",
+        "preview_workflows": "view_loadedlibrary",
+    }
 
     search_fields = ["name", "description", "urn", "ref_id"]
 
@@ -769,6 +808,96 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
+
+    @action(detail=True, methods=["post"], url_path="instantiate-workflows")
+    def instantiate_workflows(self, request, pk):
+        """Create fresh, divorced workflows from this library's documents in a
+        chosen folder — repeatable at will, no
+        unload/reload dance. Reads the matching StoredLibrary content: loaded
+        workflows are divorced rows, so the documents only live in the store."""
+        from django.db import transaction
+
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            import_workflow,
+        )
+
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
+        except Exception:
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+
+        stored = StoredLibrary.objects.filter(urn=lib.urn, locale=lib.locale).first()
+        entries = (stored.content if stored else {}).get("workflows")
+        if not entries:
+            return Response(
+                {"error": "storedLibraryContentMissing"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            folder_id = uuid.UUID(str(request.data.get("folder")))
+        except ValueError, TypeError, AttributeError:
+            return Response({"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST)
+        folder = Folder.objects.filter(id=folder_id).first()
+        if folder is None:
+            return Response({"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_workflow"),
+            folder=folder,
+        ):
+            return Response({"error": "permissionDenied"}, status=HTTP_403_FORBIDDEN)
+
+        warnings = []
+        created = []
+        try:
+            with transaction.atomic():
+                for entry in entries:
+                    workflow, entry_warnings = import_workflow(
+                        entry,
+                        folder,
+                        user=request.user,
+                        source_version=stored.version,
+                    )
+                    created.append({"id": str(workflow.id), "name": workflow.name})
+                    warnings.extend(entry_warnings)
+        except WorkflowImportError as e:
+            return Response({"error": e.message}, status=HTTP_400_BAD_REQUEST)
+        return Response({"workflows": created, "warnings": warnings})
+
+    @action(detail=True, methods=["get"], url_path="preview-workflows")
+    def preview_workflows(self, request, pk):
+        """Read-only preview of this library's workflow documents:
+        each entry's graph + required secrets, for a look-before-instantiate.
+        Same stored-content source as instantiate_workflows (loaded workflows
+        are divorced rows, so the documents only live in the store)."""
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
+        except Exception:
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+
+        stored = StoredLibrary.objects.filter(urn=lib.urn, locale=lib.locale).first()
+        entries = (stored.content if stored else {}).get("workflows") or []
+        return Response(
+            {
+                "workflows": [
+                    {
+                        "ref_id": entry.get("ref_id", ""),
+                        "name": entry.get("name", ""),
+                        "graph": entry.get("graph", {}),
+                        "requires": entry.get("requires", {}),
+                    }
+                    for entry in entries
+                ]
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def tree(
@@ -865,7 +994,7 @@ class MappingLibrariesList(generics.ListAPIView):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering_fields = "__all__"
 
@@ -878,10 +1007,8 @@ class MappingLibrariesList(generics.ListAPIView):
             | Q(content__requirement_mapping_sets__isnull=False)
         ).distinct()
 
-        viewable_libraries, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(),
-            self.request.user,
-            StoredLibrary,
+        viewable_libraries = RoleAssignment.get_viewable_object_ids(
+            self.request.user, StoredLibrary
         )
         return qs.filter(id__in=viewable_libraries)
 
@@ -905,9 +1032,7 @@ def _get_readable_stored_library(user, pk_or_urn) -> StoredLibrary | None:
 
     Reading a stored library follows the regular folder-scoped RBAC model
     like any other object; an unreadable library is indistinguishable from
-    a missing one. (Stored rows are is_published, so any role holding
-    view_storedlibrary keeps seeing the catalog — the check only bites
-    where visibility is actually restricted.)
+    a missing one.
     """
     stored = _get_stored_library(pk_or_urn)
     if stored is not None and RoleAssignment.is_object_readable(
@@ -955,6 +1080,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
         "export": "view_librarydraft",
         "framework_editor_preview": "view_librarydraft",
         "add_framework": "change_librarydraft",
+        "add_quick_form": "change_librarydraft",
+        "quick_form_editor_preview": "view_librarydraft",
         "upsert_object": "change_librarydraft",
         "delete_object": "change_librarydraft",
         "preset_editor_preview": "view_librarydraft",
@@ -1279,7 +1406,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             return Response({"error": "fileTooLarge"}, status=HTTP_400_BAD_REQUEST)
         try:
             validate_file_extension(attachment)
-            document = yaml.safe_load(attachment.read())
+            document = yaml_safe_load(attachment.read())
         except (yaml.YAMLError, ValidationError, DRFValidationError) as e:
             return Response(
                 {"error": "invalidYamlFile", "detail": str(e)},
@@ -1416,6 +1543,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 overwrite=bool(request.data.get("overwrite")),
             )
         except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         dependencies = set(draft.dependencies or []) | set(extraction["dependencies"])
         dependencies.discard(draft.effective_urn)
@@ -1465,10 +1594,293 @@ class LibraryDraftViewSet(BaseModelViewSet):
         """Audits on a live framework the user is allowed to see. We only ever
         surface what the caller may read (RBAC), never the raw cross-scope set.
         """
-        viewable, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, ComplianceAssessment
-        )
+        viewable = RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
         return ComplianceAssessment.objects.filter(framework=framework, id__in=viewable)
+
+    @staticmethod
+    def _pick_quick_form(content: dict, quick_form_urn):
+        """Resolve the target quick form object from a normalized document.
+
+        Returns (quick_form, error_response): exactly one of the two is None.
+        """
+        quick_forms = content.get("quick_forms") or []
+        if not quick_forms:
+            return None, Response(
+                {"error": "noQuickFormInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        if quick_form_urn:
+            lowered = str(quick_form_urn).lower()
+            for quick_form in quick_forms:
+                if str(quick_form.get("urn", "")).lower() == lowered:
+                    return quick_form, None
+            return None, Response(
+                {"error": "quickFormNotFoundInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        if len(quick_forms) > 1:
+            return None, Response(
+                {
+                    "error": "quickFormUrnRequired",
+                    "quick_forms": [
+                        {"urn": f.get("urn"), "name": f.get("name")}
+                        for f in quick_forms
+                    ],
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
+        return quick_forms[0], None
+
+    @action(detail=True, methods=["post"], url_path="add-quick-form")
+    def add_quick_form(self, request, pk):
+        """Add a skeleton quick form object (one empty page) to the draft."""
+        draft = self.get_object()
+        if not (
+            re.match(LibraryDraft.IDENTITY_REGEX, draft.packager)
+            and re.match(LibraryDraft.IDENTITY_REGEX, draft.ref_id)
+        ):
+            return Response(
+                {"error": "identityNotMintable"}, status=HTTP_400_BAD_REQUEST
+            )
+        content = builder.normalize_objects(draft.content or {})
+        quick_forms = content.setdefault("quick_forms", [])
+        if quick_forms:
+            return Response(
+                {"error": "singleObjectOfKindPerLibrary", "field": "quick_forms"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        quick_form_urn = builder.object_urn_base(
+            draft.packager, draft.ref_id, "quick_forms"
+        )
+        quick_forms.append(
+            {
+                "urn": quick_form_urn,
+                "ref_id": request.data.get("ref_id") or draft.ref_id,
+                "name": request.data.get("name") or draft.name,
+                "pages": [
+                    {
+                        "urn": f"{qf_editor.page_base_urn(quick_form_urn)}:page-1",
+                        "ref_id": "page-1",
+                        "name": "Page 1",
+                    }
+                ],
+            }
+        )
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response(
+            {"status": "ok", "quick_form_urn": quick_form_urn},
+            status=HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["get", "put"], url_path="quick-form-editor")
+    def quick_form_editor(self, request, pk):
+        """Bridge to the visual editor for the quick form of the draft.
+
+        Same protocol as framework-editor: GET returns the editor doc, PUT
+        converts an editor doc back and saves it into the draft document.
+        """
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+
+        if request.method == "GET":
+            quick_form, error = self._pick_quick_form(
+                content, request.query_params.get("quick_form_urn")
+            )
+            if error is not None:
+                return error
+            quick_form_urn = str(quick_form.get("urn", "")).lower()
+            live = QuickForm.objects.filter(urn=quick_form_urn).first()
+            return Response(
+                {
+                    "status": "ok",
+                    "quick_form_urn": quick_form_urn,
+                    "has_responses": bool(live and live.responses.exists()),
+                    "editing_draft": qf_editor.quick_form_to_editor_doc(
+                        quick_form, locale=draft.locale
+                    ),
+                }
+            )
+
+        editor_doc = request.data.get("editing_draft")
+        if not isinstance(editor_doc, dict):
+            return Response(
+                {"error": "editingDraftMustBeAnObject"}, status=HTTP_400_BAD_REQUEST
+            )
+        quick_form, error = self._pick_quick_form(
+            content, request.data.get("quick_form_urn")
+        )
+        if error is not None:
+            return error
+        urn_map: dict = {}
+        try:
+            new_quick_form = qf_editor.editor_doc_to_quick_form_object(
+                editor_doc, existing=quick_form, urn_map_out=urn_map
+            )
+        except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        # An outcome rule written against the wrong context compiles but raises at
+        # evaluation, where it is swallowed and logged — the rule would just never
+        # fire. Catch it while the author is still looking at it.
+        if expression_errors := [
+            *validate_quick_form_expressions(new_quick_form),
+            *validate_on_accept_document(new_quick_form),
+        ]:
+            return Response(
+                {"error": "invalidExpressions", "details": expression_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        quick_forms = content["quick_forms"]
+        quick_forms[quick_forms.index(quick_form)] = new_quick_form
+        if shape_errors := builder.check_document_shape(content):
+            return Response(
+                {"error": "draftShapeInvalid", "details": shape_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response(
+            {
+                "status": "ok",
+                "quick_form_urn": new_quick_form["urn"],
+                "urn_map": urn_map,
+            }
+        )
+
+    @action(detail=True, methods=["post"], url_path="quick-form-fill-preview")
+    def quick_form_fill_preview(self, request, pk):
+        """The form as a respondent would meet it, straight from the draft.
+
+        Distinct from `quick-form-editor-preview`, which diffs the draft against the
+        live rows: this renders the pages and evaluates the real conditional
+        visibility, scoring and outcome rules against trial answers, so an author can
+        see what their logic actually does before publishing anything. Nothing is
+        stored — the answers live in the request body. Same pipeline as a loaded
+        form's preview (`core.quick_form_preview`).
+        """
+        from core.quick_form_preview import fill_preview
+
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        quick_form, error = self._pick_quick_form(
+            content, request.data.get("quick_form_urn")
+        )
+        if error is not None:
+            return error
+        editor_doc = request.data.get("editing_draft")
+        if isinstance(editor_doc, dict):
+            try:
+                quick_form = qf_editor.editor_doc_to_quick_form_object(
+                    editor_doc, existing=quick_form
+                )
+            except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        return Response(fill_preview(quick_form, request.data.get("answers")))
+
+    @action(detail=True, methods=["post"], url_path="quick-form-editor-preview")
+    def quick_form_editor_preview(self, request, pk):
+        """What would change on the live quick form if the draft were
+        published now, diffed by URN against the loaded rows."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        quick_form, error = self._pick_quick_form(
+            content, request.data.get("quick_form_urn")
+        )
+        if error is not None:
+            return error
+        editor_doc = request.data.get("editing_draft")
+        if isinstance(editor_doc, dict):
+            try:
+                quick_form = qf_editor.editor_doc_to_quick_form_object(
+                    editor_doc, existing=quick_form
+                )
+            except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        quick_form_urn = str(quick_form.get("urn", "")).lower()
+        live = QuickForm.objects.filter(urn=quick_form_urn).first()
+        live_pages = (
+            {page.urn: page for page in QuickFormPage.objects.filter(quick_form=live)}
+            if live
+            else {}
+        )
+        doc_pages = {
+            page["urn"]: page
+            for page in quick_form.get("pages") or []
+            if page.get("urn")
+        }
+        added = [urn for urn in doc_pages if urn not in live_pages]
+        removed = [urn for urn in live_pages if urn not in doc_pages]
+        doc_question_urns = set()
+        doc_choice_urns = set()
+        for page in doc_pages.values():
+            for q_urn, q_data in (page.get("questions") or {}).items():
+                doc_question_urns.add(str(q_urn).lower())
+                for choice in q_data.get("choices") or []:
+                    if choice.get("urn"):
+                        doc_choice_urns.add(str(choice["urn"]).lower())
+        live_question_urns = (
+            set(
+                Question.objects.filter(page__quick_form=live).values_list(
+                    "urn", flat=True
+                )
+            )
+            if live
+            else set()
+        )
+        live_choice_urns = (
+            set(
+                QuestionChoice.objects.filter(
+                    question__page__quick_form=live
+                ).values_list("urn", flat=True)
+            )
+            if live
+            else set()
+        )
+
+        def details(urns, source, limit=20):
+            entries = []
+            for urn in urns[:limit]:
+                page = source[urn]
+                name = page.get("name") if isinstance(page, dict) else page.name
+                entries.append({"name": name or urn, "assessable": True})
+            return entries
+
+        viewable = (
+            RoleAssignment.get_viewable_object_ids(request.user, QuickFormResponse)
+            if live
+            else []
+        )
+        return Response(
+            {
+                "added": {
+                    "requirements": len(added),
+                    "questions": len(doc_question_urns - live_question_urns),
+                    "choices": len(doc_choice_urns - live_choice_urns),
+                    "details": details(added, doc_pages),
+                },
+                "removed": {
+                    "requirements": len(removed),
+                    "questions": len(live_question_urns - doc_question_urns),
+                    "choices": len(live_choice_urns - doc_choice_urns),
+                    "details": details(removed, live_pages),
+                },
+                "breaking_changes": [],
+                "affected_audits": [
+                    {"id": str(response.id), "name": response.name}
+                    for response in QuickFormResponse.objects.filter(
+                        quick_form=live, id__in=viewable
+                    )
+                ]
+                if live
+                else [],
+            }
+        )
 
     @action(detail=True, methods=["get", "put"], url_path="framework-editor")
     def framework_editor(self, request, pk):
@@ -1516,12 +1928,22 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
         if error is not None:
             return error
+        urn_map: dict = {}
         try:
             new_framework = fw_editor.editor_doc_to_framework_object(
-                editor_doc, existing=framework
+                editor_doc, existing=framework, urn_map_out=urn_map
             )
         except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        # Same gate as quick forms: a rule that cannot evaluate would only be
+        # logged when an audit runs, and never fire.
+        if expression_errors := validate_framework_expressions(new_framework):
+            return Response(
+                {"error": "invalidExpressions", "details": expression_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
         frameworks = content["frameworks"]
         frameworks[frameworks.index(framework)] = new_framework
         # Shape gate before persisting, like every other content door: the
@@ -1537,7 +1959,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if self._sync_link_dependencies(draft, content, new_framework, request.user):
             update_fields.append("dependencies")
         draft.save(update_fields=update_fields)
-        return Response({"status": "ok", "framework_urn": new_framework["urn"]})
+        return Response(
+            {"status": "ok", "framework_urn": new_framework["urn"], "urn_map": urn_map}
+        )
 
     @staticmethod
     def _sync_link_dependencies(draft, content, framework, user) -> bool:
@@ -1605,6 +2029,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     editor_doc, existing=framework
                 )
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         framework_urn = str(framework.get("urn", "")).lower()
@@ -1779,9 +2205,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
         known = {str(s.get("library_urn", "")).lower() for s in sources}
         latest: dict = {}
-        accessible_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, StoredLibrary
-        )[0]
+        accessible_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, StoredLibrary
+        )
         rows = (
             StoredLibrary.objects.filter(id__in=accessible_ids)
             .filter(
@@ -2030,6 +2456,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
             try:
                 base = builder.leaf_object_base(draft.effective_urn, field)
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
             if field in builder.SINGLETON_OBJECT_FIELDS:
                 # The single object of its kind takes the bare family URN,
@@ -2062,7 +2490,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
             definition = {
                 key: candidate.get(key)
-                for key in ("probability", "impact", "risk", "grid")
+                for key in ("probability", "impact", "risk", "grid", "ebios_rm")
             }
             if matrix_errors := RiskMatrixViewSet._validate_json_definition(definition):
                 return Response(
@@ -2390,3 +2818,38 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "loaded_library": str(loaded.id) if loaded else None,
             }
         )
+
+
+class RequirementKnowledgeView(APIView):
+    """Requirements of shipped frameworks, loaded or not: ?framework=&ref_id=&search="""
+
+    def get(self, request):
+        from library.knowledge import find_requirements
+
+        p = request.query_params
+        return Response(
+            find_requirements(
+                request.user, p.get("framework"), p.get("ref_id"), p.get("search")
+            )
+        )
+
+
+class RequirementMappingKnowledgeView(APIView):
+    """What one requirement maps to: ?requirement=<urn|id> or ?source_framework=&ref_id=, plus &framework=<target>"""
+
+    def get(self, request):
+        from library.knowledge import requirement_mappings
+
+        p = request.query_params
+        if not (p.get("requirement") or p.get("ref_id")):
+            return Response({"error": "requirement or ref_id is required"}, status=400)
+        data = requirement_mappings(
+            request.user,
+            p.get("requirement"),
+            p.get("framework"),
+            p.get("source_framework"),
+            p.get("ref_id"),
+        )
+        if data is None:
+            return Response({"error": "requirement not found"}, status=404)
+        return Response(data)

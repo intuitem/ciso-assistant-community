@@ -24,14 +24,12 @@ def requirement_node(db):
         locale="en",
         default_locale=True,
         folder=folder,
-        is_published=True,
     )
     fw = Framework.objects.create(
         name="Sync Test Framework",
         urn="urn:test:sync:fw",
         folder=folder,
         library=lib,
-        is_published=True,
         locale="en",
         default_locale=True,
     )
@@ -40,7 +38,6 @@ def requirement_node(db):
         ref_id="SYNC-REQ-1",
         framework=fw,
         folder=folder,
-        is_published=True,
         assessable=True,
     )
 

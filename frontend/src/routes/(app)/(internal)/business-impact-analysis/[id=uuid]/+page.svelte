@@ -1,20 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import { invalidateAll } from '$app/navigation';
-	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { refreshAll } from '$app/navigation';
+	import ActivityTracker from '#lib/components/DataViz/ActivityTracker.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 
 	interface Props {
 		data: PageData;
@@ -36,7 +36,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -100,6 +100,12 @@
 				><i class="fa-solid fa-stopwatch mr-2"></i>{m.impactOverTime()}</Anchor
 			>
 			<Anchor
+				href={`${page.url.pathname}/dependencies`}
+				class="btn preset-filled-primary-500 h-fit"
+				breadcrumbAction="push"
+				><i class="fa-solid fa-sitemap mr-2"></i>{m.assetDependencies()}</Anchor
+			>
+			<Anchor
 				href={`${page.url.pathname}/report`}
 				class="btn preset-filled-primary-500 h-fit"
 				breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.report()}</Anchor
@@ -122,7 +128,9 @@
 				<div class="card p-4 bg-surface-50-950 shadow-xs grow">
 					<div class="font-bold text-xl mb-4">{m.recoveryInsights()}</div>
 					<div class="flex items-center justify-center">
-						<ActivityTracker metrics={data.metrics} />
+						{#key data.metrics}
+							<ActivityTracker metrics={data.metrics} />
+						{/key}
 					</div>
 				</div>
 				{#if page.data?.featureflags?.validation_flows}

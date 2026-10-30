@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { documentTypeLabel, documentTypeIcon } from '$lib/utils/documentTypes';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
+	import { documentTypeLabel, documentTypeIcon } from '#lib/utils/documentTypes.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -64,7 +64,7 @@
 					href="/document-templates/{t.id}/edit?next={encodeURIComponent(
 						`/document-templates/${t.id}`
 					)}"
-					class="btn btn-sm variant-filled-primary shrink-0"
+					class="btn btn-sm preset-filled-primary-500 shrink-0"
 				>
 					<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 				</a>

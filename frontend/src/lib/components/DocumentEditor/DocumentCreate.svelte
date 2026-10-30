@@ -2,15 +2,15 @@
 	import { superForm, defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { goto } from '$app/navigation';
-	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { DOCUMENT_TYPES } from '$lib/utils/documentTypes';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
+	import { DOCUMENT_TYPES } from '#lib/utils/documentTypes.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 
 	interface Props {
 		// Function/context — optional; the standalone flow leaves these unset. A
@@ -48,6 +48,7 @@
 		applied_controls: z.array(z.string()).optional().default(boundIds('applied_controls')),
 		task_templates: z.array(z.string()).optional().default(boundIds('task_templates')),
 		processings: z.array(z.string()).optional().default(boundIds('processings')),
+		reviewers: z.array(z.string()).optional().default([]),
 		filtering_labels: z.array(z.string()).optional().default([])
 	});
 	const _form = superForm(defaults(zod(schema)), {
@@ -98,6 +99,7 @@
 				'applied_controls',
 				'task_templates',
 				'processings',
+				'reviewers',
 				'filtering_labels'
 			] as const) {
 				for (const id of $form[f] ?? []) fd.append(f, id);
@@ -122,7 +124,7 @@
 
 <div class="space-y-5">
 	{#if error}
-		<aside class="variant-soft-error rounded p-3 text-sm">{error}</aside>
+		<aside class="preset-tonal-error rounded p-3 text-sm">{error}</aside>
 	{/if}
 
 	<TextField form={_form} field="ref_id" label={m.refId()} />
@@ -143,10 +145,24 @@
 	<AutocompleteSelect
 		form={_form}
 		field="classification"
-		optionsEndpoint="classification-levels"
+		optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
 		optionsLabelField="label"
 		label={m.classification()}
 		nullable
+	/>
+
+	<AutocompleteSelect
+		form={_form}
+		multiple
+		optionsEndpoint="actors?is_third_party=false"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="reviewers"
+		helpText={m.documentReviewersHelpText()}
+		label={m.reviewers()}
 	/>
 
 	<!-- Content source: the same document, provided three ways -->
@@ -213,6 +229,10 @@
 			optionsEndpoint="applied-controls"
 			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
+			optionsInfoFields={{
+				fields: [{ field: 'category', translate: true }],
+				position: 'prefix'
+			}}
 			field="applied_controls"
 			label={m.appliedControls()}
 		/>
@@ -239,7 +259,7 @@
 	<div class="border-t border-surface-200-800 pt-5">
 		<button
 			type="button"
-			class="btn variant-filled-primary w-full font-semibold shadow-sm transition-shadow hover:shadow-md"
+			class="btn preset-filled-primary-500 w-full font-semibold shadow-sm transition-shadow hover:shadow-md"
 			disabled={busy}
 			onclick={submit}
 		>

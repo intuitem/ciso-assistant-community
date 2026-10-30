@@ -258,7 +258,7 @@ User=ciso-assistant
 Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/frontend
 Environment="NODE_ENV=production"
-Environment="BODY_SIZE_LIMIT=25000000"
+Environment="BODY_SIZE_LIMIT=50000000"
 Environment="ORIGIN=http://localhost:3000"
 Environment="PUBLIC_BACKEND_API_URL=http://localhost:8000/api"
 ExecStart=/usr/bin/node server

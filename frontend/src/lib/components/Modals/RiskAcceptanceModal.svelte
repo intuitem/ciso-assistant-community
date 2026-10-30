@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { urlModel } from '$lib/utils/types';
+	import type { urlModel } from '#lib/utils/types.js';
 	import SuperDebug from 'sveltekit-superforms';
 	import type { ComponentType } from 'svelte';
 	import { getModalStore, type ModalStore } from './stores';
-	import { m } from '$paraglide/messages';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import { m } from '#paraglide/messages.js';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 

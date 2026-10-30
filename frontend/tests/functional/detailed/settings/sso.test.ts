@@ -44,6 +44,20 @@ test.describe('SSO settings', () => {
 			await page.getByRole('button', { name: 'Sign In' }).click();
 			await expect(page).toHaveURL('/analytics');
 		});
+		await test.step('SSO user should be able to generate a personal access token', async () => {
+			await page.goto('/my-profile/settings');
+			await expect(page).toHaveURL(/\/reauthenticate\?method=password&next=/);
+			await page.getByTestId('form-input-password').fill(logedPage.password);
+			await page.getByTestId('reauthenticate-button').click();
+			await expect(page).toHaveURL('/my-profile/settings');
+			await page.getByRole('button', { name: 'Generate new token' }).click();
+			const modal = page.getByTestId('modal-component');
+			await modal.getByTestId('form-input-name').fill('sso-pat');
+			await modal.getByRole('button', { name: 'Generate new token' }).click();
+			await expect(
+				modal.getByText('The token will only be displayed once', { exact: false })
+			).toBeVisible();
+		});
 	});
 
 	test('OIDC settings', async ({ logedPage, page }) => {

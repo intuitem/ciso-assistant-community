@@ -1,49 +1,59 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { FindingSchema, RequirementAssessmentSchema } from '#lib/utils/schemas.js';
+	import { getModelInfo } from '#lib/utils/crud.js';
 	import type { ActionData, PageData } from './$types';
 
 	import { page } from '$app/state';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
-	import Score from '$lib/components/Forms/Score.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getSecureRedirect, getFieldVisibility, alignmentColorMap } from '$lib/utils/helpers';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import HiddenInput from '#lib/components/Forms/HiddenInput.svelte';
+	import Score from '#lib/components/Forms/Score.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import {
+		getSecureRedirect,
+		getFieldVisibility,
+		isFieldVisible,
+		alignmentColorMap
+	} from '#lib/utils/helpers.js';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	import { hideSuggestions } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { countMasked } from '$lib/utils/related-visibility';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import { hideSuggestions } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { countMasked } from '#lib/utils/related-visibility.js';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 
-	import Question from '$lib/components/Forms/Question.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import SuggestControlsModal from '#lib/components/Modals/SuggestControlsModal.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { superForm } from 'sveltekit-superforms';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { page as pageStore } from '$app/state';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import {
 		computeRequirementScoreAndResult,
 		formatScoreValue,
 		displayScoreColor,
+		hasComputedScore,
 		resultBadgeStyle,
 		filterResultChoices
-	} from '$lib/utils/helpers';
+	} from '#lib/utils/helpers.js';
 
 	interface Props {
 		data: PageData;
@@ -102,6 +112,89 @@
 			title: safeTranslate('add-' + data.measureModel.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	// Off by default: only teams who work this way see the button.
+	const canRaiseFinding = $derived(
+		!!page.data?.featureflags?.findings_from_requirements &&
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: 'add',
+				model: 'finding',
+				object: data.requirementAssessment
+			})
+	);
+	// Picking an existing finding edits that finding, so it needs change rather than add.
+	const canBindFinding = $derived(
+		!!page.data?.featureflags?.findings_from_requirements &&
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: 'change',
+				model: 'finding',
+				object: data.requirementAssessment
+			})
+	);
+
+	const flash = getFlash(pageStore);
+
+	async function modalFindingCreateForm(): Promise<void> {
+		// The audit's binder is created on first use, so the finding has somewhere to live
+		// and the audit gets its findings list for free.
+		const res = await fetch(
+			`/requirement-assessments/${data.requirementAssessment.id}/findings-binder`,
+			{ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }
+		);
+		if (!res.ok) {
+			// Never fail silently: a missing route or a permission refusal both land here.
+			flash.set({ type: 'error', message: `${m.anErrorOccurred()} (${res.status})` });
+			return;
+		}
+		const binder = await res.json();
+
+		const findingModel = getModelInfo('findings');
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: defaults(
+					{
+						findings_assessment: binder.id,
+						// The assessment implies the requirement; setting the catalog node too
+						// just renders the same thing twice on the finding.
+						requirement_assessment: data.requirementAssessment.id
+					},
+					zod(FindingSchema)
+				),
+				formAction: '?/createFinding',
+				model: findingModel,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.raiseFinding()
+		});
+	}
+
+	function modalTaskTemplateCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.taskTemplateCreateForm,
+				formAction: '?/createTaskTemplate',
+				model: data.taskTemplateModel,
+				invalidateAll: false,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.addTaskTemplate(),
+			response: (r: boolean) => {
+				if (r) refreshKey = !refreshKey;
+			}
+		});
 	}
 
 	function modalEvidenceCreateForm(): void {
@@ -306,16 +399,25 @@
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showTaskTemplates = $derived(fieldVis.showTaskTemplates);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 	const showComments = $derived(fieldVis.showComments);
 
 	const isAuditor = $derived(viewerRole === 'auditor');
 	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
+	// Same gate as applied controls, on top of the finding permissions.
+	const showFindings = $derived(
+		(canRaiseFinding || canBindFinding) &&
+			isFieldVisible(complianceAssessment, 'findings', viewerRole) &&
+			!page.data.user.is_third_party
+	);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
+		if (showTaskTemplates) return 'task_templates';
 		if (showEvidences) return 'evidences';
+		if (showFindings) return 'findings';
 		// Security exceptions are auditor-only — not part of the per-CA visibility model.
 		if (isAuditor) return 'security_exceptions';
 		return 'applied_controls';
@@ -326,6 +428,10 @@
 	let refreshKey = $state(false);
 
 	let formStore = $derived(requirementAssessmentForm.form);
+	// Entering a score is what makes a requirement scored (as in table mode).
+	function markScored() {
+		requirementAssessmentForm.form.update((d) => ({ ...d, is_scored: true }));
+	}
 
 	$effect(() => {
 		if (form?.newControls) {
@@ -356,6 +462,20 @@
 	});
 
 	$effect(() => {
+		if (form?.newTaskTemplate) {
+			refreshKey = !refreshKey;
+			requirementAssessmentForm.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					task_templates: [...(current.task_templates ?? []), form?.newTaskTemplate]
+				}),
+				{ taint: false }
+			);
+			form.newTaskTemplate = undefined;
+		}
+	});
+
+	$effect(() => {
 		if (form?.newSecurityException) {
 			refreshKey = !refreshKey;
 			requirementAssessmentForm.form.update(
@@ -366,6 +486,20 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
+		}
+	});
+
+	$effect(() => {
+		if (form?.newFinding) {
+			refreshKey = !refreshKey;
+			requirementAssessmentForm.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					findings: [...(current.findings ?? []), form?.newFinding]
+				}),
+				{ taint: false }
+			);
+			form.newFinding = undefined;
 		}
 	});
 
@@ -536,7 +670,7 @@
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-				{#if canShowAppliedControls || showEvidences || isAuditor}
+				{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings || isAuditor}
 					<div class="card shadow-lg bg-surface-50-950">
 						<Tabs
 							value={group}
@@ -550,6 +684,11 @@
 										>{m.appliedControls()}</Tabs.Trigger
 									>
 								{/if}
+								{#if showTaskTemplates}
+									<Tabs.Trigger value="task_templates" data-testid="task-templates-tab"
+										>{m.taskTemplates()}</Tabs.Trigger
+									>
+								{/if}
 								{#if showEvidences}
 									<Tabs.Trigger value="evidences" data-testid="evidences-tab"
 										>{m.evidences()}</Tabs.Trigger
@@ -557,6 +696,11 @@
 								{/if}
 								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
+								{/if}
+								{#if showFindings}
+									<Tabs.Trigger value="findings" data-testid="findings-tab"
+										>{m.findings()}</Tabs.Trigger
+									>
 								{/if}
 								<Tabs.Indicator />
 							</Tabs.List>
@@ -609,18 +753,25 @@
 												class="btn preset-filled-primary-500 self-end"
 												onclick={modalMeasureCreateForm}
 												type="button"
-												><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 											>
+												<i class="fa-solid fa-plus mr-2"></i>
+												{m.addAppliedControl()}
+											</button>
 										</span>
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="applied-controls"
 												optionsDetailedUrlParameters={[
 													['scope_folder_id', page.data.requirementAssessment.folder.id]
 												]}
 												optionsExtraFields={[['folder', 'str']]}
+												optionsInfoFields={{
+													fields: [{ field: 'category', translate: true }],
+													position: 'prefix'
+												}}
 												field="applied_controls"
 												placeholder={m.appliedControlsPlaceholder()}
 											/>
@@ -636,6 +787,48 @@
 									</div>
 								</Tabs.Content>
 							{/if}
+							{#if showTaskTemplates}
+								<Tabs.Content value="task_templates">
+									<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+										<i class="fa-solid fa-info-circle"></i>
+										<p>{m.requirementTaskTemplateHelpText()}</p>
+									</div>
+									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+										<span class="flex flex-row justify-end items-center">
+											<button
+												class="btn preset-filled-primary-500 self-end"
+												onclick={modalTaskTemplateCreateForm}
+												data-testid="add-task-template-button"
+												type="button"
+											>
+												<i class="fa-solid fa-plus mr-2"></i>
+												{m.addTaskTemplate()}
+											</button>
+										</span>
+										{#key refreshKey}
+											<AutocompleteSelect
+												multiple
+												lazy
+												{form}
+												optionsEndpoint="task-templates"
+												optionsExtraFields={[['folder', 'str']]}
+												optionsDetailedUrlParameters={[
+													['scope_folder_id', page.data.requirementAssessment.folder.id]
+												]}
+												field="task_templates"
+											/>
+										{/key}
+										<ModelTable
+											source={page.data.tables['task-templates']}
+											hideFilters={true}
+											URLModel="task-templates"
+											expectedCount={countMasked(page.data.requirementAssessment.task_templates)}
+											baseEndpoint="/task-templates?requirement_assessments={page.data
+												.requirementAssessment.id}"
+										/>
+									</div>
+								</Tabs.Content>
+							{/if}
 							{#if showEvidences}
 								<Tabs.Content value="evidences">
 									<div class="flex items-center mb-2 px-2 text-xs space-x-2">
@@ -647,12 +840,16 @@
 											<button
 												class="btn preset-filled-primary-500 self-end"
 												onclick={modalEvidenceCreateForm}
-												type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+												type="button"
 											>
+												<i class="fa-solid fa-plus mr-2"></i>
+												{m.addEvidence()}
+											</button>
 										</span>
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="evidences"
 												optionsExtraFields={[['folder', 'str']]}
@@ -681,12 +878,15 @@
 												class="btn preset-filled-primary-500 self-end"
 												onclick={modalSecurityExceptionCreateForm}
 												type="button"
-												><i class="fa-solid fa-plus mr-2"></i>{m.addSecurityException()}</button
 											>
+												<i class="fa-solid fa-plus mr-2"></i>
+												{m.addSecurityException()}
+											</button>
 										</span>
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="security-exceptions"
 												optionsExtraFields={[['folder', 'str']]}
@@ -703,6 +903,49 @@
 											baseEndpoint="/security-exceptions?requirement_assessments={page.data
 												.requirementAssessment.id}"
 										/>
+									</div>
+								</Tabs.Content>
+							{/if}
+							{#if showFindings}
+								<Tabs.Content value="findings">
+									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+										{#if canRaiseFinding}
+											<span class="flex flex-row justify-end items-center">
+												<button
+													class="btn preset-filled-primary-500 self-end"
+													onclick={modalFindingCreateForm}
+													data-testid="raise-finding-button"
+													type="button"
+												>
+													<i class="fa-solid fa-plus mr-2"></i>
+													{m.raiseFinding()}
+												</button>
+											</span>
+										{/if}
+										{#key refreshKey}
+											{#if canBindFinding}
+												<AutocompleteSelect
+													multiple
+													lazy
+													{form}
+													optionsEndpoint="findings"
+													optionsDetailedUrlParameters={[
+														['requirement_assessment', '--'],
+														['requirement_assessment', page.data.requirementAssessment.id]
+													]}
+													optionsExtraFields={[['folder', 'str']]}
+													field="findings"
+												/>
+											{/if}
+											<ModelTable
+												source={page.data.tables['findings']}
+												hideFilters={true}
+												URLModel="findings"
+												expectedCount={countMasked(page.data.requirementAssessment.findings)}
+												baseEndpoint="/findings?requirement_assessment={page.data
+													.requirementAssessment.id}"
+											/>
+										{/key}
 									</div>
 								</Tabs.Content>
 							{/if}
@@ -787,77 +1030,106 @@
 						</div>
 					{/if}
 					{#if page.data.compliance_assessment_score.scoring_enabled}
-						{#if computedScore !== null}
+						{#if computedScore !== null || hasComputedScore(page.data.requirementAssessment.requirement.questions)}
 							{#if showScore}
-								<div class="flex flex-row items-center space-x-4">
-									<span class="font-medium">{m.score()}</span>
-									<div class="shrink-0 relative">
-										<Progress
-											value={formatScoreValue(computedScore || 0, resolvedMax, false, resolvedMin)}
-											min={0}
-											max={100}
+								<div class="flex flex-col space-y-2" data-testid="score-field">
+									<div class="flex flex-row items-center space-x-4">
+										<span class="font-medium"
+											>{$formStore.is_score_overridden ? m.automaticScore() : m.score()}</span
 										>
-											<Progress.Circle class="[--size:--spacing(10)]">
-												<Progress.CircleTrack />
-												<Progress.CircleRange
-													class={displayScoreColor(computedScore, resolvedMax, false, resolvedMin)}
-												/>
-											</Progress.Circle>
-											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold">{computedScore}</span>
-											</div>
-										</Progress>
+										<div class="shrink-0 relative">
+											<Progress
+												value={formatScoreValue(computedScore, resolvedMax, false, resolvedMin)}
+												min={0}
+												max={100}
+											>
+												<Progress.Circle class="[--size:--spacing(10)]">
+													<Progress.CircleTrack />
+													<Progress.CircleRange
+														class={displayScoreColor(
+															computedScore,
+															resolvedMax,
+															false,
+															resolvedMin
+														)}
+													/>
+												</Progress.Circle>
+												<div class="absolute inset-0 flex items-center justify-center">
+													<span class="text-xs font-bold">{computedScore ?? '–'}</span>
+												</div>
+											</Progress>
+										</div>
+										{#if isAuditor}
+											<Checkbox
+												{form}
+												field="is_score_overridden"
+												label={m.overrideScore()}
+												helpText={m.overrideScoreHelpText()}
+												checkboxComponent="switch"
+											/>
+										{/if}
 									</div>
+									{#if $formStore.is_score_overridden}
+										<Score
+											{form}
+											min_score={resolvedMin}
+											max_score={resolvedMax}
+											scores_definition={resolvedScoresDef}
+											field="score"
+											label={m.score()}
+										/>
+										{#if computedScore !== null && $formStore.score !== computedScore}
+											<p class="text-warning-700-300 text-sm flex items-center gap-1">
+												<i class="fa-solid fa-triangle-exclamation"></i>
+												{m.scoreDeviatesFromAuto({ score: computedScore })}
+											</p>
+										{/if}
+									{/if}
 								</div>
 							{/if}
 						{:else if data.result !== 'not_applicable'}
-							{#if showScore}
-								<div class="flex flex-col" data-testid="score-field">
-									<Score
-										{form}
-										min_score={resolvedMin}
-										max_score={resolvedMax}
-										scores_definition={resolvedScoresDef}
-										field="score"
-										label={page.data.compliance_assessment_score.show_documentation_score
-											? m.implementationScore()
-											: m.score()}
-										disabled={!data.is_scored}
-									>
-										{#snippet left()}
-											<div>
-												<Checkbox
-													{form}
-													field="is_scored"
-													label={''}
-													helpText={m.scoringHelpText()}
-													checkboxComponent="switch"
-													classes="h-full flex flex-row items-center justify-center my-1"
-													classesContainer="h-full flex flex-row items-center space-x-4"
-												/>
-											</div>
-										{/snippet}
-									</Score>
-								</div>
-							{/if}
-							{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
-								<Score
-									{form}
-									min_score={resolvedMin}
-									max_score={resolvedMax}
-									scores_definition={resolvedScoresDef}
-									field="documentation_score"
-									label={m.documentationScore()}
-									isDoc={true}
-									disabled={!data.is_scored}
-								/>
-							{/if}
+							{@const docScoreShown =
+								showDocumentationScore &&
+								page.data.compliance_assessment_score.show_documentation_score}
+							<ScorePair>
+								{#snippet implementation()}
+									{#if showScore}
+										<div class="flex flex-col" data-testid="score-field">
+											<Score
+												{form}
+												min_score={resolvedMin}
+												max_score={resolvedMax}
+												scores_definition={resolvedScoresDef}
+												field="score"
+												label={page.data.compliance_assessment_score.show_documentation_score
+													? m.implementationScore()
+													: m.score()}
+												onChange={markScored}
+											/>
+										</div>
+									{/if}
+								{/snippet}
+								{#snippet documentation()}
+									{#if docScoreShown}
+										<Score
+											{form}
+											min_score={resolvedMin}
+											max_score={resolvedMax}
+											scores_definition={resolvedScoresDef}
+											field="documentation_score"
+											label={m.documentationScore()}
+											isDoc={true}
+											onChange={markScored}
+										/>
+									{/if}
+								{/snippet}
+							</ScorePair>
 						{/if}
 					{/if}
 
 					{#if showObservation}
 						<div data-testid="observation-field">
-							<MarkdownField {form} field="observation" label="Observation" />
+							<MarkdownField {form} field="observation" label={m.observation()} />
 						</div>
 					{/if}
 				</div>

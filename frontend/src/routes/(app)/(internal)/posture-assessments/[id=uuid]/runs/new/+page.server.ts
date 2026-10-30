@@ -1,6 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { discardBody } from '#lib/utils/responses.js';
 import type { PageServerLoad } from './$types';
-import { error, fail, redirect, type Actions, type NumericRange } from '@sveltejs/kit';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 function flattenChecks(nodes: any[], acc: any[] = []) {
 	for (const node of nodes) {
@@ -16,9 +18,11 @@ export const load: PageServerLoad = async (event) => {
 		event.fetch(`${endpoint}/`),
 		event.fetch(`${endpoint}/tree/`)
 	]);
-	if (!assessmentRes.ok)
-		error(assessmentRes.status as NumericRange<400, 599>, await assessmentRes.json());
-	if (!treeRes.ok) error(treeRes.status as NumericRange<400, 599>, await treeRes.json());
+	if (!assessmentRes.ok) {
+		await discardBody(treeRes);
+		errorFromBody(assessmentRes.status, await assessmentRes.json());
+	}
+	if (!treeRes.ok) errorFromBody(treeRes.status, await treeRes.json());
 	const [assessment, tree] = await Promise.all([assessmentRes.json(), treeRes.json()]);
 	const asset =
 		event.url.searchParams.get('asset') ??
@@ -34,7 +38,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const checks = flattenChecks(tree.tree);
 	const from = event.url.searchParams.get('from');
-	let prefill: Record<string, string> = {};
+	const prefill: Record<string, string> = {};
 	let prefillDropped = 0;
 	if (from && asset) {
 		const sourceRun = await event.fetch(`${endpoint}/runs/${from}/`);
@@ -71,7 +75,12 @@ export const actions: Actions = {
 		const results = [];
 		for (const [key, value] of formData.entries()) {
 			if (key.startsWith('result:') && value) {
-				results.push({ ref_id: key.slice('result:'.length), result: value });
+				const ref_id = key.slice('result:'.length);
+				results.push({
+					ref_id,
+					result: value,
+					message: formData.get(`comment:${ref_id}`) ?? ''
+				});
 			}
 		}
 		if (!asset || !results.length) {
@@ -86,6 +95,7 @@ export const actions: Actions = {
 			}
 		);
 		if (!res.ok) return fail(res.status, await res.json());
-		redirect(303, `/posture-assessments/${event.params.id}`);
+		const body = await res.json();
+		redirect(303, `/posture-assessments/${event.params.id}/runs/${body.run_id}`);
 	}
 };

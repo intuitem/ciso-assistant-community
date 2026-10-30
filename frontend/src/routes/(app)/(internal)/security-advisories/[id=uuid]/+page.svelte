@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { invalidateAll } from '$app/navigation';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -25,7 +25,7 @@
 					result.detail || result.error || (res.ok ? m.enrichmentComplete() : m.enrichmentFailed()),
 				preset: res.ok ? 'success' : 'error'
 			});
-			if (res.ok) await invalidateAll();
+			if (res.ok) await refreshAll();
 		} catch {
 			toastStore.trigger({ message: m.enrichmentFailed(), preset: 'error' });
 		}

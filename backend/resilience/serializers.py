@@ -1,4 +1,8 @@
-from core.serializers import BaseModelSerializer, AssessmentReadSerializer
+from core.serializers import (
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+    AssessmentReadSerializer,
+)
 from core.serializer_fields import FieldsRelatedField
 from .models import (
     BusinessImpactAnalysis,
@@ -18,6 +22,7 @@ class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     risk_matrix = FieldsRelatedField()
     validation_flows = FieldsRelatedField(
         many=True,
@@ -31,7 +36,14 @@ class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
     )
 
 
-class BusinessImpactAnalysisWriteSerializer(BaseModelSerializer):
+class BusinessImpactAnalysisWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     class Meta:
         model = BusinessImpactAnalysis
         fields = "__all__"
@@ -87,6 +99,15 @@ class AssetAssessmentWriteSerializer(BaseModelSerializer):
         validated_data["folder"] = bia.folder
 
         return super().create(validated_data)
+
+    def delete(self, instance):
+        # validate() only guards create/update — deletes skip validation, so the
+        # lock must be enforced here for the destroy flow as well.
+        if instance.bia.is_locked:
+            raise serializers.ValidationError(
+                "⚠️ Cannot delete asset assessments when the business impact analysis is locked."
+            )
+        super().delete(instance)
 
 
 class EscalationThresholdReadSerializer(BaseModelSerializer):

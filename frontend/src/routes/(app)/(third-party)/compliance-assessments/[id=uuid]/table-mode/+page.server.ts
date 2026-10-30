@@ -1,15 +1,14 @@
-import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { modelSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { handleErrorResponse, nestedWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
-import type { ModelInfo } from '$lib/utils/types';
+import type { ModelInfo } from '#lib/utils/types.js';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
@@ -31,44 +30,24 @@ export const load = (async ({ fetch, params }) => {
 
 	const measureModel = getModelInfo('applied-controls');
 	const measureCreateSchema = modelSchema('applied-controls');
-
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
-	const scoreSchema = z.object({
-		is_scored: z.boolean().optional(),
-		score: z.number().optional().nullable(),
-		documentation_score: z.number().optional().nullable()
-	});
+
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
-			// TODO: merge initial data ?
-			const measureInitialData = {
+			// The requirement_assessments link is a non-rendered field, so it must be
+			// baked into the form data here (it can't be passed via additionalInitialData).
+			const linkInitialData = {
 				requirement_assessments: [requirementAssessment.id],
 				folder: requirementAssessment.folder.id
 			};
-			const measureCreateForm = await superValidate(measureInitialData, zod(measureCreateSchema), {
+			const measureCreateForm = await superValidate(linkInitialData, zod(measureCreateSchema), {
 				errors: false
 			});
-			const evidenceInitialData = {
-				requirement_assessments: [requirementAssessment.id],
-				folder: requirementAssessment.folder.id
-			};
-			const evidenceCreateForm = await superValidate(
-				evidenceInitialData,
-				zod(evidenceCreateSchema),
-				{
-					errors: false
-				}
-			);
+			const evidenceCreateForm = await superValidate(linkInitialData, zod(evidenceCreateSchema), {
+				errors: false
+			});
 			const observationBuffer = requirementAssessment.observation;
-			const scoreForm = await superValidate(
-				{
-					is_scored: requirementAssessment.is_scored,
-					score: requirementAssessment.score,
-					documentation_score: requirementAssessment.documentation_score
-				},
-				zod(scoreSchema)
-			);
 			const updateSchema = modelSchema('requirement-assessments');
 			const updatedModel: ModelInfo = getModelInfo('requirement-assessments');
 			const object = {
@@ -89,7 +68,6 @@ export const load = (async ({ fetch, params }) => {
 				measureCreateForm,
 				evidenceCreateForm,
 				observationBuffer,
-				scoreForm,
 				updateForm,
 				updatedModel,
 				object

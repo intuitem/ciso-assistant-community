@@ -78,11 +78,9 @@ class EntityDestroyConflictTestCase(TestCase):
         return view(request, pk=entity.id)
 
     @patch(
-        "iam.models.RoleAssignment.get_accessible_object_ids",
-        side_effect=lambda folder, user, model: (
-            list(model.objects.values_list("id", flat=True)),
-            list(model.objects.values_list("id", flat=True)),
-            list(model.objects.values_list("id", flat=True)),
+        "iam.models.RoleAssignment._get_accessible_ids",
+        side_effect=lambda user, perm_prefix, model, folder=None: list(
+            model.objects.values_list("id", flat=True)
         ),
     )
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
@@ -101,11 +99,9 @@ class EntityDestroyConflictTestCase(TestCase):
         self.assertTrue(Entity.objects.filter(pk=self.subcontractor.pk).exists())
 
     @patch(
-        "iam.models.RoleAssignment.get_accessible_object_ids",
-        side_effect=lambda folder, user, model: (
-            list(model.objects.values_list("id", flat=True)),
-            list(model.objects.values_list("id", flat=True)),
-            list(model.objects.values_list("id", flat=True)),
+        "iam.models.RoleAssignment._get_accessible_ids",
+        side_effect=lambda user, perm_prefix, model, folder=None: list(
+            model.objects.values_list("id", flat=True)
         ),
     )
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
@@ -116,11 +112,9 @@ class EntityDestroyConflictTestCase(TestCase):
         self.assertFalse(Entity.objects.filter(pk=self.orphan.pk).exists())
 
     @patch(
-        "iam.models.RoleAssignment.get_accessible_object_ids",
-        side_effect=lambda folder, user, model: (
-            list(model.objects.values_list("id", flat=True)),
-            list(model.objects.values_list("id", flat=True)),
-            list(model.objects.values_list("id", flat=True)),
+        "iam.models.RoleAssignment._get_accessible_ids",
+        side_effect=lambda user, perm_prefix, model, folder=None: list(
+            model.objects.values_list("id", flat=True)
         ),
     )
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
@@ -142,3 +136,15 @@ class EntityDestroyConflictTestCase(TestCase):
             solution_names,
             ["Blocking Solution", "Second Blocking Solution"],
         )
+
+
+class EntityExportLegacyLegalIdentifiersTestCase(TestCase):
+    def test_csv_identifier_columns_tolerate_legacy_string(self):
+        folder = Folder.objects.create(name="Export Folder")
+        entity = Entity.objects.create(name="Legacy", folder=folder)
+        Entity.objects.filter(pk=entity.pk).update(legal_identifiers="LEI123")
+        entity.refresh_from_db()
+        view = EntityViewSet()
+        for key in ("lei", "euid", "duns", "vat"):
+            config = view.export_config["fields"][key]
+            self.assertEqual(view._resolve_field_value(entity, config), "")

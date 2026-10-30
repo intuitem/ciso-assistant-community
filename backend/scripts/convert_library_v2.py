@@ -21,6 +21,7 @@ Note: the "node_id" column can be defined to force an urn suffix. This can be us
 
 import sys
 import re
+import json
 import yaml
 import datetime
 import argparse
@@ -29,7 +30,7 @@ import openpyxl
 from copy import deepcopy
 from typing import Any, Dict, List
 from pathlib import Path
-from collections import Counter
+from collections import Counter, defaultdict
 
 SCRIPT_VERSION = "2.1"
 
@@ -59,6 +60,36 @@ def print_error(message: str) -> None:
 # --- Translation helpers ------------------------------------------------------
 
 
+_UNEVALUATED_FORMULA_COUNT = 0
+
+
+def is_unevaluated_formula(value) -> bool:
+    """A spreadsheet formula that was never evaluated to a value."""
+    return isinstance(value, str) and value.lstrip().startswith("=")
+
+
+def _clean_translation(value):
+    global _UNEVALUATED_FORMULA_COUNT
+    if is_unevaluated_formula(value):
+        _UNEVALUATED_FORMULA_COUNT += 1
+        return None
+    return str(value).strip()
+
+
+def reset_unevaluated_formula_count():
+    global _UNEVALUATED_FORMULA_COUNT
+    _UNEVALUATED_FORMULA_COUNT = 0
+
+
+def report_unevaluated_formulas():
+    if _UNEVALUATED_FORMULA_COUNT:
+        print(
+            f"⚠️  [WARNING] Skipped {_UNEVALUATED_FORMULA_COUNT} translation cell(s) "
+            "holding unevaluated formulas. Evaluate them in the spreadsheet and "
+            "paste back as values, or the library ships without those translations."
+        )
+
+
 def extract_translations_from_row(header, row):
     translations = {}
     for i, col_name in enumerate(header):
@@ -66,8 +97,8 @@ def extract_translations_from_row(header, row):
         if match and i < len(row):
             base_key, lang = match.groups()
             value = row[i].value
-            if value:
-                translations.setdefault(lang, {})[base_key] = str(value).strip()
+            if value and (cleaned := _clean_translation(value)):
+                translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -76,9 +107,9 @@ def extract_translations_from_metadata(meta_dict, prefix):
     pattern = re.compile(r"(\w+)\[(\w+)\]")
     for key, value in meta_dict.items():
         match = pattern.match(key)
-        if match and value:
+        if match and value and (cleaned := _clean_translation(value)):
             base_key, lang = match.groups()
-            translations.setdefault(lang, {})[base_key] = str(value).strip()
+            translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -200,7 +231,7 @@ def expand_urns_from_prefixed_list(
 ):
     """
     Convert a prefixed list like 'abc:xyz, def:uvw' into a list of full URNs,
-    using a prefix mapping. Fully qualified URNs (starting with 'urn:') are left untouched.
+    using a prefix mapping. Fully qualified URNs (starting with 'urn:') are only lowercased.
 
     Args:
         field_value (str): Raw string field value from the sheet (e.g., 'abc:id1, urn:...').
@@ -218,7 +249,7 @@ def expand_urns_from_prefixed_list(
             continue
 
         if element.startswith("urn:"):
-            result.append(element)
+            result.append(element.lower())
             continue
 
         parts = element.split(":")
@@ -363,7 +394,7 @@ def inject_questions_into_node(
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
 
-    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
+    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer", "depends_on" and "question_group"
     :param node: The requirement node (dict)
     :param answers_dict: Dictionary of all available answers (from answer sheet)
     """
@@ -372,6 +403,8 @@ def inject_questions_into_node(
     raw_answer_str = qa_data.get("answer")
     raw_depends_on_str = qa_data.get("depends_on")
     raw_condition_str = qa_data.get("condition")
+    raw_group_str = qa_data.get("question_group")
+    raw_group_color_str = qa_data.get("question_group_color")
 
     if not raw_question_str:
         return
@@ -437,6 +470,35 @@ def inject_questions_into_node(
             f"Mismatch between questions and 'condition' for node {node.get('urn')}"
         )
 
+    group_lines = (
+        [g.strip() for g in str(raw_group_str).split("\n") if g.strip()]
+        if raw_group_str
+        else None
+    )
+    if group_lines and len(group_lines) != len(question_lines):
+        raise ValueError(
+            f"Mismatch between questions and 'question_group' for node {node.get('urn')}"
+        )
+    group_color_lines = (
+        [c.strip() for c in str(raw_group_color_str).split("\n") if c.strip()]
+        if raw_group_color_str
+        else None
+    )
+    if group_color_lines:
+        if not group_lines or len(group_color_lines) != len(question_lines):
+            raise ValueError(
+                f"Mismatch between questions and 'question_group_color' for node {node.get('urn')}"
+            )
+        for color, group in zip(group_color_lines, group_lines):
+            if color != "/" and not re.fullmatch(r"#([0-9a-fA-F]{6})", color):
+                raise ValueError(
+                    f"Invalid 'question_group_color' value '{color}' for node {node.get('urn')}. Must match #RRGGBB or be '/'"
+                )
+            if color != "/" and group == "/":
+                raise ValueError(
+                    f"'question_group_color' '{color}' set on a question without a group for node {node.get('urn')}"
+                )
+
     question_block = {}
 
     for idx, question_text in enumerate(question_lines):
@@ -458,6 +520,10 @@ def inject_questions_into_node(
         }
 
         question_entry["text"] = question_text
+        if group_lines and group_lines[idx] != "/":
+            question_entry["config"] = {"group": group_lines[idx]}
+            if group_color_lines and group_color_lines[idx] != "/":
+                question_entry["config"]["group_color"] = group_color_lines[idx].upper()
         _attach_question_translations(
             question_entry,
             row_translations,
@@ -796,7 +862,13 @@ def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
 
 # --- Object type handlers -----------------------------------------------------
 
-_SKIPPED_TYPES = {"answers", "implementation_groups", "scores", "urn_prefix"}
+_SKIPPED_TYPES = {
+    "answers",
+    "implementation_groups",
+    "scores",
+    "urn_prefix",
+    "ttp_groups",  # consumed via ttp_catalog meta.grouping_definition
+}
 
 
 def _handle_reference_controls(obj, library, compat_mode, verbose):
@@ -843,6 +915,140 @@ def _handle_reference_controls(obj, library, compat_mode, verbose):
         controls.append(entry)
 
     extend_or_set(library["objects"], "reference_controls", controls)
+
+
+def _handle_ttp_catalog(obj, library, object_blocks, compat_mode, verbose):
+    """Process a ttp_catalog object block into the library."""
+    catalogs = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    # named block, as framework does for implementation_groups_definition
+    grouping_defs = []
+    grouping_name = meta.get("grouping_definition")
+    if grouping_name and grouping_name in object_blocks:
+        g_header, g_rows = parse_content_rows(
+            object_blocks[grouping_name]["content_sheet"]
+        )
+        for row, data in g_rows:
+            entry = {
+                "ref_id": str(data.get("ref_id", "")).strip(),
+                "name": str(data.get("name", "")).strip(),
+            }
+            set_optional_fields(entry, data, ["description", "dimension"])
+            attach_translations_from_row(entry, g_header, row)
+            grouping_defs.append(entry)
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+        entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        if grouping_defs:
+            entry["grouping_definition"] = grouping_defs
+        attach_translations_from_row(entry, header, row)
+        catalogs.append(entry)
+
+    extend_or_set(library["objects"], "ttp_catalogs", catalogs)
+
+
+def _handle_tactics(obj, library, compat_mode, verbose):
+    """Process a tactics object block. Sheet order is the column order."""
+    tactics = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    catalog_urn = meta.get("catalog_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+        entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
+        if catalog_urn:
+            entry["catalog_urn"] = catalog_urn
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        attach_translations_from_row(entry, header, row)
+        tactics.append(entry)
+
+    extend_or_set(library["objects"], "tactics", tactics)
+
+
+def _handle_techniques(obj, library, prefix_to_urn, compat_mode, verbose):
+    """Process a techniques object block into the library."""
+    techniques = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    catalog_urn = meta.get("catalog_urn")
+    tactics_base_urn = meta.get("tactics_base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    def suffix_for(ref_id: str, node_id_raw) -> str:
+        if node_id_raw and str(node_id_raw).strip():
+            return str(node_id_raw).strip().lower()
+        return ref_id.lower()
+
+    # parent_urn must use the same rule as the parent's own urn, so a sheet
+    # overriding node_id does not break the parent links
+    suffix_by_ref_id = {
+        str(data.get("ref_id", "")).strip(): suffix_for(
+            str(data.get("ref_id", "")).strip(), data.get("node_id")
+        )
+        for _, data in rows_with_data
+        if str(data.get("ref_id", "")).strip()
+    }
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+
+        urn_suffix = suffix_for(ref_id, data.get("node_id"))
+        entry = {"urn": f"{base_urn}:{urn_suffix}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        if catalog_urn:
+            entry["catalog_urn"] = catalog_urn
+
+        # explicit ref_id, not the positional `depth`: technique sheets get sorted
+        parent_ref_id = data.get("parent_ref_id")
+        if parent_ref_id and str(parent_ref_id).strip():
+            parent_ref_id = str(parent_ref_id).strip()
+            parent_suffix = suffix_by_ref_id.get(parent_ref_id, parent_ref_id.lower())
+            entry["parent_urn"] = f"{base_urn}:{parent_suffix}"
+
+        if tactic_ref_ids := data.get("tactic_ref_ids"):
+            entry["tactics"] = [
+                f"{tactics_base_urn}:{item.strip().lower()}"
+                for item in re.split(r"\s*,\s*", str(tactic_ref_ids))
+                if item.strip()
+            ]
+
+        if groups := data.get("groups"):
+            entry["groups"] = [
+                item.strip()
+                for item in re.split(r"\s*,\s*", str(groups))
+                if item.strip()
+            ]
+
+        if data.get("reference_controls"):
+            controls = expand_urns_from_prefixed_list(
+                data["reference_controls"], prefix_to_urn, compat_mode, verbose
+            )
+            if controls:
+                entry["reference_controls"] = controls
+
+        attach_translations_from_row(entry, header, row)
+        techniques.append(entry)
+
+    extend_or_set(library["objects"], "techniques", techniques)
 
 
 def _handle_threats(obj, library, compat_mode, verbose):
@@ -1040,6 +1246,52 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
     if "max_score" in meta:
         framework["max_score"] = int(meta["max_score"])
 
+    if meta.get("result_aggregation"):
+        result_aggregation = str(meta["result_aggregation"]).strip().lower()
+        if result_aggregation not in ("per_answer", "tiered_all"):
+            raise ValueError(
+                f'(framework) Invalid result_aggregation "{result_aggregation}": '
+                "expected per_answer or tiered_all."
+            )
+        framework["result_aggregation"] = result_aggregation
+
+    if meta.get("field_visibility"):
+        try:
+            field_visibility = json.loads(meta["field_visibility"])
+        except json.JSONDecodeError as e:
+            raise ValueError(f"(framework) Invalid field_visibility JSON: {e}")
+        if not isinstance(field_visibility, dict):
+            raise ValueError(
+                "(framework) field_visibility must be a JSON object "
+                '({"field": {"role": "edit"|"read"|"hidden"}})'
+            )
+        framework["field_visibility"] = field_visibility
+
+    # The standard defines the score scale: audits of the framework keep it.
+    if "score_scale_locked" in meta:
+        framework["score_scale_locked"] = str(
+            meta["score_scale_locked"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+
+    # Calculation method proposed for new audits (defaults to "average").
+    if meta.get("score_calculation_method"):
+        method = str(meta["score_calculation_method"]).strip()
+        if method not in ("average", "sum", "average_of_averages"):
+            raise ValueError(
+                f"(framework) Invalid score_calculation_method {method!r}: "
+                "expected average, sum or average_of_averages"
+            )
+        framework["score_calculation_method"] = method
+
+    # Scoring proposed for new audits: N/A requirements counted as the target
+    # score, which implementation groups can override (see below).
+    if "anchor_na_to_target" in meta:
+        framework["anchor_na_to_target"] = str(
+            meta["anchor_na_to_target"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+    if meta.get("target_score") not in (None, ""):
+        framework["target_score"] = float(meta["target_score"])
+
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:
         score_header, score_rows_data = parse_content_rows(
@@ -1083,11 +1335,33 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
 
             if data.get("default_selected") is not None:
                 ig_entry["default_selected"] = bool(data.get("default_selected"))
+            if data.get("target_score") not in (None, ""):
+                if "target_score" not in framework:
+                    raise ValueError(
+                        f"(framework) Implementation group {ig_entry['ref_id']!r} "
+                        "sets a target_score: the framework needs one too"
+                    )
+                ig_entry["target_score"] = float(data["target_score"])
 
             attach_translations_from_row(ig_entry, ig_header, row)
             ig_defs.append(ig_entry)
 
         framework["implementation_groups_definition"] = ig_defs
+
+    # Audits must accept what the framework proposes (same rules as the loader).
+    if framework.get("anchor_na_to_target") and "target_score" not in framework:
+        raise ValueError("(framework) anchor_na_to_target needs a target_score")
+    scale = (framework.get("min_score", 0), framework.get("max_score", 100))
+    targets = [("target_score", framework.get("target_score"))] + [
+        (f"implementation group {ig['ref_id']!r} target_score", ig.get("target_score"))
+        for ig in framework.get("implementation_groups_definition") or []
+    ]
+    for label, target in targets:
+        if target is not None and not scale[0] <= target <= scale[1]:
+            raise ValueError(
+                f"(framework) {label} {target} is outside the scale "
+                f"{scale[0]}-{scale[1]}"
+            )
 
     # NOTE: The requirement_nodes loop counts ALL rows (including empty) for its
     # counter logic, so we cannot use parse_content_rows here.
@@ -1224,6 +1498,14 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 data,
                 ["ref_id", "name", "description", "annotation", "typical_evidence"],
             )
+            # Optional: evidence_required ("x" = the requirement needs an evidence)
+            if str(data.get("evidence_required") or "").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+                "x",
+            ):
+                node["evidence_required"] = True
             # Optional: importance: mandatory/recommended/nice_to_have or empty (= undefined)
             if "importance" in data and data["importance"]:
                 importance = str(data["importance"]).strip().lower()
@@ -1358,7 +1640,28 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
 
         framework["requirement_nodes"] = requirement_nodes
 
-    library["objects"]["framework"] = framework
+        # An implementation group that the definition doesn't declare can never be
+        # selected, so its requirements silently drop out of every scoped audit.
+        defined_igs = {
+            str(ig.get("ref_id", "")).strip()
+            for ig in framework.get("implementation_groups_definition") or []
+        }
+        orphan_igs = defaultdict(list)
+        for node in requirement_nodes:
+            for ig in node.get("implementation_groups") or []:
+                if ig not in defined_igs:
+                    orphan_igs[ig].append(node.get("ref_id") or node.get("urn"))
+        if orphan_igs:
+            details = "; ".join(
+                f"'{ig}' used by {nodes[:3]}{' ...' if len(nodes) > 3 else ''}"
+                for ig, nodes in sorted(orphan_igs.items())
+            )
+            raise ValueError(
+                "(framework) implementation groups used by requirements but missing "
+                f"from the implementation groups definition {sorted(defined_igs)}: {details}"
+            )
+
+    library["objects"].setdefault("frameworks", []).append(framework)
 
 
 def _handle_metric_definitions(obj, library, compat_mode, verbose):
@@ -1455,9 +1758,7 @@ def _handle_risk_matrix(obj, library, wb):
     """Process a risk_matrix object block into the library."""
     matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
     if matrix:
-        if "risk_matrix" not in library["objects"]:
-            library["objects"]["risk_matrix"] = []
-        library["objects"]["risk_matrix"].append(matrix)
+        library["objects"].setdefault("risk_matrices", []).append(matrix)
 
 
 def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbose):
@@ -1538,6 +1839,9 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
         if "rationale" in data and data["rationale"]:
             entry["rationale"] = data.get("rationale").strip()
             entry_revert["rationale"] = data.get("rationale").strip()
+        if "annotation" in data and data["annotation"]:
+            entry["annotation"] = data.get("annotation").strip()
+            entry_revert["annotation"] = data.get("annotation").strip()
         if "strength_of_relationship" in data and data["strength_of_relationship"]:
             entry["strength_of_relationship"] = int(
                 data.get("strength_of_relationship")
@@ -1678,9 +1982,8 @@ def validate_name_lengths(library: dict) -> list:
 
     objects = library.get("objects", {})
 
-    # Check framework
-    framework = objects.get("framework")
-    if framework:
+    # Check frameworks
+    for framework in objects.get("frameworks", []):
         if framework.get("name") and len(framework["name"]) > NAME_MAX_LENGTH:
             violations.append(
                 ("framework", framework.get("urn", "?"), len(framework["name"]))
@@ -1698,8 +2001,11 @@ def validate_name_lengths(library: dict) -> list:
     # Check list-based object types
     for obj_type in (
         "threats",
+        "ttp_catalogs",
+        "tactics",
+        "techniques",
         "reference_controls",
-        "risk_matrix",
+        "risk_matrices",
         "metric_definitions",
         "requirement_mapping_sets",
     ):
@@ -1722,6 +2028,7 @@ def validate_name_lengths(library: dict) -> list:
 def create_library(
     input_file: str, output_file: str, compat_mode: int = 0, verbose: bool = False
 ):
+    reset_unevaluated_formula_count()
     wb = openpyxl.load_workbook(input_file)
     sheets = wb.sheetnames
     object_blocks = {}
@@ -1857,7 +2164,13 @@ def create_library(
     print(f"📦 Found {len(object_blocks)} objects.")
 
     # Step 5: Ordered object insertion (reference_controls before threats)
-    priority_order = ["reference_controls", "threats"]
+    priority_order = [
+        "ttp_catalog",
+        "tactics",
+        "reference_controls",
+        "techniques",
+        "threats",
+    ]
 
     sorted_object_names = sorted(
         object_blocks.keys(),
@@ -1872,6 +2185,13 @@ def create_library(
     handler_map = {
         "reference_controls": lambda obj: _handle_reference_controls(
             obj, library, compat_mode, verbose
+        ),
+        "ttp_catalog": lambda obj: _handle_ttp_catalog(
+            obj, library, object_blocks, compat_mode, verbose
+        ),
+        "tactics": lambda obj: _handle_tactics(obj, library, compat_mode, verbose),
+        "techniques": lambda obj: _handle_techniques(
+            obj, library, prefix_to_urn, compat_mode, verbose
         ),
         "threats": lambda obj: _handle_threats(obj, library, compat_mode, verbose),
         "framework": lambda obj: _handle_framework(
@@ -1910,6 +2230,7 @@ def create_library(
         )
 
     # Step 7: Export to YAML
+    report_unevaluated_formulas()
     print(f'✅ YAML saved as: "{output_file}"')
     if not verbose:
         print(

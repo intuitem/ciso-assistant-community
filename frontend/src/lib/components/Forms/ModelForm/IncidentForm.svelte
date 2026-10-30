@@ -2,12 +2,13 @@
 	import Select from '../Select.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import * as m from '$paraglide/messages.js';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import * as m from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -108,6 +109,10 @@
 		optionsEndpoint="applied-controls"
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="applied_controls"
 		label={m.appliedControls()}
 	/>
@@ -127,7 +132,7 @@
 		optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 		field="qualifications"
 		optionsLabelField="translated_name"
-		label={m.qualifications()}
+		label={safeTranslate('qualifications')}
 	/>
 	<AutocompleteSelect
 		multiple
@@ -160,6 +165,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -174,6 +180,7 @@
 		{form}
 		multiple
 		optionsEndpoint="entities"
+		optionsExtraFields={[['folder', 'str']]}
 		field="entities"
 		cacheLock={cacheLocks['entities']}
 		bind:cachedValue={formDataCache['entities']}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { get } from 'svelte/store';
 	import { getBuilderContext } from './builder-state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	const builder = getBuilderContext();
 

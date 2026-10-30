@@ -1,11 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { defaultMatrixObject } from '../builder-helpers';
 	import TranslationsEditor from '../TranslationsEditor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { createCopyHandler } from '$lib/components/FrameworkBuilder/builder-utils.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { createCopyHandler } from '#lib/components/FrameworkBuilder/builder-utils.svelte.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+
+	const toastStore = getToastStore();
 
 	let { data } = $props();
 	let draft: any = $state(data.draft);
@@ -16,6 +23,7 @@
 
 	const OBJECT_TYPES = [
 		'frameworks',
+		'quick_forms',
 		'threats',
 		'reference_controls',
 		'risk_matrices',
@@ -28,6 +36,7 @@
 	// by the message). Unknown keys fall back to the raw key.
 	const OBJECT_LABELS: Record<string, (args: { count: number }) => string> = {
 		frameworks: m.lbCountFrameworks,
+		quick_forms: m.lbCountQuickForms,
 		threats: m.lbCountThreats,
 		reference_controls: m.lbCountReferenceControls,
 		risk_matrices: m.lbCountRiskMatrices,
@@ -38,6 +47,7 @@
 
 	const OBJECT_ICONS: Record<string, string> = {
 		frameworks: 'fa-sitemap',
+		quick_forms: 'fa-clipboard-question',
 		threats: 'fa-bolt',
 		reference_controls: 'fa-shield-halved',
 		risk_matrices: 'fa-table-cells',
@@ -54,20 +64,11 @@
 		return label ? label({ count }) : `${count} ${type.replaceAll('_', ' ')}`;
 	}
 
-	let statusMessage = $state('');
-	let statusType: 'success' | 'error' | '' = $state('');
-	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
-
 	function setStatus(message: string, type: 'success' | 'error') {
-		statusMessage = message;
-		statusType = type;
-		if (statusTimeout) clearTimeout(statusTimeout);
-		if (type === 'success') {
-			statusTimeout = setTimeout(() => {
-				statusMessage = '';
-				statusType = '';
-			}, 3000);
-		}
+		toastStore.trigger({
+			message,
+			background: type === 'error' ? 'preset-filled-error-500' : 'preset-filled-success-500'
+		});
 	}
 
 	const base = () => `/experimental/library-builder/${draft.id}`;
@@ -153,7 +154,10 @@
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
-			setStatus(JSON.stringify(err), 'error');
+			setStatus(
+				err.detail || (err.error ? safeTranslate(err.error) : JSON.stringify(err)),
+				'error'
+			);
 			return false;
 		}
 		await reload();
@@ -193,6 +197,30 @@
 
 	// --- Import objects (clone / selective extraction) ----------------------
 	let importSource = $state('');
+	const importSchema = z.object({ source: z.string().optional() });
+	const importForm = superForm(defaults(zod(importSchema)), {
+		SPA: true,
+		validators: zod(importSchema),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false
+	});
+	const importOptions = [
+		...storedLibraries.map((library) => ({
+			label: `${library.name} (v${library.version})`,
+			value: library.id,
+			infoString: library.builtin
+				? { string: m.builtin(), position: 'suffix' as const, classes: 'text-surface-500' }
+				: undefined
+		})),
+		...otherDrafts.map((other) => ({
+			label: other.name,
+			value: 'draft:' + other.id,
+			infoString: { string: m.draft(), position: 'suffix' as const, classes: 'text-surface-500' }
+		}))
+	];
 	let importTypes: string[] = $state([]);
 	let importPolicy = $state('strip');
 	let importOverwrite = $state(false);
@@ -403,7 +431,7 @@
 	}
 
 	// Kinds the builder allows at most one of per library.
-	const SINGLE_KINDS = ['frameworks', 'risk_matrices', 'preset'];
+	const SINGLE_KINDS = ['frameworks', 'quick_forms', 'risk_matrices', 'preset'];
 	function singleKindFull(type: string): boolean {
 		return SINGLE_KINDS.includes(type) && objectCount(type) > 0;
 	}
@@ -418,6 +446,7 @@
 		const populated = OBJECT_TYPES.filter((type) => objectCount(type) > 0);
 		if (populated.length !== 1) return null;
 		if (populated[0] === 'frameworks' && objectCount('frameworks') === 1) return 'framework';
+		if (populated[0] === 'quick_forms' && objectCount('quick_forms') === 1) return 'quick_form';
 		if (populated[0] === 'risk_matrices' && objectCount('risk_matrices') === 1) return 'matrix';
 		return null;
 	});
@@ -433,6 +462,8 @@
 
 	// --- Visual framework editor -----------------------------------------------
 	let frameworks = $derived((draft.content?.frameworks ?? []) as any[]);
+	let quickForms = $derived((draft.content?.quick_forms ?? []) as any[]);
+	let addingQuickForm = $state(false);
 	let addingFramework = $state(false);
 
 	// --- Leaf object editors (threats, reference controls) ----------------------
@@ -476,7 +507,7 @@
 						}
 					: {})
 			},
-			translations: { ...(item?.translations ?? {}) }
+			translations: { ...item?.translations }
 		};
 	}
 
@@ -607,6 +638,29 @@
 		)}`;
 	}
 
+	function quickFormEditorHref(quickForm: any): string {
+		return `/experimental/library-builder/${draft.id}/quick-form?quick_form_urn=${encodeURIComponent(
+			quickForm.urn
+		)}`;
+	}
+
+	async function addQuickForm() {
+		addingQuickForm = true;
+		try {
+			const res = await fetch(base(), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'add-quick-form' })
+			});
+			const result = await res.json();
+			if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+			window.location.href = quickFormEditorHref({ urn: result.quick_form_urn });
+		} catch (e: any) {
+			setStatus(safeTranslate(e.message), 'error');
+			addingQuickForm = false;
+		}
+	}
+
 	async function addFramework() {
 		addingFramework = true;
 		try {
@@ -647,14 +701,14 @@
 						     identity committed (frozen), by decision or by proof; the
 						     packager/ref_id fields show the (frozen) hint. -->
 						{#if !draft.identity_locked}
-							<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+							<span class="badge preset-outlined-surface-500 text-xs">{m.lbListDraft()}</span>
 						{:else if draft.has_unpublished_changes}
-							<span class="badge variant-filled-warning text-xs">
+							<span class="badge preset-filled-warning-500 text-xs">
 								<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 								></i>{m.lbListPublishedModified()}
 							</span>
 						{:else}
-							<span class="badge variant-filled-success text-xs">
+							<span class="badge preset-filled-success-500 text-xs">
 								<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 								></i>{m.lbListPublished()}
 							</span>
@@ -692,19 +746,10 @@
 			     would otherwise pollute the controls' accessible names (breaking
 			     exact-name queries like the functional tests' /^publish$/). -->
 			<div class="flex items-center gap-2 flex-wrap">
-				{#if statusMessage}
-					<span
-						class="text-xs px-2 py-1 rounded-full {statusType === 'error'
-							? 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300'
-							: 'bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300'}"
-					>
-						{statusMessage}
-					</span>
-				{/if}
 				{#if primaryKind}
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-surface"
+						class="btn btn-sm preset-outlined-surface-500"
 						onclick={() => setView(view === 'simple' ? 'full' : 'simple')}
 						title={view === 'simple' ? m.lbDraftFullViewTitle() : m.lbDraftSimpleViewTitle()}
 					>
@@ -717,18 +762,18 @@
 				{/if}
 				<button
 					type="button"
-					class="btn btn-sm variant-ghost-surface"
+					class="btn btn-sm preset-outlined-surface-500"
 					onclick={validateDraft}
 					disabled={validating}
 				>
 					<i class="fa-solid fa-list-check mr-1" aria-hidden="true"></i>{m.validate()}
 				</button>
-				<button type="button" class="btn btn-sm variant-ghost-surface" onclick={exportYaml}>
+				<button type="button" class="btn btn-sm preset-outlined-surface-500" onclick={exportYaml}>
 					<i class="fa-solid fa-file-arrow-down mr-1" aria-hidden="true"></i>{m.exportYaml()}
 				</button>
 				<button
 					type="button"
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					onclick={() => publish()}
 					disabled={publishing}
 				>
@@ -804,7 +849,7 @@
 				{#each scoreConflict.strategies ?? [] as strategy}
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-warning"
+						class="btn btn-sm preset-outlined-warning-500"
 						onclick={() => publish({ strategy: strategy.action, _presetChecked: true })}
 					>
 						{strategy.name}
@@ -942,7 +987,7 @@
 					<div class="flex items-center justify-end gap-2 pt-1 mt-auto">
 						<button
 							type="button"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 							onclick={saveMeta}
 							disabled={savingMeta || !metaDirty}
 						>
@@ -968,27 +1013,15 @@
 					<p class="text-xs text-surface-500">
 						{m.lbDraftImportObjectsHelp()}
 					</p>
-					<select class="select text-sm" bind:value={importSource}>
-						<option value="">{m.lbDraftSourceLibrary()}</option>
-						{#if storedLibraries.length > 0}
-							<optgroup label={m.lbDraftStoredLibraries()}>
-								{#each storedLibraries as library}
-									<option value={library.id}>
-										{library.name} (v{library.version}){library.builtin
-											? m.lbDraftBuiltinSuffix()
-											: ''}
-									</option>
-								{/each}
-							</optgroup>
-						{/if}
-						{#if otherDrafts.length > 0}
-							<optgroup label={m.lbDraftYourDrafts()}>
-								{#each otherDrafts as other}
-									<option value={'draft:' + other.id}>{other.name}</option>
-								{/each}
-							</optgroup>
-						{/if}
-					</select>
+					<AutocompleteSelect
+						form={importForm}
+						field="source"
+						options={importOptions}
+						translateOptions={false}
+						placeholder={m.lbDraftSourceLibrary()}
+						portalDropdown={true}
+						onChange={(value) => (importSource = value ?? '')}
+					/>
 					<div class="flex flex-wrap gap-3 text-sm">
 						{#each OBJECT_TYPES as type}
 							{@const atLimit = singleKindFull(type)}
@@ -1027,7 +1060,7 @@
 					</div>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={importObjects}
 						disabled={!importSource || importing}
 					>
@@ -1093,13 +1126,16 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
-								<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
+								<a
+									href={frameworkEditorHref(framework)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
 									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
-									class="btn btn-sm variant-ghost-error"
+									class="btn btn-sm preset-outlined-error-500"
 									onclick={() => deleteObject(framework)}
 									aria-label={m.lbDraftDeleteFramework()}
 								>
@@ -1119,13 +1155,85 @@
 					</p>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={addFramework}
 						disabled={addingFramework}
 					>
 						{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1" aria-hidden="true"
 							></i>{:else}<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{/if}
 						{m.addFramework()}
+					</button>
+				</div>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Quick forms: visual editor entry points -->
+	{#if view === 'full' || primaryKind === 'quick_form'}
+		<div class="card p-4 space-y-3">
+			<h3
+				class="text-xs font-semibold uppercase tracking-wider text-surface-500 flex items-center gap-1.5"
+			>
+				<i class="fa-solid fa-clipboard-question" aria-hidden="true"></i>{m.quickForm()}
+			</h3>
+			{#if quickForms.length > 0}
+				<ul class="space-y-2">
+					{#each quickForms as quickForm}
+						<li
+							class="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200-800 hover:border-primary-300 dark:hover:border-primary-500/50 transition-colors"
+						>
+							<div class="flex items-center gap-3 min-w-0">
+								<span
+									class="shrink-0 w-9 h-9 rounded-lg bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center"
+								>
+									<i class="fa-solid fa-clipboard-question" aria-hidden="true"></i>
+								</span>
+								<div class="min-w-0">
+									<p class="font-medium truncate">{quickForm.name || quickForm.ref_id}</p>
+									<p class="text-xs font-mono text-surface-500 truncate">{quickForm.urn}</p>
+									<p class="text-xs text-surface-500">
+										{m.lbDraftPageCount({ count: (quickForm.pages ?? []).length })}
+									</p>
+								</div>
+							</div>
+							<div class="flex items-center gap-1 shrink-0">
+								<a
+									href={quickFormEditorHref(quickForm)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
+									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
+									{m.lbDraftEditVisually()}
+								</a>
+								<button
+									type="button"
+									class="btn btn-sm preset-outlined-error-500"
+									onclick={() => deleteObject(quickForm)}
+									aria-label={m.delete()}
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<div
+					class="border border-dashed border-surface-300-700 rounded-lg py-8 px-4 flex flex-col items-center gap-3 text-center"
+				>
+					<i class="fa-solid fa-clipboard-question text-2xl text-surface-300-700" aria-hidden="true"
+					></i>
+					<p class="text-sm text-surface-500 max-w-md">
+						{m.lbDraftNoQuickForm()}
+					</p>
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-primary-500"
+						onclick={addQuickForm}
+						disabled={addingQuickForm}
+					>
+						{#if addingQuickForm}<i class="fa-solid fa-spinner fa-spin mr-1" aria-hidden="true"
+							></i>{:else}<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{/if}
+						{m.addQuickForm()}
 					</button>
 				</div>
 			{/if}
@@ -1165,13 +1273,13 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
-								<a href={matrixEditorHref(matrix)} class="btn btn-sm variant-filled-primary">
+								<a href={matrixEditorHref(matrix)} class="btn btn-sm preset-filled-primary-500">
 									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
-									class="btn btn-sm variant-ghost-error"
+									class="btn btn-sm preset-outlined-error-500"
 									onclick={() => deleteObject(matrix)}
 									aria-label={m.lbDraftDeleteMatrix()}
 								>
@@ -1189,7 +1297,7 @@
 					<p class="text-sm text-surface-500 max-w-md">{m.lbDraftNoMatrix()}</p>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={addMatrix}
 						disabled={addingMatrix}
 					>
@@ -1215,14 +1323,14 @@
 					<div class="flex items-center gap-1">
 						<a
 							href="/experimental/library-builder/{draft.id}/preset"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 						>
 							<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 							{m.lbDraftEditJourney()}
 						</a>
 						<button
 							type="button"
-							class="btn btn-sm variant-ghost-error"
+							class="btn btn-sm preset-outlined-error-500"
 							onclick={deletePreset}
 							aria-label={m.lbDraftRemovePreset()}
 						>
@@ -1260,7 +1368,7 @@
 					</p>
 					<a
 						href="/experimental/library-builder/{draft.id}/preset"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 					>
 						<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
 						{m.lbDraftCreateJourney()}
@@ -1286,7 +1394,7 @@
 					{#if kind.items.length > 0}
 						<button
 							type="button"
-							class="btn btn-sm variant-ghost-primary"
+							class="btn btn-sm preset-outlined-primary-500"
 							onclick={() => openLeafForm(kind.field)}
 						>
 							<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
@@ -1354,14 +1462,14 @@
 						<div class="md:col-span-3 flex justify-end gap-2">
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-surface"
+								class="btn btn-sm preset-outlined-surface-500"
 								onclick={() => (leafForm = null)}
 							>
 								{m.cancel()}
 							</button>
 							<button
 								type="button"
-								class="btn btn-sm variant-filled-primary"
+								class="btn btn-sm preset-filled-primary-500"
 								onclick={saveLeafForm}
 								disabled={savingLeaf || (!leafForm.urn && !leafForm.values.ref_id.trim())}
 							>
@@ -1402,7 +1510,7 @@
 										<td class="space-x-1 text-right">
 											<button
 												type="button"
-												class="btn-icon btn-icon-sm variant-ghost-surface"
+												class="btn-icon btn-icon-sm preset-outlined-surface-500"
 												onclick={() => openLeafForm(kind.field, item)}
 												aria-label={m.edit()}
 											>
@@ -1410,7 +1518,7 @@
 											</button>
 											<button
 												type="button"
-												class="btn-icon btn-icon-sm variant-ghost-error"
+												class="btn-icon btn-icon-sm preset-outlined-error-500"
 												onclick={() => deleteObject(item)}
 												aria-label={m.delete()}
 											>
@@ -1430,7 +1538,7 @@
 						<p class="text-sm text-surface-500">{m.lbDraftNoneYet()}</p>
 						<button
 							type="button"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 							onclick={() => openLeafForm(kind.field)}
 						>
 							<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
@@ -1466,7 +1574,7 @@
 							</div>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-error shrink-0"
+								class="btn btn-sm preset-outlined-error-500 shrink-0"
 								onclick={() => deleteObject(mappingSet)}
 								aria-label={m.lbDraftDeleteMappingSet()}
 							>
@@ -1495,7 +1603,7 @@
 							</div>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-error shrink-0"
+								class="btn btn-sm preset-outlined-error-500 shrink-0"
 								onclick={() => deleteObject(metric)}
 								aria-label={m.lbDraftDeleteMetricDefinition()}
 							>
@@ -1512,7 +1620,9 @@
 		<p class="text-xs text-surface-500 text-center">
 			{primaryKind === 'framework'
 				? m.lbDraftSimpleViewPackagedFramework({ urn: draft.urn })
-				: m.lbDraftSimpleViewPackagedMatrix({ urn: draft.urn })}
+				: primaryKind === 'quick_form'
+					? m.lbDraftSimpleViewPackagedQuickForm({ urn: draft.urn })
+					: m.lbDraftSimpleViewPackagedMatrix({ urn: draft.urn })}
 		</p>
 	{/if}
 </div>

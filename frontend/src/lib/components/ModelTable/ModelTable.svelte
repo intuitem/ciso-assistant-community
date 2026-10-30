@@ -4,40 +4,68 @@
 
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
-	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { onMount, tick, untrack } from 'svelte';
+	import TableRowActions from '#lib/components/TableRowActions/TableRowActions.svelte';
+	import { booleanDisplay } from '#lib/utils/boolean-display.js';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '#lib/utils/constants.js';
+	import {
+		CUSTOM_ACTIONS_COMPONENT,
+		getFieldComponentMap,
+		isFieldFlagEnabled,
+		URL_MODEL_MAP,
+		urlModelForDjangoName
+	} from '#lib/utils/crud.js';
 
-	import { tableA11y } from '$lib/components/ModelTable/actions';
+	// Presentational row weighting, declared per model in listViewFields.rowEmphasis.
+	function rowEmphasisClass(row: TableSource): string {
+		const config = listViewFields[URLModel]?.rowEmphasis;
+		if (!config) return '';
+		const expected = 'equals' in config ? config.equals : true;
+		return row.meta?.[config.field] === expected ? (config.class ?? 'font-semibold') : '';
+	}
+
+	// A filter on a flag-gated field must go away with its flag, like its column does.
+	function filtersForActiveFlags(urlModel: string) {
+		const filters = listViewFields[urlModel].filters ?? {};
+		const flaggedFields = URL_MODEL_MAP[urlModel]?.flaggedFields;
+		if (!flaggedFields) return filters;
+		const featureFlags = page.data?.featureflags ?? {};
+		return Object.fromEntries(
+			Object.entries(filters).filter(([field]) => {
+				return isFieldFlagEnabled(flaggedFields[field], featureFlags);
+			})
+		);
+	}
+	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { onMount, tick, untrack } from 'svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { applyUnreadCount } from '#lib/utils/stores.js';
+
 	// Types
-	import { browser } from '$app/environment';
-	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import type { ListViewFilterConfig, BatchActionConfig } from '$lib/utils/table';
-	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isDark } from '$lib/utils/helpers';
-	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
-	import { tableFilterStates } from '$lib/utils/stores';
+	import { browser } from '$app/env';
+	import LecChartPreview from '#lib/components/ModelTable/field/LecChartPreview.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import type { ListViewFilterConfig, BatchActionConfig } from '#lib/utils/table.js';
+	import { goto, breadcrumbs } from '#lib/utils/breadcrumbs.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { contextMenuActions, listViewFields, getBatchActions } from '#lib/utils/table.js';
+	import { tableFilterStates } from '#lib/utils/stores.js';
 	import BatchActionBar from './BatchActionBar.svelte';
 	import ColumnSelector from './ColumnSelector.svelte';
-	import type { urlModel } from '$lib/utils/types.js';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
+	import HexColorPill from './HexColorPill.svelte';
+	import type { urlModel } from '#lib/utils/types.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import type { SvelteEvent } from '#lib/utils/types.js';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import type { FormDataShape } from '$lib/utils/schemas';
-	import { loadTableData } from './handler';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
+	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -48,17 +76,23 @@
 		canPerformAction,
 		canPerformActionOnObject,
 		hasPermissionAnywhere
-	} from '$lib/utils/access-control';
+	} from '#lib/utils/access-control.js';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import {
+		tableHandlers,
+		tableRefreshers,
+		tableStates,
+		tableColumnStates,
+		tableSortStates
+	} from '#lib/utils/stores.js';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		// Props
@@ -86,6 +120,16 @@
 		displayActions?: boolean;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
+		// A model with no edit form can still have a field worth changing in bulk (an
+		// inbox's read flag), so this is separable from `disableEdit` -- which it
+		// defaults to, leaving existing callers unaffected.
+		disableBatchEdit?: boolean;
+		/** Columns the backend cannot meaningfully ORDER BY (computed, or stored
+		 *  in a shape whose order means nothing), so the header must not offer
+		 *  a sort. Defaults to the resolved model's
+		 *  `ModelMapEntry.unsortableColumns`, so every caller gets it; pass this
+		 *  only to override that per table. */
+		unsortableColumns?: string[];
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
@@ -105,7 +149,9 @@
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
 		expectedCount?: number;
+		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
+		onQueryChange?: (query: string) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
@@ -115,15 +161,13 @@
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
-		// Opt-in multi-row selection independent of batch actions. Renders the
-		// checkbox column and exposes the current selection to `selectActions`.
-		selectable?: boolean;
-		// Toolbar rendered when rows are selected (selectable mode). Receives the
-		// selected ids, a clear callback, and a reload callback (to refresh rows
-		// after acting) — e.g. a "remove from group" button.
-		selectActions?: import('svelte').Snippet<
-			[{ ids: string[]; clear: () => void; reload: () => void }]
-		>;
+		// Table-scoped batch actions merged into the batch bar next to the child
+		// model's global batchActions. The caller pre-gates them (DetailView only
+		// passes them when the user can change the parent object); this component
+		// only applies the disableDelete/disableEdit filters — never the
+		// child-model permission filter, which would ask the wrong question for
+		// parent_action entries.
+		extraBatchActions?: import('#lib/utils/table.js').TableBatchAction[];
 	}
 
 	let {
@@ -142,7 +186,7 @@
 		backgroundColor = 'bg-surface-50-950',
 		color = '',
 		regionHead = '',
-		regionHeadCell = 'uppercase bg-surface-50-950 text-surface-700-300',
+		regionHeadCell = 'bg-surface-50-950 text-surface-700-300',
 		regionBody = 'bg-surface-50-950',
 		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
@@ -150,6 +194,8 @@
 		displayActions = true,
 		disableCreate = false,
 		disableEdit = false,
+		disableBatchEdit = undefined,
+		unsortableColumns = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -167,13 +213,15 @@
 		tableFilters = URLModel &&
 		listViewFields[URLModel] &&
 		Object.hasOwn(listViewFields[URLModel], 'filters')
-			? listViewFields[URLModel].filters
+			? filtersForActiveFlags(URLModel)
 			: {},
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
 		expectedCount = undefined,
+		loading = false,
 		onFilterChange = () => {},
+		onQueryChange = () => {},
 		quickFilters,
 		optButton,
 		selectButton,
@@ -183,24 +231,38 @@
 		actionsBody,
 		actionsHead,
 		tail,
-		selectable = false,
-		selectActions
+		extraBatchActions = []
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
+	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
+	const BUILTIN_EDITABLE_URL_MODELS = [
+		'terminologies',
+		'entities',
+		'asset-class',
+		'folders',
+		'object-classifications'
+	];
+	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
+	// Hidden only once every listed flag is a known, explicitly-false feature flag.
+	function isFieldHiddenByFeatureFlags(
+		flaggedFields: Record<string, string | string[]> | undefined,
+		key: string
+	) {
+		if (!flaggedFields || !Object.hasOwn(flaggedFields, key)) return false;
+		const flags = ([] as string[]).concat(flaggedFields[key]);
+		return flags.every(
+			(flag) =>
+				Object.hasOwn(page.data?.featureflags ?? {}, flag) &&
+				page.data?.featureflags[flag] === false
+		);
+	}
+
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
-			.filter(
-				(key) =>
-					!(
-						model?.flaggedFields &&
-						Object.hasOwn(model.flaggedFields, key) &&
-						Object.hasOwn(page.data?.featureflags, model.flaggedFields[key]) &&
-						page.data?.featureflags[model.flaggedFields[key]] === false
-					)
-			)
+			.filter((key) => !isFieldHiddenByFeatureFlags(model?.flaggedFields, key))
 			.reduce(
 				(acc, key) => {
 					acc.head[key] = source.head[key];
@@ -272,15 +334,58 @@
 		$tableColumnStates = next;
 	}
 
-	function onRowClick(
-		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
+	/**
+	 * Open the object a row points at, rather than the row itself. Returns true when it
+	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
+	 */
+	function followRowNavigation(rowMetaData: Record<string, any>, newTab: boolean): boolean {
+		const nav = listViewFields[URLModel]?.rowNavigation;
+		if (!nav) return false;
+
+		const marked =
+			nav.markField && rowMetaData[nav.markField] === false
+				? fetch(`/${URLModel}/${rowMetaData[identifierField]}/${nav.markField}`, {
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ [nav.markField]: true })
+					})
+						.then((res) => (res.ok ? res.json() : null))
+						.then(applyUnreadCount)
+						.catch((error) => console.error(`Could not mark ${nav.markField}:`, error))
+				: Promise.resolve();
+
+		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);
+		const targetId = rowMetaData[nav.idField];
+		if (!targetModel || !targetId) {
+			// Unmapped model, or a target deleted under the row: still counts as read, so
+			// only the navigation is skipped. Refetching before the PATCH lands would
+			// bring the row back unread.
+			marked.finally(() => handler.invalidate());
+			return true;
+		}
+
+		if (newTab) {
+			window.open(`/${targetModel}/${targetId}`, '_blank', 'noopener');
+			marked.finally(() => handler.invalidate());
+		} else goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
+		return true;
+	}
+
+	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
+
+		const newTab = event.metaKey || event.ctrlKey;
+		if (followRowNavigation(rowMetaData, newTab)) return;
+
+		const detailURL = `/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`;
+		if (newTab) {
+			window.open(detailURL, '_blank', 'noopener');
+			return;
+		}
 
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
@@ -292,17 +397,10 @@
 			rowMetaData.label ||
 			rowMetaData[identifierField];
 
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+		goto(detailURL, {
 			label,
 			breadcrumbAction: 'push'
 		});
-	}
-
-	function onRowKeydown(
-		event: SvelteEvent<KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
-		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
@@ -350,46 +448,109 @@
 			totalRows: source?.meta?.count
 		}
 	);
-	const rows = handler.getRows();
 
+	const rows = handler.getRows();
 	const relatedFieldNames = $derived(
 		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
 	);
-
 	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
-	$tableHandlers[baseEndpoint] = handler;
+	// A table handed its rows up front has no model or endpoint ("/undefined"): the
+	// remote handler would poll it and clear the seeded rows. A bare baseEndpoint is
+	// still remote.
+	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
 
-	handler.onChange((state: State) =>
-		loadTableData({
-			state,
-			URLModel,
-			endpoint: baseEndpoint,
-			fields:
-				showColumnSelector && allColumnKeys.length > 0
-					? { head: allColumnKeys, body: allColumnKeys }
-					: fields.length > 0
-						? { head: fields, body: fields }
-						: {
-								head:
-									typeof tableSource.head[0] === 'string'
-										? Object.values(tableSource.head)
-										: Object.keys(tableSource.head),
-								body:
-									typeof tableSource.body[0] === 'string'
-										? Object.values(tableSource.body)
-										: Object.keys(tableSource.body)
-							},
-			featureFlags: page.data?.featureflags
-		})
-	);
+	if (hasRemoteSource) $tableHandlers[baseEndpoint] = handler;
+
+	const toastStore = getToastStore();
+
+	// Rows arrive from the API, so on a slow connection an empty table would
+	// otherwise be indistinguishable from a table with no data loaded. Requests
+	// can overlap (search, sort, filters), so count them rather than flag them,
+	// and only show placeholders until the first page has landed: a later
+	// refetch keeps the previous rows on screen.
+	let inFlight = $state(0);
+	let hasLoadedOnce = $state(false);
+	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let currentLoad: Promise<any[]> = Promise.resolve([]);
+
+	if (hasRemoteSource) {
+		// The trigger handler calls our reload synchronously before its first
+		// await, so once invalidate() returns, currentLoad is the new request.
+		$tableRefreshers[baseEndpoint] = () => {
+			handler.invalidate();
+			return currentLoad;
+		};
+		handler.onChange((state: State) => {
+			const query = getParams(state);
+			query.delete('offset');
+			query.delete('limit');
+			onQueryChange(query.toString());
+			inFlight += 1;
+			// Per request, so a failure cannot mask a success that overlapped it.
+			let failed = false;
+			currentLoad = loadTableData({
+				state,
+				URLModel,
+				endpoint: baseEndpoint,
+				fields:
+					showColumnSelector && allColumnKeys.length > 0
+						? { head: allColumnKeys, body: allColumnKeys }
+						: fields.length > 0
+							? { head: fields, body: fields }
+							: {
+									head:
+										typeof tableSource.head[0] === 'string'
+											? Object.values(tableSource.head)
+											: Object.keys(tableSource.head),
+									body:
+										typeof tableSource.body[0] === 'string'
+											? Object.values(tableSource.body)
+											: Object.keys(tableSource.body)
+								},
+				featureFlags: page.data?.featureflags,
+				onError: (error) => {
+					failed = true;
+					console.error(error);
+					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+				}
+			}).finally(() => {
+				inFlight -= 1;
+				if (!failed) hasLoadedOnce = true;
+			});
+			return currentLoad;
+		});
+	}
+
+	function applySavedSort() {
+		const saved = $tableSortStates[filterStoreKey];
+		const sort = saved ? { identifier: saved.orderBy, direction: saved.direction } : orderBy;
+		if (!sort) handler.getSort().set({});
+		else if (sort.direction === 'asc') handler.sortAsc(sort.identifier);
+		else handler.sortDesc(sort.identifier);
+	}
 
 	onMount(() => {
-		if (orderBy) {
-			orderBy.direction === 'asc'
-				? handler.sortAsc(orderBy.identifier)
-				: handler.sortDesc(orderBy.identifier);
-		}
+		applySavedSort();
+		const unsubscribeSort = handler.getSort().subscribe(({ orderBy: key, direction }) => {
+			if (!key || !direction) return;
+			const next = { ...$tableSortStates };
+			if (key === orderBy?.identifier && direction === orderBy?.direction) {
+				if (!(filterStoreKey in next)) return;
+				delete next[filterStoreKey];
+			} else {
+				next[filterStoreKey] = { orderBy: String(key), direction };
+			}
+			$tableSortStates = next;
+		});
+		return () => {
+			unsubscribeSort();
+			if (hasRemoteSource)
+				tableRefreshers.update((r) => {
+					delete r[baseEndpoint];
+					return r;
+				});
+		};
 	});
 
 	const actionsURLModel = URLModel;
@@ -401,84 +562,78 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => row?.meta?.builtin || forcePreventEdit;
-
+	const preventEdit = (row: TableSource) =>
+		(row?.meta?.builtin && !BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)) || forcePreventEdit;
 	const tableURLModel = URLModel;
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
-	// Only persist filters on standalone list pages, not embedded sub-tables
-	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
-	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
-	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
-	// Check if any filter-related URL params exist
-	const hasUrlFilterParams = filteredFields.some(
-		(field) => page.url.searchParams.getAll(field).length > 0
-	);
-	const filterValues: { [key: string]: any } = $state(
-		Object.fromEntries(
+	// A filter emits one query param per key by default; `params` lets one widget drive several
+	// (a date range emits both bounds).
+	const paramsOf = (field: string): string[] => filters[field]?.params ?? [field];
+	// Standalone list pages only: offer the column selector (embedded tables pass
+	// a curated `fields` prop) and sync filters with the URL.
+	const isStandaloneTable = $derived(hasRemoteSource && baseEndpoint === `/${URLModel}`);
+	// Embedded tables share the page URL with sibling tables (DetailView keeps
+	// visited tabs mounted) and their filter names overlap (status, owner, ...):
+	// syncing them would leak one table's filters into another. They persist
+	// through the filter store only.
+	const syncFiltersToUrl = $derived(isStandaloneTable);
+	// Unique per parent object + tab (baseEndpoint carries the parent id).
+	// $derived so it updates when this instance is reused for a different
+	// object (DetailView.svelte keys tabs by model name, not by parent id).
+	const filterStoreKey = $derived(`${page.url.pathname}::${baseEndpoint}`);
+	// Order-insensitive fingerprint of one field's selection. Values are
+	// `{ value, param? }` objects or bare strings (defaultFilters allows both).
+	const filterFingerprint = (field: string, values: any[] = []) =>
+		values
+			.map((v) =>
+				typeof v === 'object' && v !== null ? `${v.param ?? field}=${v.value}` : `${field}=${v}`
+			)
+			.sort()
+			.join('&');
+
+	const isDefaultFilterState = (state: Record<string, any[]>) =>
+		filteredFields.every(
+			(field) =>
+				filterFingerprint(field, state[field]) === filterFingerprint(field, defaultFilters[field])
+		);
+
+	function seedFilterValues() {
+		const stored = $tableFilterStates[filterStoreKey] ?? {};
+		const urlParams = syncFiltersToUrl ? page.url.searchParams : new URLSearchParams();
+		// Check if any filter-related URL params exist
+		const hasUrlFilterParams = filteredFields.some((field) =>
+			paramsOf(field).some((param: string) => urlParams.getAll(param).length > 0)
+		);
+		return Object.fromEntries(
 			filteredFields.map((field: string) => {
-				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				const urlValues = paramsOf(field).flatMap((param: string) =>
+					urlParams.getAll(param).map((value) => ({ value, param }))
+				);
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
-				if (!hasUrlFilterParams && field in storedFilters) {
-					return [field, storedFilters[field] ?? []];
+				if (!hasUrlFilterParams && field in stored) {
+					return [field, stored[field] ?? []];
 				}
 				const defaultValue = defaultFilters[field] || [];
 				return [field, defaultValue];
 			})
-		)
-	);
+		);
+	}
+
+	const filterValues: { [key: string]: any } = $state(seedFilterValues());
 	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
-		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
-	});
-
-	$effect(() => {
-		for (const field of filteredFields) {
-			const filterValue = filterValues[field];
-			const overrideFilterValue = overrideFilters[field];
-			const finalFilterValue = overrideFilterValue || filterValue;
-
-			const fieldFilterParams = finalFilterValue
-				? finalFilterValue.map((v: Record<string, any>) => v.value)
-				: [];
-			handler.filter(fieldFilterParams, field);
-			page.url.searchParams.delete(field);
-			if (finalFilterValue) {
-				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
-			}
-		}
-		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Sync the current crumb's href with the new filter query.
-		breadcrumbs.update((crumbs) => {
-			if (crumbs.length < 2) return crumbs;
-			const last = crumbs[crumbs.length - 1];
-			const lastPath = last.href?.split('?')[0];
-			if (lastPath !== page.url.pathname) return crumbs;
-			const newHref = page.url.pathname + page.url.search;
-			if (last.href === newHref) return crumbs;
-			const next = crumbs.slice();
-			next[next.length - 1] = { ...last, href: newHref };
-			return next;
-		});
-		// untracked so resetFilters can delete the entry without retriggering us
-		if (isStandaloneTable) {
-			untrack(() => {
-				$tableFilterStates[filterStoreKey] = { ...filterValues };
-			});
-		}
-		setTimeout(() => {
-			handler.invalidate();
-		}, 10);
+		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter?.hide);
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params and default filters to filter initial data
-	for (const [key, value] of page.url.searchParams) {
+	// convert URL search params (standalone only) and seeded filters to filter initial data
+	for (const [key, value] of syncFiltersToUrl ? page.url.searchParams : []) {
 		filterInitialData[key] ??= [];
 		filterInitialData[key].push(value);
 	}
@@ -503,10 +658,95 @@
 		validationMethod: 'auto'
 	});
 
+	// Reseed + sync/persist in one effect: a scope change (instance reused for
+	// a different object) must finish reseeding before anything is written
+	// under the new key -- two separate effects can't guarantee that order.
+	let previousFilterStoreKey = filterStoreKey;
 	$effect(() => {
-		if (page.form?.form?.posted && page.form?.form?.valid) {
+		// Rerun (and refetch) when the page reloads its data
+		page.data;
+		if (filterStoreKey !== previousFilterStoreKey) {
+			previousFilterStoreKey = filterStoreKey;
+			untrack(applySavedSort);
+			const fresh = untrack(seedFilterValues);
+			Object.assign(filterValues, fresh);
+			_form.form.update((data) => ({
+				...data,
+				...Object.fromEntries(
+					Object.entries(fresh).map(([f, v]) => [f, (v ?? []).map((x: any) => x.value)])
+				)
+			}));
+		}
+
+		// untracked: the shallow goto below swaps page.url, which must not rerun this effect
+		const url = syncFiltersToUrl ? new URL(untrack(() => page.url.href)) : null;
+		for (const field of filteredFields) {
+			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
+
+			const buckets: Record<string, any> = Object.fromEntries(
+				paramsOf(field).map((param: string) => [param, []])
+			);
+			for (const v of finalFilterValue) {
+				(buckets[v.param ?? field] ??= []).push(v.value);
+			}
+			for (const [param, values] of Object.entries(buckets)) {
+				handler.filter(values, param);
+				if (!url) continue;
+				url.searchParams.delete(param);
+				values.forEach((value: string) => url.searchParams.append(param, value));
+			}
+		}
+		if (url) {
+			if (url.href !== untrack(() => page.url.href)) {
+				_goto(url, { shallow: true, replace: true, state: untrack(() => page.state) });
+			}
+			// Sync the current crumb's href with the new filter query.
+			breadcrumbs.update((crumbs) => {
+				if (crumbs.length < 2) return crumbs;
+				const last = crumbs[crumbs.length - 1];
+				const lastPath = last.href?.split('?')[0];
+				if (lastPath !== url.pathname) return crumbs;
+				const newHref = url.pathname + url.search;
+				if (last.href === newHref) return crumbs;
+				const next = crumbs.slice();
+				next[next.length - 1] = { ...last, href: newHref };
+				return next;
+			});
+		}
+		// untracked so resetFilters can delete the entry without retriggering us.
+		// A default selection isn't stored: seeding falls back to defaultFilters
+		// anyway, so untouched tables leave no entry behind in localStorage.
+		untrack(() => {
+			if (!isDefaultFilterState(filterValues)) {
+				$tableFilterStates[filterStoreKey] = { ...filterValues };
+			} else if (filterStoreKey in $tableFilterStates) {
+				const next = { ...$tableFilterStates };
+				delete next[filterStoreKey];
+				$tableFilterStates = next;
+			}
+		});
+		if (hasRemoteSource)
+			setTimeout(() => {
+				handler.invalidate();
+			}, 10);
+	});
+
+	// Refetch when the page reloads its data (navigation, refreshAll(), form actions).
+	// Standalone tables get this from the filter effect above; embedded ones don't sync
+	// filters, so track it here. page.data, not page.url: the filter-syncing shallow goto
+	// also swaps page.url.
+	let pageDataSeen = false;
+	$effect(() => {
+		page.data;
+		if (!pageDataSeen) return void (pageDataSeen = true);
+		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
+	});
+
+	$effect(() => {
+		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
-			handler.invalidate();
+			// untracked: the reload writes inFlight, which would retrigger this effect
+			untrack(() => handler.invalidate());
 		}
 	});
 
@@ -528,6 +768,8 @@
 				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
+	// Library-managed content: authored in the library builder, never from the table.
+	const LIBRARY_MANAGED_URL_MODELS = ['quick-forms'];
 	let contextMenuCanEditObject = $derived(
 		(model
 			? canPerformActionOnObject({
@@ -538,15 +780,20 @@
 				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
-				URLModel === 'terminologies' ||
-				URLModel === 'entities')
+				BUILTIN_EDITABLE_URL_MODELS.includes(URLModel))
 	);
 
 	let contextMenuDisplayEdit = $derived(
 		contextMenuCanEditObject &&
 			URLModel &&
-			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel)
+			!disableEdit &&
+			!['frameworks', 'risk-matrices', 'ebios-rm', ...LIBRARY_MANAGED_URL_MODELS].includes(URLModel)
 	);
+
+	// The context menu ignored disableEdit/disableView entirely, so a model that
+	// suppressed them in the row actions still offered them on right-click. View
+	// matches TableRowActions: builtin/urn restricts editing, never reading.
+	let contextMenuDisplayView = $derived(!disableView);
 
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
@@ -560,7 +807,9 @@
 				: false)
 	);
 
-	let contextMenuDisplayDelete = $derived(contextMenuCanDeleteObject && deleteForm !== undefined);
+	let contextMenuDisplayDelete = $derived(
+		!disableDelete && contextMenuCanDeleteObject && deleteForm !== undefined
+	);
 
 	function contextMenuModalConfirmDelete(
 		id: string,
@@ -568,17 +817,13 @@
 	): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,
-			props: {
-				_form: deleteForm,
-				id: id,
-				debug: false,
-				URLModel: URLModel
-			}
+			props: { _form: deleteForm, id, debug: false, URLModel }
 		};
 		const name =
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
 				: (row.name ?? row.meta?.str ?? Object.values(row)[0]);
+
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name as string })
@@ -587,7 +832,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.deleteModalTitle(),
-			body: body
+			body
 		};
 		modalStore.trigger(modal);
 	}
@@ -600,9 +845,9 @@
 			ref: PromptConfirmModal,
 			props: {
 				_form: deleteForm,
-				id: id,
+				id,
 				debug: false,
-				URLModel: URLModel,
+				URLModel,
 				formAction: '?/delete'
 			}
 		};
@@ -610,6 +855,7 @@
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
 				: (row.name ?? Object.values(row)[0]);
+
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name as string })
@@ -618,7 +864,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.deleteModalTitle(),
-			body: body
+			body
 		};
 		modalStore.trigger(modal);
 	}
@@ -627,7 +873,11 @@
 		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
 
+	// Bumped on reset so filters holding their own state (date ranges) remount cleared.
+	let filterResetKey = $state(0);
+
 	async function resetFilters() {
+		filterResetKey++;
 		for (const field of filteredFields) {
 			const defaultValue = defaultFilters[field] ?? [];
 			filterValues[field] = Array.isArray(defaultValue)
@@ -641,19 +891,26 @@
 			}
 			return data;
 		});
-		if (!isStandaloneTable) return;
 		await tick();
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
+		if (!(filterStoreKey in $tableSortStates)) return;
+		const nextSort = { ...$tableSortStates };
+		delete nextSort[filterStoreKey];
+		$tableSortStates = nextSort;
+		applySavedSort();
+		handler.invalidate();
 	}
 
-	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
-		// The badge background is a fixed hex color, so the text must be a fixed color too
-		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
-		// light-colored badge. White on dark backgrounds, fixed dark surface otherwise.
-		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
-	});
+	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
+		to_do: 'preset-tonal-primary',
+		in_progress: 'preset-tonal-warning',
+		on_hold: 'preset-tonal-secondary',
+		active: 'preset-tonal-success',
+		degraded: 'preset-tonal-error',
+		deprecated: 'preset-tonal-surface'
+	};
 
 	const tail_render = $derived(tail);
 
@@ -671,10 +928,10 @@
 		'user_groups'
 	];
 
-	// Function to check if a column is multi-value and should not be sortable
-	const isMultiValueColumn = (key: string): boolean => {
+	const isUnsortableColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
+			(unsortableColumns ?? model?.unsortableColumns ?? []).includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};
@@ -713,6 +970,13 @@
 	};
 
 	let openState = $state(false);
+	// Popover.Content renders while closed and every filter widget fetches its
+	// options on mount, so keep them out of the tree until the first open. Kept
+	// once mounted so reopening does not refetch.
+	let filtersMounted = $state(false);
+	$effect(() => {
+		if (openState) filtersMounted = true;
+	});
 
 	// Search state lifted here so it survives BatchActionBar show/hide cycles
 	let searchValue = $state('');
@@ -720,16 +984,28 @@
 	// Batch selection state
 	let selectedIds: Set<string> = $state(new Set());
 
+	const noBatchFieldEdit = $derived(disableBatchEdit ?? disableEdit);
+
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
-			? getBatchActions(URLModel).filter((a) =>
+			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
 					a.type === 'delete'
-						? hasPermissionAnywhere(user, `delete_${model.name}`)
-						: hasPermissionAnywhere(user, `change_${model.name}`)
+						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
+						: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
-	const hasBatchActions = $derived(currentBatchActions.length > 0 && deleteForm !== undefined);
+	// Table-scoped extras are pre-gated by the caller (change on the parent);
+	// only the lock/disable filters apply here — the child-model permission
+	// filter above would ask the wrong question for parent_action entries.
+	const extraActions = $derived(
+		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !noBatchFieldEdit))
+	);
+
+	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
+	const hasBatchActions = $derived(
+		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
+	);
 
 	let selectAllChecked = $derived.by(() => {
 		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
@@ -777,25 +1053,11 @@
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
 				{selectedIds}
-				actions={currentBatchActions}
+				actions={allBatchActions}
 				{URLModel}
 				{handler}
 				onClearSelection={clearSelection}
 			/>
-		{:else if selectable && selectedIds.size > 0}
-			<div class="flex items-center gap-3 px-2">
-				<span class="text-sm text-surface-700-300"
-					>{selectedIds.size} {safeTranslate('selected')}</span
-				>
-				{@render selectActions?.({
-					ids: [...selectedIds],
-					clear: clearSelection,
-					reload: () => handler.invalidate()
-				})}
-				<button type="button" class="btn btn-sm preset-tonal" onclick={clearSelection}
-					>{safeTranslate('cancel')}</button
-				>
-			</div>
 		{:else}
 			{#if !hideFilters}
 				<Popover
@@ -817,45 +1079,54 @@
 						<Popover.Content
 							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
-							<SuperForm {_form} validators={zod(z.object({}))}>
-								{#snippet children({ form })}
-									{#each filteredFields as field}
-										{#if filters[field]?.component}
-											{@const FilterComponent = filters[field].component}
-											<FilterComponent
-												{form}
-												{field}
-												{...filters[field].props}
-												fieldContext="filter"
-												label={safeTranslate(filters[field].props?.label)}
-												onChange={(value) => {
-													const arrayValue = Array.isArray(value) ? value : [value];
-													const sanitizedArrayValue = arrayValue.filter(
-														(v) => v !== null && v !== undefined && v !== ''
-													);
+							{#if filtersMounted}
+								<SuperForm {_form} validators={zod(z.object({}))}>
+									{#snippet children({ form })}
+										{#each filteredFields as field}
+											{#if filters[field]?.component}
+												{@const FilterComponent = filters[field].component}
+												{#key filterResetKey}
+													<FilterComponent
+														{form}
+														{field}
+														{...filters[field].props}
+														fieldContext="filter"
+														label={safeTranslate(filters[field].props?.label)}
+														filterValue={filterValues[field]}
+														onChange={(value) => {
+															const arrayValue = Array.isArray(value) ? value : [value];
+															const sanitizedArrayValue = arrayValue.filter(
+																(v) => v !== null && v !== undefined && v !== ''
+															);
 
-													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-												}}
-											/>
+															filterValues[field] = sanitizedArrayValue.map((v) =>
+																typeof v === 'object' && v !== null && 'value' in v
+																	? v
+																	: { value: v }
+															);
+														}}
+													/>
+												{/key}
+											{/if}
+										{/each}
+										{#if filterCount > 0 || filterStoreKey in $tableSortStates}
+											<div class="flex justify-end pt-1">
+												<button
+													type="button"
+													class="btn preset-tonal-surface text-sm"
+													onclick={() => {
+														resetFilters();
+														openState = false;
+													}}
+												>
+													<i class="fa-solid fa-rotate-left mr-2"></i>
+													{m.resetFilters()}
+												</button>
+											</div>
 										{/if}
-									{/each}
-									{#if filterCount > 0}
-										<div class="flex justify-end pt-1">
-											<button
-												type="button"
-												class="btn preset-tonal-surface text-sm"
-												onclick={() => {
-													resetFilters();
-													openState = false;
-												}}
-											>
-												<i class="fa-solid fa-rotate-left mr-2"></i>
-												{m.resetFilters()}
-											</button>
-										</div>
-									{/if}
-								{/snippet}
-							</SuperForm>
+									{/snippet}
+								</SuperForm>
+							{/if}
 						</Popover.Content>
 					</Popover.Positioner>
 				</Popover>
@@ -879,7 +1150,7 @@
 				{#if canSelectObject}
 					{@render selectButton?.()}
 				{/if}
-				{#if canCreateObject && !disableCreate}
+				{#if canCreateObject && !disableCreate && !LIBRARY_MANAGED_URL_MODELS.includes(URLModel)}
 					{@render addButton?.()}
 				{/if}
 			</div>
@@ -894,15 +1165,10 @@
 		</div>
 	{/if}
 	<!-- Table -->
-	<table
-		class="table caption-bottom {classesTable}"
-		class:table-interactive={interactive}
-		role="grid"
-		use:tableA11y
-	>
+	<table class="table caption-bottom {classesTable}" class:table-interactive={interactive}>
 		<thead class="table-head {regionHead}">
 			<tr>
-				{#if hasBatchActions || selectable}
+				{#if hasBatchActions}
 					<th
 						class="{regionHeadCell} group/check w-10 text-center cursor-pointer"
 						title={m.selectAll()}
@@ -925,7 +1191,7 @@
 					</th>
 				{/if}
 				{#each renderColumnKeys as key (key)}
-					<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+					<Th {handler} orderBy={isUnsortableColumn(key) ? undefined : key} class={regionHeadCell}
 						>{safeTranslate(tableSource.head[key])}</Th
 					>
 				{/each}
@@ -935,7 +1201,7 @@
 			</tr>
 			{#if thFilter}
 				<tr>
-					{#if hasBatchActions || selectable}
+					{#if hasBatchActions}
 						<th></th>
 					{/if}
 					{#each renderColumnKeys as key (key)}
@@ -956,15 +1222,14 @@
 							{@const meta = row?.meta ?? row}
 							<tr
 								onclick={(e) => onRowClick(e, rowIndex)}
-								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								aria-rowindex={rowIndex + 1}
-								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer {rowEmphasisClass(
+									row
+								)}"
 							>
-								{#if hasBatchActions || selectable}
+								{#if hasBatchActions}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
-										role="gridcell"
 										onclick={(e) => {
 											e.stopPropagation();
 											if (meta?.id) toggleRowSelection(meta.id);
@@ -986,7 +1251,7 @@
 								{#each renderColumnKeys as key (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
-									<td role="gridcell">
+									<td>
 										<div class={regionCell}>
 											{#if component && browser}
 												{@const CellComponent = component}
@@ -1000,7 +1265,7 @@
 											{:else}
 												<div
 													data-testid="model-table-td-array-elem"
-													class="base-font-family whitespace-pre-line break-words"
+													class="font-typo-base whitespace-pre-line break-words"
 												>
 													{#if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
@@ -1024,6 +1289,14 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
+																			{#if key === 'applied_controls' && val.status && val.status !== '--'}
+																				<span
+																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
+																						val.status
+																					] ?? 'preset-tonal-surface'}"
+																					>{safeTranslate(val.status)}</span
+																				>
+																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
@@ -1034,9 +1307,11 @@
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																			{@const [labelKey, ...valueParts] = val.split(':')}
 																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
+																				>{unsafeTranslate(labelKey + 'Colon') ??
+																					`${unsafeTranslate(labelKey)}:`}
+																				{valueParts.join(':')}</span
 																			>
 																		{:else}
 																			{val ?? '-'}
@@ -1091,15 +1366,12 @@
 															{safeTranslate(value.str) ?? '-'}
 														{/if}
 													{:else if value && value.hexcolor}
-														<p
-															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																value.hexcolor
-															)}"
-															style="background-color: {value.hexcolor}"
-														>
-															{safeTranslate(value.name ?? value.str) ?? '-'}
-														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+														<HexColorPill
+															hexcolor={value.hexcolor}
+															label={safeTranslate(value.name ?? value.str) ?? '-'}
+															class="ml-2"
+														/>
+													{:else if ISO_8601_REGEX.test(value) && DATE_FIELDS_TO_FORMAT.includes(key)}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
 														{@const bd = booleanDisplay(value, key, URLModel)}
@@ -1107,25 +1379,51 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field'}
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
 														<span class="ml-9"
 															>{value != null
 																? safeTranslate('percentageDisplay', { number: value })
 																: '--'}</span
 														>
+													{:else if key === 'last_assessment_status'}
+														<!-- The status is nullable: only a missing round is "never assessed". -->
+														{#if !meta?.last_assessment_date}
+															<span class="text-surface-500">{m.neverAssessed()}</span>
+														{:else}
+															{safeTranslate(value ?? '-')}
+														{/if}
 													{:else if key === 'translations'}
 														{#if Object.keys(value).length > 0}
 															<div class="flex flex-col gap-2">
 																{#each Object.entries(value) as [lang, translation]}
 																	<div class="flex flex-row gap-2">
 																		<strong>{lang}:</strong>
-																		<span>{safeTranslate(translation)}</span>
+
+																		<span>
+																			{safeTranslate(
+																				typeof translation === 'object' && translation !== null
+																					? ((translation as Record<string, string>).name ?? '')
+																					: translation
+																			)}
+																		</span>
 																	</div>
 																{/each}
 															</div>
 														{:else}
 															--
 														{/if}
+													{:else if URLModel == 'document-containers' && key === 'status' && row.meta?.pending_revision}
+														<div class="flex items-center space-x-2">
+															<span>{safeTranslate(value)}</span>
+															<span
+																class="badge preset-tonal-primary text-xs whitespace-nowrap"
+																data-testid="pending-revision-badge"
+															>
+																v{row.meta.pending_revision.version_number} · {safeTranslate(
+																	row.meta.pending_revision.status
+																)}
+															</span>
+														</div>
 													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.state}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
@@ -1156,11 +1454,13 @@
 														{@const displayValue = [
 															'name',
 															'description',
+															'observation',
 															'ref_id',
 															'key'
 														].includes(key)
 															? (value ?? '-')
 															: safeTranslate(value ?? '-')}
+
 														{#if displayValue?.length > 300}
 															{displayValue.slice(0, 300)}...
 														{:else}
@@ -1174,7 +1474,7 @@
 									</td>
 								{/each}
 								{#if displayActions}
-									<td class="text-end {regionCell}" role="gridcell">
+									<td class="text-end {regionCell}">
 										{#if actions}{@render actions({
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}
@@ -1185,8 +1485,7 @@
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 												editURL={!(row.meta.builtin || row.meta.urn) ||
-												URLModel === 'terminologies' ||
-												URLModel === 'entities'
+												BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}
@@ -1209,7 +1508,10 @@
 												{/snippet}
 												{#snippet tail()}
 													{@const ActionsComponent = actionsComponent}
-													{#if tail_render}{@render tail_render()}{:else if ActionsComponent}
+
+													{#if tail_render}
+														{@render tail_render()}
+													{:else if ActionsComponent}
 														<ActionsComponent meta={row.meta ?? {}} {actionsURLModel} {handler} />
 													{/if}
 												{/snippet}
@@ -1219,10 +1521,32 @@
 								{/if}
 							</tr>
 						{/each}
+						{#if (loading || isFetching) && $rows.length === 0}
+							{#each Array(5) as _}
+								<tr class="even:bg-surface-100-900" data-testid="row-skeleton">
+									{#if hasBatchActions}
+										<td class="w-10"></td>
+									{/if}
+									{#each renderColumnKeys as key (key)}
+										<td>
+											<div class={regionCell}>
+												<div class="space-y-2 py-2 animate-pulse">
+													<div class="h-4 rounded bg-surface-200-800"></div>
+													<div class="h-4 w-3/5 rounded bg-surface-200-800"></div>
+												</div>
+											</div>
+										</td>
+									{/each}
+									{#if displayActions}
+										<td class="text-end {regionCell}"></td>
+									{/if}
+								</tr>
+							{/each}
+						{/if}
 					</tbody>
 				{/snippet}
 			</ContextMenu.Trigger>
-			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
+			{#if contextMenuDisplayEdit || contextMenuDisplayView || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
 					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
@@ -1232,7 +1556,7 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
+					{#if contextMenuDisplayEdit}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
@@ -1246,6 +1570,8 @@
 						>
 							{m.edit()}
 						</ContextMenu.Item>
+					{/if}
+					{#if contextMenuDisplayView}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
@@ -1297,7 +1623,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} syncToUrl={syncFiltersToUrl} />
 		{/if}
 	</footer>
 </div>

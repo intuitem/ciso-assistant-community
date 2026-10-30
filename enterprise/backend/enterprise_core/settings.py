@@ -54,9 +54,29 @@ MODULES["enterprise_core"] = {  # noqa: F405
 
 INSTALLED_APPS.append("enterprise_core")  # noqa: F405
 
+CONFIGURABLE_DEFAULT_ROLE = True
+"""
+If set to `True`, `Folder.default_role` is editable by users (folder form and API),
+and the upgrade migration assigns the baseline reader role to content-holding folders.
+
+Otherwise `Folder.default_role` is immutable: the root folder carries the baseline
+reader role, re-pinned by `startup()` at every boot, and no other folder gets one.
+"""
+
+DELEGATED_USER_CREATION = True
+"""
+If set to `True`, `startup()` provisions the builtin User creator role (`add_user`
+and `view_user` only) and its "Global - User creator" group, so that non-admins
+such as domain managers can create users.
+
+Otherwise neither the role nor the group is created.
+"""
+
 # --- License ---
 LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
+BACKUP_RESTORE_VALIDATORS.append("enterprise_core.license.check_restored_seats")  # noqa: F405
+INSTANCE_STATUS_EXTENSIONS.append("enterprise_core.instance_status")  # noqa: F405
 
 # --- Startup banner ---
 logger.info("Launching CISO Assistant Enterprise")

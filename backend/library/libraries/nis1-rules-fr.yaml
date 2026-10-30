@@ -8,8 +8,8 @@ description: "Arr\xEAt\xE9 du 14 septembre 2018 fixant les r\xE8gles de s\xE9cur
   \ des op\xE9rateurs de services essentiels et des fournisseurs de service num\xE9\
   rique\nhttps://www.legifrance.gouv.fr/loda/id/JORFTEXT000037444012/"
 copyright: "Loi fran\xE7aise"
-version: 1
-publication_date: 2024-07-29
+version: 2
+publication_date: 2026-09-26
 provider: "Gouvernement fran\xE7ais"
 packager: intuitem
 translations:
@@ -76,7 +76,7 @@ objects:
         \ dans le cadre de l'homologation de s\xE9curit\xE9 pr\xE9vue \xE0 la r\xE8\
         gle 3, une analyse de risque de ses syst\xE8mes d'information essentiels (SIE)."
       reference_controls:
-      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         en:
           name: null
@@ -115,7 +115,7 @@ objects:
         \ et met en \u0153uvre une politique de s\xE9curit\xE9 des r\xE9seaux et syst\xE8\
         mes d'information (PSSI)."
       reference_controls:
-      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      - urn:intuitem:risk:function:doc-pol:pol.risk
       translations:
         en:
           name: null
@@ -755,7 +755,7 @@ objects:
         \ notamment la r\xE9alisation d'un audit d'architecture, d'un audit de configuration\
         \ et d'un audit organisationnel et physique."
       reference_controls:
-      - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+      - urn:intuitem:risk:function:doc-pol:pol.audit
       translations:
         en:
           name: null
@@ -776,7 +776,7 @@ objects:
         \ de service de confiance pour les besoins de la s\xE9curit\xE9 des syst\xE8\
         mes d'information."
       reference_controls:
-      - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+      - urn:intuitem:risk:function:doc-pol:pol.audit
       translations:
         en:
           name: null
@@ -976,7 +976,7 @@ objects:
       description: "R\xE8gles relatives \xE0 la protection des r\xE9seaux et syst\xE8\
         mes d'information"
       reference_controls:
-      - urn:intuitem:risk:function:mitre-attack:M1026
+      - urn:intuitem:risk:function:mitre-attack:m1026
       translations:
         en:
           name: Chapter II
@@ -2735,8 +2735,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
       description: " les serveurs d'infrastructure syst\xE8me ;"
       reference_controls:
-      - urn:intuitem:risk:function:doc-pol:POL.MONITOR
-      - urn:intuitem:risk:function:mitre-attack:M1029
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:mitre-attack:m1029
       translations:
         en:
           name: null
@@ -2972,8 +2972,8 @@ objects:
         \ ces relev\xE9s techniques \xE0 la disposition de l'Agence nationale de la\
         \ s\xE9curit\xE9 des syst\xE8mes d'information."
       reference_controls:
-      - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
-      - urn:intuitem:risk:function:doc-pol:POL.BCP
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
       translations:
         en:
           name: null

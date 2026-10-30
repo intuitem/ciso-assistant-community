@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { isDarkTheme, mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { roundScore } from '#lib/utils/helpers.js';
+
 	interface Props {
 		width?: string;
 		height?: string;
@@ -8,12 +11,14 @@
 		name?: string;
 		value: number;
 		max: number;
+		min?: number;
 		isPercentage?: boolean;
 		color?: string;
 		backgroundColor?: string;
 		strokeWidth?: number;
 		fontSize?: number;
 		title?: string;
+		radius?: string;
 	}
 
 	let {
@@ -23,40 +28,46 @@
 		name = 'single_gauge',
 		value,
 		max,
+		min = 0,
 		isPercentage = false,
 		color = '#B075CC',
-		backgroundColor = '#E6E6E6',
+		backgroundColor,
 		strokeWidth = 20,
 		fontSize = 32,
-		title = ''
+		title = '',
+		radius = '65%'
 	}: Props = $props();
 
 	const chart_id = `${name}_${crypto.randomUUID().slice(0, 8)}_div`;
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		const el = document.getElementById(chart_id);
-		if (!el) return;
-		const isDark = document.documentElement.classList.contains('dark');
-		const chart = echarts.init(el, isDark ? 'dark' : null, { renderer: 'svg' });
+	let chart: any;
+
+	const percentage = $derived.by(() => {
+		const range = max - min;
+		return range > 0 ? Math.min(100, Math.max(0, ((value - min) / range) * 100)) : 0;
+	});
+	const displayValue = $derived(roundScore(value, isPercentage ? 1 : 2));
+
+	function buildOption() {
+		// Recomputed on every theme flip so the value and track stay readable on both surfaces.
+		const isDark = isDarkTheme();
 		const valueColor = isDark ? '#e5e5e5' : '#333';
-
-		// Capture values at mount time to avoid reactive context issues in ECharts callbacks
-		const percentage = max > 0 ? (value / max) * 100 : 0;
-		const displayValue = Math.round(value * 10) / 10;
-
-		const option = {
+		const trackColor = backgroundColor ?? (isDark ? '#475569' : '#E6E6E6');
+		// read once so the ECharts formatter closes over a plain value
+		const shown = displayValue;
+		return {
 			title: {
 				text: title,
 				textStyle: {
 					fontWeight: 'bold',
-					fontSize: 14
+					fontSize: 14,
+					color: valueColor
 				}
 			},
 			series: [
 				{
 					type: 'gauge',
-					radius: '65%',
+					radius: radius,
 					center: ['50%', '45%'],
 					startAngle: 90,
 					endAngle: -270,
@@ -76,7 +87,7 @@
 					axisLine: {
 						lineStyle: {
 							width: strokeWidth,
-							color: [[1, backgroundColor]]
+							color: [[1, trackColor]]
 						}
 					},
 					splitLine: {
@@ -101,7 +112,7 @@
 								fontWeight: 'bold',
 								color: valueColor,
 								formatter: function () {
-									return isPercentage ? `${displayValue}%` : displayValue;
+									return isPercentage ? `${shown}%` : shown;
 								}
 							}
 						}
@@ -118,17 +129,31 @@
 				}
 			]
 		};
+	}
 
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
-
-		const handleResize = () => chart.resize();
-		window.addEventListener('resize', handleResize);
-
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			dispose = mountThemeAwareChart(echarts, el, buildOption, {
+				onChart: (c: any) => (chart = c)
+			});
+		})();
 		return () => {
-			window.removeEventListener('resize', handleResize);
-			chart.dispose();
+			active = false;
+			dispose?.();
+			chart = undefined;
 		};
+	});
+
+	$effect(() => {
+		void percentage;
+		void displayValue;
+		chart?.setOption(buildOption());
 	});
 </script>
 
@@ -138,6 +163,7 @@
 	style="min-width: 180px; min-height: 180px;"
 	data-testid="progress-ring-svg"
 	aria-valuenow={value}
+	aria-valuemin={min}
 	aria-valuemax={max}
 	role="progressbar"
 ></div>

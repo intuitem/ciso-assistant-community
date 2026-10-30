@@ -11,12 +11,13 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ActionPlanList,
     ActionPlanBudgetOverview,
+    GenericFilterSet,
+    NullableChoiceFilter,
 )
 from core.models import AppliedControl, Folder
 from core.utils import format_currency as _fmt_currency, get_global_currency
 from iam.models import RoleAssignment
 from rest_framework.exceptions import PermissionDenied
-from global_settings.models import GlobalSettings
 
 from .models import (
     QuantitativeRiskStudy,
@@ -42,6 +43,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         "reviewers",
         "status",
         "genericcollection",
+        "filtering_labels",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
@@ -1063,18 +1065,25 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             )
 
 
+class QuantitativeRiskScenarioFilterSet(GenericFilterSet):
+    status = NullableChoiceFilter(choices=QuantitativeRiskScenario.STATUS_OPTIONS)
+
+    class Meta:
+        model = QuantitativeRiskScenario
+        fields = [
+            "quantitative_risk_study",
+            "assets",
+            "threats",
+            "vulnerabilities",
+            "qualifications",
+            "priority",
+            "is_selected",
+        ]
+
+
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario
-    filterset_fields = [
-        "quantitative_risk_study",
-        "assets",
-        "threats",
-        "vulnerabilities",
-        "qualifications",
-        "status",
-        "priority",
-        "is_selected",
-    ]
+    filterset_class = QuantitativeRiskScenarioFilterSet
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
 
@@ -1263,9 +1272,29 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
 
 class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     model = QuantitativeRiskHypothesis
-    filterset_fields = ["quantitative_risk_scenario", "risk_stage", "is_selected"]
+    filterset_fields = [
+        "quantitative_risk_scenario",
+        "risk_stage",
+        "is_selected",
+        "filtering_labels",
+    ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "quantitative_risk_scenario",
+                "quantitative_risk_scenario__quantitative_risk_study",
+            )
+            .prefetch_related(
+                "existing_applied_controls",
+                "added_applied_controls",
+                "removed_applied_controls",
+            )
+        )
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
@@ -1452,10 +1481,8 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
             quantitative_risk_hypotheses_added__in=hypotheses
         ).distinct()
 
-        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(),
-            self.request.user,
-            AppliedControl,
+        viewable_controls = RoleAssignment.get_viewable_object_ids(
+            self.request.user, AppliedControl
         )
         return qs.filter(id__in=viewable_controls)
 
@@ -1465,4 +1492,4 @@ class QuantitativeRiskStudyActionPlanBudgetOverview(
 ):
     def get(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
+        return Response(self.compute_budget_overview(qs, request.user))

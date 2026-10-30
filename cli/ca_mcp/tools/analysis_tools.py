@@ -1,10 +1,20 @@
 """Analysis MCP tools for CISO Assistant"""
 
+from decimal import ROUND_HALF_UP, Decimal
+
 from ..client import make_get_request, fetch_all_results
 from ..utils.response_formatter import (
     success_response,
     error_response,
 )
+
+
+def _display_score(value) -> float:
+    """A score as the app shows it: two decimals, half up (the API sends it
+    unrounded)."""
+    return float(
+        Decimal(repr(round(value, 9))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
 
 
 async def get_all_audits_with_metrics(
@@ -40,7 +50,9 @@ async def get_all_audits_with_metrics(
 
         # Filtered listing (with pagination) — carries the native status/progress
         # fields and honours all four filters.
-        audits, error = fetch_all_results("/compliance-assessments/", params=params)
+        audits, error = fetch_all_results(
+            "/compliance-assessments/", params=params, max_items=None
+        )
         if error:
             return error
 
@@ -64,7 +76,7 @@ async def get_all_audits_with_metrics(
 
         def _fmt_score(value):
             # -1 is the backend sentinel for "nothing scored"
-            return "N/A" if value is None or value == -1 else value
+            return "N/A" if value is None or value == -1 else _display_score(value)
 
         result = "# Compliance Assessments - Summary\n\n"
         result += f"Total Audits: {len(audits)}\n\n"
@@ -91,17 +103,21 @@ async def get_all_audits_with_metrics(
             # Aggregate score (server-computed). The headline "score" is the
             # maturity score; implementation/documentation are its components.
             gs = entry.get("global_score") or {}
-            result += f"- **Score (Maturity):** {_fmt_score(gs.get('maturity_score'))}\n"
-            result += f"  - Implementation: {_fmt_score(gs.get('implementation_score'))}\n"
+            result += (
+                f"- **Score (Maturity):** {_fmt_score(gs.get('maturity_score'))}\n"
+            )
+            result += (
+                f"  - Implementation: {_fmt_score(gs.get('implementation_score'))}\n"
+            )
             doc_score = gs.get("documentation_score")
             if doc_score is not None:
                 result += f"  - Documentation: {_fmt_score(doc_score)}\n"
 
             # Compliance-result counts (assessable requirements only), taken from
             # the donut breakdown rather than re-counted client-side.
-            donut_values = (
-                ((entry.get("donut") or {}).get("result") or {}).get("values") or []
-            )
+            donut_values = ((entry.get("donut") or {}).get("result") or {}).get(
+                "values"
+            ) or []
             counts = {v.get("name"): v.get("value", 0) for v in donut_values}
             total = sum(counts.values())
 
@@ -130,7 +146,15 @@ async def get_all_audits_with_metrics(
 
             result += "\n"
 
-        return result
+        # The fetch above is intentionally unbounded (max_items=None) so the
+        # per-audit counts are computed over every audit. The *output* still has
+        # to be bounded: one section per audit grows without limit otherwise.
+        return success_response(
+            result,
+            "get_all_audits_with_metrics",
+            "Use get_audit_gap_analysis for the requirement-level detail of one audit, "
+            "or filter by folder/framework/status to narrow this report.",
+        )
     except Exception as e:
         return f"Error in get_all_audits_with_metrics: {str(e)}"
 
@@ -168,7 +192,9 @@ async def get_audit_gap_analysis(audit_name: str):
 
     # Get all requirement assessments for this compliance assessment (with pagination)
     params = {"compliance_assessment": audit["id"]}
-    requirements, error = fetch_all_results("/requirement-assessments/", params=params)
+    requirements, error = fetch_all_results(
+        "/requirement-assessments/", params=params, max_items=None
+    )
 
     if error:
         return error_response(
@@ -314,7 +340,7 @@ async def get_audit_global_score(audit_name: str):
 
     def _fmt(value):
         # -1 is the backend sentinel for "nothing scored"
-        return "N/A" if value is None or value == -1 else value
+        return "N/A" if value is None or value == -1 else _display_score(value)
 
     if not scores.get("scoring_enabled", True):
         return success_response(
@@ -326,9 +352,7 @@ async def get_audit_global_score(audit_name: str):
     result = f"# Score: {audit_name}\n\n"
     result += f"- **Score (Maturity):** {_fmt(scores.get('maturity_score'))}\n"
     result += f"\n_Components:_\n"
-    result += (
-        f"- **Implementation:** {_fmt(scores.get('implementation_score'))}\n"
-    )
+    result += f"- **Implementation:** {_fmt(scores.get('implementation_score'))}\n"
     documentation_score = scores.get("documentation_score")
     if documentation_score is not None:
         result += f"- **Documentation:** {_fmt(documentation_score)}\n"

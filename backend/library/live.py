@@ -204,11 +204,17 @@ def live_framework_to_object(framework) -> dict:
                 "typical_evidence": node.typical_evidence,
                 "implementation_groups": node.implementation_groups,
                 "visibility_expression": node.visibility_expression,
+                "min_score": node.min_score,
+                "max_score": node.max_score,
+                "scores_definition_ref": node.scores_definition_ref,
+                "target_score": node.target_score,
                 "translations": node.translations or None,
             }
         )
         if node.weight is not None and node.weight != 1:
             node_dict["weight"] = node.weight
+        if node.evidence_required:
+            node_dict["evidence_required"] = True
         if node.importance and node.importance != "undefined":
             node_dict["importance"] = node.importance
         if node.display_mode and node.display_mode != "default":
@@ -323,6 +329,11 @@ def live_framework_to_object(framework) -> dict:
             "implementation_groups_definition": framework.implementation_groups_definition,
             "outcomes_definition": framework.outcomes_definition,
             "field_visibility": framework.field_visibility or None,
+            "score_scale_locked": framework.score_scale_locked,
+            "score_calculation_method": framework.score_calculation_method,
+            "anchor_na_to_target": framework.anchor_na_to_target,
+            "target_score": framework.target_score,
+            "result_aggregation": framework.result_aggregation,
             "translations": framework.translations or None,
             "requirement_nodes": requirement_nodes,
         }

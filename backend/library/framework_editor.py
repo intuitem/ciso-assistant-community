@@ -23,7 +23,10 @@ Rules:
 """
 
 import copy
+import re
 
+from core.quick_form_scoring import PAGE_AGGREGATIONS
+from core.utils import extract_node_id
 from library.builder import BuilderError, rebase_tree, urn_safe_leaf
 
 # Node keys owned by the editor: everything else on an existing node is
@@ -38,7 +41,9 @@ EDITOR_NODE_KEYS = {
     "assessable",
     "implementation_groups",
     "visibility_expression",
+    "aggregation",
     "typical_evidence",
+    "evidence_required",
     "weight",
     "importance",
     "display_mode",
@@ -71,9 +76,54 @@ QUESTION_KEYS = {
     "config",
     "depends_on",
     "weight",
+    "required",
     "translations",
     "choices",
 }
+
+
+# Where a rule names a node (a quick-form page, a framework requirement), a
+# question or a choice by node id. Only these positions are rewritten: a bare
+# string elsewhere (`value == "2"`) is data.
+_SUBSCRIPT = re.compile(r"""\b(pages|requirements|answers)\[\s*(["'])(.*?)\2\s*\]""")
+_CHOICE_IN = re.compile(r"""(["'])([^"'\\]*)\1(\s+in\s+answers\s*\[)""")
+
+
+def node_id_maps(urn_map: dict) -> tuple[dict, dict, dict]:
+    """(nodes, questions, choices) node-id renames implied by a save's URN map:
+    a rule written before the first save names the editor's ids."""
+    pages, questions, choices = {}, {}, {}
+    for old, new in urn_map.items():
+        if ":" not in old:  # editor-local ids, not URNs
+            continue
+        old_id, new_id = extract_node_id(old), extract_node_id(new)
+        if not old_id or not new_id or old_id == new_id:
+            continue
+        if ":choice:" in new:
+            choices[old_id] = new_id
+        elif ":question:" in new:
+            questions[old_id] = new_id
+        else:
+            pages[old_id] = new_id
+    return pages, questions, choices
+
+
+def rebase_expression(expression, maps):
+    """The expression with renamed node/question/choice ids, in reference
+    positions only. Mirrored by `rebaseExpression` in the builder."""
+    if not expression:
+        return expression
+    pages, questions, choices = maps
+
+    def subscript(match):
+        new = (questions if match[1] == "answers" else pages).get(match[3])
+        return match[0] if new is None else f"{match[1]}[{match[2]}{new}{match[2]}]"
+
+    def choice(match):
+        new = choices.get(match[2])
+        return match[0] if new is None else f"{match[1]}{new}{match[1]}{match[3]}"
+
+    return _CHOICE_IN.sub(choice, _SUBSCRIPT.sub(subscript, expression))
 
 
 def node_base_urn(framework_urn: str) -> str:
@@ -130,7 +180,9 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                 "assessable": bool(node.get("assessable")),
                 "implementation_groups": node.get("implementation_groups"),
                 "visibility_expression": node.get("visibility_expression"),
+                "aggregation": node.get("aggregation"),
                 "typical_evidence": node.get("typical_evidence"),
+                "evidence_required": bool(node.get("evidence_required")),
                 "weight": node.get("weight", 1),
                 "importance": node.get("importance"),
                 "display_mode": node.get("display_mode", "default"),
@@ -165,6 +217,7 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                     "depends_on": q_data.get("depends_on"),
                     "order": q_order,
                     "weight": q_data.get("weight", 1),
+                    "required": q_data.get("required", True) is not False,
                     "requirement_node_id": node_urn,
                     "folder_id": "",
                     "translations": q_data.get("translations"),
@@ -218,17 +271,25 @@ def _clean(mapping: dict) -> dict:
     return {key: value for key, value in mapping.items() if value is not None}
 
 
-def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
+def editor_doc_to_framework_object(
+    editor_doc: dict,
+    *,
+    existing: dict,
+    node_base: str | None = None,
+    urn_map_out: dict | None = None,
+) -> dict:
     """Convert an editor doc back into the library-YAML framework object.
 
     `existing` is the framework object currently in the draft document; it
     provides the pinned framework URN, the set of known item URNs, and the
-    fields the editor does not model.
+    fields the editor does not model. `node_base` overrides the URN base new
+    nodes are minted under (quick form pages reuse this converter with their
+    own token, see quick_form_editor).
     """
     framework_urn = str(existing.get("urn", "")).lower()
     if not framework_urn:
         raise BuilderError("The framework in the draft has no URN")
-    base = node_base_urn(framework_urn)
+    base = node_base or node_base_urn(framework_urn)
 
     existing_nodes = {
         str(node.get("urn", "")).lower(): node
@@ -301,6 +362,9 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
         )
 
     question_id_to_urn: dict = {}
+    # Reported to the editor only: choice ids are short and never appear
+    # inside the tree, so they stay out of the rebase map.
+    choice_id_to_urn: dict = {}
     # URNs claimed by questions during this save, per node. Minting must
     # avoid both these and every URN existing anywhere in the document —
     # existing questions keep their URN verbatim (whatever their position),
@@ -346,6 +410,13 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
                 continue
             seen_choice_ids.add(choice_key)
             c_urn = str(choice.get("urn") or "").lower()
+            # A choice added in the editor and never given a text is not content.
+            # An existing one emptied by the author stays: dropping it would
+            # cascade into the answers that picked it.
+            if not str(choice.get("value") or "").strip() and (
+                c_urn not in existing_choice_urns
+            ):
+                continue
             if c_urn and c_urn in existing_choice_urns and c_urn not in claimed_choices:
                 claimed_choices.add(c_urn)
             else:
@@ -359,6 +430,9 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
                 next_index += 1
                 if old_c_urn:
                     urn_map[old_c_urn] = c_urn
+            choice_id = str(choice.get("id") or "").lower()
+            if choice_id and choice_id != c_urn:
+                choice_id_to_urn[choice_id] = c_urn
             q_choices.append(
                 _clean(
                     {
@@ -385,6 +459,9 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
                 "config": question.get("config"),
                 "depends_on": question.get("depends_on"),
                 "weight": question.get("weight"),
+                # Only the non-default value is emitted, so compliance
+                # documents stay byte-identical.
+                "required": False if question.get("required") is False else None,
                 "translations": question.get("translations"),
                 "choices": q_choices or None,
             }
@@ -439,10 +516,31 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
         display_mode = node.get("display_mode")
         if display_mode and display_mode != "default":
             node_dict["display_mode"] = display_mode
+        previous = existing_nodes.get(canonical)
+        # Page score aggregation (quick forms). Absent from the payload means
+        # the editor does not model it: keep what the document had.
+        aggregation = (
+            node.get("aggregation")
+            if "aggregation" in node
+            else (previous or {}).get("aggregation")
+        )
+        if aggregation and aggregation not in PAGE_AGGREGATIONS:
+            raise BuilderError(
+                f"{canonical}: aggregation must be one of "
+                + ", ".join(PAGE_AGGREGATIONS)
+            )
+        if aggregation and aggregation != "sum":
+            node_dict["aggregation"] = aggregation
+        evidence_required = (
+            node.get("evidence_required")
+            if "evidence_required" in node
+            else (previous or {}).get("evidence_required")
+        )
+        if evidence_required is True:
+            node_dict["evidence_required"] = True
         node_questions = questions_by_node.get(canonical)
         if node_questions:
             node_dict["questions"] = node_questions
-        previous = existing_nodes.get(canonical)
         # Threat / reference-control links: lists of full URNs, as in the
         # library YAML. Key absent (or null) → the payload does not model
         # links, keep the existing ones; empty list → deliberate detach-all.
@@ -478,6 +576,10 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
     for editor_id, canonical in {**node_ids_to_urn, **question_id_to_urn}.items():
         if editor_id and editor_id != canonical:
             urn_map[editor_id] = canonical
+    # The editor keeps its own URNs until told otherwise; sending these back
+    # lets it adopt the canonical ones, or every save re-mints new content.
+    if urn_map_out is not None:
+        urn_map_out.update({**choice_id_to_urn, **urn_map})
     if urn_map:
         requirement_nodes = rebase_tree(requirement_nodes, urn_map)
 
@@ -512,5 +614,16 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
     if not framework.get("ref_id"):
         # migrated pre-LibraryDraft drafts may lack it; a save heals them
         framework["ref_id"] = framework_urn.rsplit(":", 1)[-1]
+    # Rules and conditions written before the first save name the editor's ids.
+    maps = node_id_maps({**choice_id_to_urn, **urn_map})
+    if any(maps):
+        for rule in framework.get("outcomes_definition") or []:
+            if isinstance(rule, dict) and rule.get("expression"):
+                rule["expression"] = rebase_expression(rule["expression"], maps)
+        for node in requirement_nodes:
+            if node.get("visibility_expression"):
+                node["visibility_expression"] = rebase_expression(
+                    node["visibility_expression"], maps
+                )
     framework["requirement_nodes"] = requirement_nodes
     return framework

@@ -1,0 +1,53 @@
+urn: urn:intuitem:risk:library:workflow-compliance-audit-in-review
+locale: en
+ref_id: workflow-compliance-audit-in-review
+name: Audit moved to review — notify the reviewer
+description: When an audit's status becomes In review, email whoever is expected to review it. Set notify_emails
+  before publishing.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-audit-in-review:workflow:audit-in-review
+    schema_version: 1
+    ref_id: audit-in-review
+    name: Audit moved to review — notify the reviewer
+    description: When an audit's status becomes In review, email whoever is expected to review it. Set
+      notify_emails before publishing.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      nodes:
+      - ref: on_review
+        type: trigger
+        label: Audit moved to review
+        trigger_config:
+          type: internal_event
+          event_key: complianceassessment.updated
+          filters:
+            operator: and
+            conditions:
+            - field: status
+              op: eq
+              value: in_review
+              changed: true
+      - ref: notify
+        type: action
+        label: Email the reviewer
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Ready for review: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} moved to In review on {{today}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_review
+        target: notify
+      - source: notify
+        target: done

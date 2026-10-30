@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, json } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 const LINK_FIELDS = [
@@ -7,11 +7,12 @@ const LINK_FIELDS = [
 	'applied_controls',
 	'task_templates',
 	'processings',
+	'reviewers',
 	'filtering_labels'
 ] as const;
 
 export const POST: RequestHandler = async ({ request, fetch, locals }) => {
-	if (!locals.featureflags?.document_management) error(404, 'Not found');
+	if (!(await locals.getFeatureFlags())?.document_management) error(404, 'Not found');
 
 	const fd = await request.formData();
 	const source = String(fd.get('source') ?? 'author');
@@ -63,7 +64,7 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 	}
 
 	const data = await res.json().catch(() => null);
-	if (!res.ok) return json(data ?? { error: 'Failed' }, { status: res.status });
+	if (!res.ok) return Response.json(data ?? { error: 'Failed' }, { status: res.status });
 
 	// upload/link go through custom actions that don't accept object-links or
 	// classification — set them in a follow-up PATCH when present.
@@ -81,10 +82,10 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 			})
 		});
 		if (!patchRes.ok) {
-			return json(await patchRes.json().catch(() => ({ error: 'Failed to set links' })), {
+			return Response.json(await patchRes.json().catch(() => ({ error: 'Failed to set links' })), {
 				status: patchRes.status
 			});
 		}
 	}
-	return json(data);
+	return Response.json(data);
 };

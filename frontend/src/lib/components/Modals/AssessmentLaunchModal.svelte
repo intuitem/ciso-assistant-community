@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { deserialize } from '$app/forms';
 	import { onDestroy } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -12,12 +12,19 @@
 	interface Props {
 		parent: any;
 		item: string;
+		action?: string;
 		showName?: boolean;
 		defaultName?: string;
 		showDomain?: boolean;
 	}
 
-	let { item, showName = false, defaultName = '', showDomain = false }: Props = $props();
+	let {
+		item,
+		action = '?/launchAssessment',
+		showName = false,
+		defaultName = '',
+		showDomain = false
+	}: Props = $props();
 	const modalStore: ModalStore = getModalStore();
 
 	let name = $state(defaultName);
@@ -52,11 +59,11 @@
 			body.append('item', item);
 			if (showDomain) body.append('folder', folder);
 			if (showName) body.append('name', name.trim());
-			const res = await fetch('?/launchAssessment', { method: 'POST', body });
+			const res = await fetch(action, { method: 'POST', body });
 			const result: any = deserialize(await res.text());
 			if (result.type === 'success' && result.data?.redirect) {
 				modalStore.close();
-				await goto(result.data.redirect);
+				await gotoOrLoad(result.data.redirect);
 			} else {
 				error = result.data?.error || m.assessmentLaunchFailed();
 			}

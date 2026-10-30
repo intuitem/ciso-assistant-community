@@ -4,7 +4,7 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { superForm } from 'sveltekit-superforms';
 	import { z } from 'zod';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 	const modalStore: ModalStore = getModalStore();
@@ -19,7 +19,8 @@
 
 	let { parent, currentAudit }: Props = $props();
 
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-2xl shadow-xl space-y-4';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-fit max-w-2xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	const schema = z.object({
@@ -121,7 +122,11 @@
 				</div>
 			{/if}
 			<div class="flex justify-end space-x-2">
-				<button type="button" class="btn preset-filled-surface-500" onclick={parent.onClose}>
+				<button
+					type="button"
+					class="btn preset-tonal-surface border border-surface-500"
+					onclick={parent.onClose}
+				>
 					{m.cancel()}
 				</button>
 				<button

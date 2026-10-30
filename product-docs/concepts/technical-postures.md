@@ -16,10 +16,10 @@ graph LR
   TP -->|monitors| A[Assets]
   TP -->|comprises| R[Runs]
   R -->|records| CR[Check results]
-  TP -.->|remediated through| FA[Follow-up findings assessment]
+  TP -.->|remediated through| FA[Findings binder]
 ```
 
-A technical posture always lives inside a **domain** and is measured against one **framework**, whose assessable requirements act as the check list. It monitors a set of **assets**, and every ingestion of results — a manual entry session, an API push, a file import — is recorded as a **run** carrying one **check result** per (check, asset) it touched. An optional **follow-up findings assessment** is where remediation of failing checks is tracked.
+A technical posture always lives inside a **domain** and is measured against one **framework**, whose assessable requirements act as the check list. It monitors a set of **assets**, and every ingestion of results — a manual entry session, an API push, a file import — is recorded as a **run** carrying one **check result** per (check, asset) it touched. An optional **findings binder** is where remediation of failing checks is tracked.
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -27,7 +27,7 @@ A technical posture always lives inside a **domain** and is measured against one
 | Run | `PostureRun` | One ingestion event; keeps the tool name and start time |
 | Check result | `PostureResult` | One measurement of one check on one asset |
 | Check | `RequirementNode` | Assessable requirement from the framework library |
-| Follow-up assessment | `FindingsAssessment` | Findings assessment with the "Posture follow-up" category |
+| Findings binder | `FindingsAssessment` | Findings binder with the "Posture follow-up" category |
 | Domain | `Folder` | Required; drives IAM scoping |
 
 ## The measurement cube
@@ -64,16 +64,31 @@ Every way of getting results in produces a run:
 - **API** — scanners push JSON to the assessment's `upload-results` endpoint; re-using the returned run identifier accumulates or patches the same run. The API tab shows a ready-to-copy example.
 - **File import** — the "Import results" button on the Runs tab accepts CSV and XLSX files as well as OCSF Compliance Finding JSON. A mapping dialog lets you bind arbitrary scanner CSV columns and result values, choose how colliding rows aggregate, and target one or several of the scoped assets.
 
+A run only records the checks present in what was sent. A check missing from a file or a push is never assumed to pass: it keeps its previous result.
+
 Runs are the ingestion log of the assessment: the Runs tab lists them with their tool, check counts, and pass/fail breakdown, and a run's detail page shows exactly what it recorded per asset. The trend chart on the Overview tab plots the pass rate across runs, which is how posture drift becomes visible.
+
+### Scanner recipes
+
+| Scanner | Framework | Produce the file | Import |
+|---|---|---|---|
+| [Prowler](https://github.com/prowler-cloud/prowler) | The matching cloud benchmark (for example a CIS Benchmark) | The compliance CSV Prowler writes for that framework | Pick the **Prowler compliance** preset in the mapping dialog |
+| [Plumber](https://github.com/getplumber/plumber) | Plumber CI/CD Security Checks | `plumber analyze --ocsf results.json` | Direct, no mapping |
+
+**Plumber** scans GitHub Actions and GitLab CI pipelines. Its OCSF output carries one finding per control, passes included, with the control key in the finding's `control` field. Each Plumber control is a check of the Plumber CI/CD Security Checks framework, matched on that key; the per-job findings land in the check's message. Controls disabled in your `.plumber.yaml` come in as **Not checked**.
+
+To set it up, create a technical posture on the Plumber CI/CD Security Checks framework, select the **GitHub Actions** or **GitLab CI** implementation group together with **Cross-provider**, and add one asset per repository. Then, after each scan, use **Import results** on the **Runs** tab, choose the file, and tick the repository under **Apply results to**.
+
+Prowler's own OCSF export is not used: it is made of detection findings, which only report what failed, so a passing check would be indistinguishable from one that was never evaluated. Its compliance CSV reports every requirement.
 
 ## Findings and remediation
 
 The **Action plan** tab lists every check whose current result is anything other than Pass — failures first, then errors, then unchecked and not-applicable cells — so the operational team can decide what to investigate. From there, each line can be turned into a **finding** with one click.
 
-Findings do not live on the technical posture itself. They are created in the **follow-up assessment**, a regular findings assessment linked to the posture (the creation form offers to create one automatically via **Create a related findings assessment**). This separation is deliberate:
+Findings do not live on the technical posture itself. They are created in the **findings binder** linked to the posture (the creation form offers to create one automatically via **Create a related findings assessment**). This separation is deliberate:
 
 - **Measurements are ephemeral; remediation is not.** A check result is overwritten by the next run and eventually pruned by the history depth. A finding needs a stable life of its own — status, owner, ETA, severity, linked applied controls — that survives every re-measurement. Pinning remediation to a measurement row would lose it on the next scan.
-- **Remediation is a shared discipline.** Findings assessments are the platform's common remediation ledger — the same object used for pentest reports and internal reviews. Routing posture failures into one means they benefit from the full findings workflow (action plans, applied controls, reporting) instead of a parallel, posture-only mechanism.
-- **The posture stays a pure measurement surface.** The cube tells you *what is true right now*; the follow-up assessment tells you *what you are doing about it*. Either can be read — or rebuilt — without touching the other.
+- **Remediation is a shared discipline.** Findings binders are the platform's common remediation ledger — the same object used for pentest reports and internal reviews. Routing posture failures into one means they benefit from the full findings workflow (action plans, applied controls, reporting) instead of a parallel, posture-only mechanism.
+- **The posture stays a pure measurement surface.** The cube tells you *what is true right now*; the binder tells you *what you are doing about it*. Either can be read — or rebuilt — without touching the other.
 
 The link is kept visible in both directions: the action plan shows the finding attached to each failing check with its status and ETA, and re-measuring a remediated check back to Pass is how the fix is verified — on the next run, not by declaration.

@@ -1,9 +1,10 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { getSecureRedirect } from '$lib/utils/helpers';
-import { safeTranslate } from '$lib/utils/i18n';
-import { UserEditSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { UserEditSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
@@ -18,6 +19,19 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 	const schema = UserEditSchema;
 	const form = await superValidate(object, zod(schema));
+
+	// This route shadows the generic edit page, so it has to load the select options
+	// the generic layout would have provided.
+	const selectOptions: Record<string, any> = {};
+	for (const selectField of model.selectFields ?? []) {
+		const response = await fetch(`${BASE_API_URL}/${URLModel}/${selectField.field}/`);
+		if (response.ok) {
+			selectOptions[selectField.field] = formatSelectFieldData(await response.json(), selectField);
+		} else {
+			console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+		}
+	}
+	model.selectOptions = selectOptions;
 
 	return { form, model, object, title: m.edit() };
 };

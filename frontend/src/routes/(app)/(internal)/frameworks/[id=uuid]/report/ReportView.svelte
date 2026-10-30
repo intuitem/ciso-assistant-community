@@ -1,22 +1,18 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	// -----------------------------------------------------------------------------
 	// Types — match the backend response shape from GET /api/frameworks/{id}/report/
 	// -----------------------------------------------------------------------------
 
 	type Result =
-		| 'not_assessed'
-		| 'partially_compliant'
-		| 'non_compliant'
-		| 'compliant'
-		| 'not_applicable';
+		'not_assessed' | 'partially_compliant' | 'non_compliant' | 'compliant' | 'not_applicable';
 
 	type InheritancePathEntry = {
 		ca_id: string;
@@ -113,6 +109,7 @@
 		ca_status_counts: Record<string, number>;
 		live_statuses: string[];
 		aggregation_strategy: string;
+		campaign: { id: string; name: string } | null;
 		generated_at: string;
 	};
 
@@ -126,6 +123,7 @@
 	// is defense-in-depth and means the file stays correct if a future caller
 	// passes a reactive `report` prop without remounting.
 	let framework = $derived(report.framework);
+	let campaign = $derived(report.campaign ?? null);
 	let rows = $derived<ReportRow[]>(report.rows ?? []);
 	let sectionList = $derived<Section[]>(framework.sections ?? []);
 	let igDefs = $derived<IGDef[]>(framework.implementation_groups_definition ?? []);
@@ -146,7 +144,9 @@
 	let excludedCAs = $derived(totalDetectedCAs - countedCAs);
 
 	$effect(() => {
-		$pageTitle = `${framework.name} — ${m.frameworkReport()}`;
+		$pageTitle = campaign
+			? `${campaign.name} — ${m.frameworkReport()}`
+			: `${framework.name} — ${m.frameworkReport()}`;
 	});
 
 	// IG id resolver: most YAMLs use ref_id as the canonical key on the requirement
@@ -200,10 +200,10 @@
 
 	function onIGChange(event: Event) {
 		const nextIG = (event.currentTarget as HTMLSelectElement).value;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (nextIG && nextIG !== 'all') url.searchParams.set('implementation_group', nextIG);
 		else url.searchParams.delete('implementation_group');
-		goto(url, { invalidateAll: true, keepFocus: true });
+		goto(url, { refreshAll: true, reset: false });
 	}
 
 	const RESULT_COLORS: Record<Result, string> = {
@@ -463,6 +463,14 @@
 					{m.frameworkReport()}
 				</div>
 				<h1 class="text-xl font-semibold">{framework.name}</h1>
+				{#if campaign}
+					<a
+						href="/campaigns/{campaign.id}"
+						class="badge preset-tonal-secondary text-xs mt-1 inline-block hover:preset-filled-secondary-500"
+					>
+						<i class="fa-solid fa-bullhorn mr-1"></i>{campaign.name}
+					</a>
+				{/if}
 				<div class="text-sm text-surface-600-400 mt-1">
 					{m.frameworkReportSubtitle({
 						min: framework.min_score ?? '—',
@@ -557,7 +565,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2 items-center">
-				<a class="btn variant-ghost-surface text-sm" href="/frameworks/{framework.id}"
+				<a class="btn preset-outlined-surface-500 text-sm" href="/frameworks/{framework.id}"
 					>{m.backToFramework()}</a
 				>
 			</div>

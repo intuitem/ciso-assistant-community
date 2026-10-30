@@ -1,12 +1,12 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/requirement-mapping-sets/`;
 
-	const res = await fetch(endpoint);
-	const data = await res.json();
+	const data = await fetchAllPages(fetch, endpoint);
 
 	return { data, title: 'Visualize applied mapping data as a graph' };
 }) satisfies PageServerLoad;

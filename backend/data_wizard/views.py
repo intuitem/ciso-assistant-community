@@ -1,162 +1,195 @@
 import csv
+import enum
+import importlib
 import io
 import logging
+import math
 import structlog
-from types import MappingProxyType
 import re
-import pandas as pd
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.parsers import FileUploadParser
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from dataclasses import dataclass, field, replace
+from datetime import date, datetime
+from functools import cached_property
+from pathlib import Path
+from types import MappingProxyType
+from typing import Any, ClassVar, Final, Mapping, Optional
+from uuid import UUID
 
-from .serializers import LoadFileSerializer
+import pandas as pd
+import structlog
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
+from django.db import IntegrityError, models, transaction
+from django.db.models import Q
+from django.http import FileResponse, HttpRequest
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from core.base_models import AbstractBaseModel
-from core.utils import build_questions_dict
+from core.constants import COUNTRY_CHOICES
+from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
+    AppliedControl,
     Assessment,
     Asset,
+    AssetClass,
     ComplianceAssessment,
     Evidence,
+    FilteringLabel,
+    FindingsAssessment,
     Folder,
     Framework,
+    Incident,
     LoadedLibrary,
     Perimeter,
+    Policy,
     RequirementAssessment,
     RequirementNode,
     RiskAssessment,
     RiskMatrix,
-    StoredLibrary,
-    AppliedControl,
-    FindingsAssessment,
     RiskScenario,
-    Policy,
     SecurityException,
-    Incident,
-    TaskTemplate,
+    StoredLibrary,
     TaskNode,
+    TaskTemplate,
+    Terminology,
+    Threat,
     Vulnerability,
 )
 from core.serializers import (
-    BaseModelSerializer,
-    AssetWriteSerializer,
-    PerimeterWriteSerializer,
     AppliedControlWriteSerializer,
+    AssetWriteSerializer,
+    BaseModelSerializer,
     ComplianceAssessmentWriteSerializer,
-    RequirementAssessmentWriteSerializer,
+    EvidenceWriteSerializer,
     FindingsAssessmentWriteSerializer,
     FindingWriteSerializer,
-    UserWriteSerializer,
+    FolderWriteSerializer,
+    IncidentWriteSerializer,
+    PerimeterWriteSerializer,
+    PolicyWriteSerializer,
+    ReferenceControlWriteSerializer,
+    RequirementAssessmentWriteSerializer,
     RiskAssessmentWriteSerializer,
     RiskScenarioWriteSerializer,
-    ReferenceControlWriteSerializer,
-    ThreatWriteSerializer,
-    EvidenceWriteSerializer,
-    FolderWriteSerializer,
-    PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
-    IncidentWriteSerializer,
     TaskTemplateWriteSerializer,
+    ThreatWriteSerializer,
+    UserWriteSerializer,
     VulnerabilityWriteSerializer,
 )
-from ebios_rm.models import (
-    EbiosRMStudy,
-    FearedEvent,
-    RoTo,
-    Stakeholder,
-    StrategicScenario,
-    AttackPath,
-    ElementaryAction,
-    KillChain,
+from core.utils import (
+    build_questions_dict,
+    get_global_currency,
+    parse_answers_cell,
+    unescape_excel_formula,
 )
-from ebios_rm.serializers import (
-    ElementaryActionWriteSerializer,
-    EbiosRMStudyWriteSerializer,
-)
-from .ebios_rm_excel_helpers import (
-    extract_elementary_actions,
-    process_excel_file as process_ebios_rm_excel,
-)
-from .egerie_xml_helpers import (
-    process_xml_file as process_egerie_xml,
-    quartile_to_index,
-    map_egerie_status,
-)
-from core.models import Terminology
-from core.utils import AUDITOR_ONLY
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
-    CYFUN_FRAMEWORK_URN,
     CYFUN_LIBRARY_URN,
     LEVEL_TO_GROUP,
     process_cyfun_file,
 )
-from tprm.models import Entity, Solution, Contract, Representative
-from tprm.serializers import (
-    EntityWriteSerializer,
-    SolutionWriteSerializer,
-    ContractWriteSerializer,
-    RepresentativeWriteSerializer,
+from ebios_rm.models import (
+    AttackPath,
+    EbiosRMStudy,
+    ElementaryAction,
+    FearedEvent,
+    KillChain,
+    RoTo,
+    Stakeholder,
+    StrategicScenario,
 )
-from resilience.models import (
-    BusinessImpactAnalysis,
-    AssetAssessment,
-    EscalationThreshold,
+from ebios_rm.serializers import (
+    EbiosRMStudyWriteSerializer,
+    ElementaryActionWriteSerializer,
 )
-from resilience.serializers import (
-    BusinessImpactAnalysisWriteSerializer,
-    AssetAssessmentWriteSerializer,
-    EscalationThresholdWriteSerializer,
-)
+from rest_framework.exceptions import APIException, PermissionDenied
+
+from core.views import check_folder_add_permission
+from iam.models import Permission, RoleAssignment, User
 from privacy.models import (
-    Processing,
-    PersonalData,
-    DataSubject,
-    DataRecipient,
-    DataContractor,
     ART6_LAWFUL_BASIS_CHOICES,
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
+    DataContractor,
+    DataRecipient,
+    DataSubject,
+    PersonalData,
+    Processing,
 )
 from privacy.serializers import (
+    DataContractorWriteSerializer,
+    DataRecipientWriteSerializer,
+    DataSubjectWriteSerializer,
+    DataTransferWriteSerializer,
+    PersonalDataWriteSerializer,
     ProcessingWriteSerializer,
     PurposeWriteSerializer,
-    PersonalDataWriteSerializer,
-    DataSubjectWriteSerializer,
-    DataRecipientWriteSerializer,
-    DataContractorWriteSerializer,
-    DataTransferWriteSerializer,
 )
-from core.constants import COUNTRY_CHOICES
-from iam.models import RoleAssignment, User
-from core.models import FilteringLabel
-from core.utils import get_global_currency
-from uuid import UUID
-from django.core.files.uploadedfile import UploadedFile
-from django.db.models import Q
-from django.http import HttpRequest
-from django.utils import timezone
-from django.db import models, IntegrityError
-from django.core.exceptions import ValidationError
-from datetime import datetime, date
-from typing import Optional, Final, ClassVar, Mapping, Any
-from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
-import enum
+from resilience.models import (
+    AssetAssessment,
+    BusinessImpactAnalysis,
+    EscalationThreshold,
+)
+from resilience.serializers import (
+    AssetAssessmentWriteSerializer,
+    BusinessImpactAnalysisWriteSerializer,
+    EscalationThresholdWriteSerializer,
+)
+from tprm.models import Contract, Entity, EntityAssessment, Representative, Solution
+from tprm.serializers import (
+    ContractWriteSerializer,
+    EntityAssessmentWriteSerializer,
+    EntityWriteSerializer,
+    RepresentativeWriteSerializer,
+    SolutionWriteSerializer,
+)
+
+from .ebios_rm_excel_helpers import (
+    extract_elementary_actions,
+)
+from .ebios_rm_excel_helpers import (
+    process_excel_file as process_ebios_rm_excel,
+)
+from .egerie_xml_helpers import (
+    map_egerie_status,
+    quartile_to_index,
+)
+from .egerie_xml_helpers import (
+    process_xml_file as process_egerie_xml,
+)
+from metrology.models import MetricDefinition, MetricInstance
+from metrology.serializers import (
+    CustomMetricSampleWriteSerializer,
+    MetricInstanceWriteSerializer,
+)
+
+from .serializers import LoadFileSerializer
 
 logger = structlog.get_logger(__name__)
 
 
-def resolve_container_name(request, default_prefix: str) -> str:
+def resolve_container_name(
+    request, default_prefix: str, override: Optional[str] = None
+) -> str:
     """Return a user-supplied name for an imported container object (assessment,
     study, etc.) or a timestamped fallback.
 
     Data Wizard imports that create a single parent object (e.g. compliance /
     risk / findings assessments, EBIOS RM studies) let the client override the
-    auto-generated name via the ``X-Name`` header. When absent or blank,
+    auto-generated name via the ``X-Name`` header, or the caller pass one
+    directly. When both are absent or blank,
     ``{default_prefix}_{YYYYMMDD_HHMMSS}`` is used.
     """
+    if override and override.strip():
+        return override.strip()
     custom_name = ""
     if request is not None:
         custom_name = (request.headers.get("X-Name") or "").strip()
@@ -166,14 +199,33 @@ def resolve_container_name(request, default_prefix: str) -> str:
     return f"{default_prefix}_{timestamp}"
 
 
+def may_import(user: User, model_name: str, folder_id) -> bool:
+    """Does *user* hold ``add_<model_name>`` where the import would write?"""
+    # No target folder is legitimate: rows may carry their own `domain`, and
+    # the per-record serializer check is what scopes those writes.
+    if not folder_id:
+        return RoleAssignment.has_permission_anywhere(user, f"add_{model_name}")
+
+    try:
+        folder = Folder.objects.filter(id=UUID(str(folder_id))).first()
+    except ValueError:
+        return False
+    if folder is None:
+        return False
+    try:
+        perm = Permission.objects.get(codename=f"add_{model_name}")
+    except Permission.DoesNotExist:
+        logger.error("No import permission defined", model_name=model_name)
+        return False
+    return RoleAssignment.is_access_allowed(user=user, perm=perm, folder=folder)
+
+
 def resolve_accessible_target(model_class, target_id, user):
     """Resolve a client-supplied reconciliation target, scoped to the objects the
     user may change. Returns None when the id is unknown or out of reach."""
     if not target_id:
         return None
-    (_, change_ids, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, model_class
-    )
+    change_ids = RoleAssignment.get_changeable_object_ids(user, model_class)
     return model_class.objects.filter(id=target_id, id__in=change_ids).first()
 
 
@@ -181,10 +233,13 @@ def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     """
     Build a map of folder names to IDs that the provided user can access.
     Used by the data wizard import flow to validate targets.
+
+    Deliberately view-scoped: consumers fall back to the request folder for any
+    name absent from this map, so narrowing it to add-permitted folders would
+    silently redirect a row instead of failing it. The write serializers reject
+    the unauthorized folder loudly, which is the behaviour we want.
     """
-    (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Folder
-    )
+    viewable_folders_ids = RoleAssignment.get_viewable_object_ids(user, Folder)
     folders_map = {
         f.name.lower(): f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
     }
@@ -219,7 +274,21 @@ def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
         sep = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
     except csv.Error:
         sep = ","
-    return pd.read_csv(file, sep=sep, encoding="utf-8-sig").fillna("")
+    # Keep ref_ids as text: parsed as floats, "X.10" collapses onto "X.1".
+    header = pd.read_csv(io.StringIO(sample), sep=sep, nrows=0).columns
+    dtype = {c: str for c in header if str(c).strip().lower().endswith("ref_id")}
+    return pd.read_csv(file, sep=sep, encoding="utf-8-sig", dtype=dtype).fillna("")
+
+
+def read_excel_sheet(file: io.BytesIO, sheet_name=0) -> pd.DataFrame:
+    """Read a sheet keeping text cells as text (pandas would turn "1.10" into 1.1),
+    while numeric, boolean and date cells keep their inferred dtypes.
+    ref_id columns are always text, even when typed as numbers in Excel."""
+    df = pd.read_excel(file, sheet_name=sheet_name, dtype=object)
+    for c in df.columns:
+        if str(c).strip().lower().endswith("ref_id"):
+            df[c] = df[c].map(lambda v: v if pd.isna(v) else str(v))
+    return df.infer_objects()
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -354,19 +423,57 @@ def _parse_recovery_objectives(raw: str) -> dict:
     return result
 
 
+def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
+    """Resolve a canonical asset class path, or an unambiguous leaf name."""
+    if not isinstance(value, str):
+        return None
+    token = value.strip()
+    if not token:
+        return None
+
+    normalized = "/".join(part.strip() for part in token.split("/") if part.strip())
+    match = path_index.get(normalized.lower())
+    if match is not None:
+        return match
+
+    # A path that names its parents is explicit: falling back to a leaf match
+    # elsewhere in the tree would silently reclassify the asset.
+    if "/" in normalized:
+        return None
+
+    candidates = [
+        node
+        for key, node in path_index.items()
+        if key.split("/")[-1] == normalized.lower()
+    ]
+    return candidates[0] if len(candidates) == 1 else None
+
+
+def _split_label_names(value: Any) -> set[str]:
+    """Split a pipe-, comma- or newline-separated cell into label names."""
+    if not isinstance(value, str):
+        return set()
+    return {name.strip() for name in re.split(r"[|,\n]", value) if name.strip()}
+
+
+def _invalid_label_names(names: set[str]) -> list[str]:
+    """Names FilteringLabel would reject, so a row can fail with a clear message."""
+    field = FilteringLabel._meta.get_field("label")
+    invalid = []
+    for name in names:
+        try:
+            field.run_validators(name)
+        except ValidationError:
+            invalid.append(name)
+    return sorted(invalid)
+
+
 def _resolve_filtering_labels(value: Any) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
     Labels that do not yet exist are created on the fly.
     """
-    if not isinstance(value, str):
-        return []
-
-    value = value.strip()
-    if not value:
-        return []
-
-    label_names = set(name.strip() for name in re.split(r"[|,]", value) if name.strip())
+    label_names = _split_label_names(value)
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -379,6 +486,38 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
                 logging.error(f"Failed to save label: {value}")
         label_ids.append(label.id)
     return label_ids
+
+
+def _resolve_actors(value: Any, unresolved: list[str] | None = None) -> list[UUID]:
+    """Resolve separated user emails or team names to Actor IDs.
+
+    Each entry is matched as a user email first, then as a team name; entries that
+    match neither are skipped, since a typo must not silently become a new actor.
+    Skipped entries are added to *unresolved* when given, to warn the importer.
+    """
+    if not isinstance(value, str):
+        return []
+
+    actor_ids: list[UUID] = []
+    for entry in re.split(r"[|,;\n]", value):
+        entry = entry.strip()
+        if not entry:
+            continue
+        actor = (
+            Actor.objects.filter(user__email__iexact=entry).first()
+            or Actor.objects.filter(team__name__iexact=entry).first()
+        )
+        if actor is not None:
+            actor_ids.append(actor.id)
+        else:
+            if unresolved is not None:
+                unresolved.append(entry)
+            # Masked: owner entries are emails, which have no place in the logs.
+            logger.warning(
+                "Import: could not resolve owner entry (masked: %s***); skipping.",
+                entry[:4],
+            )
+    return actor_ids
 
 
 def _resolve_vulnerabilities(
@@ -394,7 +533,7 @@ def _resolve_vulnerabilities(
     """
     if not value or not isinstance(value, str):
         return [], []
-    tokens = [t.strip() for t in re.split(r"[|,]", value) if t.strip()]
+    tokens = [t.strip() for t in re.split(r"[|,\n]", value) if t.strip()]
     vuln_ids: list[UUID] = []
     failed_tokens: list[str] = []
     for token in tokens:
@@ -416,6 +555,240 @@ def _resolve_vulnerabilities(
             logging.exception(f"Failed to resolve vulnerability {token}")
             failed_tokens.append(token)
     return vuln_ids, failed_tokens
+
+
+def _split_multi_separator(text: Any) -> list[str]:
+    """Split a cell on newline, pipe, semicolon or comma; trimmed, non-empty."""
+    if not text or not isinstance(text, str):
+        return []
+    return [item.strip() for item in re.split(r"[\n|;,]", text) if item.strip()]
+
+
+@dataclass
+class SideObjects:
+    ids: list[UUID] = field(default_factory=list)
+    failed: list[str] = field(default_factory=list)
+    created: list[str] = field(default_factory=list)
+    # Tokens matching several objects with none a better fit; left unlinked.
+    ambiguous: list[str] = field(default_factory=list)
+
+
+def _resolve_named_objects(
+    value: Any,
+    folder: "Folder",
+    request,
+    model_class,
+    serializer_class,
+    extra_create_data: Optional[dict] = None,
+    linked=None,
+) -> SideObjects:
+    """Resolve object names on a row to ids in *folder*, by ref_id then name.
+
+    The *linked* objects (already on the record, wherever they live) are
+    matched first, so re-importing an export does not duplicate them. Misses
+    are created through the write serializer, and only when the user may add
+    that model there; otherwise the token comes back in `failed`.
+    """
+    resolved = SideObjects()
+    tokens = _split_multi_separator(value)
+    if not tokens:
+        return resolved
+
+    may_create: Optional[bool] = None
+    model_name = model_class._meta.model_name
+    scopes = [model_class.objects.filter(folder=folder)]
+    if linked is not None:
+        scopes.insert(0, linked)
+    for token in tokens:
+        obj = next(
+            (
+                found
+                for scope in scopes
+                if (
+                    found := scope.filter(ref_id=token).first()
+                    or scope.filter(name__iexact=token).first()
+                )
+            ),
+            None,
+        )
+        if obj is None:
+            if may_create is None:
+                may_create = may_import(request.user, model_name, folder.id)
+            if not may_create:
+                resolved.failed.append(token)
+                continue
+            serializer = serializer_class(
+                data={
+                    "name": token,
+                    "folder": str(folder.id),
+                    **(extra_create_data or {}),
+                },
+                context={"request": request},
+            )
+            if not serializer.is_valid():
+                logger.warning(
+                    "import_side_object_invalid",
+                    model=model_name,
+                    token=token,
+                    errors=serializer.errors,
+                )
+                resolved.failed.append(token)
+                continue
+            obj = serializer.save()
+            resolved.created.append(token)
+        resolved.ids.append(obj.id)
+    return resolved
+
+
+def _resolve_assets(value: Any, folder: "Folder", request) -> SideObjects:
+    return _resolve_named_objects(
+        value,
+        folder,
+        request,
+        Asset,
+        AssetWriteSerializer,
+        extra_create_data={"type": Asset.Type.SUPPORT},
+    )
+
+
+def _resolve_applied_controls(
+    value: Any, folder: "Folder", request, linked=None
+) -> SideObjects:
+    return _resolve_named_objects(
+        value,
+        folder,
+        request,
+        AppliedControl,
+        AppliedControlWriteSerializer,
+        extra_create_data={"status": "to_do"},
+        linked=linked,
+    )
+
+
+@dataclass(frozen=True)
+class ThreatLookup:
+    """The threats a risk import may link, keyed by ref_id and by lowered name.
+
+    Candidates are the threats the user may view in the assessment's folder or
+    one of its ancestors, the root folder holding the library ones; a sibling
+    domain's threat is never a candidate. Each key maps to (distance, id)
+    pairs, distance 0 being the assessment's folder itself.
+    """
+
+    by_ref_id: Mapping[str, list[tuple[int, UUID]]]
+    by_name: Mapping[str, list[tuple[int, UUID]]]
+
+    @classmethod
+    def build(cls, user, folder: "Folder") -> "ThreatLookup":
+        distances = {
+            f.id: distance
+            for distance, f in enumerate(folder.get_parent_folders(include_self=True))
+        }
+        by_ref_id: dict[str, list[tuple[int, UUID]]] = defaultdict(list)
+        by_name: dict[str, list[tuple[int, UUID]]] = defaultdict(list)
+        rows = Threat.objects.filter(
+            folder_id__in=distances.keys(),
+            id__in=RoleAssignment.get_viewable_object_ids(user, Threat),
+        ).values_list("id", "ref_id", "name", "folder_id")
+        for threat_id, ref_id, name, folder_id in rows:
+            entry = (distances[folder_id], threat_id)
+            if ref_id:
+                by_ref_id[ref_id].append(entry)
+            if name:
+                by_name[name.casefold()].append(entry)
+        return cls(by_ref_id=dict(by_ref_id), by_name=dict(by_name))
+
+
+def _resolve_threats(value: Any, lookup: ThreatLookup) -> SideObjects:
+    """Link threats by ref_id, then by name; never creates one.
+
+    The match in the nearest folder wins, so a domain's own threat shadows an
+    inherited one; a tie there is reported as ambiguous instead of linking
+    one of them arbitrarily.
+    """
+    resolved = SideObjects()
+    for token in _split_multi_separator(value):
+        matches = lookup.by_ref_id.get(token) or lookup.by_name.get(token.casefold())
+        if not matches:
+            resolved.failed.append(token)
+            continue
+        nearest = min(distance for distance, _ in matches)
+        candidates = {
+            threat_id for distance, threat_id in matches if distance == nearest
+        }
+        if len(candidates) > 1:
+            resolved.ambiguous.append(token)
+        else:
+            resolved.ids.append(candidates.pop())
+    return resolved
+
+
+def _resolve_owners(value: Any, unresolved: list[str] | None = None) -> list[UUID]:
+    """Owners: user emails or team names separated like any actor list, each
+    actor kept once."""
+    return list(dict.fromkeys(_resolve_actors(value, unresolved)))
+
+
+def _owner_warning(record: dict, unresolved: list[str]) -> Optional["Error"]:
+    """The row is still imported, without the owners nobody could be found for."""
+    if not unresolved:
+        return None
+    return Error(
+        record=record,
+        error=f"owner: no user or team found for {', '.join(sorted(unresolved))}",
+        is_warning=True,
+    )
+
+
+def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
+    """Label-to-value mappings for probability and impact, translations included.
+
+    A level's value is its position in the matrix definition, which is how
+    risk scenarios index levels everywhere else. Levels carry no reliable
+    "id": built-in libraries and builder-published matrices omit it.
+    """
+    mappings: dict[str, dict[str, int]] = {"probability": {}, "impact": {}}
+
+    try:
+        matrix_definition = risk_matrix.json_definition
+        for dimension in ("probability", "impact"):
+            for index, entry in enumerate(matrix_definition.get(dimension, [])):
+                name = entry.get("name", "")
+                if name:
+                    mappings[dimension][name.strip().lower()] = index
+                for translation in (entry.get("translations") or {}).values():
+                    translated = translation.get("name", "")
+                    if translated:
+                        mappings[dimension][translated.strip().lower()] = index
+    except Exception:
+        logger.warning("matrix_mappings_build_failed", exc_info=True)
+
+    return mappings
+
+
+# Label the exports write for an unrated level (see RiskScenario._get_risk_data).
+NOT_RATED_LABEL = "--"
+
+
+def is_blank_cell(value: Any) -> bool:
+    return value is None or (isinstance(value, str) and not value.strip())
+
+
+def map_risk_value(value: Any, mapping_dict: dict) -> int:
+    """Map a probability/impact label to its matrix value, -1 when undefined."""
+    if is_blank_cell(value):
+        return -1
+    clean_value = str(value).strip().lower()
+    if clean_value == NOT_RATED_LABEL:
+        return -1
+    if clean_value in mapping_dict:
+        return mapping_dict[clean_value]
+    logger.warning(
+        "risk_value_unmapped",
+        value=str(value),
+        available=list(mapping_dict.keys()),
+    )
+    return -1
 
 
 class RecordFileType(enum.StrEnum):
@@ -468,6 +841,8 @@ class ModelType(enum.StrEnum):
     TASK_TEMPLATE = "TaskTemplate"
     VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
+    METRIC_INSTANCE = "MetricInstance"
+    METRIC_SAMPLE = "CustomMetricSample"
 
     @staticmethod
     def from_string(model_type: str) -> Optional["ModelType"]:
@@ -476,6 +851,60 @@ class ModelType(enum.StrEnum):
             return ModelType(model_type)
         except ValueError:
             return
+
+
+# ModelType values are model class names; only multi-object imports need an entry here.
+IMPORT_ROOT_MODEL: dict[ModelType, str] = {
+    ModelType.TPRM: "entity",
+    ModelType.EBIOS_RM_STUDY_ARM: "ebiosrmstudy",
+    ModelType.EBIOS_RM_STUDY_EXCEL: "ebiosrmstudy",
+    ModelType.EBIOS_RM_STUDY_EGERIE_XML: "ebiosrmstudy",
+    ModelType.CYFUN_ASSESSMENT: "complianceassessment",
+}
+
+
+IMPORT_TEMPLATES_DIR = Path(__file__).resolve().parent / "import_templates"
+
+# Models without an entry (ComplianceAssessment, CyFun, EBIOS variants) have no
+# generic template: their file depends on a framework or comes from an external tool.
+IMPORT_TEMPLATES: dict[ModelType, str] = {
+    ModelType.ASSET: "assets_template.xlsx",
+    ModelType.APPLIED_CONTROL: "applied_controls_template.xlsx",
+    ModelType.PERIMETER: "perimeters_template.xlsx",
+    ModelType.USER: "users_template.xlsx",
+    ModelType.ELEMENTARY_ACTION: "elementary_actions_template.xlsx",
+    ModelType.REFERENCE_CONTROL: "reference_controls_template.xlsx",
+    ModelType.THREAT: "threats_template.xlsx",
+    ModelType.FOLDER: "domains_template.xlsx",
+    ModelType.SECURITY_EXCEPTION: "security_exceptions_template.xlsx",
+    ModelType.INCIDENT: "incidents_template.xlsx",
+    ModelType.POLICY: "policies_template.xlsx",
+    ModelType.VULNERABILITY: "vulnerabilities_template.xlsx",
+    ModelType.PROCESSING: "processings_template.xlsx",
+    ModelType.TPRM: "third_parties_template.xlsx",
+    ModelType.FINDINGS_ASSESSMENT: "findings_assessment_template.xlsx",
+    ModelType.RISK_ASSESSMENT: "risk_assessment_template.xlsx",
+    ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
+    ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
+    ModelType.EVIDENCE: "evidences_template.xlsx",
+    ModelType.METRIC_INSTANCE: "metric_instances_template.xlsx",
+    ModelType.METRIC_SAMPLE: "metric_samples_template.xlsx",
+}
+
+
+class ImportTemplateView(APIView):
+    def get(self, request, model_type: str):
+        parsed = ModelType.from_string(model_type)
+        filename = IMPORT_TEMPLATES.get(parsed) if parsed else None
+        if filename is None:
+            return Response(
+                {"error": "noTemplateAvailable"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return FileResponse(
+            (IMPORT_TEMPLATES_DIR / filename).open("rb"),
+            as_attachment=True,
+            filename=filename,
+        )
 
 
 @dataclass(frozen=True)
@@ -488,8 +917,62 @@ class Error:
         return {"record": self.record, "error": self.error}
 
 
+def readable_error(error: Any) -> str:
+    """'field: message' text for a validation error, whatever its shape, instead
+    of the repr of DRF's ErrorDetail objects."""
+    if isinstance(error, APIException):
+        error = error.detail
+    elif isinstance(error, ValidationError):
+        error = getattr(error, "message_dict", None) or error.messages
+    elif isinstance(error, Exception):
+        # Any other exception may carry database or code internals.
+        logger.error("Unexpected import error", error=error)
+        return "Unexpected error, see the server logs"
+    if isinstance(error, dict):
+        # "a: x; b: y", without the ".;" a period-ending message would leave.
+        return "; ".join(
+            (
+                readable_error(v)
+                if k == "non_field_errors"
+                else f"{k}: {readable_error(v)}"
+            ).rstrip(".")
+            for k, v in error.items()
+        )
+    if isinstance(error, (list, tuple)):
+        return " ".join(readable_error(v) for v in error)
+    return str(error)
+
+
 class FolderScopeError(ValueError):
     """Raised when an existing-record lookup cannot be scoped to a folder."""
+
+
+def _parse_bool_cell(value: object, *, binary_only: bool = False) -> Optional[bool]:
+    """Parse a boolean cell. Returns None when the value is unrecognized.
+
+    binary_only additionally rejects numbers other than 0/1, for columns where
+    a stray 2 is a data error rather than spreadsheet truthiness.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        if math.isnan(value) or math.isinf(value):
+            return None
+        if binary_only and value not in (0, 1):
+            return None
+        return value != 0
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in {"true", "yes", "y", "1", "1.0", "oui", "vrai", "x"}:
+            return True
+        if token in {"false", "no", "n", "0", "0.0", "non", "faux"}:
+            return False
+    return None
+
+
+def _bool_cell_or_false(value: object) -> bool:
+    """Lenient variant: blanks and unrecognized values read as False."""
+    return _parse_bool_cell(value) is True
 
 
 @dataclass
@@ -549,6 +1032,8 @@ class BaseContext:
     on_conflict: ConflictMode = ConflictMode.STOP
     # Existing composite container to reconcile the import into, if any.
     target_id: Optional[str] = None
+    # Name for a container this import creates, overriding the timestamped one.
+    container_name: Optional[str] = None
 
 
 class RecordConsumer[Context = None](ABC):
@@ -566,6 +1051,8 @@ class RecordConsumer[Context = None](ABC):
         self.framework_id = base_context.framework_id
         self.on_conflict = base_context.on_conflict
         self.target_id = base_context.target_id
+        self.container_name = base_context.container_name
+        self.side_effects: dict[str, list[str]] = {}
 
     def __init_subclass__(cls):
         provided_class = getattr(cls, "SERIALIZER_CLASS", None)
@@ -573,6 +1060,19 @@ class RecordConsumer[Context = None](ABC):
         is_serializer = is_defined and issubclass(provided_class, BaseModelSerializer)
 
         assert is_serializer, f"Invalid serializer for class {cls.__name__}"
+
+    @classmethod
+    def get_serializer_class(cls) -> type[BaseModelSerializer]:
+        """Resolve the edition's serializer, mirroring what `SerializerFactory`
+        does for viewsets. `SERIALIZER_CLASS` is bound at import time, so without
+        this the enterprise override never reaches the importer and nested domains
+        are rejected with `subDomainsRequirePro` even on PRO.
+        """
+        override_module = settings.MODULE_PATHS.get("serializers")
+        if not override_module:
+            return cls.SERIALIZER_CLASS
+        module = importlib.import_module(override_module)
+        return getattr(module, cls.SERIALIZER_CLASS.__name__, cls.SERIALIZER_CLASS)
 
     @abstractmethod
     def create_context(self) -> tuple[Context, Optional[Error]]:
@@ -650,8 +1150,12 @@ class RecordConsumer[Context = None](ABC):
                 continue
             source_keys = self.SOURCE_KEY_MAP.get(key, [key])
             # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
+            # Names that resolved to nobody are not a blank: keep the owners (the
+            # row's warning reports the names).
             if key == "owner" and any(sk in record for sk in source_keys):
-                update_data[key] = value
+                blank = all(not str(record.get(sk) or "").strip() for sk in source_keys)
+                if value or blank:
+                    update_data[key] = value
                 continue
             if any(record.get(sk) not in (None, "") for sk in source_keys):
                 update_data[key] = value
@@ -667,8 +1171,8 @@ class RecordConsumer[Context = None](ABC):
             return results
 
         model_class = self.SERIALIZER_CLASS.Meta.model
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, model_class
+        viewable_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, model_class
         )
         viewable_ids = set(viewable_ids)
 
@@ -687,9 +1191,21 @@ class RecordConsumer[Context = None](ABC):
             existing = None
             internal_id = record.get("internal_id")
             if internal_id:
-                existing = model_class.objects.filter(
-                    pk=internal_id, id__in=viewable_ids
-                ).first()
+                try:
+                    existing = model_class.objects.filter(
+                        pk=internal_id, id__in=viewable_ids
+                    ).first()
+                except ValidationError, ValueError:
+                    # A hand-edited id would otherwise abort the whole file.
+                    results.add_error(
+                        Error(
+                            record=record, error=f"Invalid internal_id '{internal_id}'"
+                        )
+                    )
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
             if existing is None:
                 try:
                     existing = self.find_existing(record_data)
@@ -713,44 +1229,25 @@ class RecordConsumer[Context = None](ABC):
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
-                        serializer = self.SERIALIZER_CLASS(
-                            instance=existing,
-                            data=update_data,
-                            partial=True,
-                            context={"request": self.request},
-                        )
-                        if serializer.is_valid():
-                            try:
-                                serializer.save()
-                                results.add_updated()
-                            except Exception as e:
-                                results.add_error(Error(record=record, error=str(e)))
+                        error = self._write_record(update_data, instance=existing)
+                        if error:
+                            results.add_error(Error(record=record, error=error))
                         else:
-                            results.add_error(
-                                Error(
-                                    record=record,
-                                    error=str(serializer.errors),
-                                )
-                            )
+                            results.add_updated()
                         continue
 
-            serializer = self.SERIALIZER_CLASS(
-                data=record_data, context={"request": self.request}
-            )
-            if serializer.is_valid():
-                try:
-                    serializer.save()
-                    results.add_created()
-                except Exception as e:
-                    results.add_error(Error(record=record, error=str(e)))
-                    if self.on_conflict == ConflictMode.STOP:
-                        results.stopped = True
-                        break
-            else:
-                results.add_error(Error(record=record, error=str(serializer.errors)))
+            error = self._write_record(record_data)
+            if error:
+                results.add_error(Error(record=record, error=error))
                 if self.on_conflict == ConflictMode.STOP:
                     results.stopped = True
                     break
+            else:
+                results.add_created()
+
+        for key, names in self.side_effects.items():
+            if names:
+                results.details[key] = len(names)
 
         logger.info(
             f"{self.__class__.__name__} record processing complete. "
@@ -758,6 +1255,43 @@ class RecordConsumer[Context = None](ABC):
             f"Skipped: {results.skipped}, Failed: {results.failed}"
         )
         return results
+
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
+        """Resolve values whose resolution writes to the database.
+
+        Runs only once a row is known to be written, inside the transaction of
+        that write, so a skipped or rejected row leaves nothing behind.
+        *instance* is the record being updated, None on creation.
+        """
+        return data
+
+    def after_write(self, instance, created: bool) -> None:
+        """Follow-up writes for a saved row, inside the transaction of that write."""
+
+    def _write_record(self, data: dict, instance=None) -> Optional[str]:
+        """Create, or update *instance*, from *data*; return an error or None."""
+        with transaction.atomic():
+            # Validation can raise too (e.g. PermissionDenied when linking an
+            # object the user cannot view): that must fail the row, not the file.
+            try:
+                serializer = self.get_serializer_class()(
+                    instance=instance,
+                    data=self.resolve_deferred(data, instance),
+                    partial=instance is not None,
+                    context={"request": self.request},
+                )
+                if not serializer.is_valid():
+                    transaction.set_rollback(True)
+                    return readable_error(serializer.errors)
+                saved = serializer.save()
+                self.after_write(saved, created=instance is None)
+            except Exception as e:
+                transaction.set_rollback(True)
+                return readable_error(e)
+        return None
+
+    def _record_side_effects(self, key: str, resolved: SideObjects) -> None:
+        self.side_effects.setdefault(key, []).extend(resolved.created)
 
 
 class AssetRecordConsumer(RecordConsumer[list]):
@@ -771,6 +1305,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
         {
             "reference_link": ["reference_link", "link"],
             "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
+            "asset_class": ["asset_class", "class", "classe"],
         }
     )
     TYPE_MAP: Final[dict[str, str]] = {
@@ -779,6 +1314,10 @@ class AssetRecordConsumer(RecordConsumer[list]):
         "support": "SP",
         "sp": "SP",
     }
+
+    @cached_property
+    def asset_class_index(self) -> dict:
+        return AssetClass.path_index()
 
     def create_context(self):
         return _get_security_objective_scale(), None
@@ -855,6 +1394,16 @@ class AssetRecordConsumer(RecordConsumer[list]):
             parse_warning_msgs.append(
                 f"Could not parse disaster_recovery_objectives: '{raw_rec}'"
             )
+
+        raw_asset_class = (
+            record.get("asset_class") or record.get("class") or record.get("classe")
+        )
+        if raw_asset_class:
+            asset_class = _resolve_asset_class(raw_asset_class, self.asset_class_index)
+            if asset_class is not None:
+                data["asset_class"] = asset_class.id
+            else:
+                parse_warning_msgs.append(f"Unknown asset_class: '{raw_asset_class}'")
 
         if asset_type == "PR":
             if sec_objectives:
@@ -1098,53 +1647,60 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         # Resolve owner field (semicolon-separated user emails or team names).
         # Always set data["owner"] when the column is present, even if blank,
         # so that UPDATE mode can clear the M2M instead of silently preserving it.
+        unresolved: list[str] = []
         if "owner" in record:
-            data["owner"] = self._resolve_owners(record.get("owner"))
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
 
-        return data, None
-
-    @staticmethod
-    def _resolve_owners(value: Any) -> list[UUID]:
-        """Resolve semicolon-separated user emails or team names to Actor IDs.
-
-        Each entry is matched first as a user email, then as a team name.
-        Unresolvable entries are silently skipped.
-        """
-        if not isinstance(value, str):
-            return []
-
-        entries = set(entry.strip() for entry in value.split(";"))
-        actor_ids = []
-
-        for entry in entries:
-            # Try matching as user email first
-            actor = Actor.objects.filter(user__email__iexact=entry).first()
-            if actor is None:
-                # Try matching as team name
-                actor = Actor.objects.filter(team__name__iexact=entry).first()
-            if actor is not None:
-                actor_ids.append(actor.id)
-            else:
-                logger.warning(
-                    "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
-                )
-
-        return actor_ids
+        return data, _owner_warning(record, unresolved)
 
 
 class EvidenceRecordConsumer(RecordConsumer):
+    """Consumer for importing Evidence definitions.
+
+    Definitions only: an evidence is declared here (what is expected, who owns it,
+    when it expires), while the artifact itself lands later as a revision. The
+    import therefore carries no attachment or link — those belong to a revision.
+    """
+
     SERIALIZER_CLASS = EvidenceWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {"folder": ["domain"]}
+    )
+
+    _STATUS_BY_KEY: ClassVar[dict[str, str]] = {
+        key.lower(): key for key, _ in Evidence.Status.choices
+    }
+    _STATUS_BY_LABEL: ClassVar[dict[str, str]] = {
+        str(label).strip().lower(): key for key, label in Evidence.Status.choices
+    }
 
     def create_context(self):
         return None, None
+
+    def find_existing(self, record_data: dict) -> Optional[Evidence]:
+        # Case-insensitive, matching how a task import resolves an evidence name:
+        # an exact match would import "audit log" as a second "Audit Log".
+        return Evidence.objects.filter(
+            name__iexact=record_data.get("name"),
+            folder_id=record_data.get("folder"),
+        ).first()
+
+    @classmethod
+    def _normalize_status(cls, value) -> Optional[str]:
+        normalized = str(value or "").strip().lower()
+        if not normalized:
+            return None
+        return cls._STATUS_BY_KEY.get(normalized) or cls._STATUS_BY_LABEL.get(
+            normalized
+        )
 
     def prepare_create(
         self, record: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
-        if domain_name is not None:
-            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+        if domain_name:
+            domain = self.folders_map.get(str(domain_name).lower(), self.folder_id)
 
         name = record.get("name")
         if not name:
@@ -1153,15 +1709,29 @@ class EvidenceRecordConsumer(RecordConsumer):
         data = {
             "name": name,
             "description": record.get("description", ""),
-            "ref_id": record.get("ref_id", ""),
             "folder": domain,
+            "expiry_date": _parse_date(record.get("expiry_date")),
         }
+
+        raw_status = record.get("status")
+        if str(raw_status or "").strip():
+            status_value = self._normalize_status(raw_status)
+            if status_value is None:
+                return {}, Error(
+                    record=record, error=f"Invalid status value: '{raw_status}'"
+                )
+            data["status"] = status_value
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank has to reach the serializer so UPDATE mode can clear it.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_actors(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class UserRecordConsumer(RecordConsumer):
@@ -1185,8 +1755,9 @@ class UserRecordConsumer(RecordConsumer):
 
         return {
             "email": email,
-            "first_name": record.get("first_name"),
-            "last_name": record.get("last_name"),
+            # Optional columns: absent ones must not reach the serializer as null.
+            "first_name": record.get("first_name") or "",
+            "last_name": record.get("last_name") or "",
         }, None
 
 
@@ -1318,6 +1889,142 @@ class ThreatRecordConsumer(RecordConsumer):
         }, None
 
 
+def _find_one(records, wanted: str, fields: tuple[str, ...], folder_id, label: str):
+    """The record a cell names, trying *fields* in order. Names repeat across
+    domains: several matches resolve to the one in the import's domain, or not
+    at all. Returns (record, error)."""
+    noun = label.replace("_", " ")
+    for name in fields:
+        matches = list(records.filter(**{f"{name}__iexact": wanted})[:50])
+        if len(matches) > 1:
+            matches = [m for m in matches if str(m.folder_id) == str(folder_id)]
+            if len(matches) != 1:
+                return None, (
+                    f"{label}: several {noun}s are named '{wanted}'; choose the"
+                    f" domain the right one is in"
+                )
+        if matches:
+            return matches[0], None
+    return None, f"{label}: no {noun} '{wanted}'"
+
+
+class MetricInstanceRecordConsumer(RecordConsumer):
+    """Metric instances, each tied to a metric definition of the library or the
+    instance, found by ref_id, urn or name."""
+
+    SERIALIZER_CLASS = MetricInstanceWriteSerializer
+
+    def create_context(self):
+        viewable = RoleAssignment.get_viewable_object_ids(
+            self.request.user, MetricDefinition
+        )
+        return MetricDefinition.objects.filter(id__in=viewable), None
+
+    def prepare_create(self, record: dict, definitions) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="name: this field is mandatory")
+        wanted = str(record.get("metric_definition") or "").strip()
+        if not wanted:
+            return {}, Error(
+                record=record, error="metric_definition: this field is mandatory"
+            )
+        domain = self.folder_id
+        if record.get("domain"):
+            domain = self.folders_map.get(str(record["domain"]).lower(), domain)
+        definition, error = _find_one(
+            definitions, wanted, ("ref_id", "urn", "name"), domain, "metric_definition"
+        )
+        if definition is None:
+            return {}, Error(record=record, error=error)
+        data = {
+            "name": name,
+            "ref_id": record.get("ref_id") or "",
+            "description": record.get("description") or "",
+            "metric_definition": definition.id,
+            "folder": domain,
+        }
+        for key in ("status", "collection_frequency"):
+            if record.get(key) not in (None, ""):
+                data[key] = record[key]
+        if record.get("target_value") not in (None, ""):
+            data["target_value"] = record["target_value"]
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+        return data, _owner_warning(record, unresolved)
+
+
+class MetricSampleRecordConsumer(RecordConsumer):
+    """Values of metric instances over time. A number for a quantitative metric;
+    for a qualitative one, a level's name or its 1-based position. A sample for
+    a metric and second that already holds one replaces it."""
+
+    SERIALIZER_CLASS = CustomMetricSampleWriteSerializer
+
+    def create_context(self):
+        viewable = RoleAssignment.get_viewable_object_ids(
+            self.request.user, MetricInstance
+        )
+        return MetricInstance.objects.filter(id__in=viewable).select_related(
+            "metric_definition"
+        ), None
+
+    @staticmethod
+    def _value(raw, definition) -> tuple[Optional[dict], Optional[str]]:
+        if definition.category == MetricDefinition.Category.QUALITATIVE:
+            levels = [
+                str(c.get("name", "")).strip().lower()
+                for c in definition.choices_definition or []
+            ]
+            text = str(raw).strip()
+            if text.lower() in levels:
+                return {"choice_index": levels.index(text.lower()) + 1}, None
+            if text.isdigit() and 1 <= int(text) <= len(levels):
+                return {"choice_index": int(text)}, None
+            return None, f"value: '{raw}' is none of {', '.join(levels)}"
+        try:
+            number = float(str(raw).replace(",", ".").strip())
+        except ValueError:
+            number = math.nan
+        if not math.isfinite(number):
+            return None, f"value: '{raw}' is not a number"
+        return {"result": number}, None
+
+    def prepare_create(self, record: dict, instances) -> tuple[dict, Optional[Error]]:
+        wanted = str(record.get("metric_instance") or "").strip()
+        if not wanted:
+            return {}, Error(
+                record=record, error="metric_instance: this field is mandatory"
+            )
+        instance, error = _find_one(
+            instances, wanted, ("ref_id", "name"), self.folder_id, "metric_instance"
+        )
+        if instance is None:
+            return {}, Error(record=record, error=error)
+        if record.get("value") in (None, ""):
+            return {}, Error(record=record, error="value: this field is mandatory")
+        value, error = self._value(record["value"], instance.metric_definition)
+        if error:
+            return {}, Error(record=record, error=error)
+        timestamp = _parse_datetime(record.get("timestamp"))
+        if not timestamp:
+            return {}, Error(record=record, error="timestamp: this field is mandatory")
+        if not isinstance(timestamp, str):
+            return {}, Error(
+                record=record, error=f"timestamp: '{timestamp}' is not a date"
+            )
+        if len(timestamp) == 10:
+            # A date alone: the sample stands for that day.
+            timestamp = f"{timestamp}T00:00:00"
+        return {
+            "metric_instance": instance.id,
+            "timestamp": timestamp,
+            "value": value,
+            "observation": record.get("observation") or "",
+        }, None
+
+
 class ReferenceControlRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = ReferenceControlWriteSerializer
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
@@ -1390,6 +2097,14 @@ class FindingsAssessmentContext:
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
     SERIALIZER_CLASS = FindingWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "asset": ["asset", "assets", "actif", "actifs"],
+            "filtering_labels": ["filtering_labels", "labels", "label"],
+            "applied_controls": ["applied_controls", "controls"],
+            "owner": ["owner"],
+        }
+    )
     SEVERITY_MAP: Final[dict[Optional[str], int]] = {
         None: -1,
         "info": 0,
@@ -1432,7 +2147,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                     error="A folder must be specified when there's no perimeter!",
                 )
 
-            assessment_name = resolve_container_name(self.request, "Followup")
+            assessment_name = resolve_container_name(
+                self.request, "Followup", self.container_name
+            )
             assessment_data = {
                 "name": assessment_name,
                 "perimeter": self.perimeter_id,
@@ -1455,7 +2172,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                     findings_assessment=findings_assessment,
                     folder=folder,
                 ), None
-            return None, Error(record=assessment_data, error=str(serializer.errors))
+            return None, Error(
+                record=assessment_data, error=readable_error(serializer.errors)
+            )
 
         except Exception as e:
             return None, Error(record={}, error=str(e))
@@ -1490,8 +2209,10 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
-        # Parse priority (1-4)
+        # Parse priority: 1-4, or the "P1".."P4" labels the export writes
         priority = record.get("priority")
+        if isinstance(priority, str):
+            priority = priority.strip().upper().removeprefix("P")
         if isinstance(priority, (int, float)):
             priority = int(priority)
         elif isinstance(priority, str) and priority.isdigit():
@@ -1501,36 +2222,348 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         if isinstance(priority, int) and not (1 <= priority <= 4):
             priority = None
 
-        filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_label_ids = _resolve_filtering_labels(
+            record.get("filtering_labels") or record.get("labels")
+        )
         vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
             record.get("vulnerabilities"), context.folder
         )
+        # Resolve only the first: Finding.asset is a single FK, and the others
+        # would be created and left attached to nothing.
+        asset_tokens = _split_multi_separator(
+            record.get("asset")
+            or record.get("assets")
+            or record.get("actif")
+            or record.get("actifs")
+        )
+        assets = _resolve_assets(
+            asset_tokens[0] if asset_tokens else None, context.folder, self.request
+        )
+        self._record_side_effects("assets_created", assets)
+
+        # With SKIP/STOP, a row matching an existing Finding never reaches the
+        # serializer — so resolving applied_controls unconditionally would
+        # create (and never link) a control for a row that's about to be
+        # discarded. Peek for that duplicate first, using only the raw
+        # ref_id/name (identical to what find_existing() will check again in
+        # process_records), and skip control resolution entirely when it's
+        # going to be skipped or stop the whole import anyway.
+        is_discarded_duplicate = self.on_conflict in (
+            ConflictMode.SKIP,
+            ConflictMode.STOP,
+        ) and self.find_existing({"ref_id": record.get("ref_id"), "name": name})
+
+        if is_discarded_duplicate:
+            applied_controls = SideObjects()
+        else:
+            applied_controls = _resolve_applied_controls(
+                record.get("applied_controls") or record.get("controls"),
+                context.folder,
+                self.request,
+            )
+            self._record_side_effects("applied_controls_created", applied_controls)
 
         finding_data = {
             "name": name,
             "description": record.get("description"),
             "ref_id": record.get("ref_id"),
-            "status": record.get("status"),
             "findings_assessment": context.findings_assessment.id,
             "severity": severity,
             "filtering_labels": filtering_label_ids,
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "recommendation": record.get("recommendation", ""),
             "vulnerabilities": vulnerabilities,
+            "applied_controls": applied_controls.ids,
         }
+
+        # Only pass status when the source provides one — a None status fails
+        # serializer validation, so files without a status column keep the
+        # model default.
+        if record.get("status"):
+            finding_data["status"] = record.get("status")
 
         if priority is not None:
             finding_data["priority"] = priority
 
+        if assets.ids:
+            finding_data["asset"] = assets.ids[0]
+
+        # Resolve owner field (semicolon-separated user emails or team names).
+        # Always set finding_data["owner"] when the column is present, even if
+        # blank, so that UPDATE mode can clear the M2M instead of silently
+        # preserving it.
+        unresolved_owners: list[str] = []
+        if "owner" in record:
+            finding_data["owner"] = _resolve_owners(
+                record.get("owner"), unresolved_owners
+            )
+
+        unresolved = []
+        if warning := _owner_warning(record, unresolved_owners):
+            unresolved.append(warning.error)
         if failed_vulnerabilities:
+            unresolved.append(
+                f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}"
+            )
+        if assets.failed:
+            unresolved.append(f"Could not resolve assets: {', '.join(assets.failed)}")
+        if applied_controls.failed:
+            unresolved.append(
+                f"Could not resolve applied controls: {', '.join(applied_controls.failed)}"
+            )
+        if len(asset_tokens) > 1:
+            unresolved.append(
+                f"A finding takes a single asset: ignored {', '.join(asset_tokens[1:])}"
+            )
+        if unresolved:
             return finding_data, Error(
                 record=record,
-                error=f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}",
+                error="; ".join(unresolved),
                 is_warning=True,
             )
 
         return finding_data, None
+
+
+@dataclass(frozen=True)
+class RiskAssessmentContext:
+    risk_assessment: RiskAssessment
+    folder: Folder
+    matrix_mappings: dict
+    # Candidates for the `threats` column, see ThreatLookup.
+    threats: ThreatLookup
+
+
+class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
+    """Import risk scenarios into a risk assessment, creating the assessment
+    itself unless the caller reconciles into an existing one."""
+
+    SERIALIZER_CLASS = RiskScenarioWriteSerializer
+    # Legacy column names alongside the ones the CSV/XLSX export writes.
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "inherent_proba": ["inherent_proba", "inherent_probability"],
+            "current_proba": ["current_proba", "current_probability"],
+            "residual_proba": ["residual_proba", "residual_probability"],
+            "existing_applied_controls": [
+                "existing_applied_controls",
+                "existing_controls",
+            ],
+            "applied_controls": ["applied_controls", "additional_controls"],
+            "assets": ["assets", "asset"],
+            "threats": ["threats", "threat"],
+            "filtering_labels": ["filtering_labels", "labels", "label"],
+        }
+    )
+    RISK_LEVEL_FIELDS: ClassVar[tuple[str, ...]] = (
+        "inherent_impact",
+        "inherent_proba",
+        "current_impact",
+        "current_proba",
+        "residual_impact",
+        "residual_proba",
+    )
+
+    def create_context(self) -> tuple[Optional[RiskAssessmentContext], Optional[Error]]:
+        try:
+            if self.target_id:
+                risk_assessment = resolve_accessible_target(
+                    RiskAssessment, self.target_id, self.request.user
+                )
+                if risk_assessment is None:
+                    return None, Error(
+                        record={},
+                        error=f"Target risk assessment with ID {self.target_id} does not exist",
+                    )
+                logger.info(
+                    "Reconciling import into existing risk assessment",
+                    risk_assessment_id=str(risk_assessment.id),
+                )
+            else:
+                perimeter = None
+                if self.perimeter_id:
+                    perimeter = Perimeter.objects.get(id=self.perimeter_id)
+
+                if perimeter is not None:
+                    folder = perimeter.folder
+                elif self.folder_id:
+                    folder = Folder.objects.get(id=self.folder_id)
+                else:
+                    return None, Error(
+                        record={},
+                        error="A folder must be specified when there's no perimeter!",
+                    )
+
+                if not self.matrix_id:
+                    return None, Error(
+                        record={},
+                        error="A risk matrix is required to create a risk assessment.",
+                    )
+                RiskMatrix.objects.get(id=self.matrix_id)
+
+                assessment_name = resolve_container_name(
+                    self.request, "Risk_Assessment", self.container_name
+                )
+                assessment_data = {
+                    "name": assessment_name,
+                    "perimeter": self.perimeter_id,
+                    "risk_matrix": self.matrix_id,
+                    "folder": folder.id,
+                }
+                serializer = RiskAssessmentWriteSerializer(
+                    data=assessment_data, context={"request": self.request}
+                )
+                if not serializer.is_valid():
+                    return None, Error(
+                        record=assessment_data,
+                        error=readable_error(serializer.errors),
+                    )
+                risk_assessment = serializer.save()
+                logger.info(
+                    "Created risk assessment",
+                    name=assessment_name,
+                    risk_assessment_id=str(risk_assessment.id),
+                )
+
+            self._container = risk_assessment
+            return RiskAssessmentContext(
+                risk_assessment=risk_assessment,
+                folder=risk_assessment.folder,
+                matrix_mappings=build_matrix_mappings(risk_assessment.risk_matrix),
+                threats=ThreatLookup.build(self.request.user, risk_assessment.folder),
+            ), None
+
+        except Perimeter.DoesNotExist:
+            return None, Error(
+                record={},
+                error=f"Perimeter with ID {self.perimeter_id} does not exist",
+            )
+        except RiskMatrix.DoesNotExist:
+            return None, Error(
+                record={},
+                error=f"Risk matrix with ID {self.matrix_id} does not exist",
+            )
+        except Exception as e:
+            return None, Error(record={}, error=str(e))
+
+    def find_existing(self, record_data: dict):
+        # Match only within this assessment, never a sibling's scenario.
+        container = getattr(self, "_container", None)
+        if container is None:
+            return None
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = model_class.objects.filter(
+                risk_assessment=container, ref_id=ref_id
+            ).first()
+            if existing:
+                return existing
+        name = record_data.get("name")
+        if name:
+            return model_class.objects.filter(
+                risk_assessment=container, name__iexact=name
+            ).first()
+        return None
+
+    def prepare_create(
+        self, record: dict, context: RiskAssessmentContext
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Risk scenario name is required")
+
+        impact = context.matrix_mappings["impact"]
+        probability = context.matrix_mappings["probability"]
+        treatment = str(record.get("treatment") or "").strip().lower()
+
+        existing_controls = _resolve_applied_controls(
+            record.get("existing_applied_controls") or record.get("existing_controls"),
+            context.folder,
+            self.request,
+        )
+        additional_controls = _resolve_applied_controls(
+            record.get("applied_controls") or record.get("additional_controls"),
+            context.folder,
+            self.request,
+        )
+        assets = _resolve_assets(
+            record.get("assets") or record.get("asset"), context.folder, self.request
+        )
+        threats = _resolve_threats(
+            record.get("threats") or record.get("threat"), context.threats
+        )
+        self._record_side_effects("assets_created", assets)
+        self._record_side_effects("applied_controls_created", existing_controls)
+        self._record_side_effects("applied_controls_created", additional_controls)
+
+        scenario_data = {
+            "name": name,
+            "ref_id": record.get("ref_id", ""),
+            "description": record.get("description", ""),
+            "risk_assessment": context.risk_assessment.id,
+            "treatment": next(
+                (opt for opt, _ in RiskScenario.TREATMENT_OPTIONS if treatment == opt),
+                "open",
+            ),
+            "justification": record.get("justification", "") or "",
+            "existing_applied_controls": existing_controls.ids,
+            "applied_controls": additional_controls.ids,
+            "assets": assets.ids,
+            "filtering_labels": _resolve_filtering_labels(
+                record.get("filtering_labels") or record.get("labels")
+            ),
+        }
+        # Only set when something resolved, so that on update a cell of
+        # unknown or ambiguous threats warns instead of wiping the links.
+        if threats.ids:
+            scenario_data["threats"] = threats.ids
+
+        # A level is only written when its cell holds a matrix label or the
+        # explicit "--" (unrated). Blank cells and unknown labels leave the
+        # field out: a new scenario gets the -1 default, an update keeps the
+        # existing rating. Unknown labels are reported on the row.
+        unmapped = []
+        for field_name in self.RISK_LEVEL_FIELDS:
+            raw = next(
+                (
+                    record[key]
+                    for key in self.SOURCE_KEY_MAP.get(field_name, [field_name])
+                    if not is_blank_cell(record.get(key))
+                ),
+                None,
+            )
+            if raw is None:
+                continue
+            mapping = impact if field_name.endswith("_impact") else probability
+            value = map_risk_value(raw, mapping)
+            if value == -1 and str(raw).strip() != NOT_RATED_LABEL:
+                unmapped.append(f"{field_name} '{str(raw).strip()}'")
+                continue
+            scenario_data[field_name] = value
+
+        unresolved = existing_controls.failed + additional_controls.failed
+        messages = []
+        if unmapped:
+            messages.append(f"Not in the risk matrix: {', '.join(unmapped)}")
+        if unresolved:
+            messages.append(f"Could not resolve controls: {', '.join(unresolved)}")
+        if assets.failed:
+            messages.append(f"Could not resolve assets: {', '.join(assets.failed)}")
+        if threats.failed:
+            messages.append(f"Could not resolve threats: {', '.join(threats.failed)}")
+        if threats.ambiguous:
+            messages.append(
+                "Ambiguous threats, several match in the same domain: "
+                f"{', '.join(threats.ambiguous)}"
+            )
+        if messages:
+            return scenario_data, Error(
+                record=record, error="; ".join(messages), is_warning=True
+            )
+        return scenario_data, None
 
 
 class PolicyRecordConsumer(RecordConsumer):
@@ -1582,7 +2615,12 @@ class PolicyRecordConsumer(RecordConsumer):
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank has to reach the serializer so UPDATE mode can clear it.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class SecurityExceptionRecordConsumer(RecordConsumer):
@@ -1861,7 +2899,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         """
         has_ref_id = any(f.name == "ref_id" for f in model._meta.fields)
         ids = set()
-        for entry in re.split(r"[|,]", raw):
+        for entry in re.split(r"[|,\n]", raw):
             entry = entry.strip()
             if not entry:
                 continue
@@ -1904,6 +2942,44 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                     entry,
                 )
         return list(ids)
+
+    def _resolve_or_create_evidences(
+        self, raw: str, accessible_folder_ids: set, folder_id
+    ) -> list[UUID]:
+        """Resolve evidence names to ids, creating the ones the domain lacks.
+
+        An existing evidence wins, preferring the task's own folder so a name reused
+        across domains binds locally; only when nothing matches is one created, in
+        the task's folder.
+
+        Creation is authorized here because it writes through the ORM, ahead of the
+        task's own permission check: without it, `add_tasktemplate` alone would be
+        enough to create evidence.
+        """
+        ids: list[UUID] = []
+        folder = None
+        for entry in re.split(r"[|,\n]", str(raw)):
+            entry = entry.strip()
+            if not entry:
+                continue
+            candidates = list(
+                Evidence.objects.filter(
+                    name__iexact=entry, folder_id__in=accessible_folder_ids
+                )
+            )
+            evidence = next(
+                (c for c in candidates if str(c.folder_id) == str(folder_id)), None
+            ) or (candidates[0] if candidates else None)
+            if evidence is None:
+                if folder is None:
+                    folder = Folder.objects.filter(id=folder_id).first()
+                check_folder_add_permission(self.request.user, folder, Evidence)
+                evidence = Evidence(name=entry, folder_id=folder_id)
+                evidence.full_clean()
+                evidence.save()
+            if evidence.id not in ids:
+                ids.append(evidence.id)
+        return ids
 
     def prepare_create(
         self, record: dict, context: None
@@ -2015,7 +3091,6 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         for col_name, model in [
             ("assets", Asset),
             ("applied_controls", AppliedControl),
-            ("evidences", Evidence),
             ("compliance_assessments", ComplianceAssessment),
             ("risk_assessments", RiskAssessment),
             ("findings_assessment", FindingsAssessment),
@@ -2028,6 +3103,22 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                 if raw
                 else []
             )
+
+        # Expected evidence is a declaration, not a pre-existing artifact: naming one
+        # the domain does not have yet creates it there rather than dropping the link.
+        raw_evidences = record.get("evidences") or ""
+        if raw_evidences:
+            try:
+                data["evidences"] = self._resolve_or_create_evidences(
+                    raw_evidences, accessible_folder_ids, folder_id
+                )
+            except PermissionDenied:
+                return {}, Error(
+                    record=record,
+                    error="Not allowed to create evidence in this domain",
+                )
+        else:
+            data["evidences"] = []
 
         if unresolved:
             return data, Error(
@@ -2049,11 +3140,60 @@ class FolderRecordConsumer(RecordConsumer):
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
         {
             "parent_folder": ["domain"],
+            "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
         }
     )
 
     def create_context(self):
         return None, None
+
+    @cached_property
+    def may_add_labels(self) -> bool:
+        # New labels are created in the root folder (FolderMixin's default).
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="add_filteringlabel"),
+            folder=Folder.get_root_folder(),
+        )
+
+    def _resolve_parent(self, record: dict) -> tuple[Optional[UUID], Optional[Error]]:
+        """Resolve the `domain` column, a parent domain given by name."""
+        domain_name = str(record.get("domain", "")).strip()
+        if not domain_name:
+            return Folder.get_root_folder().id, None
+
+        # Names are not unique: a row exported with its internal_id keeps its
+        # current parent while that parent's name is unchanged.
+        internal_id = record.get("internal_id")
+        if internal_id:
+            try:
+                current = (
+                    Folder.objects.filter(id=internal_id)
+                    .select_related("parent_folder")
+                    .first()
+                )
+            except ValidationError, ValueError:
+                current = None  # reported when the row is matched
+            parent = current.parent_folder if current else None
+            if parent and parent.name.lower() == domain_name.lower():
+                return parent.id, None
+
+        # The root counts too: files may name it instead of leaving `domain` blank.
+        matching_folders = Folder.objects.filter(
+            name__iexact=domain_name,
+            content_type__in=[Folder.ContentType.DOMAIN, Folder.ContentType.ROOT],
+        )
+        count = matching_folders.count()
+        if count == 0:
+            return None, Error(
+                record=record, error=f"Parent folder '{domain_name}' not found"
+            )
+        if count > 1:
+            return None, Error(
+                record=record,
+                error=f"Multiple folders named '{domain_name}' found; please use a unique name",
+            )
+        return matching_folders.first().id, None
 
     def find_existing(self, record_data: dict) -> Optional[Folder]:
         name = record_data.get("name")
@@ -2068,33 +3208,89 @@ class FolderRecordConsumer(RecordConsumer):
     def prepare_create(
         self, record: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
+        # A domains export escapes formula-like cells; undo it so they round-trip.
+        record = {key: unescape_excel_formula(value) for key, value in record.items()}
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        domain_name = str(record.get("domain", "")).strip()
-        if domain_name:
-            matching_folders = Folder.objects.filter(name__iexact=domain_name)
-            count = matching_folders.count()
-            if count == 0:
-                return {}, Error(
-                    record=record,
-                    error=f"Parent folder '{domain_name}' not found",
-                )
-            if count > 1:
-                return {}, Error(
-                    record=record,
-                    error=f"Multiple folders named '{domain_name}' found; please use a unique name",
-                )
-            parent_folder_id = matching_folders.first().id
-        else:
-            parent_folder_id = Folder.get_root_folder().id
+        parent_folder_id, error = self._resolve_parent(record)
+        if error is not None:
+            return {}, error
 
-        return {
+        data = {
+            "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
-        }, None
+        }
+
+        raw_labels = (
+            record.get("filtering_labels")
+            or record.get("labels")
+            or record.get("étiquette")
+            or record.get("label")
+        )
+        label_names = _split_label_names(raw_labels)
+        invalid_labels = _invalid_label_names(label_names)
+        if invalid_labels:
+            return {}, Error(
+                record=record,
+                error=f"Invalid labels {', '.join(invalid_labels)}: use only "
+                "letters, digits, '_' or '-', 36 characters at most",
+            )
+        if label_names and not self.may_add_labels:
+            existing = set(
+                FilteringLabel.objects.filter(label__in=label_names).values_list(
+                    "label", flat=True
+                )
+            )
+            missing = sorted(label_names - existing)
+            if missing:
+                return {}, Error(
+                    record=record,
+                    error=f"You are not allowed to create labels: {', '.join(missing)}",
+                )
+        # Kept as names: missing labels are created only when the row is written.
+        if label_names:
+            data["filtering_labels"] = raw_labels
+
+        raw_iam_groups = record.get("create_iam_groups")
+        if not is_blank_cell(raw_iam_groups):
+            create_iam_groups = _parse_bool_cell(raw_iam_groups, binary_only=True)
+            if create_iam_groups is None:
+                return {}, Error(
+                    record=record,
+                    error=f"Invalid create_iam_groups '{raw_iam_groups}': "
+                    "use true or false",
+                )
+            data["create_iam_groups"] = create_iam_groups
+
+        return data, None
+
+    def after_write(self, instance: Folder, created: bool) -> None:
+        # The API provisions IAM groups in FolderViewSet.perform_create, which the
+        # import bypasses; on update, the serializer handles the flag change.
+        if created:
+            Folder.create_default_ug_and_ra(instance)
+
+    @cached_property
+    def viewable_label_ids(self) -> set:
+        return set(
+            RoleAssignment.get_viewable_object_ids(self.request.user, FilteringLabel)
+        )
+
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
+        if "filtering_labels" not in data:
+            return data
+        label_ids = _resolve_filtering_labels(data["filtering_labels"])
+        if instance is not None:
+            # The export only lists the labels the user may view: the cell cannot
+            # mention the others, so it must not unlink them.
+            label_ids += instance.filtering_labels.exclude(
+                id__in=self.viewable_label_ids
+            ).values_list("id", flat=True)
+        return {**data, "filtering_labels": label_ids}
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):
@@ -2148,7 +3344,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             status = "--"
 
         applied_controls = []
-        for token in re.split(r"[|,]", record.get("applied_controls") or ""):
+        for token in re.split(r"[|,\n]", record.get("applied_controls") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2170,7 +3366,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         assets = []
-        for token in re.split(r"[|,]", record.get("assets") or ""):
+        for token in re.split(r"[|,\n]", record.get("assets") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2192,7 +3388,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         security_exceptions = []
-        for token in re.split(r"[|,]", record.get("security_exceptions") or ""):
+        for token in re.split(r"[|,\n]", record.get("security_exceptions") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2217,6 +3413,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
+            "observation": record.get("observation", ""),
             "status": status,
             "severity": severity,
             "folder": folder_id,
@@ -2233,11 +3430,20 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
         if due_date:
             data["due_date"] = due_date
 
+        remediated_at = _parse_date(record.get("remediated_at"))
+        if remediated_at:
+            data["remediated_at"] = remediated_at
+
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank still sets it, so UPDATE mode can clear the owners.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class ElementaryActionRecordConsumer(RecordConsumer):
@@ -2361,11 +3567,18 @@ class ProcessingRecordConsumer(RecordConsumer):
     _STATUS_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
         {v.lower(): k for k, v in Processing.STATUS_CHOICES}
     )
+    _ROLE_KEYS: ClassVar[frozenset[str]] = frozenset(
+        k for k, _ in Processing.ROLE_CHOICES
+    )
+    _ROLE_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {v.lower(): k for k, v in Processing.ROLE_CHOICES}
+    )
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
-        if "assigned_to" not in update_data and "assigned_to" in record:
-            update_data["assigned_to"] = record_data.get("assigned_to", [])
+        for field in ("assigned_to", "controllers"):
+            if field not in update_data and field in record:
+                update_data[field] = record_data.get(field, [])
         return update_data
 
     def create_context(self):
@@ -2392,12 +3605,23 @@ class ProcessingRecordConsumer(RecordConsumer):
         else:
             status_value = "privacy_draft"
 
+        record_role_value = str(record.get("role") or "").strip()
+        if not record_role_value:
+            role_value = "privacy_controller"
+        elif record_role_value in self._ROLE_KEYS:
+            role_value = record_role_value
+        elif record_role_value.lower() in self._ROLE_BY_DISPLAY:
+            role_value = self._ROLE_BY_DISPLAY[record_role_value.lower()]
+        else:
+            return {}, Error(record=record, error=f"Unknown role: {record_role_value}")
+
         data = {
             "name": name,
             "description": record.get("description", ""),
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
             "status": status_value,
+            "role": role_value,
             "information_channel": record.get("information_channel", ""),
             "usage_channel": record.get("usage_channel", ""),
             "dpia_required": record.get("dpia_required", False),
@@ -2417,6 +3641,30 @@ class ProcessingRecordConsumer(RecordConsumer):
                     name__in=nature_names,
                 ).values_list("id", flat=True)
             )
+
+        # Resolve M2M: controllers (by entity name)
+        lines = [
+            line.strip()
+            for line in str(record.get("controllers") or "").splitlines()
+            if line.strip()
+        ]
+        known = set(
+            Entity.objects.filter(name__in=lines).values_list("name", flat=True)
+        )
+        entity_names = set()
+        for line in lines:
+            if line in known:
+                entity_names.add(line)
+            else:
+                entity_names |= {n.strip() for n in line.split(",") if n.strip()}
+        entities = Entity.objects.filter(name__in=entity_names)
+        missing = entity_names - {e.name for e in entities}
+        if missing:
+            return {}, Error(
+                record=record,
+                error=f"Unknown controllers: {', '.join(sorted(missing))}",
+            )
+        data["controllers"] = [e.id for e in entities]
 
         # Resolve M2M: assigned_to (by user email → Actor)
         record_assigned_to = record.get("assigned_to")
@@ -2446,15 +3694,7 @@ class ProcessingChildConsumerMixin:
     def create_context(self):
         return None, None
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     @staticmethod
     def _choice_key(value: object, choices) -> Optional[str]:
@@ -2480,9 +3720,7 @@ class ProcessingChildConsumerMixin:
     def _accessible_processings(self):
         ids = getattr(self, "_accessible_processing_ids", None)
         if ids is None:
-            (ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, Processing
-            )
+            ids = RoleAssignment.get_viewable_object_ids(self.request.user, Processing)
             self._accessible_processing_ids = ids
         return Processing.objects.filter(id__in=ids)
 
@@ -2953,17 +4191,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             return [v.strip() for v in value.split(",") if v.strip()]
         return []
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if value is None:
-            return False
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     def _resolve_bia(
         self, record: dict
@@ -3342,27 +4570,63 @@ def normalize_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+@dataclass(frozen=True)
+class ImportOptions:
+    model_type: Optional[str]
+    folder_id: Optional[str] = None
+    perimeter_id: Optional[str] = None
+    framework_id: Optional[str] = None
+    matrix_id: Optional[str] = None
+    target_id: Optional[str] = None
+    on_conflict: str = ConflictMode.STOP
+    # Name of the container a single-container import creates (an audit, a
+    # risk assessment...); None falls back to the X-Name header, then a timestamp.
+    container_name: Optional[str] = None
+
+    @classmethod
+    def from_headers(cls, meta) -> "ImportOptions":
+        # Empty header -> None, so a blank optional selector never reaches get(id="").
+        return cls(
+            model_type=meta.get("HTTP_X_MODEL_TYPE"),
+            folder_id=meta.get("HTTP_X_FOLDER_ID") or None,
+            perimeter_id=meta.get("HTTP_X_PERIMETER_ID") or None,
+            framework_id=meta.get("HTTP_X_FRAMEWORK_ID") or None,
+            matrix_id=meta.get("HTTP_X_MATRIX_ID") or None,
+            target_id=meta.get("HTTP_X_TARGET_ID") or None,
+            on_conflict=meta.get("HTTP_X_ON_CONFLICT", ConflictMode.STOP),
+        )
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
 
-    def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
-        # Parse Excel data
-        # Note: I can still pick the request.user for extra checks on the legit access for write operations
-        model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
+    def _may_import(self, request, model_type: ModelType, folder_id) -> bool:
+        return may_import(
+            request.user,
+            IMPORT_ROOT_MODEL.get(model_type, model_type.value.lower()),
+            folder_id,
+        )
+
+    def process_excel_file(
+        self,
+        request,
+        record_file: io.BytesIO,
+        options: Optional[ImportOptions] = None,
+    ) -> Response:
+        options = options or ImportOptions.from_headers(request.META)
+        model_type_string = options.model_type
         model_type = ModelType.from_string(model_type_string)
-        folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
-        # Empty header -> None, so a blank optional selector never reaches get(id="").
-        perimeter_id = request.META.get("HTTP_X_PERIMETER_ID") or None
-        framework_id = request.META.get("HTTP_X_FRAMEWORK_ID") or None
-        matrix_id = request.META.get("HTTP_X_MATRIX_ID") or None
-        target_id = request.META.get("HTTP_X_TARGET_ID") or None
-        on_conflict_str = request.META.get("HTTP_X_ON_CONFLICT", "stop")
+        folder_id = options.folder_id
+        perimeter_id = options.perimeter_id
+        framework_id = options.framework_id
+        matrix_id = options.matrix_id
+        target_id = options.target_id
+        container_name = options.container_name
         try:
-            on_conflict = ConflictMode(on_conflict_str)
+            on_conflict = ConflictMode(options.on_conflict)
         except ValueError:
             on_conflict = ConflictMode.STOP
-
         logger.info(
             f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}, matrix: {matrix_id}"
         )
@@ -3381,11 +4645,24 @@ class LoadFileView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            if not self._may_import(request, model_type, folder_id):
+                logger.warning(
+                    "Unauthorized import attempt",
+                    user=request.user,
+                    model_type=model_type,
+                    folder_id=folder_id,
+                )
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
             # Special handling for TPRM multi-sheet import
             match model_type:
                 case ModelType.TPRM:
                     res = self._process_tprm_file(
-                        request, record_file, folders_map, folder_id, on_conflict
+                        request,
+                        record_file,
+                        folders_map,
+                        folder_id,
+                        on_conflict,
                     )
                 # Special handling for EBIOS RM Study ARM format (multi-sheet)
                 case ModelType.EBIOS_RM_STUDY_ARM:
@@ -3498,13 +4775,12 @@ class LoadFileView(APIView):
                     is_excel = is_excel_file(record_file)
                     if is_excel:
                         df = normalize_datetime_columns(
-                            pd.read_excel(record_file)
+                            read_excel_sheet(record_file)
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        # utf-8-sig transparently strips a leading BOM (added to our
-                        # CSV exports for Excel) so the first column header is not corrupted.
-                        df = pd.read_csv(record_file, encoding="utf-8-sig").fillna("")
+                        # Detects the delimiter: our table exports use ';'.
+                        df = read_csv_file(record_file)
 
                     try:
                         df = normalize_df_columns(df)
@@ -3526,6 +4802,7 @@ class LoadFileView(APIView):
                         framework_id=framework_id,
                         on_conflict=on_conflict,
                         target_id=target_id,
+                        container_name=container_name,
                     )
                     records = df.to_dict(orient="records")
 
@@ -3578,6 +4855,12 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.RISK_ASSESSMENT:
+                            res = (
+                                RiskAssessmentRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case ModelType.POLICY:
                             res = (
                                 PolicyRecordConsumer(base_context)
@@ -3620,6 +4903,18 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.METRIC_INSTANCE:
+                            res = (
+                                MetricInstanceRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.METRIC_SAMPLE:
+                            res = (
+                                MetricSampleRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case _:
                             res = self.process_data(
                                 request,
@@ -3631,6 +4926,7 @@ class LoadFileView(APIView):
                                 matrix_id,
                                 on_conflict,
                                 target_id,
+                                container_name,
                             )
 
         except Exception as e:
@@ -3656,6 +4952,7 @@ class LoadFileView(APIView):
         matrix_id=None,
         on_conflict=ConflictMode.STOP,
         target_id=None,
+        container_name=None,
     ):
         # Dispatch to appropriate handler
         match model_type:
@@ -3668,16 +4965,7 @@ class LoadFileView(APIView):
                     framework_id,
                     on_conflict,
                     target_id,
-                )
-            case ModelType.RISK_ASSESSMENT:
-                return self._process_risk_assessment(
-                    request,
-                    records,
-                    folder_id,
-                    perimeter_id,
-                    matrix_id,
-                    on_conflict,
-                    target_id,
+                    container_name,
                 )
             case _:
                 return {
@@ -3695,6 +4983,7 @@ class LoadFileView(APIView):
         framework_id,
         on_conflict=ConflictMode.STOP,
         target_id=None,
+        container_name=None,
     ):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
@@ -3732,7 +5021,9 @@ class LoadFileView(APIView):
                 )
                 return results
 
-            assessment_name = resolve_container_name(request, "Assessment")
+            assessment_name = resolve_container_name(
+                request, "Assessment", container_name
+            )
 
             # Prepare data for serializer
             assessment_data = {
@@ -3761,17 +5052,25 @@ class LoadFileView(APIView):
                     request, records, compliance_assessment, framework_id, results
                 )
 
+        # Results, not a Response: the caller nests them in its own payload.
         except Perimeter.DoesNotExist:
             logger.error(f"Perimeter with ID {perimeter_id} does not exist")
-            return Response(
-                {"error": f"Perimeter with ID {perimeter_id} does not exist"},
-                status=status.HTTP_400_BAD_REQUEST,
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": f"Perimeter with ID {perimeter_id} does not exist"}
+            )
+        except (APIException, ValidationError) as e:
+            results["failed"] += 1
+            results["errors"].append(
+                {
+                    "error": f"Failed to create compliance assessment: {readable_error(e)}"
+                }
             )
         except Exception as e:
-            logger.error(f"Error creating compliance assessment: {str(e)}")
-            return Response(
-                {"error": f"Failed to create compliance assessment: {str(e)}"},
-                status=status.HTTP_400_BAD_REQUEST,
+            logger.error("Error creating compliance assessment", error=e)
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": "Failed to create compliance assessment"}
             )
 
         return results
@@ -3789,7 +5088,16 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        if loaded_library is not None and (
+            StoredLibrary.objects.filter(
+                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+            ).exists()
+        ):
+            # The import relies on the scoring settings of the current library
+            # (calculation method, visibility...): update the library first.
+            return fail("CyfunLibraryOutdated")
+        if loaded_library is None:
             stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
@@ -3798,7 +5106,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+            framework = Framework.objects.get(urn=CYFUN_2025_URN)
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 
@@ -3822,12 +5130,6 @@ class LoadFileView(APIView):
             "perimeter": perimeter_id,
             "framework": framework.id,
             "folder": folder_id,
-            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
-            "field_visibility": {
-                "score": dict(AUDITOR_ONLY),
-                "is_scored": dict(AUDITOR_ONLY),
-                "documentation_score": dict(AUDITOR_ONLY),
-            },
         }
         level = parsed["assurance_level"]
         if level:
@@ -3836,21 +5138,25 @@ class LoadFileView(APIView):
         serializer = ComplianceAssessmentWriteSerializer(
             data=assessment_data, context={"request": request}
         )
-        try:
-            serializer.is_valid(raise_exception=True)
-            compliance_assessment = serializer.save()
-            compliance_assessment.create_requirement_assessments()
-        except Exception as e:
-            logger.error("Failed to create CyFun compliance assessment", error=e)
-            return fail("CyfunAssessmentCreationFailed")
-        logger.info(
-            "Created CyFun compliance assessment",
-            id=compliance_assessment.id,
-            assurance_level=level,
-        )
-        return self._reconcile_compliance_requirements(
-            request, parsed["records"], compliance_assessment, framework.id, results
-        )
+        # One transaction: the outcome rules are evaluated once, at commit,
+        # instead of after every imported row.
+        with transaction.atomic():
+            try:
+                serializer.is_valid(raise_exception=True)
+                compliance_assessment = serializer.save()
+                compliance_assessment.create_requirement_assessments()
+            except Exception as e:
+                logger.error("Failed to create CyFun compliance assessment", error=e)
+                transaction.set_rollback(True)
+                return fail("CyfunAssessmentCreationFailed")
+            logger.info(
+                "Created CyFun compliance assessment",
+                id=compliance_assessment.id,
+                assurance_level=level,
+            )
+            return self._reconcile_compliance_requirements(
+                request, parsed["records"], compliance_assessment, framework.id, results
+            )
 
     @staticmethod
     def _resolve_summary_row_template(
@@ -3914,7 +5220,7 @@ class LoadFileView(APIView):
 
             summary_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=summary_sheet)
+                    read_excel_sheet(excel_data, sheet_name=summary_sheet)
                 )
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
@@ -4061,7 +5367,7 @@ class LoadFileView(APIView):
 
             sheet_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=sheet_name)
+                    read_excel_sheet(excel_data, sheet_name=sheet_name)
                 )
             ).fillna("")
 
@@ -4194,6 +5500,11 @@ class LoadFileView(APIView):
     ):
         """Update matched requirement assessments from the rows; only populated
         cells are written, so blanks never clobber existing audit data."""
+        # Non-fatal per-line problems (an answer we could not match) land here
+        # rather than being dropped silently. Set here so every caller's results
+        # dict carries the key.
+        results.setdefault("warnings", [])
+        controls_created: list[str] = []
         for record in records:
             ref_id = record.get("ref_id")
             urn = record.get("urn")
@@ -4210,156 +5521,176 @@ class LoadFileView(APIView):
                 )
                 continue
 
+            # Controls this row created; dropped if the row rolls back.
+            row_controls: list[str] = []
             try:
-                # ref_id wins, but a stale ref_id must still fall back to urn.
-                ReqNode = None
-                if ref_id:
-                    ReqNode = RequirementNode.objects.filter(
-                        framework__id=framework_id, ref_id=ref_id
-                    ).first()
-                if ReqNode is None and urn:
-                    ReqNode = RequirementNode.objects.filter(
-                        framework__id=framework_id, urn=urn
-                    ).first()
+                # A savepoint per row: a failing row rolls back alone instead of
+                # aborting the caller's transaction for the rows after it.
+                with transaction.atomic():
+                    # ref_id wins, but a stale ref_id must still fall back to urn.
+                    ReqNode = None
+                    if ref_id:
+                        ReqNode = RequirementNode.objects.filter(
+                            framework__id=framework_id, ref_id=ref_id
+                        ).first()
+                    if ReqNode is None and urn:
+                        ReqNode = RequirementNode.objects.filter(
+                            framework__id=framework_id, urn=urn
+                        ).first()
 
-                requirement_assessment = None
-                if ReqNode:
-                    requirement_assessment = RequirementAssessment.objects.filter(
-                        compliance_assessment=compliance_assessment,
-                        requirement=ReqNode,
-                    ).first()
-                else:
-                    logger.warning("Import attempt: unknown ref_id/urn")
+                    requirement_assessment = None
+                    if ReqNode:
+                        requirement_assessment = RequirementAssessment.objects.filter(
+                            compliance_assessment=compliance_assessment,
+                            requirement=ReqNode,
+                        ).first()
+                    else:
+                        logger.warning("Import attempt: unknown ref_id/urn")
 
-                if requirement_assessment:
-                    compliance_result = record.get("compliance_result")
-                    requirement_progress = record.get("requirement_progress")
-                    observations = record.get("observations")
-                    requirement_data = {}
-                    if compliance_result not in (None, ""):
-                        requirement_data["result"] = compliance_result
-                    if requirement_progress not in (None, ""):
-                        requirement_data["status"] = requirement_progress
-                    if observations not in (None, ""):
-                        requirement_data["observation"] = observations
-                    impl_score = record.get("implementation_score")
-                    doc_score = record.get("documentation_score")
-                    score = record.get("score")
-                    enable_doc_score = False
-                    if impl_score not in (None, "") and doc_score not in (None, ""):
-                        requirement_data.update(
-                            {
-                                "score": impl_score,
-                                "documentation_score": doc_score,
-                                "is_scored": True,
-                            }
+                    if requirement_assessment:
+                        compliance_result = record.get("compliance_result")
+                        extended_result = record.get("extended_result")
+                        requirement_progress = record.get("requirement_progress")
+                        observations = record.get("observations")
+                        requirement_data = {}
+
+                        if compliance_result not in (None, ""):
+                            requirement_data["result"] = compliance_result
+                        if extended_result not in (None, ""):
+                            requirement_data["extended_result"] = extended_result
+                        if requirement_progress not in (None, ""):
+                            requirement_data["status"] = requirement_progress
+                        if observations not in (None, ""):
+                            requirement_data["observation"] = observations
+                        controls_cell = record.get("applied_controls") or record.get(
+                            "controls"
                         )
-                        enable_doc_score = True
-                    elif score not in (None, ""):
-                        requirement_data.update({"score": score, "is_scored": True})
-
-                    # Build answers from the "answers" cell
-                    answers_cell = record.get("answers")
-                    questions_dict = build_questions_dict(ReqNode) if ReqNode else None
-                    if answers_cell not in (None, "") and questions_dict:
-                        text_to_question = {}
-                        for q_urn, qdef in questions_dict.items():
-                            q_text = qdef.get("text", "")
-                            if q_text:
-                                text_to_question[q_text] = (q_urn, qdef)
-
-                        answers = {}
-                        has_any_answer = False
-
-                        for line in str(answers_cell).split("\n"):
-                            line = line.strip()
-                            if ">>" not in line:
-                                continue
-                            q_part, _, a_part = line.partition(">>")
-                            q_text = q_part.replace("(multiple)", "").strip()
-                            a_value = a_part.strip()
-                            # Skip template hints
-                            if a_value.startswith("[") and a_value.endswith("]"):
-                                continue
-                            if not a_value:
-                                continue
-
-                            matched = text_to_question.get(q_text)
-                            if not matched:
-                                continue
-                            q_urn, qdef = matched
-                            q_type = qdef.get("type")
-
-                            if q_type in ("text", "date"):
-                                answers[q_urn] = a_value
-                                has_any_answer = True
-                            elif q_type == "multiple_choice":
-                                selected = [
-                                    v.strip() for v in a_value.split("|") if v.strip()
-                                ]
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
-                                }
-                                choice_urns = [
-                                    value_to_urn[v]
-                                    for v in selected
-                                    if v in value_to_urn
-                                ]
-                                if choice_urns:
-                                    answers[q_urn] = choice_urns
-                                    has_any_answer = True
-                            elif q_type == "unique_choice":
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
-                                }
-                                if a_value in value_to_urn:
-                                    answers[q_urn] = value_to_urn[a_value]
-                                    has_any_answer = True
-
-                        if has_any_answer:
-                            requirement_data["answers"] = answers
-
-                    req_serializer = RequirementAssessmentWriteSerializer(
-                        instance=requirement_assessment,
-                        data=requirement_data,
-                        partial=True,
-                        context={"request": request},
-                    )
-                    if req_serializer.is_valid():
-                        req_serializer.save()
-                        if (
-                            enable_doc_score
-                            and not compliance_assessment.show_documentation_score
-                        ):
-                            # show_documentation_score is a @property backed by
-                            # `field_visibility`; the setter mutates that JSON
-                            # column, so update_fields must point at the concrete
-                            # field.
-                            compliance_assessment.show_documentation_score = True
-                            compliance_assessment.save(
-                                update_fields=["field_visibility"]
+                        if controls_cell not in (None, ""):
+                            controls = _resolve_applied_controls(
+                                controls_cell,
+                                compliance_assessment.folder,
+                                request,
+                                linked=requirement_assessment.applied_controls.all(),
                             )
-                        results["successful"] += 1
+                            row_controls.extend(controls.created)
+                            requirement_data["applied_controls"] = controls.ids
+                            if controls.failed:
+                                results["warnings"].append(
+                                    {
+                                        "requirement": ReqNode.ref_id or ReqNode.urn,
+                                        "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
+                                    }
+                                )
+                        impl_score = record.get("implementation_score")
+                        doc_score = record.get("documentation_score")
+                        score = record.get("score")
+                        enable_doc_score = False
+                        if impl_score not in (None, "") and doc_score not in (None, ""):
+                            requirement_data.update(
+                                {
+                                    "score": impl_score,
+                                    "documentation_score": doc_score,
+                                    "is_scored": True,
+                                }
+                            )
+                            enable_doc_score = True
+                        elif score not in (None, ""):
+                            requirement_data.update({"score": score, "is_scored": True})
+
+                        # Build answers from the "answers" cell
+                        answers_cell = record.get("answers")
+                        questions_dict = (
+                            build_questions_dict(ReqNode) if ReqNode else None
+                        )
+                        if answers_cell not in (None, "") and questions_dict:
+                            answers, answer_warnings = parse_answers_cell(
+                                answers_cell, questions_dict
+                            )
+                            for warning in answer_warnings:
+                                results["warnings"].append(
+                                    {
+                                        "requirement": ReqNode.ref_id or ReqNode.urn,
+                                        "warning": warning,
+                                    }
+                                )
+                            # An empty dict means every line was a hint or was
+                            # skipped; sending it would be a no-op write.
+                            if answers:
+                                requirement_data["answers"] = answers
+
+                        override_cell = record.get("is_score_overridden")
+                        if override_cell not in (None, ""):
+                            override_value = _parse_bool_cell(
+                                override_cell, binary_only=True
+                            )
+                            if override_value is None:
+                                results["failed"] += 1
+                                results["errors"].append(
+                                    {
+                                        "record": record,
+                                        "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
+                                    }
+                                )
+                                continue
+                            requirement_data["is_score_overridden"] = override_value
+                        elif (
+                            requirement_data.get("score") not in (None, "")
+                            and requirement_assessment.requirement.questions.exists()
+                        ):
+                            # Imported score on question-driven requirement = override
+                            requirement_data["is_score_overridden"] = True
+
+                        req_serializer = RequirementAssessmentWriteSerializer(
+                            instance=requirement_assessment,
+                            data=requirement_data,
+                            partial=True,
+                            context={"request": request},
+                        )
+                        if req_serializer.is_valid():
+                            req_serializer.save()
+                            if (
+                                enable_doc_score
+                                and not compliance_assessment.show_documentation_score
+                            ):
+                                # show_documentation_score is a @property backed by
+                                # `field_visibility`; the setter mutates that JSON
+                                # column, so update_fields must point at the concrete
+                                # field.
+                                compliance_assessment.show_documentation_score = True
+                                compliance_assessment.save(
+                                    update_fields=["field_visibility"]
+                                )
+                            results["successful"] += 1
+                        else:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": readable_error(req_serializer.errors),
+                                }
+                            )
                     else:
                         results["failed"] += 1
                         results["errors"].append(
-                            {"record": record, "errors": req_serializer.errors}
+                            {
+                                "record": record,
+                                "error": f"No matching requirement found with ref_id '{ref_id}'"
+                                + (f" or urn '{urn}'" if urn else ""),
+                            }
                         )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
-                        }
-                    )
             except Exception as e:
+                row_controls = []
                 logger.warning(f"Error updating requirement assessment: {str(e)}")
                 results["failed"] += 1
                 results["errors"].append({"record": record, "error": str(e)})
+            finally:
+                # Also after a row's early `continue`, which keeps its savepoint.
+                controls_created.extend(row_controls)
 
+        if controls_created:
+            results.setdefault("details", {})["applied_controls_created"] = len(
+                controls_created
+            )
         logger.info(
             f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
@@ -4382,7 +5713,7 @@ class LoadFileView(APIView):
             if len(sheet_names) == 1:
                 # Single-sheet file: treat it as a Summary-only import.
                 df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_names[0])
+                    read_excel_sheet(excel_file, sheet_name=sheet_names[0])
                 ).fillna("")
                 records = df.to_dict(orient="records")
                 base_context = BaseContext(
@@ -4415,7 +5746,7 @@ class LoadFileView(APIView):
             }
 
             summary_df = normalize_datetime_columns(
-                pd.read_excel(excel_file, sheet_name="Summary")
+                read_excel_sheet(excel_file, sheet_name="Summary")
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
 
@@ -4456,7 +5787,7 @@ class LoadFileView(APIView):
                 )
 
                 sheet_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_name)
+                    read_excel_sheet(excel_file, sheet_name=sheet_name)
                 ).fillna("")
                 sheet_records = sheet_df.to_dict(orient="records")
 
@@ -4543,7 +5874,7 @@ class LoadFileView(APIView):
             if parent_sheet is None and not has_child_sheets:
                 # Flat list of processings (legacy single-sheet format)
                 df = normalize_df_columns(
-                    normalize_datetime_columns(pd.read_excel(excel_file)).fillna("")
+                    normalize_datetime_columns(read_excel_sheet(excel_file)).fillna("")
                 )
                 return (
                     ProcessingRecordConsumer(base_context)
@@ -4561,7 +5892,7 @@ class LoadFileView(APIView):
 
             parent_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=parent_sheet)
+                    read_excel_sheet(excel_file, sheet_name=parent_sheet)
                 ).fillna("")
             )
             parent_records = parent_df.to_dict(orient="records")
@@ -4587,9 +5918,10 @@ class LoadFileView(APIView):
                 hint = parent_records[0]
                 domain_name = str(hint.get("domain") or "").lower()
                 scope_folder = folders_map.get(domain_name, folder_id)
-                (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
-                    Folder.get_root_folder(), request.user, Processing
+                viewable_processings = RoleAssignment.get_viewable_object_ids(
+                    request.user, Processing
                 )
+
                 queryset = Processing.objects.filter(id__in=viewable_processings)
                 if scope_folder:
                     queryset = queryset.filter(folder_id=scope_folder)
@@ -4612,7 +5944,7 @@ class LoadFileView(APIView):
                 result_key, consumer_class = PROCESSING_CHILD_SHEETS[key]
                 sheet_df = normalize_df_columns(
                     normalize_datetime_columns(
-                        pd.read_excel(excel_file, sheet_name=sheet_name)
+                        read_excel_sheet(excel_file, sheet_name=sheet_name)
                     ).fillna("")
                 )
                 sheet_records = sheet_df.to_dict(orient="records")
@@ -4657,23 +5989,27 @@ class LoadFileView(APIView):
             overall_results = {
                 "entities": {"successful": 0, "failed": 0, "errors": []},
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
+                "entity_assessments": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
                 "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
             # Track ref_id to actual ID mappings
             entity_ref_map = {}  # ref_id -> actual UUID
+            entity_name_map = {}  # lowercased name -> actual UUID (fallback)
             solution_ref_map = {}  # ref_id -> actual UUID
 
             # Process Entities sheet first
             if "Entities" in excel_data.sheet_names:
                 logger.info("Processing Entities sheet")
                 entities_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Entities")
+                    read_excel_sheet(excel_file, sheet_name="Entities")
                 ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
-                entities_result, entity_ref_map = self._process_entities(
-                    request, entities_records, folders_map, folder_id, on_conflict
+                entities_result, entity_ref_map, entity_name_map = (
+                    self._process_entities(
+                        request, entities_records, folders_map, folder_id, on_conflict
+                    )
                 )
                 overall_results["entities"] = entities_result
                 if entities_result.get("stopped"):
@@ -4685,13 +6021,14 @@ class LoadFileView(APIView):
             if "Solutions" in excel_data.sheet_names:
                 logger.info("Processing Solutions sheet")
                 solutions_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Solutions")
+                    read_excel_sheet(excel_file, sheet_name="Solutions")
                 ).fillna("")
                 solutions_records = solutions_df.to_dict(orient="records")
                 solutions_result, solution_ref_map = self._process_solutions(
                     request,
                     solutions_records,
                     entity_ref_map,
+                    entity_name_map,
                     on_conflict,
                 )
                 overall_results["solutions"] = solutions_result
@@ -4700,11 +6037,36 @@ class LoadFileView(APIView):
             else:
                 logger.warning("No 'Solutions' sheet found in Excel file")
 
+            # Process EntityAssessments sheet (requires entities, may reference solutions)
+            if "EntityAssessments" in excel_data.sheet_names:
+                logger.info("Processing EntityAssessments sheet")
+                entity_assessments_df = normalize_datetime_columns(
+                    read_excel_sheet(excel_file, sheet_name="EntityAssessments")
+                ).fillna("")
+                entity_assessments_records = entity_assessments_df.to_dict(
+                    orient="records"
+                )
+                entity_assessments_result = self._process_entity_assessments(
+                    request,
+                    entity_assessments_records,
+                    folders_map,
+                    folder_id,
+                    entity_ref_map,
+                    entity_name_map,
+                    solution_ref_map,
+                    on_conflict,
+                )
+                overall_results["entity_assessments"] = entity_assessments_result
+                if entity_assessments_result.get("stopped"):
+                    return overall_results
+            else:
+                logger.warning("No 'EntityAssessments' sheet found in Excel file")
+
             # Process Contracts sheet last (requires entities and solutions)
             if "Contracts" in excel_data.sheet_names:
                 logger.info("Processing Contracts sheet")
                 contracts_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Contracts")
+                    read_excel_sheet(excel_file, sheet_name="Contracts")
                 ).fillna("")
                 contracts_records = contracts_df.to_dict(orient="records")
                 contracts_result = self._process_contracts(
@@ -4713,6 +6075,7 @@ class LoadFileView(APIView):
                     folders_map,
                     folder_id,
                     entity_ref_map,
+                    entity_name_map,
                     solution_ref_map,
                     on_conflict,
                 )
@@ -4726,13 +6089,14 @@ class LoadFileView(APIView):
             if "Representatives" in excel_data.sheet_names:
                 logger.info("Processing Representatives sheet")
                 representatives_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Representatives")
+                    read_excel_sheet(excel_file, sheet_name="Representatives")
                 ).fillna("")
                 representatives_records = representatives_df.to_dict(orient="records")
                 representatives_result = self._process_representatives(
                     request,
                     representatives_records,
                     entity_ref_map,
+                    entity_name_map,
                     on_conflict,
                 )
                 overall_results["representatives"] = representatives_result
@@ -4800,6 +6164,23 @@ class LoadFileView(APIView):
             error = "Missing mandatory fields: " + ", ".join(missing_fields)
         self._add_tprm_record_error(results, record, error)
 
+    def _resolve_tprm_entity(
+        self, record, ref_field, name_field, entity_ref_map, entity_name_map
+    ):
+        """Resolve an entity by ref_id, or by name when no ref_id is given.
+
+        A ref_id that is present but unknown fails the lookup instead of
+        falling back to the name: a typo'd ref must surface as a row error,
+        not silently bind to a same-named entity.
+        """
+        ref = str(record.get(ref_field, "")).strip()
+        name = str(record.get(name_field, "")).strip()
+        if ref:
+            return entity_ref_map.get(ref), ref, name
+        if name:
+            return entity_name_map.get(name.lower()), ref, name
+        return None, ref, name
+
     def _log_tprm_import_results(self, label, results) -> None:
         logger.info(
             f"{label} import complete. "
@@ -4844,7 +6225,7 @@ class LoadFileView(APIView):
                 if not serializer.is_valid():
                     results["failed"] += 1
                     results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
+                        {"record": record, "error": readable_error(serializer.errors)}
                     )
                     return "failed"
                 updated_instance = serializer.save()
@@ -4867,17 +6248,19 @@ class LoadFileView(APIView):
         """Process entities from TPRM import"""
         results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
+        name_map = {}  # Map lowercased name to actual UUID — fallback when ref_id is absent
 
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name"]
+                    record, ["name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
+                name = record.get("name", "").strip()
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -4920,16 +6303,20 @@ class LoadFileView(APIView):
                 if legal_identifiers:
                     entity_data["legal_identifiers"] = legal_identifiers
 
-                # Check for existing entity by ref_id or name
-                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
+                # Check for existing entity by ref_id (if provided), else by name
+                existing_entity = None
+                if ref_id:
+                    existing_entity = Entity.objects.filter(ref_id=ref_id).first()
                 if not existing_entity:
                     existing_entity = Entity.objects.filter(
-                        name__iexact=record.get("name"),
+                        name__iexact=name,
                         folder_id=domain,
                     ).first()
 
                 if existing_entity:
-                    ref_id_map[ref_id] = str(existing_entity.id)
+                    if ref_id:
+                        ref_id_map[ref_id] = str(existing_entity.id)
+                    name_map[name.lower()] = str(existing_entity.id)
                     action = self._handle_tprm_conflict(
                         request,
                         results,
@@ -4951,13 +6338,15 @@ class LoadFileView(APIView):
 
                 serializer.is_valid(raise_exception=True)
                 entity = serializer.save()
-                ref_id_map[ref_id] = str(entity.id)
+                if ref_id:
+                    ref_id_map[ref_id] = str(entity.id)
+                name_map[name.lower()] = str(entity.id)
                 results["successful"] += 1
                 logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating entity: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         # Second pass: handle parent_entity relationships
         for record in records:
@@ -4981,13 +6370,14 @@ class LoadFileView(APIView):
                 logger.warning(f"Error linking parent entity: {str(e)}")
 
         self._log_tprm_import_results("Entity", results)
-        return results, ref_id_map
+        return results, ref_id_map, name_map
 
     def _process_solutions(
         self,
         request,
         records,
         entity_ref_map,
+        entity_name_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process solutions from TPRM import"""
@@ -4997,25 +6387,29 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                    record, ["ref_id", "name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
-                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-
-                # Lookup provider entity UUID
-                if provider_ref_id not in entity_ref_map:
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
+                if provider_entity_id is None:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
-
-                provider_entity_id = entity_ref_map[provider_ref_id]
 
                 # Prepare solution data (used by both update and create)
                 solution_data = {
@@ -5034,6 +6428,11 @@ class LoadFileView(APIView):
                         solution_data["criticality"] = int(record.get("criticality"))
                     except ValueError, TypeError:
                         pass
+                    # Kept for existing files: the 1-4 value also sets the tier.
+                    from tprm.tiers import tier_for_criticality
+
+                    if tier := tier_for_criticality(record.get("criticality")):
+                        solution_data["tier"] = tier.id
 
                 # Check for existing solution by ref_id or name
                 existing_solution = Solution.objects.filter(ref_id=ref_id).first()
@@ -5071,10 +6470,196 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating solution: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
+
+    def _resolve_tprm_perimeter(self, record) -> tuple[Optional[Perimeter], str | None]:
+        """Blank column is not an error — perimeter is optional here."""
+        value = str(
+            record.get("perimeter") or record.get("perimeter_ref_id") or ""
+        ).strip()
+        if not value:
+            return None, None
+
+        try:
+            perimeter = Perimeter.objects.filter(id=value).first()
+            if perimeter:
+                return perimeter, None
+        except (ValueError, ValidationError) as exc:
+            # Invalid UUID/ID format is expected for some imports; fall back to ref_id lookup.
+            logger.debug(
+                "Failed perimeter lookup by id, falling back to ref_id",
+                value=value,
+                error=str(exc),
+            )
+
+        perimeter = Perimeter.objects.filter(ref_id=value).first()
+        if perimeter is None:
+            return None, f"Perimeter '{value}' not found"
+        return perimeter, None
+
+    def _process_entity_assessments(
+        self,
+        request,
+        records,
+        folders_map,
+        folder_id,
+        entity_ref_map,
+        entity_name_map,
+        solution_ref_map,
+        on_conflict=ConflictMode.STOP,
+    ):
+        results = self._empty_tprm_results()
+        changeable_audit_ids = RoleAssignment.get_changeable_object_ids(
+            request.user, ComplianceAssessment
+        )
+
+        for record in records:
+            try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["name"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
+                entity_id, entity_ref_id, entity_name = self._resolve_tprm_entity(
+                    record,
+                    "entity_ref_id",
+                    "entity_name",
+                    entity_ref_map,
+                    entity_name_map,
+                )
+                if entity_id is None:
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Entity with ref_id '{entity_ref_id}' or name '{entity_name}' not found",
+                    )
+                    continue
+
+                # Get domain from record or use fallback
+                domain = folder_id
+                if record.get("domain") != "":
+                    domain = folders_map.get(
+                        str(record.get("domain")).lower(), folder_id
+                    )
+
+                assessment_data = {
+                    "name": record.get("name"),
+                    "description": record.get("description", ""),
+                    "entity": entity_id,
+                    "folder": domain,
+                }
+
+                perimeter, perimeter_error = self._resolve_tprm_perimeter(record)
+                if perimeter_error:
+                    self._add_tprm_record_error(results, record, perimeter_error)
+                    continue
+                if perimeter:
+                    assessment_data["perimeter"] = str(perimeter.id)
+
+                due_date = _parse_date(record.get("due_date"))
+                if due_date:
+                    assessment_data["due_date"] = due_date
+
+                if record.get("criticality") not in ("", None):
+                    try:
+                        assessment_data["criticality"] = int(record.get("criticality"))
+                    except ValueError, TypeError:
+                        logger.warning(
+                            "Invalid criticality value skipped during entity assessment import",
+                            criticality=record.get("criticality"),
+                        )
+
+                # Same parsing/error convention as the Contracts sheet.
+                solution_ids = []
+                missing_solution_refs = []
+                solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
+                if solution_ref_id_raw:
+                    for sol_ref in re.split(r"[\n\r|,]+", solution_ref_id_raw):
+                        sol_ref = sol_ref.strip()
+                        if not sol_ref:
+                            continue
+                        if sol_ref in solution_ref_map:
+                            solution_ids.append(solution_ref_map[sol_ref])
+                        else:
+                            missing_solution_refs.append(sol_ref)
+                if missing_solution_refs:
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                "Unknown solution_ref_id(s) skipped: "
+                                + ", ".join(missing_solution_refs)
+                            ),
+                        }
+                    )
+                if solution_ids:
+                    assessment_data["solutions"] = solution_ids
+
+                audit_ref = str(record.get("audit_ref_id", "")).strip()
+                audit_name = str(record.get("audit_name", "")).strip()
+                if audit_ref or audit_name:
+                    # Same strict convention as entity lookups: a provided but
+                    # unknown ref_id fails the row; the name is only consulted
+                    # when no ref_id is given.
+                    if audit_ref:
+                        audit = ComplianceAssessment.objects.filter(
+                            ref_id=audit_ref, id__in=changeable_audit_ids
+                        ).first()
+                    else:
+                        audit = ComplianceAssessment.objects.filter(
+                            name__iexact=audit_name, id__in=changeable_audit_ids
+                        ).first()
+                    if audit is None:
+                        self._add_tprm_record_error(
+                            results,
+                            record,
+                            f"Audit with ref_id '{audit_ref}' or name '{audit_name}' not found",
+                        )
+                        continue
+                    assessment_data["link_audit"] = str(audit.id)
+
+                # Entity assessments dedupe by (entity, name, folder)
+                existing_assessment = EntityAssessment.objects.filter(
+                    name__iexact=record.get("name"),
+                    entity_id=entity_id,
+                    folder_id=domain,
+                ).first()
+
+                if existing_assessment:
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Entity assessment",
+                        serializer_class=EntityAssessmentWriteSerializer,
+                        instance=existing_assessment,
+                        data=assessment_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
+                serializer = EntityAssessmentWriteSerializer(
+                    data=assessment_data, context={"request": request}
+                )
+
+                serializer.is_valid(raise_exception=True)
+                assessment = serializer.save()
+                results["successful"] += 1
+                logger.debug(f"Created entity assessment: {assessment.name}")
+
+            except Exception as e:
+                logger.warning(f"Error creating entity assessment: {str(e)}")
+                self._add_tprm_record_error(results, record, readable_error(e))
+
+        self._log_tprm_import_results("Entity assessment", results)
+        return results
 
     def _process_contracts(
         self,
@@ -5083,6 +6668,7 @@ class LoadFileView(APIView):
         folders_map,
         folder_id,
         entity_ref_map,
+        entity_name_map,
         solution_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
@@ -5092,25 +6678,29 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                    record, ["ref_id", "name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
-                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-
-                # Lookup provider entity UUID
-                if provider_ref_id not in entity_ref_map:
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
+                if provider_entity_id is None:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
-
-                provider_entity_id = entity_ref_map[provider_ref_id]
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -5222,7 +6812,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating contract: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Contract", results)
         return results
@@ -5232,6 +6822,7 @@ class LoadFileView(APIView):
         request,
         records,
         entity_ref_map,
+        entity_name_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process representatives from TPRM import."""
@@ -5240,21 +6831,28 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["email", "provider_entity_ref_id"]
+                    record, ["email"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 email = str(record.get("email", "")).strip()
-                provider_ref_id = str(record.get("provider_entity_ref_id", "")).strip()
-                provider_entity_id = entity_ref_map.get(provider_ref_id)
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
 
                 if not provider_entity_id:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
 
@@ -5300,16 +6898,12 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating representative: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Representative", results)
         return results
 
     def post(self, request, *args, **kwargs) -> Response:
-        # if not request.user.has_file_permission:
-        #     logger.error("Unauthorized user tried to load a file", user=request.user)
-        #     return Response({}, status=status.HTTP_403_FORBIDDEN)
-
         if not request.data:
             logger.error("Request has no data")
             return Response(
@@ -5337,537 +6931,11 @@ class LoadFileView(APIView):
         # Process the Excel file
         return self.process_excel_file(request, io.BytesIO(file_data))
 
-    def _process_risk_assessment(
-        self,
-        request,
-        records,
-        folder_id,
-        perimeter_id,
-        matrix_id,
-        on_conflict=ConflictMode.STOP,
-        target_id=None,
-    ):
-        """Process risk assessment import with the specified column structure"""
-        results = {"successful": 0, "failed": 0, "errors": []}
-
-        try:
-            if target_id is not None:
-                # Reconcile into an existing risk assessment, reusing its domain
-                # and matrix.
-                risk_assessment = resolve_accessible_target(
-                    RiskAssessment, target_id, request.user
-                )
-                if risk_assessment is None:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "error": f"Target risk assessment with ID {target_id} does not exist"
-                        }
-                    )
-                    return results
-                domain = risk_assessment.folder
-                risk_matrix = risk_assessment.risk_matrix
-                logger.info(
-                    f"Reconciling import into existing risk assessment {risk_assessment.id}"
-                )
-            else:
-                # Get the perimeter and its domain
-                perimeter = None
-                if perimeter_id is not None:
-                    perimeter = Perimeter.objects.get(id=perimeter_id)
-
-                if perimeter is not None:
-                    domain = perimeter.folder
-                else:
-                    if folder_id is None:
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "error": "A folder must be specified when there's no perimeter!"
-                            }
-                        )
-                        return results
-                    else:
-                        domain = Folder.objects.get(id=folder_id)
-
-                # Get the risk matrix
-                risk_matrix = RiskMatrix.objects.get(id=matrix_id)
-
-                assessment_name = resolve_container_name(request, "Risk_Assessment")
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-                # Create the risk assessment
-                assessment_data = {
-                    "name": assessment_name,
-                    "perimeter": perimeter_id,
-                    "risk_matrix": matrix_id,
-                    "folder": domain.id,
-                    "description": f"Imported risk assessment from Excel on {timestamp}",
-                }
-
-                risk_assessment_serializer = RiskAssessmentWriteSerializer(
-                    data=assessment_data, context={"request": request}
-                )
-
-                if not risk_assessment_serializer.is_valid():
-                    return {
-                        "successful": 0,
-                        "failed": len(records),
-                        "errors": [
-                            {
-                                "error": "Failed to create risk assessment",
-                                "details": risk_assessment_serializer.errors,
-                            }
-                        ],
-                    }
-
-                risk_assessment = risk_assessment_serializer.save()
-                logger.info(
-                    f"Created risk assessment: {assessment_name} with ID {risk_assessment.id}"
-                )
-
-            # Build matrix mapping dictionaries
-            matrix_mappings = self._build_matrix_mappings(risk_matrix)
-
-            # Process controls first - collect all unique control names
-            # Accept both the legacy columns name and the model fields name for the
-            all_controls = set()
-            for record in records:
-                existing_controls = (
-                    record.get("existing_applied_controls")
-                    or record.get("existing_controls")
-                    or ""
-                ).strip()
-                additional_controls = (
-                    record.get("additional_controls")
-                    or record.get("applied_controls")
-                    or ""
-                ).strip()
-
-                if existing_controls:
-                    all_controls.update(self._split_multi_separator(existing_controls))
-                if additional_controls:
-                    all_controls.update(
-                        self._split_multi_separator(additional_controls)
-                    )
-
-            # Create or find controls in the domain
-            control_mapping = self._create_or_find_controls(
-                list(all_controls), domain, request
-            )
-
-            # Process each record to create or reconcile risk scenarios
-            results["skipped"] = 0
-            for record in records:
-                try:
-                    scenario, action = self._process_risk_scenario_record(
-                        record,
-                        risk_assessment,
-                        matrix_mappings,
-                        control_mapping,
-                        request,
-                        domain,
-                        on_conflict,
-                    )
-                    if action == "stopped":
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "record": record,
-                                "error": "Risk scenario already exists",
-                            }
-                        )
-                        results["stopped"] = True
-                        break
-                    elif action == "skipped":
-                        results["skipped"] += 1
-                    elif action in ("created", "updated"):
-                        results["successful"] += 1
-                    else:
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "record": record,
-                                "error": "Failed to create risk scenario",
-                            }
-                        )
-
-                except Exception as e:
-                    logger.warning(f"Error creating risk scenario: {str(e)}")
-                    results["failed"] += 1
-                    results["errors"].append({"record": record, "error": str(e)})
-
-            logger.info(
-                f"Risk Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
-            )
-            return results
-
-        except Perimeter.DoesNotExist:
-            return {
-                "successful": 0,
-                "failed": len(records),
-                "errors": [
-                    {"error": f"Perimeter with ID {perimeter_id} does not exist"}
-                ],
-            }
-        except RiskMatrix.DoesNotExist:
-            return {
-                "successful": 0,
-                "failed": len(records),
-                "errors": [
-                    {"error": f"Risk matrix with ID {matrix_id} does not exist"}
-                ],
-            }
-        except Exception as e:
-            logger.error(f"Error in risk assessment processing: {str(e)}")
-            return {
-                "successful": 0,
-                "failed": len(records),
-                "errors": [{"error": f"Failed to process risk assessment: {str(e)}"}],
-            }
-
     def _build_matrix_mappings(self, risk_matrix):
-        """Build label-to-value mapping dictionaries for probability and impact"""
-        mappings = {"probability": {}, "impact": {}}
-
-        try:
-            matrix_definition = risk_matrix.json_definition
-
-            # Build probability mapping
-            if "probability" in matrix_definition:
-                for prob_def in matrix_definition["probability"]:
-                    prob_id = prob_def.get("id")
-                    name = prob_def.get("name", "")
-
-                    # Add base name
-                    if name and prob_id is not None:
-                        mappings["probability"][name.lower()] = prob_id
-
-                    # Add translated names
-                    if "translations" in prob_def:
-                        for lang, translation in prob_def["translations"].items():
-                            translated_name = translation.get("name", "")
-                            if translated_name and prob_id is not None:
-                                mappings["probability"][translated_name.lower()] = (
-                                    prob_id
-                                )
-
-            # Build impact mapping
-            if "impact" in matrix_definition:
-                for impact_def in matrix_definition["impact"]:
-                    impact_id = impact_def.get("id")
-                    name = impact_def.get("name", "")
-
-                    # Add base name
-                    if name and impact_id is not None:
-                        mappings["impact"][name.lower()] = impact_id
-
-                    # Add translated names
-                    if "translations" in impact_def:
-                        for lang, translation in impact_def["translations"].items():
-                            translated_name = translation.get("name", "")
-                            if translated_name and impact_id is not None:
-                                mappings["impact"][translated_name.lower()] = impact_id
-
-            # Note: Risk levels are automatically computed by the system
-            # based on probability and impact values, so no need to map them
-
-        except Exception as e:
-            logger.warning(f"Error building matrix mappings: {str(e)}")
-            logger.debug(f"Matrix definition structure: {matrix_definition}")
-
-        return mappings
-
-    def _create_or_find_controls(self, control_names, domain, request):
-        """Create or find controls in the specified domain"""
-        control_mapping = {}
-
-        for control_name in control_names:
-            if not control_name:
-                continue
-
-            # Try to find existing control in the domain
-            existing_control = AppliedControl.objects.filter(
-                name=control_name, folder=domain
-            ).first()
-
-            if existing_control:
-                control_mapping[control_name] = existing_control.id
-            else:
-                # Create new control
-                try:
-                    control_data = {
-                        "name": control_name,
-                        "folder": domain.id,
-                        "description": f"Control imported from risk assessment",
-                        "status": "to_do",
-                    }
-
-                    control_serializer = AppliedControlWriteSerializer(
-                        data=control_data, context={"request": request}
-                    )
-
-                    if control_serializer.is_valid():
-                        control = control_serializer.save()
-                        control_mapping[control_name] = control.id
-                        logger.info(f"Created control: {control_name}")
-                    else:
-                        logger.warning(
-                            f"Failed to create control {control_name}: {control_serializer.errors}"
-                        )
-
-                except Exception as e:
-                    logger.warning(f"Error creating control {control_name}: {str(e)}")
-
-        return control_mapping
-
-    def _process_risk_scenario_record(
-        self,
-        record,
-        risk_assessment,
-        matrix_mappings,
-        control_mapping,
-        request,
-        domain,
-        on_conflict=ConflictMode.STOP,
-    ):
-        """Process one row, returning (scenario, action) where action is one of
-        created/updated/skipped/stopped/failed. Existing scenarios are matched by
-        ref_id, then name."""
-        try:
-            ref_id = record.get("ref_id", "")
-            name = record.get("name", "")
-            description = record.get("description", "")
-
-            if not name:
-                raise ValueError("Risk scenario name is required")
-
-            existing_scenario = None
-            if ref_id:
-                existing_scenario = RiskScenario.objects.filter(
-                    risk_assessment=risk_assessment, ref_id=ref_id
-                ).first()
-            if existing_scenario is None:
-                existing_scenario = RiskScenario.objects.filter(
-                    risk_assessment=risk_assessment, name__iexact=name
-                ).first()
-
-            if existing_scenario is not None:
-                if on_conflict == ConflictMode.SKIP:
-                    return existing_scenario, "skipped"
-                if on_conflict == ConflictMode.STOP:
-                    return existing_scenario, "stopped"
-                # UPDATE: fall through and update the existing scenario in place.
-
-            # Map risk values using matrix mappings. Accept both the short form
-            # (`*_proba`, used historically) and the long form (`*_probability`,
-            # used by the CSV/XLSX export) so that exported files round-trip cleanly.
-            inherent_impact = self._map_risk_value(
-                record.get("inherent_impact", ""), matrix_mappings["impact"]
-            )
-            inherent_proba = self._map_risk_value(
-                record.get("inherent_proba")
-                or record.get("inherent_probability")
-                or "",
-                matrix_mappings["probability"],
-            )
-
-            current_impact = self._map_risk_value(
-                record.get("current_impact", ""), matrix_mappings["impact"]
-            )
-            current_proba = self._map_risk_value(
-                record.get("current_proba") or record.get("current_probability") or "",
-                matrix_mappings["probability"],
-            )
-
-            residual_impact = self._map_risk_value(
-                record.get("residual_impact", ""), matrix_mappings["impact"]
-            )
-            residual_proba = self._map_risk_value(
-                record.get("residual_proba")
-                or record.get("residual_probability")
-                or "",
-                matrix_mappings["probability"],
-            )
-
-            logger.debug(
-                f"Risk scenario '{name}': current_proba={current_proba}, current_impact={current_impact}, "
-                f"residual_proba={residual_proba}, residual_impact={residual_impact}"
-            )
-
-            # Get treatment status
-            treatment = record.get("treatment", "").strip().lower()
-
-            # Prepare risk scenario data
-            # Note: inherent_level, current_level, and residual_level will be computed automatically
-            scenario_data = {
-                "ref_id": ref_id,
-                "name": name,
-                "description": description,
-                "risk_assessment": risk_assessment.id,
-                "inherent_impact": inherent_impact,
-                "inherent_proba": inherent_proba,
-                "current_impact": current_impact,
-                "current_proba": current_proba,
-                "residual_impact": residual_impact,
-                "residual_proba": residual_proba,
-                "treatment": next(
-                    (
-                        opt
-                        for opt, _ in RiskScenario.TREATMENT_OPTIONS
-                        if treatment == opt
-                    ),
-                    "open",
-                ),
-                "justification": record.get("justification", "") or "",
-            }
-
-            # Create or update the risk scenario
-            if existing_scenario is not None:
-                scenario_serializer = RiskScenarioWriteSerializer(
-                    instance=existing_scenario,
-                    data=scenario_data,
-                    partial=True,
-                    context={"request": request},
-                )
-            else:
-                scenario_serializer = RiskScenarioWriteSerializer(
-                    data=scenario_data, context={"request": request}
-                )
-
-            logger.debug(
-                f"Validating scenario serializer for '{name}' with data: {scenario_serializer.initial_data}"
-            )
-
-            if not scenario_serializer.is_valid():
-                logger.warning(
-                    f"Risk scenario validation failed: {scenario_serializer.errors}"
-                )
-                return None, "failed"
-
-            risk_scenario = scenario_serializer.save()
-
-            # Link filtering labels
-            filtering_label_ids = _resolve_filtering_labels(
-                record.get("filtering_labels")
-            )
-            if filtering_label_ids:
-                risk_scenario.filtering_labels.set(filtering_label_ids)
-
-            # Link existing controls
-            self._link_controls_to_scenario(
-                risk_scenario,
-                record.get("existing_applied_controls", ""),
-                control_mapping,
-                "existing_applied_controls",
-            )
-
-            # Link additional controls. Accept both the legacy column name
-            # (`additional_controls`) and the model field name (`applied_controls`,
-            # used by the CSV/XLSX export) for round-trip compatibility.
-            self._link_controls_to_scenario(
-                risk_scenario,
-                record.get("additional_controls")
-                or record.get("applied_controls")
-                or "",
-                control_mapping,
-                "applied_controls",
-            )
-
-            # Link assets (must already exist in the domain folder)
-            self._link_assets_to_scenario(
-                risk_scenario, record.get("assets", ""), domain
-            )
-
-            return risk_scenario, (
-                "updated" if existing_scenario is not None else "created"
-            )
-
-        except Exception as e:
-            logger.warning(f"Error processing risk scenario record: {str(e)}")
-            raise e
+        return build_matrix_mappings(risk_matrix)
 
     def _map_risk_value(self, value, mapping_dict):
-        """Map a risk value label to its numeric value using the mapping dictionary"""
-        if not value:
-            return -1
-
-        # Convert to string if needed (pandas may read Excel cells as numbers, etc.)
-        original_value = value
-        if not isinstance(value, str):
-            value = str(value)
-
-        # Try exact match first
-        clean_value = value.strip().lower()
-        if clean_value in mapping_dict:
-            mapped_value = mapping_dict[clean_value]
-            logger.debug(f"Mapped risk value '{original_value}' -> {mapped_value}")
-            return mapped_value
-
-        # If no match found, return -1 (undefined)
-        logger.warning(
-            f"Failed to map risk value '{original_value}' (type: {type(original_value).__name__}). "
-            f"Available values: {list(mapping_dict.keys())}"
-        )
-        return -1
-
-    @staticmethod
-    def _split_multi_separator(text: str) -> list[str]:
-        """Split a string on newline, pipe, semicolon or comma and return trimmed, non-empty items."""
-        if not text:
-            return []
-        return [item.strip() for item in re.split(r"[\n|;,]", text) if item.strip()]
-
-    def _link_controls_to_scenario(
-        self, risk_scenario, controls_text, control_mapping, field_name
-    ):
-        """Link controls to a risk scenario based on control names"""
-        if not controls_text:
-            return
-
-        control_names = self._split_multi_separator(controls_text)
-        control_ids = []
-
-        for control_name in control_names:
-            if control_name in control_mapping:
-                control_ids.append(control_mapping[control_name])
-
-        if control_ids:
-            # Get the field and set the many-to-many relationship
-            field = getattr(risk_scenario, field_name)
-            field.set(control_ids)
-
-    def _link_assets_to_scenario(self, risk_scenario, assets_text, domain):
-        """Link assets to a risk scenario based on asset names.
-
-        Assets are looked up by name within the domain folder. Missing assets are
-        created with the model's default type (SUPPORT); users can re-classify
-        them afterward from the UI.
-        """
-        if not assets_text:
-            return
-
-        asset_names = self._split_multi_separator(assets_text)
-        asset_ids = []
-
-        for asset_name in asset_names:
-            try:
-                asset, created = Asset.objects.get_or_create(
-                    name=asset_name, folder=domain
-                )
-                if created:
-                    logger.info(
-                        f"Created asset '{asset_name}' in domain '{domain.name}' "
-                        f"with default type '{asset.get_type_display()}'"
-                    )
-                asset_ids.append(asset.id)
-            except Exception:
-                logger.exception(
-                    f"Failed to resolve asset '{asset_name}' in domain '{domain.name}'"
-                )
-
-        if asset_ids:
-            risk_scenario.assets.set(asset_ids)
+        return map_risk_value(value, mapping_dict)
 
     def _process_ebios_rm_study_arm(
         self,
@@ -5915,6 +6983,16 @@ class LoadFileView(APIView):
             # Parse ARM Excel file
             excel_file.seek(0)
             arm_data = process_arm_file(excel_file.read())
+
+            missing_sheets = arm_data.get("missing_sheets", [])
+            if missing_sheets:
+                results["warnings"] = [
+                    {
+                        "sheet": key,
+                        "warning": "Sheet not found in the ARM file, related data was not imported",
+                    }
+                    for key in missing_sheets
+                ]
 
             # Generate study name
             study_name = resolve_container_name(request, "EBIOS_RM_Study")
@@ -7831,8 +8909,68 @@ class LoadFileView(APIView):
                                 )
                         results["details"]["operating_modes_created"] += 1
 
-                if not stopped:
-                    results["successful"] = 1
+                if stopped:
+                    return results
+
+                # Workshop 5: risk assessment, security measures, then scenarios
+                ra_data = data.get("risk_assessment") or {}
+                if ra_data or data.get("risk_scenarios"):
+                    ra_serializer = RiskAssessmentWriteSerializer(
+                        data={
+                            "name": ra_data.get("name") or study.name,
+                            "ref_id": ra_data.get("ref_id", ""),
+                            "version": ra_data.get("version", ""),
+                            "description": ra_data.get("description", ""),
+                            "folder": str(folder.id),
+                            "risk_matrix": str(study.risk_matrix_id),
+                            "ebios_rm_study": str(study.id),
+                        },
+                        context={"request": request},
+                    )
+                    if not ra_serializer.is_valid():
+                        results["errors"].append(
+                            {
+                                "risk_assessment": ra_data.get("name", ""),
+                                "error": readable_error(ra_serializer.errors),
+                            }
+                        )
+                        return results
+                    risk_assessment = ra_serializer.save()
+                    results["details"]["risk_assessment"] = str(risk_assessment.id)
+
+                    base_context = BaseContext(
+                        request, folder_id=str(folder.id), on_conflict=on_conflict
+                    )
+                    for key, consumer, records, context in (
+                        (
+                            "security_measures",
+                            AppliedControlRecordConsumer,
+                            data.get("security_measures", []),
+                            base_context,
+                        ),
+                        (
+                            "risk_scenarios",
+                            RiskAssessmentRecordConsumer,
+                            data.get("risk_scenarios", []),
+                            replace(base_context, target_id=str(risk_assessment.id)),
+                        ),
+                    ):
+                        res = consumer(context).process_records(records).to_dict()
+                        results["details"][key] = res
+                        results["errors"].extend(res["errors"])
+                        if res["stopped"]:
+                            return results
+
+                    for rs_data in data.get("risk_scenarios", []):
+                        op_scenario = op_scenario_lookup.get(
+                            rs_data.get("operational_scenario")
+                        )
+                        if op_scenario:
+                            risk_assessment.risk_scenarios.filter(
+                                name__iexact=rs_data.get("name")
+                            ).update(operational_scenario=op_scenario)
+
+                results["successful"] = 1
 
             else:
                 results["failed"] = 1

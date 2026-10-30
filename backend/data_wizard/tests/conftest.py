@@ -54,7 +54,7 @@ def other_folder(root_folder):
 
 @pytest.fixture
 def admin_user(db, root_folder):
-    user = User.objects.create_superuser("admin@datawizard.test", is_published=True)
+    user = User.objects.create_superuser("admin@datawizard.test")
     user.folder = root_folder
     user.save()
     return user
@@ -122,9 +122,7 @@ def knox_admin_client(app_ready):
     The user is added to the BI-UG-ADM superuser group created by startup(),
     giving it full RBAC access across all folders — no RBAC patching needed.
     """
-    admin = User.objects.create_superuser(
-        "knox-admin@datawizard.test", is_published=True
-    )
+    admin = User.objects.create_superuser("knox-admin@datawizard.test")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -140,10 +138,10 @@ def knox_admin_client(app_ready):
 def knox_restricted_client(app_ready, root_folder):
     """
     Authenticated APIClient for a user with NO role assignments.
-    get_accessible_object_ids() returns [] for this user — used to prove
+    get_viewable_object_ids() returns [] for this user — used to prove
     RBAC filtering is real and not a patch artifact.
     """
-    user = User.objects.create_user("restricted@datawizard.test", is_published=True)
+    user = User.objects.create_user("restricted@datawizard.test")
     user.folder = root_folder
     user.save()
 
@@ -162,12 +160,12 @@ def knox_restricted_client(app_ready, root_folder):
 def all_accessible():
     """Patch RoleAssignment so process_records sees all objects as accessible."""
 
-    def _all_ids(root_folder, user, model_class):
-        ids = list(model_class.objects.values_list("id", flat=True))
-        return ids, ids, ids
+    def _all_ids(user, perm_prefix, model, folder=None):
+        ids = model.objects.values_list("id", flat=True)
+        return ids
 
     with patch(
-        "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+        "data_wizard.views.RoleAssignment._get_accessible_ids",
         side_effect=_all_ids,
     ):
         yield

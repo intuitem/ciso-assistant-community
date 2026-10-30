@@ -1,8 +1,8 @@
 <script lang="ts">
-	import FrameworkBuilder from '$lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
-	import type { Framework } from '$lib/components/FrameworkBuilder/builder-state';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import FrameworkBuilder from '#lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
+	import type { Framework } from '#lib/components/FrameworkBuilder/builder-state.js';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { data } = $props();
 
@@ -53,7 +53,9 @@
 
 	const links = $derived({
 		back: `/experimental/library-builder/${draft.id}`,
-		preview: null
+		preview: `/experimental/library-builder/${draft.id}/framework/preview?framework_urn=${encodeURIComponent(
+			editorData.framework_urn
+		)}`
 		// No exportYaml: export is a whole-library action, offered on the
 		// library page, not inside the framework editor.
 	});

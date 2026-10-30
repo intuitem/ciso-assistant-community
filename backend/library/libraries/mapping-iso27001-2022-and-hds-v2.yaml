@@ -1,0 +1,1397 @@
+urn: urn:intuitem:risk:library:mapping-iso27001-2022-and-hds-v2
+locale: en
+ref_id: mapping-iso27001-2022-and-hds-v2
+name: ISO/IEC 27001:2022 <-> HDS v2.0
+description: Mapping between International standard ISO/IEC 27001:2022 and the French Health Data Hosting (HDS) certification framework v2.0. Chapter 5 links follow the ISO clause each HDS requirement complements (subset); Annex A links are partial overlaps (intersect). Contract (chapter 6) and sovereignty (chapter 7) requirements are largely unmapped because ISO 27001 has no equivalent.
+copyright: intuitem
+version: 1
+publication_date: '2026-10-06'
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:iso27001-2022
+- urn:intuitem:risk:library:hds-v2023-a
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-iso27001-2022-and-hds-v2
+    ref_id: mapping-iso27001-2022-and-hds-v2
+    name: ISO/IEC 27001:2022 <-> HDS v2.0
+    description: Mapping between International standard ISO/IEC 27001:2022 and the French Health Data Hosting (HDS) certification framework v2.0. Chapter 5 links follow the ISO clause each HDS requirement complements (subset); Annex A links are partial overlaps (intersect). Contract (chapter 6) and sovereignty (chapter 7) requirements are largely unmapped because ISO 27001 has no equivalent.
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    target_framework_urn: urn:intuitem:risk:framework:hds-v2023-a
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.4; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 5.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 5.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 5.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.1.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.1.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.1.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.4; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.5.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.5.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.5.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 8.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 8.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 8.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.2.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.2.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.3.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.3.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.3.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 10.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 10.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node5
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: ISO 4.3 defines the ISMS scope; HDS requires that scope to cover all health-data hosting activities.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node7
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Identifying and meeting contractual and regulatory requirements overlaps with contracts complying with CSP R.1111-11 (chapter 6); the clause content itself is not in ISO.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node9
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Privacy/PII protection per applicable law overlaps with the GDPR-based sovereignty rules of chapter 7 (EEA storage, transfers, third-country law), which ISO does not detail.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-02]
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.4.1: ISO 4.1 applies, plus the obligation to consider protection of client health data among internal/external issues.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-03]
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.4.2: ISO 4.2 applies, plus taking the health-data legal framework into account as interested-party requirements.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-03]
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Identifying applicable legal and regulatory requirements overlaps with considering the health-data legal framework.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-04]
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.4.3: ISO 4.3 applies, plus the scope must include all health-data processing, backups and media transfers.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node16
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event A (physical/environmental failure of media).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node17
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B (loss of control of media).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node18
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B.a (copies on portable media).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node20
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B.b (paper materialisation).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node22
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B.c (storage reallocation).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node24
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event C (information flow degradation/compromise).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node25
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D (access control failure).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node26
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.a (granting/changing/revoking access rights).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node27
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.b (distribution of electronic identification means).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node28
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.c (access traceability and accountability).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node29
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.d (occasional access during audits and penetration tests).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node30
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event E (failure to control interventions).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node31
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event F (unintended use of the service).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event G (HW/SW failure breaking continuity commitments).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node33
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event H (subjection to non-European legislation).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node16
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Protection against physical and environmental threats addresses the event to be considered.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node16
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Equipment siting and protection reduces physical/environmental damage to media.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node17
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Storage media lifecycle management addresses loss of control of media.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node18
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Storage media controls cover removable media holding copies of data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node18
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Data leakage prevention addresses uncontrolled copies to portable media.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node20
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Clear desk addresses exposure of printed health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node22
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Information deletion addresses residual data when storage space is reallocated.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node22
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Secure disposal or re-use of equipment addresses residual data on reallocated storage.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node24
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Information transfer rules address compromise of internal/external information flows.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node24
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Network security addresses degradation or interruption of flows.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node25
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Access control policy addresses failure to control granted access.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node26
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Access rights provisioning, review, modification and removal is the event's subject.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node27
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Identity management covers issuing identities.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node27
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Allocation and management of authentication information covers distribution of electronic identification means.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node28
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Logging provides access traceability and accountability.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node29
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protection of information systems during audit testing covers occasional access during audits/pentests.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node30
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Privileged access rights govern administrative interventions.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node30
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Change management governs validation of interventions.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node31
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Acceptable use rules address misuse of the service.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: ICT readiness for business continuity addresses failures that break continuity/recovery commitments.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Redundancy of processing facilities mitigates HW/SW failures.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Backup supports recovery after HW/SW failure.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node33
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: PII protection under applicable law touches on, but does not address, exposure to non-European legislation.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-06]
+      relationship: subset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.6.1.3: risk treatment must include controlling subcontractors'' changes to the measures that treat identified risks.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-06]
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring, review and change management of supplier services covers controlling subcontractors' changes to security measures.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-08]
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: The Statement of Applicability is required by ISO 6.1.3 d); HDS adds availability in French.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-09]
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.6.2: ISO 6.2 applies, plus objectives must include health-data protection and GDPR compliance.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-09]
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Privacy/PII protection overlaps with objectives including GDPR compliance.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node41
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.7.3: ISO 7.3 awareness applies, plus awareness of the criticality of hosted health data.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node41
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Awareness, education and training is extended with the specific health-data criticality topic.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node42
+      relationship: subset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: ISO 7.3 covers persons doing work under the organisation's control; HDS explicitly extends awareness to subcontractor staff.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node42
+      relationship: subset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Awareness programme extended to subcontractor personnel.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node44
+      relationship: subset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication (with whom) includes maintaining a per-client contact able to designate an authorised health professional.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node45
+      relationship: subset
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication includes sending the client contact list to the competent authority on request.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node45
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Contact with authorities overlaps with providing the list to the competent authority without delay.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node47
+      relationship: subset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication includes giving clients a copy of the HDS certificate.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node48
+      relationship: subset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication includes giving clients subcontractors'' HDS certificates.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-13]
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: 'HDS §5.8.1: operational planning and control includes the split of security responsibilities between host and client.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-13]
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Information security roles and responsibilities overlaps with allocating responsibilities between host and client.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-14]
+      relationship: subset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.8.3: risk treatment implementation includes a procedure for a subcontractor losing its certification.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-14]
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring supplier services covers tracking a subcontractor's certification status.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-14]
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Supplier relationship security overlaps with managing subcontractor certification risk.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node52
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Protecting systems during audit testing overlaps with assisting client-mandated audits on dedicated resources.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node53
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Independent review of information security overlaps with a technical audit by an independent auditor shared with clients.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node54
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Logging overlaps with letting the client consult access logs to its health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node57
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.9.2.1: ISO 9.2.1 applies; internal audits must also check conformity to the HDS framework.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node58
+      relationship: subset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.9.2.1: internal audits must include an audit of access logs to health data.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node58
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Logging (including log analysis) overlaps with auditing access traces.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node58
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Monitoring activities overlaps with reviewing access to health-data systems.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-19]
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: PII protection overlaps with contractual measures for data-subject rights, breach notification and DPO audits.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-19]
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Incident management planning overlaps with breach-notification arrangements towards the controller.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-20]
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Incident management planning (contacts, communication) overlaps with naming the client's incident referent.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-22]
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Security in supplier agreements overlaps with committing that subprocessors provide equivalent protection (GDPR 28.4).
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-22]
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Propagating security requirements through the ICT supply chain overlaps with equivalent protection by subprocessors.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-23]
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Access control rules overlap with contractual modalities governing access to hosted health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-23]
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Information access restriction overlaps with governing access to hosted health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node67
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Change management overlaps with contractual obligations on technical changes.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node68
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Change management overlaps with requiring client consent for changes degrading service levels or guarantees.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-25]
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: ICT continuity overlaps with guarantees and procedures covering a host failure.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-26]
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: PII protection overlaps with prohibiting use of hosted data for other purposes.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node73
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Information deletion overlaps with destroying all copies after data return.
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      target_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node78
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: PII protection under applicable law overlaps with basing non-EEA remote access on GDPR art. 45/46.
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-iso27001-2022-and-hds-v2-revert
+    ref_id: mapping-iso27001-2022-and-hds-v2-revert
+    name: ISO/IEC 27001:2022 <-> HDS v2.0
+    description: Mapping between International standard ISO/IEC 27001:2022 and the French Health Data Hosting (HDS) certification framework v2.0. Chapter 5 links follow the ISO clause each HDS requirement complements (subset); Annex A links are partial overlaps (intersect). Contract (chapter 6) and sovereignty (chapter 7) requirements are largely unmapped because ISO 27001 has no equivalent.
+    source_framework_urn: urn:intuitem:risk:framework:hds-v2023-a
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 4.4; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 5.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 5.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 5.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.1.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.1.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.1.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 6.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.4; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.5.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.5.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 7.5.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 8.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 8.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 8.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.2.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.2.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.3.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.3.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 9.3.3; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 10.1; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: EXI 01 requires an ISMS certified to ISO 27001, which includes clause 10.2; HDS adds the chapter 5 complements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: ISO 4.3 defines the ISMS scope; HDS requires that scope to cover all health-data hosting activities.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Identifying and meeting contractual and regulatory requirements overlaps with contracts complying with CSP R.1111-11 (chapter 6); the clause content itself is not in ISO.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Privacy/PII protection per applicable law overlaps with the GDPR-based sovereignty rules of chapter 7 (EEA storage, transfers, third-country law), which ISO does not detail.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-02]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.4.1: ISO 4.1 applies, plus the obligation to consider protection of client health data among internal/external issues.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-03]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.4.2: ISO 4.2 applies, plus taking the health-data legal framework into account as interested-party requirements.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-03]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Identifying applicable legal and regulatory requirements overlaps with considering the health-data legal framework.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-04]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.4.3: ISO 4.3 applies, plus the scope must include all health-data processing, backups and media transfers.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event A (physical/environmental failure of media).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B (loss of control of media).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B.a (copies on portable media).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B.b (paper materialisation).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event B.c (storage reallocation).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node24
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event C (information flow degradation/compromise).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node25
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D (access control failure).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node26
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.a (granting/changing/revoking access rights).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node27
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.b (distribution of electronic identification means).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node28
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.c (access traceability and accountability).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node29
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event D.d (occasional access during audits and penetration tests).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node30
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event E (failure to control interventions).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node31
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event F (unintended use of the service).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event G (HW/SW failure breaking continuity commitments).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node33
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.6.1.2: ISO 6.1.2 applies, and the risk assessment must at least consider event H (subjection to non-European legislation).'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Protection against physical and environmental threats addresses the event to be considered.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Equipment siting and protection reduces physical/environmental damage to media.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Storage media lifecycle management addresses loss of control of media.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Storage media controls cover removable media holding copies of data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Data leakage prevention addresses uncontrolled copies to portable media.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Clear desk addresses exposure of printed health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Information deletion addresses residual data when storage space is reallocated.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Secure disposal or re-use of equipment addresses residual data on reallocated storage.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node24
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Information transfer rules address compromise of internal/external information flows.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node24
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Network security addresses degradation or interruption of flows.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node25
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Access control policy addresses failure to control granted access.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node26
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Access rights provisioning, review, modification and removal is the event's subject.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node27
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Identity management covers issuing identities.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node27
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Allocation and management of authentication information covers distribution of electronic identification means.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node28
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Logging provides access traceability and accountability.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node29
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protection of information systems during audit testing covers occasional access during audits/pentests.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node30
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Privileged access rights govern administrative interventions.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node30
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Change management governs validation of interventions.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node31
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Acceptable use rules address misuse of the service.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: ICT readiness for business continuity addresses failures that break continuity/recovery commitments.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Redundancy of processing facilities mitigates HW/SW failures.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Backup supports recovery after HW/SW failure.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node33
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: PII protection under applicable law touches on, but does not address, exposure to non-European legislation.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-06]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: superset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.6.1.3: risk treatment must include controlling subcontractors'' changes to the measures that treat identified risks.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-06]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring, review and change management of supplier services covers controlling subcontractors' changes to security measures.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-08]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: The Statement of Applicability is required by ISO 6.1.3 d); HDS adds availability in French.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-09]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.6.2: ISO 6.2 applies, plus objectives must include health-data protection and GDPR compliance.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-09]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Privacy/PII protection overlaps with objectives including GDPR compliance.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node41
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.7.3: ISO 7.3 awareness applies, plus awareness of the criticality of hosted health data.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node41
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Awareness, education and training is extended with the specific health-data criticality topic.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node42
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: superset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: ISO 7.3 covers persons doing work under the organisation's control; HDS explicitly extends awareness to subcontractor staff.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node42
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: superset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Awareness programme extended to subcontractor personnel.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node44
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: superset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication (with whom) includes maintaining a per-client contact able to designate an authorised health professional.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node45
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: superset
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication includes sending the client contact list to the competent authority on request.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node45
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Contact with authorities overlaps with providing the list to the competent authority without delay.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node47
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: superset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication includes giving clients a copy of the HDS certificate.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node48
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: superset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.7.4: communication includes giving clients subcontractors'' HDS certificates.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-13]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: 'HDS §5.8.1: operational planning and control includes the split of security responsibilities between host and client.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-13]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Information security roles and responsibilities overlaps with allocating responsibilities between host and client.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-14]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      relationship: superset
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: 'HDS §5.8.3: risk treatment implementation includes a procedure for a subcontractor losing its certification.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-14]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring supplier services covers tracking a subcontractor's certification status.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-14]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Supplier relationship security overlaps with managing subcontractor certification risk.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node52
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Protecting systems during audit testing overlaps with assisting client-mandated audits on dedicated resources.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node53
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Independent review of information security overlaps with a technical audit by an independent auditor shared with clients.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node54
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Logging overlaps with letting the client consult access logs to its health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node57
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: 'HDS §5.9.2.1: ISO 9.2.1 applies; internal audits must also check conformity to the HDS framework.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node58
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: superset
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: 'HDS §5.9.2.1: internal audits must include an audit of access logs to health data.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node58
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Logging (including log analysis) overlaps with auditing access traces.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node58
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Monitoring activities overlaps with reviewing access to health-data systems.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-19]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: PII protection overlaps with contractual measures for data-subject rights, breach notification and DPO audits.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-19]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Incident management planning overlaps with breach-notification arrangements towards the controller.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-20]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Incident management planning (contacts, communication) overlaps with naming the client's incident referent.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-22]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Security in supplier agreements overlaps with committing that subprocessors provide equivalent protection (GDPR 28.4).
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-22]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Propagating security requirements through the ICT supply chain overlaps with equivalent protection by subprocessors.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-23]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: Access control rules overlap with contractual modalities governing access to hosted health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-23]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Information access restriction overlaps with governing access to hosted health data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node67
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Change management overlaps with contractual obligations on technical changes.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node68
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: Change management overlaps with requiring client consent for changes degrading service levels or guarantees.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-25]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      strength_of_relationship: 4
+      rationale: semantic
+      annotation: ICT continuity overlaps with guarantees and procedures covering a host failure.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-26]
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: PII protection overlaps with prohibiting use of hosted data for other purposes.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node73
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Information deletion overlaps with destroying all copies after data return.
+    - source_requirement_urn: urn:intuitem:risk:req_node:hds-v2023-a:node78
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+      annotation: PII protection under applicable law overlaps with basing non-EEA remote access on GDPR art. 45/46.

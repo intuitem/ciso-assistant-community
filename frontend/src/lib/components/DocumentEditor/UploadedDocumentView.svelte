@@ -1,15 +1,23 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { invalidateAll, goto } from '$app/navigation';
-	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll, goto } from '$app/navigation';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
+	import {
+		APPROVED_REVISION_STATUSES,
+		pickInForceRevisionToShow
+	} from '#lib/utils/documentRevisions.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { page } from '$app/state';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import PdfPreview from '#lib/components/AttachmentPreview/PdfPreview.svelte';
 
 	interface Props {
 		parent: { id: string; name: string };
@@ -56,6 +64,26 @@
 	};
 
 	let status = $derived(currentRevision?.status as string | undefined);
+	let inForceRevision = $derived(pickInForceRevisionToShow(revisions, currentRevision?.id));
+	// RBACPermissions maps POST to add_<model>, hence add_documentrevision here.
+	let canTransition = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'documentrevision',
+			object: currentRevision ?? document ?? parent
+		})
+	);
+	// Deletes the whole locale variant, not a revision.
+	let canDeleteDocument = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'delete',
+			model: 'manageddocument',
+			object: document ?? parent
+		})
+	);
+
 	let isDraft = $derived(status === 'draft' || status === 'change_requested');
 	let isInReview = $derived(status === 'in_review');
 	let isValidated = $derived(status === 'validated');
@@ -75,10 +103,10 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(body)
 			});
-			if (res.ok) await invalidateAll();
+			if (res.ok) await refreshAll();
 			else {
 				const data = await res.json().catch(() => null);
-				notifyError(data?.detail || data?.error || m.error());
+				notifyError(data?.detail || (data?.error && safeTranslate(data.error)) || m.error());
 			}
 			return res;
 		} finally {
@@ -97,7 +125,7 @@
 				method: 'POST',
 				body: fd
 			});
-			if (res.ok) await invalidateAll();
+			if (res.ok) await refreshAll();
 			else notifyError(m.uploadFailed());
 		} finally {
 			busy = false;
@@ -107,7 +135,7 @@
 
 	function switchLocale(loc: string) {
 		if (loc === currentLocale) return;
-		goto(`${proxyBase}?locale=${loc}`, { invalidateAll: true });
+		goto(`${proxyBase}?locale=${loc}`, { refreshAll: true });
 	}
 
 	function startAddLang() {
@@ -136,7 +164,7 @@
 				return;
 			}
 			addingLang = false;
-			await goto(`${proxyBase}?locale=${newLocale}`, { invalidateAll: true });
+			await goto(`${proxyBase}?locale=${newLocale}`, { refreshAll: true });
 		} finally {
 			busy = false;
 		}
@@ -178,7 +206,10 @@
 				method: 'DELETE'
 			});
 			if (res.ok) await goto(backHref);
-			else notifyError(m.deleteFailed());
+			else {
+				const data = await res.json().catch(() => null);
+				notifyError(data?.detail || data?.error || m.deleteFailed());
+			}
 		} finally {
 			busy = false;
 		}
@@ -209,9 +240,16 @@
 					{parent?.name || m.untitled()}
 				</h1>
 				{#if currentRevision}
-					<span class="badge {statusStyles[status ?? 'draft']} mt-1 text-xs">
-						{status} · v{currentRevision.version_number}
-					</span>
+					<div class="mt-1 flex flex-wrap items-center gap-1.5">
+						{#if inForceRevision}
+							<span class="badge {statusStyles.published} text-xs">
+								{m.published()} · v{inForceRevision.version_number}
+							</span>
+						{/if}
+						<span class="badge {statusStyles[status ?? 'draft']} text-xs">
+							{safeTranslate(status ?? 'draft')} · v{currentRevision.version_number}
+						</span>
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -267,13 +305,13 @@
 					/>
 				</label>
 				<button
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					disabled={busy || !newLocale || !newLangFile}
 					onclick={addLanguage}
 				>
 					{m.add()}
 				</button>
-				<button class="btn btn-sm variant-soft" onclick={() => (addingLang = false)}>
+				<button class="btn btn-sm preset-tonal" onclick={() => (addingLang = false)}>
 					{m.cancel()}
 				</button>
 			</div>
@@ -283,15 +321,11 @@
 	<!-- File card -->
 	<div class="space-y-4 rounded-xl border border-surface-200-800 bg-surface-50-950 p-6 shadow-sm">
 		{#if currentFileUrl}
-			<a href={currentFileUrl} target="_blank" rel="noopener" class="btn variant-filled-primary">
+			<a href={currentFileUrl} target="_blank" rel="noopener" class="btn preset-filled-primary-500">
 				<i class="fa-solid fa-download mr-2"></i>{m.download()}
 			</a>
 			{#if isPdf}
-				<iframe
-					src={currentFileUrl}
-					title={parent?.name}
-					class="h-[70vh] w-full rounded-xl border border-surface-200-800"
-				></iframe>
+				<PdfPreview src={currentFileUrl} title={parent?.name} />
 			{/if}
 		{:else}
 			<p class="text-sm text-surface-500">{m.noFileUploaded()}</p>
@@ -321,35 +355,62 @@
 		<div class="flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-4">
 			<input type="file" class="hidden" bind:this={fileInput} onchange={onFilePicked} />
 			{#if isDraft}
-				<button class="btn btn-sm variant-soft" disabled={busy} onclick={() => fileInput?.click()}>
+				<button
+					class="btn btn-sm preset-tonal"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={() => fileInput?.click()}
+				>
 					<i class="fa-solid fa-file-arrow-up mr-2"></i>{m.replaceFile()}
 				</button>
-				<button class="btn btn-sm variant-filled-primary" disabled={busy} onclick={submitForReview}>
+				<button
+					class="btn btn-sm preset-filled-primary-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={submitForReview}
+				>
 					{m.submitForReview()}
 				</button>
 			{:else if isInReview}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={approve}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={approve}
+				>
 					{m.approve()}
 				</button>
-				<button class="btn btn-sm variant-soft-error" disabled={busy} onclick={requestChanges}>
+				<button
+					class="btn btn-sm preset-tonal-error"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={requestChanges}
+				>
 					{m.requestChanges()}
 				</button>
 			{:else if isValidated}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={publish}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={publish}
+				>
 					{m.publish()}
 				</button>
 			{:else if isPublished}
 				<button
-					class="btn btn-sm variant-filled-primary"
-					disabled={busy}
+					class="btn btn-sm preset-filled-primary-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
 					onclick={() => fileInput?.click()}
 				>
 					<i class="fa-solid fa-file-arrow-up mr-2"></i>{m.uploadNewVersion()}
 				</button>
 			{/if}
 			<button
-				class="btn btn-sm variant-soft-error ml-auto"
-				disabled={busy}
+				class="btn btn-sm preset-tonal-error ml-auto"
+				disabled={busy || !canDeleteDocument}
+				title={canDeleteDocument ? undefined : m.permissionDenied()}
 				onclick={deleteDocument}
 			>
 				<i class="fa-solid fa-trash mr-2"></i>{m.delete()}
@@ -368,7 +429,15 @@
 			>
 				{#each revisions as rev (rev.id)}
 					<li class="flex items-center justify-between gap-2 px-4 py-2.5 text-sm">
-						<span>v{rev.version_number} · {rev.status_display ?? rev.status}</span>
+						<span class="min-w-0">
+							v{rev.version_number} · {rev.status_display ?? rev.status}
+							{#if rev.reviewer && APPROVED_REVISION_STATUSES.includes(rev.status)}
+								<span class="block truncate text-xs text-surface-500">
+									<i class="fa-solid fa-circle-check text-[9px] opacity-70"></i>
+									{m.approvedBy()}: {rev.reviewer.str || rev.reviewer.email || ''}
+								</span>
+							{/if}
+						</span>
 						{#if rev.file || rev.source === 'uploaded'}
 							<a
 								href={fileUrl(rev)}

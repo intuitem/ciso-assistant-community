@@ -1,17 +1,17 @@
 <script lang="ts">
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -52,8 +52,8 @@
 	</Anchor>
 </div>
 
-{#if data.scenariosWithoutAttackPath.count > 0}
-	{@const missingScenarios = data.scenariosWithoutAttackPath.results}
+{#if data.scenariosWithoutAttackPath.length > 0}
+	{@const missingScenarios = data.scenariosWithoutAttackPath}
 	<section class="my-6">
 		<div
 			class="flex items-start gap-3 rounded-xl border border-warning-300 bg-warning-100 p-4 shadow-xs"

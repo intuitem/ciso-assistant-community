@@ -3,18 +3,25 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 
 from core.permissions import IsGlobalAdmin
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
-from integrations.models import IntegrationProvider
+from integrations.models import IntegrationConfiguration, IntegrationProvider
 from core.serializers import SerializerFactory
 from django.conf import settings
+from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from .utils import (
+    get_instance_feature_flags,
+    get_user_hidden_feature_flags,
+    get_user_hideable_feature_flags,
+    resolve_feature_flags,
+)
 from .serializers import (
-    GlobalSettingsSerializer,
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
     VulnerabilitySlaSerializer,
@@ -22,7 +29,8 @@ from .serializers import (
     InfraConfigSerializer,
 )
 from django.db import transaction
-from .models import GlobalSettings
+from .models import GlobalSettings, MailerConfiguration, MailerHealth
+from core import mailer as mail_service
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -42,39 +50,11 @@ class GlobalSettingsSerializerFactory(SerializerFactory):
         return self._get_serializer_class(f"{base_name}Serializer")
 
 
-class GlobalSettingsViewSet(viewsets.ModelViewSet):
-    queryset = GlobalSettings.objects.all()
-    serializer_class = GlobalSettingsSerializer
-
-    def create(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Global settings can only be created through data migrations."},
-            status=405,
-        )
-
-    def delete(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Global settings can only be deleted through data migrations."},
-            status=405,
-        )
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Global settings can only be updated through data migrations."},
-            status=405,
-        )
-
-
 class FeatureFlagsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = FeatureFlagsSerializer
-    queryset = GlobalSettings.objects.filter(name="feature-flags")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.FEATURE_FLAGS)
     serializers_module = "global_settings.serializers"
-
-    def get_permissions(self):
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
-            return [IsAuthenticated()]
-        return super().get_permissions()
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = GlobalSettingsSerializerFactory(
@@ -94,7 +74,12 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `FEATURE_FLAGS` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = FeatureFlagsViewSet.queryset.first()
+
         serializer = self.get_serializer_class()(instance)
         return Response(serializer.data)
 
@@ -107,10 +92,31 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj, _ = self.model.objects.get_or_create(name="feature-flags")
-        obj.is_published = True  # we could do that at creation, but it's ok here
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
+
+    @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
+    def effective(self, request, pk=None):
+        """The instance flags narrowed by the caller's hides.
+
+        Separate from `retrieve`, which stays the raw row: the admin form reads
+        that one and PUTs the whole body back, so serving the narrowed view
+        there would save an admin's personal hides instance-wide.
+        """
+        hideable = get_user_hideable_feature_flags()
+        instance_flags = get_instance_feature_flags()
+        return Response(
+            {
+                "flags": resolve_feature_flags(request.user),
+                "hideable": sorted(hideable),
+                "hidden": sorted(get_user_hidden_feature_flags(request.user)),
+                # Un-narrowed, so the UI can tell "you hid this" from "your
+                # organisation disabled it" — false in `flags` either way.
+                "instance": {
+                    name: instance_flags.get(name, False) for name in hideable
+                },
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def defaults(self, request, pk=None):
@@ -130,10 +136,15 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = GeneralSettingsSerializer
-    queryset = GlobalSettings.objects.filter(name="general")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.GENERAL)
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -152,38 +163,13 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj = self.model.objects.get(name="general")
-        obj.is_published = True  # we could do that at creation, but it's ok here
-        obj.save(update_fields=["is_published"])
+        obj = self.model.objects.get(name=GlobalSettings.Names.GENERAL)
         self.check_object_permissions(self.request, obj)
         return obj
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
-        default_settings = {
-            "security_objective_scale": "1-4",
-            "ebios_radar_max": 6,
-            "ebios_radar_green_zone_radius": 0.2,
-            "ebios_radar_yellow_zone_radius": 0.9,
-            "ebios_radar_red_zone_radius": 2.5,
-            "notifications_enable_mailing": False,
-            "interface_agg_scenario_matrix": False,
-            "risk_matrix_swap_axes": False,
-            "risk_matrix_flip_vertical": False,
-            "risk_matrix_labels": "ISO",
-            "mapping_max_depth": 3,
-            "allow_self_validation": False,
-            "show_warning_external_links": True,
-            "show_get_started": True,
-            "personal_folders": False,
-            "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
-            "allow_assignments_to_entities": False,
-            "enforce_mfa": False,
-            "default_language": "en",
-            "default_custom_analytics_dashboard": None,
-            "default_packager": "custom",
-            "disable_partially_compliant_result": False,
-        }
+        default_settings = GlobalSettings.GENERAL_DEFAULT_VALUE
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
 
@@ -193,12 +179,28 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             settings.value = updated_value
             settings.save()
 
-        enabled_integrations = (
-            IntegrationProvider.objects.filter(is_active=True)
-            .distinct()
-            .values("id", "provider_type", "name", "configurations")
+        # Only configurations the caller can reach: the ids are consumed as a
+        # "is an integration usable here" signal, and an unscoped list handed
+        # every domain's configuration UUIDs to any authenticated user.
+
+        accessible_config_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, IntegrationConfiguration
         )
-        settings.value["enabled_integrations"] = list(enabled_integrations)
+
+        settings.value["enabled_integrations"] = [
+            {
+                "id": provider.id,
+                "provider_type": provider.provider_type,
+                "name": provider.name,
+                "configurations": [
+                    str(config_id)
+                    for config_id in provider.configurations.filter(
+                        id__in=accessible_config_ids
+                    ).values_list("id", flat=True)
+                ],
+            }
+            for provider in IntegrationProvider.objects.filter(is_active=True)
+        ]
 
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
@@ -263,9 +265,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         """
         from metrology.models import Dashboard
 
-        accessible_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Dashboard
-        )
+        accessible_ids = RoleAssignment.get_viewable_object_ids(request.user, Dashboard)
         dashboards = Dashboard.objects.filter(id__in=accessible_ids).order_by("name")
         choices = {"": "—"}
         for d in dashboards:
@@ -281,10 +281,12 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(
-                {"error": "You do not have permission to change user preferences."},
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
                 status=403,
             )
-        general = GlobalSettings.objects.filter(name="general").first()
+        general = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.GENERAL
+        ).first()
         lang = (
             general.value.get("default_language")
             if general and isinstance(general.value, dict)
@@ -292,7 +294,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         )
         if not lang or lang not in dict(settings.LANGUAGES):
             return Response(
-                {"error": "No valid default language configured in general settings."},
+                {"error": "noDefaultLanguageConfigured"},
                 status=400,
             )
         with transaction.atomic():
@@ -305,6 +307,42 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 user.save(update_fields=["preferences"])
                 updated += 1
         return Response({"updated": updated, "language": lang})
+
+    @action(detail=True, methods=["post"], name="Force date format for all users")
+    def force_date_format(self, request, pk=None):
+        perm = Permission.objects.get(codename="change_user")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
+                status=403,
+            )
+        general = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.GENERAL
+        ).first()
+        date_format = (
+            general.value.get("default_date_format")
+            if general and isinstance(general.value, dict)
+            else None
+        )
+        if not isinstance(date_format, str) or date_format not in User.DATE_FORMATS:
+            return Response(
+                {"error": "noDefaultDateFormatConfigured"},
+                status=400,
+            )
+        with transaction.atomic():
+            users = User.objects.select_for_update().all()
+            updated = 0
+            for user in users:
+                if not isinstance(user.preferences, dict):
+                    user.preferences = {}
+                user.preferences["date_format"] = date_format
+                user.save(update_fields=["preferences"])
+                updated += 1
+        return Response({"updated": updated, "date_format": date_format})
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
@@ -320,15 +358,21 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get ebios rm radar parameters")
     def ebios_radar_parameters(self, request):
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         ebios_rm_parameters = {
-            "ebios_radar_max": self.get_object().value.get("ebios_radar_max"),
-            "ebios_radar_green_zone_radius": self.get_object().value.get(
+            "ebios_radar_max": instance.value.get("ebios_radar_max"),
+            "ebios_radar_green_zone_radius": instance.value.get(
                 "ebios_radar_green_zone_radius"
             ),
-            "ebios_radar_yellow_zone_radius": self.get_object().value.get(
+            "ebios_radar_yellow_zone_radius": instance.value.get(
                 "ebios_radar_yellow_zone_radius"
             ),
-            "ebios_radar_red_zone_radius": self.get_object().value.get(
+            "ebios_radar_red_zone_radius": instance.value.get(
                 "ebios_radar_red_zone_radius"
             ),
         }
@@ -336,8 +380,14 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get notifications settings")
     def notifications_settings(self, request):
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         notifications_settings = {
-            "notifications_enable_mailing": self.get_object().value.get(
+            "notifications_enable_mailing": instance.value.get(
                 "notifications_enable_mailing"
             ),
         }
@@ -345,8 +395,14 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get interface settings")
     def interface_settings(self, request):
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         interface_settings = {
-            "interface_agg_scenario_matrix": self.get_object().value.get(
+            "interface_agg_scenario_matrix": instance.value.get(
                 "interface_agg_scenario_matrix"
             ),
         }
@@ -356,7 +412,9 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = VulnerabilitySlaSerializer
-    queryset = GlobalSettings.objects.filter(name="vulnerability-sla")
+    queryset = GlobalSettings.objects.filter(
+        name=GlobalSettings.Names.VULNERABILITY_SLA
+    )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -365,15 +423,19 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
+        # PATCH must not fill in defaults for fields it leaves out: a full update
+        # would reset the anchor and day counts the request doesn't mention.
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=kwargs.get("partial", False)
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
     def get_object(self):
-        obj, _ = self.model.objects.get_or_create(name="vulnerability-sla")
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
+        obj, _ = self.model.objects.get_or_create(
+            name=GlobalSettings.Names.VULNERABILITY_SLA
+        )
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -381,7 +443,7 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
 class SecIntelFeedsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = SecIntelFeedsSerializer
-    queryset = GlobalSettings.objects.filter(name="sec-intel-feeds")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.SEC_INTEL_FEEDS)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -396,9 +458,9 @@ class SecIntelFeedsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj, _ = self.model.objects.get_or_create(name="sec-intel-feeds")
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
+        obj, _ = self.model.objects.get_or_create(
+            name=GlobalSettings.Names.SEC_INTEL_FEEDS
+        )
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -409,7 +471,7 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
 
     model = GlobalSettings
     serializer_class = InfraConfigSerializer
-    queryset = GlobalSettings.objects.filter(name="infra-config")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.INFRA_CONFIG)
     permission_classes = [IsAuthenticated, IsGlobalAdmin]
 
     def retrieve(self, request, *args, **kwargs):
@@ -425,9 +487,9 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj, _ = self.model.objects.get_or_create(name="infra-config")
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
+        obj, _ = self.model.objects.get_or_create(
+            name=GlobalSettings.Names.INFRA_CONFIG
+        )
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -456,7 +518,12 @@ def get_sso_info(request):
     API endpoint that returns the CSRF token.
     """
     sso_settings = SSOSettings.objects.get()
-    sp_entity_id = sso_settings.settings["sp"].get("entity_id")
+    sp_settings = (sso_settings.settings or {}).get("sp") or {}
+    sp_entity_id = (
+        sp_settings.get("entity_id")
+        or sso_settings.provider_id
+        or sso_settings.provider
+    )
     callback_url = settings.CISO_ASSISTANT_URL + "/"
     return Response(
         {
@@ -482,3 +549,180 @@ def get_default_language(request):
         default_language = "en"
 
     return Response({"default_language": default_language})
+
+
+class MailerSettingsViewSet(viewsets.ViewSet):
+    """GET/PUT of the custom mailer configuration, a test send of unsaved
+    values, and delivery health. Only registered when ENABLE_CUSTOM_MAILER is
+    set, so the switch is enforced by the absence of the route."""
+
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def _require(request, codename: str) -> None:
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename=codename),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied()
+
+    def retrieve(self, request, *args, **kwargs):
+        from .serializers import MailerConfigurationSerializer
+
+        self._require(request, "view_mailerconfiguration")
+        return Response(MailerConfigurationSerializer(MailerConfiguration.get()).data)
+
+    def update(self, request, *args, **kwargs):
+        from .serializers import MailerConfigurationSerializer
+
+        self._require(request, "change_mailerconfiguration")
+        configuration = MailerConfiguration.get()
+        # Captured before the change: the notification goes through the
+        # mailers the change replaces, which the new ones cannot suppress.
+        previous_mailers = mail_service.active_mailers()
+        previous_sender = mail_service.sender_address()
+        serializer = MailerConfigurationSerializer(configuration, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        _notify_administrators_of_mailer_change(
+            request.user, configuration, previous_mailers, previous_sender
+        )
+        return Response(MailerConfigurationSerializer(configuration).data)
+
+    partial_update = update
+
+    @action(detail=True, methods=["post"])
+    def test(self, request, *args, **kwargs):
+        """Send one test message through each mailer in the form, to the
+        requesting administrator. The save token is issued only when every
+        mailer delivered. Health is recorded when the tested values are the
+        saved ones, so testing the live configuration refreshes the table."""
+        from .mailer_settings import (
+            configuration_digest,
+            issue_test_token,
+            specs_from_rows,
+        )
+        from .serializers import MailerConfigurationSerializer
+
+        self._require(request, "change_mailerconfiguration")
+        configuration = MailerConfiguration.get()
+        try:
+            stored_digest = configuration_digest(
+                configuration.from_email, specs_from_rows(configuration.mailers.all())
+            )
+        except ValueError:
+            stored_digest = None
+        serializer = MailerConfigurationSerializer(configuration, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rows = serializer.build_rows(
+            configuration, serializer.validated_data["mailers"]
+        )
+        from_email = (
+            serializer.validated_data.get("from_email") or configuration.from_email
+        )
+        specs = specs_from_rows(rows)
+        digest = configuration_digest(from_email, specs)
+        results = [
+            mail_service.send_test(
+                request.user.email,
+                mailers=[spec],
+                from_email=from_email,
+                record_health=digest == stored_digest,
+            )
+            for spec in specs
+        ]
+        payload = {
+            "ok": all(result.ok for result in results),
+            "recipient": request.user.email,
+            "results": [
+                {
+                    "mailer": spec.alias,
+                    "ok": result.ok,
+                    "backend": result.backend,
+                    # A single mailer was tried, so the skip reason is the error.
+                    "error": result.skipped[0][1] if result.skipped else result.error,
+                }
+                for spec, result in zip(specs, results)
+            ],
+        }
+        if payload["ok"]:
+            payload["test_token"] = issue_test_token(digest)
+        return Response(payload)
+
+    @action(detail=True, methods=["get"])
+    def health(self, request, *args, **kwargs):
+        """One row per active mailer, attempted or not, plus rows of mailers
+        that are no longer configured but were attempted."""
+        from .serializers import MailerHealthSerializer
+
+        self._require(request, "view_mailerconfiguration")
+        rows = {
+            row.alias: MailerHealthSerializer(row).data
+            for row in MailerHealth.objects.all()
+        }
+        listed = []
+        for spec in mail_service.active_mailers():
+            listed.append(
+                rows.pop(spec.alias, None)
+                or {
+                    "alias": spec.alias,
+                    "source": spec.source,
+                    "last_attempt_at": None,
+                    "last_outcome": None,
+                    "last_error": "",
+                    "via_failover": False,
+                    "last_success_at": None,
+                }
+            )
+        listed.extend(rows.values())
+        return Response(listed)
+
+
+def _notify_administrators_of_mailer_change(
+    actor, configuration, previous_mailers, previous_sender
+):
+    """Email the other administrators through the mailers that were active
+    before the change. Best effort: the change is already saved."""
+    recipients = list(
+        User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+        .exclude(pk=actor.pk)
+        .values_list("email", flat=True)
+        .distinct()
+    )
+    if not recipients or not previous_mailers or not previous_sender:
+        return
+    mailers = (
+        ", ".join(
+            f"{row.alias}: {row.transport} {row.host}"
+            for row in configuration.mailers.all()
+        )
+        or "none"
+    )
+    state = (
+        "active" if configuration.is_active else "parked (environment mailers apply)"
+    )
+    body = (
+        f"{actor.email} changed the outgoing mail configuration of "
+        f"{settings.CISO_ASSISTANT_URL} on {timezone.now():%Y-%m-%d %H:%M %Z}.\n"
+        f"Sender address: {configuration.from_email or '(unset)'}\n"
+        f"Mailers: {mailers}\n"
+        f"State: {state}\n\n"
+        "Password reset links and invitations now go through these mailers. "
+        "If you did not expect this change, review it in Settings > Mailer."
+    )
+    try:
+        mail_service.send(
+            "CISO Assistant: outgoing mail configuration changed",
+            body,
+            recipients,
+            from_email=previous_sender,
+            mailers=previous_mailers,
+        )
+    except Exception as error:
+        logger.error(
+            "mailer change notification not sent",
+            actor=actor.email,
+            recipients=len(recipients),
+            error=str(error),
+        )

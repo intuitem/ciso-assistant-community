@@ -194,10 +194,12 @@ WS5 is where EBIOS RM crosses back into the platform's general-purpose risk regi
 
 ### 5.1 Generate the risk assessment
 
-Click **Generate the risk assessment** on the study page. The platform either:
+Open the **Risk analyses** activity on the study's workshop 5 block. The platform either:
 
 - **Creates a new** `RiskAssessment` seeded with one risk scenario per selected operational scenario, or
-- **Syncs an existing** assessment that was generated previously — the modal walks you through which mode to use (sync mode applies to operational scenarios / attack paths / stakeholders / applied controls).
+- **Syncs an existing** assessment that was generated previously. A study holds one risk assessment, so when one already exists you get the **Risk Assessment Options** dialog offering **Sync Existing** — _"Update the existing risk assessment with current EBIOS RM data (preserves your work)"_ — followed by a **Sync Preview** naming what will change before you confirm with **Generate**.
+
+If nothing is selected yet, the preview stops you with _"No selected objects found. Please select feared events, attack paths, or operational scenarios first."_
 
 #### How the generator seeds risk scenarios
 

@@ -133,13 +133,13 @@ In **Settings > General**, set:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `llm_provider` | `ollama` | `ollama` or `openai_compatible` |
+| `llm_provider` | `ollama` | `ollama` or `openai_compatible` (local servers and hosted gateways) |
 | `ollama_base_url` | `http://localhost:11434` | Ollama server URL |
 | `ollama_model` | `mistral` | Model name for chat generation |
 | `ollama_embed_model` | `snowflake-arctic-embed2` | Model for embeddings (if using Ollama embeddings) |
 | `embedding_backend` | `sentence-transformers` | `sentence-transformers` (CPU, no setup) or `ollama` |
-| `openai_api_base` | `http://localhost:1234/v1` | For LM Studio / vLLM / llama.cpp |
-| `openai_model` | _(empty)_ | Model identifier for OpenAI-compatible servers |
+| `openai_api_base` | `http://localhost:1234/v1` | For LM Studio / vLLM / llama.cpp, or a hosted gateway (e.g. `https://openrouter.ai/api/v1`) |
+| `openai_model` | _(empty)_ | Model identifier for OpenAI-compatible servers (required for hosted gateways) |
 | `openai_api_key` | _(empty)_ | API key for authenticated endpoints (optional) |
 | `chat_system_prompt` | _(empty)_ | Custom system prompt (overrides the built-in GRC prompt) |
 

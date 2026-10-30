@@ -6,7 +6,13 @@ import { Page } from '@playwright/test';
 async function redirectToIncidents(page: Page): Promise<void> {
 	await page.getByTestId('accordion-item-operations').click();
 	await page.getByTestId('accordion-item-incidents').click();
-	await page.waitForTimeout(500);
+	// Wait for the route to actually settle rather than sleeping: under CI load
+	// a fixed delay can expire while the folders page is still mounted, so the
+	// add-button below opens the domain modal instead of the incident one. That
+	// form has a name field but no severity, so the failure only surfaces much
+	// later, as a 100s timeout on form-input-severity.
+	await page.waitForURL('**/incidents');
+	await expect(page.locator('#page-title')).toHaveText('Incidents');
 }
 
 test('Incidents full flow - creation, validation and cleanup', async ({
@@ -24,7 +30,7 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('incidents-test');
 
-		page.getByTestId('form-input-severity').waitFor({ state: 'visible' });
+		await page.getByTestId('form-input-severity').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-severity').selectOption('4');
 
 		// await page.getByTestId('accordion').click();
@@ -35,7 +41,7 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		// await page.getByRole('option', { name: 'confidentiality' }).click();
 		// await page.getByRole('option', { name: 'human' }).click();
 
-		page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
+		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-folder').click();
 		await page.getByRole('option', { name: 'incidents-folder' }).click();
 
@@ -48,15 +54,15 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await expect(page.getByTestId('toast')).not.toBeVisible();
 
 		await page
-			.getByRole('gridcell', { name: 'New' })
+			.getByRole('cell', { name: 'New' })
 			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 		await page
-			.getByRole('gridcell', { name: 'Minor' })
+			.getByRole('cell', { name: 'Minor' })
 			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 		await page
-			.getByRole('gridcell', { name: 'Internal' })
+			.getByRole('cell', { name: 'Internal' })
 			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 	});
@@ -65,13 +71,13 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByText('incidents-test').click();
 		await page.getByTestId('edit-button').click();
 
-		page.getByTestId('form-input-detection').waitFor({ state: 'visible' });
+		await page.getByTestId('form-input-detection').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-detection').selectOption({ label: 'External' });
 
-		page.getByTestId('form-input-severity').waitFor({ state: 'visible' });
+		await page.getByTestId('form-input-severity').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-severity').selectOption('2');
 
-		page.getByTestId('form-input-status').waitFor({ state: 'visible' });
+		await page.getByTestId('form-input-status').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-status').selectOption({ label: 'Resolved' });
 
 		await page.getByTestId('save-button').click();

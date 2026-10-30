@@ -1,13 +1,14 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Duration from '../Duration.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -55,7 +56,7 @@
 	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
 	optionsLabelField="translated_name"
-	label={m.qualifications()}
+	label={safeTranslate('qualifications')}
 />
 <Select
 	{form}

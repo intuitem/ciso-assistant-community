@@ -1,6 +1,18 @@
 from .views import *
-from sec_intel.views import SecurityAdvisoryViewSet, CWEViewSet
+from .search import global_search
+from sec_intel.views import (
+    SecurityAdvisoryViewSet,
+    CWEViewSet,
+    TTPCatalogViewSet,
+    TacticViewSet,
+    TechniqueViewSet,
+)
+from threat_modeling.views import ThreatModelViewSet
 from tprm.views import (
+    EntityScoreViewSet,
+    EntityTierChangeViewSet,
+    SolutionTierChangeViewSet,
+    TierViewSet,
     EntityViewSet,
     RepresentativeViewSet,
     SolutionViewSet,
@@ -10,10 +22,13 @@ from tprm.views import (
 from library.views import (
     LibraryDraftViewSet,
     MappingLibrariesList,
+    RequirementKnowledgeView,
+    RequirementMappingKnowledgeView,
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
 )
 from custom_fields.views import CustomFieldDefinitionViewSet
+from notifications.views import NotificationChannelsView, NotificationViewSet
 import importlib
 
 
@@ -24,6 +39,8 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(r"notifications", NotificationViewSet, basename="notifications")
+router.register(r"roles", RoleViewSet, basename="roles")
 router.register(
     r"custom-fields",
     CustomFieldDefinitionViewSet,
@@ -34,6 +51,16 @@ router.register(
     r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
+router.register(r"entity-scores", EntityScoreViewSet, basename="entity-scores")
+router.register(r"tiers", TierViewSet, basename="tiers")
+router.register(
+    r"entity-tier-changes", EntityTierChangeViewSet, basename="entity-tier-changes"
+)
+router.register(
+    r"solution-tier-changes",
+    SolutionTierChangeViewSet,
+    basename="solution-tier-changes",
+)
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
 router.register(r"contracts", ContractViewSet, basename="contracts")
 router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
@@ -41,6 +68,10 @@ router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
 router.register(r"threats", ThreatViewSet, basename="threats")
+router.register(r"ttp-catalogs", TTPCatalogViewSet, basename="ttp-catalogs")
+router.register(r"tactics", TacticViewSet, basename="tactics")
+router.register(r"techniques", TechniqueViewSet, basename="techniques")
+router.register(r"threat-models", ThreatModelViewSet, basename="threat-models")
 router.register(
     r"security-advisories", SecurityAdvisoryViewSet, basename="security-advisories"
 )
@@ -130,6 +161,7 @@ router.register(
     r"findings-assessments", FindingsAssessmentViewSet, basename="findings-assessments"
 )
 router.register(r"findings", FindingViewSet, basename="findings")
+router.register(r"commitments", CommitmentRegisterViewSet, basename="commitments")
 router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
 router.register(r"comments", CommentViewSet, basename="comments")
@@ -149,6 +181,19 @@ router.register(
 router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")
+router.register(r"quick-forms", QuickFormViewSet, basename="quick-forms")
+router.register(
+    r"quick-form-publications",
+    QuickFormPublicationViewSet,
+    basename="quick-form-publications",
+)
+router.register(r"my-requests", MyRequestViewSet, basename="my-requests")
+router.register(r"quick-form-pages", QuickFormPageViewSet, basename="quick-form-pages")
+router.register(
+    r"quick-form-responses",
+    QuickFormResponseViewSet,
+    basename="quick-form-responses",
+)
 router.register(r"presets", PresetViewSet, basename="presets")
 router.register(r"journeys", JourneyViewSet, basename="journeys")
 router.register(r"journey-steps", JourneyStepViewSet, basename="journey-steps")
@@ -166,6 +211,11 @@ for route in ROUTES:
 
 
 urlpatterns = [
+    path(
+        "notification-channels/",
+        NotificationChannelsView.as_view(),
+        name="notification-channels",
+    ),
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),
@@ -180,6 +230,7 @@ urlpatterns = [
     path("automation/", include("automation.urls")),
     path("crq/", include("crq.urls")),
     path("pmbok/", include("pmbok.urls")),
+    path("workflows/", include("automation.workflows.urls")),
     path("metrology/", include("metrology.urls")),
     path("", include("portals.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
@@ -258,6 +309,8 @@ urlpatterns = [
         "mapping-libraries/",
         MappingLibrariesList.as_view(),
     ),
+    path("library-knowledge/requirements/", RequirementKnowledgeView.as_view()),
+    path("library-knowledge/mappings/", RequirementMappingKnowledgeView.as_view()),
     path(
         "folders/<uuid:pk>/users/",
         UserRolesOnFolderList.as_view(),

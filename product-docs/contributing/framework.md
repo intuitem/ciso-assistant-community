@@ -16,7 +16,7 @@ A single library may contain:
 - **Risk matrices** — probability × impact grids used by risk assessments.
 - **Reference controls** — templates that applied controls can derive from.
 
-Each of these can ship in its own library, or be bundled together where it makes sense (a framework with its companion reference-control catalogue, for example). See [Designing your own libraries](../configuration/libraries/custom-libraries.md) for the format and authoring tooling.
+Each of these can ship in its own library, or be bundled together where it makes sense (a framework with its companion reference-control catalogue, for example). See [Create a Library](../configuration/libraries/create-library.md) for the Excel workflow and [Library objects](../configuration/libraries/library-objects/README.md) for the available objects and their fields.
 
 ## If you're comfortable with Git
 
@@ -83,6 +83,6 @@ The walkthrough below uses a framework as the example, but the same flow works f
 
 ## Related
 
-- [Designing your own libraries](../configuration/libraries/custom-libraries.md)
+- [Create a Library](../configuration/libraries/create-library.md)
 - [Libraries concept](../concepts/libraries.md)
 - [Mappings feature](../features/mappings.md)

@@ -3,7 +3,7 @@
 import json
 import sys
 from rich import print as rprint
-from ..client import make_get_request, get_paginated_results
+from ..client import make_get_request, get_paginated_results, found_line
 from ..utils.response_formatter import (
     success_response,
     error_response,
@@ -12,12 +12,21 @@ from ..utils.response_formatter import (
 )
 
 
-async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
-    """List risk scenarios from Risk Registry; filter by folder or assessment
+async def get_risk_scenarios(
+    folder: str = None,
+    risk_assessment: str = None,
+    ref_id: str = None,
+    limit: int = None,
+    offset: int = None,
+):
+    """List risk scenarios from Risk Registry; filter by folder, assessment or ref_id
 
     Args:
         folder: Folder ID/name
         risk_assessment: Risk assessment ID/name
+        ref_id: Exact scenario reference ID
+        limit: Max rows to return (default 100)
+        offset: Row to start from, for paging through large registers
     """
     try:
         from ..resolvers import resolve_folder_id, resolve_risk_assessment_id
@@ -35,6 +44,14 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
             params["risk_assessment"] = resolve_risk_assessment_id(risk_assessment)
             filters["risk_assessment"] = risk_assessment
 
+        if ref_id:
+            params["ref_id"] = ref_id
+            filters["ref_id"] = ref_id
+
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/risk-scenarios/", params=params)
 
         if res.status_code != 200:
@@ -46,7 +63,7 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if not scenarios:
             return empty_response("risk scenarios", filters)
 
-        result = f"Found {len(scenarios)} risk scenarios"
+        result = found_line(scenarios, "risk scenarios", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -103,7 +120,17 @@ async def get_risk_scenario(scenario_id: str):
         result += f"**Description:** {rs.get('description') or '-'}\n"
         result += f"**Justification:** {rs.get('justification') or '-'}\n"
         result += f"**Treatment:** {rs.get('treatment') or '-'}\n"
-        result += f"**Existing Controls:** {rs.get('existing_controls') or '-'}\n\n"
+        existing_applied_controls = rs.get("existing_applied_controls", [])
+        existing_controls_str = (
+            ", ".join(
+                f"{c.get('str', c)} ({c.get('id')})" if isinstance(c, dict) else str(c)
+                for c in existing_applied_controls
+            )
+            if existing_applied_controls
+            else "-"
+        )
+        result += f"**Existing Controls:** {existing_controls_str}\n"
+        result += "\n"
 
         result += "### Inherent Risk\n"
         result += f"**Proba:** {(rs.get('inherent_proba') or {}).get('name', '--')}\n"
@@ -146,7 +173,9 @@ async def get_risk_scenario(scenario_id: str):
         )
 
 
-async def get_applied_controls(folder: str = None):
+async def get_applied_controls(
+    folder: str = None, limit: int = None, offset: int = None
+):
     """List applied controls from action plan; filter by folder
 
     Args:
@@ -163,6 +192,10 @@ async def get_applied_controls(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/applied-controls/", params=params)
 
         if res.status_code != 200:
@@ -174,7 +207,7 @@ async def get_applied_controls(folder: str = None):
         if not controls:
             return empty_response("applied controls", filters)
 
-        result = f"Found {len(controls)} applied controls"
+        result = found_line(controls, "applied controls", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -341,7 +374,7 @@ async def get_folders(name: str = None):
         if not folders:
             return empty_response("folders", filters)
 
-        result = f"Found {len(folders)} folders"
+        result = found_line(folders, "folders")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -404,7 +437,7 @@ async def get_perimeters(folder: str = None, name: str = None):
         if not perimeters:
             return empty_response("perimeters", filters)
 
-        result = f"Found {len(perimeters)} perimeters"
+        result = found_line(perimeters, "perimeters")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -446,7 +479,7 @@ async def get_risk_matrices():
         if not matrices:
             return empty_response("risk matrices", None)
 
-        result = f"Found {len(matrices)} risk matrices\n\n"
+        result = found_line(matrices, "risk matrices") + "\n\n"
         result += "|ID|Name|\n"
         result += "|---|---|\n"
 
@@ -622,7 +655,7 @@ async def get_risk_assessments(folder: str = None, perimeter: str = None):
         if not assessments:
             return "No risk assessments found"
 
-        result = f"Found {len(assessments)} risk assessments"
+        result = found_line(assessments, "risk assessments")
         if folder:
             result += f" (folder: {folder})"
         if perimeter:
@@ -684,8 +717,9 @@ async def get_threats(
         if not threats:
             return "No threats found"
 
-        # Apply limit if specified (0 means no limit)
-        total_count = len(threats)
+        # Apply limit if specified (0 means no limit). Prefer the server-side
+        # total, since slicing drops the ResultList that carries it.
+        total_count = getattr(threats, "total", None) or len(threats)
         if limit > 0:
             threats = threats[:limit]
 
@@ -712,7 +746,7 @@ async def get_threats(
         return f"Error in get_threats: {str(e)}"
 
 
-async def get_assets(folder: str = None):
+async def get_assets(folder: str = None, limit: int = None, offset: int = None):
     """List assets with IDs, names, and types
 
     Args:
@@ -729,6 +763,10 @@ async def get_assets(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/assets/", params=params)
 
         if res.status_code != 200:
@@ -740,7 +778,7 @@ async def get_assets(folder: str = None):
         if not assets:
             return empty_response("assets", filters)
 
-        result = f"Found {len(assets)} assets"
+        result = found_line(assets, "assets", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -759,6 +797,152 @@ async def get_assets(folder: str = None):
             result,
             "get_assets",
             "Use this table to identify asset IDs for linking to risk scenarios",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+GAPS_MAX_ASSETS = 50
+
+
+def _gap_cell(value) -> str:
+    if value is None or value == "":
+        return "--"
+    return str(value).replace("|", "\\|").replace("\n", " ")
+
+
+def _gap_met(verdict) -> str:
+    if verdict is True:
+        return "yes"
+    if verdict is False:
+        return "no"
+    return "?"
+
+
+def _asset_gap_table(asset: dict):
+    """Markdown gap table of one asset detail, and whether a row is unmet."""
+    rows = []
+    for section, key in (
+        ("security", "security_objectives_comparison"),
+        ("recovery", "recovery_objectives_comparison"),
+    ):
+        for item in asset.get(key) or []:
+            expectation = item.get("expectation")
+            reality = item.get("reality")
+            if expectation in (None, "") and reality in (None, ""):
+                continue
+            rows.append(
+                (
+                    section,
+                    str(item.get("objective") or "--"),
+                    expectation,
+                    reality,
+                    item.get("verdict"),
+                )
+            )
+
+    asset_type = asset.get("type")
+    if isinstance(asset_type, dict):
+        asset_type = asset_type.get("str")
+    title = f"### {_gap_cell(asset.get('name'))} ({_gap_cell(asset_type)}, ID: {asset.get('id')})\n"
+    if not rows:
+        return title + "No objective or capability set.\n", False
+
+    table = title + "|Type|Criterion|Objective|Capability|Met|\n|---|---|---|---|---|\n"
+    for section, criterion, expectation, reality, verdict in rows:
+        table += (
+            f"|{section}|{criterion}|{_gap_cell(expectation)}|"
+            f"{_gap_cell(reality)}|{_gap_met(verdict)}|\n"
+        )
+    unmet = any(verdict is False for *_, verdict in rows)
+    return table, unmet
+
+
+async def get_asset_security_gaps(
+    asset: str = None, folder: str = None, only_unmet: bool = False
+):
+    """Compare asset objectives (expected) with capabilities (actual), per criterion
+
+    Security criteria use raw 0-4 values; recovery (RTO/RPO/MTD) compares
+    durations, met when the capability is at most the objective.
+    Met: yes | no | ? (one side missing).
+
+    Args:
+        asset: Asset ID/name (one asset)
+        folder: Folder ID/name (every asset of the folder, max 50); scopes `asset` when both are given
+        only_unmet: Keep only assets with at least one unmet criterion (Met = "no"; "?", one side missing, does not count as unmet)
+    """
+    try:
+        from ..resolvers import resolve_asset_id, resolve_folder_id
+
+        filters = {}
+        folder_id = resolve_folder_id(folder) if folder else None
+        if folder:
+            filters["folder"] = folder
+        if only_unmet:
+            filters["only_unmet"] = "true"
+
+        truncation = ""
+        if asset:
+            filters["asset"] = asset
+            asset_id = resolve_asset_id(asset, folder_id=folder_id)
+            res = make_get_request(f"/assets/{asset_id}/")
+            if res.status_code != 200:
+                return http_error_response(res.status_code, res.text)
+            detail = res.json() or {}
+            if folder_id and (detail.get("folder") or {}).get("id") != folder_id:
+                return error_response(
+                    "Not Found",
+                    f"Asset '{asset}' is not in folder '{folder}'",
+                    "Check the asset and folder, then report to the user",
+                    retry_allowed=False,
+                )
+            assets = [detail]
+        else:
+            params = {"limit": GAPS_MAX_ASSETS}
+            if folder_id:
+                params["folder"] = folder_id
+            res = make_get_request("/assets/full/", params=params)
+            if res.status_code != 200:
+                return http_error_response(res.status_code, res.text)
+            assets = get_paginated_results(res.json())
+            total = getattr(assets, "total", None) or len(assets)
+            if total > len(assets):
+                truncation = (
+                    f"Truncated: {len(assets)} of {total} assets checked "
+                    f"(max {GAPS_MAX_ASSETS}). Narrow with folder or asset.\n\n"
+                )
+
+        if not assets:
+            return empty_response("assets", filters)
+
+        sections = []
+        for item in assets:
+            table, unmet = _asset_gap_table(item)
+            if only_unmet and not unmet:
+                continue
+            sections.append(table)
+
+        if not sections:
+            return truncation + empty_response(
+                "assets with unmet objectives" if only_unmet else "assets", filters
+            )
+
+        result = truncation
+        result += f"Security gaps for {len(sections)} asset(s)"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n" + "\n".join(sections)
+
+        return success_response(
+            result,
+            "get_asset_security_gaps",
+            "Use update_asset (sec_*/cap_*/dro_*/rcap_*) or applied controls to close the gaps",
         )
     except Exception as e:
         return error_response(
@@ -795,7 +979,7 @@ async def get_incidents(folder: str = None):
         if not incidents:
             return "No incidents found"
 
-        result = f"Found {len(incidents)} incidents"
+        result = found_line(incidents, "incidents")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -842,7 +1026,7 @@ async def get_security_exceptions(folder: str = None):
         if not exceptions:
             return "No security exceptions found"
 
-        result = f"Found {len(exceptions)} security exceptions"
+        result = found_line(exceptions, "security exceptions")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -912,7 +1096,7 @@ async def get_frameworks(folder: str = None):
         if not frameworks:
             return "No frameworks found"
 
-        result = f"Found {len(frameworks)} frameworks"
+        result = found_line(frameworks, "frameworks")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -960,7 +1144,7 @@ async def get_business_impact_analyses(folder: str = None):
         if not bias:
             return "No Business Impact Analyses found"
 
-        result = f"Found {len(bias)} Business Impact Analyses"
+        result = found_line(bias, "Business Impact Analyses")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -986,6 +1170,8 @@ async def get_business_impact_analyses(folder: str = None):
 async def get_requirement_assessments(
     compliance_assessment_id_or_name: str = None,
     ref_id: str = None,
+    limit: int = None,
+    offset: int = None,
 ):
     """List requirement assessments (audit requirements) with IDs and results. Use IDs with update_requirement_assessment()
 
@@ -1024,6 +1210,10 @@ async def get_requirement_assessments(
         if ref_id:
             params["ref_id"] = ref_id
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/requirement-assessments/", params=params)
 
         if res.status_code != 200:
@@ -1035,7 +1225,15 @@ async def get_requirement_assessments(
         if not req_assessments:
             return "No requirement assessments found"
 
-        result = f"Found {len(req_assessments)} requirement assessments\n\n"
+        result = (
+            found_line(
+                req_assessments,
+                "requirement assessments",
+                paginated=True,
+                offset=offset,
+            )
+            + "\n\n"
+        )
         result += "|ID|Ref|Description|Requirement|Assessment|Status|Result|Scored|Score|DocScore|TargetScore|\n"
         result += "|---|---|---|---|---|---|---|---|---|---|---|\n"
 
@@ -1081,7 +1279,7 @@ async def get_quantitative_risk_studies():
         if not studies:
             return "No quantitative risk studies found"
 
-        result = f"Found {len(studies)} quantitative risk studies\n\n"
+        result = found_line(studies, "quantitative risk studies") + "\n\n"
         result += "|ID|Name|Status|Distribution Model|Loss Threshold|Folder|\n"
         result += "|---|---|---|---|---|---|\n"
 
@@ -1138,7 +1336,7 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
         if not scenarios:
             return "No quantitative risk scenarios found"
 
-        result = f"Found {len(scenarios)} quantitative risk scenarios\n\n"
+        result = found_line(scenarios, "quantitative risk scenarios") + "\n\n"
         result += (
             "|ID|Ref|Name|Status|Priority|Current ALE|Residual ALE|Study|Folder|\n"
         )
@@ -1200,7 +1398,7 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         if not hypotheses:
             return "No quantitative risk hypotheses found"
 
-        result = f"Found {len(hypotheses)} quantitative risk hypotheses\n\n"
+        result = found_line(hypotheses, "quantitative risk hypotheses") + "\n\n"
         result += "|ID|Ref|Name|Risk Stage|Selected|ALE|ROC|Fresh|Scenario|Folder|\n"
         result += "|---|---|---|---|---|---|---|---|---|---|\n"
 
@@ -1226,7 +1424,10 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
 async def get_task_templates(
     limit: int = None, offset: int = None, ordering: str = None, search: str = None
 ):
-    """List task templates with IDs, names, and details
+    """List many task templates (summary rows only)
+
+    Returns one row per template. For the full content of a single template,
+    call get_task_template_details with its ID instead.
 
     Args:
         limit: Number of results to return per page
@@ -1257,7 +1458,9 @@ async def get_task_templates(
         if not tasks:
             return "No task found"
 
-        result = f"Found {len(tasks)} task templates\n\n"
+        result = (
+            found_line(tasks, "task templates", paginated=True, offset=offset) + "\n\n"
+        )
         result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|\n"
         result += "|---|---|---|---|---|---|---|---|\n"
 
@@ -1279,7 +1482,10 @@ async def get_task_templates(
 
 
 async def get_task_template_details(task_id: str):
-    """Get detailed information for a specific task template
+    """Get the full detail of ONE task template, by ID
+
+    Use this when the user asks about a specific named template. Use
+    get_task_templates to list many.
 
     Args:
         task_id: Task template ID
@@ -1302,7 +1508,6 @@ async def get_task_template_details(task_id: str):
         result += f"|{task.get('task_date', 'N/A')}"
         result += f"|{'Yes' if task.get('is_recurrent') else 'No'}"
         result += f"|{'Yes' if task.get('enabled') else 'No'}"
-        result += f"|{'Yes' if task.get('is_published') else 'No'}"
         result += f"|{task.get('link', 'N/A')}"
         result += f"|{task.get('folder', 'N/A')}"
         result += f"|{task.get('path', 'N/A')}"
@@ -1342,11 +1547,32 @@ STATUS_LABELS = {
 }
 
 
+def _related_names(items) -> str:
+    """Names of related objects as the API returns them ({id, str} dicts)."""
+    return ", ".join(
+        o.get("str", str(o)) if isinstance(o, dict) else str(o) for o in items or []
+    )
+
+
+def _sla_label(state) -> str:
+    """The SLA state of a vulnerability, with the end of an exception."""
+    if not state:
+        return "-"
+    label = state.get("name", "-")
+    if state.get("until"):
+        label += f" until {state['until']}"
+    return label
+
+
 async def get_vulnerabilities(
     folder: str = None,
     status: str = None,
     severity: int = None,
+    sla: str = None,
     search: str = None,
+    ordering: str = None,
+    limit: int = None,
+    offset: int = None,
 ):
     """List vulnerabilities with optional filters
 
@@ -1354,7 +1580,9 @@ async def get_vulnerabilities(
         folder: Folder ID/name to filter by
         status: Filter by status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
         severity: Filter by severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
+        sla: Filter by SLA state, comma-separated for several: overdue | today | caution | on track | excepted | resolved
         search: Search term to filter results
+        ordering: Field to order by, '-' prefix for descending; 'state' lists the most urgent SLA first
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -1371,10 +1599,19 @@ async def get_vulnerabilities(
         if severity is not None:
             params["severity"] = severity
             filters["severity"] = SEVERITY_LABELS.get(severity, str(severity))
+        if sla:
+            params["state"] = [state.strip() for state in sla.split(",")]
+            filters["sla"] = sla
         if search:
             params["search"] = search
             filters["search"] = search
+        if ordering:
+            params["ordering"] = ordering
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/vulnerabilities/", params=params)
 
         if res.status_code != 200:
@@ -1386,12 +1623,14 @@ async def get_vulnerabilities(
         if not vulnerabilities:
             return empty_response("vulnerabilities", filters)
 
-        result = f"Found {len(vulnerabilities)} vulnerabilities"
+        result = found_line(
+            vulnerabilities, "vulnerabilities", paginated=True, offset=offset
+        )
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|ID|Name|Ref ID|Status|Severity|Folder|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result += "|ID|Name|Ref ID|Status|Severity|SLA|Due date|Assigned to|Folder|\n"
+        result += "|---|---|---|---|---|---|---|---|---|\n"
 
         for vuln in vulnerabilities:
             vuln_id = vuln.get("id", "N/A")
@@ -1408,7 +1647,10 @@ async def get_vulnerabilities(
             else:
                 vuln_folder = str(vuln_folder) if vuln_folder else "-"
 
-            result += f"|{vuln_id}|{name}|{ref_id}|{vuln_status}|{vuln_severity}|{vuln_folder}|\n"
+            sla = _sla_label(vuln.get("state"))
+            due_date = vuln.get("due_date") or "-"
+            owners = _related_names(vuln.get("owner")) or "-"
+            result += f"|{vuln_id}|{name}|{ref_id}|{vuln_status}|{vuln_severity}|{sla}|{due_date}|{owners}|{vuln_folder}|\n"
 
         return success_response(
             result,
@@ -1449,7 +1691,10 @@ async def get_vulnerability(vulnerability_id: str):
         result += f"**Ref ID:** {vuln.get('ref_id') or '-'}\n"
         result += f"**Status:** {vuln_status}\n"
         result += f"**Severity:** {vuln_severity}\n"
+        result += f"**SLA:** {_sla_label(vuln.get('state'))}\n"
+        result += f"**Assigned to:** {_related_names(vuln.get('owner')) or '-'}\n"
         result += f"**Description:** {vuln.get('description') or '-'}\n"
+        result += f"**Observation:** {vuln.get('observation') or '-'}\n"
 
         folder = vuln.get("folder")
         if isinstance(folder, dict):
@@ -1457,23 +1702,43 @@ async def get_vulnerability(vulnerability_id: str):
         elif folder:
             result += f"**Folder:** {folder}\n"
 
-        filtering_labels = vuln.get("filtering_labels", [])
-        if filtering_labels:
-            result += f"**Labels:** {', '.join(str(l) for l in filtering_labels)}\n"
+        for label, key in (
+            ("Detection date", "detected_at"),
+            ("Published date", "published_date"),
+            ("Due date", "due_date"),
+            ("ETA", "eta"),
+            ("Remediation date", "remediated_at"),
+        ):
+            result += f"**{label}:** {vuln.get(key) or '-'}\n"
 
-        applied_controls = vuln.get("applied_controls", [])
-        if applied_controls:
-            result += (
-                f"**Applied Controls:** {', '.join(str(c) for c in applied_controls)}\n"
-            )
+        for label, key in (
+            ("Labels", "filtering_labels"),
+            ("Applied Controls", "applied_controls"),
+            ("Assets", "assets"),
+            ("Security Exceptions", "security_exceptions"),
+            ("Evidences", "evidences"),
+            ("Security Advisories", "security_advisories"),
+            ("CWEs", "cwes"),
+        ):
+            names = _related_names(vuln.get(key))
+            if names:
+                result += f"**{label}:** {names}\n"
 
-        assets = vuln.get("assets", [])
-        if assets:
-            result += f"**Assets:** {', '.join(str(a) for a in assets)}\n"
-
-        security_exceptions = vuln.get("security_exceptions", [])
-        if security_exceptions:
-            result += f"**Security Exceptions:** {', '.join(str(e) for e in security_exceptions)}\n"
+        # Incidents and tasks point to the vulnerability: list them by filter.
+        for label, endpoint in (
+            ("Incidents", "/incidents/"),
+            ("Tasks", "/task-templates/"),
+        ):
+            linked = make_get_request(endpoint, params={"vulnerabilities": resolved_id})
+            if linked.status_code == 200:
+                names = _related_names(
+                    [
+                        {"str": o.get("name")}
+                        for o in get_paginated_results(linked.json())
+                    ]
+                )
+                if names:
+                    result += f"**{label}:** {names}\n"
 
         return success_response(
             result,
@@ -1518,7 +1783,7 @@ async def get_asset_classes(
         if not asset_classes:
             return empty_response("asset classes", filters)
 
-        result = f"Found {len(asset_classes)} asset classes"
+        result = found_line(asset_classes, "asset classes")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -1559,7 +1824,12 @@ async def get_users(
     is_applied_control_owner: bool = None,
     exclude_current: bool = None,
 ):
-    """List users with their UUIDs, names and emails
+    """List user accounts with their User UUIDs, names and emails.
+
+    These are User ids, NOT Actor ids: owner/assignee fields (owner,
+    assigned_to, default_assignee) expect Actor ids. Pass an email or name
+    directly to those tools (it is resolved to the actor), or use
+    list_objects("actors") to get Actor UUIDs.
 
     Args:
         search: Search term (name or email)
@@ -1606,7 +1876,7 @@ async def get_users(
         if not users:
             return empty_response("users", filters)
 
-        result = f"Found {len(users)} users"
+        result = found_line(users, "users")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -1624,7 +1894,79 @@ async def get_users(
         return success_response(
             result,
             "get_users",
-            "Use the UUID column to set the owner field when calling update_applied_control or update_asset",
+            "These are User ids, not Actor ids. To set owner/assigned_to/default_assignee, "
+            "pass the email or name directly, or get Actor UUIDs with list_objects('actors')",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def get_teams(
+    search: str = None,
+    folder: str = None,
+):
+    """List teams with their UUIDs, names and members.
+
+    These are Team ids, NOT Actor ids: owner/assignee fields (owner,
+    assigned_to, default_assignee) expect Actor ids. Pass a team name
+    directly to those tools (it is resolved to the actor), or use
+    list_objects("actors") to get Actor UUIDs.
+
+    Args:
+        search: Search term (matches team name or description)
+        folder: Folder ID/name
+    """
+    try:
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+        filters = {}
+
+        if search:
+            params["search"] = search
+            filters["search"] = search
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+
+        res = make_get_request("/teams/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        teams = get_paginated_results(data)
+
+        if not teams:
+            return empty_response("teams", filters)
+
+        result = found_line(teams, "teams")
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|UUID|Name|Team Email|Leader|Members|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for team in teams:
+            team_id = team.get("id", "N/A")
+            name = team.get("name", "N/A")
+            team_email = team.get("team_email") or ""
+            leader = team.get("leader") or {}
+            leader_str = leader.get("str", "") if isinstance(leader, dict) else ""
+            members = team.get("members") or []
+
+            result += f"|{team_id}|{name}|{team_email}|{leader_str}|{len(members)}|\n"
+
+        return success_response(
+            result,
+            "get_teams",
+            "These are Team ids, not Actor ids. To set owner/assigned_to/default_assignee, "
+            "pass the team name directly, or get Actor UUIDs with list_objects('actors')",
         )
     except Exception as e:
         return error_response(

@@ -38,6 +38,8 @@ A template is only used when its `is_active` flag is on, which lets you stage a 
 
 Each email template carries a **subject** and a **body**. Body content supports the same templating variables as the default emails — use the in-app preview to inspect the variables available for a given key.
 
+Whether each email is sent at all is set per notification type under **Settings → Notifications**; see [Notifications](../../features/notifications.md#choosing-channels-per-notification-type). An email turned off there is still listed here, marked as disabled, so you can keep editing its wording.
+
 ## Word templates
 
 Each Word template is an uploaded `.docx` file containing styled placeholders. The platform substitutes the dynamic content (assessment data, scores, evidence list) when generating the export.

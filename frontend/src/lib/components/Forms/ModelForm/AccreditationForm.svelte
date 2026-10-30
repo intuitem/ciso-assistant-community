@@ -1,12 +1,12 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '../TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -30,6 +30,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -114,6 +115,7 @@
 	/>
 	<TextField
 		type="number"
+		step="1"
 		{form}
 		field="duration_months"
 		cacheLock={cacheLocks['duration_months']}
@@ -133,6 +135,7 @@
 		multiple
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsLabelField="auto"
 		field="decision_evidence"
 		cacheLock={cacheLocks['decision_evidence']}

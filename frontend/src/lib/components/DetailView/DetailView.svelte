@@ -1,47 +1,72 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
-	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
-	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isURL } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { urlModelForDjangoName } from '#lib/utils/crud.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '#lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '#lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import RiskAcceptanceModal from '#lib/components/Modals/RiskAcceptanceModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import SelectExistingModal from '#lib/components/Modals/SelectExistingModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import CustomFieldsDisplay from '#lib/components/Forms/CustomFieldsDisplay.svelte';
+	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
+	import { booleanDisplay } from '#lib/utils/boolean-display.js';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '#lib/utils/constants.js';
+	import { type ModelMapEntry, type ReverseForeignKeyField } from '#lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '#lib/utils/crud.js';
+	import { formatDate, formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { isURL } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
 	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
-	import { goto, invalidateAll } from '$app/navigation';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
+	import { goto, refreshAll } from '$app/navigation';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { getListViewFields } from '#lib/utils/table.js';
+	import {
+		canPerformActionOnObject,
+		hasPermissionAnywhere,
+		resolveObjectDomain
+	} from '#lib/utils/access-control.js';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
-	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
+	// The one setting an instance owns on a library form (see QuickForm.always_review).
+	async function setAlwaysReview(box: HTMLInputElement) {
+		const ok = await fetch(`/quick-forms/${data.data?.id}/always-review`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ always_review: box.checked })
+		})
+			.then((res) => res.ok)
+			.catch(() => false);
+		if (!ok) {
+			// The page data did not change, so the box would keep showing the refused value.
+			box.checked = !box.checked;
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+			return;
+		}
+		await refreshAll();
+	}
+
+	const defaultExcludes = ['id', 'str', 'path', 'sync_mappings'];
 
 	// Format the raw numbers of the ROSI explanation per the active locale.
 	function formatRosiExplanationParams(params: Record<string, number> | undefined) {
@@ -75,6 +100,11 @@
 		displayModelTable?: boolean;
 		dateFieldsToFormat?: string[];
 		widgets?: import('svelte').Snippet;
+		/** Lets a caller keep the widget column out of the layout when its only
+		 * widget is behind a feature flag that is off. */
+		widgetsEnabled?: boolean;
+		/** List every field instead of folding them after MAX_ROWS behind "view more". */
+		showAllFields?: boolean;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
@@ -87,26 +117,10 @@
 		fields = [],
 		exclude = $bindable([]),
 		displayModelTable = true,
-		dateFieldsToFormat = [
-			'created_at',
-			'updated_at',
-			'expiry_date',
-			'accepted_at',
-			'rejected_at',
-			'revoked_at',
-			'eta',
-			'expiration_date',
-			'validation_deadline',
-			'timestamp',
-			'reported_at',
-			'occurred_at',
-			'resolved_at',
-			'due_date',
-			'start_date',
-			'closing_date',
-			'commission_date'
-		],
+		dateFieldsToFormat = DATE_FIELDS_TO_FORMAT,
 		widgets,
+		widgetsEnabled = true,
+		showAllFields = false,
 		actions,
 		disableCreate = false,
 		disableEdit = false,
@@ -117,17 +131,43 @@
 
 	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
+	// Fields whose serialized value is a stable code (e.g. "eba_TA:S02") or an
+	// English choice label (e.g. "Low reliance") that safeTranslate can map to a
+	// message key. Countries (data_location_*) are excluded on purpose: their
+	// ~250 labels have no message keys.
+	const translatedValueFieldSet = new Set([
+		'kind',
+		'status',
+		'roc_display',
+		'dora_ict_service_type',
+		'dora_data_sensitiveness',
+		'dora_reliance_level',
+		'dora_substitutability',
+		'dora_non_substitutability_reason',
+		'dora_has_exit_plan',
+		'dora_reintegration_possibility',
+		'dora_discontinuing_impact',
+		'dora_alternative_providers_identified'
+	]);
+
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
+	// A field declared in flaggedFields disappears with its feature flag.
+	let visibleDetailViewFields = $derived(
+		data.model?.detailViewFields?.filter((fieldConfig) => {
+			const flag = data.model?.flaggedFields?.[fieldConfig.field];
+			return isFieldFlagEnabled(flag, page.data?.featureflags ?? {});
+		})
+	);
+
 	let filteredData = $derived(
-		data.model?.detailViewFields
+		visibleDetailViewFields
 			? Object.fromEntries(
 					Object.entries(data.data).filter(
-						([key, _]) =>
-							data.model.detailViewFields.filter((field) => field.field === key).length > 0
+						([key, _]) => visibleDetailViewFields.filter((field) => field.field === key).length > 0
 					)
 				)
 			: data.data
@@ -135,9 +175,9 @@
 
 	// Get ordered entries based on detailViewFields configuration
 	let orderedEntries = $derived(() => {
-		if (data.model?.detailViewFields) {
+		if (visibleDetailViewFields) {
 			// Return entries in the order specified by detailViewFields
-			return data.model.detailViewFields
+			return visibleDetailViewFields
 				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
 				.filter(([key, value]) => value !== undefined);
 		} else {
@@ -151,7 +191,7 @@
 		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
 	};
 
-	let hasWidgets = $derived(!!widgets);
+	let hasWidgets = $derived(!!widgets && widgetsEnabled);
 	let relatedFieldNames = $derived(
 		new Set(data.model?.foreignKeyFields?.map((field) => field.field) ?? [])
 	);
@@ -217,36 +257,17 @@
 		modalStore.trigger(modal);
 	}
 
-	async function removeFromParent(
-		field: any,
-		ids: string[],
-		clear: () => void,
-		reload: () => void
-	): Promise<void> {
-		if (!field?.removeFromParent || !ids.length) return;
-		const res = await fetch(
-			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
-			{
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
-			}
+	// Table-scoped batch actions for a reverse-FK table, gated by change on the
+	// parent object (so parent_action entries are only offered to users the
+	// parent endpoint would authorize). parent_action endpoints are resolved
+	// here — the only place that knows the parent url and id.
+	function tableBatchActions(field: ReverseForeignKeyField) {
+		if (!field.tableBatchActions || !canEditObject) return [];
+		return field.tableBatchActions.map((a) =>
+			a.type === 'parent_action'
+				? { ...a, endpoint: `/${data.model.urlModel}/${data.data.id}/${a.action}` }
+				: a
 		);
-		if (res.ok) {
-			clear();
-			reload();
-			await invalidateAll();
-			toastStore.trigger({
-				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
-				background: 'preset-filled-success-500'
-			});
-		} else {
-			const body = await res.json().catch(() => ({}));
-			toastStore.trigger({
-				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
-				background: 'preset-filled-error-500'
-			});
-		}
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -272,12 +293,18 @@
 		modalStore.trigger(modal);
 	}
 
+	const batchCreateModals: Record<string, ModalComponent['ref']> = {
+		'personal-data': BatchCreatePersonalDataModal,
+		'asset-assessments': BatchAddAssetAssessmentsModal
+	};
+
 	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
-		if (!field.batchCreate) return;
+		const ref = batchCreateModals[field.urlModel];
+		if (!field.batchCreate || !ref) return;
 		const modalComponent: ModalComponent = {
-			ref: BatchCreatePersonalDataModal,
+			ref,
 			props: {
-				processingId: parentId,
+				parentId,
 				urlModel: field.urlModel
 			}
 		};
@@ -415,6 +442,12 @@
 		})
 	);
 
+	let relationsOpen = $state(false);
+	// Here rather than an `actions` snippet: most models ship their own detail route.
+	const showRelations = $derived(
+		Boolean(page.data?.featureflags?.relations_graph) && hasRelationGraph(data.urlModel)
+	);
+
 	let displayEditButton = $derived(function () {
 		return (
 			(canEditObject &&
@@ -438,6 +471,16 @@
 	let group = $state(
 		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
 	);
+	// Tabs.Content renders hidden panels too, so gate on first visit. Kept once
+	// visited, so switching back costs no refetch. Reassigned: a Set is not deep state.
+	let visitedTabs = $state(
+		new Set(
+			Object.keys(data?.relatedModels ?? {}).length > 0 ? [getSortedRelatedModels()[0][0]] : []
+		)
+	);
+	$effect(() => {
+		if (group && !visitedTabs.has(group)) visitedTabs = new Set(visitedTabs).add(group);
+	});
 	$effect(() => {
 		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
 
@@ -448,7 +491,9 @@
 
 		if (setsAreDifferent) {
 			relatedModelsNames = newRelatedModelsNames;
-			group = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+			const firstTab = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+			group = firstTab;
+			visitedTabs = new Set(firstTab ? [firstTab] : []);
 		}
 	});
 
@@ -580,7 +625,9 @@
 						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-100-900 sm:grid-cols-5 sm:gap-4 {index >=
-								MAX_ROWS && !expandedTable
+								MAX_ROWS &&
+							!expandedTable &&
+							!showAllFields
 								? 'hidden'
 								: ''}"
 						>
@@ -601,7 +648,7 @@
 										</Tooltip.Trigger>
 										<Tooltip.Positioner>
 											<Tooltip.Content
-												class="card bg-surface-950-50 text-white p-3 max-w-xs shadow-xl border border-surface-700-300"
+												class="card bg-surface-950-50 text-surface-50-950 p-3 max-w-xs shadow-xl border border-surface-700-300"
 											>
 												<p class="text-sm">{tooltipText}</p>
 											</Tooltip.Content>
@@ -658,7 +705,7 @@
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
-																	{value}
+																	{val}
 																{/if}
 															</li>
 														{/each}
@@ -691,7 +738,23 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'purposes'}
+																{#if key === 'produced_from'}
+																	{@const producedUrlModel = urlModelForDjangoName(val.model)}
+																	{#if producedUrlModel}
+																		<Anchor
+																			breadcrumbAction="push"
+																			href={`/${producedUrlModel}/${val.id}`}
+																			class="anchor">{val.str}</Anchor
+																		>
+																	{:else}
+																		{val.str}
+																	{/if}
+																	{#if val.source}
+																		<span class="text-surface-600-400 text-xs">
+																			— {val.source}</span
+																		>
+																	{/if}
+																{:else if key === 'purposes'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel ?? 'purposes'
@@ -733,7 +796,7 @@
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
-																	{value}
+																	{safeTranslate(val)}
 																{/if}
 															</li>
 														{/each}
@@ -792,7 +855,7 @@
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
-											{:else if key === 'roc_display'}
+											{:else if translatedValueFieldSet.has(key)}
 												{safeTranslate(value)}
 											{:else if key === 'roc_calculation_explanation'}
 												{safeTranslate(value.key, formatRosiExplanationParams(value.params))}
@@ -821,7 +884,7 @@
 				</div>
 			{/if}
 		</div>
-		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+		{#if !showAllFields && orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
 				class="m-5 text-primary-800-200"
@@ -933,7 +996,50 @@
 					>
 				{/if}
 			{/if}
+			{#if showRelations}
+				<button
+					type="button"
+					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
+					data-testid="relations-button"
+					onclick={() => (relationsOpen = true)}
+				>
+					<i class="fa-solid fa-circle-nodes mr-2"></i>{m.relationsGraph()}
+				</button>
+			{/if}
 			{@render actions?.()}
+			{#if data.urlModel === 'quick-forms' && hasPermissionAnywhere(user, 'change_quickform')}
+				<label
+					class="flex h-fit items-center gap-2 text-sm"
+					title={m.alwaysReviewHelpText()}
+					data-testid="quick-form-always-review"
+				>
+					<input
+						type="checkbox"
+						class="checkbox"
+						checked={data.data?.always_review}
+						onchange={(e) => setAlwaysReview(e.currentTarget)}
+					/>{m.alwaysReview()}
+				</label>
+			{/if}
+			{#if data.urlModel === 'quick-forms'}
+				<!-- Answering a form is the only way to see what its conditions and outcomes
+				     actually do; the same preview serves drafts in the builder. -->
+				<a
+					class="btn preset-filled-primary-500 h-fit"
+					href={`/quick-forms/${data.data?.id}/preview`}
+				>
+					<i class="fa-solid fa-eye mr-2"></i>{m.preview()}
+				</a>
+				{#if data.relatedModels?.['quick-form-publications']?.createForm && hasPermissionAnywhere(user, 'add_quickformpublication')}
+					<button
+						class="btn preset-filled-primary-500 h-fit"
+						data-testid="publish-quick-form"
+						onclick={() => modalCreateForm(data.relatedModels['quick-form-publications'])}
+					>
+						<i class="fa-solid fa-paper-plane mr-2"></i>{m.publish()}
+					</button>
+				{/if}
+			{/if}
 			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>
@@ -976,119 +1082,126 @@
 			</Tabs.List>
 			{#each relatedModels as [urlmodel, model]}
 				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
-					{#key urlmodel}
-						{@const field = data.model.reverseForeignKeyFields.find(
-							(item) => item.urlModel === urlmodel
-						)}
-						{@const fieldsToUse =
-							field?.tableFields ||
-							getListViewFields({
-								key: urlmodel,
-								featureFlags: page.data?.featureflags
-							}).body.filter((v) => v !== field.field)}
-						{#if model.table}
-							<ModelTable
-								baseEndpoint={getReverseForeignKeyEndpoint({
-									parentModel: data.model,
-									targetUrlModel: urlmodel,
-									field: field.field,
-									id: data.data.id,
-									endpointUrl: field.endpointUrl
-								})}
-								source={model.table}
-								disableCreate={disableCreate || model.disableCreate}
-								disableEdit={disableEdit || model.disableEdit}
-								disableDelete={disableDelete || model.disableDelete}
-								deleteForm={model.deleteForm}
-								URLModel={urlmodel}
-								expectedCount={getExpectedCount(urlmodel, field)}
-								fields={fieldsToUse}
-								defaultFilters={field.defaultFilters || {}}
-								selectable={Boolean(canEditObject && field?.removeFromParent)}
-							>
-								{#snippet selectActions({ ids, clear, reload })}
-									{#if field?.removeFromParent}
-										<button
-											type="button"
-											class="btn btn-sm preset-filled-error-500"
-											onclick={() => removeFromParent(field, ids, clear, reload)}
-										>
-											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
-												field.removeFromParent.label ?? 'remove'
-											)}
-										</button>
-									{/if}
-								{/snippet}
-								{#snippet addButton()}
-									{#if canEditObject && field?.addExisting}
-										<span
-											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
-										>
-											<button
-												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-												data-testid="select-existing-button"
-												title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
-												onclick={() => modalSelectExisting(field)}
-											>
-												<i class="fa-solid fa-hand-pointer"></i>
-											</button>
-										</span>
-										{#if field?.batchCreate}
+					{#if visitedTabs.has(urlmodel)}
+						{#key urlmodel}
+							{@const field = data.model.reverseForeignKeyFields.find(
+								(item) => item.urlModel === urlmodel
+							)}
+							{@const fieldsToUse =
+								field?.tableFields ||
+								getListViewFields({
+									key: urlmodel,
+									featureFlags: page.data?.featureflags
+								}).body.filter((v) => v !== field.field)}
+							{#if model.table}
+								<ModelTable
+									baseEndpoint={getReverseForeignKeyEndpoint({
+										parentModel: data.model,
+										targetUrlModel: urlmodel,
+										field: field.field,
+										id: data.data.id,
+										endpointUrl: field.endpointUrl
+									})}
+									source={model.table}
+									disableCreate={disableCreate || model.disableCreate}
+									disableEdit={disableEdit || model.disableEdit || Boolean(data.data.is_locked)}
+									disableDelete={disableDelete ||
+										model.disableDelete ||
+										Boolean(data.data.is_locked)}
+									deleteForm={model.deleteForm}
+									URLModel={urlmodel}
+									expectedCount={getExpectedCount(urlmodel, field)}
+									columnSelector={field?.columnSelector}
+									columnStateKey={`${data.urlModel}:${urlmodel}`}
+									fields={fieldsToUse}
+									defaultFilters={field.defaultFilters || {}}
+									extraBatchActions={tableBatchActions(field)}
+								>
+									{#snippet addButton()}
+										{#if data.data.is_locked}
+											<!-- Locked parent: no add affordances, matching the hidden remove selection. -->
+										{:else if canEditObject && field?.addExisting}
 											<span
 												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 											>
 												<button
 													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-													data-testid="batch-create-button"
-													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
-													onclick={() => modalBatchCreate(field, data.data.id)}
+													data-testid="select-existing-button"
+													title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
+													onclick={() => modalSelectExisting(field)}
 												>
-													<i class="fa-solid fa-layer-group"></i>
+													<i class="fa-solid fa-hand-pointer"></i>
 												</button>
 											</span>
-										{/if}
-										<span
-											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
-										>
+											{#if field?.batchCreate}
+												<span
+													class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+												>
+													<button
+														class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+														data-testid="batch-create-button"
+														title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+														onclick={() => modalBatchCreate(field, data.data.id)}
+													>
+														<i class="fa-solid fa-layer-group"></i>
+													</button>
+												</span>
+											{/if}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+											>
+												<button
+													class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+													data-testid="add-button"
+													title={safeTranslate('add-' + model.info.localName)}
+													onclick={(_) => modalCreateForm(model)}
+												>
+													<i class="fa-solid fa-file-circle-plus"></i>
+												</button>
+											</span>
+										{:else}
+											{#if field?.batchCreate}
+												<span
+													class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+												>
+													<button
+														class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+														data-testid="batch-create-button"
+														title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+														onclick={() => modalBatchCreate(field, data.data.id)}
+													>
+														<i class="fa-solid fa-layer-group"></i>
+													</button>
+												</span>
+											{/if}
 											<button
-												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+												class="btn preset-filled-primary-500 self-end my-auto"
 												data-testid="add-button"
-												title={safeTranslate('add-' + model.info.localName)}
 												onclick={(_) => modalCreateForm(model)}
+												><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
+													'add-' + model.info.localName
+												)}</button
 											>
-												<i class="fa-solid fa-file-circle-plus"></i>
-											</button>
-										</span>
-									{:else}
-										{#if field?.batchCreate}
-											<span
-												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
-											>
-												<button
-													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-													data-testid="batch-create-button"
-													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
-													onclick={() => modalBatchCreate(field, data.data.id)}
-												>
-													<i class="fa-solid fa-layer-group"></i>
-												</button>
-											</span>
 										{/if}
-										<button
-											class="btn preset-filled-primary-500 self-end my-auto"
-											data-testid="add-button"
-											onclick={(_) => modalCreateForm(model)}
-											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-												'add-' + model.info.localName
-											)}</button
-										>
-									{/if}
-								{/snippet}
-							</ModelTable>
-						{/if}
-					{/key}
+									{/snippet}
+								</ModelTable>
+							{/if}
+						{/key}
+					{/if}
 				</Tabs.Content>
 			{/each}
 		</Tabs>
 	</div>
+{/if}
+
+{#if showRelations}
+	{#await import('#lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+		<RelationsDrawer
+			open={relationsOpen}
+			urlModel={data.urlModel}
+			id={data.data.id}
+			name={data.data.name ?? data.data.str ?? ''}
+			onClose={() => (relationsOpen = false)}
+		/>
+	{/await}
 {/if}

@@ -1,10 +1,15 @@
 <script lang="ts">
-	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
-	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { LOCALE_MAP, language } from '$lib/utils/locales';
+	import LevelEditor from '#lib/components/RiskMatrixEditor/LevelEditor.svelte';
+	import GridEditor from '#lib/components/RiskMatrixEditor/GridEditor.svelte';
+	import EbiosRmSectionEditor from './EbiosRmSectionEditor.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { page } from '$app/state';
+	import { LOCALE_MAP, language } from '#lib/utils/locales.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+
+	const toastStore = getToastStore();
 
 	interface Level {
 		id: number;
@@ -22,6 +27,10 @@
 	$pageTitle = m.lbMatrixPageTitle({ name: matrix.name || matrix.ref_id });
 
 	const baseLang = draft.locale ?? 'en';
+
+	let labelStandard = $derived(page.data.settings?.risk_matrix_labels ?? 'ISO');
+	let probabilityLabel = $derived(safeTranslate(`probability${labelStandard}`));
+	let impactLabel = $derived(safeTranslate(`impact${labelStandard}`));
 
 	// The document's level objects carry no numeric id; the editor components
 	// key on one. Assigned on load, stripped on save.
@@ -49,6 +58,7 @@
 	let impactLevels = $state(withIds(matrix.impact));
 	let riskLevels = $state(withIds(matrix.risk));
 	let grid = $state<number[][]>((matrix.grid ?? []).map((row: number[]) => [...row]));
+	let ebiosRm = $state<any>(matrix.ebios_rm ? structuredClone(matrix.ebios_rm) : null);
 	let unsaved = $state(false);
 	let saving = $state(false);
 
@@ -59,14 +69,25 @@
 	let activeLang = $state(baseLang);
 	let addedLanguages: string[] = $state([]);
 	let metaTranslations: Record<string, { name?: string; description?: string }> = $state({
-		...(matrix.translations ?? {})
+		...matrix.translations
 	});
 	let isTranslatingMeta = $derived(activeLang !== baseLang);
+
+	// Translatable levels of the optional EBIOS RM section.
+	function ebiosRmLevels(): { translations?: Record<string, unknown> }[] {
+		if (!ebiosRm) return [];
+		const roTo = ebiosRm.ro_to ?? {};
+		return [
+			...(ebiosRm.success_probability ?? []),
+			...(ebiosRm.technical_difficulty ?? []),
+			...['motivation', 'resources', 'activity', 'pertinence'].flatMap((scale) => roTo[scale] ?? [])
+		];
+	}
 
 	// Languages that already carry translations anywhere in the matrix.
 	let usedLanguages = $derived.by(() => {
 		const langs = new Set<string>();
-		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+		for (const levels of [probabilityLevels, impactLevels, riskLevels, ebiosRmLevels()]) {
 			for (const level of levels) {
 				for (const lang of Object.keys(level.translations ?? {})) langs.add(lang);
 			}
@@ -94,11 +115,12 @@
 
 	function removeLanguage(code: string) {
 		if (code === baseLang) return;
-		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+		for (const levels of [probabilityLevels, impactLevels, riskLevels, ebiosRmLevels()]) {
 			for (const level of levels) {
 				if (level.translations?.[code]) delete level.translations[code];
 			}
 		}
+		if (ebiosRm) ebiosRm = { ...ebiosRm };
 		probabilityLevels = [...probabilityLevels];
 		impactLevels = [...impactLevels];
 		riskLevels = [...riskLevels];
@@ -117,20 +139,11 @@
 		unsaved = true;
 	}
 
-	let statusMessage = $state('');
-	let statusType: 'success' | 'error' | '' = $state('');
-	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
-
 	function setStatus(message: string, type: 'success' | 'error') {
-		statusMessage = message;
-		statusType = type;
-		if (statusTimeout) clearTimeout(statusTimeout);
-		if (type === 'success') {
-			statusTimeout = setTimeout(() => {
-				statusMessage = '';
-				statusType = '';
-			}, 3000);
-		}
+		toastStore.trigger({
+			message,
+			background: type === 'error' ? 'preset-filled-error-500' : 'preset-filled-success-500'
+		});
 	}
 
 	// Grid synchronization on level changes — same semantics as the live
@@ -224,7 +237,8 @@
 						probability: withoutIds(probabilityLevels),
 						impact: withoutIds(impactLevels),
 						risk: withoutIds(riskLevels),
-						grid
+						grid,
+						ebios_rm: ebiosRm
 					}
 				})
 			});
@@ -255,24 +269,16 @@
 						{(isTranslatingMeta && metaTranslations[activeLang]?.name) || name || matrix.ref_id}
 					</h2>
 					{#if unsaved}
-						<span class="badge variant-filled-warning text-xs">{m.lbMatrixUnsavedChanges()}</span>
+						<span class="badge preset-filled-warning-500 text-xs">{m.lbMatrixUnsavedChanges()}</span
+						>
 					{/if}
 				</div>
 				<p class="text-xs font-mono text-surface-500 mt-1">{matrix.urn}</p>
 			</div>
 			<div class="flex items-center gap-2">
-				{#if statusMessage}
-					<span
-						class="text-xs px-2 py-1 rounded-full {statusType === 'error'
-							? 'bg-red-100 text-red-700'
-							: 'bg-green-100 text-green-700'}"
-					>
-						{statusMessage}
-					</span>
-				{/if}
 				<button
 					type="button"
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					onclick={save}
 					disabled={saving}
 				>
@@ -345,7 +351,7 @@
 				>
 				{#if isTranslatingMeta}
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						value={metaTranslations[activeLang]?.name ?? ''}
 						oninput={(e) => setMetaTranslation('name', e.currentTarget.value)}
@@ -367,7 +373,7 @@
 				>
 				{#if isTranslatingMeta}
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						value={metaTranslations[activeLang]?.description ?? ''}
 						oninput={(e) => setMetaTranslation('description', e.currentTarget.value)}
@@ -394,7 +400,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={probabilityLevels}
-				title={m.lbMatrixProbability()}
+				title={probabilityLabel}
 				onchange={onProbabilityChange}
 				{activeLang}
 				{baseLang}
@@ -403,7 +409,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={impactLevels}
-				title={m.lbMatrixImpact()}
+				title={impactLabel}
 				onchange={onImpactChange}
 				{activeLang}
 				{baseLang}
@@ -434,4 +440,14 @@
 			{baseLang}
 		/>
 	</div>
+
+	{#if page.data.featureflags?.ebiosrm || ebiosRm}
+		<EbiosRmSectionEditor
+			bind:section={ebiosRm}
+			likelihoodLevels={probabilityLevels}
+			{activeLang}
+			{baseLang}
+			onchange={() => (unsaved = true)}
+		/>
+	{/if}
 </div>

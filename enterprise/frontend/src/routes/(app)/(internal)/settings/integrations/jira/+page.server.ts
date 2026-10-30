@@ -4,8 +4,8 @@ import { superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import type { Actions, PageServerLoad } from './$types';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 
 const schema = z
 	.object({
@@ -57,7 +57,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 		const providerData = await providerResponse.json();
 		const provider = providerData.results[0];
 		config = {
-			folder_id: locals.user.root_folder_id,
+			folder_id: (await locals.getUser())?.root_folder_id,
 			provider_id: provider.id
 		};
 	}

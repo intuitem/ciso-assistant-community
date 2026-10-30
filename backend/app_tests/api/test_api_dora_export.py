@@ -2,6 +2,8 @@ import csv
 import io
 import json
 import zipfile
+from datetime import date, datetime
+from unittest.mock import patch
 
 import pytest
 from rest_framework.test import APIClient
@@ -186,6 +188,31 @@ class TestDoraExportEndpoint:
         assert "LEI_APITESTLEI0000000000" in disposition
         assert "IND_FSMA" in disposition
         assert disposition.endswith('.zip"')
+
+    @patch("tprm.dora_export.datetime", wraps=datetime)
+    @patch("tprm.dora_export.date", wraps=date)
+    def test_eba_filename_and_zip_root_match(
+        self, mock_date, mock_datetime, authenticated_client, dora_data
+    ):
+        mock_date.today.return_value = date(2026, 8, 3)
+        mock_datetime.now.return_value = datetime(2026, 8, 3, 12, 34, 56, 789000)
+
+        response = authenticated_client.get(
+            DORA_EXPORT_URL, {"naming_convention": "eba"}
+        )
+
+        expected_stem = (
+            "APITESTLEI0000000000.IND_BE_DORA010100_DORA_2025-12-31_20260803123456789"
+        )
+        assert response.status_code == 200
+        assert response["Content-Disposition"] == (
+            f'attachment; filename="{expected_stem}.zip"'
+        )
+        with zipfile.ZipFile(io.BytesIO(response.content), "r") as archive:
+            assert archive.namelist()
+            assert all(
+                name.startswith(f"{expected_stem}/") for name in archive.namelist()
+            )
 
     def test_zip_is_valid(self, authenticated_client, dora_data):
         response = authenticated_client.get(DORA_EXPORT_URL)

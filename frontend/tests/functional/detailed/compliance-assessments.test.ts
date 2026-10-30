@@ -1,7 +1,7 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -195,6 +195,31 @@ test('compliance assessments scoring is working properly', async ({
 	// because enabling scoring_enabled bulk-sets is_scored=True on ALL requirement
 	// assessments in the framework (not just the 4 tested above). Score calculation
 	// correctness is covered by backend unit tests in test_compliance_assessment_scoring.py.
+});
+
+// Regression test for CA-1843: clicking the status/result badges used to be a
+// dead zone, only the title/description text was clickable. Reuses the audit
+// created by the test above.
+test('clicking a requirement row status/result badges navigates to it', async ({
+	logedPage,
+	complianceAssessmentsPage,
+	page
+}) => {
+	await complianceAssessmentsPage.goto();
+	await complianceAssessmentsPage.hasUrl();
+	await complianceAssessmentsPage.viewItemDetail(
+		testObjectsData.complianceAssessmentsPage.build.name
+	);
+
+	const IDAM3TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-3', [
+		'ID - Identify',
+		'ID.AM - Asset Management'
+	]);
+
+	await expect(IDAM3TreeViewItem.badges).toBeVisible();
+	await IDAM3TreeViewItem.badges.click();
+
+	await page.waitForURL('/requirement-assessments/**');
 });
 
 test.afterAll('cleanup', async ({ browser }) => {

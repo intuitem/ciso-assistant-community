@@ -1,8 +1,7 @@
 """Domain export / import helpers extracted from FolderViewSet.
 
-Exposes the logic used by the three DRF actions on FolderViewSet
-(`export`, `import_domain`, `import_dummy_domain`) as module-level
-functions so the ViewSet stays thin.
+Exposes the logic used by the DRF actions on FolderViewSet (`export`,
+`import_domain`) as module-level functions so the ViewSet stays thin.
 """
 
 from __future__ import annotations
@@ -31,8 +30,10 @@ from django.utils.text import slugify
 from rest_framework.exceptions import PermissionDenied
 
 from core.models import (
+    Answer,
     AppliedControl,
     Asset,
+    AssetClass,
     ComplianceAssessment,
     Evidence,
     EvidenceRevision,
@@ -42,6 +43,8 @@ from core.models import (
     OrganisationObjective,
     Perimeter,
     Question,
+    QuickForm,
+    QuickFormResponse,
     QuestionChoice,
     ReferenceControl,
     RequirementAssessment,
@@ -67,7 +70,15 @@ from ebios_rm.models import (
     StrategicScenario,
 )
 from iam.models import Folder, RoleAssignment, User
-from tprm.models import Entity
+from sec_intel.models import CWE, SecurityAdvisory, Tactic, Technique, TTPCatalog
+from tprm.models import (
+    Contract,
+    Entity,
+    EntityAssessment,
+    Solution,
+    Tier,
+)
+from tprm.tiers import set_entity_tier, set_solution_tier
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -334,7 +345,7 @@ def import_terminologies(
     names: str | List[str] | None,
     field_path: Terminology.FieldPath,
 ) -> QuerySet[Terminology] | Terminology | None:
-    """Ensure requested terminologies exist and are visible."""
+    """Ensure requested terminologies exist."""
     if not names:
         return None
 
@@ -356,10 +367,8 @@ def import_terminologies(
             ignore_conflicts=True,
         )
 
-    Terminology.objects.filter(
-        name__in=names, field_path=field_path, is_visible=False
-    ).update(is_visible=True)
-
+    # An entry hidden on this instance stays hidden: an import must not override
+    # a deliberate visibility decision.
     result_qs = Terminology.objects.filter(name__in=names, field_path=field_path)
 
     if single_value:
@@ -367,12 +376,76 @@ def import_terminologies(
     return result_qs
 
 
+def _imported_catalog_entries(model, ref_ids: list, **context) -> list:
+    """The catalog entries (advisories, CWEs) an export names by ref_id. They
+    don't travel with a domain, so a ref_id this instance lacks, or holds more
+    than once, is skipped rather than guessed."""
+    found: dict[str, list] = {}
+    for entry in model.objects.filter(ref_id__in=ref_ids):
+        found.setdefault(entry.ref_id, []).append(entry)
+    entries = []
+    for ref_id in ref_ids:
+        matches = found.get(ref_id, [])
+        if len(matches) == 1:
+            entries.append(matches[0])
+        else:
+            logger.warning(
+                "Import: catalog entry not matched on this instance",
+                model=model._meta.model_name,
+                ref_id=ref_id,
+                matches=len(matches),
+                **context,
+            )
+    return entries
+
+
+def _imported_tier(ref: str, **context) -> Tier | None:
+    """The tier an export names: by key, or by name for exports made before
+    tiers had keys. A missing one is not created: a tier without a rank would
+    break the ordering of the scale."""
+    tier = Tier.objects.filter(key=ref).first() or Tier.objects.filter(name=ref).first()
+    if tier is None:
+        logger.warning("Import: tier not found on this instance", tier=ref, **context)
+    return tier
+
+
+def import_asset_class(
+    full_path: str | None, create_missing: bool = True
+) -> AssetClass | None:
+    """Resolve a canonical asset class path, optionally creating missing segments.
+
+    Created classes land in the root folder, where every user sees them, so the
+    caller decides whether an import may publish them.
+    """
+    if not full_path or not isinstance(full_path, str):
+        return None
+
+    segments = [part.strip() for part in full_path.split("/") if part.strip()]
+    if not segments:
+        return None
+
+    parent = None
+    for segment in segments:
+        # unique_together is case-sensitive, so match first to avoid creating a
+        # near-duplicate sibling differing only in case.
+        existing = AssetClass.objects.filter(
+            parent=parent, name__iexact=segment
+        ).first()
+        if existing is None and not create_missing:
+            return None
+        parent = existing or AssetClass.objects.create(
+            name=segment, parent=parent, builtin=False, is_visible=True
+        )
+    return parent
+
+
 def import_objects(
     parsed_data: dict,
     domain_name: str,
     load_missing_libraries: bool,
     user: User,
-) -> dict[str, str]:
+    create_missing_asset_classes: bool = False,
+) -> dict[str, Any]:
     """Import and validate domain objects using their ImportExport serializers."""
     validation_errors: list = []
     required_libraries: list = []
@@ -384,13 +457,21 @@ def import_objects(
         logger.error("No objects found in the dump")
         raise ValidationError({"error": "No objects found in the dump"})
 
+    # Referentials missing on this instance are created on the fly, in the root
+    # folder where everyone sees them. Snapshot so the caller is told which.
+    known_asset_classes = set(AssetClass.objects.values_list("id", flat=True))
+    known_terminologies = set(Terminology.objects.values_list("id", flat=True))
+
     try:
         models_map = get_models_map(objects)
-        # Our own domain exports never contain Folder rows (see the comment
-        # in serdes.utils.get_domain_export_objects). This guard only rejects
-        # dumps from elsewhere — e.g. a full DB backup mistakenly uploaded
-        # here.
-        if Folder in models_map.values():
+        # A domain export carries its enclaves and nothing else folder-wise, so
+        # any other folder means this is a foreign dump — a full DB backup, or a
+        # domain tree that would smuggle sub-domains past the Pro gating.
+        if any(
+            obj["model"] == "iam.folder"
+            and obj.get("fields", {}).get("content_type") != Folder.ContentType.ENCLAVE
+            for obj in objects
+        ):
             logger.error("Dump contains a domain")
             raise ValidationError({"error": "Dump contains a domain"})
 
@@ -430,7 +511,21 @@ def import_objects(
             logger.error(
                 "Failed to validate objects", validation_errors=validation_errors
             )
-            raise ValidationError({"validation_errors": validation_errors})
+            # Django's ValidationError can't wrap a list of dicts: it tries to
+            # read `.error_list` off each nested entry (which, built from a
+            # dict, only has `.error_dict`) and raises AttributeError. That
+            # AttributeError used to be swallowed by the outer `except
+            # Exception` and reported as an opaque "errorOccuredDuringImport".
+            # Flatten to readable strings so the real per-object errors reach
+            # the caller.
+            raise ValidationError(
+                {
+                    "validation_errors": [
+                        f"{err['model']} ({err['id']}): {err['errors']}"
+                        for err in validation_errors
+                    ]
+                }
+            )
 
         with transaction.atomic():
             base_folder = Folder.objects.create(
@@ -476,11 +571,27 @@ def import_objects(
                     model=model,
                     objects=objects,
                     link_dump_database_ids=link_dump_database_ids,
+                    create_missing_asset_classes=create_missing_asset_classes,
                 )
 
             resolve_security_exception_m2m(objects, link_dump_database_ids)
+            resolve_self_referencing_fks(objects, link_dump_database_ids)
+            restore_entity_assessment_enclaves(objects, link_dump_database_ids)
 
-        return {"message": "Import successful"}
+        return {
+            "message": "Import successful",
+            "created_referentials": {
+                "asset_classes": sorted(
+                    node.full_path
+                    for node in AssetClass.objects.exclude(id__in=known_asset_classes)
+                ),
+                "terminologies": sorted(
+                    Terminology.objects.exclude(id__in=known_terminologies).values_list(
+                        "name", flat=True
+                    )
+                ),
+            },
+        }
 
     except (ValidationError, PermissionDenied) as e:
         # Keep 403 semantics — don't let the broad Exception branch below
@@ -568,6 +679,7 @@ def create_model_objects(
     model: type[models.Model],
     objects: List[dict],
     link_dump_database_ids: dict[str, Any],
+    create_missing_asset_classes: bool = True,
 ) -> None:
     """Create all objects for a model after validation."""
     logger.debug("Creating objects for model", model=model)
@@ -598,18 +710,78 @@ def create_model_objects(
             model=model,
             batch=batch,
             link_dump_database_ids=link_dump_database_ids,
+            create_missing_asset_classes=create_missing_asset_classes,
         )
+
+
+def imported_folder(
+    folder_hash: Any,
+    link_dump_database_ids: dict[str, Any],
+    cache: dict[Any, Folder | None],
+) -> Folder:
+    """Where an exported object belongs: its enclave if one travelled, else the
+    new base folder. Domain folders never travel, so they flatten. `cache` keeps
+    this to one query per enclave rather than one per row."""
+    mapped = link_dump_database_ids.get(folder_hash)
+    if not mapped:
+        return link_dump_database_ids.get("base_folder")
+    if mapped not in cache:
+        cache[mapped] = Folder.objects.filter(id=mapped).first()
+    return cache[mapped] or link_dump_database_ids.get("base_folder")
+
+
+def dedup_clashing_fields(
+    model: type[models.Model], fields: dict[str, Any], error: ValidationError
+) -> List[str]:
+    """Suffix one clashing fields_to_check value, in place.
+
+    Returns the fields changed. Only one eligible field is suffixed, `name`
+    first: making one value unique makes the tuple unique, while clean() reports
+    every field it re-checks alone — so suffixing them all would stamp a UUID
+    onto ComplianceAssessment.version, which always collides on "1.0", and
+    starting from fields_to_check order would mangle ref_id and leave two rows
+    reading identically in list views. Dates / FKs / enums (e.g.
+    TaskNode.fields_to_check = ["task_template", "due_date"]), fields the model's
+    own clean() rejected for another reason, and over-long values are left alone.
+    """
+    error_dict = getattr(error, "error_dict", {})
+    candidates = list(getattr(model, "fields_to_check", []) or [])
+    if "name" in candidates:
+        candidates = ["name"] + [field for field in candidates if field != "name"]
+    for field in candidates:
+        errors = error_dict.get(field)
+        current = fields.get(field)
+        if errors is None or not isinstance(current, str):
+            continue
+        # Values are still raw dump JSON here, so a DateField's is a str too:
+        # only the model's own field type says a suffix means anything.
+        model_field = model._meta.get_field(field)
+        if not isinstance(model_field, (models.CharField, models.TextField)):
+            continue
+        if any(getattr(err, "code", None) == "max_length" for err in errors):
+            continue
+        suffix = f" {uuid.uuid4()}"
+        max_length = model_field.max_length
+        if max_length:
+            if max_length <= len(suffix):
+                suffix = f" {uuid.uuid4().hex[:8]}"[:max_length]
+            current = current[: max(0, max_length - len(suffix))]
+        fields[field] = f"{current}{suffix}"
+        return [field]
+    return []
 
 
 def create_batch(
     model: type[models.Model],
     batch: List[dict],
     link_dump_database_ids: dict[str, Any],
+    create_missing_asset_classes: bool = True,
 ) -> None:
     """Create a batch of objects with proper relationship handling."""
     with transaction.atomic():
         try:
             objects_creation_data = []
+            folder_cache: dict[Any, Folder | None] = {}
 
             for obj in batch:
                 obj_id = obj.get("id")
@@ -621,7 +793,9 @@ def create_batch(
                     continue
 
                 if fields.get("folder"):
-                    fields["folder"] = link_dump_database_ids.get("base_folder")
+                    fields["folder"] = imported_folder(
+                        fields["folder"], link_dump_database_ids, folder_cache
+                    )
 
                 many_to_many_map_ids: dict = {}
                 fields = process_model_relationships(
@@ -629,33 +803,25 @@ def create_batch(
                     fields=fields,
                     link_dump_database_ids=link_dump_database_ids,
                     many_to_many_map_ids=many_to_many_map_ids,
+                    create_missing_asset_classes=create_missing_asset_classes,
                 )
 
                 try:
                     model(**fields).clean()
                 except ValidationError as e:
-                    # clean() raises on fields_to_check uniqueness conflicts;
-                    # de-duplicate by appending a UUID, but only for
-                    # string-valued fields. Dates / FKs / enums in error_dict
-                    # (e.g. TaskNode.fields_to_check = ["task_template",
-                    # "due_date"]) are left untouched so we don't corrupt
-                    # them.
-                    for field in getattr(e, "error_dict", {}):
-                        current = fields.get(field)
-                        if isinstance(current, str):
-                            fields[field] = f"{current} {uuid.uuid4()}"
-                    # Re-validate. Anything still failing isn't a name
-                    # collision we can paper over — log it so it's visible
-                    # instead of silently creating bogus data.
+                    dedup_clashing_fields(model, fields, e)
                     try:
                         model(**fields).clean()
                     except ValidationError as retry_err:
+                        # Not a name collision we can paper over. bulk_create()
+                        # never re-validates, so abort rather than persist it.
                         logger.warning(
                             "Import validation still failing after UUID dedup",
                             model=model._meta.model_name,
                             obj_id=obj_id,
                             errors=getattr(retry_err, "error_dict", {}),
                         )
+                        raise
 
                 logger.debug("Creating object", fields=fields)
                 objects_creation_data.append(
@@ -672,7 +838,19 @@ def create_batch(
             if has_save_override and not is_requirement_assessment:
                 created_objects = []
                 for object_creation_data in objects_creation_data:
-                    obj_created = model.objects.create(**object_creation_data["fields"])
+                    fields = object_creation_data["fields"]
+                    try:
+                        obj_created = model.objects.create(**fields)
+                    except ValidationError as e:
+                        # A sibling created earlier in this batch took the value.
+                        if not dedup_clashing_fields(model, fields, e):
+                            raise
+                        obj_created = model.objects.create(**fields)
+                    if model is Vulnerability and not fields.get("remediated_at"):
+                        model.objects.filter(pk=obj_created.pk).update(
+                            remediated_at=None
+                        )
+                        obj_created.remediated_at = None
                     created_objects.append(obj_created)
             else:
                 objects_to_create = [
@@ -713,11 +891,28 @@ def create_batch(
             raise ValidationError(f"Error creating {model._meta.model_name}: {str(e)}")
 
 
+def adopt_framework_labels(fields: dict[str, Any]) -> None:
+    """Exports predating score_scale_preset relied on the framework's labels at
+    display time; give such audits a copy, as migration 0190 does."""
+    if "score_scale_preset" in fields:
+        return
+    framework = fields["framework"]
+    definition = fields.get("scores_definition")
+    own = definition.get("scale") if isinstance(definition, dict) else definition
+    if own or (fields.get("min_score"), fields.get("max_score")) != (
+        framework.min_score,
+        framework.max_score,
+    ):
+        return
+    fields["scores_definition"] = framework.scores_definition
+
+
 def process_model_relationships(
     model: type[models.Model],
     fields: dict[str, Any],
     link_dump_database_ids: dict[str, Any],
     many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
+    create_missing_asset_classes: bool = True,
 ) -> dict[str, Any]:
     """Resolve FK references and split out M2M fields for post-create handling."""
 
@@ -734,9 +929,21 @@ def process_model_relationships(
     logger.debug("Processing model relationships", model=model_name, _fields=_fields)
 
     match model_name:
+        case "folder":
+            # Only enclaves travel, and their domain parent stayed behind.
+            _fields["parent_folder"] = link_dump_database_ids.get("base_folder")
+            # Folder ref_ids are unique instance-wide: re-importing or copying a
+            # domain keeps an enclave's ref_id only while it is free.
+            ref_id = _fields.get("ref_id")
+            if ref_id and Folder.ref_id_in_use(ref_id):
+                _fields["ref_id"] = None
+
         case "asset":
             many_to_many_map_ids["parent_ids"] = get_mapped_ids(
                 _fields.pop("parent_assets", []), link_dump_database_ids
+            )
+            _fields["asset_class"] = import_asset_class(
+                _fields.get("asset_class"), create_missing_asset_classes
             )
 
         case "riskassessment":
@@ -759,6 +966,10 @@ def process_model_relationships(
                 id=link_dump_database_ids.get(_fields["perimeter"])
             ).first()
             _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
+            adopt_framework_labels(_fields)
+            many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
+                _fields.pop("evidences", []), link_dump_database_ids
+            )
 
         case "appliedcontrol":
             many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
@@ -804,16 +1015,34 @@ def process_model_relationships(
                 }
             )
 
+        case "quickformresponse":
+            _fields["quick_form"] = QuickForm.objects.get(urn=_fields["quick_form"])
+
         case "answer":
-            _fields["requirement_assessment"] = RequirementAssessment.objects.get(
-                id=link_dump_database_ids.get(_fields["requirement_assessment"])
-            )
             question = Question.objects.get(urn=_fields.get("question"))
-            ra = _fields["requirement_assessment"]
-            if question.requirement_node_id != ra.requirement_id:
-                raise ValidationError(
-                    f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+            if _fields.get("response"):
+                _fields["requirement_assessment"] = None
+                _fields["response"] = QuickFormResponse.objects.get(
+                    id=link_dump_database_ids.get(_fields["response"])
                 )
+                response = _fields["response"]
+                if (
+                    question.page_id is None
+                    or question.page.quick_form_id != response.quick_form_id
+                ):
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to quick form {response.quick_form_id}"
+                    )
+            else:
+                _fields.pop("response", None)
+                _fields["requirement_assessment"] = RequirementAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["requirement_assessment"])
+                )
+                ra = _fields["requirement_assessment"]
+                if question.requirement_node_id != ra.requirement_id:
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+                    )
             _fields["question"] = question
 
             choice_urns = _fields.pop("selected_choices_urns", None)
@@ -821,9 +1050,13 @@ def process_model_relationships(
                 many_to_many_map_ids["selected_choices_urns"] = choice_urns
 
         case "vulnerability":
-            many_to_many_map_ids["applied_controls"] = get_mapped_ids(
-                _fields.pop("applied_controls", []), link_dump_database_ids
-            )
+            for field in ("applied_controls", "assets", "evidences"):
+                many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
+                    _fields.pop(field, []), link_dump_database_ids
+                )
+            # Catalog entries, named by ref_id: matched in set_many_to_many_relations.
+            for field in ("security_advisories", "cwes"):
+                many_to_many_map_ids[f"{field}_refs"] = _fields.pop(field, [])
 
         case "riskscenario":
             _fields["risk_assessment"] = RiskAssessment.objects.get(
@@ -856,9 +1089,97 @@ def process_model_relationships(
 
         case "entity":
             _fields.pop("owned_folders", None)
+            # parent_entity is a self-reference; the parent may be created in
+            # the same batch, so link_dump_database_ids isn't populated yet.
+            # Create with no parent and wire it up in the post-pass
+            # resolve_self_referencing_fks once every entity exists.
+            _fields["parent_entity"] = None
+            if tier_ref := _fields.pop("tier", None):
+                many_to_many_map_ids["tier"] = _imported_tier(
+                    tier_ref, entity=_fields.get("name")
+                )
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
+            )
+
+        case "solution":
+            _fields["provider_entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["provider_entity"])
+            )
+            recipient_id = link_dump_database_ids.get(_fields.get("recipient_entity"))
+            _fields["recipient_entity"] = (
+                Entity.objects.filter(id=recipient_id).first() if recipient_id else None
+            )
+            many_to_many_map_ids["asset_ids"] = get_mapped_ids(
+                _fields.pop("assets", []), link_dump_database_ids
+            )
+            if tier_ref := _fields.pop("tier", None):
+                many_to_many_map_ids["tier"] = _imported_tier(
+                    tier_ref, solution=_fields.get("name")
+                )
+
+        case "solutionsubcontractor":
+            _fields["solution"] = Solution.objects.get(
+                id=link_dump_database_ids.get(_fields["solution"])
+            )
+            _fields["subcontractor"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["subcontractor"])
+            )
+            recipient_id = link_dump_database_ids.get(_fields.get("recipient"))
+            _fields["recipient"] = (
+                Entity.objects.filter(id=recipient_id).first() if recipient_id else None
+            )
+
+        case "representative":
+            _fields["entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["entity"])
+            )
+
+        case "entityassessment":
+            perimeter_id = link_dump_database_ids.get(_fields.get("perimeter"))
+            _fields["perimeter"] = (
+                Perimeter.objects.filter(id=perimeter_id).first()
+                if perimeter_id
+                else None
+            )
+            _fields["entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["entity"])
+            )
+            ca_id = link_dump_database_ids.get(_fields.get("compliance_assessment"))
+            _fields["compliance_assessment"] = (
+                ComplianceAssessment.objects.filter(id=ca_id).first() if ca_id else None
+            )
+            evidence_id = link_dump_database_ids.get(_fields.get("evidence"))
+            _fields["evidence"] = (
+                Evidence.objects.filter(id=evidence_id).first() if evidence_id else None
+            )
+            many_to_many_map_ids["solution_ids"] = get_mapped_ids(
+                _fields.pop("solutions", []), link_dump_database_ids
+            )
+
+        case "contract":
+            provider_id = link_dump_database_ids.get(_fields.get("provider_entity"))
+            _fields["provider_entity"] = (
+                Entity.objects.filter(id=provider_id).first() if provider_id else None
+            )
+            beneficiary_id = link_dump_database_ids.get(
+                _fields.get("beneficiary_entity")
+            )
+            _fields["beneficiary_entity"] = (
+                Entity.objects.filter(id=beneficiary_id).first()
+                if beneficiary_id
+                else None
+            )
+            # overarching_contract is a self-reference; the parent contract may
+            # be created in the same batch. Wire it up in the post-pass
+            # resolve_self_referencing_fks once every contract exists.
+            _fields["overarching_contract"] = None
+            many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
+                _fields.pop("evidences", []), link_dump_database_ids
+            )
+            many_to_many_map_ids["solution_ids"] = get_mapped_ids(
+                _fields.pop("solutions", []), link_dump_database_ids
             )
 
         case "ebiosrmstudy":
@@ -911,6 +1232,10 @@ def process_model_relationships(
                 _fields["risk_origin"],
                 Terminology.FieldPath.ROTO_RISK_ORIGIN,
             )
+            _fields["target_objective_category"] = import_terminologies(
+                _fields.get("target_objective_category"),
+                Terminology.FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            )
 
         case "stakeholder":
             _fields.update(
@@ -958,6 +1283,26 @@ def process_model_relationships(
                 _fields.pop("stakeholders", []), link_dump_database_ids
             )
 
+        case "technique":
+            # Library techniques never reach here: create_batch maps them to
+            # their urn. A custom one still carries referential links as urns.
+            # urn is unique but nullable, so `urn=None` matches every custom
+            # row — never look one up for a missing link.
+            catalog_urn = _fields.get("catalog")
+            _fields["catalog"] = (
+                TTPCatalog.objects.filter(urn=catalog_urn).first()
+                if catalog_urn
+                else None
+            )
+            parent_urn = _fields.get("parent")
+            _fields["parent"] = (
+                Technique.objects.filter(urn=parent_urn).first() if parent_urn else None
+            )
+            many_to_many_map_ids["tactic_urns"] = _fields.pop("tactics", [])
+            many_to_many_map_ids["reference_control_urns"] = _fields.pop(
+                "reference_controls", []
+            )
+
         case "operationalscenario":
             _fields.update(
                 {
@@ -972,6 +1317,9 @@ def process_model_relationships(
             many_to_many_map_ids["threat_ids"] = get_mapped_ids(
                 _fields.pop("threats", []), link_dump_database_ids
             )
+            many_to_many_map_ids["technique_ids"] = get_mapped_ids(
+                _fields.pop("techniques", []), link_dump_database_ids
+            )
 
         case "findingsassessment":
             perimeter_id = link_dump_database_ids.get(_fields.get("perimeter"))
@@ -980,13 +1328,37 @@ def process_model_relationships(
                 if perimeter_id
                 else None
             )
+            audit_id = link_dump_database_ids.get(_fields.get("compliance_assessment"))
+            _fields["compliance_assessment"] = (
+                ComplianceAssessment.objects.filter(id=audit_id).first()
+                if audit_id
+                else None
+            )
             many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                 _fields.pop("evidences", []), link_dump_database_ids
             )
 
         case "finding":
-            _fields["findings_assessment"] = FindingsAssessment.objects.get(
-                id=link_dump_database_ids.get(_fields["findings_assessment"])
+            findings_assessment_id = link_dump_database_ids.get(
+                _fields.get("findings_assessment")
+            )
+            _fields["findings_assessment"] = (
+                FindingsAssessment.objects.filter(id=findings_assessment_id).first()
+                if findings_assessment_id
+                else None
+            )
+            # Optional links: the asset may live outside the exported domain
+            # and the requirement node's framework may not be loaded on the
+            # target instance, so drop the link rather than fail the import.
+            asset_id = link_dump_database_ids.get(_fields.get("asset"))
+            _fields["asset"] = (
+                Asset.objects.filter(id=asset_id).first() if asset_id else None
+            )
+            requirement_node_urn = _fields.get("requirement_node")
+            _fields["requirement_node"] = (
+                RequirementNode.objects.filter(urn=requirement_node_urn).first()
+                if requirement_node_urn
+                else None
             )
             for field in (
                 "threats",
@@ -1005,7 +1377,7 @@ def process_model_relationships(
             )
 
         case "incident":
-            for field in ("threats", "assets", "entities"):
+            for field in ("threats", "assets", "entities", "vulnerabilities"):
                 many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
                     _fields.pop(field, []), link_dump_database_ids
                 )
@@ -1022,8 +1394,10 @@ def process_model_relationships(
                 "assets",
                 "applied_controls",
                 "compliance_assessments",
+                "requirement_assessments",
                 "risk_assessments",
                 "findings_assessment",
+                "vulnerabilities",
             ):
                 many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
                     _fields.pop(field, []), link_dump_database_ids
@@ -1069,6 +1443,10 @@ def set_many_to_many_relations(
                 logger.debug("Setting parent assets", asset=obj, parent_ids=parent_ids)
                 obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
 
+        case "complianceassessment":
+            if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
         case "appliedcontrol":
             if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
                 obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
@@ -1087,10 +1465,21 @@ def set_many_to_many_relations(
                 obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
 
         case "vulnerability":
-            if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                obj.applied_controls.set(
-                    AppliedControl.objects.filter(id__in=applied_control_ids)
-                )
+            for key, mcls, attr in (
+                ("applied_controls_ids", AppliedControl, "applied_controls"),
+                ("assets_ids", Asset, "assets"),
+                ("evidences_ids", Evidence, "evidences"),
+            ):
+                if ids := many_to_many_map_ids.get(key):
+                    getattr(obj, attr).set(mcls.objects.filter(id__in=ids))
+            for key, mcls, attr in (
+                ("security_advisories_refs", SecurityAdvisory, "security_advisories"),
+                ("cwes_refs", CWE, "cwes"),
+            ):
+                if ref_ids := many_to_many_map_ids.get(key):
+                    getattr(obj, attr).set(
+                        _imported_catalog_entries(mcls, ref_ids, vulnerability=obj.name)
+                    )
 
         case "riskscenario":
             if threat_ids := many_to_many_map_ids.get("threat_ids"):
@@ -1150,11 +1539,24 @@ def set_many_to_many_relations(
             if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
                 obj.stakeholders.set(Stakeholder.objects.filter(id__in=stakeholder_ids))
 
+        case "technique":
+            if tactic_urns := many_to_many_map_ids.get("tactic_urns"):
+                obj.tactics.set(Tactic.objects.filter(urn__in=tactic_urns))
+            if ref_control_urns := many_to_many_map_ids.get("reference_control_urns"):
+                obj.reference_controls.set(
+                    ReferenceControl.objects.filter(urn__in=ref_control_urns)
+                )
+
         case "operationalscenario":
             if threat_ids := many_to_many_map_ids.get("threat_ids"):
                 uuids, urns = split_uuids_urns(threat_ids)
                 obj.threats.set(
                     Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                )
+            if technique_ids := many_to_many_map_ids.get("technique_ids"):
+                uuids, urns = split_uuids_urns(technique_ids)
+                obj.techniques.set(
+                    Technique.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                 )
 
         case "answer":
@@ -1198,6 +1600,24 @@ def set_many_to_many_relations(
         case "entity":
             if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                 obj.relationship.set(relationship_ids)
+            if tier := many_to_many_map_ids.get("tier"):
+                set_entity_tier(obj, tier)
+
+        case "solution":
+            if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+            if tier := many_to_many_map_ids.get("tier"):
+                set_solution_tier(obj, tier, propagate=False)
+
+        case "entityassessment":
+            if solution_ids := many_to_many_map_ids.get("solution_ids"):
+                obj.solutions.set(Solution.objects.filter(id__in=solution_ids))
+
+        case "contract":
+            if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+            if solution_ids := many_to_many_map_ids.get("solution_ids"):
+                obj.solutions.set(Solution.objects.filter(id__in=solution_ids))
 
         case "findingsassessment":
             if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
@@ -1235,6 +1655,10 @@ def set_many_to_many_relations(
                 obj.assets.set(Asset.objects.filter(id__in=asset_ids))
             if entity_ids := many_to_many_map_ids.get("entities_ids"):
                 obj.entities.set(Entity.objects.filter(id__in=entity_ids))
+            if vulnerability_ids := many_to_many_map_ids.get("vulnerabilities_ids"):
+                obj.vulnerabilities.set(
+                    Vulnerability.objects.filter(id__in=vulnerability_ids)
+                )
 
         case "campaign":
             if framework_urns := many_to_many_map_ids.get("framework_urns"):
@@ -1252,12 +1676,18 @@ def set_many_to_many_relations(
                     ComplianceAssessment,
                     "compliance_assessments",
                 ),
+                (
+                    "requirement_assessments_ids",
+                    RequirementAssessment,
+                    "requirement_assessments",
+                ),
                 ("risk_assessments_ids", RiskAssessment, "risk_assessments"),
                 (
                     "findings_assessment_ids",
                     FindingsAssessment,
                     "findings_assessment",
                 ),
+                ("vulnerabilities_ids", Vulnerability, "vulnerabilities"),
             ):
                 if ids := many_to_many_map_ids.get(key):
                     getattr(obj, attr).set(mcls.objects.filter(id__in=ids))
@@ -1304,6 +1734,86 @@ def resolve_security_exception_m2m(
             ]
             if ids:
                 getattr(se, field_name).set(model_cls.objects.filter(id__in=ids))
+
+
+def resolve_self_referencing_fks(
+    objects: List[dict], link_dump_database_ids: dict[str, Any]
+) -> None:
+    """Post-pass: wire up nullable self-referencing FKs once every row exists.
+
+    parent_entity / overarching_contract point at another row of the same
+    model that may be created in the same batch, so they can't be resolved at
+    construction time (link_dump_database_ids is only populated after each
+    batch is created). We create those rows with a null parent and set the
+    link here. Targets outside the exported scope stay null by design.
+
+    Uses .update() so no model save() side effects (e.g. ActorSync) fire and
+    the historical timestamps are left untouched.
+    """
+    self_ref = (
+        ("tprm.entity", Entity, "parent_entity"),
+        ("tprm.contract", Contract, "overarching_contract"),
+    )
+    for model_name, model_cls, field_name in self_ref:
+        for obj in objects:
+            if obj["model"] != model_name:
+                continue
+            db_id = link_dump_database_ids.get(obj["id"])
+            if not db_id:
+                continue
+            parent_hash = obj.get("fields", {}).get(field_name)
+            parent_id = link_dump_database_ids.get(parent_hash) if parent_hash else None
+            if not parent_id:
+                continue
+            model_cls.objects.filter(id=db_id).update(**{f"{field_name}_id": parent_id})
+
+
+def restore_entity_assessment_enclaves(
+    objects: List[dict], link_dump_database_ids: dict[str, Any]
+) -> None:
+    """Put questionnaires from a pre-enclave dump back into an enclave.
+
+    Such a dump carries no folders, so its audits land flat in the domain — and
+    `grant_respondent_access` builds a recursive assignment on `audit.folder`,
+    which would hand the respondent everything.
+
+    Decided per assessment, not per dump: an enclave-aware export can still carry
+    pre-enclave questionnaires next to migrated ones, and skipping the repair for
+    all of them because some enclave travelled would leave those respondents with
+    the whole domain. An audit that did arrive in an enclave keeps that placement.
+
+    Only the questionnaire itself moves. Evidence and tasks from a pre-enclave
+    dump stay in the domain folder: everything there shares one folder, so
+    nothing tells the respondent's uploads from the organisation's, and sweeping
+    them into the enclave would hand internal evidence to the third party.
+    """
+    from tprm.services import enclave_folder
+
+    for obj in objects:
+        if obj["model"] != "tprm.entityassessment":
+            continue
+        db_id = link_dump_database_ids.get(obj["id"])
+        if not db_id:
+            continue
+        entity_assessment = (
+            EntityAssessment.objects.filter(id=db_id)
+            .select_related("compliance_assessment")
+            .first()
+        )
+        if entity_assessment is None or entity_assessment.compliance_assessment is None:
+            continue
+        audit = entity_assessment.compliance_assessment
+        if audit.folder.content_type == Folder.ContentType.ENCLAVE:
+            continue
+        enclave = enclave_folder(entity_assessment)
+        # .update(): Assessment.save would pull the folder back to the perimeter's.
+        ComplianceAssessment.objects.filter(id=audit.id).update(folder=enclave)
+        RequirementAssessment.objects.filter(compliance_assessment=audit).update(
+            folder=enclave
+        )
+        Answer.objects.filter(
+            requirement_assessment__compliance_assessment=audit
+        ).update(folder=enclave)
 
 
 def split_uuids_urns(ids: List[str]) -> Tuple[List[UUID], List[str]]:

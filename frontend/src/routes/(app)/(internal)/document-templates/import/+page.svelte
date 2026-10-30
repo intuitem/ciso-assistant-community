@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { enhance } from '$app/forms';
 	import { superForm, defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import type { PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: { error?: string; result?: any } | null } = $props();
@@ -47,11 +47,11 @@
 	</header>
 
 	{#if form?.error}
-		<aside class="variant-soft-error rounded-lg p-3 text-sm">{form.error}</aside>
+		<aside class="preset-tonal-error rounded-lg p-3 text-sm">{form.error}</aside>
 	{/if}
 
 	{#if form?.result}
-		<aside class="variant-soft-success space-y-2 rounded-lg p-3 text-sm">
+		<aside class="preset-tonal-success space-y-2 rounded-lg p-3 text-sm">
 			<p class="font-medium">
 				<i class="fa-solid fa-check mr-1"></i>{m.templatesImported({
 					created: form.result.created,
@@ -101,7 +101,7 @@
 
 			<button
 				type="submit"
-				class="btn variant-filled-primary w-full font-semibold shadow-sm transition-shadow hover:shadow-md"
+				class="btn preset-filled-primary-500 w-full font-semibold shadow-sm transition-shadow hover:shadow-md"
 				disabled={submitting || !$folderData.folder}
 			>
 				{#if submitting}

@@ -137,3 +137,12 @@ Click "Save" to apply the changes made to the questionnaire.
 Click "Send questionnaire" to distribute the assessment to the representatives.
 
 ![Send Questionnaire](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2FhLVvBdoDyaNiZmFPgBPi4z%2Fpi9Lsg6LYnG1eFxw5k4P7t_doc.png?alt=media\&token=ac3a71bc-3d0f-49e7-b671-b47a3aad744a)
+
+## Where to go from here
+
+The walkthrough above covers one third party, assessed once. A few things worth knowing once you're running this at scale:
+
+- **Reassessing** — don't start from scratch next round. **New revision** on the assessment carries the previous answers, results and evidences into a fresh one, in the same workspace. See [Revisions](../concepts/third-party-risk.md#revisions).
+- **Assessing many vendors at once** — a [third-party campaign](../features/campaigns.md) sends the same questionnaire to a whole set of third parties and gives you one page to watch the round from.
+- **Knowing who's overdue** — the entity list carries a **Last assessment** column, and third parties never assessed can be filtered out of the register in one click.
+- **Outside-in scores** — if you subscribe to a rating service, record its readings on the entity as [external ratings](../concepts/third-party-risk.md#external-ratings) so they sit next to the questionnaire answers.

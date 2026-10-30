@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import OTPInput from '#lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { activateTOTPSchema } from '$lib/utils/schemas';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { activateTOTPSchema } from '#lib/utils/schemas.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import { superForm } from 'sveltekit-superforms';
 	import { goto } from '$app/navigation';
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-fit shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { URL_MODEL_MAP, getMarkdownFields } from '$lib/utils/crud';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { URL_MODEL_MAP, getMarkdownFields } from '#lib/utils/crud.js';
 	const showRisks = true;
 	let { data } = $props();
 	const riskMatrix = data.data;
@@ -31,7 +31,7 @@
 												}/${val.id}`}
 												<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 											{:else}
-												{value}
+												{val}
 											{/if}
 										</li>
 									{/each}

@@ -1,18 +1,21 @@
 import uuid
+from datetime import date
 
 import pytest
+from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Framework,
+    HistoricalMetric,
     Perimeter,
     RequirementAssessment,
     RequirementNode,
     StoredLibrary,
 )
-from iam.models import Folder
+from iam.models import Folder, User
 
 from test_utils import EndpointTestsQueries
 
@@ -181,6 +184,9 @@ class TestComplianceAssessmentsAuthenticated:
         perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
+        # Framework has no Meta ordering, so all()[0]/all()[1] are
+        # nondeterministic on PostgreSQL — pin the import order explicitly.
+        frameworks = list(Framework.objects.order_by("created_at", "pk"))
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -191,14 +197,14 @@ class TestComplianceAssessmentsAuthenticated:
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION,
                 "perimeter": perimeter,
-                "framework": Framework.objects.all()[0],
+                "framework": frameworks[0],
             },
             {
                 "name": "new " + COMPLIANCE_ASSESSMENT_NAME,
                 "description": "new " + COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION + ".1",
                 "perimeter": str(perimeter2.id),
-                "framework": str(Framework.objects.all()[1].id),
+                "framework": str(frameworks[1].id),
             },
             {
                 "perimeter": {
@@ -210,18 +216,18 @@ class TestComplianceAssessmentsAuthenticated:
                     },
                 },
                 "framework": {
-                    "id": str(Framework.objects.all()[0].id),
-                    "urn": Framework.objects.all()[0].urn,
-                    "str": str(Framework.objects.all()[0]),
+                    "id": str(frameworks[0].id),
+                    "urn": frameworks[0].urn,
+                    "str": str(frameworks[0]),
                     "implementation_groups_definition": None,
                     "outcomes_definition": [],
                     "reference_controls": [
                         {"id": str(rc["id"]), "str": rc["str"], "urn": rc["urn"]}
-                        for rc in Framework.objects.all()[0].reference_controls
+                        for rc in frameworks[0].reference_controls
                     ],
-                    "min_score": Framework.objects.all()[0].min_score,
-                    "max_score": Framework.objects.all()[0].max_score,
-                    "ref_id": str(Framework.objects.all()[0].ref_id),
+                    "min_score": frameworks[0].min_score,
+                    "max_score": frameworks[0].max_score,
+                    "ref_id": str(frameworks[0].ref_id),
                     "has_update": False,
                 },
             },
@@ -506,16 +512,6 @@ class TestComplianceAssessmentMapFrom:
     the engine to exercise partial coverage and mapping_inference.
     """
 
-    @pytest.fixture(autouse=True)
-    def _reset_engine_cache(self):
-        # After each test the django_db transaction rolls back; reload the
-        # global engine so any mapping libraries we created don't leak into
-        # other tests via the in-memory cache.
-        yield
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
-
     # --- helpers -----------------------------------------------------------
     def _audit(self, framework, **kwargs):
         audit = _make_audit(Folder.get_root_folder(), framework, **kwargs)
@@ -564,9 +560,6 @@ class TestComplianceAssessmentMapFrom:
             is_loaded=True,
             content={"requirement_mapping_sets": [rms]},
         )
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
     # --- same-framework merge strategy -------------------------------------
     def test_full_copy_into_empty_target(self, authenticated_client):
@@ -803,9 +796,6 @@ class TestComplianceAssessmentMapFrom:
         _make_requirement(src_fw, "A")
         _make_requirement(tgt_fw, "X")
         # no mapping library loaded for this pair
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
         source = self._audit(src_fw)
         target = self._audit(tgt_fw)
@@ -815,3 +805,73 @@ class TestComplianceAssessmentMapFrom:
 
         resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# ---------------------------------------------------------------------------
+# Object-level authorization on custom detail actions
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentDetailActionAuthorization:
+    """The `frameworks` and `progress_ts` detail actions must fetch the audit
+    through `get_object()` so folder scoping applies: a user without a role
+    on the audit's folder gets the same 404 as the standard detail endpoint
+    and cannot tell whether the object exists."""
+
+    @pytest.fixture
+    def audit(self, app_config):
+        framework = _make_framework()
+        _make_requirement(framework, "R0")
+        domain = Folder.objects.create(
+            name="idor-domain", parent_folder=Folder.get_root_folder()
+        )
+        audit = _make_audit(domain, framework)
+        audit.create_requirement_assessments()
+        HistoricalMetric.objects.create(
+            model="ComplianceAssessment",
+            object_id=audit.id,
+            date=date(2026, 1, 1),
+            data={"reqs": {"progress_perc": 42}},
+        )
+        return audit
+
+    @pytest.fixture
+    def outsider_client(self, app_config):
+        """An authenticated user with no role assignment on any folder."""
+        user = User.objects.create_user("outsider@tests.com")
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+        )
+        return client
+
+    def test_frameworks_requires_folder_access(
+        self, authenticated_client, outsider_client, audit
+    ):
+        url = f"/api/compliance-assessments/{audit.id}/frameworks/"
+        assert outsider_client.get(url).status_code == status.HTTP_404_NOT_FOUND
+        resp = authenticated_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK, resp.content
+        assert isinstance(resp.json(), list)
+
+    def test_progress_ts_requires_folder_access(
+        self, authenticated_client, outsider_client, audit
+    ):
+        url = f"/api/compliance-assessments/{audit.id}/progress_ts/"
+        assert outsider_client.get(url).status_code == status.HTTP_404_NOT_FOUND
+        resp = authenticated_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK, resp.content
+        # Snapshots are date-ordered; creating the audit auto-records one for
+        # today, so only pin the synthetic (oldest) point.
+        assert resp.json()["data"][0] == ["2026-01-01", 42]
+
+    def test_unknown_audit_is_404(self, authenticated_client):
+        """Nonexistent UUIDs must 404: `frameworks` used to raise a bare
+        DoesNotExist (500) and `progress_ts` returned an empty 200."""
+        missing = uuid.uuid4()
+        for action in ("frameworks", "progress_ts"):
+            resp = authenticated_client.get(
+                f"/api/compliance-assessments/{missing}/{action}/"
+            )
+            assert resp.status_code == status.HTTP_404_NOT_FOUND, action

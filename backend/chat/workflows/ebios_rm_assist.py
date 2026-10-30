@@ -97,7 +97,7 @@ class EbiosRMAssistWorkflow(Workflow):
     def _resume_domain_choice(self, ctx) -> Iterator[SSEEvent]:
         folders = list(
             Folder.objects.filter(
-                id__in=ctx.accessible_folder_ids,
+                id__in=ctx.scope.folder_ids,
                 content_type=Folder.ContentType.DOMAIN,
             )
         )
@@ -147,7 +147,7 @@ class EbiosRMAssistWorkflow(Workflow):
     def _run_from_general(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
         folders = list(
             Folder.objects.filter(
-                id__in=ctx.accessible_folder_ids,
+                id__in=ctx.scope.folder_ids,
                 content_type=Folder.ContentType.DOMAIN,
             ).order_by("name")[:20]
         )
@@ -186,7 +186,7 @@ class EbiosRMAssistWorkflow(Workflow):
         yield self._thinking("Looking up domain and existing assets...")
 
         folder_id = ctx.parsed_context.object_id
-        if str(folder_id) not in ctx.accessible_folder_ids:
+        if str(folder_id) not in ctx.scope.folder_ids:
             yield self._token("You don't have access to this domain.")
             return
         try:
@@ -198,9 +198,9 @@ class EbiosRMAssistWorkflow(Workflow):
         # Check for existing assets in this domain
         Asset = apps.get_model("core", "Asset")
         domain_assets = list(
-            Asset.objects.filter(
-                folder_id=folder_id,
-            ).values("id", "name", "type", "description")[:30]
+            ctx.scope.queryset(Asset)
+            .filter(folder_id=folder_id)
+            .values("id", "name", "type", "description")[:30]
         )
 
         # Resolve risk matrix
@@ -210,7 +210,7 @@ class EbiosRMAssistWorkflow(Workflow):
             available_matrices = list(
                 RiskMatrix.objects.filter(
                     is_enabled=True,
-                    folder_id__in=ctx.accessible_folder_ids,
+                    folder_id__in=ctx.scope.folder_ids,
                 ).order_by("name")[:20]
             )
             if not available_matrices:
@@ -579,11 +579,9 @@ class EbiosRMAssistWorkflow(Workflow):
         try:
             EbiosRMStudy = apps.get_model("ebios_rm", "EbiosRMStudy")
             study = (
-                EbiosRMStudy.objects.select_related("risk_matrix", "folder")
-                .filter(
-                    id=ctx.parsed_context.object_id,
-                    folder_id__in=ctx.accessible_folder_ids,
-                )
+                ctx.scope.queryset(EbiosRMStudy)
+                .select_related("risk_matrix", "folder")
+                .filter(id=ctx.parsed_context.object_id)
                 .first()
             )
             if not study:

@@ -1,9 +1,12 @@
-import { env } from '$env/dynamic/public';
-import { m } from '$paraglide/messages';
+import {
+	PUBLIC_BACKEND_API_URL,
+	PUBLIC_DEFAULT_LANGUAGE,
+	PUBLIC_BACKEND_API_EXPOSED_URL
+} from '$app/env/public';
 
-const rawBackendApiUrl = Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
-	? env.PUBLIC_BACKEND_API_URL
-	: 'http://localhost:8000/api';
+import { m } from '#paraglide/messages.js';
+
+const rawBackendApiUrl = PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
 
 // Strip default ports so this matches request.url in handleFetch's startsWith check (issue #4422).
 export const BASE_API_URL = (() => {
@@ -14,17 +17,9 @@ export const BASE_API_URL = (() => {
 	}
 })();
 
-export const DEFAULT_LANGUAGE = `${
-	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE') ? env.PUBLIC_DEFAULT_LANGUAGE : 'en'
-}`;
-
+export const DEFAULT_LANGUAGE = PUBLIC_DEFAULT_LANGUAGE ?? 'en';
 export const ALLAUTH_API_URL = `${BASE_API_URL}/_allauth/app/v1`;
-
-export const BACKEND_API_EXPOSED_URL = `${
-	Object.hasOwn(env, 'PUBLIC_BACKEND_API_EXPOSED_URL')
-		? env.PUBLIC_BACKEND_API_EXPOSED_URL
-		: BASE_API_URL
-}`;
+export const BACKEND_API_EXPOSED_URL = PUBLIC_BACKEND_API_EXPOSED_URL ?? BASE_API_URL;
 
 export const complianceResultColorMap: { [key: string]: string } = {
 	not_assessed: '#d1d5db',
@@ -68,7 +63,7 @@ export const extendedResultColorMap: { [key: string]: string } = {
 	not_set: '#d1d5db',
 	major_nonconformity: '#dc2626',
 	minor_nonconformity: '#f97316',
-	observation: '#eab308',
+	observation_sensitive_point: '#eab308',
 	opportunity_for_improvement: '#3b82f6',
 	good_practice: '#22c55e'
 };
@@ -88,6 +83,14 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	in_progress: '#f59e0b',
 	in_review: '#3b82f6',
 	done: '#86efac',
+	// Applied control statuses. '--' is AppliedControl.Status.UNDEFINED, the field
+	// default, so it is usually the largest series: keep it muted so the statuses
+	// that carry the signal stay legible next to it.
+	'--': '#cbd5e1',
+	active: '#22c55e',
+	on_hold: '#a855f7',
+	degraded: '#f97316',
+	deprecated: '#64748b',
 	// Severity (findings, incidents, vulnerabilities, exceptions)
 	critical: '#dc2626',
 	high: '#ea580c',
@@ -107,6 +110,56 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	observation: '#eab308',
 	opportunity_for_improvement: '#3b82f6',
 	good_practice: '#22c55e'
+};
+
+// Vulnerability statuses (raw values): solid and soft for the treemap filters,
+// outline for the badge on a vulnerability's page. Class names are written out
+// in full because Tailwind only generates the classes it finds in the source.
+export const VULNERABILITY_STATUS_COLORS: Record<
+	string,
+	{ solid: string; soft: string; outline: string }
+> = {
+	potential: {
+		solid: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
+		soft: 'bg-yellow-50 text-yellow-400 border-yellow-200 hover:bg-yellow-100',
+		outline:
+			'bg-yellow-50 text-yellow-800 border-yellow-400 dark:bg-yellow-950 dark:text-yellow-200 dark:border-yellow-600'
+	},
+	exploitable: {
+		solid: 'bg-red-500 dark:bg-red-600 text-white border-red-600 hover:bg-red-600',
+		soft: 'bg-red-50 text-red-400 border-red-200 hover:bg-red-100',
+		outline:
+			'bg-red-50 text-red-800 border-red-400 dark:bg-red-950 dark:text-red-200 dark:border-red-600'
+	},
+	mitigated: {
+		solid: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 hover:bg-blue-600',
+		soft: 'bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100',
+		outline:
+			'bg-blue-50 text-blue-800 border-blue-400 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-600'
+	},
+	fixed: {
+		solid: 'bg-green-500 dark:bg-green-600 text-white border-green-600 hover:bg-green-600',
+		soft: 'bg-green-50 text-green-400 border-green-200 hover:bg-green-100',
+		outline:
+			'bg-green-50 text-green-800 border-green-400 dark:bg-green-950 dark:text-green-200 dark:border-green-600'
+	},
+	not_exploitable: {
+		solid: 'bg-teal-500 dark:bg-teal-600 text-white border-teal-600 hover:bg-teal-600',
+		soft: 'bg-teal-50 text-teal-400 border-teal-200 hover:bg-teal-100',
+		outline:
+			'bg-teal-50 text-teal-800 border-teal-400 dark:bg-teal-950 dark:text-teal-200 dark:border-teal-600'
+	},
+	unaffected: {
+		solid: 'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-600',
+		soft: 'bg-emerald-50 text-emerald-400 border-emerald-200 hover:bg-emerald-100',
+		outline:
+			'bg-emerald-50 text-emerald-800 border-emerald-400 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-600'
+	},
+	'--': {
+		solid: 'bg-surface-950-50 text-surface-50-950 border-surface-600-400 hover:bg-surface-800-200',
+		soft: 'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900',
+		outline: 'bg-surface-50-950 text-surface-700-300 border-surface-300-700'
+	}
 };
 
 // Fallback palette for breakdown keys not in breakdownSemanticColorMap.
@@ -155,9 +208,6 @@ export const TODAY = new Date();
 export const UUID_REGEX = '([0-9a-f]{8}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{12})';
 export const UUID_LIST_REGEX = new RegExp(`^${UUID_REGEX}(,${UUID_REGEX})*$`);
 
-export const URN_REGEX =
-	/^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$/;
-
 export const LOCALE_DISPLAY_MAP = {
 	en: '🇬🇧 English',
 	fr: '🇫🇷 Français',
@@ -181,11 +231,51 @@ export const LOCALE_DISPLAY_MAP = {
 	lt: '🇱🇹 Lietuvių',
 	ko: '🇰🇷 한국어',
 	et: '🇪🇪 Eesti',
-	sk: '🇸🇰 Slovenčina'
+	sk: '🇸🇰 Slovenčina',
+	sl: '🇸🇮 Slovenščina',
+	nb: '🇳🇴 Norsk bokmål'
 };
 
 export const ISO_8601_REGEX =
 	/^([+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([.,]\d+(?!:))?)?(\17[0-5]\d([.,]\d+)?)?([zZ]|([+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
+
+/**
+ * Fields rendered as localised dates when their value is an ISO 8601 string. The regex
+ * alone is not the test: some ISO values stay verbatim, so the field must be declared
+ * too. Union of the two lists ModelTable and DetailView used to keep separately.
+ */
+export const DATE_FIELDS_TO_FORMAT = [
+	'accepted_at',
+	'as_of',
+	'authority_notified_on',
+	'closed_at',
+	'closing_date',
+	'commission_date',
+	'created_at',
+	'detected_at',
+	'discovered_on',
+	'due_date',
+	'end_date',
+	'eta',
+	'expiration_date',
+	'expiry_date',
+	'exploited_date_added',
+	'last_assessment_date',
+	'occurred_at',
+	'published_date',
+	'read_at',
+	'rejected_at',
+	'remediated_at',
+	'reported_at',
+	'requested_on',
+	'resolved_at',
+	'revoked_at',
+	'start_date',
+	'subjects_notified_on',
+	'timestamp',
+	'updated_at',
+	'validation_deadline'
+];
 
 export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'1-3': ['1', '2', '3', '3', '3'],

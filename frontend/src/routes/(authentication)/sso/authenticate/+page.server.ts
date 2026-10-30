@@ -1,12 +1,13 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { logger } from '$lib/server/logger';
-import { getSecureRedirect } from '$lib/utils/helpers';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { logger } from '#lib/server/logger.js';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals, cookies, url }) => {
-	if (locals.user) {
-		redirect(302, locals.user.is_auditee ? '/auditee-dashboard' : '/analytics');
+	const user = await locals.getUser();
+	if (user) {
+		redirect(302, user.is_auditee ? '/auditee-dashboard' : '/analytics');
 	}
 
 	const token = cookies.get('token');
