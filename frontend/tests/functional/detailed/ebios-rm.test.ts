@@ -609,4 +609,23 @@ test('ebios rm study', async ({
 		await expect(page).not.toHaveURL(/.*workshop-5.*/);
 		await expect(page.locator('span:text("High")').first()).toBeVisible();
 	});
+
+	await test.step('duplicate study', async () => {
+		await page.goto('/ebios-rm');
+		await ebiosRmStudyPage.hasUrl();
+		await page.getByRole('cell', { name: ebiosRmStudy.build.name }).first().click();
+		await expect(page).toHaveURL(/\/ebios-rm\/[0-9a-f-]+$/);
+		const sourceUrl = page.url();
+
+		await page.getByTestId('duplicate-button').click();
+		await expect(page.getByTestId('modal-title')).toBeVisible();
+		await page.getByTestId('form-input-name').fill(`${ebiosRmStudy.build.name} (copy)`);
+		await page.getByTestId('save-button').click();
+
+		// redirected to the clone, a different study carrying the copied name
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
+		await expect(page).toHaveURL(/\/ebios-rm\/[0-9a-f-]+$/);
+		expect(page.url()).not.toBe(sourceUrl);
+		await expect(page.getByText(`${ebiosRmStudy.build.name} (copy)`).first()).toBeVisible();
+	});
 });

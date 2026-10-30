@@ -9,6 +9,7 @@ import {
 	urlParamModelVerboseName
 } from '#lib/utils/crud.js';
 import { formatSelectFieldData } from '#lib/utils/load.js';
+import { handleErrorResponse } from '#lib/utils/actions.js';
 import { modelSchema } from '#lib/utils/schemas.js';
 import type { ModelInfo } from '#lib/utils/types.js';
 import { type Actions } from '@sveltejs/kit';
@@ -68,7 +69,25 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	}
 
-	return { createRiskAnalysisForm, riskModel, syncPreview };
+	const ebiosRmStudyDuplicateForm = await superValidate(
+		{
+			name: data.name,
+			description: data.description ?? '',
+			version: data.version ?? '',
+			ref_id: data.ref_id ?? ''
+		},
+		zod(modelSchema('ebios-rm_duplicate')),
+		{ errors: false }
+	);
+	const ebiosRmStudyDuplicateModel = getModelInfo('ebios-rm_duplicate');
+
+	return {
+		createRiskAnalysisForm,
+		riskModel,
+		syncPreview,
+		ebiosRmStudyDuplicateForm,
+		ebiosRmStudyDuplicateModel
+	};
 };
 
 export const actions: Actions = {
@@ -127,6 +146,41 @@ export const actions: Actions = {
 			event
 		);
 		return message(form, { redirect: `/risk-assessments/${writtenObject.id}` });
+	},
+	duplicate: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return;
+
+		const form = await superValidate(formData, zod(modelSchema('ebios-rm_duplicate')));
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/duplicate/`;
+		const response = await event.fetch(endpoint, {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		});
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const res = await response.json();
+		const newId = res.results?.id;
+
+		const modelVerboseName = urlParamModelVerboseName('ebios-rm');
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDuplicateObject({
+					object: safeTranslate(modelVerboseName).toLowerCase()
+				})
+			},
+			event
+		);
+
+		if (newId) {
+			return message(form, { redirect: `/ebios-rm/${newId}` });
+		}
+		return { form };
 	},
 	changeStepState: async (event) => {
 		const formData = await event.request.formData();

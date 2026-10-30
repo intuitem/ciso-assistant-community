@@ -1437,6 +1437,7 @@
 	"backToWorkshop": "Retour à l'étude EBIOS RM / écosystème",
 	"duplicate": "Dupliquer",
 	"duplicateRiskAssessment": "Dupliquer l'évaluation de risque",
+	"duplicateEbiosRmStudy": "Dupliquer l'étude EBIOS RM",
 	"duplicateAppliedControl": "Dupliquer la mesure appliquée",
 	"duplicateOrganisationObjective": "Dupliquer l'objectif organisationnel",
 	"requestValidation": "Demander une validation",

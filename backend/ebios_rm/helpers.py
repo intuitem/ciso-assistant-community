@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext as _
 import math
@@ -8,6 +9,8 @@ from .models import (
     AttackPath,
     EbiosRMStudy,
     FearedEvent,
+    KillChain,
+    OperatingMode,
     OperationalScenario,
     RoTo,
     Stakeholder,
@@ -1075,3 +1078,143 @@ def sync_risk_assessment(risk_assessment, sources):
         "archived": total_archived,
         "total_scenarios": risk_assessment.risk_scenarios.count(),
     }
+
+
+def _copy_scalar_fields(instance):
+    """Scalar field values of `instance`, ready to recreate a copy of it.
+    Skips the pk, auto timestamps and every relation (set explicitly)."""
+    data = {}
+    for field in instance._meta.concrete_fields:
+        if field.primary_key or field.is_relation:
+            continue
+        if getattr(field, "auto_now", False) or getattr(field, "auto_now_add", False):
+            continue
+        data[field.name] = getattr(instance, field.name)
+    return data
+
+
+@transaction.atomic
+def duplicate_ebios_rm_study(
+    source, *, name, description="", ref_id="", version=None, folder=None
+):
+    """Deep-copy an EBIOS RM study into `folder` (the source's folder by default).
+
+    Owned objects (feared events -> ro/to -> ... -> kill chains) are recreated
+    and their intra-study links remapped through old_id -> new_obj maps; shared
+    objects (assets, threats, controls, elementary actions, ...) are referenced.
+    Ratings are recomputed from the copied inputs by the final save(), so the
+    clone matches the source.
+    """
+    clone = EbiosRMStudy.objects.create(
+        **{
+            **_copy_scalar_fields(source),
+            "name": name,
+            "description": description,
+            "ref_id": ref_id,
+            "version": version,
+        },
+        folder=folder or source.folder,
+        risk_matrix=source.risk_matrix,
+        reference_entity=source.reference_entity,
+        responsibility_matrix=source.responsibility_matrix,
+        classification=source.classification,
+    )
+    clone.assets.set(source.assets.all())
+    clone.compliance_assessments.set(source.compliance_assessments.all())
+    clone.authors.set(source.authors.all())
+    clone.reviewers.set(source.reviewers.all())
+    clone.filtering_labels.set(source.filtering_labels.all())
+
+    feared_events = {}
+    for fe in FearedEvent.objects.filter(ebios_rm_study=source):
+        new_fe = FearedEvent.objects.create(
+            **_copy_scalar_fields(fe), ebios_rm_study=clone
+        )
+        new_fe.assets.set(fe.assets.all())
+        new_fe.qualifications.set(fe.qualifications.all())
+        feared_events[fe.id] = new_fe
+
+    ro_tos = {}
+    for ro_to in RoTo.objects.filter(ebios_rm_study=source):
+        new_ro_to = RoTo.objects.create(
+            **_copy_scalar_fields(ro_to),
+            ebios_rm_study=clone,
+            risk_origin=ro_to.risk_origin,
+            target_objective_category=ro_to.target_objective_category,
+        )
+        new_ro_to.feared_events.set(
+            feared_events[fe.id] for fe in ro_to.feared_events.all()
+        )
+        ro_tos[ro_to.id] = new_ro_to
+
+    stakeholders = {}
+    for stakeholder in Stakeholder.objects.filter(ebios_rm_study=source):
+        new_stakeholder = Stakeholder.objects.create(
+            **_copy_scalar_fields(stakeholder),
+            ebios_rm_study=clone,
+            entity=stakeholder.entity,
+            category=stakeholder.category,
+        )
+        new_stakeholder.applied_controls.set(stakeholder.applied_controls.all())
+        stakeholders[stakeholder.id] = new_stakeholder
+
+    strategic_scenarios = {}
+    for ss in StrategicScenario.objects.filter(ebios_rm_study=source):
+        new_ss = StrategicScenario.objects.create(
+            **_copy_scalar_fields(ss),
+            ebios_rm_study=clone,
+            ro_to_couple=ro_tos[ss.ro_to_couple_id],
+            focused_feared_event=feared_events.get(ss.focused_feared_event_id),
+        )
+        strategic_scenarios[ss.id] = new_ss
+
+    attack_paths = {}
+    for ap in AttackPath.objects.filter(ebios_rm_study=source):
+        # ebios_rm_study is derived from strategic_scenario in save()
+        new_ap = AttackPath.objects.create(
+            **_copy_scalar_fields(ap),
+            strategic_scenario=strategic_scenarios[ap.strategic_scenario_id],
+        )
+        new_ap.stakeholders.set(stakeholders[sh.id] for sh in ap.stakeholders.all())
+        attack_paths[ap.id] = new_ap
+
+    operational_scenarios = {}
+    for scenario in OperationalScenario.objects.filter(ebios_rm_study=source):
+        new_scenario = OperationalScenario.objects.create(
+            **_copy_scalar_fields(scenario),
+            ebios_rm_study=clone,
+            attack_path=attack_paths[scenario.attack_path_id],
+        )
+        new_scenario.threats.set(scenario.threats.all())
+        new_scenario.techniques.set(scenario.techniques.all())
+        operational_scenarios[scenario.id] = new_scenario
+
+    operating_modes = {}
+    for om in OperatingMode.objects.filter(operational_scenario__ebios_rm_study=source):
+        new_om = OperatingMode.objects.create(
+            **_copy_scalar_fields(om),
+            operational_scenario=operational_scenarios[om.operational_scenario_id],
+        )
+        operating_modes[om.id] = new_om
+
+    source_steps = KillChain.objects.filter(
+        operating_mode__operational_scenario__ebios_rm_study=source
+    )
+    steps = {}
+    for step in source_steps:
+        new_step = KillChain.objects.create(
+            **_copy_scalar_fields(step),
+            operating_mode=operating_modes[step.operating_mode_id],
+            elementary_action=step.elementary_action,
+        )
+        new_step.assets.set(step.assets.all())
+        steps[step.id] = new_step
+    # antecedents point at other steps, so wire them once every step exists
+    for step in source_steps:
+        antecedents = [steps[a.id] for a in step.antecedents.all()]
+        if antecedents:
+            steps[step.id].antecedents.set(antecedents)
+
+    # recompute ratings from the copied inputs now that the graph is complete
+    clone.save()
+    return clone

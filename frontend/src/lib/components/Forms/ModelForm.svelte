@@ -823,7 +823,16 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
+			<EbiosRmForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{object}
+				{duplicate}
+				{...rest}
+			/>
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}
@@ -1195,6 +1204,16 @@
 					data-testid="save-button"
 					type="submit"
 					onclick={(e) => {
+						// a full-graph duplicate is a long request: show a busy state and block re-clicks
+						if (duplicate) {
+							if (isLoading) {
+								e.preventDefault();
+								e.stopPropagation();
+								return;
+							}
+							isLoading = true;
+							return;
+						}
 						if (URLModel !== 'folders-import') return;
 						if (isLoading) {
 							e.preventDefault();

@@ -48,6 +48,13 @@ class EbiosRMStudyWriteSerializer(AssignmentNotificationMixin, BaseModelSerializ
         return value
 
 
+class EbiosRMStudyDuplicateSerializer(BaseModelSerializer):
+    # the clone always lands in the source's folder, so no folder field here
+    class Meta:
+        model = EbiosRMStudy
+        fields = ["name", "ref_id", "version", "description"]
+
+
 class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
