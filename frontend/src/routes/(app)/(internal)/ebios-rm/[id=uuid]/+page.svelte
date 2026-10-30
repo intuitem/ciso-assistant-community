@@ -10,6 +10,7 @@
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import Card from '#lib/components/DataViz/Card.svelte';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -43,6 +44,10 @@
 			props: {
 				form: data.ebiosRmStudyDuplicateForm,
 				model: data.ebiosRmStudyDuplicateModel,
+				// getModelInfo normalizes urlModel to 'ebios-rm', so ModelForm would
+				// otherwise validate against the full study schema; pass the minimal
+				// duplicate schema explicitly so name/version is all that's required.
+				schema: modelSchema('ebios-rm_duplicate'),
 				duplicate: true,
 				formAction: '?/duplicate'
 			}
