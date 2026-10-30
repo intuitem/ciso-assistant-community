@@ -143,7 +143,7 @@
 			[]) as Record<string, any>[];
 		const groupName = (id: string) => {
 			const group = definitions.find((g) => g.ref_id === id);
-			return group?.translations?.[getLocale()]?.name || group?.name || id;
+			return group?.name || id;
 		};
 		const columns = new Map<string, { key: string; title: string; rules: Record<string, any>[] }>();
 		for (const rule of shownRules) {
