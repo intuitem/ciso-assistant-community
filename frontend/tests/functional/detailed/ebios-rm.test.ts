@@ -622,10 +622,11 @@ test('ebios rm study', async ({
 		await page.getByTestId('form-input-name').fill(`${ebiosRmStudy.build.name} (copy)`);
 		await page.getByTestId('save-button').click();
 
-		// redirected to the clone, a different study carrying the copied name
+		// the duplicate redirects to the clone: a different study carrying the copied name.
+		// not.toHaveURL auto-retries, so it waits for the SPA redirect to land.
 		await expect(page.getByTestId('modal-title')).not.toBeVisible();
+		await expect(page).not.toHaveURL(sourceUrl);
 		await expect(page).toHaveURL(/\/ebios-rm\/[0-9a-f-]+$/);
-		expect(page.url()).not.toBe(sourceUrl);
 		await expect(page.getByText(`${ebiosRmStudy.build.name} (copy)`).first()).toBeVisible();
 	});
 });
