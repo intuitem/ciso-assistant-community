@@ -42,7 +42,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 These settings drive the optional AI features (chat mode, agentic workflows, RAG over the knowledge base):
 
-- **LLM provider** — which model server the platform calls: `Ollama`, or `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)` for any server speaking the OpenAI chat completions API, hosted or local.
+- **LLM provider** — which model server the platform calls: `Ollama`, or `OpenAI-compatible (hosted gateway or local server)` for any server speaking the OpenAI chat completions API, hosted or local.
 - **Ollama base URL**, **Ollama model**, **Ollama embedding model** — used when the provider is Ollama.
 - **API base URL**, **Model name**, **API key** — used when the provider is OpenAI-compatible. The key is write-only and never returned by GET.
 - **Embedding backend** — which backend powers semantic search over knowledge. Local sentence transformers or Ollama; hosted providers are not offered here, so selecting one for the LLM leaves embeddings where they are.

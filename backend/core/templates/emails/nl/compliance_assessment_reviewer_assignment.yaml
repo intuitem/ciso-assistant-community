@@ -1,0 +1,16 @@
+subject: "CISO Assistant: U bent toegevoegd als beoordelaar van '${assessment_name}'"
+body: |
+  Hallo,
+
+  U bent toegevoegd als beoordelaar van de volgende audit:
+
+  - Naam: ${assessment_name}
+  - Beschrijving: ${assessment_description}
+  - Kader: ${framework_name}
+  - Status: ${assessment_status}
+  - Vervaldatum: ${assessment_due_date}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om deze audit te beoordelen: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.
