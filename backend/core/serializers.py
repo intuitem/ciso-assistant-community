@@ -3374,6 +3374,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id", "urn"])
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
+    has_required_evidence = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
     has_compliance_assessments = serializers.SerializerMethodField()
     is_scale_bound = serializers.SerializerMethodField()
@@ -4648,6 +4649,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "name",
                 "description",
                 "typical_evidence",
+                "evidence_required",
                 "ref_id",
                 "associated_reference_controls",
                 "associated_threats",
