@@ -1956,7 +1956,7 @@
 	"loginUsingTOTP": "Utiliser l'application d'authentification",
 	"copy": "Copier",
 	"incorrectCode": "Code incorrect",
-	"tooManyLoginAttempts": "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
+	"tooManyLoginAttempts": "Trop de tentatives de connexion échouées. Veuillez réessayer plus tard.",
 	"tooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
 	"step": "Étape {number}",
 	"critical": "Critique",

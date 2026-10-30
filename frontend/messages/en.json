@@ -1950,7 +1950,7 @@
 	"loginUsingTOTP": "Use authenticator app",
 	"copy": "Copy",
 	"incorrectCode": "Incorrect code",
-	"tooManyLoginAttempts": "Too many login attempts. Please try again later.",
+	"tooManyLoginAttempts": "Too many failed login attempts. Please try again later.",
 	"tooManyAttempts": "Too many attempts. Please try again in a minute.",
 	"step": "Step {number}",
 	"critical": "Critical",

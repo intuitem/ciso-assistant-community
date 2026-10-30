@@ -799,6 +799,19 @@ else:
     }
     logger.info("SQLITE_FILE: %s", SQLITE_FILE)
 
+# Without a shared cache each worker and Huey keep a private LocMemCache, so
+# feature-flag invalidation, metrology locks and DRF throttles are per-process.
+# e.g. MEMCACHED_LOCATION=unix:/run/memcached/memcached.sock or memcached:11211
+MEMCACHED_LOCATION = os.environ.get("MEMCACHED_LOCATION")
+# MEMCACHED_LOCATION = "unix:/run/memcached/memcached.sock"
+if MEMCACHED_LOCATION:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+            "LOCATION": MEMCACHED_LOCATION,
+        }
+    }
+
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
 PASSWORD_HASHERS = [

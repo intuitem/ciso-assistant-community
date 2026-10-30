@@ -42,6 +42,17 @@ class AccountAdapter(DefaultAccountAdapter):
         return False
 
     def authenticate(self, request, **credentials):
+        # allauth's failed-login limits (per email and per IP) live in
+        # pre_authenticate; the base authenticate we replace is what calls it.
+        self.pre_authenticate(request, **credentials)
+        user = self._authenticate_local(credentials)
+        if user:
+            self._rollback_login_failed_rl_usage()
+        else:
+            self.authentication_failed(request, **credentials)
+        return user
+
+    def _authenticate_local(self, credentials):
         try:
             serializer = AuthTokenSerializer(
                 data={

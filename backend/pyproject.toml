@@ -58,6 +58,7 @@ dependencies = [
     "rapidfuzz>=3.14.3,<4",
     "cronsim>=2.6,<3",
     "typst>=0.15.0",
+    "pymemcache>=4.0,<5",
 ]
 
 [dependency-groups]

@@ -17,6 +17,8 @@ services:
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
 
+    depends_on:
+      - memcached
     read_only: true
     cap_drop:
       - ALL
@@ -26,6 +28,7 @@ services:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
       - ./db:/code/db
+      - memcached_sock:/run/memcached
     user: "1001:1001"
 
   huey:
@@ -37,6 +40,7 @@ services:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     depends_on:
       - backend
+      - memcached
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -57,6 +61,7 @@ services:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
       - ./db:/code/db
+      - memcached_sock:/run/memcached
     entrypoint:
       - /bin/sh
       - -c
@@ -88,6 +93,22 @@ services:
     depends_on:
       - backend
     restart: always
+
+  # Shared cache for backend workers and huey, reached over a unix socket only
+  # (-s disables TCP). The socket lives on a tmpfs volume owned by 1001.
+  memcached:
+    container_name: memcached
+    image: ${MEMCACHED_IMAGE:-memcached:1.6-alpine}
+    restart: unless-stopped
+    command: ["memcached", "-s", "/run/memcached/memcached.sock", "-a", "0660", "-m", "64"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - memcached_sock:/run/memcached
+    user: "1001:1001"
 
   qdrant:
     container_name: qdrant
@@ -154,3 +175,8 @@ services:
 
 volumes:
   qdrant_data:
+  memcached_sock:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "uid=1001,gid=1001,mode=0770"
