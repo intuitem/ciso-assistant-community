@@ -17,6 +17,14 @@ PUBLISHED_SITE = "https://top10.owasp.org"
 DEFAULT_LOCALE = "en"
 EXPECTED_CATEGORY_IDS = [f"A{number:02d}" for number in range(1, 11)]
 MIN_CATEGORY_PAGES = len(EXPECTED_CATEGORY_IDS) // 2
+SOFT_WRAPPED_2021_LANGUAGE_CODES = frozenset(
+    {"de", "en", "es", "id", "it", "ja", "pt"}
+)
+CATEGORY_SECTION_TITLES = {
+    "score_table": "Score table",
+    "prevention": "How to prevent",
+    "examples": "Example attack scenarios",
+}
 CATEGORY_FILE_RE = re.compile(r"^A(0[1-9]|10)_(\d{4}).*\.md$", re.IGNORECASE)
 H1_RE = re.compile(r"^#(?!#)\s*(.+?)\s*$")
 H2_RE = re.compile(r"^##\s+(.+?)\s*$")
@@ -24,6 +32,31 @@ H2_OR_H3_RE = re.compile(r"^#{2,3}\s+(.+?)\s*$")
 MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)(?:\{[^}]*\})?")
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[(?P<label>[^\]]+)\]\((?P<target>[^)]+)\)")
 JINJA_RE = re.compile(r"\{\{.*?\}\}")
+MARKDOWN_LIST_ITEM_RE = re.compile(
+    r"^\s*(?:\\?[-+*~]\s+|\d+[.)]\s+)"
+)
+MARKDOWN_FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
+MARKDOWN_TABLE_SEPARATOR_RE = re.compile(
+    r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$"
+)
+MARKDOWN_BOLD_ONLY_RE = re.compile(
+    r"^\s*(?:\*\*|__)[^\n]+(?:\*\*|__)\s*$"
+)
+MARKDOWN_STRUCTURAL_LINE_RE = re.compile(
+    r"^\s*(?:"
+    r"#{1,6}\s+|"
+    r">|"
+    r"\||"
+    r"!\[|"
+    r"\[[^]]+\]:\s*\S|"
+    r"<!--|"
+    r"</?[A-Za-z][^>]*>|"
+    r"(?:-{3,}|\*{3,}|_{3,})\s*$"
+    r")"
+)
+MARKDOWN_HTML_BLOCK_START_RE = re.compile(
+    r"^\s*<(table|details|div|pre|script|style)\b", re.IGNORECASE
+)
 LOCALIZED_TEXT = {
     "ar": {
         "source": "المصدر",
@@ -187,6 +220,135 @@ def clean_markdown_block(lines: list[str]) -> str:
     return "\n".join(lines[start:end])
 
 
+def is_explicit_markdown_line_break(line: str) -> bool:
+    """Return whether a Markdown source line explicitly requests a line break."""
+    return line.endswith("  ") or bool(
+        re.search(r"</?br\s*/?>\s*$", line.rstrip(), flags=re.IGNORECASE)
+    )
+
+
+def markdown_table_line_indexes(lines: list[str]) -> set[int]:
+    """Return lines belonging to pipe tables, including tables without outer pipes."""
+    table_lines: set[int] = set()
+    for separator_index, line in enumerate(lines):
+        if separator_index == 0 or not MARKDOWN_TABLE_SEPARATOR_RE.match(line):
+            continue
+        if "|" not in lines[separator_index - 1]:
+            continue
+
+        start = separator_index - 1
+        end = separator_index + 1
+        while end < len(lines) and lines[end].strip() and "|" in lines[end]:
+            end += 1
+        table_lines.update(range(start, end))
+    return table_lines
+
+
+def join_soft_wrapped_markdown_lines(lines: list[str]) -> str:
+    """Join prose lines while preserving Markdown block boundaries and hard breaks."""
+    output: list[str] = []
+    text_buffer: list[str] = []
+    buffer_kind: str | None = None
+    fence_marker: str | None = None
+    html_block_tag: str | None = None
+    markdown_table_lines = markdown_table_line_indexes(lines)
+
+    def flush_text_buffer() -> None:
+        nonlocal buffer_kind
+        if not text_buffer:
+            return
+        joined = text_buffer[0]
+        for previous, current in zip(text_buffer, text_buffer[1:]):
+            if is_explicit_markdown_line_break(previous):
+                joined += "\n" + current.lstrip()
+            else:
+                joined = joined.rstrip() + " " + current.lstrip()
+        output.extend(joined.split("\n"))
+        text_buffer.clear()
+        buffer_kind = None
+
+    for line_index, line in enumerate(lines):
+        stripped = line.strip()
+
+        if fence_marker is not None:
+            output.append(line)
+            if re.match(rf"^\s*{re.escape(fence_marker)}\s*$", line):
+                fence_marker = None
+            continue
+
+        fence_match = MARKDOWN_FENCE_RE.match(line)
+        if fence_match:
+            flush_text_buffer()
+            fence_marker = fence_match.group(1)
+            output.append(line)
+            continue
+
+        if html_block_tag is not None:
+            output.append(line)
+            if re.search(
+                rf"</{re.escape(html_block_tag)}>\s*$", line, flags=re.IGNORECASE
+            ):
+                html_block_tag = None
+            continue
+
+        html_block_match = MARKDOWN_HTML_BLOCK_START_RE.match(line)
+        if html_block_match:
+            flush_text_buffer()
+            html_block_tag = html_block_match.group(1).lower()
+            output.append(line)
+            if re.search(
+                rf"</{re.escape(html_block_tag)}>\s*$", line, flags=re.IGNORECASE
+            ):
+                html_block_tag = None
+            continue
+
+        if line_index in markdown_table_lines:
+            flush_text_buffer()
+            output.append(line)
+            continue
+
+        if not stripped:
+            flush_text_buffer()
+            output.append(line)
+            continue
+
+        is_list_item = bool(MARKDOWN_LIST_ITEM_RE.match(line))
+        is_indented = line.startswith(("    ", "\t"))
+        is_structural = bool(MARKDOWN_STRUCTURAL_LINE_RE.match(line))
+        is_bold_only = bool(MARKDOWN_BOLD_ONLY_RE.match(line))
+
+        if is_list_item:
+            flush_text_buffer()
+            text_buffer.append(line)
+            buffer_kind = "list"
+            continue
+
+        if is_indented and buffer_kind == "list":
+            text_buffer.append(line)
+            continue
+
+        if is_structural or is_bold_only or is_indented:
+            flush_text_buffer()
+            output.append(line)
+            continue
+
+        if buffer_kind in {"paragraph", "list"}:
+            text_buffer.append(line)
+        else:
+            text_buffer.append(line)
+            buffer_kind = "paragraph"
+
+    flush_text_buffer()
+    return "\n".join(output)
+
+
+def normalize_extracted_markdown(markdown: str, year: int, locale: str) -> str:
+    """Normalize known 2021 source wrapping without changing other releases."""
+    if year != 2021 or language_code(locale) not in SOFT_WRAPPED_2021_LANGUAGE_CODES:
+        return markdown
+    return join_soft_wrapped_markdown_lines(markdown.split("\n"))
+
+
 def markdown_link_target(raw_target: str) -> str:
     """Extract the destination from an inline Markdown link target."""
     value = raw_target.strip()
@@ -328,14 +490,17 @@ def parse_category_page(path: Path, year: int, locale: str) -> dict[str, Any]:
     if year == 2025 and locale == "fa":
         raw_headings: list[tuple[int, str | None]] = []
         semantic_positions: dict[str, int] = {}
+        semantic_titles: dict[str, str] = {}
         for line_index, line in enumerate(source_lines):
             heading_match = H2_OR_H3_RE.match(line)
             if not heading_match:
                 continue
-            section_key = classify_section_title(heading_match.group(1))
+            heading_title = clean_heading_title(heading_match.group(1))
+            section_key = classify_section_title(heading_title)
             raw_headings.append((line_index, section_key))
             if section_key and section_key not in semantic_positions:
                 semantic_positions[section_key] = line_index
+                semantic_titles[section_key] = heading_title
 
         def section_body(section_key: str) -> str | None:
             start_heading = semantic_positions.get(section_key)
@@ -358,6 +523,9 @@ def parse_category_page(path: Path, year: int, locale: str) -> dict[str, Any]:
                     len(source_lines),
                 )
             return clean_markdown_block(source_lines[start:end])
+
+        def section_title(section_key: str) -> str | None:
+            return semantic_titles.get(section_key)
 
     else:
         indexes: dict[str, int] = {}
@@ -395,13 +563,22 @@ def parse_category_page(path: Path, year: int, locale: str) -> dict[str, Any]:
                 end = len(source_lines)
             return clean_markdown_block(source_lines[start:end])
 
+        def section_title(section_key: str) -> str | None:
+            section_index = indexes.get(section_key)
+            if section_index is None or section_index >= len(sections):
+                return None
+            return sections[section_index].title.split(" / ", 1)[0]
+
     normalized_sections: dict[str, str | None] = {}
+    normalized_section_titles: dict[str, str | None] = {}
     relative_links_removed: list[dict[str, str]] = []
     for section_key in ("score_table", "description", "prevention", "examples"):
         section = section_body(section_key)
+        normalized_section_titles[section_key] = section_title(section_key)
         if section is None:
             normalized_sections[section_key] = None
             continue
+        section = normalize_extracted_markdown(section, year, locale)
         normalized, replacements = replace_relative_markdown_links(section)
         normalized_sections[section_key] = normalized
         relative_links_removed.extend(
@@ -424,6 +601,7 @@ def parse_category_page(path: Path, year: int, locale: str) -> dict[str, Any]:
             else None
         ),
         "sections": normalized_sections,
+        "section_titles": normalized_section_titles,
         "relative_links_removed": relative_links_removed,
         "language": language_code(locale),
         "source_url": source_url,
@@ -437,14 +615,16 @@ def build_annotation(
     examples: str,
     source_url: str,
     locale: str,
+    section_titles: dict[str, str] | None = None,
 ) -> str:
     separator = "\n\n\n"
     references_label = localized_text(locale)["references"]
+    titles = CATEGORY_SECTION_TITLES | (section_titles or {})
     return separator.join(
         [
-            f"## Score table\n\n{score_table}",
-            f"## How to prevent\n\n{prevention}",
-            f"## Example attack scenarios\n\n{examples}",
+            f"## {titles['score_table']}\n\n{score_table}",
+            f"## {titles['prevention']}\n\n{prevention}",
+            f"## {titles['examples']}\n\n{examples}",
             f"{references_label} {source_url}",
         ]
     )
@@ -462,6 +642,7 @@ def category_with_localized_boilerplate(
         sections["examples"],
         source_url,
         locale,
+        category["section_titles"],
     )
     localized["source_url"] = source_url
     return localized
@@ -484,6 +665,15 @@ def complete_category(parsed: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"Missing required content: {', '.join(missing)}")
 
     sections = parsed["sections"]
+    section_titles = {
+        section_key: (
+            CATEGORY_SECTION_TITLES[section_key]
+            if parsed["language"] == DEFAULT_LOCALE
+            else parsed["section_titles"].get(section_key)
+            or CATEGORY_SECTION_TITLES[section_key]
+        )
+        for section_key in CATEGORY_SECTION_TITLES
+    }
     return {
         "ref_id": parsed["ref_id"],
         "name": parsed["name"],
@@ -494,8 +684,10 @@ def complete_category(parsed: dict[str, Any]) -> dict[str, Any]:
             sections["examples"],
             parsed["source_url"],
             parsed["language"],
+            section_titles,
         ),
         "sections": sections,
+        "section_titles": section_titles,
         "source_url": parsed["source_url"],
         "source_file": parsed["source_file"],
         "relative_links_removed": parsed.get("relative_links_removed", []),
@@ -738,8 +930,9 @@ def extract_locale_with_fallback(
                 english_category["source_file"],
                 ["page"],
                 (
-                    "category page is missing; name and source sections use English, "
-                    "while generated boilerplate remains localized"
+                    "category page is missing; category content and section headings "
+                    "use English, while the generated references sentence remains "
+                    "localized"
                 ),
             )
             continue

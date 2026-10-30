@@ -61,9 +61,17 @@ emoji status markers, an aligned summary, explicit warnings, and cleanup message
 - Threat reference identifiers include the release year, for example `A01:2025`.
 - The threat `description` contains the complete Description section without its title.
 - The threat `annotation` contains `Score table`, `How to prevent`, and `Example attack scenarios` in that order, followed by the source-page link.
+- English annotations use the canonical section titles above. Translated
+  annotations preserve the corresponding section titles from each source page.
+  When a complete category page falls back to English, its section titles also
+  remain in English.
 - Generated labels and sentences, including `Source` and the final references/CWE sentence, are translated for every exported language.
 - Generated links target the published OWASP Top 10 website. Markdown filenames map directly to page paths without the `.md` extension; English pages are at the year root, while translated pages retain their full source locale such as `pt-BR` or `zh-Hant`.
 - Markdown and embedded HTML tables are preserved.
+- Soft-wrapped 2021 prose is normalized for English, German, Spanish,
+  Indonesian, Italian, Japanese, and Portuguese. Markdown tables, headings,
+  distinct list items, code blocks, HTML blocks, and explicit line breaks remain
+  unchanged.
 - Markdown links to repository-relative paths are replaced with bold link text;
   absolute URLs and same-page anchors are preserved. The console summary shows
   the conversion count and log path. The generated `*-relative-links.log` file
