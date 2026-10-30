@@ -129,7 +129,7 @@ def _render(
     return pdf, payload
 
 
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
 def test_renders_in_each_locale(lang):
     pdf, _ = _render(_clusters(current={(1, 2): ["R.01"]}), lang=lang)
     assert pdf[:5] == b"%PDF-"
@@ -198,6 +198,7 @@ def test_cover_carries_traceability():
 def test_locale_fallback_is_whole_document():
     assert localized_template("risk_report", "de") == "risk_report_en.typ"
     assert localized_template("risk_report", "fr") == "risk_report_fr.typ"
+    assert localized_template("risk_report", "tr") == "risk_report_tr.typ"
 
 
 def test_the_four_matrix_html_variants_are_gone():
@@ -211,7 +212,7 @@ def test_the_four_matrix_html_variants_are_gone():
         assert not (snippets / name).exists(), f"{name} survived the migration"
 
 
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
 def test_existing_and_extra_controls_are_both_listed(lang):
     """`existing_applied_controls` and `applied_controls` are distinct relations;
     the deprecated free-text `existing_controls` field is not rendered."""
@@ -233,7 +234,7 @@ def test_control_rows_are_omitted_when_empty():
     assert row["existing_controls"] == [] and row["controls"] == []
 
 
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
 def test_inherent_is_omitted_when_the_flag_is_off(lang):
     """The flag reaches the builder as the presence of the inherent cluster; it must
     gate the per-scenario level as well as the matrix view."""
@@ -367,7 +368,7 @@ def test_summary_table_carries_the_treatment():
     assert "Treatment" in header
 
 
-@pytest.mark.parametrize("lang,expected", [("en", "Cancelled"), ("fr", "Annulé")])
+@pytest.mark.parametrize("lang,expected", [("en", "Cancelled"), ("fr", "Annulé"), ("tr", "İptal edildi")])
 def test_treatment_is_localised_by_the_template(lang, expected):
     """`get_treatment_display()` reads Django's gettext catalog, which is fr-only
     and incomplete — "cancelled" came through untranslated. The raw key travels
@@ -380,7 +381,7 @@ def test_treatment_is_localised_by_the_template(lang, expected):
     assert expected in _text(pdf)
 
 
-@pytest.mark.parametrize("lang,expected", [("en", "In progress"), ("fr", "En cours")])
+@pytest.mark.parametrize("lang,expected", [("en", "In progress"), ("fr", "En cours"), ("tr", "Devam ediyor")])
 def test_assessment_status_is_localised_by_the_template(lang, expected):
     pdf, payload = _render(_clusters(), lang=lang)
     assert payload["assessment"]["status_key"] == "in_progress"
