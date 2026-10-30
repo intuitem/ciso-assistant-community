@@ -7060,8 +7060,7 @@ objects:
           za yard\u0131mc\u0131 olabilir.\n\n\nReferanslar ve e\u015Flenen CWE listesi\
           \ hakk\u0131nda daha fazla bilgi: https://top10.owasp.org/2021/tr/A06_2021-Vulnerable_and_Outdated_Components/"
       zh:
-        name: "\u6613\u53D7\u653B\u51FB\u548C\u5DF2\u6DD8\u6C70\u7684\u7EC4\u4EF6\
-          (Vulnerable and Outdated Components)"
+        name: "\u6613\u53D7\u653B\u51FB\u548C\u5DF2\u6DD8\u6C70\u7684\u7EC4\u4EF6"
         description: "\u60A8\u53EF\u80FD\u5BB9\u6613\u53D7\u5230\u653B\u51FB\uFF1A\
           \n\n- \u5982\u679C\u60A8\u4E0D\u77E5\u9053\u60A8\u4F7F\u7528\u7684\u6240\
           \u6709\u7EC4\u4EF6\u7684\u7248\u672C\uFF08\u7528\u6237\u7AEF\u548C\u4F3A\
@@ -9312,7 +9311,7 @@ objects:
           \n\nReferanslar ve e\u015Flenen CWE listesi hakk\u0131nda daha fazla bilgi:\
           \ https://top10.owasp.org/2021/tr/A08_2021-Software_and_Data_Integrity_Failures/"
       zh:
-        name: Software and Data Integrity Failures
+        name: "\u8F6F\u4F53\u53CA\u8D44\u6599\u5B8C\u6574\u6027\u5931\u6548"
         description: "\u7A0B\u5F0F\u7801\u6216\u57FA\u7840\u67B6\u6784\u672A\u80FD\
           \u4FDD\u62A4\u8F6F\u4F53\u53CA\u8D44\u6599\u4E4B\u5B8C\u6574\u6027\u53D7\
           \u5230\u7834\u574F\u3002\u4E3E\u4F8B\u6765\u8BF4\uFF0C\u7269\u4EF6\u6216\
@@ -10436,7 +10435,7 @@ objects:
           \ milyon pound para cezas\u0131na \xE7arpt\u0131r\u0131ld\u0131.\n\n\nReferanslar\
           \ ve e\u015Flenen CWE listesi hakk\u0131nda daha fazla bilgi: https://top10.owasp.org/2021/tr/A09_2021-Security_Logging_and_Monitoring_Failures/"
       zh:
-        name: Security Logging and Monitoring Failures
+        name: "\u5B89\u5168\u8BB0\u5F55\u53CA\u76D1\u63A7\u5931\u6548"
         description: "\u5728 2021 \u5E74 OWASP Top 10\uFF0C\u6B64\u7C7B\u578B\u6709\
           \u52A9\u4E8E\u5BF9\u8FDB\u884C\u4E2D\u8D44\u5B89\u4E8B\u4EF6\u4E4B\u4FA6\
           \u6D4B\uFF0C\u5347\u7EA7\u53CA\u5E94\u53D8\u3002\u7F3A\u4E4F\u8BB0\u5F55\
@@ -11389,7 +11388,7 @@ objects:
           r\u0131lar\u0131 ger\xE7ekle\u015Ftirebilir.\n\n\nReferanslar ve e\u015F\
           lenen CWE listesi hakk\u0131nda daha fazla bilgi: https://top10.owasp.org/2021/tr/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/"
       zh:
-        name: Server-Side Request Forgery (SSRF)
+        name: "\u670D\u52A1\u7AEF\u8BF7\u6C42\u4F2A\u9020"
         description: "\u5F53\u7F51\u9875\u5E94\u7528\u7A0B\u5F0F\u6B63\u5728\u53D6\
           \u5F97\u8FDC\u7AEF\u8D44\u6E90\uFF0C\u5374\u672A\u9A8C\u8BC1\u7531\u4F7F\
           \u7528\u8005\u63D0\u4F9B\u7684\u7F51\u5740\uFF0C\u6B64\u65F6\u5C31\u4F1A\
