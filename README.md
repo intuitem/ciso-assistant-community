@@ -198,7 +198,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Multi-level domains
 - Kubernetes (Helm) deployment
 - Open Source
-- Available in +27 languages
+- Available in 28 languages
 
 </details>
 <!-- FEATURES:END -->
