@@ -157,3 +157,72 @@ class TestReadEntry:
         assert entry.skip_unrated == frozenset()
         assert entry.select_related == [] and entry.prefetch_related == []
         assert entry.readable_fields() == [*BASE_READ_FIELDS, "status"]
+
+
+@pytest.mark.django_db
+class TestRequirementAssignmentEntry:
+    def assignment(self, actors):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssignment,
+        )
+        from iam.models import Folder
+
+        domain = Folder.objects.create(
+            name="Assignment domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        framework = Framework.objects.create(
+            name="Assigned", urn="urn:test:risk:framework:assigned", folder=domain
+        )
+        perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=audit, folder=domain
+        )
+        assignment.actor.set(actors)
+        return assignment
+
+    def test_framework_identifies_the_audit_framework(self):
+        entry = READABLE_MODELS["requirement_assignment"]
+        framework = entry.computed["framework"](self.assignment([]))
+        assert framework["urn"] == "urn:test:risk:framework:assigned"
+        assert framework["name"] == "Assigned"
+
+    def test_users_resolve_users_teams_and_entity_representatives(self):
+        from core.models import Actor, Team
+        from iam.models import User
+        from tprm.models import Entity, Representative
+
+        direct = User.objects.create_user(email="direct@example.com")
+        leader = User.objects.create_user(email="leader@example.com")
+        member = User.objects.create_user(email="member@example.com")
+        rep_user = User.objects.create_user(email="rep@example.com")
+        User.objects.create_user(email="bystander@example.com")
+        team = Team.objects.create(name="Team", leader=leader)
+        team.members.add(member)
+        entity = Entity.objects.create(name="Vendor")
+        Representative.objects.create(
+            entity=entity, email="rep@example.com", user=rep_user
+        )
+        Representative.objects.create(entity=entity, email="noaccount@example.com")
+
+        assignment = self.assignment(
+            [
+                Actor.objects.get(user=direct),
+                Actor.objects.get(team=team),
+                Actor.objects.get(entity=entity),
+            ]
+        )
+        users = READABLE_MODELS["requirement_assignment"].computed["users"](assignment)
+        assert sorted(user["email"] for user in users) == [
+            "direct@example.com",
+            "leader@example.com",
+            "member@example.com",
+            "rep@example.com",
+        ]

@@ -103,7 +103,9 @@ Starts when an object is created, updated or deleted inside CISO Assistant.
 
 ### When this happens
 
-A select grouped by object kind, offering `created`, `updated` and `deleted` for each. Anything audited by the platform is available: applied controls, findings, vulnerabilities, audits, requirement assessments, risk acceptances, validation flows, entities, users, personal access tokens and more.
+A select grouped by object kind, offering `created`, `updated` and `deleted` for each. Anything audited by the platform is available: applied controls, findings, vulnerabilities, audits, requirement assessments, requirement assignments, risk acceptances, validation flows, entities, users, personal access tokens and more.
+
+Links set after creation (a requirement assignment's actors, an audit's authors) arrive as an `updated` event. To react to an assignment's actors, listen to `requirementassignment.updated`, which also covers its creation.
 
 ### Filters
 

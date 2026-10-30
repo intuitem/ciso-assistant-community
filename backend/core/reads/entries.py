@@ -35,6 +35,7 @@ from core.models import (
     Incident,
     QuickFormResponse,
     RequirementAssessment,
+    RequirementAssignment,
     RiskAcceptance,
     RiskAssessment,
     RiskScenario,
@@ -44,6 +45,7 @@ from core.models import (
     Vulnerability,
 )
 from doc_management.models import DocumentContainer, DocumentRevision, ManagedDocument
+from iam.models import User
 from tprm.models import Entity, EntityAssessment
 
 from .filters import get_model_field
@@ -245,6 +247,20 @@ def _requirements_breakdown(assessment):
         by_result[result] = count
         total += count
     return {"total": total, **by_result}
+
+
+def _assignment_users(assignment):
+    """Users behind the assigned actors: the user, team people, entity representatives."""
+    actors = list(assignment.actor.all())
+    users = User.objects.filter(
+        Q(actor__in=actors)
+        | Q(led_teams__actor__in=actors)
+        | Q(deputy_teams__actor__in=actors)
+        | Q(teams__actor__in=actors)
+        | Q(representative__entity__actor__in=actors),
+        is_active=True,
+    ).distinct()
+    return [{"id": str(user.id), "email": user.email} for user in users]
 
 
 READABLE_MODELS: dict[str, ReadEntry] = {
@@ -538,6 +554,28 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "evidences__revisions": EvidenceRevision,
             },
         },
+    ),
+    "requirement_assignment": ReadEntry(
+        model=RequirementAssignment,
+        fields=["status", "compliance_assessment", "folder"],
+        computed={
+            "name": str,
+            "compliance_assessment": lambda a: {
+                "str": str(a.compliance_assessment),
+                "id": str(a.compliance_assessment_id),
+                "name": a.compliance_assessment.name,
+            },
+            "framework": lambda a: {
+                "id": str(a.compliance_assessment.framework_id),
+                "urn": a.compliance_assessment.framework.urn,
+                "ref_id": a.compliance_assessment.framework.ref_id,
+                "name": a.compliance_assessment.framework.name,
+            },
+            "actors": lambda a: [str(actor.id) for actor in a.actor.all()],
+            "users": _assignment_users,
+        },
+        select_related=["compliance_assessment__framework", "folder"],
+        prefetch_related=["actor"],
     ),
     "risk_scenario": ReadEntry(
         model=RiskScenario,

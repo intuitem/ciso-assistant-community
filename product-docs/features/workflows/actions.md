@@ -141,6 +141,7 @@ Each row carries `id`, `name`, `created_at`, `updated_at` plus the fields below.
 | `managed_document` | description, locale, default_locale, container, plus `document_type` and `current_revision` (id, version number, status). A locale variant with no title of its own reads under the document's name |
 | `document_revision` | version_number, status, source, change_summary, content, published_at, document. `content` is the markdown itself, so a long one is truncated in `{{nodes.…}}`; map it to a variable to pass a whole document to an AI step |
 | `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, `applied_controls_count`, `evidences_count`, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself, all narrowed to what the run may see. Every evidence says whether anything is `attached`. Only assessable requirements |
+| `requirement_assignment` | status, compliance_assessment, folder, plus `framework` (id, urn, ref_id, name) of the audit, `actors` (ids) and `users` (id, email): the assigned user, a team's leader, deputies and members, an entity's representatives with an account |
 | `risk_scenario` | description, ref_id, treatment, inherent_level, current_level, residual_level, risk_assessment, `applied_controls_count`. Level filters ignore unrated scenarios |
 | `risk_acceptance` | description, state, expiry_date, justification |
 | `validation_flow` | ref_id, status, validation_deadline |
@@ -507,7 +508,7 @@ Adds a user to a group or removes them.
 
 | Setting | |
 |---|---|
-| User *expr* | An email, or a variable holding one |
+| User *expr* | An email or a user id, or a variable holding one. In a loop over a requirement assignment's `users`, `{{item.id}}` |
 | Domain | The domain whose group to use |
 | Group | Reader, Approver, Analyst, Domain manager or Respondent |
 | Operation | **Add** or **Remove** |
