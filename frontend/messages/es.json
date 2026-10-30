@@ -3926,5 +3926,7 @@
 	"dpiaRequirementChanges": "Historial del requisito de EIPD",
 	"previously": "Anteriormente",
 	"vulnerabilityOpenWithRemediationDate": "Vulnerabilidad abierta con fecha de remediación",
-	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidad resuelta sin fecha de remediación"
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidad resuelta sin fecha de remediación",
+	"reportTimezone": "Zona horaria de los informes",
+	"reportTimezoneHelpText": "Región utilizada para las horas impresas en informes y exportaciones. Cada hora muestra su desfase respecto a UTC. Las horas en pantalla no se ven afectadas."
 }

@@ -5802,5 +5802,7 @@
 	"dpiaRequirementChanges": "Zgodovina zahtev za DPIA",
 	"previously": "Prej",
 	"vulnerabilityOpenWithRemediationDate": "Odprta ranljivost ima datum odprave",
-	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave"
+	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave",
+	"reportTimezone": "Časovni pas poročil",
+	"reportTimezoneHelpText": "Regija, uporabljena za čase, izpisane v poročilih in izvozih. Vsak čas prikazuje svoj zamik glede na UTC. Časi na zaslonu se ne spremenijo."
 }

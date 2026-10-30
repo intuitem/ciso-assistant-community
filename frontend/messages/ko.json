@@ -4532,5 +4532,7 @@
 	"dpiaRequirementChanges": "DPIA 요건 이력",
 	"previously": "이전",
 	"vulnerabilityOpenWithRemediationDate": "열린 취약점에 조치 완료일이 있습니다",
-	"vulnerabilityResolvedWithoutRemediationDate": "해결된 취약점에 조치 완료일이 없습니다"
+	"vulnerabilityResolvedWithoutRemediationDate": "해결된 취약점에 조치 완료일이 없습니다",
+	"reportTimezone": "보고서 시간대",
+	"reportTimezoneHelpText": "보고서와 내보내기에 표시되는 시간에 사용되는 지역입니다. 각 시간에는 UTC 기준 오프셋이 표시됩니다. 화면에 표시되는 시간에는 영향을 주지 않습니다."
 }

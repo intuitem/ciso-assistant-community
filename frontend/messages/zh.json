@@ -3918,5 +3918,7 @@
 	"dpiaRequirementChanges": "DPIA 要求历史",
 	"previously": "此前",
 	"vulnerabilityOpenWithRemediationDate": "未关闭的漏洞有修复日期",
-	"vulnerabilityResolvedWithoutRemediationDate": "已解决的漏洞没有修复日期"
+	"vulnerabilityResolvedWithoutRemediationDate": "已解决的漏洞没有修复日期",
+	"reportTimezone": "报告时区",
+	"reportTimezoneHelpText": "用于报告和导出中所印时间的地区。每个时间都会显示其相对于 UTC 的偏移量。屏幕上显示的时间不受影响。"
 }

@@ -437,6 +437,8 @@
 	"dateFormatSettings": "Date format",
 	"defaultDateFormat": "Default date format",
 	"defaultDateFormatHelpText": "Date format applied to new users. Use the button below to apply it to all existing users.",
+	"reportTimezone": "Report time zone",
+	"reportTimezoneHelpText": "Region used for the times printed in reports and exports. Each time shows its UTC offset. Times on screen are not affected.",
 	"forceDateFormatForAllUsers": "Force date format for all users",
 	"forceDateFormatHelpText": "Override the date format preference for all existing users with the saved default above.",
 	"forceDateFormatConfirmTitle": "Force date format for all users",

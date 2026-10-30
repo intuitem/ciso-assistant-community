@@ -2170,5 +2170,7 @@
 	"dpiaRequirementChanges": "DPIA کی ضرورت کا تاریخچہ",
 	"previously": "پہلے",
 	"vulnerabilityOpenWithRemediationDate": "کھلی کمزوری کی تدارک کی تاریخ ہے",
-	"vulnerabilityResolvedWithoutRemediationDate": "حل شدہ کمزوری کی تدارک کی تاریخ نہیں ہے"
+	"vulnerabilityResolvedWithoutRemediationDate": "حل شدہ کمزوری کی تدارک کی تاریخ نہیں ہے",
+	"reportTimezone": "رپورٹس کا ٹائم زون",
+	"reportTimezoneHelpText": "رپورٹس اور ایکسپورٹس میں درج اوقات کے لیے استعمال ہونے والا علاقہ۔ ہر وقت UTC سے اپنا فرق دکھاتا ہے۔ اسکرین پر دکھائے گئے اوقات متاثر نہیں ہوتے۔"
 }

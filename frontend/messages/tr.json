@@ -2791,5 +2791,7 @@
 	"dpiaRequirementChanges": "DPIA gerekliliği geçmişi",
 	"previously": "Önceden",
 	"vulnerabilityOpenWithRemediationDate": "Açık zafiyetin giderme tarihi var",
-	"vulnerabilityResolvedWithoutRemediationDate": "Çözülmüş zafiyetin giderme tarihi yok"
+	"vulnerabilityResolvedWithoutRemediationDate": "Çözülmüş zafiyetin giderme tarihi yok",
+	"reportTimezone": "Rapor saat dilimi",
+	"reportTimezoneHelpText": "Raporlarda ve dışa aktarımlarda yazılan saatler için kullanılan bölge. Her saat, UTC'ye göre farkını gösterir. Ekrandaki saatler etkilenmez."
 }
