@@ -8,7 +8,7 @@ Unloading a library makes its content unavailable for use, but keeps the library
 
 ## Unload a library
 
-1. Open **Governance > Libraries** and find the library you want to unload.
+1. Open **Catalog > Libraries** and find the library you want to unload.
 2. In the relevant row, click the <img src="../../.gitbook/assets/unload_library_button.png" alt="Document with a minus sign: Unload library" data-size="line"> button at the far right.
 
 ![Libraries page with the Unload library button highlighted for a custom library](../../.gitbook/assets/unload_library.png)
@@ -24,7 +24,7 @@ If you only want to update the library, follow [Update a library](update-library
 ## Delete a library
 
 1. If the library is loaded, unload it first using the steps above.
-2. In **Governance > Libraries**, find the library you want to delete.
+2. In **Catalog > Libraries**, find the library you want to delete.
 3. In the relevant row, click the <img src="../../.gitbook/assets/delete_library_button.png" alt="Trash can: Delete library" data-size="line"> button at the far right.
 
 ![Libraries page with the Delete button highlighted for an unloaded custom library](../../.gitbook/assets/delete_library.png)
