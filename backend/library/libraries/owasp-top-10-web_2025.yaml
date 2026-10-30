@@ -2630,8 +2630,7 @@ objects:
           ne la compromission de vos syst\xE8mes informatiques lors de la mise \xE0\
           \ jour. L\u2019exemple le plus c\xE9l\xE8bre est probablement : \n\n\n\n\
           * Le compromis SolarWinds de 2019 qui a conduit \xE0 la compromission de\
-          \ ~18 000 organisations. [https://www.npr.org/2021/04/16/985439655/a-worst-nightmare-cyberattack-the-untold-story-of-the-solarwinds-hack]\
-          \ (https://www.npr.org/2021/04/16/985439655/a-worst-nightmare-cyberattack-the-untold-story-of-the-solarwinds-hack)\n\
+          \ ~18 000 organisations. [https://www.npr.org/2021/04/16/985439655/a-worst-nightmare-cyberattack-the-untold-story-of-the-solarwinds-hack](https://www.npr.org/2021/04/16/985439655/a-worst-nightmare-cyberattack-the-untold-story-of-the-solarwinds-hack)\n\
           \n**Sc\xE9nario #2 :** Un fournisseur de confiance est compromis au point\
           \ de ne se comporter de mani\xE8re malveillante que dans une condition sp\xE9\
           cifique. \n\n\n\n* Le vol de 1,5 milliard de dollars par Bybit en 2025 a\
@@ -6233,7 +6232,7 @@ objects:
           \u0648\u0646\u0647 \u0633\u0646\u0627\u0631\u06CC\u0648\u0647\u0627\u06CC\
           \ \u062D\u0645\u0644\u0647\n\n**\u0633\u0646\u0627\u0631\u06CC\u0648 #1:**\n\
           ```java\nString query = \"SELECT * FROM accounts WHERE custID='\" + request.getParameter(\"\
-          id\") + \"'\";\n\u0633\u0646\u0627\u0631\u06CC\u0648 #2:\nQuery HQLQuery\
+          id\") + \"'\";\n```\n\u0633\u0646\u0627\u0631\u06CC\u0648 #2:\nQuery HQLQuery\
           \ = session.createQuery(\"FROM accounts WHERE custID='\" + request.getParameter(\"\
           id\") + \"'\");\n\u062F\u0631 \u0647\u0631 \u062F\u0648\u060C \u0645\u0647\
           \u0627\u062C\u0645 \u0645\u0642\u062F\u0627\u0631 id \u0631\u0627 \u0628\
@@ -8407,7 +8406,7 @@ objects:
           identifiants connus pour violation (par exemple : utiliser [haveibeenpwned.com](https://haveibeenpwned.com)).\
           \ \n\n* Aligner les politiques de longueur, de complexit\xE9 et de rotation\
           \ des mots de passe avec les directives du [National Institute of Standards\
-          \ and Technology (NIST) 800-63b dans la section 5.1.1] (https://pages.nist.gov/800-63-3/sp800-63b.html#:~:text=5.1.1%20Memorized%20Secrets)\
+          \ and Technology (NIST) 800-63b dans la section 5.1.1](https://pages.nist.gov/800-63-3/sp800-63b.html#:~:text=5.1.1%20Memorized%20Secrets)\
           \ pour les secrets m\xE9moris\xE9s ou d\u2019autres politiques modernes\
           \ fond\xE9es sur des mots de passe fond\xE9es sur des preuves. \n\n* Ne\
           \ forcez pas les \xEAtres humains \xE0 faire tourner les mots de passe sauf\
