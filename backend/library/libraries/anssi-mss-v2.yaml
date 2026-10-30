@@ -36,6 +36,10 @@ objects:
       Sources :
       - https://monservicesecurise.cyber.gouv.fr
       - https://github.com/betagouv/mon-service-securise (commit 1362dc4)
+    field_visibility:
+      extended_result:
+        auditor: hidden
+        respondent: hidden
     implementation_groups_definition:
     - ref_id: B-I
       name: 'Basique : mesures indispensables'
