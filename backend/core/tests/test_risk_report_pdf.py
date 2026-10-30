@@ -368,7 +368,9 @@ def test_summary_table_carries_the_treatment():
     assert "Treatment" in header
 
 
-@pytest.mark.parametrize("lang,expected", [("en", "Cancelled"), ("fr", "Annulé"), ("tr", "İptal edildi")])
+@pytest.mark.parametrize(
+    "lang,expected", [("en", "Cancelled"), ("fr", "Annulé"), ("tr", "İptal edildi")]
+)
 def test_treatment_is_localised_by_the_template(lang, expected):
     """`get_treatment_display()` reads Django's gettext catalog, which is fr-only
     and incomplete — "cancelled" came through untranslated. The raw key travels
@@ -381,7 +383,9 @@ def test_treatment_is_localised_by_the_template(lang, expected):
     assert expected in _text(pdf)
 
 
-@pytest.mark.parametrize("lang,expected", [("en", "In progress"), ("fr", "En cours"), ("tr", "Devam ediyor")])
+@pytest.mark.parametrize(
+    "lang,expected", [("en", "In progress"), ("fr", "En cours"), ("tr", "Devam ediyor")]
+)
 def test_assessment_status_is_localised_by_the_template(lang, expected):
     pdf, payload = _render(_clusters(), lang=lang)
     assert payload["assessment"]["status_key"] == "in_progress"
