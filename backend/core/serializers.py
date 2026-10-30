@@ -311,6 +311,15 @@ class BaseModelSerializer(serializers.ModelSerializer):
                     }
                 )
 
+    def _viewable_ids(self, model: type[models.Model]) -> models.QuerySet:
+        cache = self.context.setdefault("viewable_ids", {})
+        if model not in cache:
+            request = self.context.get("request")
+            cache[model] = RoleAssignment.get_viewable_object_ids(
+                request.user if request is not None else None, model
+            )
+        return cache[model]
+
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
@@ -369,6 +378,63 @@ class ReferentialSerializer(BaseModelSerializer):
     class Meta:
         model: ReferentialObjectMixin
         exclude = ["translations"]
+
+
+class CollectionMembershipMixin(serializers.Serializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
+    def _resolve_collections(self, collections: list) -> list:
+        request = self.context.get("request")
+        if request is None:
+            return collections
+        current = (
+            set(GenericCollection.containing(self.instance))
+            if isinstance(self.instance, models.Model)
+            else set()
+        )
+        viewable = set(self._viewable_ids(GenericCollection))
+        final = set(collections) | {c for c in current if c.pk not in viewable}
+        if final == current:
+            return list(final)
+        changeable = set(
+            RoleAssignment.get_changeable_object_ids(request.user, GenericCollection)
+        )
+        if {c.pk for c in final ^ current} - changeable:
+            raise PermissionDenied(
+                {
+                    "genericcollection": "You do not have permission to change this genericcollection"
+                }
+            )
+        return list(final)
+
+    def validate(self, data):
+        data = super().validate(data)
+        if "genericcollection" in data:
+            data["genericcollection"] = self._resolve_collections(
+                data["genericcollection"]
+            )
+        return data
+
+    def create(self, validated_data):
+        collections = validated_data.pop("genericcollection", None)
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            if collections is not None:
+                GenericCollection.set_collections_of(instance, collections)
+        return instance
+
+    def update(self, instance, validated_data):
+        collections = validated_data.pop("genericcollection", None)
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if collections is not None:
+                GenericCollection.set_collections_of(instance, collections)
+        return instance
 
 
 class AssignmentNotificationMixin:
@@ -767,18 +833,13 @@ class PerimeterImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class RiskAssessmentWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+class RiskAssessmentWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
     assignment_notifications = {
         "authors": "object_assignment",
         "reviewers": "object_review_assignment",
     }
-
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
 
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
@@ -1789,7 +1850,10 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class AppliedControlWriteSerializer(
-    CommitmentSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+    CollectionMembershipMixin,
+    CommitmentSerializerMixin,
+    CustomFieldsSerializerMixin,
+    BaseModelSerializer,
 ):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
@@ -2412,13 +2476,6 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
-
     class Meta:
         model = Policy
         fields = "__all__"
@@ -3585,7 +3642,9 @@ class EvidenceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class EvidenceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+class EvidenceWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
     assignment_notifications = {"owner": "object_assignment"}
 
     applied_controls = serializers.PrimaryKeyRelatedField(
@@ -3615,12 +3674,6 @@ class EvidenceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
     )
     vulnerabilities = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Vulnerability.objects.all(), required=False
-    )
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
     )
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Actor.objects.all(), required=False
@@ -4131,15 +4184,11 @@ class ScoreRescaleConfirmationRequired(APIException):
         }
 
 
-class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+class ComplianceAssessmentWriteSerializer(
+    CollectionMembershipMixin, BaseModelSerializer
+):
     confirm_rescale = serializers.BooleanField(
         write_only=True, required=False, default=False
-    )
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
     )
     baseline = serializers.PrimaryKeyRelatedField(
         write_only=True,
@@ -6058,14 +6107,8 @@ class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
 
 
 class SecurityExceptionWriteSerializer(
-    CustomFieldsSerializerMixin, BaseModelSerializer
+    CollectionMembershipMixin, CustomFieldsSerializerMixin, BaseModelSerializer
 ):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
@@ -6267,19 +6310,12 @@ class SecurityExceptionReadSerializer(
 
 
 class FindingsAssessmentWriteSerializer(
-    AssignmentNotificationMixin, BaseModelSerializer
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
 ):
     assignment_notifications = {
         "authors": "object_assignment",
         "reviewers": "object_review_assignment",
     }
-
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
 
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:

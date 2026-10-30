@@ -44,6 +44,7 @@ from django.db.models import (
     Prefetch,
 )
 from django.db.models.functions import Coalesce, Concat
+from django.contrib.contenttypes.models import ContentType
 
 from collections import defaultdict, deque
 import pytz
@@ -135,6 +136,7 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
     domain_quality_checks,
@@ -797,6 +799,7 @@ class GenericFilterSet(df.FilterSet):
         pass
 
     id = UUIDInFilter(field_name="id", lookup_expr="in")
+    genericcollection = UUIDInFilter(method="filter_genericcollection")
 
     # Range lookups every date column gets, so listing a date in filterset_fields is
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
@@ -836,6 +839,29 @@ class GenericFilterSet(df.FilterSet):
                 continue
             fields[name] = list(dict.fromkeys([*fields.get(name, []), *extra]))
         return fields
+
+    def filter_genericcollection(self, queryset, name, value):
+        allowed = next(
+            (
+                item_queryset
+                for item_queryset in GenericCollection.ITEM_TYPES.values()
+                if item_queryset.model is queryset.model
+            ),
+            None,
+        )
+        if allowed is None:
+            return queryset.none()
+        items = CollectionItem.objects.filter(
+            collection_id__in=value,
+            content_type=ContentType.objects.get_for_model(queryset.model),
+        ).filter(
+            collection_id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, GenericCollection
+            )
+        )
+        return queryset.filter(pk__in=items.values("object_id")).filter(
+            pk__in=allowed.values("pk")
+        )
 
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
@@ -4531,7 +4557,6 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "ref_id": ["exact"],
             "authors": ["exact"],
             "reviewers": ["exact"],
-            "genericcollection": ["exact"],
             "due_date": ["exact", "year", "month"],
             "eta": ["exact"],
             "filtering_labels": ["exact"],
@@ -5852,6 +5877,9 @@ class AppliedControlFilterSet(GenericFilterSet):
     )
     # Nullable choice filters that support filtering for unset values using "--"
     category = NullableChoiceFilter(choices=AppliedControl.CATEGORY)
+    exclude_category = df.MultipleChoiceFilter(
+        field_name="category", choices=AppliedControl.CATEGORY, exclude=True
+    )
     csf_function = NullableChoiceFilter(choices=AppliedControl.CSF_FUNCTION)
     priority = NullableChoiceFilter(choices=AppliedControl.PRIORITY)
     effort = NullableChoiceFilter(choices=AppliedControl.EFFORT)
@@ -5992,7 +6020,6 @@ class AppliedControlFilterSet(GenericFilterSet):
             "expiry_date": ["exact"],
             "ref_id": ["exact"],
             "processings": ["exact"],
-            "genericcollection": ["exact"],
         }
 
 
@@ -7899,7 +7926,6 @@ class PolicyViewSet(AppliedControlViewSet):
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
-        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -11624,7 +11650,6 @@ class EvidenceFilterSet(GenericFilterSet):
             "findings",
             "findings_assessments",
             "task_templates",
-            "genericcollection",
             "expiry_date",
             "contracts",
             "status",
@@ -12977,7 +13002,6 @@ class ComplianceAssessmentFilterSet(GenericFilterSet):
             "evidences",
             "authors",
             "reviewers",
-            "genericcollection",
             "filtering_labels",
             "due_date",
             "eta",
@@ -17507,7 +17531,6 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "folder": ["exact"],
         "severity": ["exact"],
         "status": ["exact"],
-        "genericcollection": ["exact"],
         "expiration_date": ["exact"],
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
@@ -17673,7 +17696,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "compliance_assessment",
         "filtering_labels",
-        "genericcollection",
         "reported_at",
     ]
     search_fields = ["name", "description", "ref_id"]
