@@ -27,6 +27,9 @@ export const load: PageServerLoad = async (event) => {
 	const object = {
 		name: serviceAccount.name,
 		description: serviceAccount.description,
+		identity_source: serviceAccount.identity_source,
+		social_app: serviceAccount.social_app?.id,
+		federated_subject: serviceAccount.federated_subject,
 		permissions: serviceAccount.permissions?.map((permission: { id: number }) => permission.id),
 		folders: serviceAccount.folders?.map((folder: { id: string }) => folder.id),
 		is_recursive: serviceAccount.is_recursive,

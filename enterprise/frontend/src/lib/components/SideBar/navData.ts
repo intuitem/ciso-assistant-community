@@ -169,6 +169,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-robot',
 					href: '/service-accounts',
 					adminOnly: true
+				},
+				{
+					name: 'identityProviders',
+					fa_icon: 'fa-solid fa-id-card',
+					href: '/identity-providers',
+					adminOnly: true
 				}
 			]
 		},
