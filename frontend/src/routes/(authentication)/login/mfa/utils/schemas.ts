@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ZodSchema } from '$lib/utils/schemas';
+import type { ZodSchema } from '#lib/utils/schemas.js';
 
 export const mfaAuthenticateSchema: ZodSchema = z.object({
 	code: z

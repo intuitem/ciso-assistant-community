@@ -1,21 +1,21 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData, ActionData } from './$types';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { invalidateAll } from '$app/navigation';
+	} from '#lib/components/Modals/stores.js';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -83,6 +83,24 @@
 			label: m.policies(),
 			urlPattern: '/policies/',
 			icon: 'fa-solid fa-book'
+		},
+		{
+			key: 'applied_controls',
+			label: m.appliedControls(),
+			urlPattern: '/applied-controls/',
+			icon: 'fa-solid fa-fire-extinguisher'
+		},
+		{
+			key: 'document_containers',
+			label: m.documentContainers(),
+			urlPattern: '/document-containers/',
+			icon: 'fa-solid fa-file-lines'
+		},
+		{
+			key: 'business_impact_analyses',
+			label: m.businessImpactAnalyses(),
+			urlPattern: '/business-impact-analysis/',
+			icon: 'fa-solid fa-arrows-to-eye'
 		}
 	];
 
@@ -119,7 +137,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};

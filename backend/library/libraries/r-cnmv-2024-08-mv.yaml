@@ -1,0 +1,3073 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility Mode}'
+urn: urn:soluciones-ge:risk:library:r-cnmv-2024-08-mv
+locale: es
+ref_id: R-CNMV-2024-08-MV
+name: R-CNMV-2024-08-MV – Reglamento de Seguridad Cibernética y de la Información del Mercado de Valores
+description: 'Reglamento sobre Seguridad Cibernética y de la Información en el Mercado de Valores de la República Dominicana, aprobado por el Consejo Nacional del Mercado de Valores mediante la Resolución R-CNMV-2024-08-MV del 16 de julio de 2024. Aplica a intermediarios de valores, sociedades administradoras de mecanismos centralizados de negociación, depósitos centralizados de valores, entidades de contrapartida central, sociedades administradoras de fondos de inversión, sociedades fiduciarias de fideicomisos de oferta pública, sociedades titularizadoras y sociedades proveedoras de precios. Texto literal estructurado por artículo, párrafo, numeral y literal. Fuente oficial: https://simv.gob.do/download/96/cnv/19909/r-cnmv-2024-08-mv.pdf'
+copyright: Texto oficial del Consejo Nacional del Mercado de Valores de la República Dominicana (Resolución R-CNMV-2024-08-MV). Transcripción estructurada por Soluciones GE, SRL.
+version: 2
+publication_date: 2026-10-03
+provider: Superintendencia del Mercado de Valores de la República Dominicana (SIMV)
+packager: soluciones-ge
+objects:
+  framework:
+    urn: urn:soluciones-ge:risk:framework:r-cnmv-2024-08-mv
+    ref_id: R-CNMV-2024-08-MV
+    name: R-CNMV-2024-08-MV – Reglamento de Seguridad Cibernética y de la Información del Mercado de Valores
+    description: Texto del R-CNMV-2024-08-MV – Reglamento de Seguridad Cibernética y de la Información del Mercado de Valores.
+    requirement_nodes:
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Art. 1 – Objeto
+      description: Establecer los criterios y lineamientos generales que deben adoptar los Participantes del Mercado de Valores para procurar la Integridad, disponibilidad y Confidencialidad de la Información y el funcionamiento óptimo de los sistemas de Información y de la Infraestructura Tecnológica. Asimismo, establecer la adopción e implementación de prácticas para la gestión de Riesgos de la Seguridad Cibernética y de la Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Art. 2 – Alcance
+      description: 'Las disposiciones del presente Reglamento aplican a:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.1'
+      name: núm. 1
+      description: Los intermediarios de valores;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.2'
+      name: núm. 2
+      description: Las sociedades administradoras de mecanismos centralizados de negociación;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.3'
+      name: núm. 3
+      description: Los depósitos centralizados de valores;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.4'
+      name: núm. 4
+      description: Las entidades de contrapartida central;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.5'
+      name: núm. 5
+      description: Las sociedades administradoras de fondos de inversión;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.6'
+      name: núm. 6
+      description: Las sociedades fiduciarias de fideicomisos de oferta pública;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.7'
+      name: núm. 7
+      description: Las sociedades titularizadoras; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: '2.8'
+      name: núm. 8
+      description: Las sociedades proveedoras de precios.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.p1
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: 2.P1
+      name: Párr. I
+      description: Este Reglamento comprende las disposiciones normativas relativas al régimen general para la administración integral de Riesgos Tecnológicos, de Seguridad Cibernética y de la Información, así como el establecimiento de disposiciones relativas al gobierno interno de los Participantes del Mercado de Valores. Las disposiciones contenidas en este Reglamento serán de carácter supletorio para los Participantes del Mercado de Valores que, en virtud de su participación en el sistema de pagos y liquidación de valores y el correspondiente intercambio de Información Esencial, se encuentren dentro del ámbito de aplicación de la normativa especializada emitida por la Junta Monetaria relacionada con estos Riesgos, por lo que, esta última será el régimen de aplicación principal para dichas entidades.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.p2
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: 2.P2
+      name: Párr. II
+      description: Los Participantes del Mercado de Valores que no se encuentren sujetos al sistema de pagos y liquidación de valores y a los cuales les sea otorgado el Acceso al Equipo de Respuesta a Incidentes de Seguridad Cibernética para el Sector Financiero (CSIRT, por sus siglas en inglés) por parte del Banco Central de la República Dominicana deben remitir los requerimientos relativos a Incidentes de conformidad a lo establecido en el Reglamento de Seguridad Cibernética y de la Información emitido por la Junta Monetaria.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.p3
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: 2.P3
+      name: Párr. III
+      description: El superintendente de la Superintendencia del Mercado de Valores (en lo adelante, el “superintendente”) podrá desarrollar mediante norma técnica u operativa los requerimientos mínimos aplicables a los Emisores. Las Entidades de Intermediación Financiera reguladas y fiscalizadas por las Administración Monetaria y Financiera estarán sujetas únicamente a las disposiciones sobre la materia emitidas por su regulador sectorial.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2.p4
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:2
+      ref_id: 2.P4
+      name: Párr. IV
+      description: El superintendente podrá dictar las disposiciones y lineamientos mínimos en materia de Seguridad Cibernética y de la Información a los fines de permitir la conexión de los Participantes del Mercado de Valores, incluyendo aquellos que no se encuentran sujetos al Alcance del presente Reglamento, a los sistemas de la Superintendencia del Mercado de Valores (en lo adelante, la "Superintendencia”).
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Art. 3 – Definiciones
+      description: 'En adición a los términos definidos por la Ley núm. 249-17 del Mercado de Valores de la República Dominicana del diecinueve (19) de diciembre de dos mil diecisiete (2017), que deroga y sustituye la Ley núm. 19-00 del ocho (8) de mayo del año dos mil (2000) (en lo adelante, la “Ley”) y sus reglamentos de aplicación, para los fines del presente Reglamento, los términos y conceptos que se detallan a continuación tienen el significado siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.1'
+      name: núm. 1
+      description: 'Acceso: Capacidad y medios para comunicarse o interactuar con un sistema, utilizar recursos de dicho sistema para manejar y adquirir conocimiento de la Información que contiene o controlar sus componentes y funciones.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.2'
+      name: núm. 2
+      description: 'Amenaza: Circunstancia desfavorable que puede ocurrir y que, de suceder, tendría consecuencias negativas sobre la Seguridad Cibernética y de la Información. Una Amenaza puede tener causas naturales, ser accidental o intencionada. Si esta circunstancia desfavorable acontece a la vez que existe una Vulnerabilidad o debilidad de los sistemas o aprovechando su existencia, puede derivar en un Incidente de seguridad.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.3'
+      name: núm. 3
+      description: 'Ataque: Intento de obtener acceso no autorizado a los sistemas, sus recursos, servicios o Información, o de comprometer la Integridad de los mismos. Comprender cualquier tipo de actividad maliciosa que pretenda recopilar, degradar o destruir los recursos de los sistemas de Información, la Información contenida en éstos, interrumpir o provocar negación de sus servicios, o el daño a la Infraestructura Tecnológica que los soporta.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.4'
+      name: núm. 4
+      description: 'Bases de Datos: Serie de datos organizados y relacionados entre sí, almacenados en los sistemas de Información del Participante del Mercado de Valores o de sus proveedores de servicios.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.5'
+      name: núm. 5
+      description: 'BSA: Corresponde a las siglas en inglés a Software Alliance (Alianza de Software).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.6'
+      name: núm. 6
+      description: 'CIS: Corresponde a las siglas en inglés a Center for Internet Security (Centro de Seguridad de Internet).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.7'
+      name: núm. 7
+      description: 'CMMI: Corresponde a las siglas en inglés de Capability Maturity Model Integration (modelos que contienen las mejores prácticas que ayudan a las organizaciones a mejorar sus procesos).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.8'
+      name: núm. 8
+      description: 'Confidencialidad: Preservación de la Información a fin de que la misma no sea divulgada en todo o en parte a personas físicas o jurídicas, o procesos, a menos que éstos hayan sido autorizados para acceder a dicha Información. Incluye los medios para proteger la privacidad personal y la Información Esencial.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.9'
+      name: núm. 9
+      description: 'Control de Acceso: Proceso de concesión o denegación de solicitudes específicas para obtener y utilizar Información y servicios de procesamiento de Información relacionados o entrar en instalaciones físicas específicas.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.10'
+      name: núm. 10
+      description: 'COSO: Corresponde las siglas en inglés al Committee of Sponsoring Organizations of the Treadway (Comité de Organizaciones Patrocinadoras de la Comisión Treadway).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.11
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.11'
+      name: núm. 11
+      description: 'COBIT: Corresponde a las siglas en inglés a Control Objectives for Information and related Technology (Objetivos de Control para Tecnología de Información y Tecnologías Relacionadas).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.12
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.12'
+      name: núm. 12
+      description: 'Dispositivos Móviles: Dispositivos informáticos portátiles que: (i) son de tamaño pequeño, de modo que pueden ser transportados fácilmente por un solo individuo; (ii) están diseñados para funcionar sin conexión física; (iii) poseen almacenamiento de datos local, no extraíble; y, (iv) operan durante largos períodos con una fuente de alimentación autónoma. Los Dispositivos Móviles también pueden incluir capacidades de comunicación de voz, sensores electrónicos que permitan capturar y procesar Información o características integradas para sincronizar datos locales con ubicaciones remotas.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.13
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.13'
+      name: núm. 13
+      description: 'Encriptación: Proceso mediante el cual la Información o archivos son alterados en forma matemática, utilizando una llave, con el objetivo de evitar que una persona no autorizada pueda interpretarlos.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.14
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.14'
+      name: núm. 14
+      description: 'Entidad Interconectada: Persona jurídica habilitada mediante una relación contractual para mantener una conexión electrónica o intercambio de Información con un Participante del Mercado de Valores.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.15
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.15'
+      name: núm. 15
+      description: 'Evento: Un suceso o serie de sucesos que pueden ser internos o externos a la entidad, originados por la misma causa, que ocurren durante el mismo período.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.16
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.16'
+      name: núm. 16
+      description: 'Firmware: Conjunto de datos e instrucciones para el funcionamiento de un dispositivo de computación, almacenado como Software de solo lectura en dicho dispositivo, debiendo permanecer inalterado durante su ejecución.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.17
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.17'
+      name: núm. 17
+      description: 'GDPR: Corresponde a las siglas en inglés de General Data Protection Regulation (Regulación General de Protección de Datos) de la Unión Europea.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.18
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.18'
+      name: núm. 18
+      description: 'Gestión de Parches: Proceso que consiste en mantener actualizados los sistemas y aplicaciones o Software para corregir Vulnerabilidades o errores que pueden ser explotados por atacantes.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.19
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.19'
+      name: núm. 19
+      description: 'Gestión de Riesgo Tecnológico: Método para determinar, analizar, valorar y clasificar el Riesgo con el objeto de implementar mecanismos que permitan gestionarlo.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.20
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.20'
+      name: núm. 20
+      description: 'Hardware: Conjunto de equipos físicos que componen una computadora.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.21
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.21'
+      name: núm. 21
+      description: 'Hipervisor: Tecnología que se compone por una capa de Software que permite utilizar, al mismo tiempo, diferentes sistemas operativos o máquinas virtuales en una misma computadora central.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.22
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.22'
+      name: núm. 22
+      description: 'IAPP: Corresponde a las siglas en inglés al International Association of Privacy Professionals (Asociación Internacional de Profesionales de la Privacidad).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.23
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.23'
+      name: núm. 23
+      description: 'IEC: Corresponde a las siglas en inglés al International Electrotechnical Commission (Comisión Electrotécnica Internacional).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.24
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.24'
+      name: núm. 24
+      description: 'Incidente: Evento que pone en peligro la Integridad, disponibilidad o Confidencialidad de la Infraestructura Tecnológica o la Información procesada, almacenada o transmitida por dicho sistema, o que constituye una violación o Amenaza inminente de violación de políticas o Procedimientos de seguridad o políticas de uso aceptable.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.25
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.25'
+      name: núm. 25
+      description: 'Incidentes Significativo: Incidente o conjunto de Incidentes relacionados que podrían resultar en la degradación o pérdida de funciones críticas de servicios financieros, resultando en un riesgo sistémico para el sector financiero o en pérdida de la confianza.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.26
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.26'
+      name: núm. 26
+      description: 'Información: Conjunto de datos o cualquier forma de registro electrónico, óptico, magnético u otros medios, susceptible de ser procesada, distribuida y almacenada.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.27
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.27'
+      name: núm. 27
+      description: 'Información Esencial: Es aquella que facilita el desarrollo de las actividades fundamentales de la entidad y que sustentan la operatividad de la Infraestructura Tecnológica.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.28
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.28'
+      name: núm. 28
+      description: 'Información Esencial de Tipo Maestro: Conjunto de datos básicos cuyos registros sufren poca o ninguna variación en el tiempo.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.29
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.29'
+      name: núm. 29
+      description: 'Información Esencial de Tipo Transaccional: Conjunto de datos cuyos registros contienen Información sobre las transacciones realizadas en un sistema de Información.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.30
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.30'
+      name: núm. 30
+      description: 'Infraestructura Tecnológica: Aquellos equipos y sistemas con que cuenta el Participante del Mercado de Valores para procesar la Información y las adecuaciones del espacio físico que los aloja.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.31
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.31'
+      name: núm. 31
+      description: 'Integridad: Propiedad que poseen los datos para asegurar que los mismos no han sido alterados de manera no autorizada o destruidos de manera inadecuada durante su creación, transmisión o almacenamiento.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.32
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.32'
+      name: núm. 32
+      description: 'IP: Corresponde a las siglas en inglés de Internet Protocol (Protocolo de Internet).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.33
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.33'
+      name: núm. 33
+      description: 'ISO: Corresponde a las siglas en inglés de Internacional Organization for Standardization (Organización Internacional de Normalización).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.34
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.34'
+      name: núm. 34
+      description: 'ISF: Corresponde a las siglas en inglés de Information Security Forum (Foro de la Seguridad de la Información).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.35
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.35'
+      name: núm. 35
+      description: 'ITIL: Corresponde a las siglas en inglés de Information Technology Infrastructure Library (Biblioteca de Infraestructura de Tecnologías de Información).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.36
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.36'
+      name: núm. 36
+      description: 'Mecanismos de Control de Acceso: Medidas de seguridad diseñadas para detectar, restringir y permitir el Acceso a un sistema de Información o a un entorno local físico.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.37
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.37'
+      name: núm. 37
+      description: 'Marco de Trabajo: Son los marcos de referencia de control, estándares internacionales u otros estudios que ayuden a monitorear y mejorar las actividades críticas en el ámbito de la Tecnología de la Información, aumentar el valor del negocio y reducir sus Riesgos. Tales como: BSA, CIS, CMMI, COBIT, COSO, GDPR, IAPP, ISF, ISO 9001, ISO 20000, ISO 27001, ISO 27002, ISO 31000, IEC, ITIL, NIST, OWASP, PMBOK, SWIFT, entre otros estándares reconocidos internacionalmente que puedan aplicar.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.38
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.38'
+      name: núm. 38
+      description: 'Monitoreo Continuo: Proceso implementado para mantener en estado de vigilancia, el funcionamiento de los controles de seguridad de los sistemas de Información y la Infraestructura Tecnológica de los que depende la operación del Participante del Mercado de Valores.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.39
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.39'
+      name: núm. 39
+      description: 'NIST: Corresponde a las siglas en inglés de National Institute of Standards and Technology (Instituto Nacional de Estándares y Tecnología).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.40
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.40'
+      name: núm. 40
+      description: 'OWASP: Corresponde a las siglas en inglés de Open Web Application Security Project (Proyecto Abierto de Seguridad de Aplicaciones Web).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.41
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.41'
+      name: núm. 41
+      description: 'PBX: Corresponde a las siglas en inglés de Private Branch Exchange (Central Privada Automática).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.42
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.42'
+      name: núm. 42
+      description: 'Plan de Contingencia: Conjunto de Procedimientos alternativos a la operatividad normal del Participante del Mercado de Valores, cuya finalidad es la de permitir su funcionamiento, buscando minimizar el impacto operativo y financiero que pueda ocasionar cualquier Evento inesperado.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.43
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.43'
+      name: núm. 43
+      description: 'Plan de Continuidad de Negocio: Conjunto formado por planes de actuación, emergencia, financiero, de comunicación y Plan de Contingencia, destinados a mitigar el impacto provocado por la concreción de determinado Riesgo sobre la Información y los procesos de negocio de un Participante del Mercado de Valores.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.44
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.44'
+      name: núm. 44
+      description: 'PMBOK: Corresponde a las siglas en inglés de Project Management Body of Knowledge (Guía de los Fundamentos para la Dirección de Proyectos).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.45
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.45'
+      name: núm. 45
+      description: 'Problema: Es la causa conocida o desconocida de un Incidente.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.46
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.46'
+      name: núm. 46
+      description: 'Procedimientos: Lista detallada de la secuencia lógica y consistente de actividades y cursos de acción por medio de los cuales se asegura el cumplimiento de una función operativa.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.47
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.47'
+      name: núm. 47
+      description: 'Procesos Críticos: Procesos indispensables para la continuidad del negocio y las operaciones del Participante del Mercado de Valores, y cuya falta de identificación o aplicación deficiente puede generar un impacto financiero negativo.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.48
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.48'
+      name: núm. 48
+      description: 'Riesgo: Es la posibilidad de ocurrencia de Eventos que impacten negativamente los objetivos del Participante del Mercado de Valores y su situación financiera.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.49
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.49'
+      name: núm. 49
+      description: 'Riesgos Tecnológicos: Posibilidad de sufrir un impacto adverso relacionado con la afectación de la Integridad, disponibilidad y Confidencialidad de la Información o de la Infraestructura Tecnológica.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.50
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.50'
+      name: núm. 50
+      description: 'Seguridad Cibernética y de la Información: La protección de los sistemas de Información y de la Información en todos sus formatos, durante su almacenamiento, procesamiento o transmisión, contra el Acceso, uso, divulgación, interrupción, modificación o destrucción no autorizados.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.51
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.51'
+      name: núm. 51
+      description: 'Software: Conjunto de programas, instrucciones y reglas informáticas para ejecutar ciertas tareas en una computadora.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.52
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.52'
+      name: núm. 52
+      description: 'SWIFT: Corresponde a las siglas en inglés de Society for Worlwide Interbank Financial Telecommunication (Sociedad para las Telecomunicaciones Financieras Interbancarias Mundiales).'
+      annotation: «Worlwide» figura así en el texto oficial; se conserva literal.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.53
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.53'
+      name: núm. 53
+      description: 'Tecnología de Información: Conjunto de herramientas y métodos empleados para llevar a cabo la administración de la Información.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3.54
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:3
+      ref_id: '3.54'
+      name: núm. 54
+      description: 'Vulnerabilidad: Es una debilidad en el sistema de Información, sus Procedimientos de seguridad, implementación o controles internos que podrían permitir la materialización de una Amenaza.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:4
+      assessable: true
+      depth: 1
+      ref_id: '4'
+      name: Art. 4 – Marco de Trabajo
+      description: Los Participantes del Mercado de Valores sujetos al presente Reglamento deben establecer acciones para el desarrollo, implementación y mantenimiento de un programa de Seguridad Cibernética y de la Información y, a la vez, optar por uno o varios Marcos de Trabajo conforme a sus requerimientos y necesidades que se encuentren acorde a los estándares reconocidos internacionalmente que puedan aplicar.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:4.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:4
+      ref_id: 4.P1
+      name: Párr. I
+      description: El programa de Seguridad Cibernética y de la Información requerido en este Reglamento debe ser diseñado de acuerdo al Marco de Trabajo seleccionado y ser cónsono con la naturaleza, tamaño, complejidad y perfil de Riesgos del negocio de cada Participante del Mercado de Valores.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:4.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:4
+      ref_id: 4.P2
+      name: Párr. II
+      description: El programa de Seguridad Cibernética y de la Información comprende las estrategias, actividades, procesos y políticas que los Participantes del Mercado de Valores deben documentar, desarrollar e implementar, a fin de cumplir las disposiciones y requerimientos establecidos en este Reglamento. Dicho programa se debe basar en la identificación de los Eventos que podrían tener un efecto adverso sobre la continuidad de las operaciones, así como el impacto financiero, humano y reputacional sobre el Participante del Mercado de Valores.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      assessable: true
+      depth: 1
+      ref_id: '5'
+      name: Art. 5 – Criterios de Información
+      description: 'Los Participantes del Mercado de Valores deben observar los siguientes criterios para el establecimiento de sus políticas y Procedimientos para el control y la gestión de Riesgos en materia de Seguridad Cibernética y de la Información:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.1'
+      name: núm. 1
+      description: 'Autenticación o autentificación: Es el acto de validar la identidad de un usuario para otorgarle Acceso a recursos tecnológicos;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.2'
+      name: núm. 2
+      description: 'Auditabilidad o trazabilidad: Es el proceso que facilita la reconstrucción, revisión y análisis de la secuencia de Eventos que, a la vez, permite el registro y Monitoreo Continuo de los distintos recursos por parte de los usuarios que han sido previamente autorizados a manipular la Información;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.3'
+      name: núm. 3
+      description: 'Confiabilidad: Los sistemas deben brindar la Información correcta, completa, oportuna y exacta que será utilizada en la operación del Participante del Mercado de Valores, en la toma de decisiones, en la preparación de estados financieros y demás Información para su remisión a los órganos reguladores competentes;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.4'
+      name: núm. 4
+      description: 'Confidencialidad: Se debe brindar protección a la Información contra la divulgación no autorizada o inadecuada en virtud de las disposiciones legales y normativas aplicables;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.5'
+      name: núm. 5
+      description: 'Disponibilidad: Los recursos y la Información deben estar disponibles a los usuarios y para las autoridades públicas competentes en el ejercicio de sus facultades legales en el tiempo y la forma requerida;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.6'
+      name: núm. 6
+      description: 'Efectividad: La Información y los Procedimientos para su manejo deben ser relevantes, pertinentes y eficientes en términos de tiempo, de forma que garanticen el proceso del negocio. De igual forma, deben presentarse en forma correcta, coherente, completa y que puedan utilizarse oportunamente;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.7'
+      name: núm. 7
+      description: 'Eficiencia: La gestión y manejo de la Información debe realizarse mediante una óptima utilización de los recursos;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:5
+      ref_id: '5.8'
+      name: núm. 8
+      description: 'Integridad: Propiedad que poseen los datos y que asegura que los mismos no han sido alterados de manera no autorizada o destruidos de forma inadecuada, durante su creación, transmisión o almacenamiento.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      assessable: true
+      depth: 1
+      ref_id: '6'
+      name: Art. 6 – Responsabilidades en materia de seguridad
+      description: 'A los efectos del presente Reglamento, es responsabilidad de los Participantes del Mercado de Valores:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.1'
+      name: núm. 1
+      description: Establecer y mantener actualizado un sistema de gestión que proporcione un enfoque estándar, formal y continuo para la Seguridad Cibernética y de la Información y procesos del negocio, que permita garantizar la Integridad, Confidencialidad y Disponibilidad de la Información, así como gestionar efectivamente los Riesgos, incluyendo los de Ciberseguridad, mediante la adecuada combinación de políticas, Procedimientos, controles, estructura organizacional y herramientas informáticas especializadas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.2'
+      name: núm. 2
+      description: Definir políticas y Procedimientos para la Seguridad Cibernética y de la Información conforme a al Marco de Trabajo adoptado. Dichas políticas y Procedimientos deben procurar que la ejecución de los criterios de control interno relativos a eficacia, eficiencia y cumplimiento se encuentren alineados a los objetivos y las actividades del Participante del Mercado de Valores. Las políticas y Procedimientos en la materia deben ser aprobadas por el consejo de administración;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.3'
+      name: núm. 3
+      description: Asegurar la Integridad, Confidencialidad y disponibilidad de la Información en sus sistemas y de la Información en tránsito, almacenada y procesada;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.4'
+      name: núm. 4
+      description: Preservar la Información privilegiada, reservada y confidencial;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.5'
+      name: núm. 5
+      description: Gestionar la privacidad de los datos en la forma contemplada en las leyes, normativa vigente aplicable y los Marcos de Trabajo reconocidos internacionalmente sobre la materia y adoptado por la entidad. De igual forma, guiar y coordinar la implementación de políticas, Procedimientos y actividades para asegurar que se cumplan las directivas sobre privacidad de los datos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.6'
+      name: núm. 6
+      description: Formular, mantener y ejecutar un plan de tratamiento de Riesgos de Seguridad Cibernética y de la Información alineado con los objetivos estratégicos y operativos del Participante del Mercado de Valores. Dicho plan debe de identificar las prácticas de gestión y las soluciones de seguridad apropiadas y óptimas, con los recursos, las responsabilidades y las prioridades asociadas para gestionar los Riegos identificados en la materia;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.7'
+      name: núm. 7
+      description: Revisar y monitorear de forma regular, la efectividad y cumplimiento de las disposiciones contenidas en este Reglamento y sus políticas y Procedimientos de control. Además, deben incluir las excepciones y resultados de las autoevaluaciones y mantener evidencia del Monitoreo Continuo realizado, conforme a lo establecido en sus políticas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.8'
+      name: núm. 8
+      description: Identificar Amenazas y Vulnerabilidades de manera periódica;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.9'
+      name: núm. 9
+      description: Definir y evaluar las responsabilidades y competencias de sus empleados y de los proveedores de servicios en lo concerniente a la Seguridad Cibernética y de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.10'
+      name: núm. 10
+      description: Entrenar a los empleados que cuenten con Acceso sobre la forma de interconectar con la Superintendencia; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:6
+      ref_id: '6.11'
+      name: núm. 11
+      description: Establecer, implementar, mantener y monitorear los controles, procesos y Procedimientos de continuidad de negocio o de recuperación que aseguren un nivel aceptable de Seguridad Cibernética y de la Información ante desastres o situaciones adversas.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:7
+      assessable: true
+      depth: 1
+      ref_id: '7'
+      name: Art. 7 – Gestión de Riesgos Tecnológicos
+      description: Los Participantes del Mercado de Valores deben monitorear diariamente los Riesgos que implica el uso actual y futuro de la Tecnología de la Información desde su concepción, desarrollo e implementación. Al efecto, dicho monitoreo incluye los entornos y procesos internos, en función del análisis de las Amenazas, Vulnerabilidades, controles, impacto y política de Riesgos establecidos por su consejo de administración y el alcance de dichas evaluaciones.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:8
+      assessable: true
+      depth: 1
+      ref_id: '8'
+      name: Art. 8 – Metodología para la Gestión de Riesgos
+      description: La Gestión de Riesgos Tecnológicos debe llevarse a cabo a través de metodologías que contemplen un análisis del Riesgo inherente al Participante del Mercado de Valores y que, de forma cuantitativa y/o cualitativa, recopile el surgimiento e identificación de nuevos Riesgos, Amenazas y Vulnerabilidades, así como la probabilidad de ocurrencia, posible impacto en la operatividad del negocio y los controles necesarios para su mitigación.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:8.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:8
+      ref_id: 8.P
+      name: Párr.
+      description: Las evaluaciones de Riesgo deben contemplar, como mínimo, la divulgación no autorizada de la Información, su corrupción accidental o deliberada, manipulación y la disponibilidad de los entornos en cualquier período.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:9
+      assessable: true
+      depth: 1
+      ref_id: '9'
+      name: Art. 9 – Gestión de Riesgos Tecnológicos de terceros
+      description: Los Participantes del Mercado de Valores deben verificar que las disposiciones de este Reglamento son cumplidas por cualquier Entidad Interconectada mediante el mantenimiento de una conexión electrónica o por el intercambio de Información Esencial, a través de cualquier medio digital, en la medida en que dicha vinculación pueda comprometer la estabilidad del Mercado de Valores y la salvaguarda de la Información que manejan.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:10
+      assessable: true
+      depth: 1
+      ref_id: '10'
+      name: Art. 10 – Políticas y Procedimientos de seguridad
+      description: En el marco del programa de Seguridad Cibernética y de la Información, los Participantes del Mercado de Valores deben diseñar, implementar y mantener políticas que contemplen los Procedimientos para la gestión de la Seguridad Cibernética y de la Información bajo el Marco de Trabajo. Dichas políticas y Procedimientos deben aplicar criterios de control interno relativos a la protección de activos de la organización, datos, Información y servicios de Tecnología de la Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:10.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:10
+      ref_id: 10.P1
+      name: Párr. I
+      description: Las políticas y Procedimientos citadas anteriormente deben ser aprobadas por el consejo de administración y posteriormente comunicadas a los empleados, proveedores de servicios, Entidades Interconectadas y a las demás partes externas relevantes, en tanto sea pertinente en virtud de las funciones ejercidas o servicios contratados.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:10.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:10
+      ref_id: 10.P2
+      name: Párr. II
+      description: Los Participantes del Mercado de Valores deben elaborar y aplicar las políticas y Procedimientos citados en este Reglamento. Asimismo, deben documentar todos los procesos implementados para la gestión de la Seguridad Cibernética y de la Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:11
+      assessable: true
+      depth: 1
+      ref_id: '11'
+      name: Art. 11 – Educación y concientización
+      description: Los empleados del Participante del Mercado de Valores y, cuando sea pertinente, los proveedores de servicios, afiliados o usuarios, deben recibir entrenamiento y orientación apropiado y periódico sobre las políticas y Procedimientos de Seguridad Cibernética y de la Información. Esto incluye los requerimientos de seguridad, las responsabilidades legales y los controles del negocio. De igual forma, deben recibir entrenamiento en el uso correcto de las facilidades de procesamiento de Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      assessable: true
+      depth: 1
+      ref_id: '12'
+      name: Art. 12 – Gestión del ciclo de vida de los activos de Tecnología de la Información
+      description: 'Los Participantes del Mercado de Valores deben desarrollar un esquema de gestión de activos de Tecnología de la Información a través de su ciclo de vida que contemple, al menos, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.1'
+      name: núm. 1
+      description: Adquisición de todos los activos de Tecnología de la Información conforme a lo dispuesto en el artículo 41 (Gestión de proveedores externos) de este Reglamento y sus políticas y prácticas de adquisición;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.2'
+      name: núm. 2
+      description: Desplegar los activos de Tecnología de la Información siguiendo el ciclo de vida de implementación, incluyendo la gestión de cambios y pruebas de aceptación dispuestos en este Reglamento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.3'
+      name: núm. 3
+      description: Procedimientos para identificar y clasificar los activos de Tecnología de la Información críticos y sensibles;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.4'
+      name: núm. 4
+      description: 'Registro actualizado y exacto de los activos de Tecnología de la Información necesarios para proveer los servicios, incluyendo:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4
+      ref_id: 12.4.a
+      name: núm. 4, lit. a)
+      description: Identificación específica del activo de Tecnología de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4
+      ref_id: 12.4.b
+      name: núm. 4, lit. b)
+      description: Prioridad de recuperación;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4
+      ref_id: 12.4.c
+      name: núm. 4, lit. c)
+      description: Locación;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4
+      ref_id: 12.4.d
+      name: núm. 4, lit. d)
+      description: Propietario o custodio designado;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.4
+      ref_id: 12.4.e
+      name: núm. 4, lit. e)
+      description: Clasificación según el Riesgo asociado o criticidad definida.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.5'
+      name: núm. 5
+      description: Procedimientos de control para la devolución y asignación de los activos de Tecnología de la Información a los usuarios, con aceptación y firma de responsabilidades, según corresponda;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.6'
+      name: núm. 6
+      description: Definir responsabilidades de los empleados, proveedores de servicios y otras partes externas sobre la protección física de cada activo;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.7'
+      name: núm. 7
+      description: Establecer un plan de mantenimiento preventivo para todo el Hardware, considerando las recomendaciones del proveedor del servicio, el Riesgo en caso de interrupción del servicio, falla o la necesidad del reemplazo del activo;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.8'
+      name: núm. 8
+      description: Definir Procedimientos para el manejo adecuado cuando el activo de Tecnología de la Información es eliminado o destruido;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.9'
+      name: núm. 9
+      description: Definir Procedimientos para la seguridad de los activos de Tecnología de la Información fuera de las instalaciones del Participante del Mercado de Valores, teniendo en cuenta los diferentes Riesgos asociados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.10'
+      name: núm. 10
+      description: Procedimientos para advertir a los usuarios las responsabilidades y Procedimientos de seguridad para proteger los activos de Tecnología de la Información desatendidos; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:12
+      ref_id: '12.11'
+      name: núm. 11
+      description: Revisar los activos de Tecnología de la Información que contengan medios de almacenamiento para asegurar que los datos sensibles y Software licenciado se hayan removido o se hayan sobrescrito con seguridad antes de su disposición, eliminación o reutilización.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:13
+      assessable: true
+      depth: 1
+      ref_id: '13'
+      name: Art. 13 – Aplicaciones de estaciones de trabajo
+      description: 'Los Participantes del Mercado de Valores deben establecer procesos para la gestión adecuada de la Seguridad Cibernética y de la Información de las aplicaciones instaladas en las estaciones de trabajo, contemplando los aspectos siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:13
+      ref_id: '13.1'
+      name: núm. 1
+      description: 'Inventario de las aplicaciones de estaciones de trabajo: Las aplicaciones de estaciones de trabajo deben estar registradas en un inventario o su equivalente;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:13.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:13
+      ref_id: '13.2'
+      name: núm. 2
+      description: 'Protección de los archivos con Información Confidencial: Los archivos creados en aplicaciones de estaciones de trabajo cuyo contenido sea Información Confidencial deben ser protegidos mediante la validación de la entrada, aplicando Mecanismos de Control de Acceso;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:13.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:13
+      ref_id: '13.3'
+      name: núm. 3
+      description: 'Desarrollo de aplicaciones de estaciones de trabajo: Debe ser llevado a cabo según la metodología de desarrollo seguro adoptada por la entidad.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:14
+      assessable: true
+      depth: 1
+      ref_id: '14'
+      name: Art. 14 – Aplicaciones del negocio
+      description: 'Los Participantes del Mercado de Valores deben implementar controles de seguridad conforme al Marco de Trabajo adoptado para las aplicaciones del negocio. Dichos controles deben contemplar, al menos, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:14.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:14
+      ref_id: '14.1'
+      name: núm. 1
+      description: 'Protección de las aplicaciones: Deben utilizar funcionalidades de Seguridad Cibernética y de la Información, alineadas a la infraestructura técnica de seguridad, que permitan el cumplimiento de los requerimientos de Confidencialidad e Integridad de la Información;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:14.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:14
+      ref_id: '14.2'
+      name: núm. 2
+      description: 'Protección de las aplicaciones basadas en navegación: Deben establecer controles específicos de Seguridad Cibernética y de la Información sobre las aplicaciones web y servicios transaccionales, tanto internos como externos, que apoyen los servicios hacia internet, basados en el navegador y en los servidores donde se ejecutan; y,'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:14.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:14
+      ref_id: '14.3'
+      name: núm. 3
+      description: 'Validación de la Información en las aplicaciones de negocio: Deben incorporar los controles de Seguridad Cibernética y de la Información que protejan la Confidencialidad e Integridad de la Información al ser ingresada, procesada o extraída de la aplicación.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:15
+      assessable: true
+      depth: 1
+      ref_id: '15'
+      name: Art. 15 – Clasificación y etiquetado de la Información
+      description: Los Participantes del Mercado de Valores deben desarrollar las políticas y Procedimientos que aseguren que la Información recibe la protección adecuada de acuerdo a su importancia en términos de valor, requisitos legales, criticidad y sensibilidad a la divulgación o modificación no autorizada. Por lo que, solo las personas autorizadas pueden acceder a la Información almacenada.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:15.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:15
+      ref_id: 15.P
+      name: Párr.
+      description: Los Procedimientos de gestión de documentos físicos y digitales deben incluir las etapas de creación, clasificación, almacenamiento, adquisición, modificación y destrucción de documentos, así como los mecanismos de control para la protección de la Información acorde a su nivel de sensibilidad, Confidencialidad y períodos de conservación.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      assessable: true
+      depth: 1
+      ref_id: '16'
+      name: Art. 16 – Privacidad de la Información
+      description: 'Los Participantes del Mercado de Valores deben desarrollar políticas y Procedimientos de protección de datos personales y de privacidad de Información según las leyes y normativas vigentes y el Marco de Trabajo seleccionado. Dichas políticas y Procedimientos deben establecer, como mínimo, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.1'
+      name: núm. 1
+      description: Mecanismos para la identificación, gestión y destrucción de Información Confidencial identificable de los clientes y de los empleados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.2'
+      name: núm. 2
+      description: Evaluaciones de Riesgo sobre la privacidad de la Información personal gestionada por procesos y aplicaciones del negocio;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.3'
+      name: núm. 3
+      description: Documentación del uso dado a la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.4'
+      name: núm. 4
+      description: Mecanismos para la obtención de la aprobación por parte de los titulares de la Información antes de recopilar, procesar, almacenar o divulgarla a terceros;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.5'
+      name: núm. 5
+      description: Cifrado de la Información y gestión eficiente de las llaves de cifrado;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.6'
+      name: núm. 6
+      description: Uso de técnicas de enmascaramiento de datos para ocultar partes de la Información al momento de ser almacenada o transmitida;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.7'
+      name: núm. 7
+      description: Protección de los metadatos relacionados con la privacidad (atributos de archivos o Información descriptiva que pudiera contener Información personal); y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:16
+      ref_id: '16.8'
+      name: núm. 8
+      description: Protocolos de notificación al órgano interno aplicable y a los titulares de la Información cuando se produce una violación de la privacidad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:17
+      assessable: true
+      depth: 1
+      ref_id: '17'
+      name: Art. 17 – Obligaciones contractuales
+      description: Los contratos suscritos entre los Participantes del Mercado de Valores y sus empleados, proveedores de servicios, Entidades Interconectadas y demás partes externas a los cuales se les concede Acceso a la Información, deben establecer las responsabilidades generales de las partes, disposiciones sobre la Confidencialidad y no divulgación de la Información, protección de datos y especificaciones sobre Seguridad Cibernética y de la Información. De igual forma, las disposiciones sobre las citadas materias deben prolongarse luego de la finalización de la relación contractual por el tiempo que se defina en el acuerdo en virtud de la naturaleza del Acceso a la Información concedido.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:17.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:17
+      ref_id: 17.P
+      name: Párr.
+      description: Asimismo, el Participante del Mercado de Valores debe conservar el derecho de revisar periódicamente los procesos y controles de dichos proveedores de servicios o Entidad Interconectada.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:18
+      assessable: true
+      depth: 1
+      ref_id: '18'
+      name: Art. 18 – Protección contra la fuga de Información
+      description: Los Participantes del Mercado de Valores deben mantener políticas, Procedimientos y mecanismos de protección contra la fuga de Información (Data Loss Prevention -DLP) a los sistemas, Infraestructura Tecnológica y entornos locales que procesan, almacenan o transmiten Información sensible.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:19
+      assessable: true
+      depth: 1
+      ref_id: '19'
+      name: Art. 19 – Registros de usuarios
+      description: Los Participantes del Mercado de Valores deben mantener políticas y Procedimientos formales de altas y bajas de usuarios con objeto de garantizar y cancelar el Acceso a todos los sistemas y servicios de Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      assessable: true
+      depth: 1
+      ref_id: '20'
+      name: Art. 20 – Gestión de identidades y Mecanismo de Control de Acceso
+      description: 'Los Participantes del Mercado de Valores deben mantener las políticas y Procedimientos de gestión de identidades y de Mecanismos de Control de Acceso que apliquen a los empleados, proveedores de servicios y demás partes externas y personas autorizadas que tengan Acceso a los sistemas de Información e Infraestructura Tecnológica, incluyendo:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      ref_id: '20.1'
+      name: núm. 1
+      description: Procedimientos documentados para la administración y autenticación de identidades a nivel institucional, incluyendo la doble autenticación;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      ref_id: '20.2'
+      name: núm. 2
+      description: Procedimiento documentado de asignación de roles y privilegios por tipo de usuario y componente de la Infraestructura Tecnológica;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      ref_id: '20.3'
+      name: núm. 3
+      description: Procedimiento para establecer los Mecanismos de Control de Acceso de los usuarios a los distintos componentes de la Infraestructura Tecnológica basado en los principios del menor privilegio;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      ref_id: '20.4'
+      name: núm. 4
+      description: Establecimiento de directrices generales para la asignación y utilización de cuentas privilegiadas en los sistemas de Información y aplicaciones del negocio, que regulan la asignación y el uso aceptable de las referidas cuentas a los casos que estrictamente lo ameriten tras obtener la autorización escrita por parte del órgano interno aplicable; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      ref_id: '20.5'
+      name: núm. 5
+      description: Procedimientos para la gestión de las autorizaciones de Acceso de los usuarios.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      ref_id: 20.P1
+      name: Párr. I
+      description: 'Los Mecanismos de Control de Acceso deben considerar, al menos, algunos de los siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p1
+      ref_id: 20.P1.a
+      name: Párr. I, lit. a)
+      description: Algo que el usuario sabe, por ejemplo, contraseña o PIN;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p1
+      ref_id: 20.P1.b
+      name: Párr. I, lit. b)
+      description: Algo que el usuario tiene, por ejemplo, token físico o digital, tarjeta inteligente o certificado digital;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p1
+      ref_id: 20.P1.c
+      name: Párr. I, lit. c)
+      description: Algo que el usuario es o hace, por ejemplo, elementos biométricos como huella dactilar, patrón de iris, reconocimiento de voz, estilo de escritura o similares.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:20
+      ref_id: 20.P2
+      name: Párr. II
+      description: Los Participantes del Mercado de Valores pueden decidir establecer uno o más Mecanismos de Control de Acceso, según el análisis de Riesgo realizado por la entidad y el grado de criticidad de los sistemas de Información y otros componentes de la Infraestructura Tecnológica a los que cada usuario debe acceder conforme a los roles asignados y en virtud de los resultados de las evaluaciones de Riesgos Tecnológicos o de la funcionalidad de los Mecanismos de Control de Acceso.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21
+      assessable: true
+      depth: 1
+      ref_id: '21'
+      name: Art. 21 – Gestión de contraseñas
+      description: 'Los Participantes del Mercado de Valores, de conformidad a su análisis de Riesgo, deben mantener políticas y Procedimientos para la gestión segura de contraseñas de los sistemas de Información y los componentes de la Infraestructura Tecnológica, los cuales deben considerar, al menos, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21
+      ref_id: '21.1'
+      name: núm. 1
+      description: Formato de contraseñas y reglas relativas a la longitud;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21
+      ref_id: '21.2'
+      name: núm. 2
+      description: Cambio de contraseñas temporales en su primera conexión y de manera periódica; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21
+      ref_id: '21.3'
+      name: núm. 3
+      description: Registro de contraseñas utilizadas y reglas para su reutilización.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:21
+      ref_id: 21.P
+      name: Párr.
+      description: Los empleados de los Participantes del Mercado de Valores deben suscribir un compromiso donde reconozcan la responsabilidad de mantener confidenciales las contraseñas y credenciales personales para el Acceso a los sistemas de Información y los componentes de la Infraestructura Tecnológica.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22
+      assessable: true
+      depth: 1
+      ref_id: '22'
+      name: Art. 22 – Seguridad física y del entorno
+      description: Los Participantes del Mercado de Valores deben implementar políticas, Procedimientos y mecanismos para la protección de la seguridad física y el entorno de las instalaciones del negocio, según el Marco de Trabajo adoptado y la naturaleza de su actividad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22
+      ref_id: 22.P1
+      name: Párr. I
+      description: 'Dichas políticas, Procedimientos y mecanismos deben contemplar, al menos, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1
+      ref_id: 22.P1.1
+      name: Párr. I, núm. 1
+      description: Procedimientos para la protección física de entornos críticos del Participante del Mercado de Valores que contemplen la gestión del personal autorizado, uso de identificación en lugares visibles, documentación de entrada y salida autorizada de activos de Tecnología de la Información y control de visitas al entorno;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1
+      ref_id: 22.P1.2
+      name: Párr. I, núm. 2
+      description: Mecanismos de control de visitas, incluyendo el registro de entrada y salida, uso obligatorio de identificación, Acceso limitado y bajo supervisión a las áreas autorizadas y el retorno obligatorio de los mecanismos de Acceso físico entregados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1
+      ref_id: 22.P1.3
+      name: Párr. I, núm. 3
+      description: Mecanismos para la protección de la Infraestructura Tecnológica y equipos especializados contra el daño causado por alguna Amenaza ambiental; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p1
+      ref_id: 22.P1.4
+      name: Párr. I, núm. 4
+      description: Monitoreo y control de la temperatura y humedad de los entornos conforme a los requerimientos definidos por los fabricantes.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22
+      ref_id: 22.P2
+      name: Párr. II
+      description: 'Los mecanismos para la protección de la seguridad física y el entorno de las instalaciones del negocio deben asegurar:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2
+      ref_id: 22.P2.1
+      name: Párr. II, núm. 1
+      description: El ocultamiento de la ubicación de los entornos críticos para prevenir el Acceso no autorizado y el mantenimiento de la Confidencialidad de la misma, por ejemplo, el uso señalizaciones discretas y la exclusión de directorios telefónicos y de portales informativos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2
+      ref_id: 22.P2.2
+      name: Párr. II, núm. 2
+      description: El fortalecimiento de la seguridad perimetral y mecanismos contra robos de equipos informáticos críticos y documentación sensible en formato físico, por ejemplo, el uso de paredes sólidas, ventanas y puertas blindadas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2
+      ref_id: 22.P2.3
+      name: Párr. II, núm. 3
+      description: La instalación de controles físicos, por ejemplo, cerrojos digitales, dispositivos de Acceso biométrico, cámaras de vigilancia en puntos vulnerables, sistemas de detección de intrusos, así como el despliegue de guardianes de seguridad en los entornos que sea necesario;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2
+      ref_id: 22.P2.4
+      name: Párr. II, núm. 4
+      description: Los mecanismos para la protección de los cables de alimentación energética que cubran aspectos como la segregación de los cables de comunicaciones, instalación oculta y distinta de las rutas públicas, puntos de inspección y terminación cerrados y fuentes alternas; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p2
+      ref_id: 22.P2.5
+      name: Párr. II, núm. 5
+      description: Los mecanismos para el aseguramiento de la disponibilidad energética, tales como, instalación de equipos contra fluctuación de cargas, uso de generadores eléctricos de emergencia, instalación de luces de emergencia o la ubicación de interruptores cerca de las puertas de emergencia para facilitar el apagado rápido en caso de que sea necesario.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22
+      ref_id: 22.P3
+      name: Párr. III
+      description: Los entornos críticos, incluyendo lugares que albergan los sistemas informáticos, tales como, los centros de datos, redes, equipos de telecomunicaciones, material físico sensible y otros activos importantes, deben ser protegidos contra accidentes, Ataques y el acceso físico no autorizado; contra los cortes o fluctuaciones de energía, así como estar protegidos contra incendios, inundaciones y otras Amenazas naturales.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22.p4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:22
+      ref_id: 22.P4
+      name: Párr. IV
+      description: Los Participantes del Mercado de Valores deben capacitar a sus empleados sobre los protocolos para emergencias causadas por desastres naturales, incendios o situaciones de fuerza mayor.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23
+      assessable: true
+      depth: 1
+      ref_id: '23'
+      name: Art. 23 – Sistemas informáticos e Infraestructura Tecnológica
+      description: 'Los Participantes del Mercado de Valores deben procurar que los sistemas informáticos y la Infraestructura Tecnológica puedan ser protegidos contra Amenazas. Por lo que, deben configurar adecuadamente los controles de Seguridad Cibernética y de la Información integrados por defecto, incluyendo:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23
+      ref_id: '23.1'
+      name: núm. 1
+      description: Compatibilidad con otros sistemas de Información, redes e instalaciones de telecomunicaciones utilizados, a fin de asegurar el establecimiento de controles de seguridad integrados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23
+      ref_id: '23.2'
+      name: núm. 2
+      description: Administración centralizada de sistemas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23
+      ref_id: '23.3'
+      name: núm. 3
+      description: Gestión adecuada de las actualizaciones de seguridad, listas de Control de Acceso, firmas y reglas de firewalls (cortafuegos); y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:23
+      ref_id: '23.4'
+      name: núm. 4
+      description: Diseño adecuado de la red, contemplando segregación de sistemas de Información mediante el uso de dominios de seguridad, aislamiento de tipos particulares de tráfico de red, la restricción de puntos de entrada a la red y la denegación de Acceso a dispositivos no registrados. Al efecto, deben establecer la incorporación de mecanismos de autenticación, el diseño de esquemas de firewalls (cortafuegos) para evitar su omisión y la priorización del tráfico de red para reducir la latencia en el uso de servicios críticos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      assessable: true
+      depth: 1
+      ref_id: '24'
+      name: Art. 24 – Gestión de cambio
+      description: 'Los Participantes del Mercado de Valores deben contar con una política de gestión de cambios, incluyendo cambios estándar y de mantenimiento, en los sistemas de Información e Infraestructura Tecnológica. Dicha política debe considerar, al menos, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: '24.1'
+      name: núm. 1
+      description: Procedimientos documentados de gestión de cambios de forma controlada que contemplen las etapas de solicitud, análisis de impacto, autorización, pruebas y aceptación final, para asegurar la aplicación adecuada de los cambios, con el fin de no comprometer la seguridad de la Infraestructura Tecnológica;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: '24.2'
+      name: núm. 2
+      description: Creación de un registro de control de versiones, especificando cambios realizados, empleados involucrados, persona que autoriza los cambios, fechas de solicitud, realización, aprobación y componentes afectados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: '24.3'
+      name: núm. 3
+      description: Evaluaciones periódicas a la Infraestructura Tecnológica para identificar cambios no autorizados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: '24.4'
+      name: núm. 4
+      description: Gestión de los cambios de emergencia para minimizar futuras incidencias y asegurar que el cambio está controlado y se realiza de forma segura; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: '24.5'
+      name: núm. 5
+      description: Procedimiento de vuelta atrás (Rollback), incluyendo Procedimientos y responsabilidades para abortar y recuperar los cambios sin éxito y de acontecimientos imprevistos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: 24.P1
+      name: Párr. I
+      description: 'La gestión del cambio incluye los siguientes componentes: Hardware, equipo de comunicaciones y Software sistemas y de aplicación, así como toda la documentación y los Procedimientos asociados con la Infraestructura Tecnológica.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: 24.P2
+      name: Párr. II
+      description: Sobre las aplicaciones de alta relevancia de la entidad, los Participantes del Mercado de Valores deben realizar una evaluación de Riesgo de los cambios propuestos que contemple un análisis del impacto en el negocio y en otros componentes de la Infraestructura Tecnológica.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:24
+      ref_id: 24.P3
+      name: Párr. III
+      description: Los Participantes del Mercado de Valores deben aplicar pruebas de seguridad en entornos apropiados para verificar que los cambios realizados no provocan Vulnerabilidades ni fallos de rendimiento que pudieran comprometer la seguridad de la Infraestructura Tecnológica y que los mismos no comprometan los controles de Seguridad Cibernética y de la Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:25
+      assessable: true
+      depth: 1
+      ref_id: '25'
+      name: Art. 25 – Separación de ambientes
+      description: Los Participantes del Mercado de Valores deben contar con entornos aislados para ejecutar las fases de desarrollo, pruebas y puesta en producción de sistemas de Información, aplicaciones del negocio y comunicaciones para reducir Riesgos de Acceso no autorizados o cambios en el ambiente de producción.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26
+      assessable: true
+      depth: 1
+      ref_id: '26'
+      name: Art. 26 – Instalación de Software
+      description: Los Participantes del Mercado de Valores deben definir e implementar Procedimientos, reglas y mecanismos para controlar que la instalación y actualización de Software y aplicaciones, en los sistemas operativos, sea realizada por el personal autorizado para tales fines.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26
+      ref_id: 26.P
+      name: Párr.
+      description: 'La instalación y actualización de Software y aplicaciones en los sistemas operativos solo podrán ser implementados luego de realizar pruebas adecuadas en un ambiente separado de producción. Las pruebas realizadas deben contemplar, según corresponda, los aspectos siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p
+      ref_id: 26.P.1
+      name: Párr., núm. 1
+      description: Ensayo de rendimiento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p
+      ref_id: 26.P.2
+      name: Párr., núm. 2
+      description: Carga de trabajo;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p
+      ref_id: 26.P.3
+      name: Párr., núm. 3
+      description: Seguridad;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p
+      ref_id: 26.P.4
+      name: Párr., núm. 4
+      description: Disponibilidad operativa;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p
+      ref_id: 26.P.5
+      name: Párr., núm. 5
+      description: Efectos sobre otros sistemas; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:26.p
+      ref_id: 26.P.6
+      name: Párr., núm. 6
+      description: Copia de respaldo y de recuperación.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      assessable: true
+      depth: 1
+      ref_id: '27'
+      name: Art. 27 – Respaldos
+      description: 'Los Participantes del Mercado de Valores deben contar con una política de gestión de copias de respaldos de seguridad de sistemas, aplicaciones, datos y documentación. Dicha política debe contemplar:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: '27.1'
+      name: núm. 1
+      description: Ejecución de respaldos de Información y de Software exactas y completas, las cuales deben probarse regularmente acorde con la política de respaldo;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: '27.2'
+      name: núm. 2
+      description: Procedimientos documentados para el resguardo y recuperación de la Información, cubriendo los requerimientos del negocio, métodos, herramientas y frecuencia de realización;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: '27.3'
+      name: núm. 3
+      description: Registros o equivalentes que detallen la Información resguardada, la fecha y la hora, así como la fecha de expiración, el tipo de medio utilizado y su ubicación física;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: '27.4'
+      name: núm. 4
+      description: Esquemas de etiquetado de copias de seguridad de los datos para su correcta identificación, para sistemas que realicen copias en cinta;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: '27.5'
+      name: núm. 5
+      description: Controles para la prevención de la escritura accidental.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: 27.P1
+      name: Párr. I
+      description: Los Participantes del Mercado de Valores deben contar con entornos locales seguros de Acceso restringido, procurando el almacenamiento de las copias de resguardo en formato físico con el nivel apropiado de protección ambiental y conforme a los métodos indicados por los fabricantes y, en caso de las copias de resguardo en formato digital, en la nube o en un ambiento con diferentes niveles de Acceso y de localización.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: 27.P2
+      name: Párr. II
+      description: Los respaldos de seguridad de sistemas, aplicaciones, datos y documentación deben probarse regularmente para asegurar que pueden ser confiables para el uso cuando sean necesarios. La prueba debe contemplar la capacidad para restaurar los datos de respaldo en medios dedicados a ensayos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: 27.P3
+      name: Párr. III
+      description: Los Participantes del Mercado de Valores deben contar con almacenamiento apartado, con la suficiente distancia definida por la entidad, para la salvaguarda de cualquier daño de un desastre en el sitio principal.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.p4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: 27.P4
+      name: Párr. IV
+      description: Los Participantes del Mercado de Valores, cuya Infraestructura Tecnológica sea administrada por un proveedor de servicios, deben asegurarse que los sistemas, aplicaciones, datos y documentación se encuentran adecuadamente respaldados según los lineamientos citados en este Reglamento y acorde a sus políticas y procedimientos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.p5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: 27.P5
+      name: Párr. V
+      description: El resguardo de la Información Esencial deberá ser conservado de conformidad con el grado de utilidad de la misma para los fines de restauración. Dicha Información deberá ser cifrada. El tiempo de retención para la Información Esencial de Tipo Transaccional será de, por lo menos, un (1) año. Para la Información Esencial de Tipo Maestro, la entidad deberá resguardar en todo momento la más actualizada de las versiones disponibles de dicha Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27.p6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:27
+      ref_id: 27.P6
+      name: Párr. VI
+      description: Para las copias de resguardo de pistas de auditoría, el tiempo de retención será de, por lo menos, ciento ochenta (180) días.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28
+      assessable: true
+      depth: 1
+      ref_id: '28'
+      name: Art. 28 – Configuración de los servidores
+      description: 'La configuración de los servidores físicos y virtuales debe realizarse con el objeto de evitar cambios o Accesos no autorizados, previniendo la interrupción de los servicios como resultado de una sobrecarga del sistema u otros factores. Al efecto, dichas configuraciones deben cumplir con lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28
+      ref_id: '28.1'
+      name: núm. 1
+      description: 'Marco de configuraciones de línea base o de ajustes predeterminados para servidores físicos y virtuales, incluyendo el Hipervisor, así como lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.1
+      ref_id: 28.1.a
+      name: núm. 1, lit. a)
+      description: Estandarización de las configuraciones del Firmware; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.1
+      ref_id: 28.1.b
+      name: núm. 1, lit. b)
+      description: Estandarización y mantenimiento de las imágenes de instalación y configuración de los sistemas operativos, incluyendo parámetros adecuados de seguridad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28
+      ref_id: '28.2'
+      name: núm. 2
+      description: Restricción de Accesos para evitar uso de utilidades y de consolas de configuración de sistemas de la Información sin previa autorización;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28
+      ref_id: '28.3'
+      name: núm. 3
+      description: Restricción de Accesos a un número limitado de usuarios con cuentas privilegiadas, asimismo, el Acceso al Sistema Básico de Entrada y Salida (BIOS, por sus siglas en inglés) de cada servidor debe estar protegido mediante contraseña u otro Mecanismo de Control de Acceso; e,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28
+      ref_id: '28.4'
+      name: núm. 4
+      description: Inhabilitación de cuentas locales generadas por defecto por los sistemas operativos instalados en los servidores físicos y virtuales para proteger estos sistemas de algún Acceso no autorizado.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:28
+      ref_id: 28.P
+      name: Párr.
+      description: Los Participantes del Mercado de Valores deben documentar los procesos para la configuración de los servidores físicos y virtuales mediante políticas y Procedimientos internos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:29
+      assessable: true
+      depth: 1
+      ref_id: '29'
+      name: Art. 29 – Protección de Bases de Datos
+      description: Los Participantes del Mercado de Valores deben definir e implementar Procedimientos para asegurar la Integridad y consistencia de toda la Información almacenada en formato electrónico, tales como, Bases de Datos, almacenes de datos (data warehouses) y archivos de datos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:29.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:29
+      ref_id: 29.P
+      name: Párr.
+      description: Las Bases de Datos gestionadas con aplicaciones de estaciones de trabajo deben ser protegidas mediante la validación de la entrada, la aplicación de controles de Acceso y la restricción a empleados autorizados a las funcionalidades de alto privilegio.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30
+      assessable: true
+      depth: 1
+      ref_id: '30'
+      name: Art. 30 – Continuidad del negocio
+      description: Los Participantes del Mercado de Valores deben establecer y mantener un plan logístico para permitir que el negocio y la Tecnología de la Información puedan responder a algún Incidente o a las interrupciones significativas de servicio de sus Procesos Críticos y se mantenga la disponibilidad y Seguridad Cibernética y de la Información a un nivel aceptable para dicha entidad durante una crisis, desastres naturales, incendios o situaciones de fuerza mayor.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30
+      ref_id: 30.P1
+      name: Párr. I
+      description: 'El plan debe ser diseñado de acuerdo con la naturaleza, tamaño, complejidad y perfil de Riesgos del negocio para garantizar su capacidad de operación, minimizar las pérdidas y asegurar la Seguridad Cibernética y de la Información ante una situación de emergencia en que se interrumpa el curso normal del negocio. La metodología y esquema del plan debe establecer, al menos, lo siguiente:'
+      annotation: El texto oficial no numera los párrafos de este artículo; se codificó como primer párrafo.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.1
+      name: Párr. I, núm. 1
+      description: 'Política de continuidad de negocio: Este debe contener, como mínimo, los siguientes aspectos:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1
+      ref_id: 30.P1.1.a
+      name: Párr. I, núm. 1, lit. a)
+      description: Roles y responsabilidades;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1
+      ref_id: 30.P1.1.b
+      name: Párr. I, núm. 1, lit. b)
+      description: Recursos requeridos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1
+      ref_id: 30.P1.1.c
+      name: Párr. I, núm. 1, lit. c)
+      description: Requerimientos de entrenamiento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1
+      ref_id: 30.P1.1.d
+      name: Párr. I, núm. 1, lit. d)
+      description: Periodicidad de pruebas; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.1
+      ref_id: 30.P1.1.e
+      name: Párr. I, núm. 1, lit. e)
+      description: Periodicidad de mantenimiento.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.2
+      name: Párr. I, núm. 2
+      description: 'Análisis de Riesgo: Consiste en identificar y evaluar los Riesgos que puedan afectar la operación de los procesos clave. De igual forma, identifica los desastres, Amenazas cibernéticas, Eventos o accidentes que tienen una probabilidad de ocurrencia dentro de diferentes escenarios.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.3
+      name: Párr. I, núm. 3
+      description: 'Análisis de impacto del negocio: Consiste en identificar funciones y Procesos Críticos del negocio con importancia estratégica y su clasificación según la criticidad, prioridades, impacto que su interrupción impondría y el tiempo de recuperación. Dicho análisis debe ponderar, al menos, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3
+      ref_id: 30.P1.3.a
+      name: Párr. I, núm. 3, lit. a)
+      description: Análisis de las pérdidas potenciales asociadas con la disrupción de los Procesos Críticos del negocio, mediante el desarrollo de una evaluación de impacto al negocio (BIA, por sus siglas en inglés);
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3
+      ref_id: 30.P1.3.b
+      name: Párr. I, núm. 3, lit. b)
+      description: Análisis de Vulnerabilidad para el perfilado del tipo de Amenazas que son relevantes al Participante del Mercado de Valores y su nivel de ocurrencia estimado;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3
+      ref_id: 30.P1.3.c
+      name: Párr. I, núm. 3, lit. c)
+      description: Preselección de planes adecuados para el tratamiento de los Riesgos identificados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3
+      ref_id: 30.P1.3.d
+      name: Párr. I, núm. 3, lit. d)
+      description: Escalas de tiempo para la recuperación de sistemas, aplicaciones y servicios;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3
+      ref_id: 30.P1.3.e
+      name: Párr. I, núm. 3, lit. e)
+      description: Tiempo de interrupción máxima de sistemas, aplicaciones y servicios del Participante del Mercado de Valores; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.3
+      ref_id: 30.P1.3.f
+      name: Párr. I, núm. 3, lit. f)
+      description: Nivel de servicio mínimo que el Participante del Mercado de Valores está dispuesto a aceptar tras la recuperación.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.4
+      name: Párr. I, núm. 4
+      description: 'Plan de recuperación de desastre (DRP, por sus siglas en inglés): Se deben establecer y documentar planes de recuperación ante desastres para las operaciones tecnológicas que soportan los Procesos Críticos del negocio y garantizar la disponibilidad de los mismos cuando sea necesario.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.5
+      name: Párr. I, núm. 5
+      description: 'Plan de Incidentes Significativos: Se deben definir Procedimientos y mecanismos para mitigar y corregir Ataques cibernéticos o ciberataque dirigidos.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.6
+      name: Párr. I, núm. 6
+      description: 'Gestión de crisis: se debe establecer un proceso de gestión de crisis con el soporte de una unidad de apoyo que detalle las acciones que se deben tomar en caso de la ocurrencia de un Incidente Significativo que afecten significativamente las operaciones normales del negocio.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.7
+      name: Párr. I, núm. 7
+      description: 'Plan de Contingencia: Se deben definir múltiples Planes de Contingencia desarrollados y desplegados para cada entorno del negocio para asegurar la continuidad de las operaciones para cada tipo de emergencia a enfrentar.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.8
+      name: Párr. I, núm. 8
+      description: 'Retorno a la normalidad: Proceso documentado para la vuelta a la normalidad una vez el Incidente haya sido superado, manteniendo los controles de Seguridad Cibernética y de la Información.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p1
+      ref_id: 30.P1.9
+      name: Párr. I, núm. 9
+      description: 'Recursos alternos: Se deben definir y documentar los recursos necesarios para soportar los Procedimientos de continuidad y recuperación, considerando personas, instalaciones, Infraestructura Tecnológica y controles de Seguridad Cibernética y de la Información.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:30
+      ref_id: 30.P2
+      name: Párr. II
+      description: Los planes deben ser aprobados por el consejo de administración y revisados regularmente por la alta gerencia con el objeto de asegurar la viabilidad, efectividad y eficacia operativa de los mismos.
+      annotation: El texto oficial no numera los párrafos de este artículo; se codificó como segundo párrafo.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:31
+      assessable: true
+      depth: 1
+      ref_id: '31'
+      name: Art. 31 – Pruebas del Plan de Continuidad de Negocio
+      description: Los Participantes del Mercado de Valores deben ejecutar pruebas al Plan de Continuidad de Negocio en períodos no mayores a un (1) año para confirmar la eficacia, eficiencia del plan y validar el desempeño coherente de las medidas de continuidad de Seguridad Cibernética y de la Información y realizar los ajustes pertinentes. Debe existir un registro o constancia de la calidad y los resultados de las mismas.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      assessable: true
+      depth: 1
+      ref_id: '32'
+      name: Art. 32 – Registros y Monitoreo Continuo
+      description: 'Los Participantes del Mercado de Valores deben contar con una política para mantener y revisar regularmente los registros de Eventos de las actividades realizadas por los usuarios en los sistemas infraestructura, aplicaciones, páginas web y Bases de Datos. De igual forma, deben contar con una política de las excepciones, fallas, y Eventos de Seguridad Cibernética y de la Información, con el fin de facilitar las investigaciones futuras y el Monitoreo Continuo de los Controles de Acceso. Los registros de Eventos deben contemplar, al menos, lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.1'
+      name: núm. 1
+      description: Identificación del usuario;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.2'
+      name: núm. 2
+      description: Actividades del sistema;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.3'
+      name: núm. 3
+      description: Fechas, horas y detalles de los Eventos clave;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.4'
+      name: núm. 4
+      description: Identificación o ubicación del dispositivo, si es posible, y el identificador del sistema o los intentos de Acceso a los datos y otros recursos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.5'
+      name: núm. 5
+      description: Registros de intentos de Acceso al sistema;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.6'
+      name: núm. 6
+      description: Cambios en la configuración del sistema;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.7'
+      name: núm. 7
+      description: Uso de privilegios, es decir, derechos y permisos otorgados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.8'
+      name: núm. 8
+      description: Uso de utilidades y aplicaciones del sistema;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.9'
+      name: núm. 9
+      description: Archivos accedidos y tipo de Acceso;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.10'
+      name: núm. 10
+      description: Direcciones IP, origen, destino y protocolos de red;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.11'
+      name: núm. 11
+      description: Activación y desactivación de los sistemas de protección;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.12'
+      name: núm. 12
+      description: Procedimientos para identificar falsos positivos menores y Eventos significativos; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: '32.13'
+      name: núm. 13
+      description: Otros registros de Eventos que la entidad considere relevantes conforme a su matriz de Riesgos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: 32.P1
+      name: Párr. I
+      description: Las informaciones referidas en este artículo deben ser conservadas a través de los medios electrónicos definidos por la entidad por un período que, en ningún caso, será inferior a tres (3) años.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:32
+      ref_id: 32.P2
+      name: Párr. II
+      description: Estos registros deben ser protegidos contra modificación no autorizada y analizados de manera regular.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33
+      assessable: true
+      depth: 1
+      ref_id: '33'
+      name: Art. 33 – Gestión de Problemas e Incidentes
+      description: 'Los Participantes del Mercado de Valores deben establecer las responsabilidades e implementar los Procedimientos de gestión para asegurar una respuesta rápida, eficaz y ordenada a todo Problema o Incidente Significativo, incluyendo:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33
+      ref_id: '33.1'
+      name: núm. 1
+      description: 'Establecimiento de un marco de gestión de Problemas o Incidentes de Seguridad Cibernética y de la Información contemplando lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1
+      ref_id: 33.1.a
+      name: núm. 1, lit. a)
+      description: Definición de roles y responsabilidades del equipo de gestión para garantizar una respuesta rápida, eficaz y ordenada;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1
+      ref_id: 33.1.b
+      name: núm. 1, lit. b)
+      description: Definición de tipo de Información necesaria para la gestión Problemas o Incidentes;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1
+      ref_id: 33.1.c
+      name: núm. 1, lit. c)
+      description: Uso de herramientas necesarias para asistir en el proceso de gestión de Problemas o Incidentes; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.1
+      ref_id: 33.1.d
+      name: núm. 1, lit. d)
+      description: Datos sobre Problemas o Incidentes a ser documentados, incluyendo la Información de contacto, entorno de negocios afectados y aspectos técnicos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33
+      ref_id: '33.2'
+      name: núm. 2
+      description: Establecimiento de un Procedimiento para la gestión de Problemas e Incidentes Significativos que cubra las fases de identificación, respuesta, recuperación y seguimiento conforme al Marco de Trabajo, así como el mecanismo para su identificación, registro, categorización y clasificación. El tiempo de retención de los registros no podrá ser menor a tres (3) años, procurando el almacenamiento en formato físico con el nivel apropiado de protección ambiental y conforme a los métodos indicados por los fabricantes o, en caso tratarse de almacenamiento en formato digital, en la nube o en un ambiento con diferentes niveles de Acceso y de localización;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33
+      ref_id: '33.3'
+      name: núm. 3
+      description: 'Implementación de sistemas especializados que contemplen herramientas para:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3
+      ref_id: 33.3.a
+      name: núm. 3, lit. a)
+      description: Gestión, análisis y correlación de Eventos de seguridad;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3
+      ref_id: 33.3.b
+      name: núm. 3, lit. b)
+      description: Investigación;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3
+      ref_id: 33.3.c
+      name: núm. 3, lit. c)
+      description: Restauración de registros históricos; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.3
+      ref_id: 33.3.d
+      name: núm. 3, lit. d)
+      description: Manejo de evidencias e investigaciones forenses.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33
+      ref_id: '33.4'
+      name: núm. 4
+      description: 'Establecimiento y documentación de Procedimientos para el análisis y revisión de la Información sobre Problemas e Incidentes de seguridad para:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4
+      ref_id: 33.4.a
+      name: núm. 4, lit. a)
+      description: Determinar patrones y tendencias;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4
+      ref_id: 33.4.b
+      name: núm. 4, lit. b)
+      description: Determinar los costos tangibles e intangibles asociados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4
+      ref_id: 33.4.c
+      name: núm. 4, lit. c)
+      description: Evaluar las implicaciones operacionales;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4
+      ref_id: 33.4.d
+      name: núm. 4, lit. d)
+      description: Determinar la efectividad de los controles; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:33.4
+      ref_id: 33.4.e
+      name: núm. 4, lit. e)
+      description: Realizar comparaciones de los Problemas e Incidentes internos con reportes externos similares.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:34
+      assessable: true
+      depth: 1
+      ref_id: '34'
+      name: Art. 34 – Gestión de parches
+      description: Los Participantes del Mercado de Valores deben gestionar e instalar parches de seguridad para proteger los sistemas de Información y la infraestructura de tecnología de la Información, así como mantener el conocimiento actualizado de los parches disponibles. La gestión e implementación de parches debe considerar los aspectos del artículo 24 (Gestión de cambio) del presente Reglamento.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:34.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:34
+      ref_id: 34.P
+      name: Párr.
+      description: Los Participantes del Mercado de Valores deben contar con políticas y Procedimientos para la gestión e instalación de los parches seguridad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:35
+      assessable: true
+      depth: 1
+      ref_id: '35'
+      name: Art. 35 – Monitoreo Continuo
+      description: Los Participantes del Mercado de Valores deben contar con una política para gestionar, mantener y revisar regularmente el rendimiento, sobrecargas y las capacidades de los servicios, sistemas y la Infraestructura Tecnológica, conforme a lo determinado en la norma de carácter técnico emitido por el superintendente.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36
+      assessable: true
+      depth: 1
+      ref_id: '36'
+      name: Art. 36 – Prevención y detección de intrusos
+      description: 'Los Participantes del Mercado de Valores deben implementar soluciones tecnológicas o mecanismos de prevención y detección de intrusos, a fin de proteger los sistemas y la Infraestructura Tecnológica. Estos deben cubrir, como mínimo, los siguientes aspectos:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36
+      ref_id: '36.1'
+      name: núm. 1
+      description: Infraestructura Tecnológica;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36
+      ref_id: '36.2'
+      name: núm. 2
+      description: 'Definición de mecanismos de prevención de intrusos los cuales deben identificar:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2
+      ref_id: 36.2.a
+      name: núm. 2, lit. a)
+      description: Características y patrones de Ataques conocidos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2
+      ref_id: 36.2.b
+      name: núm. 2, lit. b)
+      description: Comportamiento inusual de los sistemas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2
+      ref_id: 36.2.c
+      name: núm. 2, lit. c)
+      description: Acceso no autorizado a los sistemas de Información; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.2
+      ref_id: 36.2.d
+      name: núm. 2, lit. d)
+      description: Configuraciones base que contemplen actualizaciones de las Bases de Datos para incorporar cualquier nueva Amenaza o forma de Ataque, envío de alertas cuando surja una actividad sospechosa o inusual y la protección contra Ataques dirigidos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36
+      ref_id: '36.3'
+      name: núm. 3
+      description: 'Elaboración de análisis de las posibles intrusiones para determinar el impacto de los mismos en la entidad, incluyendo lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3
+      ref_id: 36.3.a
+      name: núm. 3, lit. a)
+      description: Determinación de ocurrencia de Ataque para descartar los falsos positivos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3
+      ref_id: 36.3.b
+      name: núm. 3, lit. b)
+      description: Determinación de tipo de Ataque y trazabilidad del mismo;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3
+      ref_id: 36.3.c
+      name: núm. 3, lit. c)
+      description: Identificación de vectores de Ataque; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:36.3
+      ref_id: 36.3.d
+      name: núm. 3, lit. d)
+      description: Cuantificación estimada del posible impacto del Ataque.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:37
+      assessable: true
+      depth: 1
+      ref_id: '37'
+      name: Art. 37 – Protección de Software malicioso
+      description: Los Participantes del Mercado de Valores deben contar con políticas, Procedimientos y mecanismos para la detección, prevención y recuperación para proteger de Software malicioso a los sistemas e Infraestructura Tecnológica, así como Procedimientos y capacitación continua y adecuada para concientizar a sus empleados sobre el Software malicioso. De igual manera, los Participantes del Mercado de Valores deberán informar y hacer recomendaciones a los usuarios a los fines de concientizarlos sobre el Software malicioso.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:37.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:37
+      ref_id: 37.P1
+      name: Párr. I
+      description: Al efecto, los Participantes del Mercado de Valores deben instalar y desplegar sistemas para la protección contra Software malicioso en todos los dispositivos que formen parte de la Infraestructura Tecnológica de la entidad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:37.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:37
+      ref_id: 37.P2
+      name: Párr. II
+      description: De igual forma, los Participantes del Mercado de Valores deben mantener configuraciones adecuadas para los sistemas de protección contra Software malicioso que contemple políticas para la protección en tiempo real, la programación de escaneos en escalas de tiempo definidas, la notificación de potenciales infecciones, la inhabilitación y cuarentena de archivos infectados, la remoción de cualquier Software malicioso y archivos infectados asociados al mismo.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:37.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:37
+      ref_id: 37.P3
+      name: Párr. III
+      description: los Participantes del Mercado de Valores deben realizar análisis y escaneos periódicos a los componentes de la Infraestructura Tecnológica.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      assessable: true
+      depth: 1
+      ref_id: '38'
+      name: Art. 38 – Gestión de la red
+      description: 'Los Participantes del Mercado de Valores deben implementar los controles para garantizar la seguridad y protección de la Información en los componentes de redes y la protección de los servicios conectados e Información en tránsito. Por lo cual, deben establecer:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      ref_id: '38.1'
+      name: núm. 1
+      description: 'Configuración de dispositivos de la red: Los dispositivos de red deben ser configurados para funcionar de acuerdo con su rol y con los controles de seguridad que eviten cambios no autorizados o incorrectos;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      ref_id: '38.2'
+      name: núm. 2
+      description: 'Gestión de la red física: Las redes deben ser protegidas por controles físicos de seguridad, con el apoyo de documentación actualizada y el etiquetado de los componentes esenciales, los puntos de Acceso a la red deben estar protegidos por Mecanismos de Control de Acceso;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      ref_id: '38.3'
+      name: núm. 3
+      description: 'Conexiones de redes externas: Las conexiones de redes externas a los sistemas y redes informáticas deben ser identificadas, verificadas, registradas y aprobadas individualmente por el personal designado o comité funcional de Seguridad Cibernética y de la Información, para lo cual deben establecer:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.3
+      ref_id: 38.3.a
+      name: núm. 3, lit. a)
+      description: Procedimientos para la gestión de las conexiones con redes externas que contemplen la identificación individual de cada conexión externa a otros sistemas y redes, mecanismos de Acceso a dispositivos autorizados, documentación de conexiones externas y remoción de conexiones innecesarias;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.3
+      ref_id: 38.3.b
+      name: núm. 3, lit. b)
+      description: Mecanismos de protección que contemplen la restricción de las conexiones a los puntos de entrada definidos, verificación de la fuente de las conexiones externas y registro de las mismas, así como registro de potenciales violaciones a la política de seguridad interna; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.3
+      ref_id: 38.3.c
+      name: núm. 3, lit. c)
+      description: Aislamiento de dispositivos desconocidos o inseguros en un segmento de cuarentena para los fines de configuración y actualización de los mismos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      ref_id: '38.4'
+      name: núm. 4
+      description: 'Tráfico de datos a través de los firewalls (cortafuegos):'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4
+      ref_id: 38.4.a
+      name: núm. 4, lit. a)
+      description: La configuración del filtrado de tráfico debe utilizar reglas predefinidas tomando en cuenta los principios del menor privilegio, por defecto, y revisada periódicamente;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4
+      ref_id: 38.4.b
+      name: núm. 4, lit. b)
+      description: Los firewalls (cortafuegos) deben contar con reglas de protección y protocolos de comunicación propensos a abusos por Ataques;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4
+      ref_id: 38.4.c
+      name: núm. 4, lit. c)
+      description: Bloqueo de paquetes maliciosos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4
+      ref_id: 38.4.d
+      name: núm. 4, lit. d)
+      description: Bloqueo del tráfico entrante o saliente a direcciones comprometidas; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.4
+      ref_id: 38.4.e
+      name: núm. 4, lit. e)
+      description: Pruebas de funcionamiento y efectividad de reglas, previo a su aplicación.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      ref_id: '38.5'
+      name: núm. 5
+      description: 'Acceso y mantenimiento remoto:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.a
+      name: núm. 5, lit. a)
+      description: Establecer responsabilidades y Procedimientos para la gestión de los activos de Tecnologías y de Información remotos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.b
+      name: núm. 5, lit. b)
+      description: Establecer Procedimientos para la gestión de Acceso remoto que contemplen las etapas de solicitud, autorización y registro;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.c
+      name: núm. 5, lit. c)
+      description: Identificar los usuarios que dispondrán de servicio de remoto;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.d
+      name: núm. 5, lit. d)
+      description: Implementar mecanismos de conexión segura con Encriptación de datos, autenticación e identificación para el Acceso remoto de los usuarios;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.e
+      name: núm. 5, lit. e)
+      description: Establecer Procedimientos para la gestión de mantenimiento remoto de sistemas críticos por terceros autorizados, contemplando la definición de objetivos y alcance del mantenimiento planificado, controles para el registro de Acceso individualizado por cada tercero, mecanismos de autorización de Acceso a los sistemas mediante credenciales únicas especializadas y su revocación tras la finalización del mantenimiento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.f
+      name: núm. 5, lit. f)
+      description: Verificar el cumplimiento y registrar las labores de mantenimiento remoto;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.g
+      name: núm. 5, lit. g)
+      description: Supervisar los mantenimientos remotos durante su realización. Una vez terminadas las sesiones de mantenimiento, la conexión debe finalizar automáticamente;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.5
+      ref_id: 38.5.h
+      name: núm. 5, lit. h)
+      description: Definir los controles para aplicaciones de gestión de mantenimiento remoto, contemplando aspectos de gestión de Acceso, análisis de origen y destino de conexiones, así como el Monitoreo Continuo de las actividades realizadas en cada sesión y la inhabilitación de la conexión tras la conclusión del mantenimiento.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      ref_id: '38.6'
+      name: núm. 6
+      description: 'Acceso a redes inalámbricas: Elaboración de Procedimientos documentados para la gestión de redes inalámbricas, contemplando los siguientes aspectos:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.a
+      name: núm. 6, lit. a)
+      description: Ubicación segura y configuración de Acceso inalámbrico;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.b
+      name: núm. 6, lit. b)
+      description: Mecanismos de restricción de Acceso a usuarios no autorizados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.c
+      name: núm. 6, lit. c)
+      description: Cifrado de conexiones entre dispositivos previamente registrados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.d
+      name: núm. 6, lit. d)
+      description: Inventario de dispositivos de puntos de Acceso de redes inalámbricas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.e
+      name: núm. 6, lit. e)
+      description: 'Mecanismos de detección de usuarios y dispositivos no autorizados:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.f
+      name: núm. 6, lit. f)
+      description: Uso de identificadores de servicios (SSID, por sus siglas en inglés) ocultos en redes privadas para evitar revelar Información importante de la red inalámbrica;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.g
+      name: núm. 6, lit. g)
+      description: Aplicación de múltiples capas de protección para la red, tales como, listas de Control de Acceso, autenticación de dispositivos y de usuarios;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.h
+      name: núm. 6, lit. h)
+      description: Uso de mecanismos para el filtrado de seguridad para prevenir el Acceso no autorizado a la red;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.i
+      name: núm. 6, lit. i)
+      description: 'Establecimiento de redes inalámbricas segregadas de la red principal para uso del personal externo, tales como: visitantes, suplidores y empleados que deseen conectarse con sus dispositivos personales. Estas redes deben estar localizadas en segmentos exclusivos de la red, monitoreadas y protegidas por firewalls (cortafuegos);'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.j
+      name: núm. 6, lit. j)
+      description: Redes de voz sobre IP (VoIP, por sus siglas en inglés); y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6.k
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.6
+      ref_id: 38.6.k
+      name: núm. 6, lit. k)
+      description: Controles de seguridad y monitoreo contemplando el registro de intentos de Acceso, restricción y filtrado del tráfico, así como mecanismos de redundancia.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38
+      ref_id: '38.7'
+      name: núm. 7
+      description: 'Telefonía y Conferencia:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7
+      ref_id: 38.7.a
+      name: núm. 7, lit. a)
+      description: Procedimientos documentados para la gestión y uso de servicios de telefonía y conferencia, así como la administración de su infraestructura subyacente;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7
+      ref_id: 38.7.b
+      name: núm. 7, lit. b)
+      description: Controles generales de red como, por ejemplo, el despliegue de herramientas de monitoreo, instalación de componentes para el aseguramiento de resiliencia y redundancia de la red de telefonía, instalación de firewalls (cortafuegos) con capacidad de filtrado de tráfico de voz y bloqueo de terminales no autorizadas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7
+      ref_id: 38.7.c
+      name: núm. 7, lit. c)
+      description: Controles especializados para la infraestructura de telefonía como, por ejemplo, la separación del tráfico de voz, aplicación de configuraciones de seguridad a teléfonos, enrutadores, centrales PBX, cifrado de dispositivos, conexiones, escaneo de Vulnerabilidades y el registro y Monitoreo Continuo de Eventos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7
+      ref_id: 38.7.d
+      name: núm. 7, lit. d)
+      description: Protección de los sistemas de buzones de voz contra el Acceso no autorizado a través de mecanismos de autenticación;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7
+      ref_id: 38.7.e
+      name: núm. 7, lit. e)
+      description: Documentación de cambios realizados a las configuraciones de los servicios de telefonía y conferencia como, por ejemplo, cambios de extensiones, restablecimiento de contraseñas de buzones y redireccionamiento de llamadas; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:38.7
+      ref_id: 38.7.f
+      name: núm. 7, lit. f)
+      description: Despliegue de sistemas de telecomunicaciones alternos para asegurar la continuidad de las operaciones del negocio del Participante del Mercado de Valores dentro de un período razonable de tiempo de acuerdo al Plan de Contingencia.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39
+      assessable: true
+      depth: 1
+      ref_id: '39'
+      name: Art. 39 – Dispositivos Móviles
+      description: 'Los Participantes del Mercado de Valores deben establecer mecanismos de seguridad para proteger la Información intercambiada a través de los Dispositivos Móviles utilizados por los empleados en el ejercicio de sus funciones laborales, incluyendo:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39
+      ref_id: '39.1'
+      name: núm. 1
+      description: Gestión y autorización de los Accesos desde entornos remotos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39
+      ref_id: '39.2'
+      name: núm. 2
+      description: Gestión centralizada de los Dispositivos Móviles;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39
+      ref_id: '39.3'
+      name: núm. 3
+      description: 'Protección de la Información: Los Dispositivos Móviles deben ser protegidos contra la divulgación no autorizada de Información, pérdida o hurto, mediante Control de Acceso y cifrado;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39
+      ref_id: '39.4'
+      name: núm. 4
+      description: Conectividad segura de los Dispositivos Móviles;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:39
+      ref_id: '39.5'
+      name: núm. 5
+      description: 'Dispositivos portátiles de almacenamiento: El uso de dispositivos portátiles de almacenamiento debe ser objeto de aprobación con Acceso restringido. El almacenamiento de Información en este tipo de dispositivos debe ser cifrada.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40
+      assessable: true
+      depth: 1
+      ref_id: '40'
+      name: Art. 40 – Comunicaciones electrónicas
+      description: 'Los Participantes del Mercado de Valores deben asegurar las comunicaciones electrónicas, mediante controles y políticas de Seguridad Cibernética y de la Información, incluyendo:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40
+      ref_id: '40.1'
+      name: núm. 1
+      description: 'Correos electrónicos: Los sistemas de correos electrónicos de los Participantes del Mercado de Valores deben estar protegidos por una combinación de procesos, concienciación y controles técnicos de Seguridad Cibernética y de la Información que contemplen lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.1
+      ref_id: 40.1.a
+      name: núm. 1, lit. a)
+      description: Definición de política interna de correo electrónico, la cual debe contemplar Procedimientos para la configuración de buzones, escaneo de mensajes de correo para la detección y bloqueo de cualquier Amenaza de seguridad, términos y condiciones de uso y Monitoreo Continuo de actividad, así como la revisión de capacidades y requerimientos para su continuo funcionamiento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.1
+      ref_id: 40.1.b
+      name: núm. 1, lit. b)
+      description: Establecimiento de controles de seguridad para la prevención de la divulgación accidental de mensajes a través del cifrado, inhabilitación de funcionalidades de autoenvío, prohibición del uso de grandes listas de distribución y la presentación de advertencias a los usuarios previo al envío de correo a grandes grupos de destinatarios;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.1
+      ref_id: 40.1.c
+      name: núm. 1, lit. c)
+      description: Establecimiento de controles de seguridad para el bloqueo de mensajes no deseados, mecanismos de no repudiación del origen y recepción de mensajes, así como de validación de direcciones IP.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40
+      ref_id: '40.2'
+      name: núm. 2
+      description: 'Mensajería instantánea: Los servicios de mensajería instantánea deben ser protegidos mediante el establecimiento de un proceso de gestión que contemple las etapas de solicitud, autorización, implementación de los controles y la configuración de los elementos de Seguridad Cibernética y de la Información; y,'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:40
+      ref_id: '40.3'
+      name: núm. 3
+      description: 'Servicios de comunicación de voz: Los servicios de comunicación de voz deben ser aprobados y protegidos por una combinación de controles tecnológicos, los cuales deben monitorearse regularmente y estar respaldados por restricciones en el Acceso.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:41
+      assessable: true
+      depth: 1
+      ref_id: '41'
+      name: Art. 41 – Gestión de proveedores externos
+      description: 'Los Participantes del Mercado de Valores que contraigan obligaciones contractuales con proveedores externos de productos o servicios tecnológicos, deben asegurar la integración de los requerimientos de Seguridad Cibernética y de la Información, conforme a los aspectos siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:41.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:41
+      ref_id: '41.1'
+      name: núm. 1
+      description: 'Tercerización: Establecer un proceso para regir la selección y gestión de los proveedores externos, apoyado en contratos que especifiquen los requisitos de Seguridad Cibernética y de la Información;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:41.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:41
+      ref_id: '41.2'
+      name: núm. 2
+      description: 'Requisitos de seguridad a los proveedores externos: El cumplimiento de los requisitos de Seguridad Cibernética y de la Información debe revisarse de manera periódica durante la relación con los proveedores externos, contemplando el análisis y la gestión adecuada de los Riesgos.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:41.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:41
+      ref_id: 41.P
+      name: Párr.
+      description: 'En los casos que los servicios provistos consideren Información financiera u otro tipo de Información sensible, los Participantes del Mercado de Valores deben solicitar a la entidad proveedora una evaluación enfocada en los Riesgos de Integridad, disponibilidad y Confidencialidad. Dicha evaluación debe ser realizada por un tercero independiente utilizando modelos de reportes de Riesgo y controles en la provisión de servicio (Por ejemplo: SOC 2, etc., u otras conforme a la naturaleza del servicio contratado).'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:42
+      assessable: true
+      depth: 1
+      ref_id: '42'
+      name: Art. 42 – Contratación de servicios de computación en la nube
+      description: Los Participantes del Mercado de Valores deben documentar una política para el uso y contratación de servicios de computación en la nube, incluyendo el hospedaje de servicios web, que contemple el desarrollo de un análisis de los Riesgos de Seguridad Cibernética y de la Información de los servicios contratados para determinar el uso de los mismos por parte de los empleados, la Integridad de la Información almacenada y sus mecanismos de protección. Esta política debe ser comunicada a todos los empleados que puedan hacer uso de los mismos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:43
+      assessable: true
+      depth: 1
+      ref_id: '43'
+      name: Art. 43 – Desarrollo de sistemas
+      description: 'Los Participantes de Mercado de Valores que mantengan en su estructura orgánica un área de desarrollo de sistemas, deben establecer un proceso de gestión de desarrollo de sistemas que contemple:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:43.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:43
+      ref_id: '43.1'
+      name: núm. 1
+      description: 'Metodología de Desarrollo de Sistemas: Las actividades de desarrollo de sistemas deben llevarse a cabo de acuerdo con una metodología de desarrollo documentada y apegada al Marco de Trabajo;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:43.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:43
+      ref_id: '43.2'
+      name: núm. 2
+      description: 'Entorno de Desarrollo de Sistemas: Las actividades de desarrollo de sistemas se deben realizar en los entornos de desarrollo especializados, los cuales deben estar separados de los ambientes de desarrollo, preproducción y producción, así como protegidos contra Accesos no autorizados. Los datos de entornos productivos no deben ser utilizada o almacenada en los entornos de desarrollo. Deben establecerse mecanismos para asegurar la privacidad y protección de los datos de carácter personal en los ambientes de preproducción (aseguramiento de la calidad) y producción;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:43.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:43
+      ref_id: '43.3'
+      name: núm. 3
+      description: 'Aseguramiento de la Calidad: El desarrollo de los sistemas debe realizarse siguiendo normas y pruebas de calidad que procuren que los controles y requisitos de Seguridad Cibernética y de la Información acordados sean implementados durante el ciclo de desarrollo del mismo.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:44
+      assessable: true
+      depth: 1
+      ref_id: '44'
+      name: Art. 44 – Interfaces programables de aplicaciones (API)
+      description: Los sistemas y aplicaciones, que permitan la extensibilidad de funciones a través de interfaces de aplicaciones programables, deben contar con controles de Seguridad Cibernética y de la Información que regulen la interacción con otros sistemas y aplicaciones, tanto internos como de terceros. Del mismo modo, las aplicaciones desarrolladas que interactúen con estas interfaces de aplicaciones programables deben cumplir con los requerimientos de seguridad establecidos por los Participantes del Mercado de Valores.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45
+      assessable: true
+      depth: 1
+      ref_id: '45'
+      name: Art. 45 – Información a la Superintendencia
+      description: 'Los Participantes del Mercado de Valores deben notificar mediante comunicación confidencial a la Superintendencia, a más tardar el día hábil siguiente, sobre la ocurrencia y las acciones tomadas para corregir los siguientes Eventos:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45
+      ref_id: '45.1'
+      name: núm. 1
+      description: La activación del Plan de Contingencia o estrategias de recuperación de las operaciones del negocio;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45
+      ref_id: '45.2'
+      name: núm. 2
+      description: La interrupción en el funcionamiento normal de los sistemas operativos y Software aplicativos principales que afecten la prestación de servicios a los clientes;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45
+      ref_id: '45.3'
+      name: núm. 3
+      description: La decisión de realizar cambios en la plataforma central de operaciones y sistemas computarizados que afecten o podrían afectar la operatividad de la entidad;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45
+      ref_id: '45.4'
+      name: núm. 4
+      description: La ocurrencia de Incidentes de seguridad relacionados con la realización exitosa de Ataques externos o penetración a los sistemas de la entidad a través de los servicios de red y comunicaciones, debidamente reportados previamente al CSIRT para aquellos que cuenten con acceso para realizar dichas notificaciones conforme al Párrafo II del artículo 2 de este Reglamento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45
+      ref_id: '45.5'
+      name: núm. 5
+      description: La decisión de implementar o cambiar la plataforma tecnológica utilizada para proporcionar servicios financieros por medios electrónicos; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:45
+      ref_id: '45.6'
+      name: núm. 6
+      description: Cualquier Evento que provoque cambios no programados en la Infraestructura Tecnológica de la Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      assessable: true
+      depth: 1
+      ref_id: '46'
+      name: Art. 46 – Criptografía
+      description: 'Los Participantes del Mercado de Valores deben establecer políticas y Procedimientos sobre la gestión y empleo de controles criptográficos para asegurar la Integridad, disponibilidad, Confidencialidad, autenticidad y no repudio de la Información, los cuales deben incluir:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      ref_id: '46.1'
+      name: núm. 1
+      description: La administración de las soluciones criptográficas, contemplando la selección de herramientas y soluciones de cifrado, la gestión de solicitudes, aprobaciones y gestión de actualizaciones de soluciones y algoritmos de cifrado;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      ref_id: '46.2'
+      name: núm. 2
+      description: 'Mantenimiento de un registro de soluciones criptográficas aprobadas, contemplando lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2
+      ref_id: 46.2.a
+      name: núm. 2, lit. a)
+      description: Especificación de la intención del uso de cifrado;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2
+      ref_id: 46.2.b
+      name: núm. 2, lit. b)
+      description: Información sobre los usuarios autorizados a utilizar las mismas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2
+      ref_id: 46.2.c
+      name: núm. 2, lit. c)
+      description: Detalles de los entornos locales donde se aplica la solución; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.2
+      ref_id: 46.2.d
+      name: núm. 2, lit. d)
+      description: Requerimientos de licenciamiento de la solución.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      ref_id: '46.3'
+      name: núm. 3
+      description: Análisis de Riesgos asociados al uso de soluciones criptográficas, incluyendo los algoritmos de Encriptación, cuando sean aplicados;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      ref_id: '46.4'
+      name: núm. 4
+      description: Uso, protección y duración de las claves criptográficas en todo su ciclo de vida;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      ref_id: '46.5'
+      name: núm. 5
+      description: Mecanismos para la distribución segura, almacenamiento, respaldo, recuperación, reemplazo y actualización de llaves criptográficas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      ref_id: '46.6'
+      name: núm. 6
+      description: La forma de designación de los custodios de llaves criptográficas, incluyendo la sensibilización a usuarios sobre sus deberes y responsabilidades; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:46
+      ref_id: '46.7'
+      name: núm. 7
+      description: Forma de revocación de llaves criptográficas en caso de que alguna llave haya sido comprometida o por modificación del custodio de llave criptográfica.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:47
+      assessable: true
+      depth: 1
+      ref_id: '47'
+      name: Art. 47 – Gestión de las Vulnerabilidades
+      description: Los Participantes del Mercado de Valores deben contar con políticas, Procedimientos y mecanismos para identificar y evaluar de forma continua las Vulnerabilidades en la infraestructura, aplicaciones, páginas web y Bases de Datos que permitan determinar el tipo de Amenaza, impacto potencial y mejor curso de acción para hacer frente a cada Vulnerabilidad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:47.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:47
+      ref_id: 47.P
+      name: Párr.
+      description: Sobre las pruebas de penetración, las mismas deben llevarse a cabo con regularidad cada vez que sea necesario y en todo caso, por lo menos, una (1) vez al año con el objetivo de identificar nuevas Vulnerabilidades utilizando técnicas avanzadas y garantizando que las identificadas previamente han sido corregidas correctamente.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:48
+      assessable: true
+      depth: 1
+      ref_id: '48'
+      name: Art. 48 – Sincronización de reloj de sistemas e Infraestructura Tecnológica
+      description: Los sistemas de procesamiento de Información relevantes o de dominio de seguridad de los Participantes del Mercado de Valores debe estar sincronizados para asegurar la exactitud de los registros de auditoría, los cuales podrán requerirse para investigaciones o como pruebas en acciones legales o disciplinarias. Al efecto, se deben establecer las políticas y Procedimientos internos.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:49
+      assessable: true
+      depth: 1
+      ref_id: '49'
+      name: Art. 49 – Registros y monitoreo de los usuarios administradores
+      description: Los Participantes del Mercado de Valores deben contar con políticas, Procedimientos y mecanismos para proteger, revisar y registrar las actividades realizadas por los usuarios privilegiados de los sistemas e Infraestructura Tecnológica. Las revisiones deben realizarse, por lo menos, semestralmente o en un período inferior definido por la entidad en función de los hallazgos detectados en evaluaciones anteriores y de la necesidad del negocio.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      assessable: true
+      depth: 1
+      ref_id: '50'
+      name: Art. 50 – Ciclo de vida del desarrollo de sistemas y aplicaciones
+      description: 'Los Participantes del Mercado de Valores que mantengan en su estructura orgánica un área de desarrollo de sistemas, deben adoptar un ciclo de vida para el desarrollo seguro de sus sistemas y aplicaciones, tanto internas como tercerizadas, de acuerdo a las disposiciones siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      ref_id: '50.1'
+      name: núm. 1
+      description: 'Especificaciones de los requerimientos: Los requerimientos del negocio, incluidos los de Seguridad Cibernética y de la Información, deben ser contemplados durante la fase de especificación de requerimientos;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      ref_id: '50.2'
+      name: núm. 2
+      description: 'Diseño de sistemas y aplicaciones: Los requisitos de Seguridad Cibernética y de la Información para los sistemas que se encuentran en el ciclo de desarrollo deben ser considerados en el diseño de dichos sistemas y aplicaciones, a fin de minimizar las Vulnerabilidades;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      ref_id: '50.3'
+      name: núm. 3
+      description: 'Compilación de sistemas y aplicaciones: Las actividades de compilación de los sistemas y aplicaciones, incluyendo la codificación y personalización de paquetes, deben llevarse a cabo de conformidad con el Marco de Trabajo de la industria, realizadas por el personal especializado en el desarrollo de sistemas y aplicaciones. Las actividades de compilación deben ser inspeccionadas para identificar modificaciones o cambios no autorizados;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      ref_id: '50.4'
+      name: núm. 4
+      description: 'Prueba de sistemas y aplicaciones: Los sistemas y aplicaciones en desarrollo deben ser probados en una zona dedicada de pruebas que simule el entorno de producción, con la debida atención a los datos de carácter personal utilizada, antes de que el sistema o aplicación sea colocado en el ambiente de producción;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      ref_id: '50.5'
+      name: núm. 5
+      description: 'Pruebas de seguridad: Los sistemas y aplicaciones en desarrollo deben ser sometidos a pruebas de Seguridad Cibernética y de la Información en las fases requeridas dentro del ciclo de desarrollo, utilizando herramientas para la detección de Vulnerabilidades, pruebas de penetración y pruebas de Control de Acceso, previo a su colocación en los ambientes de producción;'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      ref_id: '50.6'
+      name: núm. 6
+      description: 'Proceso de instalación: Los nuevos sistemas y aplicaciones se deben instalar en el entorno de producción, de acuerdo con un proceso documentado que contemple los requerimientos de Seguridad Cibernética y de la Información; y,'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:50
+      ref_id: '50.7'
+      name: núm. 7
+      description: 'Revisiones luego de las implementaciones: Luego de la implementación, se deben realizar revisiones periódicas de acuerdo con procesos documentados, incluyendo la cobertura de la Seguridad Cibernética y de la Información.'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:51
+      assessable: true
+      depth: 1
+      ref_id: '51'
+      name: Art. 51 – Gobierno de Seguridad Cibernética y de la Información
+      description: Los Participantes del Mercado de Valores deben contar con un Gobierno de Seguridad Cibernética y de la Información, el cual se constituye como parte integral del programa de gobierno empresarial-corporativo que brinda dirección estratégica para garantizar que se logren los objetivos del negocio y determina que el Riesgo tecnológico se administre de forma apropiada y que los recursos se utilicen con responsabilidad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:51.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:51
+      ref_id: 51.P
+      name: Párr.
+      description: 'Los Participantes del Mercado de Valores deben contar con una estructura organizacional y funcional de control de Seguridad Cibernética y de la Información acordes a su naturaleza, tamaño, complejidad, perfil de riesgo e importancia sistémica, la cual estará conformada por:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:51.p.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:51.p
+      ref_id: 51.P.a
+      name: Párr., lit. a)
+      description: El comité funcional de Seguridad Cibernética y de la Información especializado o cuyas funciones sean asumidas por el comité de Riesgos de la entidad;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:51.p.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:51.p
+      ref_id: 51.P.b
+      name: Párr., lit. b)
+      description: La estructura gerencial quien dirigirá el Programa de Seguridad Cibernética y de la Información, en el marco de las responsabilidades definidas en este Reglamento.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      assessable: true
+      depth: 1
+      ref_id: '52'
+      name: Art. 52 – Responsabilidad del consejo de administración
+      description: 'El consejo de administración será responsable del cumplimiento de los principios y lineamientos básicos en materia de Seguridad Cibernética y de la Información. En tal virtud, el consejo debe cumplir con las responsabilidades que se detallan a continuación:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.1'
+      name: núm. 1
+      description: Establecer y velar por la existencia de un Gobierno de Seguridad Cibernética y de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.2'
+      name: núm. 2
+      description: Evaluar y aprobar un sistema de gestión de la Seguridad Cibernética y de la Información que proporcione la estrategia y enfoque estándar, formal y continuo a la gestión de seguridad para la Información y procesos de negocios que estén alineados con los requerimientos de negocio y la gestión de seguridad del Participante del Mercado de Valores;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.3'
+      name: núm. 3
+      description: Aprobar el programa de Seguridad Cibernética y de la Información, incluyendo los objetivos, lineamientos y políticas en dicha materia y sus Riesgos, así como velar por su cumplimiento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.4'
+      name: núm. 4
+      description: Proveer los recursos necesarios para lograr el cumplimiento de las políticas y lineamientos en materia de Seguridad Cibernética y de la Información y de las disposiciones contenidas en este Reglamento;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.5'
+      name: núm. 5
+      description: Velar para que los Riesgos relacionados con la Seguridad Cibernética y de la Información no excedan la tolerancia de Riesgo de la entidad;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.6'
+      name: núm. 6
+      description: Dar seguimiento al cumplimiento de la implementación de sistemas de Información propios, adquiridos o subcontratados, con la normativa vigente aplicable;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.7'
+      name: núm. 7
+      description: Adoptar las políticas que contemplen las estrategias de índole técnica, organizativa y de seguridad necesarias para salvaguardar los datos de carácter personal y eviten su alteración, pérdida, tratamiento, consulta o Acceso no autorizado;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.8'
+      name: núm. 8
+      description: Aprobar y dar seguimiento al Plan de Continuidad de Negocios, Plan de Contingencia y programas de pruebas de estrés, como parte de su proceso de gestión integral de Riesgo;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:52
+      ref_id: '52.9'
+      name: núm. 9
+      description: Asegurar que exista un sistema adecuado de delegación de responsabilidades y segregación de funciones en la entidad.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      assessable: true
+      depth: 1
+      ref_id: '53'
+      name: Art. 53 – Comité funcional de Seguridad Cibernética y de la Información
+      description: 'Los Participantes del Mercado de Valores deben establecer un comité funcional de Seguridad Cibernética y de la Información, cuyas responsabilidades se detallan a continuación:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: '53.1'
+      name: núm. 1
+      description: Diseñar los lineamientos para la Seguridad Cibernética y de la Información y el mantenimiento del programa de Seguridad Cibernética y de la Información, en consonancia con los objetivos estratégicos de la entidad, evaluados y aprobados por el consejo de administración;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: '53.2'
+      name: núm. 2
+      description: Someter al consejo de administración, para su aprobación, las políticas del programa de Seguridad Cibernética y de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: '53.3'
+      name: núm. 3
+      description: Evaluar la efectividad del programa de Seguridad Cibernética y de la Información en consonancia con los objetivos estratégicos de la entidad;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: '53.4'
+      name: núm. 4
+      description: Aprobar las conexiones de redes externas a los sistemas y redes informáticas identificadas por el área a cargo de la Seguridad Cibernética y de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: '53.5'
+      name: núm. 5
+      description: Asignar y verificar el cumplimiento de las funciones y responsabilidades de Seguridad Cibernética y de la Información para los roles definidos en el área correspondiente;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: '53.6'
+      name: núm. 6
+      description: Ratificar las decisiones de tratamiento de Riesgo en coordinación con las áreas pertinentes de negocios, previamente presentados por el oficial de Seguridad Cibernética y de la Información; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: '53.7'
+      name: núm. 7
+      description: Comunicar al consejo de administración los resultados de las valoraciones sobre los aspectos de Seguridad Cibernética y de la Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: 53.P1
+      name: Párr. I
+      description: 'El comité funcional de Seguridad Cibernética y de la Información estará integrado por un número impar, como mínimo, de tres (3) miembros con voz y voto:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p1
+      ref_id: 53.P1.a
+      name: Párr. I, lit. a)
+      description: Un miembro del consejo de administración que no ocupe cargos ejecutivos en el Participante del Mercado de Valores, quien lo presidirá;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p1
+      ref_id: 53.P1.b
+      name: Párr. I, lit. b)
+      description: El Ejecutivo Principal del Participante del Mercado de Valores;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p1
+      ref_id: 53.P1.c
+      name: Párr. I, lit. c)
+      description: Un miembro de la Alta Gerencia designado por el consejo de administración cuyas funciones guarden relevancia en la materia.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: 53.P2
+      name: Párr. II
+      description: El oficial de Seguridad Cibernética y la Información fungirá como secretario del comité funcional de Seguridad Cibernética y de la Información y participará con voz, pero sin voto.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: 53.P3
+      name: Párr. III
+      description: En las reuniones del comité deberán asistir en calidad de invitados permanentes el Ejecutivo Principal en materia de tecnología y el gerente de Riesgos. De igual forma, podrán asistir a las reuniones del comité en calidad de invitados con voz, pero sin voto, el personal u otros ejecutivos de la entidad que los miembros del comité consideren necesarios para la presentación y sustentación de los temas que se deban tratar en la respectiva sesión, lo cual se hará constar en el acta levantada de la reunión.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: 53.P4
+      name: Párr. IV
+      description: Las entidades deben remitir la integración del comité a la Superintendencia en un plazo de quince (15) días hábiles, contados a partir de su designación. De igual forma, cualquier modificación en la composición del comité debe ser comunicada a la Superintendencia, a más tardar, cinco (5) días hábiles luego del hecho.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: 53.P5
+      name: Párr. V
+      description: Las labores del comité funcional de Seguridad Cibernética y de la Información podrán ser asumidas por el comité de Riesgos de los Participantes del Mercado de Valores (el cual no alterará su composición en este caso) que, por su naturaleza, complejidad, perfil de Riesgo e importancia sistémica así lo requieran. En estas entidades, el proceso de gestión integral de Riesgos debe tomar en consideración el programa de Seguridad Cibernética y de la Información en lo que respecta a los Riesgos asociados a dicha materia. Cuando el comité de Riesgos sesione en calidad de comité funcional de Seguridad Cibernética y de la Información deben participar, con voz y sin voto, el oficial de Seguridad Cibernética y la Información y el Ejecutivo Principal en materia de tecnología.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53.p6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:53
+      ref_id: 53.P6
+      name: Párr. VI
+      description: La Superintendencia vía norma técnica u operativa establecerá las disposiciones relativas al comité funcional de Seguridad Cibernética y de la Información
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:54
+      assessable: true
+      depth: 1
+      ref_id: '54'
+      name: Art. 54 – Estructura gerencial y funciones de control de Seguridad Cibernética y de la Información
+      description: Los Participantes del Mercado de Valores deben contar con una estructura gerencial para el control de Seguridad Cibernética y de la Información acordes a su naturaleza, tamaño, y complejidad. El programa establecido en el marco de las responsabilidades definidas en este Reglamento será dirigido por la unidad funcional de Seguridad Cibernética y de la Información, la cual estará a cargo del oficial de Seguridad Cibernética y la Información y reportará directamente al Ejecutivo Principal y al consejo de administración.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:55
+      assessable: true
+      depth: 1
+      ref_id: '55'
+      name: Art. 55 – Oficial de Seguridad Cibernética y de la Información
+      description: El oficial de Seguridad Cibernética y de la Información debe contar con la competencia y capacidad requerida para sus funciones. Según la estructura de cada Participante del Mercado de Valores, el oficial de Seguridad Cibernética y la Información, debe tener suficiente autoridad e independencia para cumplir con sus responsabilidades.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      assessable: true
+      depth: 1
+      ref_id: '56'
+      name: Art. 56 – Responsabilidades del oficial de Seguridad Cibernética y de la Información
+      description: 'El oficial de Seguridad Cibernética y de la Información debe cumplir, al menos, con las responsabilidades siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.1'
+      name: núm. 1
+      description: Desarrollar, implementar y mantener actualizado el programa de Seguridad Cibernética y de la Información, el cual debe ser revisado y actualizado una vez al año;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.2'
+      name: núm. 2
+      description: Presentar informes periódicos o, al menos, un informe anual al consejo de administración sobre el contenido, aplicabilidad y actualización de las políticas establecidas en materia de Seguridad Cibernética y de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.3'
+      name: núm. 3
+      description: Implementar políticas, estándares y Procedimientos apropiados para apoyar el programa de Seguridad Cibernética y de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.4'
+      name: núm. 4
+      description: Asignar las responsabilidades de los miembros que conforman las áreas especializadas;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.5'
+      name: núm. 5
+      description: Gestionar las acciones para el tratamiento del Riesgo tecnológico en coordinación con las áreas pertinentes del negocio;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.6'
+      name: núm. 6
+      description: Cumplir con los límites de los niveles de Riesgos relevantes establecidos por el consejo de administración, relacionados con Amenazas o Incidentes Significativos;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.7'
+      name: núm. 7
+      description: Monitorear permanentemente el estado de la Seguridad Cibernética y de la Información y rendir informes periódicos según la necesidad sobre los hallazgos y Riesgos identificados al comité funcional de Seguridad Cibernética y de la Información;
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.8'
+      name: núm. 8
+      description: Cumplir con las atribuciones asignadas y decisiones tomadas por el consejo de administración; y,
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:56
+      ref_id: '56.9'
+      name: núm. 9
+      description: Definir y evaluar las responsabilidades de los proveedores de servicios en lo concerniente a la Seguridad Cibernética y de la Información.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:57
+      assessable: true
+      depth: 1
+      ref_id: '57'
+      name: Art. 57 – Autoevaluación
+      description: Los Participantes del Mercado de Valores deben autoevaluar su cumplimiento normativo en materia de Seguridad Cibernética y de la Información con periodicidad anual. Los resultados de dicha evaluación, así como los de la evaluación del nivel de exposición en materia de Seguridad Cibernética y de la Información deben presentarse anualmente al consejo de administración.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:57.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:57
+      ref_id: 57.P
+      name: Párr.
+      description: Las evaluaciones deben contemplar los Eventos que involucren la divulgación no autorizada de Información, la corrupción accidental o deliberada, la manipulación de la Información y la disponibilidad de los entornos en cualquier período.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:58
+      assessable: true
+      depth: 1
+      ref_id: '58'
+      name: Art. 58 – Auditoría interna
+      description: Los Participantes del Mercado de Valores deben establecer procesos de auditorías internas para garantizar la supervisión efectiva del programa de Seguridad Cibernética y de la Información y del estado de la Seguridad Cibernética y de la Información en sus sistemas de Información y de la Infraestructura Tecnológica. El resultado de las auditorías internas debe contener la documentación y notificación a las partes interesadas de sus conclusiones y recomendaciones.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:59
+      assessable: true
+      depth: 1
+      ref_id: '59'
+      name: Art. 59 – Evaluación de un tercero independiente
+      description: Los Participantes del Mercado de Valores deben realizar evaluaciones independientes sobre el cumplimiento normativo en materia de Seguridad Cibernética y de la Información, con una periodicidad no mayor de tres (3) años.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:59.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:59
+      ref_id: 59.P1
+      name: Párr. I
+      description: La evaluación inicial se llevará a cabo dentro de los tres (3) años contados a partir de la entrada en vigencia de este Reglamento.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:59.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:59
+      ref_id: 59.P2
+      name: Párr. II
+      description: La entidad debe contar por lo menos con cinco (5) años de experiencia y con las calificaciones e independencia necesaria para realizar la evaluación.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:59.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:59
+      ref_id: 59.P3
+      name: Párr. III
+      description: Los Participantes del Mercado de Valores deben presentar las auditorías realizadas por auditores externos inscritos en el Registro del Mercado de Valores al consejo de administración posterior a la evaluación por parte del comité de auditoría.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:60
+      assessable: false
+      depth: 1
+      ref_id: '60'
+      name: Art. 60 – Normativa complementaria
+      description: El superintendente, mediante normas técnicas u operativas, emitirá el contenido y otros requisitos aplicables para la elaboración, implementación y manejo del programa de Seguridad Cibernética y de la Información de los Participantes del Mercado de Valores.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:61
+      assessable: false
+      depth: 1
+      ref_id: '61'
+      name: Art. 61 – Obligatoriedad
+      description: Las disposiciones establecidas en este Reglamento son de cumplimiento obligatorio y, en caso de incumplimiento, se aplicarán las sanciones previstas en la Ley y el Reglamento del Procedimiento Administrativo Sancionador.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:62
+      assessable: false
+      depth: 1
+      ref_id: '62'
+      name: Art. 62 – Entrada en vigencia
+      description: Las disposiciones de este Reglamento entran en vigencia en el plazo de seis (6) meses, contados a partir del día hábil siguiente a su publicación.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:63
+      assessable: true
+      depth: 1
+      ref_id: '63'
+      name: Art. 63 – Plazo de adecuación
+      description: Los Participantes del Mercado de Valores deben adecuarse a las disposiciones del presente Reglamento en el plazo máximo de doce (12) meses contados a partir de su entrada en vigencia.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:63.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:63
+      ref_id: 63.P1
+      name: Párr. I
+      description: 'Para el fin anterior, los Participantes del Mercado de Valores deben remitir a la Superintendencia un cronograma de adecuación gradual que, al menos, se ajuste a la siguiente distribución en su implementación: Trimestre 1 % Trimestre 2 % Trimestre 3 % Trimestre 4 %'
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:63.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:63
+      ref_id: 63.P2
+      name: Párr. II
+      description: El cronograma de adecuación indicado en párrafo anterior debe remitirse a la Superintendencia dentro de noventa (90) días hábiles, contados a partir del día hábil siguiente a la publicación de este Reglamento.
+    - urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:63.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:r-cnmv-2024-08-mv:63
+      ref_id: 63.P3
+      name: Párr. III
+      description: Los Participantes del Mercado de Valores deberán remitir un informe trimestral a la Superintendencia sobre su nivel de avance o ejecución de la adecuación reglamentaria conforme al cronograma notificado. No obstante, los Participantes del Mercado de Valores que, por su nivel de sofisticación y estrategias de mitigación de Riesgos, estén avanzados en el cumplimiento de los estándares de este Reglamento, deben notificarlo a la Superintendencia.

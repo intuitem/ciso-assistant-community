@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
-	import MappingTable from '$lib/components/Mapping/MappingTable.svelte';
-	import SegmentedControl from '$lib/components/Forms/SegmentedControl.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import GraphExplorer from '#lib/components/DataViz/GraphExplorer.svelte';
+	import MappingTable from '#lib/components/Mapping/MappingTable.svelte';
+	import SegmentedControl from '#lib/components/Forms/SegmentedControl.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 	interface Props {
 		data: PageData;
 	}

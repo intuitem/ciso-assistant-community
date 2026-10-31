@@ -1,18 +1,17 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { goto as breadcrumbGoto } from '$lib/utils/breadcrumbs';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { gotoOrLoad, goto as breadcrumbGoto } from '#lib/utils/breadcrumbs.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import { deserialize } from '$app/forms';
-	import { openPortalExternal } from '$lib/utils/external-links';
-	import { m } from '$paraglide/messages';
-	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import AssessmentLaunchModal from '$lib/components/Modals/AssessmentLaunchModal.svelte';
+	import { openPortalExternal } from '#lib/utils/external-links.js';
+	import { m } from '#paraglide/messages.js';
+	import PortalGrid from '#lib/components/PortalGrid/PortalGrid.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import AssessmentLaunchModal from '#lib/components/Modals/AssessmentLaunchModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 
 	interface PortalItem {
@@ -39,6 +38,8 @@
 			quick_form?: string;
 			// Either wiring will do; a publication carries its own form and target folder.
 			publication?: string;
+			document_types?: string[];
+			document?: string;
 		};
 	}
 
@@ -82,7 +83,7 @@
 				if (result.data.resumed && result.data.ref_id) {
 					resumedRef = result.data.ref_id;
 				}
-				await goto(result.data.redirect);
+				await gotoOrLoad(result.data.redirect);
 			} else {
 				launchError = result.data?.error || m.assessmentLaunchFailed();
 			}
@@ -112,11 +113,21 @@
 		modalStore.trigger(modal);
 	}
 
+	const typeQuery = (types?: string[]) =>
+		types?.length ? `?${types.map((t) => `type=${encodeURIComponent(t)}`).join('&')}` : '';
+	// No ?doc=: the reader opens the default language and offers the others.
+	const navigateHref = (t: PortalItem['target']) =>
+		t.model !== 'documents'
+			? `/${t.model}`
+			: t.document
+				? `/documents/${t.document}/read`
+				: `/documents${typeQuery(t.document_types)}`;
+
 	function trigger(item: PortalItem) {
 		if (openPortalExternal(item)) return;
 		if (item.kind === 'create' && item.target.model) openCreate(item.target.model, item.title);
 		else if (item.kind === 'navigate' && item.target.model)
-			breadcrumbGoto(`/${item.target.model}`, {
+			breadcrumbGoto(navigateHref(item.target), {
 				label: URL_MODEL_MAP[item.target.model]?.localNamePlural ?? item.title,
 				breadcrumbAction: 'replace'
 			});

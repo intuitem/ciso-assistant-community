@@ -19,6 +19,7 @@ from global_settings.serializers import (
 )
 
 from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
+from .license import get_editors, seat_limit_reachable, seat_permissions
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -62,27 +63,33 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
 
 class EditorPermissionMixin:
     @staticmethod
-    def check_editor_permissions(instance, group):
-        editor_prefixes = {"add_", "change_", "delete_"}
-        editors = User.get_editors()
+    def check_editor_permissions(instance, groups):
+        """Refuse groups that would make `instance` an editor when no seat is
+        left: one check for all the groups of a request."""
         seats = settings.LICENSE_SEATS
-
-        perms = [
-            p
-            for p in RoleAssignment.get_permissions(group)
-            if p not in User.NON_SEAT_PERMISSIONS
-        ]
-        if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
-            logger.info("Adding editor permissions to user", user=instance, group=group)
-            if instance not in editors and len(editors) >= seats:
-                logger.error(
-                    "License seats exceeded, cannot add editor user groups to user",
-                    user=instance,
-                    seats=seats,
-                )
-                raise serializers.ValidationError(
-                    {"user_groups": "errorLicenseSeatsExceeded"}
-                )
+        # While the limit is out of reach no check can fail, and get_editors()
+        # scans every user: test the cheap bound first.
+        if not seat_limit_reachable(seats):
+            return
+        seat_codenames = set(seat_permissions().values_list("codename", flat=True))
+        if all(
+            seat_codenames.isdisjoint(RoleAssignment.get_permissions(group))
+            for group in groups
+        ):
+            return
+        logger.info("Adding editor permissions to user", user=instance)
+        editors = get_editors()
+        if instance is not None and editors.filter(pk=instance.pk).exists():
+            return
+        if editors.count() >= seats:
+            logger.error(
+                "License seats exceeded, cannot add editor user groups to user",
+                user=instance,
+                seats=seats,
+            )
+            raise serializers.ValidationError(
+                {"user_groups": "errorLicenseSeatsExceeded"}
+            )
 
 
 class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
@@ -93,8 +100,7 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
                 user=instance,
                 groups=validated_data["user_groups"],
             )
-            for group in validated_data["user_groups"]:
-                self.check_editor_permissions(instance, group)
+            self.check_editor_permissions(instance, validated_data["user_groups"])
 
     def create(self, validated_data):
         self._update_user_groups(None, validated_data)

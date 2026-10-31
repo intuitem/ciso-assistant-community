@@ -1,15 +1,15 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { urlParamModelVerboseName } from '$lib/utils/crud';
-import { safeTranslate } from '$lib/utils/i18n';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { urlParamModelVerboseName } from '#lib/utils/crud.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 import {
 	handleErrorResponse,
 	nestedDeleteFormAction,
 	nestedWriteFormAction
-} from '$lib/utils/actions';
-import { modelSchema } from '$lib/utils/schemas';
+} from '#lib/utils/actions.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, superValidate } from 'sveltekit-superforms';

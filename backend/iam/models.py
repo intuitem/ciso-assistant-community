@@ -5,20 +5,23 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any, List, Literal, Optional, Final
+from typing import Any, Literal, Optional, Final
 from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
-from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
+from django.db.models import Q, F, Func, QuerySet, Case, When, Value, BooleanField
+from django.db.models.functions import Lower
+from django.db.models.lookups import Exact
+from django.core.exceptions import ValidationError
 from knox.models import AuthToken
 
 from core.utils import (
@@ -38,7 +41,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import get_connection, EmailMessage
+from core import mailer
 from django.core.validators import validate_email
 from django.conf import settings
 
@@ -48,7 +51,6 @@ logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
 from auditlog.signals import pre_log
-from allauth.mfa.models import Authenticator
 from allauth.idp.oidc.models import Client, Token
 from core.context import focus_folder_id_var
 
@@ -75,6 +77,42 @@ IGNORED_PERMISSION_MODELS = (
     "idpgroup",
     "scimtoken",
     "serviceaccount",
+    # Internal: access is gated through the parent object, never by these permissions
+    "answerattachment",
+    "demomanifest",
+    "flowevent",
+    "producedobjectlink",
+    "quickformapplication",
+    "quickformoutcome",
+    "requirementassignmentevent",
+    "requirementnodeattachment",
+    # Stale content types of removed models
+    "cacheversion",
+    "processingnature",
+    # Never checked; mail settings are gated by *_mailerconfiguration
+    "mailer",
+    "mailerhealth",
+)
+
+# System-written, served read-only: only view (and custom rights) are ever checked
+READ_ONLY_PERMISSION_MODELS = (
+    "actor",
+    "assetcapability",
+    "commitment",
+    "dpiarequirementchange",
+    "entitytierchange",
+    "quickformpage",
+    "responsibilityassignment",
+    "responsibilityrole",
+    "solutiontierchange",
+)
+
+IGNORED_PERMISSIONS = Q(content_type__model__in=IGNORED_PERMISSION_MODELS) | Q(
+    codename__in=[
+        f"{action}_{model}"
+        for model in READ_ONLY_PERMISSION_MODELS
+        for action in ("add", "change", "delete")
+    ]
 )
 
 type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
@@ -104,6 +142,31 @@ def _get_root_folder() -> Optional[Folder]:
 
 
 _ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
+
+# ASCII whitespace, trimmed alike by Folder.clean() and the ref_id unique index.
+_REF_ID_WHITESPACE: Final[str] = " \t\n\r\x0b\x0c"
+
+
+def _trimmed_ref_id(expression=None) -> Func:
+    # TRIM(string, characters) reads the same on SQLite and PostgreSQL.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        Value(_REF_ID_WHITESPACE),
+        function="TRIM",
+        output_field=models.CharField(),
+    )
+
+
+def _trimmed_ref_id_literal(expression=None) -> Func:
+    # _trimmed_ref_id() with the characters written into the SQL, not bound:
+    # SQLite only matches an indexed expression whose constants are literals.
+    # Queries only: the constraint keeps _trimmed_ref_id(), so its migration stays.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        function="TRIM",
+        template=f"%(function)s(%(expressions)s, '{_REF_ID_WHITESPACE}')",
+        output_field=models.CharField(),
+    )
 
 
 class Folder(NameDescriptionMixin):
@@ -172,6 +235,10 @@ class Folder(NameDescriptionMixin):
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
     )
 
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+
     parent_folder = models.ForeignKey(
         "self",
         null=True,
@@ -223,10 +290,57 @@ class Folder(NameDescriptionMixin):
                 ),
                 name="enclave_default_role_must_be_null",
             ),
+            # Backstop for clean(): blank ref_ids are not identifiers.
+            # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
+            models.UniqueConstraint(
+                Lower(_trimmed_ref_id()),
+                condition=~Q(Exact(_trimmed_ref_id(), Value(""))),
+                name="folder_ref_id_unique",
+            ),
         ]
 
     def __str__(self) -> str:
         return self.name.__str__()
+
+    def clean(self) -> None:
+        # Whitespace-only is blank, and blank is stored as NULL.
+        if self.ref_id is not None:
+            self.ref_id = self.ref_id.strip(_REF_ID_WHITESPACE) or None
+        errors = {}
+        if self.ref_id and Folder.ref_id_in_use(self.ref_id, exclude_pk=self.pk):
+            errors["ref_id"] = [self._ref_id_taken_message()]
+        # Report a name clash alongside, so both can be fixed at once.
+        try:
+            super().clean()
+        except ValidationError as e:
+            errors = e.update_error_dict(errors)
+        if errors:
+            raise ValidationError(errors)
+
+    @staticmethod
+    def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
+        """Whether another folder holds *ref_id*."""
+        return (
+            Folder.filter_by_ref_id(Folder.objects.all(), ref_id)
+            .exclude(pk=exclude_pk)
+            .exists()
+        )
+
+    @staticmethod
+    def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
+        """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
+        return queryset.alias(
+            normalized_ref_id=Lower(_trimmed_ref_id_literal())
+        ).filter(
+            # The index's own condition, so the partial index can serve the lookup.
+            ~Q(Exact(_trimmed_ref_id_literal(), Value(""))),
+            normalized_ref_id=Lower(_trimmed_ref_id_literal(Value(ref_id))),
+        )
+
+    def _ref_id_taken_message(self) -> str:
+        # Unique across all folders, so the message must not say where it is used:
+        # the holder may be a folder the user cannot see.
+        return f"{self.ref_id} is already used. Please choose another value."
 
     @staticmethod
     def _lock_folder_tree() -> None:
@@ -320,6 +434,15 @@ class Folder(NameDescriptionMixin):
         ).delete()
 
     def save(self, *args, **kwargs):
+        try:
+            self._save_in_tree_lock(*args, **kwargs)
+        except IntegrityError as e:
+            # SQLite takes no tree lock, so a concurrent write can slip past clean().
+            if "folder_ref_id_unique" not in str(e):
+                raise
+            raise ValidationError({"ref_id": self._ref_id_taken_message()}) from e
+
+    def _save_in_tree_lock(self, *args, **kwargs):
         """
         **WARNING:** This function can raise an `Folder.InconsistencyError` `Exception`.
 
@@ -540,6 +663,7 @@ class Folder(NameDescriptionMixin):
         # NOTE: There are probably better ways to represent these, but it works.
         # NOTE: This list is not complete.
         paths = [
+            ["matrix", "folder"],
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
@@ -552,6 +676,7 @@ class Folder(NameDescriptionMixin):
             ["journey", "folder"],
             ["questionnaire_run", "folder"],
             ["agent_run", "folder"],
+            ["collection", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -856,7 +981,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
+            mailing=mailer.mailing_enabled(),
             initial_group=None,
             **extra_fields,
         )
@@ -870,9 +995,7 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool(
-                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
-            ),
+            mailing=(not password) and mailer.mailing_enabled(),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -996,7 +1119,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local and not self.is_scim_managed:
+        if not self.is_local and not (self.is_scim_managed and self.keep_local_login):
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
@@ -1142,76 +1265,18 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         self._send_email(subject, email, email)
 
     def _send_email(self, subject, body, html_body=None):
-        """Send an email with primary/rescue server fallback."""
+        """Send through the configured mailers; core.mailer handles failover."""
         try:
-            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-            with get_connection(ssl_context=ssl_context) as connection:
-                msg = EmailMessage(
-                    subject=subject,
-                    body=body,
-                    from_email=None,
-                    to=[self.email],
-                    connection=connection,
-                )
-                if html_body:
-                    msg.content_subtype = "html"
-                    msg.body = html_body
-                msg.send()
-            logger.info(
-                "Email sent successfully", recipient=self.email, subject=subject
-            )
-        except Exception as primary_exception:
+            mailer.send(subject, body, self.email, html_body=html_body)
+        except Exception as error:
             logger.error(
-                "Primary mail server failure, trying rescue",
+                "Email delivery failed",
                 recipient=self.email,
                 subject=subject,
-                error=str(primary_exception),
-                email_host=settings.EMAIL_HOST,
-                email_port=settings.EMAIL_PORT,
-                email_host_user=settings.EMAIL_HOST_USER,
-                email_use_tls=settings.EMAIL_USE_TLS,
+                error=str(error),
             )
-            if settings.EMAIL_HOST_RESCUE:
-                try:
-                    with get_connection(
-                        host=settings.EMAIL_HOST_RESCUE,
-                        port=settings.EMAIL_PORT_RESCUE,
-                        username=settings.EMAIL_HOST_USER_RESCUE,
-                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
-                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
-                    ) as new_connection:
-                        msg = EmailMessage(
-                            subject=subject,
-                            body=body,
-                            from_email=None,
-                            to=[self.email],
-                            connection=new_connection,
-                        )
-                        if html_body:
-                            msg.content_subtype = "html"
-                            msg.body = html_body
-                        msg.send()
-                    logger.info(
-                        "Email sent via rescue server",
-                        recipient=self.email,
-                        subject=subject,
-                    )
-                except Exception as rescue_exception:
-                    logger.error(
-                        "Rescue mail server failure",
-                        recipient=self.email,
-                        subject=subject,
-                        error=str(rescue_exception),
-                        email_host=settings.EMAIL_HOST_RESCUE,
-                        email_port=settings.EMAIL_PORT_RESCUE,
-                        email_username=settings.EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                    )
-                    raise rescue_exception
-            else:
-                raise primary_exception
+            raise
+        logger.info("Email sent successfully", recipient=self.email, subject=subject)
 
     def get_user_groups(self):
         """get the list of user groups containing the user in the form (group_name, builtin)"""
@@ -1290,26 +1355,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
         )
 
-    # Permissions that grant write access but do not consume a license seat
-    NON_SEAT_PERMISSIONS = {
-        "change_validationflow",
-        "add_chatsession",
-        "change_chatsession",
-        "delete_chatsession",
-        "change_notification",
-        "delete_notification",
-    }
-
-    @property
-    def is_editor(self) -> bool:
-        permissions = RoleAssignment.get_permissions(self)
-        editor_prefixes = {"add_", "change_", "delete_"}
-        return any(
-            any(perm.startswith(prefix) for prefix in editor_prefixes)
-            for perm in permissions
-            if perm not in self.NON_SEAT_PERMISSIONS
-        )
-
     @property
     def is_local(self) -> bool:
         """
@@ -1335,14 +1380,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             or not sso_settings.get("force_sso", False)
         )
 
-    @classmethod
-    def get_editors(cls) -> List["User"]:
-        return [
-            user
-            for user in cls.objects.exclude(service_account__isnull=False)
-            if user.is_editor and not user.is_third_party
-        ]
-
     @property
     def is_sso(self) -> bool:
         """
@@ -1357,7 +1394,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Check if the user has Multi-Factor Authentication (MFA) enabled.
         Returns True if the user has any active MFA authenticators (TOTP, WebAuthn, etc.).
         """
-        return Authenticator.objects.filter(user=self).exists()
+        # Through the reverse relation, so a prefetch (UserViewSet) answers it.
+        return self.authenticator_set.exists()
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -1925,7 +1963,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             Permission.objects.filter(
                 content_type__app_label__in=ALLOWED_PERMISSION_APPS
             )
-            .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+            .exclude(IGNORED_PERMISSIONS)
             .values_list("id", flat=True)
         )
 
@@ -1964,7 +2002,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
 
         if iam_scope_field_name in field_names:
-            return f"{iam_scope_field_name}__folder_id"
+            scope_model = model._meta.get_field(iam_scope_field_name).related_model
+            return f"{iam_scope_field_name}__{RoleAssignment.get_iam_folder_field(scope_model)}"
 
         raise NotImplementedError(f"Model {model.__qualname__} not supported.")
 
@@ -1986,8 +2025,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return obj.folder_id
 
         scope_field = iam_folder_field.split("__", 1)[0]
-        scope_obj = getattr(obj, scope_field)
-        return scope_obj.folder_id
+        return RoleAssignment.get_iam_folder_id(getattr(obj, scope_field))
 
     @staticmethod
     def _get_accessible_ids(
@@ -2103,6 +2141,60 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return RoleAssignment._get_directly_granted_permissions(
             principal, permission
         ).exists()
+
+    @staticmethod
+    def users_with_permission_anywhere(
+        permissions: QuerySet[Permission],
+    ) -> QuerySet["User"]:
+        """
+        Batch form of `has_permission_anywhere` for users: the users holding any
+        of `permissions` on any `Folder`, in one query instead of one per user.
+
+        Same grant sources as `_get_permission_grant_sources`: the user's own,
+        group and (when inherited) IdP-group role assignments, and the
+        `folder.default_role` a builtin-group assignment grants on its folders
+        and their ancestors, outside enclaves and never to third parties.
+        Inactive users hold nothing.
+        """
+        from global_settings.utils import idp_group_role_inheritance_enabled
+
+        roles = Role.objects.filter(permissions__in=permissions)
+        default_role_folders = Folder.objects.filter(
+            default_role__permissions__in=permissions
+        )
+        # Folders whose builtin-group assignments grant one of those default roles.
+        default_role_grant_folders = (
+            Folder.objects.filter(
+                Q(id__in=default_role_folders) | Q(ancestors__in=default_role_folders)
+            )
+            .exclude(content_type=Folder.ContentType.ENCLAVE)
+            .exclude(ancestors__content_type=Folder.ContentType.ENCLAVE)
+        )
+
+        group_paths = ["user_groups"]
+        if idp_group_role_inheritance_enabled():
+            group_paths.append("idp_groups__user_groups")
+        grants = [Q(roleassignment__role__in=roles)]
+        for path in group_paths:
+            grants.append(Q(**{f"{path}__roleassignment__role__in": roles}))
+            grants.append(
+                Q(
+                    **{
+                        f"{path}__builtin": True,
+                        f"{path}__roleassignment__perimeter_folders__in": (
+                            default_role_grant_folders
+                        ),
+                    },
+                    is_third_party=False,
+                )
+            )
+
+        # One semi-join per grant source: OR-ing them in a single filter would
+        # join every relation at once.
+        holders = Q()
+        for grant in grants:
+            holders |= Q(id__in=User.objects.filter(grant).values("id"))
+        return User.objects.filter(holders, is_active=True)
 
     @staticmethod
     def get_permissions(

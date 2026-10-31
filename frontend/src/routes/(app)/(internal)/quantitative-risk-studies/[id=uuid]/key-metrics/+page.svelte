@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Grid, Willow, WillowDark } from 'wx-svelte-grid';
-	import ALETimelineRaceChart from '$lib/components/Chart/ALETimelineRaceChart.svelte';
+	import { Grid, Willow, WillowDark } from '@svar-ui/svelte-grid';
+	import ALETimelineRaceChart from '#lib/components/Chart/ALETimelineRaceChart.svelte';
 
 	// Track the dark-mode class on <html> so the grid theme matches the app theme
 	let isDark = $state(false);
@@ -146,6 +146,7 @@
 					scenario.current_level &&
 					scenario.current_level.ale !== null &&
 					scenario.current_level.ale !== undefined;
+
 				const hasResidualALE =
 					scenario.residual_level &&
 					scenario.residual_level.ale !== null &&
@@ -310,7 +311,7 @@
 		</div>
 		<button
 			class="btn preset-outlined-surface-500"
-			on:click={() => goto(`/quantitative-risk-studies/${$page.params.id}`)}
+			on:click={() => goto(`/quantitative-risk-studies/${page.params.id}`)}
 		>
 			<i class="fa-solid fa-arrow-left mr-2"></i>
 			{m.backToStudy()}
@@ -381,8 +382,13 @@
 						<i class="fa-solid fa-info-circle mr-2"></i>
 						ALE Timeline Chart Debug Info
 					</h3>
+
 					<div class="text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
-						<p><strong>Total {m.scenarios()}:</strong> {keyMetricsData?.scenarios?.length || 0}</p>
+						<p>
+							<strong>Total {m.scenarios()}:</strong>
+							{keyMetricsData?.scenarios?.length || 0}
+						</p>
+
 						<p>
 							<strong>{m.scenariosWithCurrentLevel()}</strong>
 							{keyMetricsData?.scenarios?.filter((s) => s.current_level)?.length || 0}
@@ -451,9 +457,8 @@
 											<button
 												class="text-surface-400-600 hover:text-surface-600-400"
 												on:click={() => (showColumnControls = false)}
+												><i class="fa-solid fa-times"></i></button
 											>
-												<i class="fa-solid fa-times"></i>
-											</button>
 										</div>
 
 										<div class="flex gap-2 mb-3">
@@ -509,8 +514,7 @@
 							<Grid
 								data={prepareGridData(keyMetricsData)}
 								columns={visibleColumns}
-								headerHeight={40}
-								rowHeight={45}
+								sizes={{ headerHeight: 40, rowHeight: 45 }}
 							/>
 						{/snippet}
 						{#if isDark}

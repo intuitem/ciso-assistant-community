@@ -28,8 +28,10 @@ from ..resolvers import (
     resolve_threat_id,
     resolve_entity_id,
     resolve_incident_id,
+    resolve_evidence_id,
     resolve_in_folder_or_global,
     _is_uuid,
+    resolve_vulnerability_id,
 )
 from .write_tools import (
     _normalize_applied_control_status,
@@ -319,6 +321,124 @@ async def update_team(
             return f"Error updating team: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_team: {str(e)}"
+
+
+async def update_folder(
+    folder_id: str,
+    name: str = None,
+    description: str = None,
+) -> str:
+    """Update a domain (folder) - only provided fields are updated
+
+    Args:
+        folder_id: Folder ID/name
+        name: New name
+        description: New description
+    """
+    try:
+        resolved_id = resolve_folder_id(folder_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/folders/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            folder = res.json()
+            return f"Updated folder: {folder.get('name')} (ID: {folder.get('id')})"
+        else:
+            return f"Error updating folder: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_folder: {str(e)}"
+
+
+async def update_user(
+    user_id: str,
+    first_name: str = None,
+    last_name: str = None,
+    email: str = None,
+) -> str:
+    """Update a user - only provided fields are updated
+
+    Args:
+        user_id: User UUID, exact email or exact full/first/last name
+        first_name: New first name
+        last_name: New last name
+        email: New email (login identifier, also used for SSO matching)
+    """
+    try:
+        resolved_id = resolve_user_id(user_id)
+
+        payload = {}
+
+        if first_name is not None:
+            payload["first_name"] = first_name
+        if last_name is not None:
+            payload["last_name"] = last_name
+        if email is not None:
+            payload["email"] = email
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/users/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            user = res.json()
+            return f"Updated user: {user.get('email')} (ID: {user.get('id')})"
+        else:
+            return f"Error updating user: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_user: {str(e)}"
+
+
+async def update_evidence(
+    evidence_id: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+) -> str:
+    """Update an evidence - only provided fields are updated
+
+    Args:
+        evidence_id: Evidence UUID or name
+        name: New name
+        description: New description
+        folder_id: Folder ID/name to move the evidence to
+    """
+    try:
+        resolved_id = resolve_evidence_id(evidence_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if folder_id is not None:
+            payload["folder"] = resolve_folder_id(folder_id)
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/evidences/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            evidence = res.json()
+            return (
+                f"Updated evidence: {evidence.get('name')} (ID: {evidence.get('id')})"
+            )
+        else:
+            return f"Error updating evidence: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_evidence: {str(e)}"
 
 
 async def update_risk_scenario(
@@ -1285,6 +1405,7 @@ async def update_task_template(
     folder_id: str = None,
     assigned_to: list = None,
     assets: list = None,
+    vulnerabilities: list = None,
     applied_controls: list = None,
     compliance_assessments: list = None,
     risk_assessments: list = None,
@@ -1308,6 +1429,7 @@ async def update_task_template(
         folder_id: Folder ID/name
         assigned_to: List of assignees as actor UUIDs, emails or names
         assets: List of asset IDs/names (resolved within folder_id when given; replaces existing)
+        vulnerabilities: List of vulnerability IDs/names; replaces existing
         applied_controls: List of applied control IDs/names to associate with this task template. Can be None to leave unchanged, or empty list to clear associations. Elements should be strings representing control identifiers.
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
@@ -1367,6 +1489,10 @@ async def update_task_template(
             payload["risk_assessments"] = risk_assessments
         if findings_assessment is not None:
             payload["findings_assessment"] = findings_assessment
+        if vulnerabilities is not None:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
 
         if not payload:
             return "Error: No fields provided to update"
@@ -1409,6 +1535,8 @@ async def update_vulnerability(
     vulnerability_id: str,
     name: str = None,
     description: str = None,
+    observation: str = None,
+    owner: list = None,
     ref_id: str = None,
     status: str = None,
     severity: int = None,
@@ -1417,6 +1545,14 @@ async def update_vulnerability(
     applied_controls: list = None,
     assets: list = None,
     security_exceptions: list = None,
+    evidences: list = None,
+    incidents: list = None,
+    task_templates: list = None,
+    detected_at: str = None,
+    published_date: str = None,
+    due_date: str = None,
+    eta: str = None,
+    remediated_at: str = None,
 ) -> str:
     """Partially update a vulnerability (only provided fields are updated)
 
@@ -1424,6 +1560,8 @@ async def update_vulnerability(
         vulnerability_id: Vulnerability UUID or name
         name: New name
         description: New description
+        observation: How the vulnerability is handled (markdown)
+        owner: List of owners as actor UUIDs, emails or names (replaces existing)
         ref_id: Reference ID (e.g. CVE identifier)
         status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
         severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
@@ -1432,6 +1570,14 @@ async def update_vulnerability(
         applied_controls: List of applied control IDs/names
         assets: List of asset IDs/names
         security_exceptions: List of security exception UUIDs
+        evidences: List of evidence IDs/names (replaces existing)
+        incidents: List of incident IDs/names (replaces existing)
+        task_templates: List of task IDs/names (replaces existing)
+        detected_at: Detection date (YYYY-MM-DD)
+        published_date: Publication date of the advisory (YYYY-MM-DD)
+        due_date: Due date (YYYY-MM-DD); computed from the SLA policy when left empty
+        eta: Expected resolution date (YYYY-MM-DD)
+        remediated_at: Remediation date (YYYY-MM-DD); kept whatever the status, and set to today when the status becomes resolved without one
     """
     try:
         from ..resolvers import (
@@ -1439,6 +1585,9 @@ async def update_vulnerability(
             resolve_folder_id,
             resolve_asset_id,
             resolve_applied_control_id,
+            resolve_evidence_id,
+            resolve_incident_id,
+            resolve_task_template_id,
         )
 
         resolved_id = resolve_vulnerability_id(vulnerability_id)
@@ -1449,6 +1598,10 @@ async def update_vulnerability(
             payload["name"] = name
         if description is not None:
             payload["description"] = description
+        if observation is not None:
+            payload["observation"] = observation
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
         if ref_id is not None:
             payload["ref_id"] = ref_id
         if status is not None:
@@ -1469,6 +1622,24 @@ async def update_vulnerability(
             payload["assets"] = resolved_assets
         if security_exceptions is not None:
             payload["security_exceptions"] = security_exceptions
+        if evidences is not None:
+            payload["evidences"] = [resolve_evidence_id(x) for x in evidences]
+        if incidents is not None:
+            payload["incidents"] = [resolve_incident_id(x) for x in incidents]
+        if task_templates is not None:
+            payload["task_templates"] = [
+                resolve_task_template_id(x) for x in task_templates
+            ]
+        if detected_at is not None:
+            payload["detected_at"] = detected_at
+        if published_date is not None:
+            payload["published_date"] = published_date
+        if due_date is not None:
+            payload["due_date"] = due_date
+        if eta is not None:
+            payload["eta"] = eta
+        if remediated_at is not None:
+            payload["remediated_at"] = remediated_at
 
         if not payload:
             return "Error: No fields provided to update"
@@ -1523,6 +1694,7 @@ async def update_incident(
     threats: list = None,
     owners: list = None,
     assets: list = None,
+    vulnerabilities: list = None,
     qualifications: list = None,
     entities: list = None,
     applied_controls: list = None,
@@ -1551,6 +1723,7 @@ async def update_incident(
         threats: List of threat IDs/names (resolved within the incident's folder, then Global; replaces existing)
         owners: List of owners as actor UUIDs, emails or names (replaces existing)
         assets: List of asset IDs/names (resolved within the incident's folder, then Global; replaces existing)
+        vulnerabilities: List of vulnerability IDs/names; replaces existing
         qualifications: List of qualifications: letters C/I/A/T, names or UUIDs (replaces existing)
         entities: List of third-party entity IDs/names (replaces existing)
         applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global; replaces existing)
@@ -1619,6 +1792,10 @@ async def update_incident(
             ]
         if filtering_labels is not None:
             payload["filtering_labels"] = filtering_labels
+        if vulnerabilities is not None:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
 
         if not payload:
             return "Error: No fields provided to update"

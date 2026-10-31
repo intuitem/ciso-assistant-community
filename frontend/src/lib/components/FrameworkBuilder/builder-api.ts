@@ -1,4 +1,4 @@
-import type { VisibilityMap } from '$lib/utils/helpers';
+import type { VisibilityMap } from '#lib/utils/helpers.js';
 
 /**
  * API functions for the framework builder draft workflow.

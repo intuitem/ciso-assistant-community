@@ -1,24 +1,24 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
 	import Checkbox from '../Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
-	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import ScoreScalePicker from '$lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
+	import FrameworkResultSnippet from '#lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import ScoreScalePicker from '#lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
 	import {
 		scaleLevels,
 		scaleOptions,
 		type FrameworkScale,
 		type ScaleOption,
 		type ScoreScaleValue
-	} from '$lib/utils/score-scales';
+	} from '#lib/utils/score-scales.js';
 	import { untrack } from 'svelte';
 
 	interface Props {
@@ -54,6 +54,7 @@
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
+	let frameworkHasRequiredEvidence = $state(false);
 
 	let frameworkScoring = $state<FrameworkScale | null>(null);
 
@@ -289,7 +290,10 @@
 			pickedScale = null;
 			baselineScale = null;
 		}
-		if (!id) frameworkScoring = null;
+		if (!id) {
+			frameworkScoring = null;
+			frameworkHasRequiredEvidence = false;
+		}
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
@@ -304,6 +308,7 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
+					frameworkHasRequiredEvidence = r['has_required_evidence'] ?? false;
 					defaultScoring = r['default_scoring'] ?? null;
 
 					frameworkScoring = {
@@ -525,6 +530,7 @@
 			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
 			disabled={object?.is_locked}
 			{frameworkDefaults}
+			evidenceRequired={frameworkHasRequiredEvidence}
 		/>
 
 		{#if scaleChoice}
@@ -597,6 +603,7 @@
 		multiple
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidences"
@@ -606,6 +613,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -620,6 +628,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -629,6 +638,18 @@
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
 		label={m.reviewers()}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
 	/>
 	<TextField
 		type="date"

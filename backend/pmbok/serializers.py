@@ -1,10 +1,13 @@
 from dateutil.relativedelta import relativedelta
+from django.db import transaction
 from rest_framework import serializers
 
 from core.models import Terminology
 from core.serializers import BaseModelSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 from custom_fields.serializers import CustomFieldsSerializerMixin
+from doc_management.access import readable_ids
+from doc_management.models import DocumentContainer
 from pmbok.models import (
     GenericCollection,
     Accreditation,
@@ -17,18 +20,22 @@ from pmbok.models import (
 )
 
 
-class GenericCollectionReadSerializer(BaseModelSerializer):
+class CollectionItemsVisibilityMixin:
+    def _viewable_ids(self, model):
+        request = self.context.get("request")
+        if model is not DocumentContainer or request is None:
+            return super()._viewable_ids(model)
+        cache = self.context.setdefault("readable_ids", {})
+        if model not in cache:
+            cache[model] = readable_ids(request.user, model)
+        return cache[model]
+
+
+class GenericCollectionReadSerializer(
+    CollectionItemsVisibilityMixin, BaseModelSerializer
+):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    compliance_assessments = FieldsRelatedField(["id", "status"], many=True)
-    risk_assessments = FieldsRelatedField(["id", "status"], many=True)
-    crq_studies = FieldsRelatedField(["id", "status"], many=True)
-    ebios_studies = FieldsRelatedField(["id", "status"], many=True)
-    entity_assessments = FieldsRelatedField(["id", "status"], many=True)
-    findings_assessments = FieldsRelatedField(["id", "status"], many=True)
-    documents = FieldsRelatedField(["id", "status"], many=True)
-    security_exceptions = FieldsRelatedField(["id", "status"], many=True)
-    policies = FieldsRelatedField(["id", "status"], many=True)
     dependencies = FieldsRelatedField(many=True)
     projects = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
@@ -37,11 +44,73 @@ class GenericCollectionReadSerializer(BaseModelSerializer):
         model = GenericCollection
         fields = "__all__"
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if isinstance(self.parent, serializers.ListSerializer):
+            return data
+        related = FieldsRelatedField(["id", "status"], many=True)
+        for name, queryset in GenericCollection.ITEM_TYPES.items():
+            data[name] = related.to_representation(
+                instance.get_items(name).filter(
+                    pk__in=self._viewable_ids(queryset.model)
+                )
+            )
+        return data
 
-class GenericCollectionWriteSerializer(BaseModelSerializer):
+
+class GenericCollectionWriteSerializer(
+    CollectionItemsVisibilityMixin, BaseModelSerializer
+):
     class Meta:
         model = GenericCollection
         fields = "__all__"
+
+    def get_fields(self):
+        fields = super().get_fields()
+        for name, queryset in GenericCollection.ITEM_TYPES.items():
+            fields[name] = serializers.PrimaryKeyRelatedField(
+                many=True, required=False, write_only=True, queryset=queryset.all()
+            )
+        return fields
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        for name, queryset in GenericCollection.ITEM_TYPES.items():
+            data[name] = [
+                str(pk)
+                for pk in instance.get_items(name)
+                .filter(pk__in=self._viewable_ids(queryset.model))
+                .values_list("pk", flat=True)
+            ]
+        return data
+
+    def _pop_items(self, validated_data):
+        return {
+            name: validated_data.pop(name)
+            for name in GenericCollection.ITEM_TYPES
+            if name in validated_data
+        }
+
+    def _set_items(self, instance, items):
+        for name, objects in items.items():
+            hidden = instance.get_items(name).exclude(
+                pk__in=self._viewable_ids(GenericCollection.ITEM_TYPES[name].model)
+            )
+            instance.set_items(name, [*objects, *hidden])
+
+    def create(self, validated_data):
+        items = self._pop_items(validated_data)
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            self._set_items(instance, items)
+        return instance
+
+    def update(self, instance, validated_data):
+        items = self._pop_items(validated_data)
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            self._set_items(instance, items)
+        return instance
 
 
 class AccreditationReadSerializer(BaseModelSerializer):
@@ -76,7 +145,9 @@ class AccreditationReadSerializer(BaseModelSerializer):
 
     def get_collection_data(self, obj):
         if obj.linked_collection:
-            return GenericCollectionReadSerializer(obj.linked_collection).data
+            return GenericCollectionReadSerializer(
+                obj.linked_collection, context=self.context
+            ).data
         return None
 
     def get_checklist_progress(self, obj):
@@ -296,6 +367,10 @@ class ResponsibilityMatrixActivityWriteSerializer(BaseModelSerializer):
         model = ResponsibilityMatrixActivity
         fields = "__all__"
 
+    def validate_matrix(self, value):
+        self._ensure_immutable("matrix", value)
+        return value
+
 
 class ResponsibilityMatrixActorReadSerializer(BaseModelSerializer):
     matrix = FieldsRelatedField()
@@ -310,6 +385,10 @@ class ResponsibilityMatrixActorWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ResponsibilityMatrixActor
         fields = "__all__"
+
+    def validate_matrix(self, value):
+        self._ensure_immutable("matrix", value)
+        return value
 
 
 class ResponsibilityAssignmentReadSerializer(BaseModelSerializer):

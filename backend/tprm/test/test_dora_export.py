@@ -292,6 +292,10 @@ class TestGetEntityIdentifier(TestCase):
         entity = Entity(legal_identifiers=None)
         self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
 
+    def test_legacy_string_legal_identifiers(self):
+        entity = Entity(legal_identifiers="LEI123")
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
+
     def test_empty_legal_identifiers(self):
         entity = Entity(legal_identifiers={})
         self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))

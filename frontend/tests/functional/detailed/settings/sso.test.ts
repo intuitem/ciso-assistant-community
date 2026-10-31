@@ -1,4 +1,5 @@
 import { test, expect } from '../../../utils/test-utils.js';
+import { generateWorkingPat } from '../../../utils/pat.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -44,6 +45,9 @@ test.describe('SSO settings', () => {
 			await page.getByRole('button', { name: 'Sign In' }).click();
 			await expect(page).toHaveURL('/analytics');
 		});
+		await test.step('SSO user should be able to generate a personal access token', async () => {
+			await generateWorkingPat(page, logedPage.password, 'sso-saml-pat');
+		});
 	});
 
 	test('OIDC settings', async ({ logedPage, page }) => {
@@ -86,6 +90,9 @@ test.describe('SSO settings', () => {
 			await page.waitForTimeout(300);
 			await page.getByRole('button', { name: 'Sign In' }).click();
 			await expect(page).toHaveURL('/analytics');
+		});
+		await test.step('SSO user should be able to generate a personal access token', async () => {
+			await generateWorkingPat(page, logedPage.password, 'sso-oidc-pat');
 		});
 	});
 });

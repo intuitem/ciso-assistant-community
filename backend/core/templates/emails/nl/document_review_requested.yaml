@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Document '${document_name}' wacht op uw beoordeling"
+body: |
+  Hallo,
+
+  ${actor_name} heeft een revisie van het volgende document ter beoordeling ingediend:
+
+  - Document: ${document_name}
+  - Versie: ${version_number}
+  - Wijzigingssamenvatting: ${change_summary}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om het goed te keuren of wijzigingen aan te vragen: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Added as reviewer: ${object_type} '${object_name}'"
+body: |
+  Hello,
+
+  You have been added as a reviewer of the following item:
+
+  - Type: ${object_type}
+  - Name: ${object_name}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to review it: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

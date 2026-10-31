@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -16,8 +16,8 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	// receiving a DRF error object.
 	const fetchList = (url: string): Promise<any[]> => fetchAllPages(fetch, url).catch(() => []);
 	const [frameworks, riskMatrices, frameworkDetails] = await Promise.all([
-		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=framework&ordering=name`),
-		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=risk_matrix&ordering=name`),
+		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=frameworks&ordering=name`),
+		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=risk_matrices&ordering=name`),
 		fetchList(`${BASE_API_URL}/frameworks/?ordering=name`)
 	]);
 

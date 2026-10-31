@@ -1,53 +1,53 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { FindingSchema, RequirementAssessmentSchema } from '$lib/utils/schemas';
-	import { getModelInfo } from '$lib/utils/crud';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { FindingSchema, RequirementAssessmentSchema } from '#lib/utils/schemas.js';
+	import { getModelInfo } from '#lib/utils/crud.js';
 	import type { ActionData, PageData } from './$types';
 
 	import { page } from '$app/state';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
-	import Score from '$lib/components/Forms/Score.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import ScoreControl from '$lib/components/Forms/ScoreControl.svelte';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import HiddenInput from '#lib/components/Forms/HiddenInput.svelte';
+	import Score from '#lib/components/Forms/Score.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import ScoreControl from '#lib/components/Forms/ScoreControl.svelte';
 	import {
 		getSecureRedirect,
 		getFieldVisibility,
 		isFieldVisible,
 		isFieldEditable,
 		alignmentColorMap
-	} from '$lib/utils/helpers';
+	} from '#lib/utils/helpers.js';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	import { hideSuggestions } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { countMasked } from '$lib/utils/related-visibility';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import { hideSuggestions } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { countMasked } from '#lib/utils/related-visibility.js';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 
-	import Question from '$lib/components/Forms/Question.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import SuggestControlsModal from '#lib/components/Modals/SuggestControlsModal.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page as pageStore } from '$app/stores';
+	import { page as pageStore } from '$app/state';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import {
 		computeRequirementScoreAndResult,
 		formatScoreValue,
@@ -55,7 +55,7 @@
 		hasComputedScore,
 		resultBadgeStyle,
 		filterResultChoices
-	} from '$lib/utils/helpers';
+	} from '#lib/utils/helpers.js';
 
 	interface Props {
 		data: PageData;
@@ -768,8 +768,10 @@
 													class="btn preset-filled-primary-500 self-end"
 													onclick={modalMeasureCreateForm}
 													type="button"
-													><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 												>
+													<i class="fa-solid fa-plus mr-2"></i>
+													{m.addAppliedControl()}
+												</button>
 											</span>
 											{#key refreshKey}
 												<AutocompleteSelect
@@ -815,8 +817,10 @@
 													onclick={modalTaskTemplateCreateForm}
 													data-testid="add-task-template-button"
 													type="button"
-													><i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}</button
 												>
+													<i class="fa-solid fa-plus mr-2"></i>
+													{m.addTaskTemplate()}
+												</button>
 											</span>
 											{#key refreshKey}
 												<AutocompleteSelect
@@ -856,8 +860,10 @@
 													class="btn preset-filled-primary-500 self-end"
 													onclick={modalEvidenceCreateForm}
 													type="button"
-													><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
 												>
+													<i class="fa-solid fa-plus mr-2"></i>
+													{m.addEvidence()}
+												</button>
 											</span>
 											{#key refreshKey}
 												<AutocompleteSelect
@@ -892,8 +898,10 @@
 												class="btn preset-filled-primary-500 self-end"
 												onclick={modalSecurityExceptionCreateForm}
 												type="button"
-												><i class="fa-solid fa-plus mr-2"></i>{m.addSecurityException()}</button
 											>
+												<i class="fa-solid fa-plus mr-2"></i>
+												{m.addSecurityException()}
+											</button>
 										</span>
 										{#key refreshKey}
 											<AutocompleteSelect
@@ -928,8 +936,10 @@
 													onclick={modalFindingCreateForm}
 													data-testid="raise-finding-button"
 													type="button"
-													><i class="fa-solid fa-plus mr-2"></i>{m.raiseFinding()}</button
 												>
+													<i class="fa-solid fa-plus mr-2"></i>
+													{m.raiseFinding()}
+												</button>
 											</span>
 										{/if}
 										{#key refreshKey}

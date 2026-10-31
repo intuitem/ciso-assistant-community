@@ -8,6 +8,8 @@ and `image()` to our own inputs.
 """
 
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -22,6 +24,18 @@ DEFAULT_LOCALE = "en"
 
 # Render time grows faster than linearly with label length (1 MB took minutes).
 MERMAID_MAX_SOURCE_CHARS = 20_000
+
+# Typst loops are unbounded: a customer template compiles in a child process
+# that is killed past this, so it cannot pin a worker.
+OVERRIDE_TIMEOUT_SEC = 60
+_ISOLATED_COMPILE = """import json, sys, typst
+root, standards = sys.argv[1], json.loads(sys.argv[2])
+sys.stdout.buffer.write(typst.compile(
+    root + "/main.typ", root=root, format="pdf",
+    sys_inputs={"data": sys.stdin.buffer.read().decode()}, pdf_standards=standards,
+    package_path=root + "/packages", package_cache_path=root + "/packages",
+))
+"""
 MERMAID_TEMPLATE = """#import "@preview/merman:0.3.0": mermaid
 #set page(width: auto, height: auto, margin: 0pt, fill: none)
 #mermaid(sys.inputs.source, error-mode: "panic", theme-name: "redux-color", site-config: (look: "neo", layout: "elk"))
@@ -46,14 +60,20 @@ def render_pdf(
     data: dict,
     images: dict[str, bytes] | None = None,
     pdf_standards: list[str] | None = None,
+    source: bytes | None = None,
 ) -> bytes:
     """Compile a Typst template against `data`, returning PDF bytes.
 
     `images` maps a bare filename to its bytes; the template references it by
     that name. Package paths are pinned to an empty directory so an import
     cannot silently pull code from the network at render time.
+
+    `source` is a customer-supplied template used in place of `template_name`;
+    it compiles out of process under `OVERRIDE_TIMEOUT_SEC`.
     """
-    template = (TEMPLATE_DIR / template_name).read_bytes()
+    template = (
+        source if source is not None else (TEMPLATE_DIR / template_name).read_bytes()
+    )
 
     with tempfile.TemporaryDirectory() as root:
         root_path = Path(root)
@@ -67,11 +87,26 @@ def render_pdf(
         packages = root_path / "packages"
         packages.mkdir()
 
+        inputs = json.dumps(data, default=str)
+        if source is not None:
+            return subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    _ISOLATED_COMPILE,
+                    str(root_path),
+                    json.dumps(pdf_standards or []),
+                ],
+                input=inputs.encode(),
+                capture_output=True,
+                timeout=OVERRIDE_TIMEOUT_SEC,
+                check=True,
+            ).stdout
         return typst.compile(
             entrypoint,
             root=root_path,
             format="pdf",
-            sys_inputs={"data": json.dumps(data, default=str)},
+            sys_inputs={"data": inputs},
             pdf_standards=pdf_standards or [],
             package_path=str(packages),
             package_cache_path=str(packages),

@@ -10,6 +10,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from django.conf import settings
+from core import mailer
 from core.models import *
 from doc_management.models import DocumentContainer
 from core.serializer_fields import (
@@ -265,6 +266,60 @@ class BaseModelSerializer(serializers.ModelSerializer):
                         }
                     )
 
+    def _check_reverse_m2m_change(self, validated_data: dict) -> None:
+        """A reverse many-to-many (declared on the other model) edits the objects
+        on that side: adding or removing one needs change permission on it, not
+        just the visibility _check_m2m_visibility asks for."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return
+        model = self.Meta.model
+        for field_name, value in validated_data.items():
+            if not isinstance(value, list):
+                continue
+            try:
+                field = model._meta.get_field(field_name)
+            except FieldDoesNotExist:
+                continue
+            if not (field.many_to_many and field.auto_created and not field.concrete):
+                continue
+            current_ids: set = set()
+            if self.instance is not None and not isinstance(self.instance, list):
+                current_ids = {
+                    str(pk)
+                    for pk in getattr(self.instance, field_name).values_list(
+                        "pk", flat=True
+                    )
+                }
+            touched = {str(item.pk) for item in value} ^ current_ids
+            if not touched:
+                continue
+            related_model = field.related_model
+            try:
+                changeable = {
+                    str(pk)
+                    for pk in RoleAssignment.get_changeable_object_ids(
+                        request.user, related_model
+                    )
+                }
+            except NotImplementedError, Permission.DoesNotExist:
+                continue
+            if touched - changeable:
+                raise PermissionDenied(
+                    {
+                        field_name: f"You do not have permission to change this {related_model._meta.model_name}"
+                    }
+                )
+
+    def _viewable_ids(self, model: type[models.Model]) -> models.QuerySet:
+        cache = self.context.setdefault("viewable_ids", {})
+        if model not in cache:
+            request = self.context.get("request")
+            cache[model] = RoleAssignment.get_viewable_object_ids(
+                request.user if request is not None else None, model
+            )
+        return cache[model]
+
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
@@ -325,6 +380,113 @@ class ReferentialSerializer(BaseModelSerializer):
         exclude = ["translations"]
 
 
+class CollectionMembershipMixin(serializers.Serializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
+    def _resolve_collections(self, collections: list) -> list:
+        request = self.context.get("request")
+        if request is None:
+            return collections
+        current = (
+            set(GenericCollection.containing(self.instance))
+            if isinstance(self.instance, models.Model)
+            else set()
+        )
+        viewable = set(self._viewable_ids(GenericCollection))
+        final = set(collections) | {c for c in current if c.pk not in viewable}
+        if final == current:
+            return list(final)
+        changeable = set(
+            RoleAssignment.get_changeable_object_ids(request.user, GenericCollection)
+        )
+        if {c.pk for c in final ^ current} - changeable:
+            raise PermissionDenied(
+                {
+                    "genericcollection": "You do not have permission to change this genericcollection"
+                }
+            )
+        return list(final)
+
+    def validate(self, data):
+        data = super().validate(data)
+        if "genericcollection" in data:
+            data["genericcollection"] = self._resolve_collections(
+                data["genericcollection"]
+            )
+        return data
+
+    def create(self, validated_data):
+        collections = validated_data.pop("genericcollection", None)
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            if collections is not None:
+                GenericCollection.set_collections_of(instance, collections)
+        return instance
+
+    def update(self, instance, validated_data):
+        collections = validated_data.pop("genericcollection", None)
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if collections is not None:
+                GenericCollection.set_collections_of(instance, collections)
+        return instance
+
+
+class AssignmentNotificationMixin:
+    """Notifies actors newly added to the fields of `assignment_notifications`
+    ({m2m field: notification type}) once the save commits.
+
+    Wraps save() rather than create()/update(), so it sees the final members even
+    when a subclass sets the m2m itself."""
+
+    assignment_notifications: dict[str, str] = {}
+
+    def save(self, **kwargs):
+        def members(instance, field):
+            return set(getattr(instance, field).values_list("id", flat=True))
+
+        before = (
+            {f: members(self.instance, f) for f in self.assignment_notifications}
+            if self.instance is not None
+            else {}
+        )
+        instance = super().save(**kwargs)
+        for field, notification_type in self.assignment_notifications.items():
+            added = members(instance, field) - before.get(field, set())
+            if added:
+                self._queue_assignment_notification(
+                    notification_type, instance, field, added
+                )
+        return instance
+
+    @staticmethod
+    def _queue_assignment_notification(notification_type, instance, field, added):
+        try:
+            from .tasks import send_object_assignment_notification
+
+            args = (
+                notification_type,
+                instance._meta.label_lower,
+                str(instance.pk),
+                field,
+                [str(i) for i in added],
+            )
+            transaction.on_commit(
+                lambda: send_object_assignment_notification(*args), robust=True
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to queue assignment notification",
+                notification_type=notification_type,
+                error=e,
+            )
+
+
 class AssessmentReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
@@ -383,10 +545,39 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
         ]
 
 
+def _attach_sla_states(vulnerabilities) -> None:
+    """Give vulnerabilities the viewset didn't annotate their SLA state, all in one
+    query, so the column, its filter and its sort share one definition."""
+    missing = [v for v in vulnerabilities if not hasattr(v, "sla_state")]
+    if not missing:
+        return
+    rows = (
+        Vulnerability.objects.filter(pk__in=[v.pk for v in missing])
+        .annotate(**Vulnerability.sla_state_annotations())
+        .values("pk", "sla_state", "sla_until")
+    )
+    by_pk = {row["pk"]: row for row in rows}
+    for vulnerability in missing:
+        row = by_pk.get(vulnerability.pk, {})
+        vulnerability.sla_state = row.get("sla_state")
+        vulnerability.sla_until = row.get("sla_until")
+
+
+class VulnerabilityListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        items = list(
+            data.all() if isinstance(data, models.manager.BaseManager) else data
+        )
+        _attach_sla_states(items)
+        return super().to_representation(items)
+
+
 class VulnerabilityReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
@@ -395,61 +586,85 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     state = serializers.SerializerMethodField()
 
-    RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
-
-    def _get_sla_policy(self):
-        """Per-instance cache — one DB query per serializer instantiation."""
-        if not hasattr(self, "_sla_policy"):
-            from global_settings.models import GlobalSettings
-
-            try:
-                sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-                self._sla_policy = (
-                    sla_settings.value if isinstance(sla_settings.value, dict) else {}
-                )
-            except GlobalSettings.DoesNotExist:
-                self._sla_policy = {}
-        return self._sla_policy
-
     def get_state(self, obj):
-        from datetime import date
-
-        if obj.status in self.RESOLVED_STATUSES:
-            return {"name": "resolved", "hexcolor": "#86efac"}
-
-        if not obj.due_date:
+        _attach_sla_states([obj])
+        if obj.sla_state is None:
             return None
-
-        today = date.today()
-
-        if obj.due_date < today:
-            return {"name": "overdue", "hexcolor": "#f87171"}
-        if obj.due_date == today:
-            return {"name": "today", "hexcolor": "#f97316"}
-
-        # Check if we're in the caution zone (past 50% of the SLA window)
-        sla_policy = self._get_sla_policy()
-        severity_label = obj.get_severity_display()
-        try:
-            sla_days = int(sla_policy.get(severity_label, 0)) or None
-        except TypeError, ValueError:
-            sla_days = None
-        if sla_days is not None:
-            remaining = (obj.due_date - today).days
-            if remaining < sla_days * 0.5:
-                return {"name": "caution", "hexcolor": "#fbbf24"}
-
-        return {"name": "on track", "hexcolor": "#93c5fd"}
+        state = {
+            "name": obj.sla_state,
+            "hexcolor": Vulnerability.SLA_STATE_COLORS[obj.sla_state],
+        }
+        if obj.sla_state == "excepted":
+            state["until"] = obj.sla_until.isoformat() if obj.sla_until else None
+        return state
 
     class Meta:
         model = Vulnerability
         fields = "__all__"
+        list_serializer_class = VulnerabilityListSerializer
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+    # Reverse M2M (declared on Incident and TaskTemplate): DRF does not pick them up from Meta.
+    incidents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Incident.objects.all()
+    )
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+
+    def validate(self, data):
+        data = super().validate(data)
+        self._check_reverse_m2m_change(data)
+        return data
+
+    def create(self, validated_data):
+        owner_data = validated_data.get("owner", [])
+        vulnerability = super().create(validated_data)
+        if owner_data:
+            self._send_assignment_notifications(
+                vulnerability, [actor.id for actor in owner_data]
+            )
+        return vulnerability
+
+    def update(self, instance, validated_data):
+        old_owner_ids = set(instance.owner.values_list("id", flat=True))
+        vulnerability = super().update(instance, validated_data)
+        # Notify only newly assigned owners
+        newly_assigned_ids = (
+            set(vulnerability.owner.values_list("id", flat=True)) - old_owner_ids
+        )
+        if newly_assigned_ids:
+            self._send_assignment_notifications(vulnerability, list(newly_assigned_ids))
+        return vulnerability
+
+    def _send_assignment_notifications(self, vulnerability, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        try:
+            from core.models import Actor
+            from .tasks import send_vulnerability_assignment_notification
+
+            assigned_emails = []
+            for actor in Actor.objects.filter(id__in=owner_ids):
+                assigned_emails.extend(actor.get_emails())
+
+            # Dedupe (several actors can resolve to the same email) and defer until
+            # the transaction commits, so a rollback doesn't send spurious emails.
+            unique_emails = list(dict.fromkeys(filter(None, assigned_emails)))
+            if unique_emails:
+                vulnerability_id = vulnerability.id
+                transaction.on_commit(
+                    lambda: send_vulnerability_assignment_notification(
+                        vulnerability_id, unique_emails
+                    )
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send Vulnerability assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = Vulnerability
@@ -459,6 +674,14 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    # Catalog entries don't travel with a domain: the import matches the target
+    # instance's own by ref_id.
+    security_advisories = serializers.SlugRelatedField(
+        slug_field="ref_id", read_only=True, many=True
+    )
+    cwes = serializers.SlugRelatedField(slug_field="ref_id", read_only=True, many=True)
 
     class Meta:
         model = Vulnerability
@@ -469,7 +692,17 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "severity",
+            "detected_at",
+            "published_date",
+            "eta",
+            "due_date",
+            "remediated_at",
             "applied_controls",
+            "assets",
+            "evidences",
+            "security_advisories",
+            "cwes",
+            "observation",
             "created_at",
             "updated_at",
         ]
@@ -600,13 +833,13 @@ class PerimeterImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class RiskAssessmentWriteSerializer(BaseModelSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
+class RiskAssessmentWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
 
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
@@ -653,7 +886,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "perimeter", "description", "folder"]
+        fields = ["name", "ref_id", "version", "perimeter", "description", "folder"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
@@ -661,6 +894,7 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -801,8 +1035,13 @@ class IntegrationLinkSerializerMixin(serializers.Serializer):
 
 
 class AssetWriteSerializer(
-    IntegrationLinkSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+    AssignmentNotificationMixin,
+    IntegrationLinkSerializerMixin,
+    CustomFieldsSerializerMixin,
+    BaseModelSerializer,
 ):
+    assignment_notifications = {"owner": "object_assignment"}
+
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),
@@ -1611,7 +1850,10 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class AppliedControlWriteSerializer(
-    CommitmentSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+    CollectionMembershipMixin,
+    CommitmentSerializerMixin,
+    CustomFieldsSerializerMixin,
+    BaseModelSerializer,
 ):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
@@ -1627,6 +1869,9 @@ class AppliedControlWriteSerializer(
     )
     incidents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Incident.objects.all()
+    )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Vulnerability.objects.all()
     )
     control_documents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=DocumentContainer.objects.all()
@@ -2231,13 +2476,6 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
-
     class Meta:
         model = Policy
         fields = "__all__"
@@ -2765,7 +3003,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
-        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
+        send_mail = mailer.mailing_enabled()
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
@@ -2896,6 +3134,12 @@ class UserGroupReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class UserGroupAutocompleteSerializer(build_autocomplete_serializer(UserGroup)):
+    # Lazy pickers label options with `name`: serve the translated one, as the
+    # list does, not the code a built-in group stores (BI-UG-ANA).
+    name = serializers.CharField(source="__str__")
+
+
 class UserGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = UserGroup
@@ -2922,6 +3166,7 @@ class PermissionReadSerializer(BaseModelSerializer):
     content_type = FieldsRelatedField(fields=["id", "app_label", "model"])
     normalized_model = serializers.SerializerMethodField()
     normalized_codename = serializers.SerializerMethodField()
+    action_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Permission
@@ -2934,11 +3179,18 @@ class PermissionReadSerializer(BaseModelSerializer):
         )
 
     def get_normalized_codename(self, obj):
-        model_class = obj.content_type.model_class()
-        model_name = (
-            model_class.__name__ if model_class else obj.content_type.model.capitalize()
-        )
-        return f"{obj.codename.split('_')[0]}{model_name}"
+        prefix, _, suffix = obj.codename.partition("_")
+        if suffix == obj.content_type.model:
+            return f"{prefix}{self.get_normalized_model(obj)}"
+        # Custom permissions (e.g. view_compliance_assessment_full) keep their own key
+        return prefix + "".join(part.capitalize() for part in suffix.split("_"))
+
+    def get_action_label(self, obj):
+        """i18n key naming the permission within its model group."""
+        prefix, _, suffix = obj.codename.partition("_")
+        if suffix == obj.content_type.model:
+            return f"permission{prefix.capitalize()}"
+        return self.get_normalized_codename(obj)
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
@@ -3117,6 +3369,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
         model = Folder
         fields = [
             "parent_folder",
+            "ref_id",
             "name",
             "description",
             "content_type",
@@ -3178,6 +3431,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id", "urn"])
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
+    has_required_evidence = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
     has_compliance_assessments = serializers.SerializerMethodField()
     is_scale_bound = serializers.SerializerMethodField()
@@ -3393,7 +3647,11 @@ class EvidenceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class EvidenceWriteSerializer(BaseModelSerializer):
+class EvidenceWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {"owner": "object_assignment"}
+
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True, queryset=AppliedControl.objects.all(), required=False
     )
@@ -3419,11 +3677,8 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TaskTemplate.objects.all(), required=False
     )
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Vulnerability.objects.all(), required=False
     )
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Actor.objects.all(), required=False
@@ -3472,6 +3727,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old folder before update
         old_folder_id = instance.folder_id
+        old_status = instance.status
         task_templates = validated_data.pop("task_templates", None)
 
         # Handle properly owner field cleaning
@@ -3487,7 +3743,34 @@ class EvidenceWriteSerializer(BaseModelSerializer):
                     folder=instance.folder
                 )
 
+            if instance.status != old_status and instance.status in (
+                Evidence.Status.APPROVED,
+                Evidence.Status.REJECTED,
+            ):
+                self._send_review_notification(instance)
+
         return instance
+
+    def _send_review_notification(self, evidence):
+        """Queue, after commit, the approved/rejected notice to the owners."""
+        try:
+            from .tasks import send_evidence_reviewed_notification
+
+            user = getattr(self.context.get("request"), "user", None)
+            actor_name = (
+                (f"{user.first_name} {user.last_name}".strip() or user.email)
+                if user and user.is_authenticated
+                else "System"
+            )
+            evidence_id, decision = evidence.id, str(evidence.status)
+            transaction.on_commit(
+                lambda: send_evidence_reviewed_notification(
+                    evidence_id, decision, actor_name
+                ),
+                robust=True,
+            )
+        except Exception as e:
+            logger.error("Failed to queue evidence review notification", error=e)
 
     def to_representation(self, instance):
         """Include link and attachment from the latest revision in the response"""
@@ -3619,7 +3902,11 @@ class OrganisationObjectiveReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
+class OrganisationObjectiveWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {"assigned_to": "object_assignment"}
+
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=AppliedControl.objects.all(),
@@ -3744,6 +4031,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     campaign = FieldsRelatedField()
     # The binder raised from this audit's requirements, so the page can link to it.
     findings_assessments = FieldsRelatedField(many=True)
@@ -3839,6 +4127,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     authors = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     progress = serializers.SerializerMethodField()
@@ -3882,6 +4171,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "path",
             "authors",
             "entity_assessments",
+            "filtering_labels",
         ]
 
 
@@ -3899,15 +4189,11 @@ class ScoreRescaleConfirmationRequired(APIException):
         }
 
 
-class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+class ComplianceAssessmentWriteSerializer(
+    CollectionMembershipMixin, BaseModelSerializer
+):
     confirm_rescale = serializers.BooleanField(
         write_only=True, required=False, default=False
-    )
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
     )
     baseline = serializers.PrimaryKeyRelatedField(
         write_only=True,
@@ -4149,6 +4435,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
         authors_data = validated_data.get("authors", [])
+        reviewers_data = validated_data.get("reviewers", [])
 
         # Always merge the caller's partial field_visibility with code defaults
         # + framework template so the new CA is stored as a complete snapshot.
@@ -4164,6 +4451,10 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         if authors_data:
             self._send_assignment_notifications(
                 assessment, [user.id for user in authors_data]
+            )
+        if reviewers_data:
+            self._send_reviewer_notifications(
+                assessment, [actor.id for actor in reviewers_data]
             )
 
         # Only apply default implementation groups if none were provided by the user
@@ -4183,6 +4474,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old authors, folder, and perimeter before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
+        old_reviewer_ids = set(instance.reviewers.values_list("id", flat=True))
         old_folder_id = instance.folder_id
 
         # Auto-lock when status changes to deprecated
@@ -4300,7 +4592,37 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     )
                 )
 
+            new_reviewer_ids = set(
+                updated_instance.reviewers.values_list("id", flat=True)
+            )
+            self._send_reviewer_notifications(
+                updated_instance, new_reviewer_ids - old_reviewer_ids
+            )
+
         return updated_instance
+
+    @staticmethod
+    def _send_reviewer_notifications(assessment, reviewer_ids):
+        """Queue, after commit, the notification to newly added reviewers."""
+        if not reviewer_ids:
+            return
+        try:
+            from .tasks import (
+                send_compliance_assessment_reviewer_assignment_notification,
+            )
+
+            assessment_id = assessment.id
+            reviewer_ids = [str(i) for i in reviewer_ids]
+            transaction.on_commit(
+                lambda: send_compliance_assessment_reviewer_assignment_notification(
+                    assessment_id, reviewer_ids
+                ),
+                robust=True,
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to queue ComplianceAssessment reviewer notification", error=e
+            )
 
     def _send_assignment_notifications(self, assessment, author_ids):
         """Send assignment notifications to the specified authors"""
@@ -4386,6 +4708,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "name",
                 "description",
                 "typical_evidence",
+                "evidence_required",
                 "ref_id",
                 "associated_reference_controls",
                 "associated_threats",
@@ -5317,15 +5640,10 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         Fallback used on the retrieve path, where no pre-built map is in
         context. Resolves regardless of whether the framework is imported.
         """
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
+        lib = StoredLibrary.framework_libraries([urn]).first()
         if lib is None:
             return None
-        framework = lib.content.get("framework") or {}
+        framework = StoredLibrary.framework_of(lib.content) or {}
         return framework.get("name", urn)
 
     def _framework_info(self, urn):
@@ -5604,6 +5922,7 @@ class IncidentImportExportSerializer(BaseModelSerializer):
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     entities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Incident
@@ -5624,6 +5943,7 @@ class IncidentImportExportSerializer(BaseModelSerializer):
             "threats",
             "assets",
             "entities",
+            "vulnerabilities",
             "created_at",
             "updated_at",
         ]
@@ -5672,6 +5992,7 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
     findings_assessment = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = TaskTemplate
@@ -5692,6 +6013,7 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
             "requirement_assessments",
             "risk_assessments",
             "findings_assessment",
+            "vulnerabilities",
             "created_at",
             "updated_at",
         ]
@@ -5794,6 +6116,10 @@ class ComputeMappingSerializer(serializers.Serializer):
 class FilteringLabelReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    usage_count = serializers.SerializerMethodField()
+
+    def get_usage_count(self, obj):
+        return getattr(obj, "usage_count", None)
 
     class Meta:
         model = FilteringLabel
@@ -5822,14 +6148,8 @@ class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
 
 
 class SecurityExceptionWriteSerializer(
-    CustomFieldsSerializerMixin, BaseModelSerializer
+    CollectionMembershipMixin, CustomFieldsSerializerMixin, BaseModelSerializer
 ):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
@@ -5838,6 +6158,9 @@ class SecurityExceptionWriteSerializer(
     )
     assets = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Asset.objects.all(), required=False
+    )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Vulnerability.objects.all(), required=False
     )
     evidences = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Evidence.objects.all(), required=False
@@ -6027,13 +6350,13 @@ class SecurityExceptionReadSerializer(
         fields = "__all__"
 
 
-class FindingsAssessmentWriteSerializer(BaseModelSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
+class FindingsAssessmentWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
 
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
@@ -6109,7 +6432,9 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
         fields = "__all__"
 
 
-class FindingWriteSerializer(BaseModelSerializer):
+class FindingWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
@@ -6605,15 +6930,57 @@ class IncidentWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
+    def create(self, validated_data):
+        owner_data = validated_data.get("owners", [])
+        incident = super().create(validated_data)
+
+        # Notify newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                incident, [actor.id for actor in owner_data]
+            )
+
+        return incident
+
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
+        old_owner_ids = set(instance.owners.values_list("id", flat=True))
         with transaction.atomic():
             updated_instance = super().update(instance, validated_data)
             if old_folder_id != updated_instance.folder_id:
                 TimelineEntry.objects.filter(incident=updated_instance).update(
                     folder=updated_instance.folder
                 )
+
+        # Notify only newly assigned owners
+        new_owner_ids = set(updated_instance.owners.values_list("id", flat=True))
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
         return updated_instance
+
+    def _send_assignment_notifications(self, incident, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from .tasks import send_incident_assignment_notification
+
+            # Pass IDs, not addresses: the task resolves recipients from the owners
+            # the incident still has when it runs. Defer until the transaction
+            # commits, so a rollback doesn't send spurious notifications.
+            incident_id = incident.id
+            owner_ids = [str(owner_id) for owner_id in owner_ids]
+            transaction.on_commit(
+                lambda: send_incident_assignment_notification(incident_id, owner_ids),
+                robust=True,
+            )
+        except Exception as e:
+            logger.error("Failed to send Incident assignment notification", error=e)
 
 
 class IncidentReadSerializer(IncidentWriteSerializer):
@@ -6621,6 +6988,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     entities = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -6654,6 +7022,7 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
     findings = FieldsRelatedField(many=True)
+    vulnerabilities = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")
@@ -7102,7 +7471,10 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         try:
             from core.tasks import send_validation_flow_created_notification
 
-            send_validation_flow_created_notification(instance)
+            # The task reloads the flow, so it must not run before the row is committed.
+            transaction.on_commit(
+                lambda: send_validation_flow_created_notification(instance), robust=True
+            )
         except Exception as e:
             logger.error(
                 "Failed to send validation flow creation notification",
@@ -7123,6 +7495,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
         request_user = self.context["request"].user
         old_folder_id = instance.folder_id
+        old_approver_id = instance.approver_id
 
         # Check if status is being modified
         if "status" in validated_data:
@@ -7247,6 +7620,9 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     )
 
             transaction.on_commit(_send_update_notification)
+            # A requester resubmitting already notified the (new) approver above.
+            if request_user != updated_instance.requester:
+                self._notify_new_approver(updated_instance, old_approver_id)
 
             return updated_instance
 
@@ -7258,7 +7634,38 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     folder=updated_instance.folder
                 )
 
+        self._notify_new_approver(updated_instance, old_approver_id)
         return updated_instance
+
+    @staticmethod
+    def _notify_new_approver(validation_flow, old_approver_id):
+        """A pending flow handed to another approver: ask the new one, and drop the
+        old one's request row, which no longer asks anything of them."""
+        if (
+            validation_flow.approver_id == old_approver_id
+            or not validation_flow.approver_id
+            or validation_flow.status != ValidationFlow.Status.SUBMITTED
+        ):
+            return
+        try:
+            from core.tasks import send_validation_flow_created_notification
+            from notifications.models import Notification
+
+            def hand_over():
+                send_validation_flow_created_notification(validation_flow)
+                Notification.objects.filter(
+                    recipient_id=old_approver_id,
+                    type="validation_flow_created",
+                    object_id=validation_flow.id,
+                ).delete()
+
+            transaction.on_commit(hand_over, robust=True)
+        except Exception as e:
+            logger.error(
+                "Failed to notify the new validation flow approver",
+                validation_flow_id=validation_flow.id,
+                error=e,
+            )
 
     def _manage_associated_objects_lock(
         self, validation_flow, old_status: str, new_status: str

@@ -2,6 +2,7 @@ import uuid
 
 import structlog
 from django.conf import settings
+from core import mailer
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -17,10 +18,14 @@ from core.models import (
     Terminology,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
-from core.serializers import BaseModelSerializer
+from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+)
+from custom_fields.serializers import CustomFieldsSerializerMixin
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from pmbok.models import GenericCollection
 from tprm.models import (
     Contract,
     Entity,
@@ -30,9 +35,18 @@ from tprm.models import (
     Representative,
     Solution,
     SolutionSubcontractor,
+    SolutionTierChange,
     Tier,
+    TierSource,
 )
-from tprm.tiers import set_entity_tier
+from tprm.tiers import (
+    Propagation,
+    below_floor,
+    propagation_mode,
+    raise_to_floor,
+    set_entity_tier,
+    set_solution_tier,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -61,11 +75,37 @@ class EntityReadSerializer(BaseModelSerializer):
     subcontracts_usage = serializers.SerializerMethodField()
     tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     tier_response = FieldsRelatedField(["id", "ref_id"])
+    tier_floor = serializers.SerializerMethodField()
+
+    def get_tier_floor(self, obj):
+        """The tier the entity's solutions call for, when above its own."""
+        if self.context.get("action") == "list":
+            return None
+        mode = propagation_mode()
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        solution = below_floor(obj, user) if mode != Propagation.OFF else None
+        if solution is None:
+            return None
+        tier = solution.tier
+        return {
+            "mode": mode,
+            "tier": {
+                "id": str(tier.id),
+                "name": tier.name,
+                "rank": tier.rank,
+                "hexcolor": tier.hexcolor,
+            },
+            "solution": {"id": str(solution.id), "str": solution.name},
+        }
 
     def get_legal_identifiers(self, obj):
         """Format legal identifiers as a readable string for display"""
         if not obj.legal_identifiers:
             return ""
+        # legacy rows may hold a non-dict value written before validation existed
+        if not isinstance(obj.legal_identifiers, dict):
+            return str(obj.legal_identifiers)
         return "\n".join(
             [f"{key}: {value}" for key, value in obj.legal_identifiers.items()]
         )
@@ -117,6 +157,8 @@ class EntityWriteSerializer(BaseModelSerializer):
     tier_note = serializers.CharField(
         write_only=True, required=False, allow_blank=True, default=""
     )
+    # Raises the tier to the solution floor shown on the tier card.
+    apply_tier_floor = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = Entity
@@ -138,6 +180,7 @@ class EntityWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         tier = validated_data.pop("tier", None)
         note = validated_data.pop("tier_note", "")
+        validated_data.pop("apply_tier_floor", None)
         instance = super().create(validated_data)
         if tier is not None:
             set_entity_tier(instance, tier, user=self._user(), note=note)
@@ -145,11 +188,24 @@ class EntityWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         note = validated_data.pop("tier_note", "")
+        apply_floor = validated_data.pop("apply_tier_floor", False)
         has_tier = "tier" in validated_data
         tier = validated_data.pop("tier", None)
         instance = super().update(instance, validated_data)
         if has_tier:
             set_entity_tier(instance, tier, user=self._user(), note=note)
+        if (
+            apply_floor
+            and propagation_mode() != Propagation.OFF
+            and (solution := below_floor(instance, self._user()))
+        ):
+            set_entity_tier(
+                instance,
+                solution.tier,
+                source=TierSource.ROLLUP,
+                user=self._user(),
+                note=solution.name,
+            )
         return instance
 
     def _user(self):
@@ -174,7 +230,9 @@ class EntityWriteSerializer(BaseModelSerializer):
         """
         Validate legal identifiers, ensuring LEI is exactly 20 characters if provided.
         """
-        if value and isinstance(value, dict):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError(_("Legal identifiers must be an object"))
+        if value:
             lei = value.get("LEI", "")
             # Strip whitespace and check if LEI exists
             if lei:
@@ -388,17 +446,19 @@ class ContractImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class EntityAssessmentReadSerializer(BaseModelSerializer):
+class EntityAssessmentReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     # Bare, so the value carries `str` and the table can render it as a link to the
     # audit. Only `.id` is read elsewhere.
     compliance_assessment = FieldsRelatedField()
     completion = serializers.SerializerMethodField()
     review_progress = serializers.SerializerMethodField()
     assignment_status = serializers.SerializerMethodField()
+    compliance_overview = serializers.SerializerMethodField()
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     solutions = FieldsRelatedField(many=True)
     representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
@@ -439,6 +499,32 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
             return cached[audit_id]
         return obj.compliance_assessment.progress
 
+    def get_compliance_overview(self, obj):
+        """The questionnaire's compliance split and global score, so the third-party
+        record shows what the audit page shows. None when there is no questionnaire,
+        or when the questionnaire's own folder is out of the reader's reach."""
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        from core.models import ComplianceAssessment
+        from core.utils import compliance_overview
+        from iam.models import RoleAssignment
+
+        optimized = self.context.get("optimized_data") or {}
+        viewable = optimized.get("viewable_audits")
+        if viewable is None:
+            request = self.context.get("request")
+            if not RoleAssignment.is_object_accessible(
+                getattr(request, "user", None), "view", ComplianceAssessment, audit_id
+            ):
+                return None
+        elif audit_id not in viewable:
+            return None
+        cached = optimized.get("compliance_overview")
+        if cached is not None:
+            return cached.get(audit_id)
+        return compliance_overview(obj.compliance_assessment)
+
     def get_assignment_status(self, obj):
         """Where the questionnaire stands with its respondent: the least advanced assignment."""
         audit_id = obj.compliance_assessment_id
@@ -463,13 +549,17 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
-class EntityAssessmentWriteSerializer(BaseModelSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
+class EntityAssessmentWriteSerializer(
+    CollectionMembershipMixin,
+    CustomFieldsSerializerMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     create_audit = serializers.BooleanField(default=False)
     framework = serializers.PrimaryKeyRelatedField(
         queryset=Framework.objects.all(), required=False
@@ -488,6 +578,31 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         from core.utils import validate_field_visibility
 
         return validate_field_visibility(value)
+
+    def validate(self, attrs):
+        # Before super(): custom fields are scoped against attrs["folder"].
+        instance = self.instance
+        perimeter = attrs.get("perimeter", getattr(instance, "perimeter", None))
+        folder = attrs.get("folder", getattr(instance, "folder", None))
+        new_perimeter = (
+            instance is not None
+            and "perimeter" in attrs
+            and perimeter != instance.perimeter
+        )
+        # Global or no folder follows the perimeter, as in Assessment.save().
+        if (
+            perimeter
+            and perimeter.folder
+            and (new_perimeter or folder in (None, Folder.get_root_folder()))
+        ):
+            # Permission is checked only for a move the request asked for.
+            requested = "folder" in attrs or "perimeter" in attrs
+            attrs["folder"] = (
+                self.validate_folder(perimeter.folder)
+                if requested
+                else perimeter.folder
+            )
+        return super().validate(attrs)
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -648,12 +763,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             validated_data.get("representatives", [])
         )
 
-        # If perimeter is being changed, update folder to match the new perimeter's folder
-        if "perimeter" in validated_data:
-            new_perimeter = validated_data["perimeter"]
-            if new_perimeter and new_perimeter.folder:
-                validated_data["folder"] = new_perimeter.folder
-
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             self._create_or_update_audit(instance, audit_data)
@@ -766,9 +875,12 @@ class TierReadSerializer(BaseModelSerializer):
         annotated = getattr(obj, "in_history", None)
         if annotated is not None:
             return annotated
-        return EntityTierChange.objects.filter(
-            Q(tier=obj) | Q(previous_tier=obj)
-        ).exists()
+        return (
+            EntityTierChange.objects.filter(Q(tier=obj) | Q(previous_tier=obj)).exists()
+            or SolutionTierChange.objects.filter(
+                Q(tier=obj) | Q(previous_tier=obj)
+            ).exists()
+        )
 
     class Meta:
         model = Tier
@@ -825,10 +937,24 @@ class EntityTierChangeReadSerializer(BaseModelSerializer):
     tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     changed_by = FieldsRelatedField(["id", "email"])
-    folder = FieldsRelatedField()
+    folder = FieldsRelatedField(source="entity.folder")
+    response = FieldsRelatedField(["id", "ref_id"])
 
     class Meta:
         model = EntityTierChange
+        exclude = []
+
+
+class SolutionTierChangeReadSerializer(BaseModelSerializer):
+    solution = FieldsRelatedField()
+    tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
+    previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
+    changed_by = FieldsRelatedField(["id", "email"])
+    folder = FieldsRelatedField(source="solution.provider_entity.folder")
+    response = FieldsRelatedField(["id", "ref_id"])
+
+    class Meta:
+        model = SolutionTierChange
         exclude = []
 
 
@@ -903,7 +1029,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
+            send_mail = mailer.mailing_enabled()
             try:
                 user = User.objects.create_user(
                     email=instance.email,
@@ -1020,6 +1146,7 @@ class SolutionReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     tier = FieldsRelatedField(["id", "key", "name", "rank", "hexcolor"])
+    tier_response = FieldsRelatedField(["id", "ref_id"])
     subcontracting_chain = SolutionSubcontractorReadSerializer(
         many=True, read_only=True
     )
@@ -1062,12 +1189,17 @@ class SolutionReadSerializer(BaseModelSerializer):
         exclude = []
 
 
-class SolutionWriteSerializer(BaseModelSerializer):
+class SolutionWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     # The chain is handled manually in create()/update() below. Declared here
     # so that `initial_data.get("subcontracting_chain")` is the surface we
     # inspect.
     subcontracting_chain = SolutionSubcontractorWriteSerializer(
         many=True, required=False
+    )
+    tier_note = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, default=""
     )
 
     def validate_provider_entity(self, value):
@@ -1221,8 +1353,12 @@ class SolutionWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         chain_data = validated_data.pop("subcontracting_chain", _CHAIN_UNSET)
+        tier = validated_data.pop("tier", None)
+        note = validated_data.pop("tier_note", "")
         with transaction.atomic():
             solution = super().create(validated_data)
+            if tier is not None:
+                set_solution_tier(solution, tier, user=self._user(), note=note)
             if chain_data is not _CHAIN_UNSET:
                 self._replace_chain(solution, chain_data, solution.provider_entity_id)
         self._log_chain_event(solution, chain_data, is_create=True)
@@ -1234,9 +1370,17 @@ class SolutionWriteSerializer(BaseModelSerializer):
         # even after validated_data.pop() mutations.
         chain_sent = "subcontracting_chain" in self.initial_data
         chain_data = validated_data.pop("subcontracting_chain", _CHAIN_UNSET)
+        note = validated_data.pop("tier_note", "")
+        has_tier = "tier" in validated_data
+        tier = validated_data.pop("tier", None)
+        was_active = instance.is_active
 
         with transaction.atomic():
             solution = super().update(instance, validated_data)
+            if has_tier:
+                set_solution_tier(solution, tier, user=self._user(), note=note)
+            if solution.is_active and not was_active:
+                raise_to_floor(solution.provider_entity)
             if chain_sent:
                 direct_provider_id = self._resolve_direct_provider(
                     validated_data, solution
@@ -1252,6 +1396,10 @@ class SolutionWriteSerializer(BaseModelSerializer):
                 chain_data if chain_data is not _CHAIN_UNSET else [],
             )
         return solution
+
+    def _user(self):
+        request = self.context.get("request")
+        return getattr(request, "user", None)
 
     def _log_chain_event(self, solution, chain_data, is_create=False):
         """Emit structured audit log for chain mutations (post-commit)."""
@@ -1271,6 +1419,12 @@ class SolutionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]
+        read_only_fields = [
+            "tier_source",
+            "tier_set_at",
+            "tier_value",
+            "tier_response",
+        ]
 
 
 class ContractReadSerializer(BaseModelSerializer):
@@ -1298,7 +1452,9 @@ class ContractReadSerializer(BaseModelSerializer):
         exclude = []
 
 
-class ContractWriteSerializer(BaseModelSerializer):
+class ContractWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     class Meta:
         model = Contract
         exclude = []

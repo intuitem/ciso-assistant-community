@@ -10,8 +10,10 @@ from allauth.socialaccount.adapter import (
 from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
@@ -58,6 +60,16 @@ class AccountAdapter(DefaultAccountAdapter):
         except Exception:
             return None
 
+    def reauthenticate(self, user, password):
+        from allauth.mfa.utils import is_mfa_enabled
+
+        if is_mfa_enabled(user):
+            raise ValidationError(
+                _("Confirm with your second factor instead of your password."),
+                code="mfa_required",
+            )
+        return super().reauthenticate(user, password)
+
 
 class MFAAdapter(DefaultMFAAdapter):
     def is_mfa_enabled(self, user, types=None) -> bool:
@@ -66,7 +78,7 @@ class MFAAdapter(DefaultMFAAdapter):
 
         # Skip local MFA challenge for SSO logins — the IdP already
         # authenticated the user.
-        records = get_authentication_records(context.request)
+        records = get_authentication_records(context.request, user)
         if any(r.get("method") == "socialaccount" for r in records):
             return False
 

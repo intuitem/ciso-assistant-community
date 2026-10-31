@@ -12,10 +12,10 @@
 	import QuestionEditor from './QuestionEditor.svelte';
 	import CelInput from './CelInput.svelte';
 	import { getCelCatalogContext } from './cel-complete';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import ReferentialLinks from './ReferentialLinks.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		node: BuilderNode;
@@ -206,6 +206,7 @@
 		!!(
 			node.node.annotation ||
 			node.node.typical_evidence ||
+			node.node.evidence_required ||
 			node.node.visibility_expression ||
 			(node.node.translations &&
 				Object.values(node.node.translations).some((t) => t.annotation || t.typical_evidence))
@@ -838,6 +839,18 @@
 										onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
 									></textarea>
 								</div>
+								<label
+									class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
+									title={m.builderEvidenceRequiredHint()}
+								>
+									<input
+										type="checkbox"
+										checked={node.node.evidence_required}
+										onchange={(e) => saveField('evidence_required', e.currentTarget.checked)}
+										class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+									/>
+									{m.builderEvidenceRequiredLabel()}
+								</label>
 							{/if}
 						</div>
 					{/if}

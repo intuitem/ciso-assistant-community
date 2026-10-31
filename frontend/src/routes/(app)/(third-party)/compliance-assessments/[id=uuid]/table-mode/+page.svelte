@@ -1,32 +1,32 @@
 <script lang="ts">
-	import { roundScore } from '$lib/utils/helpers';
+	import { roundScore } from '#lib/utils/helpers.js';
 	import { page } from '$app/state';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import SegmentedControl from '$lib/components/Forms/SegmentedControl.svelte';
-	import ScoreControl from '$lib/components/Forms/ScoreControl.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
-	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import SegmentedControl from '#lib/components/Forms/SegmentedControl.svelte';
+	import ScoreControl from '#lib/components/Forms/ScoreControl.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '#lib/components/FrameworkBuilder/SplashCard.svelte';
+	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		setContextRecursiveTreeView,
 		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
-	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+	} from '#lib/components/TreeView/RecursiveTreeView.svelte';
+	import ExcludeNotApplicableRequirements from '#lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
 	import {
 		complianceResultColorMap,
 		complianceStatusColorMap,
 		extendedResultColorMap
-	} from '$lib/utils/constants';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	} from '#lib/utils/constants.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import {
 		getFieldVisibility,
 		isFieldEditable,
@@ -39,16 +39,16 @@
 		alignmentColorMap,
 		resultBadgeStyle,
 		AUTO_ALIGNMENT_QUESTION_URN
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
 	import { onMount, tick } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { deserialize } from '$app/forms';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
 		data: PageData;
@@ -247,12 +247,12 @@
 
 		// Reload to drop the optimistic value the backend rejected
 		if (!ok) {
-			if (invalidateAllBool) await invalidateAll();
+			if (invalidateAllBool) await refreshAll();
 			return false;
 		}
 
 		if (refresh && invalidateAllBool) {
-			await invalidateAll();
+			await refreshAll();
 		}
 
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
@@ -341,7 +341,7 @@
 					documentation_score: documentationScore
 				});
 				if (!ok) {
-					if (invalidateAllBool) await invalidateAll();
+					if (invalidateAllBool) await refreshAll();
 					return;
 				}
 				await refreshScores();
@@ -1450,7 +1450,7 @@
 																answers: { [urn]: newAnswer }
 															});
 															if (invalidateAllBool) {
-																await invalidateAll();
+																await refreshAll();
 															}
 														}}
 													/>

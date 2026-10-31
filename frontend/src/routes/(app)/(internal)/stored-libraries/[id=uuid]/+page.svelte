@@ -1,22 +1,21 @@
 <script lang="ts">
-	import { tableSourceMapper } from '$lib/utils/table';
-	import { applyAction, deserialize, enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { tableSourceMapper } from '#lib/utils/table.js';
+	import { applyAction, deserialize, enhance, type ActionResult } from '$app/forms';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import RecursiveTreeView from '#lib/components/TreeView/RecursiveTreeView.svelte';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import InstantiateWorkflows from '$lib/components/Libraries/InstantiateWorkflows.svelte';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import InstantiateWorkflows from '#lib/components/Libraries/InstantiateWorkflows.svelte';
 
 	let { data } = $props();
 	let loading = $state({ form: false, library: '' });
@@ -40,16 +39,18 @@
 	// Derived, not plain consts: previewing another library reuses the component, so
 	// a captured value would show the previous one.
 	const libraryObjects: LibraryObjects = $derived(data?.library?.objects ?? {});
-	const riskMatrices = $derived(libraryObjects['risk_matrix'] ?? []);
+	const riskMatrices = $derived(
+		libraryObjects['risk_matrix'] ?? libraryObjects['risk_matrices'] ?? []
+	);
 	const referenceControls = $derived(libraryObjects['reference_controls'] ?? []);
 	const threats = $derived(libraryObjects['threats'] ?? []);
 	const metricDefinitions = $derived(libraryObjects['metric_definitions'] ?? []);
-	const framework = $derived(libraryObjects['framework']);
+	const framework = $derived(libraryObjects['framework'] ?? libraryObjects['frameworks']?.[0]);
 
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {
 			return {
-				id: id,
+				id,
 				content: TreeViewItemContent,
 				contentProps: node,
 				children: node.children ? transformToTreeView(Object.entries(node.children)) : []
@@ -127,7 +128,7 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			await invalidateAll();
+			await refreshAll();
 		}
 		applyAction(result);
 	}
@@ -164,7 +165,7 @@
 								return async ({ update }) => {
 									loading.form = false;
 									loading.library = '';
-									update();
+									update({ navigate: false });
 								};
 							}}
 							onsubmit={handleSubmit}

@@ -596,6 +596,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(ebios_rm_studies__in=ebios_rm_studies)
         | Q(feared_events__in=feared_events)
         | Q(findings__in=findings)
+        | Q(vulnerabilities__in=vulnerabilities)
     ).distinct()
     # A third party owns tasks in its enclave the way it owns evidence there,
     # so those belong to the export too.
@@ -677,6 +678,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(findings_assessments__in=findings_assessments)
         | Q(entityassessment__in=entity_assessments)
         | Q(contracts__in=contracts)
+        | Q(vulnerabilities__in=vulnerabilities)
     ).distinct()
 
     evidence_revisions = EvidenceRevision.objects.filter(

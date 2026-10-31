@@ -1,5 +1,5 @@
-import { complianceResultColorMap } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { complianceResultColorMap } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
@@ -88,6 +88,26 @@ export function getScoreHexColor(
 		if (percentage < 75) return colors.yellow300;
 		return colors.green300;
 	}
+}
+
+/**
+ * `getScoreHexColor`'s bands as text classes. Its hexes are chart fills: on a
+ * light surface, yellow-300 on white is barely legible as a figure.
+ */
+const SCORE_TEXT_CLASSES: Record<string, string> = {
+	'#f87171': 'text-red-600 dark:text-red-400',
+	'#fb923c': 'text-orange-600 dark:text-orange-400',
+	'#fde047': 'text-yellow-600 dark:text-yellow-300',
+	'#86efac': 'text-green-600 dark:text-green-400'
+};
+
+export function getScoreTextClass(
+	value: number | null,
+	max_score: number,
+	inversedColors = false,
+	min_score = 0
+) {
+	return SCORE_TEXT_CLASSES[getScoreHexColor(value, max_score, inversedColors, min_score)];
 }
 
 /**

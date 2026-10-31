@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Le document '${document_name}' attend votre relecture"
+body: |
+  Bonjour,
+
+  ${actor_name} a soumis une révision du document suivant à votre relecture :
+
+  - Document : ${document_name}
+  - Version : ${version_number}
+  - Résumé des modifications : ${change_summary}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour l'approuver ou demander des modifications : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

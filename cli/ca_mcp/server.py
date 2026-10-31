@@ -60,6 +60,8 @@ from .tools.library_tools import (
     get_stored_libraries,
     get_loaded_libraries,
     import_stored_library,
+    find_requirements,
+    get_requirement_mappings,
 )
 
 from .tools.write_tools import (
@@ -87,6 +89,9 @@ from .tools.write_tools import (
 
 from .tools.update_tools import (
     update_team,
+    update_folder,
+    update_user,
+    update_evidence,
     update_asset,
     update_risk_scenario,
     update_applied_control,
@@ -163,6 +168,8 @@ from .tools.ebios_rm_tools import (
 )
 
 READ_TOOLS = [
+    find_requirements,
+    get_requirement_mappings,
     count_objects,
     list_objects,
     get_object,
@@ -219,8 +226,10 @@ READ_TOOLS = [
 WRITE_TOOLS = [
     import_stored_library,
     create_folder,
+    update_folder,
     create_team,
     update_team,
+    update_user,
     create_perimeter,
     create_asset,
     create_threat,
@@ -239,6 +248,7 @@ WRITE_TOOLS = [
     update_vulnerability,
     delete_vulnerability,
     create_evidence,
+    update_evidence,
     create_incident,
     update_incident,
     create_timeline_entry,

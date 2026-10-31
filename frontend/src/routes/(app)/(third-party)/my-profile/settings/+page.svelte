@@ -6,17 +6,17 @@
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
 	import RegisterWebAuthnModal from './mfa/components/RegisterWebAuthnModal.svelte';
 
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
 		formatDate,
 		sampleDateForPreference,
 		type DateFormatPreference
-	} from '$lib/utils/datetime';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { setTheme, type ThemeMode } from '$lib/utils/theme';
+	} from '#lib/utils/datetime.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { setTheme, type ThemeMode } from '#lib/utils/theme.js';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -27,10 +27,10 @@
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
-	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
-	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
+	import { getFeatureFlagGroups } from '#lib/utils/feature-flag-groups.js';
+	import FeatureFlagGroupList from '#lib/components/Forms/FeatureFlagGroupList.svelte';
 
 	interface Props {
 		data: PageData;
@@ -120,7 +120,7 @@
 				dateFormat = previous;
 				return;
 			}
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			dateFormat = previous;
 		}
@@ -156,13 +156,13 @@
 				landing = previous;
 				return;
 			}
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			landing = previous;
 		}
 	}
 
-	// Derived, not read once: every toggle ends in `invalidateAll()`.
+	// Derived, not read once: every toggle ends in `refreshAll()`.
 	const hideableFlags: string[] = $derived(data.moduleVisibility?.hideable ?? []);
 	const moduleGroups = $derived(getFeatureFlagGroups(hideableFlags));
 
@@ -229,7 +229,7 @@
 			// of the tree stale — rolling the toggle back would make it wrong.
 			// Sidebar, palette and flagged tables are built server-side from the
 			// effective flags, hence the reload at all.
-			await invalidateAll().catch(() => {});
+			await refreshAll().catch(() => {});
 		} finally {
 			modulePendingWrites -= 1;
 		}

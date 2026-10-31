@@ -153,6 +153,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "typical_evidence": RequirementNode.objects.all()[
                         0
                     ].typical_evidence,
+                    "evidence_required": RequirementNode.objects.all()[
+                        0
+                    ].evidence_required,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
                     "associated_reference_controls": RequirementNode.objects.all()[
                         0
@@ -328,6 +331,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "typical_evidence": RequirementNode.objects.all()[
                         0
                     ].typical_evidence,
+                    "evidence_required": RequirementNode.objects.all()[
+                        0
+                    ].evidence_required,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
                     "associated_reference_controls": RequirementNode.objects.all()[
                         0

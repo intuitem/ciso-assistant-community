@@ -4,9 +4,9 @@
 		type RoleAccess,
 		type VisibilityPair as Pair,
 		type VisibilityMap
-	} from '$lib/utils/helpers';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	} from '#lib/utils/helpers.js';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		value: VisibilityMap | null | undefined;
@@ -18,9 +18,17 @@
 		// keys in `value`, so pills on a fresh create form display what the
 		// API will actually save.
 		frameworkDefaults?: VisibilityMap | null;
+		// The framework has requirements that cannot be submitted without evidence.
+		evidenceRequired?: boolean;
 	}
 
-	let { value, onChange, disabled = false, frameworkDefaults = null }: Props = $props();
+	let {
+		value,
+		onChange,
+		disabled = false,
+		frameworkDefaults = null,
+		evidenceRequired = false
+	}: Props = $props();
 
 	const FIELD_LABELS: Record<string, () => string> = {
 		result: m.result,
@@ -42,7 +50,8 @@
 	const visibleFields = $derived(
 		VISIBILITY_FIELDS.filter((field) => {
 			const flag = FEATURE_FLAG_BY_FIELD[field];
-			return !flag || $page.data?.featureflags?.[flag];
+
+			return !flag || page.data?.featureflags?.[flag];
 		})
 	);
 
@@ -242,6 +251,14 @@
 					{/each}
 				</div>
 			{/each}
+			{#if field === 'evidences' && evidenceRequired && pair.respondent !== 'edit'}
+				<p
+					class="col-span-3 flex items-start gap-1.5 text-xs text-warning-700-300 pb-1"
+					data-testid="visibility-evidences-required-warning"
+				>
+					<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>{m.evidenceRequiredHiddenWarning()}
+				</p>
+			{/if}
 		{/each}
 	</div>
 </div>

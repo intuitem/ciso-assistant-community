@@ -478,7 +478,9 @@ def verify_against_library(nodes: list[Node], library_path: Path) -> int:
     import yaml
 
     library = yaml.safe_load(library_path.read_text(encoding="utf-8"))
-    shipped_nodes = library["objects"]["framework"]["requirement_nodes"]
+    objects = library["objects"]
+    framework = (objects.get("frameworks") or [None])[0] or objects["framework"]
+    shipped_nodes = framework["requirement_nodes"]
     shipped_statements: dict[str, str] = {
         node["ref_id"]: caf.one_line(node["description"])
         for node in shipped_nodes
