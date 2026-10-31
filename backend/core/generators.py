@@ -1027,6 +1027,31 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
             "opportunity_for_improvement": "Verbetermogelijkheid",
             "good_practice": "Goede praktijk",
         },
+        "tr": {
+            "compliant": "Uyumlu",
+            "partially_compliant": "Kısmen uyumlu",
+            "non_compliant": "Uyumsuz",
+            "not_applicable": "Uygulanamaz",
+            "not_assessed": "Değerlendirilmedi",
+            "to_do": "Yapılacak",
+            "on_hold": "Beklemede",
+            "in_progress": "Devam ediyor",
+            "deprecated": "Kullanımdan kaldırıldı",
+            "active": "Aktif",
+            "degraded": "Kötüleşti",
+            "policy": "Politika",
+            "process": "Süreç",
+            "technical": "Teknik",
+            "physical": "Fiziksel",
+            "procedure": "Prosedür",
+            "in_review": "İncelemede",
+            "done": "Tamamlandı",
+            "major_nonconformity": "Büyük uygunsuzluk",
+            "minor_nonconformity": "Küçük uygunsuzluk",
+            "observation_sensitive_point": "Gözlem / hassas nokta",
+            "opportunity_for_improvement": "İyileştirme fırsatı",
+            "good_practice": "İyi uygulama",
+        },
     }
 
     def safe_translate(lang: str, key: str) -> str:
@@ -1452,6 +1477,13 @@ _STATE_LABELS = {
         Commitment.State.COMMITTED: "Engagé",
         Commitment.State.DECLINED: "Refusé",
         Commitment.State.FULFILLED: "Réalisé",
+    },
+    "tr": {
+        Commitment.State.UNDEFINED: "Tanımsız",
+        Commitment.State.IN_NEGOTIATION: "Müzakerede",
+        Commitment.State.COMMITTED: "Taahhüt edildi",
+        Commitment.State.DECLINED: "Reddedildi",
+        Commitment.State.FULFILLED: "Yerine getirildi",
     },
 }
 
