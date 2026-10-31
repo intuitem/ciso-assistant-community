@@ -1167,7 +1167,6 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'asset', urlModel: 'findings', disableDelete: true },
-			{ field: 'asset', urlModel: 'accreditations' },
 			{ field: 'asset', urlModel: 'asset-assessments' },
 			{
 				field: 'assets',

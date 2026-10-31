@@ -106,6 +106,8 @@
 		/** List every field instead of folding them after MAX_ROWS behind "view more". */
 		showAllFields?: boolean;
 		actions?: import('svelte').Snippet;
+		/** Tabs of the page's own, listed before the related objects. */
+		extraTabs?: { value: string; label: string; content: import('svelte').Snippet }[];
 		disableCreate?: boolean;
 		disableEdit?: boolean;
 		disableDelete?: boolean;
@@ -122,6 +124,7 @@
 		widgetsEnabled = true,
 		showAllFields = false,
 		actions,
+		extraTabs = [],
 		disableCreate = false,
 		disableEdit = false,
 		disableDelete = false
@@ -469,15 +472,14 @@
 	let relatedModelsNames: Set<string> = $state(new Set());
 
 	let group = $state(
-		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
+		extraTabs[0]?.value ??
+			(Object.keys(data?.relatedModels ?? {}).length > 0
+				? getSortedRelatedModels()[0][0]
+				: undefined)
 	);
 	// Tabs.Content renders hidden panels too, so gate on first visit. Kept once
 	// visited, so switching back costs no refetch. Reassigned: a Set is not deep state.
-	let visitedTabs = $state(
-		new Set(
-			Object.keys(data?.relatedModels ?? {}).length > 0 ? [getSortedRelatedModels()[0][0]] : []
-		)
-	);
+	let visitedTabs = $state(new Set(group ? [group] : []));
 	$effect(() => {
 		if (group && !visitedTabs.has(group)) visitedTabs = new Set(visitedTabs).add(group);
 	});
@@ -491,7 +493,8 @@
 
 		if (setsAreDifferent) {
 			relatedModelsNames = newRelatedModelsNames;
-			const firstTab = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+			const firstTab =
+				extraTabs[0]?.value ?? (relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined);
 			group = firstTab;
 			visitedTabs = new Set(firstTab ? [firstTab] : []);
 		}
@@ -1051,7 +1054,7 @@
 	values={data.data?.custom_fields}
 />
 
-{#if relatedModels.length > 0 && displayModelTable}
+{#if (relatedModels.length > 0 || extraTabs.length > 0) && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-surface-50-950 px-2 py-6">
 		<Tabs
 			value={group}
@@ -1060,6 +1063,15 @@
 			class="w-full"
 		>
 			<Tabs.List class="shrink-0 gap-3">
+				{#each extraTabs as tab (tab.value)}
+					<Tabs.Trigger
+						value={tab.value}
+						class="justify-between w-full rounded-md px-3 py-2 transition-colors
+			       aria-[selected=true]:!bg-surface-200-800
+			       "
+						data-testid="tabs-control">{tab.label}</Tabs.Trigger
+					>
+				{/each}
 				{#each relatedModels as [urlmodel, model]}
 					<Tabs.Trigger
 						value={urlmodel}
@@ -1080,6 +1092,13 @@
 					</Tabs.Trigger>
 				{/each}
 			</Tabs.List>
+			{#each extraTabs as tab (tab.value)}
+				<Tabs.Content value={tab.value} class="flex-1 min-w-0">
+					{#if visitedTabs.has(tab.value)}
+						{@render tab.content()}
+					{/if}
+				</Tabs.Content>
+			{/each}
 			{#each relatedModels as [urlmodel, model]}
 				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
 					{#if visitedTabs.has(urlmodel)}

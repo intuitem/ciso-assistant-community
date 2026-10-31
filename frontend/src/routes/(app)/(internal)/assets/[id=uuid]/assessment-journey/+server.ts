@@ -26,5 +26,15 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ subject: params.id })
 	});
-	return Response.json(await res.json().catch(() => ({})), { status: res.status });
+	const body = await res.json().catch(() => ({}));
+	// A new framing starts from the last applied one's answers.
+	const responseId = res.ok && !body.resumed ? body.redirect?.split('/').pop() : undefined;
+	if (responseId) {
+		await fetch(`${BASE_API_URL}/assets/${params.id}/assessment-journey/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ response: responseId })
+		}).catch(() => {});
+	}
+	return Response.json(body, { status: res.status });
 };

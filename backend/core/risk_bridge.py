@@ -3,18 +3,32 @@ its requirement shares a threat with the scenario and its audit covers the same
 asset. Scenarios without assets fall back to the risk assessment's perimeter.
 Only requirements in the audit's scope count: with implementation groups
 selected, a requirement must belong to one of them, as in the audit itself.
-Read-only joins over existing relations; nothing is stored."""
+A homologation holds its risk assessment and audit together: an audit it holds
+pairs only with the risk assessments held alongside it, so a frozen copy never
+mixes with the living service. Read-only joins over existing relations; nothing is stored."""
 
 from collections import defaultdict
 
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     RequirementAssessment,
+    RiskAssessment,
     RiskScenario,
 )
+
+
+def _held(model):
+    """Collection items of `model` held by a homologation."""
+    from pmbok.models import CollectionItem
+
+    return CollectionItem.objects.filter(
+        collection__accreditation__isnull=False,
+        content_type=ContentType.objects.get_for_model(model),
+    )
 
 
 def _in_scope(selected_groups, requirement_groups) -> bool:
@@ -52,6 +66,18 @@ def related_requirement_assessments(scenario: RiskScenario):
         queryset = queryset.filter(compliance_assessment__perimeter_id=perimeter_id)
     else:
         return RequirementAssessment.objects.none()
+    audits = _held(ComplianceAssessment)
+    paired = audits.filter(
+        collection__in=_held(RiskAssessment)
+        .filter(object_id=scenario.risk_assessment_id)
+        .values("collection")
+    ).values("object_id")
+    if paired.exists():
+        queryset = queryset.filter(compliance_assessment__in=paired)
+    else:
+        queryset = queryset.exclude(
+            compliance_assessment__in=audits.values("object_id")
+        )
     return _scoped(queryset.distinct())
 
 
@@ -80,6 +106,19 @@ def related_scenarios_by_requirement_assessment(
             risk_assessment__perimeter_id=compliance_assessment.perimeter_id,
         )
     candidates = scenarios if scenarios is not None else RiskScenario.objects.all()
+    holding = _held(ComplianceAssessment).filter(object_id=compliance_assessment.pk)
+    if holding.exists():
+        candidates = candidates.filter(
+            risk_assessment__in=_held(RiskAssessment)
+            .filter(collection__in=holding.values("collection"))
+            .values("object_id")
+        )
+    else:
+        candidates = candidates.exclude(
+            risk_assessment__in=_held(RiskAssessment)
+            .filter(collection__in=_held(ComplianceAssessment).values("collection"))
+            .values("object_id")
+        )
     all_threats = set().union(*threats_by_ra.values())
     matched = (
         candidates.filter(scope, threats__in=all_threats)

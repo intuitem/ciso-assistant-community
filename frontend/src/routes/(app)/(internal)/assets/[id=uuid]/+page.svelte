@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import ObjectivesComparisonTable from '#lib/components/Assets/ObjectivesComparisonTable.svelte';
-	import AssessmentJourneyCard from '#lib/components/Assets/AssessmentJourneyCard.svelte';
+	import HomologationTab from '#lib/components/Assets/HomologationTab.svelte';
 	import { m } from '#paraglide/messages.js';
 
 	interface Props {
@@ -10,12 +10,28 @@
 	}
 
 	let { data }: Props = $props();
+
+	const journey = $derived(data.journey);
+	// Same switches as the Accreditations menu entry.
+	const accreditationsOn = $derived(
+		Boolean(data.featureflags?.project_management && (data.featureflags?.accreditations ?? true))
+	);
+	const extraTabs = $derived(
+		accreditationsOn &&
+			journey &&
+			(data.canFrame || journey.response || journey.accreditation || journey.past_cycles?.length)
+			? [{ value: 'homologation', label: m.accreditation(), content: homologation }]
+			: []
+	);
 </script>
 
-<DetailView {data}>
+{#snippet homologation()}
+	<HomologationTab {journey} assetId={data.data.id} />
+{/snippet}
+
+<DetailView {data} {extraTabs}>
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
-			<AssessmentJourneyCard assetId={data.data.id} />
 			<div class="card p-4 bg-surface-50-950 shadow-xs grow">
 				<ObjectivesComparisonTable
 					comparisons={data.data.security_objectives_comparison}

@@ -3047,13 +3047,55 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             if content.get("value") is not None and content.get("value") > 0
         ]
 
-    @action(detail=True, methods=["get"], url_path="assessment-journey")
+    @action(detail=True, methods=["get", "post"], url_path="assessment-journey")
     def assessment_journey(self, request, pk):
         """Framing response, risk assessment, audit and homologation cycle written
-        for this asset by form-driven assessment."""
-        from core.quick_form_risk_targets import journey_of
+        for this asset by form-driven assessment. POST `{"response": id}` fills a
+        framing just started with the last applied one's answers."""
+        from core.quick_form_risk_targets import carry_over_answers, journey_of
 
-        return Response(journey_of(self.get_object(), request.user))
+        asset = self.get_object()
+        if request.method == "POST":
+            try:
+                response_id = UUID(str(request.data.get("response")))
+            except ValueError:
+                return Response(
+                    {"error": "invalidResponse"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            response = QuickFormResponse.objects.filter(pk=response_id).first()
+            carried = response is not None and carry_over_answers(
+                response, asset, request.user
+            )
+            return Response({"carried": carried})
+        return Response(journey_of(asset, request.user))
+
+    @action(detail=True, methods=["post"], url_path="accreditation-cycle")
+    def accreditation_cycle(self, request, pk):
+        """`{"step": "start"}` opens the asset's next homologation cycle on the
+        framed service; `{"step": "freeze"}` freezes its deliverables."""
+        from core.quick_form_risk_targets import (
+            freeze_accreditation,
+            journey_of,
+            start_accreditation,
+        )
+
+        steps = {"start": start_accreditation, "freeze": freeze_accreditation}
+        step = steps.get(request.data.get("step"))
+        if step is None:
+            return Response(
+                {"error": "invalidStep"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        asset = self.get_object()
+        with transaction.atomic():
+            _, error = step(asset, request.user)
+        if error:
+            code = (
+                status.HTTP_403_FORBIDDEN
+                if error == "permissionDenied"
+                else status.HTTP_400_BAD_REQUEST
+            )
+            return Response({"error": error}, status=code)
+        return Response(journey_of(asset, request.user))
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
