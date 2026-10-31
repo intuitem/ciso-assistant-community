@@ -29,7 +29,7 @@ We will infer a target's compliance from the facts its links prove about it, rea
 
    A `not_assessed` source adds nothing, nor does a `not_applicable` source on a `subset` or `intersect` link.
 
-2. The facts contradict each other when "all met" comes with an unmet fact, or "all unmet" with a met fact. The target's facts then come from its `equal` and `superset` links only; if those still contradict each other, the target takes the most restrictive of their results.
+2. The facts contradict each other when "all met" comes with an unmet fact, or "all unmet" with a met fact. The target then takes the most restrictive of the results its links give alone, so a gap any link reports is never hidden.
 
 3. The target's result is the first that applies: all met, compliant; some met, partially compliant; some or all unmet, non-compliant; a `not_applicable` source on an `equal` or `superset` link, not applicable; otherwise `not_assessed`.
 
@@ -38,7 +38,7 @@ A multi-hop path applies the rule hop by hop, each hop reading the results the p
 ## Consequences
 
 - Only full coverage can make a target compliant. A `subset` or `intersect` link proves at most that some of the target is met, so a target reached only through partial links is at best partially compliant, a result that still asks for work. Within that bound the result is exact when the facts settle it, and otherwise the lowest value they allow. A single link gives what it gave before.
-- Results change where the most restrictive result misread the evidence. No result goes down: over every set of up to three links to one target, the inferred compliance is at least the old one, or, where the old one depended on the order of the links, at least the lowest of its answers.
+- Results change where the most restrictive result misread the evidence, or depended on the order of the links. No result goes down: over every set of up to three links to one target, the inferred compliance is at least the old one, or, where the old one depended on the order of the links, at least the lowest of its answers.
 
   | Links to one target | Before | Now |
   |---|---|---|
@@ -46,18 +46,19 @@ A multi-hop path applies the rule hop by hop, each hop reading the results the p
   | `intersect` compliant + `intersect` non-compliant | non-compliant | partially compliant |
   | `equal` partially compliant + `subset` non-compliant | non-compliant | partially compliant |
   | `equal` compliant + `subset` or `intersect` not assessed | not assessed | compliant |
-  | `equal` compliant + `subset` partially compliant (contradiction) | partially compliant | compliant |
+  | `equal` not applicable + `subset` compliant | compliant or partially compliant, by link order | partially compliant |
 
-- A contradiction is settled in favour of the `equal` and `superset` links, with no mark on the result: A.8.32 above is inferred compliant, and the partially compliant subset shows only among its sources.
+- A contradiction is settled by the most restrictive link, as the most restrictive result settled it: A.8.32 above is inferred partially compliant, and a compliant `superset` link with a non-compliant `intersect` link gives non-compliant.
 - The facts form a set, so the order of the links never changes the result.
 - A multi-hop result keeps the bound: compliance crosses a hop whole only through `equal` and `superset` links, and a partial hop caps it at partially compliant, which later hops carry on. Each hop loses precision, and a pessimistic intermediate result can create a contradiction the original inputs did not have; it is settled like any other. A fully compliant ISO/IEC 27001:2022 audit maps to NIST CSF 1.1 as partially compliant, as before.
-- The other mapped fields follow the links' coverage too, independently of their order. Status and observation come from the `equal` and `superset` links. Scores come from those whose scores are comparable, or else from the partial links whose scores are. When several links qualify, one supplies each group of fields: the link with the most restrictive result, then the lowest score, then the first source requirement. The coverage label (weakest link) and the merge strategy of *Map from an audit* stay as they are. `mapping_inference.result` always equals the inferred compliance.
+- The other mapped fields follow the links' coverage too, independently of their order. Status and observation come from the `equal` and `superset` links. Scores come from those whose scores are comparable, or else from the partial links whose scores are; on a contradiction, only from comparable links that give the target's result, so the result and the score agree. When several links qualify, one supplies each group of fields: the link with the most restrictive result, then the lowest score, then the first source requirement. The coverage label (weakest link) and the merge strategy of *Map from an audit* stay as they are. `mapping_inference.result` always equals the inferred compliance.
 - API clients see the change in the cases above, in `GET /api/compliance-assessments/{id}/frameworks/`, `map_from_preview` and `map_from`, and in the results pre-filled when `POST /api/compliance-assessments/` names a baseline from another framework; the `mapping` management command follows. Stored assessments change only when mapped again. No schema change.
+- A target reached only through links that prove nothing is inferred not assessed. Before, `subset` and `intersect` links from not applicable sources left it without a result; the frameworks summary now counts it as not assessed, like a target reached from not assessed sources. *Map from an audit* writes nothing for it, not assessed being the default.
 - The reading of the three results is part of the engine's contract. If non-compliant comes to mean "the essential part is not met" while some parts are, "some met, some unmet" no longer proves partially compliant: the rule must change, and partially compliant sources need a fact of their own.
 - Every row of both tables keeps a test in `backend/app_tests/api/test_mapping_engine.py`.
 
 ## Security considerations
 
 - Nothing new to attack: the rule is a function over source assessments the caller can already read, behind the same endpoints and permissions, and its cost stays linear in the number of links.
-- The risk is integrity: an inferred compliance that misstates the target's. Compliant, the result that lets an auditor pass over a requirement, comes only from full coverage; partial links give at most partially compliant, which still asks for work. Non-compliance crosses every link, and turns into partially compliant only when another link shows a met part.
-- We accept two approximations. A partially compliant source on a `superset` or `intersect` link makes the target partially compliant, although its met part may lie outside the target, leaving none of the target met. On contradictory inputs the `equal` and `superset` links win, so a target can be inferred compliant while a partial source reports a gap. Inferred results are suggestions an auditor reviews, and the inference panel lists every source with a link to it. To reduce the risk, the inference record should keep each source's own result and the panel should show it, so disagreements are visible; today it shows only the inferred result.
+- The risk is integrity: an inferred compliance that misstates the target's. Compliant, the result that lets an auditor pass over a requirement, comes only from full coverage, and never when a link reports a gap: partial links give at most partially compliant, which still asks for work, and contradictory inputs take the most restrictive link. Non-compliance crosses every link, and turns into partially compliant only when another link shows a met part without contradicting it.
+- We accept one approximation: a partially compliant source on a `superset` or `intersect` link makes the target partially compliant, although its met part may lie outside the target, leaving none of the target met. On contradictory inputs the most restrictive link wins, so a target can be inferred lower than its full-coverage links say; that errs toward review. Inferred results are suggestions an auditor reviews, and the inference panel lists every source with a link to it. To reduce the risk, the inference record should keep each source's own result and the panel should show it, so disagreements are visible; today it shows only the inferred result.

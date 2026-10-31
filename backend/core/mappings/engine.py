@@ -424,14 +424,13 @@ class MappingEngine:
                 return rescale_score(value, source_range, target_range)
             return value
 
-        # Per target: the facts its links prove (LINK_FACTS), the facts its
-        # full-coverage links prove alone, and the most restrictive result of
-        # the latter, for inputs that contradict themselves. Its full-coverage
-        # and partial links, as (source urn, source assessment, own scale,
-        # copy_scores), supply its other fields after the loop.
+        # Per target: the facts its links prove (LINK_FACTS), and the most
+        # restrictive of the results its links give alone, for inputs that
+        # contradict themselves. Its full-coverage and partial links, as
+        # (source urn, source assessment, own scale, copy_scores, the link's
+        # own result), supply its other fields after the loop.
         target_facts: defaultdict[str, set[str]] = defaultdict(set)
-        full_facts: defaultdict[str, set[str]] = defaultdict(set)
-        full_results: dict[str, Optional[str]] = {}
+        link_results: dict[str, Optional[str]] = {}
         full_links: defaultdict[str, list[tuple]] = defaultdict(list)
         partial_links: defaultdict[str, list[tuple]] = defaultdict(list)
 
@@ -544,13 +543,13 @@ class MappingEngine:
             link_facts = LINK_FACTS.get(
                 (rel, src_assessment.get("result")), frozenset()
             )
+            link_result = self._result_from_facts(link_facts)
             target_facts[dst] |= link_facts
-            link = (src, src_assessment, own_scale, copy_scores)
+            link_results[dst] = self._most_restrictive_result(
+                link_results.get(dst), link_result
+            )
+            link = (src, src_assessment, own_scale, copy_scores, link_result)
             if rel in ("equal", "superset"):
-                full_facts[dst] |= link_facts
-                full_results[dst] = self._most_restrictive_result(
-                    full_results.get(dst), src_assessment.get("result")
-                )
                 full_links[dst].append(link)
             else:
                 partial_links[dst].append(link)
@@ -668,14 +667,13 @@ class MappingEngine:
                 )
 
         # Each target's result, now that all its links are in. No rule settles
-        # inputs that contradict themselves, so the full-coverage links are
-        # believed, and if they clash too, the most restrictive of their
-        # results.
+        # inputs that contradict themselves, so the target takes the most
+        # restrictive of the results its links give alone: a gap any link
+        # reports is never hidden.
         for dst, facts in target_facts.items():
-            if self._facts_contradict(facts):
-                facts = full_facts[dst]
-            if self._facts_contradict(facts):
-                result = full_results[dst]
+            contradiction = self._facts_contradict(facts)
+            if contradiction:
+                result = link_results[dst]
             else:
                 result = self._result_from_facts(facts)
             target_assessment = target_audit["requirement_assessments"][dst]
@@ -684,19 +682,32 @@ class MappingEngine:
 
             # Status and observation come from the full-coverage links, scores
             # from those whose scores are comparable, or else from the partial
-            # links whose scores are. One link supplies each group
-            # (_decisive_link), so the order of the links doesn't matter.
+            # links whose scores are. On a contradiction, scores come only from
+            # the links that give the target's result, so its result and its
+            # score agree. One link supplies each group (_decisive_link), so
+            # the order of the links doesn't matter.
             status_link = self._decisive_link(full_links[dst])
             if status_link is not None:
-                _, src_assessment, _, _ = status_link
+                _, src_assessment, _, _, _ = status_link
                 for field in ("status", "observation"):
                     if field in src_assessment:
                         target_assessment[field] = src_assessment[field]
-            score_link = self._decisive_link(
-                [link for link in full_links[dst] if link[3]]
-            ) or self._decisive_link([link for link in partial_links[dst] if link[3]])
+            if contradiction:
+                score_link = self._decisive_link(
+                    [
+                        link
+                        for link in full_links[dst] + partial_links[dst]
+                        if link[3] and link[4] == result
+                    ]
+                )
+            else:
+                score_link = self._decisive_link(
+                    [link for link in full_links[dst] if link[3]]
+                ) or self._decisive_link(
+                    [link for link in partial_links[dst] if link[3]]
+                )
             if score_link is not None:
-                _, src_assessment, own_scale, _ = score_link
+                _, src_assessment, own_scale, _, _ = score_link
                 for field in ("score", "is_scored", "documentation_score"):
                     if field in src_assessment:
                         target_assessment[field] = scaled(

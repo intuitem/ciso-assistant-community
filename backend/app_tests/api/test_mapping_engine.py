@@ -455,10 +455,11 @@ MAPPED_FIELDS = (
 
 
 class TestLinkOrderIndependence:
-    def _target(self, links, scores_compatible=True, *, reverse=False):
+    def _target(self, links, scores_compatible=True, *, reverse=False, own_scales=None):
         """Map one source requirement per (relationship, result, fields) link
         onto B1, fields overriding the source's defaults. reverse sends the
-        same links, with the same source requirements, in reverse order."""
+        same links, with the same source requirements, in reverse order.
+        own_scales puts source requirements on scales of their own."""
         engine = _make_engine(
             frameworks={
                 "urn:fw:A": {"min_score": 0, "max_score": 100},
@@ -468,6 +469,7 @@ class TestLinkOrderIndependence:
                 },
             }
         )
+        engine.own_scales = own_scales or {}
         source = _source_audit(
             {
                 f"urn:req:A{i}": {
@@ -570,12 +572,18 @@ class TestLinkOrderIndependence:
             # A.8.32 in the ISO 27001 2013 → 2022 mapping (equal from
             # A.12.1.2 compliant, subset from A.14.2.2 partially compliant)
             # contradicts itself: all of A.8.32 met, and a part of it unmet.
-            # The full-coverage link is believed.
+            # The most restrictive of the links' own results: a gap any link
+            # reports is never hidden.
             (
                 [("equal", "compliant"), ("subset", "partially_compliant")],
-                "compliant",
+                "partially_compliant",
             ),
-            ([("equal", "compliant"), ("subset", "non_compliant")], "compliant"),
+            ([("equal", "compliant"), ("subset", "non_compliant")], "non_compliant"),
+            # From review.
+            (
+                [("superset", "compliant"), ("intersect", "non_compliant")],
+                "non_compliant",
+            ),
             # A.5.3 in the CCM v4.1 → ISO 27001 mapping contradicts itself
             # too, and its full-coverage link is non-compliant.
             (
@@ -593,13 +601,14 @@ class TestLinkOrderIndependence:
                 [("subset", "compliant"), ("intersect", "compliant")],
                 "partially_compliant",
             ),
-            # A partially compliant superset proves nothing, so the partial
-            # links decide.
+            # A partially compliant superset: a met part and an unmet part.
             (
                 [("superset", "partially_compliant"), ("subset", "compliant")],
                 "partially_compliant",
             ),
-            # not_applicable counts only when no link proves anything.
+            # not_applicable counts only when no link proves anything. From
+            # review: the most restrictive result gave compliant when the
+            # equal link came first, the subset link escaping its cap.
             (
                 [("equal", "not_applicable"), ("subset", "compliant")],
                 "partially_compliant",
@@ -680,6 +689,30 @@ class TestLinkOrderIndependence:
         )
         assert target["score"] == 30
         assert "status" not in target and "observation" not in target
+
+    # From review: on a contradiction, the score comes from a link that gives
+    # the target's result, so the two agree. Equal compliant with a score that
+    # isn't comparable + intersect non-compliant scored 0 gave compliant with
+    # score 0.
+    @pytest.mark.parametrize("reverse", [False, True])
+    @pytest.mark.parametrize(
+        "own_scale, expected_score", [("urn:req:A0", 0), ("urn:req:A1", None)]
+    )
+    def test_contradiction_takes_the_score_of_its_result(
+        self, own_scale, expected_score, reverse
+    ):
+        target = self._target(
+            [
+                ("equal", "compliant", {"score": 90}),
+                ("intersect", "non_compliant", {"score": 0}),
+            ],
+            reverse=reverse,
+            own_scales={own_scale: (0, 4)},
+        )
+        assert (target["result"], target.get("score")) == (
+            "non_compliant",
+            expected_score,
+        )
 
     @pytest.mark.parametrize("second_score", [20, 80])
     @pytest.mark.parametrize("scores_compatible", [True, False])
