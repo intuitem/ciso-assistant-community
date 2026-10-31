@@ -7,6 +7,7 @@ _most_restrictive_result using plain dicts — no database required.
 
 import pytest
 from collections import defaultdict
+from itertools import product
 from unittest.mock import patch, MagicMock
 
 # Patch DB access before importing the module (module-level `engine = MappingEngine()`)
@@ -429,6 +430,298 @@ class TestMapAuditResults:
 
 
 # ---------------------------------------------------------------------------
+# One target reached by several links: the result must not depend on the
+# order of the links in the mapping set
+# ---------------------------------------------------------------------------
+
+
+RESULTS = [
+    "non_compliant",
+    "partially_compliant",
+    "not_assessed",
+    "compliant",
+    "not_applicable",
+]
+
+
+MAPPED_FIELDS = (
+    "result",
+    "status",
+    "observation",
+    "score",
+    "is_scored",
+    "documentation_score",
+)
+
+
+class TestLinkOrderIndependence:
+    def _target(self, links, scores_compatible=True, *, reverse=False):
+        """Map one source requirement per (relationship, result, fields) link
+        onto B1, fields overriding the source's defaults. reverse sends the
+        same links, with the same source requirements, in reverse order."""
+        engine = _make_engine(
+            frameworks={
+                "urn:fw:A": {"min_score": 0, "max_score": 100},
+                "urn:fw:B": {
+                    "min_score": 0,
+                    "max_score": 100 if scores_compatible else 10,
+                },
+            }
+        )
+        source = _source_audit(
+            {
+                f"urn:req:A{i}": {
+                    "result": result,
+                    "status": "done",
+                    "score": 80,
+                    "is_scored": True,
+                    "observation": "",
+                    "documentation_score": 0,
+                    "applied_controls": [],
+                    "security_exceptions": [],
+                    "evidences": [],
+                    "name": f"RA-src-{i}",
+                    "id": f"ra-{i}-id",
+                    "source_framework": {"id": "fw-a-id", "name": "Framework A"},
+                    **fields,
+                }
+                for i, (_, result, fields) in enumerate(links)
+            }
+        )
+        requirement_mappings = [
+            {
+                "source_requirement_urn": f"urn:req:A{i}",
+                "target_requirement_urn": "urn:req:B1",
+                "relationship": rel,
+            }
+            for i, (rel, _, _) in enumerate(links)
+        ]
+        if reverse:
+            requirement_mappings.reverse()
+        result = engine.map_audit_results(
+            source,
+            _rms(requirement_mappings=requirement_mappings),
+            hop_index=1,
+            path=["urn:fw:A", "urn:fw:B"],
+        )
+        target = result["requirement_assessments"]["urn:req:B1"]
+        # The inference shown to the user always matches the result
+        assert target["mapping_inference"]["result"] == target.get("result")
+        return target
+
+    def _target_result(self, links, scores_compatible=True):
+        """Map one source requirement per (relationship, result) link onto B1."""
+        return self._target(
+            [(rel, result, {}) for rel, result in links], scores_compatible
+        ).get("result")
+
+    # What one link proves about its target, per the ADR's table
+    # (documentation/architecture/decisions/mapping-inference-proven-facts.md).
+    @pytest.mark.parametrize("scores_compatible", [True, False])
+    @pytest.mark.parametrize(
+        "rel, result, expected",
+        [
+            ("equal", "compliant", "compliant"),
+            ("equal", "partially_compliant", "partially_compliant"),
+            ("equal", "non_compliant", "non_compliant"),
+            ("superset", "compliant", "compliant"),
+            # The source's met part may lie outside the target.
+            ("superset", "partially_compliant", "not_assessed"),
+            ("superset", "non_compliant", "non_compliant"),
+            ("subset", "compliant", "partially_compliant"),
+            ("subset", "partially_compliant", "partially_compliant"),
+            ("subset", "non_compliant", "non_compliant"),
+            ("intersect", "compliant", "partially_compliant"),
+            ("intersect", "partially_compliant", "not_assessed"),
+            ("intersect", "non_compliant", "non_compliant"),
+            ("equal", "not_assessed", "not_assessed"),
+            ("intersect", "not_assessed", "not_assessed"),
+            ("equal", "not_applicable", "not_applicable"),
+            ("superset", "not_applicable", "not_applicable"),
+            ("subset", "not_applicable", "not_assessed"),
+            ("intersect", "not_applicable", "not_assessed"),
+        ],
+    )
+    def test_one_link(self, rel, result, expected, scores_compatible):
+        assert self._target_result([(rel, result)], scores_compatible) == expected
+
+    @pytest.mark.parametrize("scores_compatible", [True, False])
+    @pytest.mark.parametrize(
+        "links, expected",
+        [
+            # The ADR's table of results that changed from the most
+            # restrictive one. A met part and an unmet part make the target
+            # partially compliant.
+            (
+                [("subset", "compliant"), ("subset", "non_compliant")],
+                "partially_compliant",
+            ),
+            (
+                [("intersect", "compliant"), ("intersect", "non_compliant")],
+                "partially_compliant",
+            ),
+            (
+                [("equal", "partially_compliant"), ("subset", "non_compliant")],
+                "partially_compliant",
+            ),
+            # A partial link that wasn't assessed proves nothing.
+            ([("equal", "compliant"), ("subset", "not_assessed")], "compliant"),
+            ([("equal", "compliant"), ("intersect", "not_assessed")], "compliant"),
+            # A.8.32 in the ISO 27001 2013 → 2022 mapping (equal from
+            # A.12.1.2 compliant, subset from A.14.2.2 partially compliant)
+            # contradicts itself: all of A.8.32 met, and a part of it unmet.
+            # The full-coverage link is believed.
+            (
+                [("equal", "compliant"), ("subset", "partially_compliant")],
+                "compliant",
+            ),
+            ([("equal", "compliant"), ("subset", "non_compliant")], "compliant"),
+            # A.5.3 in the CCM v4.1 → ISO 27001 mapping contradicts itself
+            # too, and its full-coverage link is non-compliant.
+            (
+                [("equal", "non_compliant"), ("intersect", "compliant")],
+                "non_compliant",
+            ),
+            # Full-coverage links that clash: the most restrictive.
+            (
+                [("equal", "compliant"), ("superset", "non_compliant")],
+                "non_compliant",
+            ),
+            # A.8.14 (superset from BCR-11, intersect from DCS-18).
+            ([("superset", "compliant"), ("intersect", "compliant")], "compliant"),
+            (
+                [("subset", "compliant"), ("intersect", "compliant")],
+                "partially_compliant",
+            ),
+            # A partially compliant superset proves nothing, so the partial
+            # links decide.
+            (
+                [("superset", "partially_compliant"), ("subset", "compliant")],
+                "partially_compliant",
+            ),
+            # not_applicable counts only when no link proves anything.
+            (
+                [("equal", "not_applicable"), ("subset", "compliant")],
+                "partially_compliant",
+            ),
+            (
+                [("equal", "not_applicable"), ("intersect", "not_assessed")],
+                "not_applicable",
+            ),
+            (
+                [("subset", "not_applicable"), ("intersect", "not_applicable")],
+                "not_assessed",
+            ),
+        ],
+    )
+    def test_merged_result_in_both_link_orders(
+        self, links, expected, scores_compatible
+    ):
+        assert self._target_result(links, scores_compatible) == expected
+        assert self._target_result(links[::-1], scores_compatible) == expected
+
+    # From review: equal (score 90, done) + intersect (score 20, in progress)
+    # gave score 20 in both orders, and no status when the intersect link came
+    # first.
+    @pytest.mark.parametrize("reverse", [False, True])
+    @pytest.mark.parametrize("scores_compatible", [True, False])
+    def test_full_coverage_link_supplies_scores_and_status(
+        self, scores_compatible, reverse
+    ):
+        target = self._target(
+            [
+                ("equal", "compliant", {"score": 90, "observation": "full"}),
+                (
+                    "intersect",
+                    "compliant",
+                    {"score": 20, "status": "in_progress", "observation": "part"},
+                ),
+            ],
+            scores_compatible,
+            reverse=reverse,
+        )
+        assert (target["status"], target["observation"]) == ("done", "full")
+        assert target.get("score") == (90 if scores_compatible else None)
+
+    # Among several links, the one with the most restrictive result supplies
+    # the fields, whatever the order.
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_most_restrictive_full_link_supplies_the_fields(self, reverse):
+        target = self._target(
+            [
+                ("equal", "compliant", {"score": 80, "observation": "first"}),
+                (
+                    "equal",
+                    "non_compliant",
+                    {"score": 20, "status": "in_progress", "observation": "second"},
+                ),
+            ],
+            reverse=reverse,
+        )
+        assert [target[f] for f in MAPPED_FIELDS] == [
+            "non_compliant",
+            "in_progress",
+            "second",
+            20,
+            True,
+            0,
+        ]
+
+    # Partial links supply scores only when no full-coverage link does, and
+    # never status or observation.
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_partial_links_supply_scores_only(self, reverse):
+        target = self._target(
+            [
+                ("subset", "compliant", {"score": 70}),
+                ("intersect", "compliant", {"score": 30}),
+            ],
+            reverse=reverse,
+        )
+        assert target["score"] == 30
+        assert "status" not in target and "observation" not in target
+
+    @pytest.mark.parametrize("second_score", [20, 80])
+    @pytest.mark.parametrize("scores_compatible", [True, False])
+    def test_any_pair_of_links_gives_the_same_fields_in_both_orders(
+        self, scores_compatible, second_score
+    ):
+        mismatches = []
+        for rel1, rel2 in product(
+            ("equal", "superset", "subset", "intersect"), repeat=2
+        ):
+            for res1, res2 in product(RESULTS, repeat=2):
+                links = [
+                    (
+                        rel1,
+                        res1,
+                        {
+                            "score": 80,
+                            "observation": "first",
+                            "documentation_score": 70,
+                        },
+                    ),
+                    (
+                        rel2,
+                        res2,
+                        {
+                            "score": second_score,
+                            "status": "in_progress",
+                            "observation": "second",
+                            "documentation_score": 10,
+                        },
+                    ),
+                ]
+                forward = self._target(links, scores_compatible)
+                backward = self._target(links, scores_compatible, reverse=True)
+                forward = {f: forward.get(f) for f in MAPPED_FIELDS}
+                backward = {f: backward.get(f) for f in MAPPED_FIELDS}
+                if forward != backward:
+                    mismatches.append((links, forward, backward))
+        assert mismatches == []
+
+
+# ---------------------------------------------------------------------------
 # T8 / T9 — best_mapping_inferences
 # ---------------------------------------------------------------------------
 
@@ -588,6 +881,103 @@ class TestBestMappingInferences:
         assert src_ras["urn:req:A1"]["coverage"] == "partial"
         # Intermediate B1: its own B→C hop is intersect → partial.
         assert src_ras["urn:req:B1"]["coverage"] == "partial"
+
+    def test_multi_hop_targets_of_one_source_keep_their_own_inference(self):
+        """At hop 2, B1 fully covers both C1 and C2, and C2 also gets a gap
+        from B2. B1 is partially compliant, which proves nothing about C2, so
+        C2 takes B2's gap. Each target keeps its own result and sources.
+
+        A1 --equal--> B1 --equal-----> C1
+                         --superset--> C2
+        A2 --equal--> B2 --subset----> C2
+        """
+        rms_ab = _rms(
+            source_framework_urn="urn:fw:A",
+            target_framework_urn="urn:fw:B",
+            requirement_mappings=[
+                {
+                    "source_requirement_urn": f"urn:req:A{i}",
+                    "target_requirement_urn": f"urn:req:B{i}",
+                    "relationship": "equal",
+                }
+                for i in (1, 2)
+            ],
+            urn="urn:rms:AB",
+            name="A to B",
+        )
+        rms_bc = _rms(
+            source_framework_urn="urn:fw:B",
+            target_framework_urn="urn:fw:C",
+            requirement_mappings=[
+                {
+                    "source_requirement_urn": src,
+                    "target_requirement_urn": dst,
+                    "relationship": rel,
+                }
+                for src, dst, rel in (
+                    ("urn:req:B1", "urn:req:C1", "equal"),
+                    ("urn:req:B1", "urn:req:C2", "superset"),
+                    ("urn:req:B2", "urn:req:C2", "subset"),
+                )
+            ],
+            urn="urn:rms:BC",
+            name="B to C",
+        )
+
+        engine = self._build_engine_with_rms([rms_ab, rms_bc])
+        engine.frameworks = {
+            "urn:fw:A": {"min_score": 0, "max_score": 100},
+            "urn:fw:B": {"min_score": 0, "max_score": 100},
+            "urn:fw:C": {"min_score": 0, "max_score": 100},
+        }
+        # A shared requirement scale makes hop 2 copy B1's whole record
+        # into C1 and C2.
+        engine.own_scales = {
+            urn: (0, 4) for urn in ("urn:req:B1", "urn:req:C1", "urn:req:C2")
+        }
+
+        source = _source_audit(
+            {
+                f"urn:req:A{i}": {
+                    "result": result,
+                    "status": "done",
+                    "score": 90,
+                    "is_scored": True,
+                    "observation": "",
+                    "documentation_score": 0,
+                    "applied_controls": [],
+                    "security_exceptions": [],
+                    "evidences": [],
+                    "name": f"RA from A{i}",
+                    "id": f"ra-a{i}-id",
+                    "source_framework": {"id": "fw-a-id", "name": "Framework A"},
+                }
+                for i, result in ((1, "partially_compliant"), (2, "non_compliant"))
+            }
+        )
+
+        inferences, best_path = engine.best_mapping_inferences(
+            source, "urn:fw:A", "urn:fw:C"
+        )
+
+        assert best_path == ["urn:fw:A", "urn:fw:B", "urn:fw:C"]
+        c1 = inferences["requirement_assessments"]["urn:req:C1"]
+        c2 = inferences["requirement_assessments"]["urn:req:C2"]
+        assert c1["mapping_inference"] is not c2["mapping_inference"]
+        assert (
+            c1["result"] == c1["mapping_inference"]["result"] == "partially_compliant"
+        )
+        assert c2["result"] == c2["mapping_inference"]["result"] == "non_compliant"
+        assert set(c1["mapping_inference"]["source_requirement_assessments"]) == {
+            "urn:req:A1",
+            "urn:req:B1",
+        }
+        assert set(c2["mapping_inference"]["source_requirement_assessments"]) == {
+            "urn:req:A1",
+            "urn:req:B1",
+            "urn:req:A2",
+            "urn:req:B2",
+        }
 
     # T9: indirect path found when no direct path exists
     def test_indirect_path_when_no_direct(self):
