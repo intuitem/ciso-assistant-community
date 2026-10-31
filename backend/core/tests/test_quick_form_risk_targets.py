@@ -16,7 +16,7 @@ from core.models import (
     StoredLibrary,
     Terminology,
 )
-from core.quick_form_apply import apply_on_accept, plan
+from core.quick_form_apply import apply_on_accept, can_apply_on_submit, plan, project
 from core.quick_form_risk_targets import (
     freeze_accreditation,
     journey_of,
@@ -50,12 +50,13 @@ def setup(db):
     return {"form": form, "domain": domain, "asset": asset, "admin": admin}
 
 
-def accepted(setup, *rules, values=None) -> QuickFormResponse:
+def accepted(setup, *rules, values=None, form=None) -> QuickFormResponse:
     """A response on the asset whose listed rules fired, as the engine stores them."""
-    definitions = {r["ref_id"]: r for r in setup["form"].outcomes_definition}
+    form = form or setup["form"]
+    definitions = {r["ref_id"]: r for r in form.outcomes_definition}
     return QuickFormResponse.objects.create(
         name="cadrage",
-        quick_form=setup["form"],
+        quick_form=form,
         folder=setup["domain"],
         status=QuickFormResponse.Status.SUBMITTED,
         subject_content_type=ContentType.objects.get_for_model(Asset),
@@ -139,9 +140,9 @@ def test_severity_becomes_the_impact_until_someone_changes_it(setup):
     assert r4.current_impact == 1  # changed by a person: kept
 
 
-def framed(setup, *rules, values=None) -> QuickFormResponse:
+def framed(setup, *rules, values=None, form=None) -> QuickFormResponse:
     """A framing accepted and applied, as the asset page then finds it."""
-    response = accepted(setup, *rules, values=values)
+    response = accepted(setup, *rules, values=values, form=form)
     apply_on_accept(response, setup["admin"])
     QuickFormResponse.objects.filter(pk=response.pk).update(
         status=QuickFormResponse.Status.CLOSED,
@@ -162,7 +163,31 @@ def test_framing_describes_the_service_and_never_opens_a_cycle(setup):
         plan(accepted(setup, "risque_r4", "besoins_niveau2"), setup["admin"])
     )
     assert rows["asset.accreditation"]["proposal"].reason == "noAccreditationInProgress"
-    framed(setup, "risque_r4", "besoins_niveau2")
+    # The live projection reads the answers only: it names the category.
+    response = accepted(setup, "risque_r4", "besoins_niveau2")
+    (projected,) = [
+        row
+        for row in project(
+            setup["form"].on_accept,
+            response.computed_values,
+            response.computed_outcome,
+        )
+        if row["target"] == "asset.accreditation"
+    ]
+    assert projected["ok"] and projected["proposed"] == "accreditation_elaborated"
+    # No cycle to keep in step: submitting still applies the rest at once.
+    from core.views import _close_on_submit
+
+    submitted = accepted(setup, "risque_r4", "besoins_niveau2")
+    assert can_apply_on_submit(submitted, setup["admin"])
+    rows = _close_on_submit(
+        submitted,
+        setup["admin"],
+        {"context": {"response": {"scored_complete": True}}},
+    )
+    assert rows is not None
+    submitted.refresh_from_db()
+    assert submitted.resolution == QuickFormResponse.Resolution.ACCEPTED
     framed(setup, "risque_r4", "besoins_niveau3")
     assert not Accreditation.objects.filter(asset=setup["asset"]).exists()
     assert RiskAssessment.objects.filter(folder=setup["domain"]).count() == 1
@@ -256,6 +281,37 @@ def test_homologation_runs_on_frozen_deliverables(setup):
     levels = journey["risk_assessment"]["levels"]
     assert levels["unrated"] + sum(level["count"] for level in levels["counts"]) == 1
     assert sum(r["count"] for r in journey["audit"]["results"]) > 0
+
+
+def test_each_form_keeps_its_own_service(setup):
+    asset, admin = setup["asset"], setup["admin"]
+    variant = QuickForm.objects.get(pk=setup["form"].pk)
+    variant.pk, variant.urn, variant.name = None, None, "Variante"
+    variant._state.adding = True
+    variant.save()
+
+    framed(setup, "risque_r4", "besoins_niveau2")
+    first = living_service(asset)
+    cycle, _ = start_accreditation(asset, admin)
+
+    # Another form writes its own risk assessment and audit, and the open cycle
+    # follows the framing applied last.
+    framed(setup, "risque_r5", "besoins_niveau3", form=variant)
+    second = living_service(asset)
+    assert None not in second and set(first).isdisjoint(second)
+    assert list(first[0].risk_scenarios.values_list("ref_id", flat=True)) == ["R4"]
+    assert first[1].selected_implementation_groups == ["M-I", "M-R"]
+    assert list(cycle.linked_collection.get_items("risk_assessments")) == [second[0]]
+    assert journey_of(asset, admin)["risk_assessment"]["id"] == str(second[0].pk)
+
+    # Back to the first form: its own objects again, not a third pair.
+    framed(setup, "risque_r4", "besoins_niveau2")
+    assert living_service(asset) == first
+    assert RiskAssessment.objects.filter(folder=setup["domain"]).count() == 2
+    assert living_service(asset, variant) == second
+    assert freeze_accreditation(asset, admin) == (cycle, None)
+    (frozen,) = cycle.linked_collection.get_items("risk_assessments")
+    assert frozen not in (first[0], second[0])
 
 
 def test_audit_waits_for_the_security_needs(setup):

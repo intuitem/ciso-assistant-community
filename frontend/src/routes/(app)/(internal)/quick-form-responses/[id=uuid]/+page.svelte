@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { SUBJECT_ROUTES } from '#lib/utils/subject-routes.js';
 	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { deserialize } from '$app/forms';
-	import { refreshAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import Question from '#lib/components/Forms/Question.svelte';
@@ -17,18 +18,6 @@
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import { urlModelForDjangoName, localNameForDjangoName } from '#lib/utils/crud.js';
 	import type { PageData } from './$types';
-
-	// Referenceable models (core/object_references.py REFERENCEABLE) to their routes.
-	const SUBJECT_ROUTES: Record<string, string> = {
-		applied_control: 'applied-controls',
-		asset: 'assets',
-		risk_scenario: 'risk-scenarios',
-		vulnerability: 'vulnerabilities',
-		perimeter: 'perimeters',
-		entity: 'entities',
-		solution: 'solutions',
-		processing: 'processings'
-	};
 
 	let { data }: { data: PageData } = $props();
 
@@ -238,6 +227,22 @@
 			busy = false;
 		}
 	}
+
+	// Applied on submit: nothing left to do here, so back to the object it is about.
+	async function submit() {
+		await post('setStatus', { status: 'submitted' });
+		const route = SUBJECT_ROUTES[content.subject?.model ?? ''];
+		if (response.status === 'closed' && content.subject?.str && route) {
+			toastStore.trigger({ message: m.appliedOnSubmit(), background: 'preset-filled-success-500' });
+			await goto(`/${route}/${content.subject.id}`);
+		}
+	}
+
+	const canSubmit = $derived(
+		(viewerIsRequester || content.can_edit_answers) &&
+			response.status === 'draft' &&
+			!!content.progress?.complete
+	);
 
 	// One write at a time per question. Controls stay enabled while a save is in
 	// flight, so two edits can overlap and the older reply would land last.
@@ -510,7 +515,7 @@
 						class="btn btn-sm preset-filled-success-500"
 						disabled={busy || !content.progress?.complete}
 						title={content.progress?.complete ? m.quickFormComplete() : m.quickFormIncomplete()}
-						onclick={() => post('setStatus', { status: 'submitted' })}
+						onclick={submit}
 					>
 						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
 					</button>
@@ -816,14 +821,28 @@
 					<i class="fa-solid fa-chevron-left mr-1"></i>{m.previous()}
 				</button>
 				<span class="text-sm text-surface-500">{pageIndex + 1} / {stepCount}</span>
-				<button
-					type="button"
-					class="btn preset-filled-primary-500"
-					disabled={pageIndex >= stepCount - 1}
-					onclick={() => (pageIndex = Math.min(stepCount - 1, pageIndex + 1))}
-				>
-					{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
-				</button>
+				<!-- Last page and nothing missing: submit from here, not back at the top. -->
+				{#if pageIndex >= stepCount - 1 && canSubmit}
+					<button
+						type="button"
+						class="btn preset-filled-success-500"
+						disabled={busy}
+						title={content.on_submit === 'apply' ? m.onSubmitApplies() : undefined}
+						onclick={submit}
+						data-testid="submit-bottom"
+					>
+						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
+					</button>
+				{:else}
+					<button
+						type="button"
+						class="btn preset-filled-primary-500"
+						disabled={pageIndex >= stepCount - 1}
+						onclick={() => (pageIndex = Math.min(stepCount - 1, pageIndex + 1))}
+					>
+						{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
+					</button>
+				{/if}
 			</div>
 		{/if}
 	{/if}

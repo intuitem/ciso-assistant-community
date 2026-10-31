@@ -35,6 +35,9 @@ class Target:
     permission: str = ""
     #: i18n key of the target's name.
     label: str = ""
+    #: Refusals that mean nothing to write by design: they do not hold back
+    #: applying the other targets on submit.
+    idle_reasons: frozenset[str] = frozenset()
 
     def validate_config(self, config: dict, quick_form) -> list[str]:
         """Errors that make the config unusable with this form."""

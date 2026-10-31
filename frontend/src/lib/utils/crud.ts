@@ -2,6 +2,7 @@
 
 import EvidenceFileName from '#lib/components/ModelTable/field/EvidenceFileName.svelte';
 import NotificationTitle from '#lib/components/ModelTable/field/NotificationTitle.svelte';
+import QuickFormResponseSubject from '#lib/components/ModelTable/field/QuickFormResponseSubject.svelte';
 import CommitmentTarget from '#lib/components/ModelTable/field/CommitmentTarget.svelte';
 import ScheduleDisplay from '#lib/components/ModelTable/field/ScheduleDisplay.svelte';
 import LanguageDisplay from '#lib/components/ModelTable/field/LanguageDisplay.svelte';
@@ -4373,6 +4374,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	commitments: {
 		target: CommitmentTarget
+	},
+	'quick-form-responses': {
+		subject: QuickFormResponseSubject
 	},
 	'task-templates': {
 		schedule: ScheduleDisplay

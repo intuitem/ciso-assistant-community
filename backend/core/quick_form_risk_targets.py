@@ -32,27 +32,27 @@ def _fired(response) -> dict:
     return {k: v for k, v in outcome.items() if isinstance(v, dict)}
 
 
-def _last_value(key: str, subject) -> dict:
-    """What the last application of `key` on `subject` wrote, as logged."""
+def _last_value(key: str, subject, quick_form=None) -> dict:
+    """What the last application of `key` on `subject` wrote, as logged. Each
+    form keeps its own objects: two forms never write into each other's."""
     from core.models import QuickFormApplication
 
-    application = (
-        QuickFormApplication.objects.filter(
-            target=key,
-            subject_content_type=ContentType.objects.get_for_model(subject),
-            subject_object_id=subject.pk,
-        )
-        .order_by("-created_at")
-        .first()
+    applications = QuickFormApplication.objects.filter(
+        target=key,
+        subject_content_type=ContentType.objects.get_for_model(subject),
+        subject_object_id=subject.pk,
     )
+    if quick_form is not None:
+        applications = applications.filter(response__quick_form=quick_form)
+    application = applications.order_by("-created_at").first()
     value = application.new_value if application else None
     return value if isinstance(value, dict) else {}
 
 
-def _last_written(key: str, subject, model):
+def _last_written(key: str, subject, model, quick_form=None):
     """The object the last application of `key` on `subject` wrote, if it still
     exists."""
-    object_id = _last_value(key, subject).get("id")
+    object_id = _last_value(key, subject, quick_form).get("id")
     return model.objects.filter(pk=object_id).first() if object_id else None
 
 
@@ -86,6 +86,7 @@ class AssetRiskAssessmentTarget(Target):
     def current(self, subject):
         from core.models import RiskAssessment
 
+        # shortcut: the last written by any form, as current() has no response.
         assessment = _last_written(self.key, subject, RiskAssessment)
         return (str(assessment.pk), str(assessment)) if assessment else (None, "")
 
@@ -125,10 +126,15 @@ class AssetRiskAssessmentTarget(Target):
         from core.models import RiskAssessment, RiskMatrix, RiskScenario, Threat
 
         value = proposal.value
-        assessment = _last_written(self.key, subject, RiskAssessment)
+        assessment = _last_written(
+            self.key, subject, RiskAssessment, response.quick_form
+        )
         written = {
             s.get("ref_id"): s.get("impact")
-            for s in _last_value(self.key, subject).get("scenarios") or []
+            for s in _last_value(self.key, subject, response.quick_form).get(
+                "scenarios"
+            )
+            or []
         }
         if assessment is None:
             assessment = RiskAssessment.objects.create(
@@ -217,11 +223,19 @@ class AssetAuditTarget(Target):
         from core.models import ComplianceAssessment, Framework
 
         value = proposal.value
-        audit = _last_written(self.key, subject, ComplianceAssessment)
+        audit = _last_written(
+            self.key, subject, ComplianceAssessment, response.quick_form
+        )
         if audit is None:
             framework = Framework.objects.get(urn=value["framework"])
+            name = _name(framework.name, subject.name)
+            # Another form's audit of the same framework already holds the name.
+            if ComplianceAssessment.objects.filter(
+                name=name, folder=subject.folder
+            ).exists():
+                name = _name(framework.name, subject.name, response.quick_form.name)
             audit = ComplianceAssessment.objects.create(
-                name=_name(framework.name, subject.name),
+                name=name,
                 framework=framework,
                 folder=subject.folder,
                 selected_implementation_groups=value["implementation_groups"],
@@ -251,6 +265,9 @@ class AssetAccreditationTarget(Target):
     label = "accreditation"
 
     CLOSED = ("accredited", "not_accredited", "obsolete")
+    idle_reasons = frozenset(
+        {"noAccreditationInProgress", "accreditationDeliverablesFrozen"}
+    )
 
     def current(self, subject):
         cycle = current_cycle(subject)
@@ -262,13 +279,17 @@ class AssetAccreditationTarget(Target):
         name, reason = framed_category(response)
         if reason:
             return Proposal.refuse(reason)
+        proposal = Proposal(ok=True, value={"category": name}, display=name)
+        # The live projection reads the answers only, with no asset to check.
+        if not hasattr(response, "subject_object_id"):
+            return proposal
         asset = Asset.objects.filter(pk=response.subject_object_id).first()
         cycle = current_cycle(asset) if asset else None
         if cycle is None or not is_open(cycle):
             return Proposal.refuse("noAccreditationInProgress")
-        if is_frozen(cycle, asset):
+        if is_frozen(cycle):
             return Proposal.refuse("accreditationDeliverablesFrozen")
-        return Proposal(ok=True, value={"category": name}, display=name)
+        return proposal
 
     def apply(self, subject, proposal, *, response, user) -> None:
         from core.models import Terminology
@@ -279,6 +300,9 @@ class AssetAccreditationTarget(Target):
             name=proposal.value["category"],
         )
         cycle.save(update_fields=["category"])
+        # Until frozen, the cycle holds the service this framing keeps.
+        assessment, audit = living_service(subject, response.quick_form)
+        _hold(cycle, assessment, audit)
         proposal.value["id"] = str(cycle.pk)
 
 
@@ -312,24 +336,37 @@ def is_open(cycle) -> bool:
     return not (cycle.status and cycle.status.name in AssetAccreditationTarget.CLOSED)
 
 
-def living_service(asset):
-    """The risk assessment and audit the framing keeps up to date."""
+def living_service(asset, quick_form=None):
+    """The risk assessment and audit a framing form keeps up to date: by default
+    the form of the asset's last framing."""
     from core.models import ComplianceAssessment, RiskAssessment
 
+    if quick_form is None and (framing := _last_framing(asset)):
+        quick_form = framing.quick_form
     return (
-        _last_written(AssetRiskAssessmentTarget.key, asset, RiskAssessment),
-        _last_written(AssetAuditTarget.key, asset, ComplianceAssessment),
+        _last_written(AssetRiskAssessmentTarget.key, asset, RiskAssessment, quick_form),
+        _last_written(AssetAuditTarget.key, asset, ComplianceAssessment, quick_form),
     )
 
 
-def is_frozen(cycle, asset) -> bool:
-    """Frozen once the cycle holds copies rather than the living service."""
+def _hold(cycle, assessment, audit):
+    if assessment:
+        cycle.linked_collection.set_items("risk_assessments", [assessment])
+    if audit:
+        cycle.linked_collection.set_items("compliance_assessments", [audit])
+
+
+def is_frozen(cycle) -> bool:
+    """Frozen once the cycle holds a copy: a risk assessment no framing writes."""
+    from core.models import QuickFormApplication
+
     if cycle.linked_collection is None:
         return False
-    assessment, _ = living_service(asset)
-    linked = cycle.linked_collection.get_items("risk_assessments")
-    return linked.exists() and not (
-        assessment and linked.filter(pk=assessment.pk).exists()
+    linked = cycle.linked_collection.get_items("risk_assessments").first()
+    return linked is not None and not (
+        QuickFormApplication.objects.filter(
+            target=AssetRiskAssessmentTarget.key, new_value__id=str(linked.pk)
+        ).exists()
     )
 
 
@@ -356,6 +393,7 @@ def _last_framing(asset):
 
 def _allowed(user, folder, *codenames) -> bool:
     from django.contrib.auth.models import Permission
+
     from iam.models import RoleAssignment
 
     return all(
@@ -410,11 +448,7 @@ def start_accreditation(asset, user):
             name=name, folder=asset.folder
         ),
     )
-    assessment, audit = living_service(asset)
-    if assessment:
-        cycle.linked_collection.set_items("risk_assessments", [assessment])
-    if audit:
-        cycle.linked_collection.set_items("compliance_assessments", [audit])
+    _hold(cycle, *living_service(asset, framing.quick_form))
     return cycle, None
 
 
@@ -433,7 +467,7 @@ def freeze_accreditation(asset, user):
     cycle = current_cycle(asset)
     if cycle is None or not is_open(cycle):
         return None, "noAccreditationInProgress"
-    if is_frozen(cycle, asset):
+    if is_frozen(cycle):
         return None, "accreditationDeliverablesFrozen"
     assessment, audit = living_service(asset)
     if assessment is None and audit is None:
@@ -580,11 +614,7 @@ def journey_of(asset, user) -> dict:
     """Where the asset stands in a form-driven assessment: the latest response
     about it from a form writing these targets, and what was written, each only
     if the user may view it."""
-    from core.models import (
-        ComplianceAssessment,
-        QuickFormResponse,
-        RiskAssessment,
-    )
+    from core.models import QuickFormResponse
     from core.quick_form_apply import forms_with_target
     from iam.models import RoleAssignment
     from pmbok.models import Accreditation
@@ -602,10 +632,9 @@ def journey_of(asset, user) -> dict:
         .order_by("-updated_at")
         .first()
     )
-    assessment = _last_written(AssetRiskAssessmentTarget.key, asset, RiskAssessment)
-    audit = _last_written(AssetAuditTarget.key, asset, ComplianceAssessment)
+    assessment, audit = living_service(asset)
     cycle = current_cycle(asset)
-    frozen = bool(cycle) and is_frozen(cycle, asset)
+    frozen = bool(cycle) and is_frozen(cycle)
 
     def deliverable(field):
         linked = cycle.linked_collection.get_items(field).first()

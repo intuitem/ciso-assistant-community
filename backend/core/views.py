@@ -21542,7 +21542,7 @@ def _close_on_submit(response, user, evaluation=None) -> list[dict] | None:
     All or nothing: if a target fails to write, nothing is kept and the
     response goes to review."""
     from core.cel_service import evaluate_quick_form
-    from core.quick_form_apply import apply_on_accept
+    from core.quick_form_apply import apply_on_accept, idle
 
     if not response.quick_form.on_accept or always_reviewed(response):
         return None
@@ -21560,7 +21560,9 @@ def _close_on_submit(response, user, evaluation=None) -> list[dict] | None:
                 update_fields=["status", "resolution", "decided_by", "updated_at"]
             )
             applied = apply_on_accept(response, user)
-            if not all(row["applied"] for row in applied):
+            if not all(
+                row["applied"] or idle(row["target"], row["reason"]) for row in applied
+            ):
                 raise _NotAllApplied
     except _NotAllApplied:
         response.refresh_from_db()

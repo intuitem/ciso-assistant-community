@@ -4,6 +4,8 @@
 	import { deserialize } from '$app/forms';
 	import { page } from '$app/state';
 	import { m } from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -95,6 +97,7 @@
 	let hideClosed = $state(true);
 	let mineOnly = $state(false);
 	let busy = $state('');
+	const toastStore = getToastStore();
 
 	const myActorIds = $derived(
 		new Set(
@@ -113,9 +116,22 @@
 			body.append('id', id);
 			body.append('status', status);
 			if (resolution) body.append('resolution', resolution);
-			await fetch('?/setStatus', { method: 'POST', body }).then(async (r) =>
+			const result: any = await fetch('?/setStatus', { method: 'POST', body }).then(async (r) =>
 				deserialize(await r.text())
 			);
+			if (result?.type !== 'success') {
+				// The action passes the backend body through as text: {"error": code}.
+				let code: unknown;
+				try {
+					code = JSON.parse(result?.data?.error ?? '')?.error;
+				} catch {
+					code = undefined;
+				}
+				toastStore.trigger({
+					message: typeof code === 'string' ? safeTranslate(code) : m.anErrorOccurred(),
+					background: 'preset-filled-error-500'
+				});
+			}
 			await refreshAll();
 		} finally {
 			busy = '';

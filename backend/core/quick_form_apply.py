@@ -363,6 +363,12 @@ def project(
     return rows
 
 
+def idle(target_key: str, reason: str) -> bool:
+    """A refusal meaning nothing to write by design (see `Target.idle_reasons`)."""
+    target = get_target(target_key)
+    return target is not None and reason in target.idle_reasons
+
+
 def always_reviewed(response) -> bool:
     """The form or the publication it was filed through asks for a review even
     when the submitter could make every change themselves."""
@@ -386,4 +392,7 @@ def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool
     ):
         return False
     items = plan(response, user)
-    return bool(items) and all(item["proposal"].ok for item in items)
+    return any(item["proposal"].ok for item in items) and all(
+        item["proposal"].ok or idle(item["target"], item["proposal"].reason)
+        for item in items
+    )
