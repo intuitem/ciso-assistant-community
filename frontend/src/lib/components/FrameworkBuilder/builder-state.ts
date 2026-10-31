@@ -238,7 +238,9 @@ export function computeRefId(
 		if (!refId) continue;
 		let lastPart: string;
 		if (type === 'question') {
-			const match = refId.match(/-q(\d+)$/);
+			// Only count the new default ("3"), or legacy "q3" / "<parent>-q3";
+			// a named question is skipped even when it ends in digits ("iso-27001").
+			const match = refId.match(/(?:^q?|-q)(\d+)$/);
 			if (match) nums.push(parseInt(match[1], 10));
 			continue;
 		} else if (type === 'choice') {
@@ -262,9 +264,10 @@ export function computeRefId(
 				: 1;
 
 	if (type === 'section') return String(next);
+	// Like the Excel converter: a question is numbered under its requirement.
+	if (type === 'question') return String(next);
 	if (parentRefId) return `${parentRefId}${separator}${next}`;
 	// Fallback when parent has no ref_id
-	if (type === 'question') return `q${next}`;
 	if (type === 'choice') return `c${next}`;
 	return `${next}`;
 }

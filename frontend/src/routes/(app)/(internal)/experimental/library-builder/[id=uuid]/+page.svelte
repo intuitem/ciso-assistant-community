@@ -146,6 +146,18 @@
 
 	let metaDirty = $derived(metaSnapshot() !== metaBaseline);
 
+	// DRF errors arrive as {detail}, {error: code}, or a field map
+	// ({packager: ["packagerTooLong"]}); surface the first one, translating codes.
+	function apiErrorMessage(err: any): string {
+		if (err?.detail) return err.detail;
+		if (err?.error) return safeTranslate(err.error);
+		for (const v of Object.values(err ?? {})) {
+			const code = Array.isArray(v) ? v[0] : v;
+			if (typeof code === 'string') return safeTranslate(code);
+		}
+		return JSON.stringify(err);
+	}
+
 	async function patch(payload: Record<string, any>): Promise<boolean> {
 		const res = await fetch(base(), {
 			method: 'PATCH',
@@ -154,10 +166,7 @@
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
-			setStatus(
-				err.detail || (err.error ? safeTranslate(err.error) : JSON.stringify(err)),
-				'error'
-			);
+			setStatus(apiErrorMessage(err), 'error');
 			return false;
 		}
 		await reload();
@@ -928,6 +937,7 @@
 								class="input"
 								type="text"
 								bind:value={meta.packager}
+								maxlength="32"
 								disabled={draft.identity_locked}
 							/>
 						</label>
