@@ -16,6 +16,7 @@ from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import (
     FileUploadParser,
     FormParser,
@@ -34,6 +35,13 @@ from core.validators import validate_file_name, validate_file_size
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder
 
+from .access import (
+    DocumentRBACPermissions,
+    PublishedReadMixin,
+    full_view_ids,
+    has_full_view,
+    readable_ids,
+)
 from .models import (
     DocumentAttachment,
     DocumentContainer,
@@ -104,6 +112,48 @@ class DocumentTemplateViewSet(BaseModelViewSet):
 from .serializers import DocumentContainerReadSerializer
 
 logger = structlog.get_logger(__name__)
+
+
+def _review_reserved():
+    # Message key, translated by the document editor.
+    return Response(
+        {"error": "documentReviewReservedToReviewers"},
+        status=status.HTTP_403_FORBIDDEN,
+    )
+
+
+def _queue_review_notification(request, revision):
+    """After commit: a submit asks the container's reviewers, a decision (validated,
+    change requested, published) tells the revision's author."""
+    try:
+        from core.tasks import (
+            send_document_review_requested_notification,
+            send_document_revision_reviewed_notification,
+        )
+
+        user = request.user
+        actor_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        revision_id, state = revision.id, str(revision.status)
+        if state == DocumentRevision.Status.IN_REVIEW:
+            transaction.on_commit(
+                lambda: send_document_review_requested_notification(
+                    revision_id, actor_name, user.email
+                ),
+                robust=True,
+            )
+        elif revision.author_id and revision.author_id != user.id:
+            transaction.on_commit(
+                lambda: send_document_revision_reviewed_notification(
+                    revision_id, state, actor_name
+                ),
+                robust=True,
+            )
+    except Exception as e:
+        logger.error(
+            "Failed to queue document review notification",
+            revision_id=revision.id,
+            error=e,
+        )
 
 
 def _get_user_lang(request):
@@ -200,30 +250,47 @@ class DocumentContainerFilter(GenericFilterSet):
             "assets",
         ]
 
+    def _visible_state(self, queryset):
+        ids = full_view_ids(self.request, DocumentContainer)
+        if ids is None:
+            return queryset
+        return queryset.filter(
+            models.Q(id__in=ids)
+            | models.Q(
+                documents__default_locale=True,
+                documents__current_revision__status=DocumentRevision.Status.PUBLISHED,
+            )
+        )
+
     def filter_status(self, queryset, name, value):
         if not value:
             return queryset
-        return queryset.filter(
-            documents__default_locale=True,
-            documents__current_revision__status__in=value,
+        return self._visible_state(
+            queryset.filter(
+                documents__default_locale=True,
+                documents__current_revision__status__in=value,
+            )
         ).distinct()
 
     def filter_source(self, queryset, name, value):
         if not value:
             return queryset
-        return queryset.filter(
-            documents__default_locale=True,
-            documents__current_revision__source__in=value,
+        return self._visible_state(
+            queryset.filter(
+                documents__default_locale=True,
+                documents__current_revision__source__in=value,
+            )
         ).distinct()
 
 
-class DocumentContainerViewSet(BaseModelViewSet):
+class DocumentContainerViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint that allows document containers (the language-independent
     identity of a managed document) to be viewed or edited.
     """
 
     model = DocumentContainer
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
     filterset_class = DocumentContainerFilter
     search_fields = ["name", "ref_id"]
     serializers_module = "doc_management.serializers"
@@ -239,6 +306,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 "task_templates",
                 "processings",
                 "assets",
+                "reviewers",
                 models.Prefetch(
                     "documents",
                     # `revisions` feeds pending_revision in the serializer;
@@ -288,18 +356,29 @@ class DocumentContainerViewSet(BaseModelViewSet):
         """Computed doc-to-doc references for a container: outgoing (this links
         to) and incoming (linked from)."""
         container = self.get_object()
-        accessible = set(
-            RoleAssignment.get_viewable_object_ids(request.user, DocumentContainer)
-        )
+        accessible = readable_ids(request.user, DocumentContainer)
+
+        def shown(src_id, tgt_id):
+            if src_id not in accessible:
+                return False
+            if has_full_view(request, DocumentContainer, src_id):
+                return True
+            return DocumentRevision.objects.filter(
+                document__container_id=src_id,
+                status=DocumentRevision.Status.PUBLISHED,
+                content__contains=f"document:{tgt_id}",
+            ).exists()
+
         outgoing = [
             {"id": str(r.target_container_id), "str": r.target_container.name}
             for r in container.outgoing_references.select_related("target_container")
             if r.target_container_id in accessible
+            and shown(container.id, r.target_container_id)
         ]
         incoming = [
             {"id": str(r.source_container_id), "str": r.source_container.name}
             for r in container.incoming_references.select_related("source_container")
-            if r.source_container_id in accessible
+            if shown(r.source_container_id, container.id)
         ]
         return Response({"references": outgoing, "referenced_by": incoming})
 
@@ -595,12 +674,13 @@ class DocumentContainerViewSet(BaseModelViewSet):
         )
 
 
-class ManagedDocumentViewSet(BaseModelViewSet):
+class ManagedDocumentViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint that allows managed documents to be viewed or edited.
     """
 
     model = ManagedDocument
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
     filterset_fields = [
         "container",
         "folder",
@@ -880,7 +960,7 @@ class ManagedDocumentViewSet(BaseModelViewSet):
         )
 
 
-class DocumentAttachmentViewSet(BaseModelViewSet):
+class DocumentAttachmentViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint for serving document attachment files.
     """
@@ -888,6 +968,7 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = DocumentAttachment
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
 
     @action(detail=True, methods=["get"])
     def file(self, request, pk=None):
@@ -897,13 +978,20 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, DocumentAttachment
-        )
+        object_ids_view = readable_ids(request.user, DocumentAttachment)
 
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
         attachment = self.get_object()
+        if (
+            not has_full_view(request, DocumentAttachment, attachment.id)
+            and not DocumentRevision.objects.filter(
+                document_id=attachment.document_id,
+                status=DocumentRevision.Status.PUBLISHED,
+                content__contains=str(attachment.id),
+            ).exists()
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         if not attachment.file or not attachment.file.storage.exists(
             attachment.file.name
         ):
@@ -936,12 +1024,13 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
         )
 
 
-class DocumentRevisionViewSet(BaseModelViewSet):
+class DocumentRevisionViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint that allows document revisions to be viewed or edited.
     """
 
     model = DocumentRevision
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
     filterset_fields = ["document", "status"]
     ordering = ["-version_number"]
     serializers_module = "doc_management.serializers"
@@ -953,9 +1042,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             pk_uuid = UUID(pk)
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, DocumentRevision
-        )
+        object_ids_view = readable_ids(request.user, DocumentRevision)
 
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -1163,6 +1250,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             )
         revision.status = DocumentRevision.Status.IN_REVIEW
         revision.save()
+        _queue_review_notification(request, revision)
         return Response({"status": "in_review"})
 
     @action(detail=True, methods=["post"])
@@ -1174,7 +1262,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 {"error": "Only in-review revisions can be approved."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if not revision.document.container.may_review(request.user):
+            return _review_reserved()
         revision.validate(reviewer=request.user)
+        _queue_review_notification(request, revision)
         return Response({"status": "validated"})
 
     @action(detail=True, methods=["post"])
@@ -1187,6 +1278,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         revision.publish()
+        _queue_review_notification(request, revision)
 
         # Uploaded revisions ARE the artifact (a file) — no markdown to snapshot.
         if revision.source == DocumentRevision.Source.AUTHORED:
@@ -1206,11 +1298,14 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 {"error": "Only in-review revisions can have changes requested."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if not revision.document.container.may_review(request.user):
+            return _review_reserved()
 
         revision.mark_change_requested(
             reviewer=request.user,
             comments=request.data.get("reviewer_comments", ""),
         )
+        _queue_review_notification(request, revision)
         return Response({"status": "change_requested"})
 
     @action(
@@ -1351,11 +1446,9 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
         content_html = _render_mermaid_blocks(content_html)
-        accessible_ids = RoleAssignment.get_viewable_object_ids(
-            user, DocumentAttachment
-        )
+        accessible_ids = readable_ids(user, DocumentAttachment)
 
-        content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
+        content_html = mark_safe(self._inline_images(content_html, accessible_ids))
 
         author_name = str(revision.author) if revision.author else ""
         reviewer_name = (

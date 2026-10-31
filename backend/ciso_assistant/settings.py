@@ -493,7 +493,6 @@ INSTALLED_APPS = [
     "django.forms",
     "django_structlog",
     "auditlog",
-    "tailwind",
     "iam",
     "sec_intel",
     "threat_modeling",
@@ -739,6 +738,7 @@ LANGUAGES = [
     ("et", "Estonian"),
     ("sk", "Slovak"),
     ("sl", "Slovenian"),
+    ("nb", "Norwegian Bokmål"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -827,6 +827,8 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.hooks.postprocess_schema_enums",
         "ciso_assistant.openapi.split_namespace_tags",
     ],
+    # Redoc 3 ships an ES module bundle that drf-spectacular's template cannot load
+    "REDOC_DIST": "https://cdn.jsdelivr.net/npm/redoc@2",
     # OTHER SETTINGS
 }
 

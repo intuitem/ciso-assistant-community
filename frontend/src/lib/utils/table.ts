@@ -1751,6 +1751,25 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Values of Vulnerability.SLA_STATES, most urgent first.
+export const VULNERABILITY_SLA_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: 'overdue', value: 'overdue' },
+			{ label: 'today', value: 'today' },
+			{ label: 'caution', value: 'caution' },
+			{ label: 'onTrack', value: 'on track' },
+			{ label: 'excepted', value: 'excepted' },
+			{ label: 'resolved', value: 'resolved' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'sla',
+		multiple: true
+	}
+};
+
 export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1837,6 +1856,7 @@ export const listViewFields = {
 			'severity',
 			'sla',
 			'dueDate',
+			'owner',
 			'applied_controls',
 			'folder',
 			'labels'
@@ -1848,6 +1868,7 @@ export const listViewFields = {
 			'severity',
 			'state',
 			'due_date',
+			'owner',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1857,6 +1878,8 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
 			severity: VULNERABILITY_SEVERITY_FILTER,
+			state: VULNERABILITY_SLA_FILTER,
+			owner: OWNER_FILTER,
 			assets: ASSET_FILTER,
 			security_advisories: SECURITY_ADVISORY_FILTER,
 			cwes: CWE_FILTER,
@@ -4149,6 +4172,30 @@ export interface ParentActionConfig {
 
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
 
+const LABELS_BATCH_ACTION: BatchActionConfig = {
+	type: 'group',
+	label: 'manageLabels',
+	icon: 'fa-solid fa-tags',
+	children: [
+		{
+			type: 'add_m2m',
+			label: 'addLabels',
+			icon: 'fa-solid fa-plus',
+			field: 'filtering_labels',
+			optionsEndpoint: 'filtering-labels',
+			multiSelect: true
+		},
+		{
+			type: 'remove_m2m',
+			label: 'removeLabels',
+			icon: 'fa-solid fa-minus',
+			field: 'filtering_labels',
+			optionsEndpoint: 'filtering-labels',
+			multiSelect: true
+		}
+	]
+};
+
 export const quickFilterPresets: Partial<
 	Record<urlModel, { label: string; icon: string; field: string; values: string[] }[]>
 > = {
@@ -4211,29 +4258,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 				}
 			]
 		},
-		{
-			type: 'group',
-			label: 'manageLabels',
-			icon: 'fa-solid fa-tags',
-			children: [
-				{
-					type: 'add_m2m',
-					label: 'addLabels',
-					icon: 'fa-solid fa-plus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				},
-				{
-					type: 'remove_m2m',
-					label: 'removeLabels',
-					icon: 'fa-solid fa-minus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				}
-			]
-		},
+		LABELS_BATCH_ACTION,
 		{
 			type: 'change_folder',
 			label: 'changeDomain',
@@ -4315,29 +4340,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'actors',
 			multiSelect: true
 		},
-		{
-			type: 'group',
-			label: 'manageLabels',
-			icon: 'fa-solid fa-tags',
-			children: [
-				{
-					type: 'add_m2m',
-					label: 'addLabels',
-					icon: 'fa-solid fa-plus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				},
-				{
-					type: 'remove_m2m',
-					label: 'removeLabels',
-					icon: 'fa-solid fa-minus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				}
-			]
-		},
+		LABELS_BATCH_ACTION,
 		{
 			type: 'change_folder',
 			label: 'changeDomain',
@@ -4506,29 +4509,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'actors',
 			multiSelect: true
 		},
-		{
-			type: 'group',
-			label: 'manageLabels',
-			icon: 'fa-solid fa-tags',
-			children: [
-				{
-					type: 'add_m2m',
-					label: 'addLabels',
-					icon: 'fa-solid fa-plus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				},
-				{
-					type: 'remove_m2m',
-					label: 'removeLabels',
-					icon: 'fa-solid fa-minus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				}
-			]
-		},
+		LABELS_BATCH_ACTION,
 		{
 			type: 'change_folder',
 			label: 'changeDomain',
@@ -4745,29 +4726,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'tier',
 			optionsEndpoint: 'tiers?is_visible=true'
 		},
-		{
-			type: 'group',
-			label: 'manageLabels',
-			icon: 'fa-solid fa-tags',
-			children: [
-				{
-					type: 'add_m2m',
-					label: 'addLabels',
-					icon: 'fa-solid fa-plus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				},
-				{
-					type: 'remove_m2m',
-					label: 'removeLabels',
-					icon: 'fa-solid fa-minus',
-					field: 'filtering_labels',
-					optionsEndpoint: 'filtering-labels',
-					multiSelect: true
-				}
-			]
-		},
+		LABELS_BATCH_ACTION,
 		{
 			type: 'change_folder',
 			label: 'changeDomain',
@@ -4802,6 +4761,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'conclusion',
 			optionsEndpoint: 'entity-assessments/conclusion'
 		},
+		LABELS_BATCH_ACTION,
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'data-transfers': [

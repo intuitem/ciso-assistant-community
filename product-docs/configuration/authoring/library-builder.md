@@ -76,6 +76,12 @@ A framework is a tree of **requirement nodes**. Open the framework editor from a
 5. Drag the grip handle (left of any node) to reorder against siblings.
 6. Save with `⌘ + S` / `Ctrl + S` as you go — the editor's badge flips between **Unsaved changes** and **Saved to draft**.
 
+### Require an evidence
+
+Under **Advanced** on an assessable node, tick **Evidence required**. Respondents then cannot submit an assignment while that requirement carries no evidence. See [Assignments](../../features/assignments.md#requirements-that-require-an-evidence).
+
+The **Typical evidence** field next to it stays descriptive: it tells the respondent what to look for, it does not make the evidence compulsory.
+
 ### Add implementation groups (IGs)
 
 For tiered selection (e.g. _Basic_ / _Standard_ / _Advanced_):

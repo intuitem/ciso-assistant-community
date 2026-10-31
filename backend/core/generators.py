@@ -1,14 +1,35 @@
 import io
+import multiprocessing
+import resource
+import traceback
+from collections import OrderedDict, defaultdict
+from datetime import date, datetime, timedelta
+from decimal import Decimal
 from math import ceil
+from multiprocessing.connection import Connection
+from typing import ClassVar
+from uuid import UUID
 
+import jinja2.filters
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from django.db.models import Count
+from django.utils.safestring import SafeString
 from django.utils.timezone import now
 from docx.shared import Cm
-from docxtpl import InlineImage
+from docxtpl import DocxTemplate, InlineImage
+from jinja2.exceptions import TemplateError
+from jinja2.runtime import (
+    BlockReference,
+    LoopContext,
+    Macro,
+    TemplateReference,
+)
+from jinja2.sandbox import ImmutableSandboxedEnvironment
+from jinja2.utils import Cycler, Joiner, Namespace
 from library.helpers import get_referential_translation
+from markupsafe import Markup
 
 from .utils import is_field_visible_to
 
@@ -897,12 +918,10 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     # Calculate category scores
     category_scores = aggregate_category_scores(tree)
 
-    max_score = 100  # default
-    for node in tree.values():
-        if node.get("max_score") is not None:
-            max_score = node["max_score"]
-            break
-    print(category_scores)
+    max_score = next(
+        (s for s in (audit.max_score, audit.framework.max_score) if s is not None),
+        100,
+    )
 
     for key, content in tree.items():
         total = sum(result_counts[content["urn"]].values())
@@ -1204,6 +1223,135 @@ def inline_charts_for_docx(context, doc, width=Cm(15)):
     return wrapped
 
 
+class DocxReportSandbox(ImmutableSandboxedEnvironment):
+    """Sandbox for user-supplied Word templates.
+
+    Only plain data and Jinja's own helpers expose attributes. Anything else in
+    the context is opaque: `InlineImage.tpl` alone leads to a `DocxTemplate`,
+    whose public methods render without a sandbox and read or write arbitrary
+    files. Data is matched on its exact type, since a subclass brings its own
+    methods (`numpy.float64.tofile` writes a file).
+    """
+
+    data_types: ClassVar[frozenset[type]] = frozenset(
+        {
+            str,
+            Markup,
+            SafeString,
+            int,
+            bool,
+            float,
+            Decimal,
+            UUID,
+            date,
+            datetime,
+            timedelta,
+            list,
+            tuple,
+            getattr(jinja2.filters, "_GroupTuple", tuple),
+            dict,
+            OrderedDict,
+            defaultdict,
+            range,
+        }
+    )
+    jinja_helper_types: ClassVar[tuple[type, ...]] = (
+        LoopContext,
+        Namespace,
+        Cycler,
+        Joiner,
+        Macro,
+        TemplateReference,
+        BlockReference,
+    )
+
+    def is_safe_attribute(self, obj: object, attr: str, value: object) -> bool:
+        readable = type(obj) in self.data_types or isinstance(
+            obj, self.jinja_helper_types
+        )
+        return readable and super().is_safe_attribute(obj, attr, value)
+
+
+def render_docx_report(doc: DocxTemplate, context: dict) -> None:
+    """Render `doc` in place with `context`, charts included."""
+    doc.render(inline_charts_for_docx(context, doc), jinja_env=DocxReportSandbox())
+
+
+DOCX_RENDER_TIMEOUT = 60
+DOCX_RENDER_MEMORY = 1 << 30
+
+
+class DocxRenderError(Exception):
+    """A custom Word template failed to render; the message says why."""
+
+
+class DocxTemplateError(DocxRenderError):
+    """The Jinja template itself is wrong; the message is meant for its author."""
+
+
+class DocxRenderTimeout(DocxRenderError):
+    """A custom Word template ran longer than `DOCX_RENDER_TIMEOUT` seconds."""
+
+
+class DocxRenderCrash(DocxRenderError):
+    """The process rendering a custom Word template died, likely out of memory."""
+
+
+def _render_docx_in_child(doc: DocxTemplate, context: dict, conn: Connection) -> None:
+    try:
+        with open("/proc/self/statm") as statm:
+            used = int(statm.read().split()[0]) * resource.getpagesize()
+        resource.setrlimit(resource.RLIMIT_AS, (used + DOCX_RENDER_MEMORY,) * 2)
+    except OSError, ValueError:
+        pass
+    try:
+        render_docx_report(doc, context)
+        out = io.BytesIO()
+        doc.save(out)
+    except TemplateError as e:
+        conn.send(("template_error", str(e) or type(e).__name__))
+    except MemoryError:
+        # Closing the pipe unsent makes the parent report it as a crash.
+        return
+    except Exception:
+        conn.send(("error", traceback.format_exc()))
+    else:
+        conn.send(("report", out.getvalue()))
+
+
+def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
+    """Render `doc` with `context` in a forked child bounded in time and memory,
+    since a custom template can loop or allocate without limit.
+
+    Returns the rendered .docx; raises `DocxRenderTimeout` past
+    `DOCX_RENDER_TIMEOUT` seconds, `DocxRenderCrash` when the child dies,
+    `DocxTemplateError` when Jinja rejects the template, and `DocxRenderError`
+    carrying the child's traceback for any other failure.
+    """
+    recv, send = multiprocessing.Pipe(duplex=False)
+    child = multiprocessing.get_context("fork").Process(
+        target=_render_docx_in_child, args=(doc, context, send)
+    )
+    child.start()
+    send.close()
+    try:
+        if not recv.poll(DOCX_RENDER_TIMEOUT):
+            raise DocxRenderTimeout
+        try:
+            outcome, payload = recv.recv()
+        except EOFError, OSError:
+            raise DocxRenderCrash from None
+        if outcome == "template_error":
+            raise DocxTemplateError(payload)
+        if outcome == "error":
+            raise DocxRenderError(payload)
+        return payload
+    finally:
+        recv.close()
+        child.kill()
+        child.join()
+
+
 # Requirement-assessment fields governed by the audit's `field_visibility`;
 # `max_score` is not itself governed but is meaningless once `score` is dropped.
 _REDACTABLE_RA_FIELDS = (
@@ -1239,6 +1387,8 @@ REPORT_PROFILES = {
         # Each profile has its own self-contained template per locale, so
         # customising one cannot affect the others.
         "template": "audit_report",
+        # `CustomWordTemplate.template_key` of the PRO override.
+        "override_key": "audit_posture",
         # The reader's own role still applies on top; this is the ceiling.
         "role": "auditor",
         "discloses": (),
@@ -1257,6 +1407,7 @@ REPORT_PROFILES = {
     },
     "attestation": {
         "template": "attestation",
+        "override_key": "audit_attestation",
         "role": "respondent",
         # The questionnaire deliberately withholds the auditor's verdict while the
         # respondent is answering (THIRD_PARTY_VISIBILITY marks `result` auditor-only).

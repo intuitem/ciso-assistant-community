@@ -1,4 +1,9 @@
-from core.serializers import BaseModelSerializer, AssessmentReadSerializer
+from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+    AssessmentReadSerializer,
+)
 from core.serializer_fields import FieldsRelatedField
 from .models import (
     BusinessImpactAnalysis,
@@ -32,7 +37,14 @@ class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
     )
 
 
-class BusinessImpactAnalysisWriteSerializer(BaseModelSerializer):
+class BusinessImpactAnalysisWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     class Meta:
         model = BusinessImpactAnalysis
         fields = "__all__"

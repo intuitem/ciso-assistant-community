@@ -55,6 +55,7 @@
 	"estonian": "Észt",
 	"slovak": "Szlovák",
 	"slovenian": "Szlovén",
+	"norwegian": "Norvég",
 	"addThreat": "Fenyegetés hozzáadása",
 	"addVulnerability": "Sérülékenység hozzáadása",
 	"addReferenceControl": "Referenciakontroll hozzáadása",
@@ -1234,6 +1235,8 @@
 	"appliedControlNoStatus": "Az alkalmazott kontrollnak nincs állapota",
 	"taskTemplateNoAssignee": "A feladatnak nincs felelőse",
 	"taskNodeOverdue": "A feladat-előfordulás határideje lejárt",
+	"vulnerabilityOpenWithRemediationDate": "Nyitott sérülékenységnek van javítási dátuma",
+	"vulnerabilityResolvedWithoutRemediationDate": "Megoldott sérülékenységnek nincs javítási dátuma",
 	"evidenceNoFile": "A bizonyítékhoz nincs fájl feltöltve",
 	"requirementAppliedControlHelpText": "A kiválasztott alkalmazott kontrollokhoz kapcsolódó bizonyítékok automatikusan hozzárendelődnek a követelményhez.",
 	"requirementEvidenceHelpText": "Ezen a lapon további bizonyítékokat adhat hozzá a követelményhez.",
@@ -1472,6 +1475,8 @@
 	"templateQuickFormSubmittedDescription": "A felülvizsgálónak küldve, amikor egy űrlapválaszt beküldenek",
 	"templateSecurityExceptionAssignmentName": "Kivétel hozzárendelése",
 	"templateSecurityExceptionAssignmentDescription": "Biztonsági kivétel hozzárendelésekor küldve",
+	"templateVulnerabilityAssignmentName": "Sérülékenység hozzárendelése",
+	"templateVulnerabilityAssignmentDescription": "Sérülékenység hozzárendelésekor küldve",
 	"templateSecurityExceptionExpiringSoonName": "Hamarosan lejáró kivétel",
 	"templateSecurityExceptionExpiringSoonDescription": "Biztonsági kivételek közelgő lejáratakor küldve",
 	"templateSecurityExceptionStatusChangedName": "Kivétel állapota megváltozott",
@@ -1499,6 +1504,7 @@
 	"notificationTitleQuickFormSubmitted": "A(z) „{response_name}” gyors űrlap az Ön felülvizsgálatára vár",
 	"notificationTitleRiskScenarioAssignment": "Önhöz rendelték a(z) „{scenario_name}” kockázati forgatókönyvet",
 	"notificationTitleSecurityExceptionAssignment": "Önhöz rendelték a(z) „{exception_name}” kivételt",
+	"notificationTitleVulnerabilityAssignment": "Önhöz rendelték a(z) „{vulnerability_name}” sérülékenységet",
 	"notificationTitleSecurityExceptionExpiringSoon": "A(z) „{exception_name}” kivétel {days_remaining} nap múlva lejár",
 	"notificationTitleSecurityExceptionStatusChanged": "A(z) „{exception_name}” kivétel új állapota: {new_status}",
 	"notificationTitleTaskNodeDueSoon": "A(z) „{task_name}” feladat {days_remaining} nap múlva esedékes",
@@ -1533,8 +1539,6 @@
 	"docHtmlTemplatesDescription": "A dokumentumok PDF-exportjához használt HTML/CSS-elrendezés testreszabása (címlap, fejlécek, láblécek, arculat). Töltse fel saját sablonját a beépített alapértelmezés felülírásához.",
 	"docHtmlTemplateUploadHelp": "Töltsön fel egy .html fájlt (Django-sablonszintaxis), amely az alapértelmezettel azonos változókat használja. Kiindulásként töltse le előbb az alapértelmezett sablont.",
 	"docHtmlTemplateSyntaxHelp": "A sablonok Django-sablonszintaxist használnak, a megjelenítést a WeasyPrint végzi. A CSS-t <style> elembe ágyazza be, és az alábbi változókkal állítsa össze az elrendezést.",
-	"wordTemplates": "Word-jelentéssablonok",
-	"wordTemplatesDescription": "A jelentéskészítéshez használt Word-jelentéssablonok (.docx) testreszabása. Töltse fel saját sablonjait a beépített alapértelmezések felülírásához.",
 	"invalidFileType": "Érvénytelen fájltípus",
 	"wordTemplatesWarning": "Használat előtt gondosan ellenőrizze a sablon tartalmát, és győződjön meg róla, hogy megfelel a szervezete biztonsági és megfelelőségi szabályzatainak.",
 	"uploadTemplate": "Sablon feltöltése",
@@ -3049,10 +3053,55 @@
 	"replaceWithConfirmTitle": "Csere megerősítése",
 	"changeSeverity": "Súlyosság módosítása",
 	"batchChangeSeverity": "Súlyosság módosítása",
-	"detectedAtHelpText": "A sérülékenység észlelésének időpontja. Alapértelmezés szerint a mai nap. Ez az SLA kiindulópontja, ha a szabály az észlelés dátumára van állítva.",
+	"detectedAtHelpText": "A sérülékenység észlelésének időpontja. Alapértelmezés szerint a mai nap, kivéve, ha az SLA ki van kapcsolva. Ez az SLA kiindulópontja, ha a szabály az észlelés dátumára van állítva.",
+	"remediatedAt": "Javítás dátuma",
+	"remediatedAtHelpText": "Arra a napra áll be, amikor a sérülékenység megoldódik (csökkentve, javítva, nem kihasználható vagy nem érintett), hacsak nem ad meg dátumot. Újranyitáskor megmarad.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Az észlelés óta {count} napja nyitott",
+				"countPlural=other": "Az észlelés óta {count} napja nyitott"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Az észlelés után {count} nappal javítva",
+				"countPlural=other": "Az észlelés után {count} nappal javítva"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Még {count} nap",
+				"countPlural=other": "Még {count} nap"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nap késés",
+				"countPlural=other": "{count} nap késés"
+			}
+		}
+	],
+	"excepted": "Kivétel alatt",
+	"exceptionEnds": "Kivétel vége",
 	"refreshDueDates": "SLA-határidők frissítése",
 	"refreshDueDatesConfirm": "Ez a jelenlegi SLA-szabály alapján újraszámolja az összes határidőt. A meglévő határidők felülíródnak. Folytatja?",
 	"refreshDueDatesFailed": "A határidők frissítése nem sikerült",
+	"vulnerabilitySlaDisabledHint": "A sérülékenységi SLA ki van kapcsolva a funkciókapcsolókban, ezért a határidők nem számítódnak",
 	"changeTreatment": "Kezelés módosítása",
 	"changeAssignee": "Felelős módosítása",
 	"changeResult": "Eredmény módosítása",
@@ -4712,6 +4761,7 @@
 	"assetsDescription": "Üzleti folyamatok és funkciók (elsődleges), alkalmazások vagy technikai komponensek (támogató)",
 	"threatsDescription": "A szervezetet érintő lehetséges fenyegetések",
 	"vulnerabilitiesDescription": "Ismert sérülékenységek és gyengeségek",
+	"vulnerabilitySlaDescription": "A sérülékenységek határidejének kiszámítása a súlyosságuk alapján, és annak megjelenítése, hogy mennyire közel van mindegyik a határidejéhez",
 	"riskScenariosDescription": "Kockázati nyilvántartás a forgatókönyvekkel és kezelésükkel",
 	"referenceControlsDescription": "Tipikus biztonsági kontrollok sablonja",
 	"requirementMappingSetsDescription": "Leképezések különböző keretrendszerek és szabványok között",
@@ -4793,7 +4843,7 @@
 	"legacyEvidenceField": "Régi bizonyítékmező",
 	"pmbok": "PMBOK",
 	"iam": "IAM",
-	"vulnerabilitySlaPolicyHelpText": "Határozza meg súlyosságonként, legfeljebb hány nap alatt kell javítani a sérülékenységet. Ha egy súlyossági szintnél üresen hagyja, ott nem történik automatikus számítás. Beállítás esetén a rendszer a határidőt automatikusan kiszámítja a sérülékenység létrehozásakor vagy a súlyosság változásakor.",
+	"vulnerabilitySlaPolicyHelpText": "Határozza meg súlyosságonként, legfeljebb hány nap alatt kell javítani a sérülékenységet. Ha egy súlyossági szintnél üresen hagyja, ott nem történik automatikus számítás. Beállítás esetén a rendszer a határidőt automatikusan kiszámítja a sérülékenység létrehozásakor vagy a súlyosság változásakor. Az SLA teljes kikapcsolásához kapcsolja ki a Sérülékenységi SLA funkciókapcsolót.",
 	"slaAnchor": "SLA kezdete",
 	"slaAnchorHelpText": "Válassza ki, mikor indul az SLA órája. Észlelés dátuma: amikor a szervezete észlelte a sérülékenységet. Közzététel dátuma: amikor a biztonsági közleményt nyilvánosságra hozták. Ha nincs közzétételi dátum, az észlelés dátuma érvényes.",
 	"slaDaysHelpText": "A javításra rendelkezésre álló napok száma",

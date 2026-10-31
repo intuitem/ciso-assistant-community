@@ -21,6 +21,9 @@ SHEET_PREFIXES = {
     "elementary_actions": "4.0",
     "operational_scenarios": "4.1.1",
     "operating_modes": "4.1.2",
+    "risk_assessment": "5.1",
+    "risk_scenarios": "5.2",
+    "security_measures": "5.3",
 }
 
 
@@ -331,6 +334,25 @@ def extract_operating_modes(workbook) -> list:
     return modes
 
 
+def extract_risk_treatment(workbook) -> dict:
+    """Extract the 5.x sheets as raw records for the risk assessment and applied control imports."""
+
+    def records(key):
+        return [
+            {k: "" if v is None else v for k, v in row.items()}
+            for row in get_sheet_rows(
+                find_sheet_by_prefix(workbook, SHEET_PREFIXES[key])
+            )
+        ]
+
+    risk_assessment = records("risk_assessment")
+    return {
+        "risk_assessment": risk_assessment[0] if risk_assessment else {},
+        "risk_scenarios": records("risk_scenarios"),
+        "security_measures": records("security_measures"),
+    }
+
+
 def process_excel_file(file_content: bytes) -> dict:
     """
     Process an EBIOS RM Excel export file and extract all data.
@@ -351,4 +373,5 @@ def process_excel_file(file_content: bytes) -> dict:
         "elementary_actions": extract_elementary_actions(workbook),
         "operational_scenarios": extract_operational_scenarios(workbook),
         "operating_modes": extract_operating_modes(workbook),
+        **extract_risk_treatment(workbook),
     }

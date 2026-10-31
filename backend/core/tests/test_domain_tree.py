@@ -4,7 +4,7 @@ from datetime import timedelta
 
 import pytest
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from rest_framework.test import APIClient
 
 from core.apps import startup
@@ -439,3 +439,21 @@ class TestDomainTreeEndpoint:
         assert str(framework.id) not in listed()
         audit(framework, domain("E"), "live", {}, status=None)
         assert str(framework.id) in listed()
+
+
+@pytest.mark.django_db
+def test_feed_translates_implementation_group_names(framework):
+    framework.implementation_groups_definition = [
+        {
+            **g,
+            "name": f"Groupe {g['ref_id']}",
+            "translations": {"en": {"name": f"Group {g['ref_id']}"}},
+        }
+        for g in framework.implementation_groups_definition
+    ]
+    framework.save()
+    with translation.override("en"):
+        feed = build_domain_tree(admin(), framework)
+    assert [g["name"] for g in feed["framework"]["implementation_groups"]] == [
+        f"Group {g['ref_id']}" for g in framework.implementation_groups_definition
+    ]

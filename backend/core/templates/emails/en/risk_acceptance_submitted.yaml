@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Risk acceptance '${acceptance_name}' awaits your decision"
+body: |
+  Hello,
+
+  ${actor_name} submitted the following risk acceptance for your approval:
+
+  - Name: ${acceptance_name}
+  - Risk scenarios: ${risk_scenarios}
+  - Expiry date: ${expiry_date}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to accept or reject it: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.
