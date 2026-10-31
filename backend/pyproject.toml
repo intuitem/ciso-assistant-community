@@ -15,7 +15,6 @@ dependencies = [
     "whitenoise>=6.11.0,<7",
     "argon2-cffi>=23.1.0,<26",
     "djangorestframework>=3.16.1,<4",
-    "django-tailwind>=4.4.2,<5",
     "pyyaml>=6.0.3,<7",
     "django-structlog>=10.0.0,<11",
     "structlog>=24.4.0,<27",

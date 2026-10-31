@@ -3,12 +3,12 @@ revision = 5
 requires-python = ">=3.14, <4"
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
-    "python_full_version < '3.15' and sys_platform == 'win32'",
     "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-    "python_full_version < '3.15' and sys_platform == 'emscripten'",
     "python_full_version >= '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version < '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
     "python_full_version >= '3.15' and sys_platform == 'darwin'",
+    "python_full_version < '3.15' and sys_platform == 'win32'",
+    "python_full_version < '3.15' and sys_platform == 'emscripten'",
+    "python_full_version < '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
     "python_full_version < '3.15' and sys_platform == 'darwin'",
 ]
 
@@ -457,7 +457,6 @@ dependencies = [
     { name = "django-rest-knox" },
     { name = "django-storages", extra = ["azure"] },
     { name = "django-structlog" },
-    { name = "django-tailwind" },
     { name = "djangorestframework" },
     { name = "docxtpl" },
     { name = "drf-spectacular" },
@@ -524,7 +523,6 @@ requires-dist = [
     { name = "django-rest-knox", specifier = ">=5.0.2,<6" },
     { name = "django-storages", extras = ["azure"], specifier = ">=1.14.6,<2" },
     { name = "django-structlog", specifier = ">=10.0.0,<11" },
-    { name = "django-tailwind", specifier = ">=4.4.2,<5" },
     { name = "djangorestframework", specifier = ">=3.16.1,<4" },
     { name = "docxtpl", specifier = ">=0.20.2,<0.21" },
     { name = "drf-spectacular", specifier = ">=0.29.0,<0.31" },
@@ -940,19 +938,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d9/62/de532d58736d671b9ac0c0467909a9429758ae579d636e868ce74519566b/django_stubs_ext-6.1.2.tar.gz", hash = "sha256:2142da7fffbbe897ccecf9b4c97e09ea1a2e9291760b0a824b4c402b375ce6f9", size = 7221, upload-time = "2026-10-05T06:46:43.717Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/21/bb/393c3c1e24aaf37d62918ea50f3ea22e30d5f3162fc62f4c3bf3275e5ed3/django_stubs_ext-6.1.2-py3-none-any.whl", hash = "sha256:7334e687ab6dc78a6c3da90ab1ccb0e412efd827ea11de8d3f85adbad948abb1", size = 10850, upload-time = "2026-10-05T06:46:42.647Z" },
-]
-
-[[package]]
-name = "django-tailwind"
-version = "4.6.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-    { name = "pytailwindcss" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/43/4fbef32ce3430b9e87bfe2bc31941b4c536c645b91fb78fdd393ab4d57cd/django_tailwind-4.6.0.tar.gz", hash = "sha256:a8ff8ddf576d840c1af9e3c59a62297b17e897b2665bfc14c4f69e85d1e18527", size = 15687, upload-time = "2026-10-13T11:58:34.784Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/3c/b2a07d31d0374f08d2ac706a89a2a9d0ae18e9c476a20cfc2c5d36b66faa/django_tailwind-4.6.0-py3-none-any.whl", hash = "sha256:b865bac746158dd103ffc3b7855f54f8d75a3147eb59867d8ed0c145fd5f7a34", size = 25397, upload-time = "2026-10-13T11:58:33.332Z" },
 ]
 
 [[package]]
@@ -2470,15 +2455,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pytailwindcss"
-version = "0.4.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fb/2c/044d8fffba8c4cd236766879a8fab6e782b8ecad285399b5b7b6c29e3836/pytailwindcss-0.4.2.tar.gz", hash = "sha256:f069bfe693aba32ffa7097ed642fc53e83db3b229449d6074a67dc900fa9c89f", size = 68086, upload-time = "2026-10-13T15:31:07.633Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6e/a8/73b554fe3fab569b6827d7fba2e0cc9a0fa6ec866263153c0daa77a8417f/pytailwindcss-0.4.2-py3-none-any.whl", hash = "sha256:55cd55394ceb747c90b92e3e2822207cb60b143996e4ccf7753d8127e7fb5246", size = 10771, upload-time = "2026-10-13T15:31:06.453Z" },
-]
-
-[[package]]
 name = "pytest"
 version = "9.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3240,10 +3216,10 @@ version = "2.15.0+cpu"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
-    "python_full_version < '3.15' and sys_platform == 'win32'",
     "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-    "python_full_version < '3.15' and sys_platform == 'emscripten'",
     "python_full_version >= '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version < '3.15' and sys_platform == 'win32'",
+    "python_full_version < '3.15' and sys_platform == 'emscripten'",
     "python_full_version < '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
