@@ -525,14 +525,14 @@ class TestLinkOrderIndependence:
             ("equal", "partially_compliant", "partially_compliant"),
             ("equal", "non_compliant", "non_compliant"),
             ("superset", "compliant", "compliant"),
-            # The source's met part may lie outside the target.
-            ("superset", "partially_compliant", "not_assessed"),
+            # The part shared with the target is taken as representative.
+            ("superset", "partially_compliant", "partially_compliant"),
             ("superset", "non_compliant", "non_compliant"),
             ("subset", "compliant", "partially_compliant"),
             ("subset", "partially_compliant", "partially_compliant"),
             ("subset", "non_compliant", "non_compliant"),
             ("intersect", "compliant", "partially_compliant"),
-            ("intersect", "partially_compliant", "not_assessed"),
+            ("intersect", "partially_compliant", "partially_compliant"),
             ("intersect", "non_compliant", "non_compliant"),
             ("equal", "not_assessed", "not_assessed"),
             ("intersect", "not_assessed", "not_assessed"),
@@ -884,8 +884,8 @@ class TestBestMappingInferences:
 
     def test_multi_hop_targets_of_one_source_keep_their_own_inference(self):
         """At hop 2, B1 fully covers both C1 and C2, and C2 also gets a gap
-        from B2. B1 is partially compliant, which proves nothing about C2, so
-        C2 takes B2's gap. Each target keeps its own result and sources.
+        from B2. B1 is not assessed, which proves nothing about C2, so C2
+        takes B2's gap. Each target keeps its own result and sources.
 
         A1 --equal--> B1 --equal-----> C1
                          --superset--> C2
@@ -952,7 +952,7 @@ class TestBestMappingInferences:
                     "id": f"ra-a{i}-id",
                     "source_framework": {"id": "fw-a-id", "name": "Framework A"},
                 }
-                for i, result in ((1, "partially_compliant"), (2, "non_compliant"))
+                for i, result in ((1, "not_assessed"), (2, "non_compliant"))
             }
         )
 
@@ -964,9 +964,7 @@ class TestBestMappingInferences:
         c1 = inferences["requirement_assessments"]["urn:req:C1"]
         c2 = inferences["requirement_assessments"]["urn:req:C2"]
         assert c1["mapping_inference"] is not c2["mapping_inference"]
-        assert (
-            c1["result"] == c1["mapping_inference"]["result"] == "partially_compliant"
-        )
+        assert c1["result"] == c1["mapping_inference"]["result"] == "not_assessed"
         assert c2["result"] == c2["mapping_inference"]["result"] == "non_compliant"
         assert set(c1["mapping_inference"]["source_requirement_assessments"]) == {
             "urn:req:A1",

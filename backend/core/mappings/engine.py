@@ -15,7 +15,9 @@ import zlib
 # What a mapping link proves about its target, from its relationship (the
 # source compared with the target) and its source's result, reading compliant
 # as all of a requirement met, partially compliant as some of it met and some
-# not, and non-compliant as none of it met. A pair missing here proves nothing.
+# not, and non-compliant as none of it met. Links are approximate: a link
+# carries its source's state to the part it shares with the target, taken as
+# representative of the source. A pair missing here proves nothing.
 # See documentation/architecture/decisions/mapping-inference-proven-facts.md.
 LINK_FACTS: dict[tuple[str, str], frozenset[str]] = {
     ("equal", "compliant"): frozenset({"all_met"}),
@@ -23,12 +25,14 @@ LINK_FACTS: dict[tuple[str, str], frozenset[str]] = {
     ("equal", "non_compliant"): frozenset({"all_unmet"}),
     ("equal", "not_applicable"): frozenset({"not_applicable"}),
     ("superset", "compliant"): frozenset({"all_met"}),
+    ("superset", "partially_compliant"): frozenset({"some_met", "some_unmet"}),
     ("superset", "non_compliant"): frozenset({"all_unmet"}),
     ("superset", "not_applicable"): frozenset({"not_applicable"}),
     ("subset", "compliant"): frozenset({"some_met"}),
     ("subset", "partially_compliant"): frozenset({"some_met", "some_unmet"}),
     ("subset", "non_compliant"): frozenset({"some_unmet"}),
     ("intersect", "compliant"): frozenset({"some_met"}),
+    ("intersect", "partially_compliant"): frozenset({"some_met", "some_unmet"}),
     ("intersect", "non_compliant"): frozenset({"some_unmet"}),
 }
 
