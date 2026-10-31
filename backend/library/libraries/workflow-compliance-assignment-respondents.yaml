@@ -1,0 +1,125 @@
+urn: urn:intuitem:risk:library:workflow-compliance-assignment-respondents
+locale: en
+ref_id: workflow-compliance-assignment-respondents
+name: Assignment actors become respondents
+description: 'When a requirement assignment is created or its actors change on an audit of a chosen
+  framework, add the people behind its actors to the Respondent group of the audit''s domain.
+
+  Set framework_urns to the URNs of the frameworks concerned, comma separated. Left empty, the workflow
+  does nothing. Actors resolve to the user, the team''s leader, deputies and members, or the entity''s
+  representatives that have an account. Nobody is ever removed from the group.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-10-14
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-assignment-respondents:workflow:assignment-respondents
+    schema_version: 1
+    ref_id: assignment-respondents
+    name: Assignment actors become respondents
+    description: Adds the actors of a requirement assignment to the Respondent group of the audit's domain,
+      for audits of the frameworks listed in framework_urns.
+    graph:
+      variables:
+      - key: framework_urns
+        type: string
+        default_value: ''
+      - key: assignment_id
+        type: string
+        default_value: ''
+      - key: found
+        type: boolean
+        default_value: false
+      - key: framework_urn
+        type: string
+        default_value: ''
+      - key: audit_folder
+        type: string
+        default_value: ''
+      - key: users
+        type: json
+        default_value: []
+      nodes:
+      # Actors are set right after creation, so their change is the event to follow.
+      - ref: on_actors
+        type: trigger
+        label: Assignment actors set
+        trigger_config:
+          type: internal_event
+          event_key: requirementassignment.updated
+        input_mapping:
+          assignment_id: object_id
+      - ref: read_assignment
+        type: action
+        label: Read the assignment
+        action_config:
+          type: read_objects
+          model: requirement_assignment
+          mode: first
+          include:
+          - users
+          filters:
+            operator: and
+            conditions:
+            - field: id
+              op: eq
+              value: '{{assignment_id}}'
+        output_mapping:
+          found: found
+          framework_urn: object.framework.urn
+          audit_folder: object.audit_folder
+          users: object.users
+      - ref: check_framework
+        type: condition
+        label: Framework targeted?
+        branches:
+        - name: targeted
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: found
+              op: eq
+              value: true
+            - variable: framework_urn
+              op: in
+              value: '{{framework_urns}}'
+        - name: skipped
+          is_default: true
+      - ref: per_user
+        type: loop
+        label: One user at a time
+        loop_config:
+          collection: '{{users}}'
+          on_item_error: continue
+      - ref: add_respondent
+        type: action
+        label: Add to Respondent group
+        action_config:
+          type: manage_group_membership
+          user: '{{item.id}}'
+          folder: '{{audit_folder}}'
+          builtin_group: BI-UG-ADE
+          operation: add
+      - ref: done
+        type: end
+      edges:
+      - source: on_actors
+        target: read_assignment
+      - source: read_assignment
+        target: check_framework
+      - source: check_framework
+        target: per_user
+        source_branch: targeted
+      - source: check_framework
+        target: done
+        source_branch: skipped
+      - source: per_user
+        target: add_respondent
+        source_port: each
+      - source: add_respondent
+        target: per_user
+      - source: per_user
+        target: done
+        source_port: done
