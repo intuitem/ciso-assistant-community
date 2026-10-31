@@ -21,9 +21,18 @@ export async function generateWorkingPat(page: Page, password: string, name: str
 
 	const token = await modal.locator('input[readonly]').inputValue();
 	expect(token).not.toBe('');
-	const res = await page.request.get(`${BACKEND_API_URL}/iam/current-user/`, {
-		headers: { Authorization: `Token ${token}` }
-	});
+	const headers = { Authorization: `Token ${token}` };
+	const res = await page.request.get(`${BACKEND_API_URL}/iam/current-user/`, { headers });
 	expect(res.status()).toBe(200);
-	return token;
+
+	// Revoke it: users are capped at 5 active PATs, shared across tests and browser projects.
+	const tokens = await (
+		await page.request.get(`${BACKEND_API_URL}/iam/auth-tokens/`, { headers })
+	).json();
+	const digest = tokens.find((t: { name: string }) => t.name === name)?.digest;
+	expect(digest).toBeTruthy();
+	const del = await page.request.delete(`${BACKEND_API_URL}/iam/auth-tokens/${digest}/`, {
+		headers
+	});
+	expect(del.status()).toBe(204);
 }
