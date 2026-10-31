@@ -1,0 +1,560 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:swift-cscf-v2027
+locale: en
+ref_id: swift-cscf-v2027
+name: Swift Customer Security Controls Framework (CSCF) v2027 [10 July 2026] - Outline
+description: 'This document establishes a set of mandatory and advisory security controls
+  for the operating environment of Swift users. Mandatory security controls build
+  on existing guidance and establish a security baseline for the entire user community.
+  Advisory controls are optional best practices that Swift recommends each user to
+  implement in the operating environment. This document must be read in conjunction
+  with the [CSP FAQ](https://www2.swift.com/kb/#/tip/5021823) Knowledge Base article
+  5021823 which provides additional valuable information.
+
+
+  Source: https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2027_20260710.pdf?logDownload=true'
+copyright: SWIFT
+version: 1
+publication_date: 2026-10-29
+provider: SWIFT
+packager: intuitem
+objects:
+  frameworks:
+  - urn: urn:intuitem:risk:framework:swift-cscf-v2027
+    ref_id: swift-cscf-v2027
+    name: Swift Customer Security Controls Framework (CSCF) v2027 [10 July 2026] -
+      Outline
+    description: 'This document establishes a set of mandatory and advisory security
+      controls for the operating environment of Swift users. Mandatory security controls
+      build on existing guidance and establish a security baseline for the entire
+      user community. Advisory controls are optional best practices that Swift recommends
+      each user to implement in the operating environment. This document must be read
+      in conjunction with the [CSP FAQ](https://www2.swift.com/kb/#/tip/5021823) Knowledge
+      Base article 5021823 which provides additional valuable information.
+
+
+      Source: https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2027_20260710.pdf?logDownload=true'
+    implementation_groups_definition:
+    - ref_id: A
+      name: Advisory Controls
+      description: null
+    - ref_id: A1
+      name: Architecture A1
+      description: null
+    - ref_id: A2
+      name: Architecture A2
+      description: null
+    - ref_id: A3
+      name: Architecture A3
+      description: null
+    - ref_id: A4
+      name: Architecture A4
+      description: null
+    - ref_id: B
+      name: Architecture B
+      description: null
+    - ref_id: AB
+      name: Architecture B (Advisory)
+      description: null
+    - ref_id: AA4
+      name: Architecture A4 (Advisory)
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Restrict Internet Access and Protect Critical Systems from General IT
+        Environment
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1
+      ref_id: '1.1'
+      description: Swift Environment Protection
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1
+      ref_id: 1.1.a
+      description: Overall design goals for implementing environment separation
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1
+      ref_id: 1.1.b
+      description: Scope of the secure zone
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1
+      ref_id: 1.1.c
+      description: Protection of the secure zone
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1
+      ref_id: 1.1.d
+      description: Access to the secure zone systems
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.1
+      ref_id: 1.1.e
+      description: Separation from General Enterprise IT Services
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1
+      ref_id: '1.2'
+      description: Operating System Privileged Account Control
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - AB
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1
+      ref_id: '1.3'
+      description: Virtualisation or Cloud Platform Protection
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - AB
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1
+      ref_id: '1.4'
+      description: Restriction of Internet Access
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.4
+      ref_id: 1.4.a
+      description: Internet access from the secure zone
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.4
+      ref_id: 1.4.b
+      description: Internet access from general-purpose operator PCs
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.4
+      ref_id: 1.4.c
+      description: Internet access from other components (middleware servers or the
+        virtualisation platform)
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1
+      ref_id: '1.5'
+      description: Customer Environment Protection
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5
+      ref_id: 1.5.a
+      description: Overall design goals for implementing environment separation
+      implementation_groups:
+      - A4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5
+      ref_id: 1.5.b
+      description: Scope of the secure zone
+      implementation_groups:
+      - A4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5
+      ref_id: 1.5.c
+      description: Protection of the secure zone
+      implementation_groups:
+      - A4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5
+      ref_id: 1.5.d
+      description: Access to the secure zone systems
+      implementation_groups:
+      - A4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1.5
+      ref_id: 1.5.e
+      description: Separation from General Enterprise IT Services
+      implementation_groups:
+      - A4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Reduce Attack Surface and Vulnerabilities
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.1'
+      description: Internal Data Flow Security
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.2'
+      description: Security Updates
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.3'
+      description: System Hardening
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.4'
+      description: Back Office Data Flow Security
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.5a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: 2.5A
+      description: External Transmission Data Protection
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.6'
+      description: Operator Session Confidentiality and Integrity
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.7'
+      description: Vulnerability Scanning
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - AB
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.8'
+      description: Outsourced Critical Activity Protection
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.9'
+      description: Transaction Business Controls
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: '2.10'
+      description: Application Hardening
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2.11a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:2
+      ref_id: 2.11A
+      description: RMA Business Controls
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Physically Secure the Environment
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:3
+      ref_id: '3.1'
+      description: Physical Security
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Prevent Compromise of Credentials
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:4
+      ref_id: '4.1'
+      description: Password Policy
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:4
+      ref_id: '4.2'
+      description: Multi-Factor Authentication
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Manage Identities and Separate Privileges
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5
+      ref_id: '5.1'
+      description: Logical Access Control
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5
+      ref_id: '5.2'
+      description: Token Management
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5.3a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5
+      ref_id: 5.3A
+      description: Staff Screening Process
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5
+      ref_id: '5.4'
+      description: Password Repository Protection
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Detect Anomalous Activity to Systems or Transaction Records
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6
+      ref_id: '6.1'
+      description: Malware Protection
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6
+      ref_id: '6.2'
+      description: Software Integrity
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - AA4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6
+      ref_id: '6.3'
+      description: Database Integrity
+      implementation_groups:
+      - A1
+      - A2
+      - AA4
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6
+      ref_id: '6.4'
+      description: Logging and Monitoring
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6.5a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:6
+      ref_id: 6.5A
+      description: Intrusion Detection
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Plan for Incident Response and Information Sharing
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7
+      ref_id: '7.1'
+      description: Cyber-Incident Response Planning
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7
+      ref_id: '7.2'
+      description: Security Training and Awareness
+      implementation_groups:
+      - A1
+      - A2
+      - A3
+      - A4
+      - B
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7.3a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7
+      ref_id: 7.3A
+      description: Penetration Testing
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7.4a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7
+      ref_id: 7.4A
+      description: Scenario-based Risk Assessment
+      implementation_groups:
+      - A
