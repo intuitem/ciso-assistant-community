@@ -59,7 +59,7 @@ To reach it:
 3. **Edit** the audit and open the **More** dropdown.
 4. The **Field visibility** panel is the second block, with one row per field and one column per role.
 
-For each field, set what you (the auditor) and the third party (the respondent) can do with it: **Edit**, **Read** (see but not change) or **Hidden**. Pick the auditor's column first; the respondent is only offered what fits it (for instance, the respondent can never see a field hidden from you).
+For each field, set what you (the auditor) and the third party (the respondent) can do with it: **Edit**, **Read** (see but not change) or **Hidden**. Pick the auditor's column first; the respondent is only offered what fits it (for instance, the respondent can never see a field hidden from you, and lowering your own access never opens a field further to them).
 
 For a third-party questionnaire you typically want:
 

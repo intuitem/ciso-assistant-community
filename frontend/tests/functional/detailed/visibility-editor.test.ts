@@ -68,6 +68,15 @@ test('CA visibility editor: per-role access round-trips through save/reload', as
 	// Now doc_score's other options unlock.
 	await expect(option('documentation_score', 'auditor', 'edit')).toBeEnabled();
 
+	// Only the respondent fills alignment in: showing it to the auditor opens it to them.
+	await option('respondent_alignment', 'auditor', 'edit').click();
+	await expectChecked('respondent_alignment', 'respondent', 'edit');
+	await expect(option('respondent_alignment', 'respondent', 'read')).toBeDisabled();
+
+	// Lowering the auditor never raises the respondent: status is Edit / Hidden, and
+	// auditor Read would need the respondent on Edit.
+	await expect(option('status', 'auditor', 'read')).toBeDisabled();
+
 	// Hide status from the auditor: the respondent is dragged down with it.
 	await option('status', 'auditor', 'hidden').click();
 	await expectChecked('status', 'auditor', 'hidden');

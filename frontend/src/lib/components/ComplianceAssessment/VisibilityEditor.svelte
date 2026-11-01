@@ -80,8 +80,9 @@
 		}
 	];
 
-	// Reads from `map` so a pending update can see the fields it already changed.
-	function readPair(field: string, map: VisibilityMap | null | undefined = value): Pair {
+	// `map` is explicit: a pending update passes `next` to see the fields it already
+	// changed, everything else passes `value`.
+	function readPair(field: string, map: VisibilityMap | null | undefined): Pair {
 		const raw = (map ?? {})[field] as any;
 		if (raw && typeof raw === 'object') {
 			return {
@@ -121,18 +122,24 @@
 	// so read-only combinations make sense there.
 	const COMPUTABLE_FIELDS = new Set(['score', 'result']);
 
+	// Fields with no read-only mode: the comments panel lets anyone who sees it post,
+	// so Read would not stop that role from writing.
+	const NO_READ_FIELDS = new Set(['comments']);
+
 	// respondent_alignment is only ever populated by the respondent answering the
-	// auto-question: showing it to the auditor while hiding it from the respondent
-	// would leave it empty forever.
+	// auto-question, which is asked only when the respondent can edit it: showing it
+	// to anyone without that would leave it empty forever.
 	function isAlignmentIncoherent(field: string, pair: Pair): boolean {
 		return (
-			field === 'respondent_alignment' && pair.respondent === 'hidden' && pair.auditor !== 'hidden'
+			field === 'respondent_alignment' && pair.auditor !== 'hidden' && pair.respondent !== 'edit'
 		);
 	}
 
 	function isValidPair(field: string, pair: Pair): boolean {
 		// The auditor sees at least what the respondent sees.
 		if (pair.auditor === 'hidden' && pair.respondent !== 'hidden') return false;
+		if (NO_READ_FIELDS.has(field) && (pair.auditor === 'read' || pair.respondent === 'read'))
+			return false;
 		if (isAlignmentIncoherent(field, pair)) return false;
 		if (pair.auditor === 'hidden' && pair.respondent === 'hidden') return true;
 		// A visible field needs a writer, unless its value is computed.
@@ -144,7 +151,7 @@
 		field: string,
 		role: Role,
 		access: RoleAccess,
-		map: VisibilityMap | null | undefined = value
+		map: VisibilityMap | null | undefined
 	): boolean {
 		const parent = PARENT_OF[field];
 		return !parent || ACCESS_RANK[access] <= ACCESS_RANK[readPair(parent, map)[role]];
@@ -154,7 +161,7 @@
 	function respondentOptions(
 		field: string,
 		auditor: RoleAccess,
-		map: VisibilityMap | null | undefined = value
+		map: VisibilityMap | null | undefined
 	): RoleAccess[] {
 		return (['hidden', 'read', 'edit'] as RoleAccess[]).filter(
 			(respondent) =>
@@ -164,13 +171,13 @@
 	}
 
 	// Keep the respondent's access when it still fits, else take the most restrictive one that does.
-	// `maxRespondent` caps what the respondent may end up with (used by cascades).
+	// `maxRespondent` caps what the respondent may end up with.
 	function fitPair(
 		field: string,
 		auditor: RoleAccess,
 		respondent: RoleAccess,
 		map: VisibilityMap,
-		maxRespondent: RoleAccess = 'edit'
+		maxRespondent: RoleAccess
 	): Pair {
 		const options = respondentOptions(field, auditor, map).filter(
 			(option) => ACCESS_RANK[option] <= ACCESS_RANK[maxRespondent]
@@ -180,19 +187,33 @@
 		return { auditor: 'hidden', respondent: 'hidden' };
 	}
 
+	// The most the respondent may end up with when the auditor switches to `auditor`:
+	// lowering the auditor's own access must never raise the respondent's.
+	function respondentCap(current: Pair, auditor: RoleAccess): RoleAccess {
+		return ACCESS_RANK[auditor] < ACCESS_RANK[current.auditor] ? current.respondent : 'edit';
+	}
+
 	function isOptionAllowed(field: string, role: Role, access: RoleAccess): boolean {
+		const current = readPair(field, value);
 		// An auditor choice no respondent access fits would snap the field back to hidden.
-		if (role === 'auditor')
-			return withinParent(field, 'auditor', access) && respondentOptions(field, access).length > 0;
-		return respondentOptions(field, readPair(field).auditor).includes(access);
+		if (role === 'auditor') {
+			const cap = respondentCap(current, access);
+			return (
+				withinParent(field, 'auditor', access, value) &&
+				respondentOptions(field, access, value).some(
+					(option) => ACCESS_RANK[option] <= ACCESS_RANK[cap]
+				)
+			);
+		}
+		return respondentOptions(field, current.auditor, value).includes(access);
 	}
 
 	function setAccess(field: string, role: Role, access: RoleAccess) {
 		const next: VisibilityMap = { ...value };
-		const current = readPair(field);
+		const current = readPair(field, value);
 		const pair =
 			role === 'auditor'
-				? fitPair(field, access, current.respondent, next)
+				? fitPair(field, access, current.respondent, next, respondentCap(current, access))
 				: { ...current, respondent: access };
 		next[field] = pair;
 		// is_scored has no independent meaning — it always tracks score
@@ -222,7 +243,7 @@
 			<span class="text-xs font-semibold text-surface-600-400 text-center">{label()}</span>
 		{/each}
 		{#each visibleFields as field}
-			{@const pair = readPair(field)}
+			{@const pair = readPair(field, value)}
 			{@const label = FIELD_LABELS[field]?.() ?? field}
 			<span class="text-sm text-surface-700-300">{label}</span>
 			{#each ROLES as { role, label: roleLabel }}

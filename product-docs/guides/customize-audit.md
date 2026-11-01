@@ -33,10 +33,14 @@ Pick the auditor's access first: it decides which respondent options are offered
 Options that don't make sense are greyed out:
 
 - The respondent never sees a field hidden from the auditor.
+- Lowering the auditor's access never raises the respondent's. For _Read_ / _Edit_ on a field the respondent can't edit yet, set the respondent to _Edit_ first.
 - A visible field needs someone who can edit it. **Result** and **Score** are the exception, since they can be computed from the answers: _Read_ for both roles is allowed there.
-- **Respondent alignment** is only filled in by the respondent, so it can't be shown to the auditor while hidden from the respondent.
+- **Respondent alignment** is only filled in by the respondent, so whenever it is shown, the respondent has _Edit_.
+- **Comments** have no _Read_ level: a role either takes part in the thread or doesn't see it.
 
-A field set to _Read_ shows as disabled for that role in table mode, on the requirement edit page and in the respondent view. Changes sent anyway through the API are ignored, and a `field_visibility` that breaks the rules above is rejected on save.
+A field set to _Read_ shows as disabled for that role in table mode, on the requirement edit page and in the respondent view. Changes that role sends anyway to the requirement assessment or its answers through the API are ignored.
+
+The panel applies all the rules above. When `field_visibility` is saved through the API instead, only an unknown role or access level, or a field shown to the respondent while hidden from the auditor, is rejected.
 
 ### Fields you can configure
 
@@ -55,7 +59,7 @@ In the order they appear on the panel (mirroring the respondent view). Defaults 
 | **Task templates** | Hidden / Hidden | Tasks linked to this requirement. Off unless the audit opts in. |
 | **Evidences** | Edit / Edit | Files / links proving the requirement. |
 | **Observation** | Edit / Edit | Free-text commentary. |
-| **Comments** | Edit / Edit | Per-row comments. Only visible when the `comments` feature flag is on. |
+| **Comments** | Edit / Edit | Per-row comments. Only visible when the `comments` feature flag is on. No _Read_ level. |
 
 ### Parent / child constraints
 
