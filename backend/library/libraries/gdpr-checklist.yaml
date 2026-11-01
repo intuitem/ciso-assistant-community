@@ -552,8 +552,9 @@ objects:
             engelskspråklige land utenfor EU kan det være enklest å melde til det irske
             datatilsynet (Data Protection Commission). Dere må også uten ugrunnet
             opphold underrette de registrerte om bruddet dersom det er sannsynlig at det
-            vil medføre en høy risiko for dem (art. 34). Underretning er for eksempel
-            ikke påkrevd hvis de stjålne opplysningene er kryptert.
+            vil medføre en høy risiko for dem (art. 34). Underretning er ikke påkrevd
+            hvis opplysningene er gjort uleselige for alle som ikke har autorisert
+            tilgang til dem, for eksempel ved kryptering (art. 34 nr. 3 bokstav a).
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
       assessable: false
       depth: 1

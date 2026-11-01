@@ -730,9 +730,14 @@ def translate_library(lib: dict) -> dict:
     return lib
 
 
+def _identity(item):
+    return (item.get("urn") or item.get("ref_id")) if isinstance(item, dict) else None
+
+
 def keep_other_locales(new, old) -> None:
     """Carry over translations the script does not generate (added to the YAML by
-    hand, like `it`), so rebuilding does not drop them."""
+    hand, like `it`), so rebuilding does not drop them. List items are matched by
+    `urn` or `ref_id`, so an inserted or reordered item keeps its own text."""
     if isinstance(new, dict) and isinstance(old, dict):
         for key, value in new.items():
             if key == "translations" and isinstance(old.get(key), dict):
@@ -740,12 +745,16 @@ def keep_other_locales(new, old) -> None:
             elif key in old:
                 keep_other_locales(value, old[key])
     elif isinstance(new, list) and isinstance(old, list):
-        for n, o in zip(new, old):
-            keep_other_locales(n, o)
+        old_by_id = {_identity(o): o for o in old if _identity(o)}
+        for n in new:
+            if _identity(n) in old_by_id:
+                keep_other_locales(n, old_by_id[_identity(n)])
 
 
 translate_library(library)
-if OUTPUT.exists():
-    keep_other_locales(library, yaml.safe_load(OUTPUT.read_text()))
+# Read the checked-in library, not OUTPUT, so writing to another path keeps them too
+CURRENT = LIBRARIES / "quick-form-dpia.yaml"
+if CURRENT.exists():
+    keep_other_locales(library, yaml.safe_load(CURRENT.read_text()))
 with OUTPUT.open("w") as out:
     yaml.safe_dump(library, out, sort_keys=False, allow_unicode=True, width=100)
