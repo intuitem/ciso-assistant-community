@@ -1528,8 +1528,6 @@
 	"builderUnsavedChangesNavigation": "لديك تعديلات غير محفوظة ستُفقد. هل تريد المغادرة على أي حال؟",
 	"fieldVisibility": "إظهار الحقول",
 	"fieldVisibilityHelpText": "ضابط في الحقول التي يمكن لكل دور رؤيتها وتحريرها.",
-	"visibilityAuditorRespondent": "المدقق + المُجيب",
-	"visibilityAuditorOnly": "المدقق فقط",
 	"visibilityHidden": "مخفي",
 	"answers": "الإجابات",
 	"respondentAlignment": "توافق المُجيب",

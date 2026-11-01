@@ -2354,8 +2354,6 @@
 	"builderUnsavedChangesNavigation": "Kaybolacak kaydedilmemiş değişiklikleriniz var. Yine de çıkılsın mı?",
 	"fieldVisibility": "Alan görünürlüğü",
 	"fieldVisibilityHelpText": "Her rolün hangi alanları görebileceğini ve düzenleyebileceğini kontrol edin.",
-	"visibilityAuditorRespondent": "Denetçi + Yanıtlayan",
-	"visibilityAuditorOnly": "Yalnızca denetçi",
 	"visibilityHidden": "Gizli",
 	"answers": "Yanıtlar",
 	"respondentAlignment": "Yanıtlayan uyumu",

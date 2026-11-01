@@ -574,6 +574,11 @@ class EntityAssessmentWriteSerializer(
     # visibility here instead of opening the audit afterwards.
     field_visibility = serializers.JSONField(required=False)
 
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
+
     def validate(self, attrs):
         # Before super(): custom fields are scoped against attrs["folder"].
         instance = self.instance
