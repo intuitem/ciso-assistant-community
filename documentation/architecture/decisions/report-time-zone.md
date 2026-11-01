@@ -12,24 +12,25 @@ A broader date and time spec is drafted (kinds of time values, machine formats, 
 
 ## Decision
 
-We will add one instance-wide setting, `report_timezone`: an IANA zone, `UTC` by default so existing instances see no change, set in the general settings. It applies to the times printed in frozen outputs: the Typst PDF reports, the findings and incident Markdown exports, the Word audit report, and the `created_at` column of the findings XLSX export. Every instant is printed as `2026-10-23 09:58:11 (UTC+02:00)`, and each output states its zone:
+We will add one instance-wide setting, `report_timezone`: an IANA zone, `UTC` by default, set in the general settings. It applies to the times printed in frozen outputs: the Typst PDF reports, the findings and incident Markdown exports, the Word audit report, the policy document PDF, and the `created_at` column of the findings XLSX export. Every instant is printed as `2026-10-23 09:58:11 (UTC+02:00)`, and each output states its zone:
 
 ```
 Generated at   2026-10-23 09:58:11 (UTC+02:00)
 Time zone      Europe/Paris - each time shows its UTC offset
 ```
 
-On-screen display, the API and the CSV exports are unchanged. Calendar dates (due dates, ETAs) stay dates and are never converted.
+With the default `UTC`, existing instances print the same instants as before, in this new format. On-screen display, the API and the CSV exports are unchanged. Calendar dates (due dates, ETAs) stay dates and are never converted.
 
 ### Implementation choices
 
 - **One formatter.** `format_report_timestamp(value, tz, empty)` in `core/utils.py` prints every instant. The offset is worked out per timestamp with `%:z`, because it changes at clock changes; a zero offset prints `(UTC)`. Zone abbreviations (`%Z`, CEST, CST) are never printed: they are ambiguous.
-- **The zone is passed, not activated.** Each report view reads `get_report_timezone()` once per request and passes `tz=` to the context builders (`_report_time_context`, `gen_audit_context`, the Markdown and XLSX exports). The database, the server process and Django's current zone stay in UTC, so nothing outside reports can change by accident. The builders default to `timezone.utc`, which keeps the previous output for any caller not yet passing a zone.
+- **The zone is passed, not activated.** Each report view reads `get_report_timezone()` once per request and passes `tz=` to the context builders (`_report_time_context`, `gen_audit_context`, the Markdown and XLSX exports). The database, the server process and Django's current zone stay in UTC, so nothing outside reports can change by accident. The builders default to `timezone.utc`, so a caller not yet passing a zone still prints UTC times, in the new format.
 - **A broken setting never breaks an export.** `get_report_timezone()` falls back to UTC when the setting is missing or holds a value `ZoneInfo` cannot load.
 - **Current region names only.** The selector and the validation share one list, read from tzdata's `zone.tab` (current IANA names, one per zone and country) rather than `available_timezones()`, which also holds aliases (`US/Eastern`, `Factory`) and renamed regions (`Europe/Kiev`). Options are labelled `(UTC+02:00) Europe/Paris` and ordered from west to east at the current offset. `tzdata` becomes a direct dependency; it was already in the lock through `pendulum`.
 - **A stored renamed region stays usable.** The settings form sends every key on save, so rejecting a stored `Europe/Kiev` would block saving any other general setting. A stored name is accepted as long as it still loads as a zone, and the choices endpoint adds it to the list so the selector can show it. A stored value that is not a zone is rejected.
 - **Header and footer.** Reports carry the two lines above; the PDF footer reads `date · zone · page`. Labels are translated, values are identical in every language.
 - **Word report.** `{{ date }}` is the local date in the report zone; `{{ generated_at }}` uses the new format, which custom Word templates using it will see.
+- **Policy document PDF.** Its publication and generation dates are local days in the report zone, including the copy stored when a revision is published. It prints dates only, so it states no zone.
 - **Findings XLSX.** `created_at` uses the human format with its offset, as requested in review: the data wizard never reads this column back. The incident XLSX keeps its UTC times.
 - **Historical offsets.** Old timestamps whose zone had an offset in seconds print it as such (`UTC+00:09:21`), as `%:z` gives it.
 
@@ -39,6 +40,7 @@ On-screen display, the API and the CSV exports are unchanged. Calendar dates (du
 - Any new time printed in a frozen output must go through `format_report_timestamp` with the request's zone. Printing an instant with `strftime`, `%Z`, the operating system's zone or a naive `datetime.now()` is forbidden.
 - Calendar dates must never be converted to a zone.
 - Changing the setting affects reports generated afterwards only; a report already generated keeps the zone printed in it.
+- Outputs change even at the default `UTC`: each printed time carries `(UTC)`, the PDF and Markdown outputs gain the zone line, PDF footers show the zone, and the findings XLSX `created_at` gains the `(UTC)` suffix. Scripts reading that column as a plain datetime must be adapted.
 - Custom Word templates using `{{ generated_at }}` now get `… (UTC+02:00)` instead of `… UTC`.
 - Machine formats are not unified yet: the API and CSV keep UTC, the findings XLSX `created_at` is human-formatted, the incident XLSX is UTC.
 - Not covered by this decision and left to the date and time spec: emails, "today" (overdue, due soon), day and month grouping in charts and filters, reading imported times without a zone, scheduled local times, machine format rules (RFC 3339 in UTC, refusing naive input, `(UTC)` column headers, timestamped file names), a "Status as of" line, a marker when a report period crosses a clock change, a UTC column in incident timelines, and a zone per report or per domain.

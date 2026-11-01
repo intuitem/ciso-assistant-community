@@ -1,5 +1,6 @@
 """Integration coverage for SSRF guard wiring in doc_management."""
 
+from datetime import UTC, datetime
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -25,6 +26,7 @@ from doc_management.views import (
     DocumentRevisionViewSet,
     _safe_url_fetcher,
 )
+from global_settings.models import GlobalSettings
 from iam.models import Folder, User
 
 
@@ -363,6 +365,53 @@ class TestPdfApproverRow:
     def test_validated_revision_names_its_approver(self):
         rev = self._revision(DocumentRevision.Status.VALIDATED)
         assert self._reviewer_name(rev) == str(rev.reviewer)
+
+
+@pytest.mark.django_db
+class TestPdfDatesInReportTimezone:
+    """The PDF prints local days in the report time zone: 23:30 UTC on 1 July is
+    already 2 July in Paris."""
+
+    LATE_EVENING_UTC = datetime(2026, 7, 1, 23, 30, tzinfo=UTC)
+
+    def _dates(self, report_timezone):
+        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        settings.value = {**(settings.value or {}), "report_timezone": report_timezone}
+        settings.save()
+        folder = Folder.objects.create(
+            name="PDF-dates", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        rev = s.save().revisions.first()
+        DocumentRevision.objects.filter(pk=rev.pk).update(
+            published_at=self.LATE_EVENING_UTC
+        )
+        rev.refresh_from_db()
+        user = User.objects.create_user(email="pdf-dates@test.com")
+
+        view = DocumentRevisionViewSet()
+        captured = {}
+
+        def capture(revision, context):
+            captured.update(context)
+            return "<html></html>"
+
+        view._resolve_document_html = capture
+        with patch(
+            "doc_management.views.timezone.now", return_value=self.LATE_EVENING_UTC
+        ):
+            view._render_pdf_bytes(rev, user)
+        return captured["published_at"], captured["date"]
+
+    def test_dates_are_local_days_in_the_report_time_zone(self):
+        assert self._dates("Europe/Paris") == ("2026-07-02", "2026-07-02")
+
+    def test_dates_stay_utc_days_by_default(self):
+        assert self._dates("UTC") == ("2026-07-01", "2026-07-01")
 
 
 @pytest.mark.django_db

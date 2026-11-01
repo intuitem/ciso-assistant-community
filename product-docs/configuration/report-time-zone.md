@@ -44,6 +44,7 @@ The offset is worked out for each time, because it changes with daylight saving 
 - The PDF reports: audit report, attestation, action plan, findings report, incident report and risk report.
 - The Markdown exports of incidents and findings assessments.
 - The Word audit report.
+- The publication and generation dates of policy document PDFs.
 - The creation time of each finding in the findings Excel export.
 
 ## What does not change
