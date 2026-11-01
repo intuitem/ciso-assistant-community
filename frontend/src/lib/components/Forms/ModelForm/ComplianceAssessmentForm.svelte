@@ -292,6 +292,7 @@
 		const next = [...(selected ?? [])];
 		for (const levels of staircaseLevels) {
 			const top = Math.max(-1, ...next.map((g) => levels.indexOf(g)));
+			if (top < 1) continue;
 			for (const level of levels.slice(0, top)) if (!next.includes(level)) next.push(level);
 		}
 		const order = implementationGroupsChoices.map((c) => c.value);
@@ -316,8 +317,11 @@
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
 					staircaseLevels = (r['outcomes_definition'] || [])
-						.filter((rule) => rule?.kind === 'staircase' && Array.isArray(rule.levels))
-						.map((rule) => rule.levels.map(String));
+						.filter(
+							(rule: Record<string, any>) =>
+								rule?.kind === 'staircase' && Array.isArray(rule.levels)
+						)
+						.map((rule: Record<string, any>) => rule.levels.map(String));
 					implementationGroupsChoices = implementation_groups.map((group) => ({
 						label: group.name,
 						value: group.ref_id

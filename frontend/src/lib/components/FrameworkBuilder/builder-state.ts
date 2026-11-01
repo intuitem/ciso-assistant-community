@@ -2357,3 +2357,49 @@ export function rulesToGrid(rule: OutcomeRule, scales: Scale[]): string[][] | nu
 	}
 	return fitGrid({ ...rule, grid }, scales);
 }
+
+/** What a staircase rule covers, as core/staircase.py counts it: the sections that get
+ *  a level, and per level the requirements that must pass. */
+export function staircaseCoverage(
+	rule: OutcomeRule,
+	roots: BuilderNode[]
+): { sections: number; counts: number[] } {
+	const levels = ((rule.levels ?? []) as unknown[]).map(String);
+	const units: string[][][] = [];
+	const collect = (bn: BuilderNode, into: string[][]) => {
+		if (bn.node.assessable) into.push((bn.node.implementation_groups ?? []).map(String));
+		bn.children.forEach((c) => collect(c, into));
+	};
+	if (rule.per === 'depth_1') {
+		for (const root of roots) {
+			const tags: string[][] = [];
+			collect(root, tags);
+			units.push(tags);
+		}
+	} else {
+		const tags: string[][] = [];
+		roots.forEach((r) => collect(r, tags));
+		units.push(tags);
+	}
+	const memberOf = (tags: string[], index: number) =>
+		(rule.cumulative ? levels.slice(0, index + 1) : [levels[index]]).some((l) => tags.includes(l));
+	const counts = levels.map((_, i) =>
+		units.reduce((sum, unit) => sum + unit.filter((t) => memberOf(t, i)).length, 0)
+	);
+	const sections = units.filter((unit) =>
+		unit.some((t) => levels.some((_, i) => memberOf(t, i)))
+	).length;
+	return { sections, counts };
+}
+
+export function levelsInGroupOrder(rules: OutcomeRule[], order: string[]): OutcomeRule[] {
+	return rules.map((rule) => {
+		if (rule.kind !== 'staircase') return rule;
+		const levels = ((rule.levels ?? []) as unknown[]).map(String);
+		const sorted = [
+			...order.filter((id) => levels.includes(id)),
+			...levels.filter((id) => !order.includes(id))
+		];
+		return { ...rule, levels: sorted as unknown as OutcomeRule['levels'] };
+	});
+}

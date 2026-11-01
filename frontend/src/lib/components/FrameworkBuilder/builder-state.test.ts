@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, test, expect } from 'vitest';
 import { get } from 'svelte/store';
 import {
 	slugifyFrameworkName,
@@ -14,6 +14,9 @@ import {
 	applyUrnMap,
 	describeSaveError,
 	rebaseExpression,
+	staircaseCoverage,
+	levelsInGroupOrder,
+	type OutcomeRule,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -1536,5 +1539,59 @@ describe('nodePassesIgFilter', () => {
 		expect(nodePassesIgFilter(null, new Set(['A']))).toBe(false);
 		expect(nodePassesIgFilter(undefined, new Set(['A']))).toBe(false);
 		expect(nodePassesIgFilter([], new Set(['A']))).toBe(false);
+	});
+});
+
+describe('staircaseCoverage', () => {
+	const leaf = (groups: string[]) =>
+		({
+			node: { assessable: true, implementation_groups: groups },
+			questions: [],
+			children: [],
+			depth: 2
+		}) as unknown as BuilderNode;
+	const section = (...children: BuilderNode[]) =>
+		({ node: { assessable: false }, questions: [], children, depth: 1 }) as unknown as BuilderNode;
+	const roots = [section(leaf(['1', '2']), leaf(['3'])), section(leaf(['2'])), section()];
+	const rule = {
+		ref_id: 'ml',
+		annotation: '',
+		color: null,
+		expression: '',
+		kind: 'staircase' as const,
+		levels: ['1', '2', '3'] as unknown as OutcomeRule['levels']
+	};
+
+	test('counts per section, listed tags', () => {
+		expect(staircaseCoverage({ ...rule, per: 'depth_1' }, roots)).toEqual({
+			sections: 2,
+			counts: [1, 2, 1]
+		});
+	});
+
+	test('cumulative tags count at higher levels, whole audit is one section', () => {
+		expect(staircaseCoverage({ ...rule, cumulative: true }, roots)).toEqual({
+			sections: 1,
+			counts: [1, 2, 3]
+		});
+	});
+});
+
+describe('levelsInGroupOrder', () => {
+	test('staircase levels follow the group order, unknown ids are kept last', () => {
+		const rules = [
+			{
+				ref_id: 'ml',
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'staircase' as const,
+				levels: ['1', 'x', '2'] as unknown as OutcomeRule['levels']
+			},
+			{ ref_id: 'flag', annotation: '', color: null, expression: 'true' }
+		];
+		const [ml, flag] = levelsInGroupOrder(rules, ['2', '1', '3']);
+		expect(ml.levels).toEqual(['2', '1', 'x']);
+		expect(flag).toBe(rules[1]);
 	});
 });

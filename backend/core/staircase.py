@@ -58,6 +58,10 @@ def staircase_errors(rule, known_groups) -> list[str]:
     ]
     if rule.get("per") not in (None, "depth_1"):
         errors.append("per must be 'depth_1' or left out")
+    if len({str(level) for level in levels}) != len(levels):
+        errors.append("Each level must appear only once")
+    if not isinstance(rule.get("cumulative", False), bool):
+        errors.append("cumulative must be true or false")
     return errors
 
 
@@ -164,11 +168,18 @@ def evaluate_staircases(ca, rules) -> tuple[dict, list]:
             "urn", "parent_urn", "ref_id", "name", "assessable", "implementation_groups"
         )
     )
+    selected = set(ca.selected_implementation_groups or [])
+    in_scope = {
+        n["urn"]
+        for n in nodes
+        if not selected or selected & set(n.get("implementation_groups") or [])
+    }
     ras = {
         urn: (str(pk), result)
         for pk, urn, result in RequirementAssessment.objects.filter(
             compliance_assessment=ca
         ).values_list("id", "requirement__urn", "result")
+        if urn in in_scope
     }
     values, details = {}, []
     for rule in rules:

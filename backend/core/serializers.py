@@ -4082,7 +4082,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
 
     def get_staircases(self, obj):
         from core.staircase import evaluate_staircases
+        from core.utils import get_respondent_scoped_folder_ids
 
+        view = self.context.get("view")
+        request = self.context.get("request")
+        if getattr(view, "action", None) != "retrieve" or request is None:
+            return []
+        if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return []
         return evaluate_staircases(obj, obj.outcome_rules)[1]
 
     scores_definition = serializers.SerializerMethodField()
@@ -4466,7 +4473,11 @@ class ComplianceAssessmentWriteSerializer(
             for ig in assessment.framework.implementation_groups_definition:
                 if ig.get("default_selected", False):
                     default_implementation_groups += [ig["ref_id"]]
-            assessment.selected_implementation_groups = default_implementation_groups
+            from core.staircase import expand_scope
+
+            assessment.selected_implementation_groups = expand_scope(
+                assessment.framework.outcomes_definition, default_implementation_groups
+            )
             assessment.save()
 
         return assessment

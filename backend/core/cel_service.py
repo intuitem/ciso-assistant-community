@@ -846,7 +846,11 @@ def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
     """
     values: dict[str, float] = dict(seed_values or {})
     fired: dict[str, dict] = {}
-    rules = [r for r in rules or [] if r.get("expression") and r.get("ref_id")]
+    rules = [
+        r
+        for r in rules or []
+        if r.get("expression") and r.get("ref_id") and r.get("kind") != "staircase"
+    ]
     base = {
         k: _python_to_cel(v)
         for k, v in context.items()
@@ -1134,7 +1138,7 @@ def _check_rules(rules, probe: dict, check, error, rating_values=()) -> None:
             )
     # Rating outcomes are computed before any rule, from their scales.
     values: dict[str, float] = {name: 1.0 for name in rating_values}
-    rules = [r for r in rules if r.get("kind") != "rating"]
+    rules = [r for r in rules if r.get("kind") not in ("rating", "staircase")]
     for rule in [r for r in rules if is_numeric_rule(r)]:
         ref_id = str(rule.get("ref_id") or "")
         expression = str(rule.get("expression") or "")

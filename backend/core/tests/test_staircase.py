@@ -1,9 +1,23 @@
 from pathlib import Path
 
+import pytest
 import yaml
 
 from core.cel_service import validate_framework_expressions
-from core.staircase import compute_staircase, expand_scope
+from core.models import (
+    ComplianceAssessment,
+    Framework,
+    Perimeter,
+    RequirementAssessment,
+    RequirementNode,
+)
+from core.staircase import (
+    compute_staircase,
+    evaluate_staircases,
+    expand_scope,
+    staircase_errors,
+)
+from iam.models import Folder
 
 RULE = {
     "ref_id": "ml",
@@ -134,3 +148,77 @@ def test_essential_eight_library_rule_validates():
     out = compute_staircase(rule, nodes, in_scope)
     assert len(out["units"]) == 8 and out["level"] == 3
     assert len(in_scope) == 152
+
+
+def test_failed_requirement_with_missing_row_at_same_level():
+    out = run({"a1": "non_compliant", "b1": "compliant"})
+    assert out["units"][0]["levels"] == {
+        "1": "not_met",
+        "2": "out_of_scope",
+        "3": "out_of_scope",
+    }
+
+
+def test_duplicate_levels_and_non_boolean_cumulative_are_rejected():
+    groups = {"1", "2", "3"}
+    assert staircase_errors({**RULE, "levels": ["1", "1"]}, groups)
+    assert staircase_errors({**RULE, "cumulative": "false"}, groups)
+    assert staircase_errors({**RULE, "cumulative": True}, groups) == []
+
+
+def test_yes_no_rule_cannot_read_a_staircase_as_an_outcome():
+    framework = {
+        "implementation_groups_definition": [{"ref_id": g} for g in ("1", "2", "3")],
+        "requirement_nodes": [],
+        "outcomes_definition": [
+            RULE,
+            {"ref_id": "flag", "expression": '"ml" in computed_outcomes'},
+            {"ref_id": "high", "expression": "values.ml >= 2.0"},
+        ],
+    }
+    errors = validate_framework_expressions(framework)
+    assert [e["ref_id"] for e in errors] == ["flag"]
+
+
+@pytest.mark.django_db
+def test_requirements_outside_the_selected_groups_are_out_of_scope():
+    folder = Folder.get_root_folder()
+    framework = Framework.objects.create(
+        name="Staircase", folder=folder, min_score=0, max_score=100
+    )
+    tags = {"s": None, "s1": ["1", "2"], "s2": ["2"], "s3": ["3"]}
+    nodes = {
+        ref: RequirementNode.objects.create(
+            framework=framework,
+            urn=f"urn:intuitem:risk:req_node:sc:{ref}",
+            parent_urn=None if ref == "s" else "urn:intuitem:risk:req_node:sc:s",
+            ref_id=ref,
+            assessable=ref != "s",
+            implementation_groups=groups,
+            folder=folder,
+        )
+        for ref, groups in tags.items()
+    }
+    audit = ComplianceAssessment.objects.create(
+        name="ML1",
+        framework=framework,
+        folder=folder,
+        perimeter=Perimeter.objects.create(name="Staircase", folder=folder),
+        min_score=0,
+        max_score=100,
+        selected_implementation_groups=["1"],
+    )
+    for ref, node in nodes.items():
+        RequirementAssessment.objects.create(
+            compliance_assessment=audit,
+            requirement=node,
+            folder=folder,
+            result="compliant" if ref == "s1" else "not_assessed",
+        )
+    values, details = evaluate_staircases(audit, [RULE])
+    assert values == {"ml": 1.0}
+    assert details[0]["units"][0]["levels"] == {
+        "1": "met",
+        "2": "out_of_scope",
+        "3": "out_of_scope",
+    }

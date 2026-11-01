@@ -17,6 +17,14 @@
 	const unitLabel = $derived(
 		rule.translations?.[getLocale()]?.unit_label || rule.unit_label || m.staircaseSections()
 	);
+	const lowerOutOfScope = $derived(
+		levels.length > 0 &&
+			staircase.units.some(
+				(u: Record<string, any>) =>
+					u.levels[levels[0]] === 'out_of_scope' &&
+					levels.some((l: string) => u.levels[l] !== 'out_of_scope')
+			)
+	);
 	const groupName = (id: string) => groups.find((g) => g.ref_id === id)?.name || id;
 	const levelName = (level: number) =>
 		level === 0 ? (rule.floor_label ?? '0') : groupName(levels[level - 1]);
@@ -66,6 +74,16 @@
 			{/if}
 		</div>
 	</div>
+
+	{#if lowerOutOfScope}
+		<p
+			class="flex items-start gap-2 rounded-lg border border-warning-300-700 bg-warning-50-950 p-3 text-sm text-surface-800-200"
+			data-testid="staircase-lower-out-of-scope"
+		>
+			<i class="fa-solid fa-triangle-exclamation text-warning-600-400 mt-0.5" aria-hidden="true"
+			></i>{m.staircaseLowerOutOfScope()}
+		</p>
+	{/if}
 
 	<div class="overflow-x-auto">
 		<table class="w-full text-sm">

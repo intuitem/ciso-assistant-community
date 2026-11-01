@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { getTranslation, withTranslation, type OutcomeRule } from './builder-state';
+	import {
+		getTranslation,
+		staircaseCoverage,
+		withTranslation,
+		type BuilderNode,
+		type OutcomeRule
+	} from './builder-state';
 	import { m } from '#paraglide/messages.js';
 
 	// One staircase outcome (core/staircase.py): the implementation groups that are its
@@ -8,10 +14,12 @@
 		rule: OutcomeRule;
 		groups: { id: string; label: string }[];
 		activeLanguage?: string | null;
+		/** The framework's tree, to say what each level holds. */
+		nodes?: BuilderNode[];
 		onchange: (rule: OutcomeRule) => void;
 	}
 
-	let { rule, groups, activeLanguage = null, onchange }: Props = $props();
+	let { rule, groups, activeLanguage = null, nodes = [], onchange }: Props = $props();
 
 	const levels = $derived(((rule.levels ?? []) as unknown[]).map(String));
 
@@ -27,25 +35,76 @@
 	function toggleLevel(id: string) {
 		const picked = levels.includes(id) ? levels.filter((l) => l !== id) : [...levels, id];
 		update({
-			levels: groups.map((g) => g.id).filter((g) => picked.includes(g)) as OutcomeRule['levels']
+			levels: groups
+				.map((g) => g.id)
+				.filter((g) => picked.includes(g)) as unknown as OutcomeRule['levels']
 		});
 	}
 
+	const coverage = $derived(staircaseCoverage(rule, nodes));
+	const nameOf = (id: string) => groups.find((g) => g.id === id)?.label ?? id;
+	const tagsOf = (index: number) =>
+		(rule.cumulative ? levels.slice(0, index + 1) : [levels[index]]).map(nameOf).join(', ');
+
 	const TEXTS = [
 		['label', () => m.builderRatingLabel()],
+		['annotation', () => m.description()],
 		['unit_label', () => m.builderStaircaseUnitLabel()],
 		['floor_label', () => m.builderStaircaseFloorLabel()]
 	] as const;
 </script>
 
 <div class="space-y-3 text-sm" data-testid="staircase-rule-editor">
+	{#if levels.length}
+		<div
+			class="rounded-lg border border-primary-200-800 bg-primary-50-950 p-3 space-y-1.5"
+			data-testid="staircase-how"
+		>
+			<p class="text-xs font-semibold text-primary-800-200">{m.builderStaircaseHowTitle()}</p>
+			<p>
+				{rule.per === 'depth_1'
+					? m.builderStaircaseHowPer({
+							count: coverage.sections,
+							unit: rule.unit_label || m.staircaseSections(),
+							max: levels.length
+						})
+					: m.builderStaircaseHowWhole({ max: levels.length })}
+			</p>
+			<ol class="space-y-0.5">
+				<li class="text-surface-700-300">
+					<span class="font-semibold tabular-nums">0</span>
+					{rule.floor_label ? `· ${rule.floor_label}` : ''}: {m.builderStaircaseHowZero()}
+				</li>
+				{#each levels as level, index (level)}
+					<li class="text-surface-700-300">
+						<span class="font-semibold tabular-nums">{index + 1}</span> · {nameOf(level)}:
+						{index === 0
+							? m.builderStaircaseHowFirst({ tags: tagsOf(index) })
+							: m.builderStaircaseHowNext({ tags: tagsOf(index), previous: index })}
+						{#if coverage.counts[index]}
+							<span class="text-xs text-surface-500"
+								>({m.builderStaircaseHowCount({ count: coverage.counts[index] })})</span
+							>
+						{:else}
+							<span class="text-xs text-error-600 dark:text-error-400"
+								>({m.builderStaircaseHowEmpty()})</span
+							>
+						{/if}
+					</li>
+				{/each}
+			</ol>
+			<p class="text-xs text-surface-600-400">{m.builderStaircaseHowPass()}</p>
+			<p class="text-xs text-surface-600-400">{m.builderStaircaseHowTags()}</p>
+		</div>
+	{/if}
+
 	{#each TEXTS as [key, title] (key)}
 		{#if key !== 'unit_label' || rule.per === 'depth_1'}
 			<div class="flex flex-wrap gap-3">
 				<label class="flex flex-col gap-1">
 					<span class="text-xs text-surface-600-400">{title()}</span>
 					<input
-						class="input w-56 text-sm py-1"
+						class="input {key === 'annotation' ? 'w-[28rem] max-w-full' : 'w-56'} text-sm py-1"
 						value={rule[key] ?? ''}
 						data-testid="staircase-{key}"
 						onblur={(e) => update({ [key]: e.currentTarget.value.trim() } as Partial<OutcomeRule>)}
@@ -96,7 +155,6 @@
 				{m.builderStaircaseNoLevels()}
 			</p>
 		{/if}
-		<p class="text-xs text-surface-500 mt-1">{m.builderStaircaseLevelsHint()}</p>
 	</div>
 
 	<label class="flex items-start gap-2">

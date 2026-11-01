@@ -4,6 +4,7 @@
 		ruleIdFromLabel,
 		ruleIdProblem,
 		withTranslation,
+		type BuilderNode,
 		type OutcomeRule,
 		type Scale
 	} from './builder-state';
@@ -30,6 +31,8 @@
 		catalog?: CelCatalog;
 		/** Frameworks: implementation groups a rule can be limited to. */
 		groups?: { id: string; label: string }[];
+		/** Frameworks: the requirement tree, for what a maturity level covers. */
+		nodes?: BuilderNode[];
 		/** Quick forms: the scales a rating can measure. */
 		scales?: Scale[];
 		measured?: string[];
@@ -44,6 +47,7 @@
 		pages = [],
 		catalog = { mode: 'framework', nodes: [], questions: [] },
 		groups = [],
+		nodes = [],
 		scales = [],
 		measured = [],
 		onaddscales = () => {}
@@ -170,8 +174,9 @@
 				expression: '',
 				kind: 'staircase',
 				label: rule.annotation || m.builderRuleKindStaircase(),
-				levels: groups.map((g) => g.id) as OutcomeRule['levels'],
-				per: 'depth_1'
+				levels: groups.map((g) => g.id) as unknown as OutcomeRule['levels'],
+				per: 'depth_1',
+				...(rule.implementation_groups ? { implementation_groups: rule.implementation_groups } : {})
 			};
 		} else {
 			const next: OutcomeRule = {
@@ -402,7 +407,30 @@
 					>
 				</span>
 			{/if}
-			<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+			{#if rule.kind !== 'staircase'}
+				<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+			{/if}
+		</label>
+	{/snippet}
+
+	{#snippet idField(rule: OutcomeRule, index: number)}
+		{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
+		<label class="block">
+			<span class="text-xs text-surface-600-400">{m.frameworkRefId()}</span>
+			<input
+				type="text"
+				value={rule.ref_id}
+				aria-invalid={!!idProblem}
+				data-testid="outcome-rule-id"
+				class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+				onblur={(e) => {
+					rules[index].ref_id = e.currentTarget.value.trim();
+					persist();
+				}}
+			/>
+			{#if idProblem}
+				<span class="text-xs text-error-600 dark:text-error-400">{safeTranslate(idProblem)}</span>
+			{/if}
 		</label>
 	{/snippet}
 
@@ -503,10 +531,12 @@
 				</div>
 			{:else if expandedIndex === index && rule.kind === 'staircase'}
 				<div class="px-3 pb-3 pt-2 border-t border-surface-200-800 space-y-3">
+					{@render idField(rule, index)}
 					{@render kindSelect(rule, index)}
 					<StaircaseRuleEditor
 						{rule}
 						{groups}
+						{nodes}
 						{activeLanguage}
 						onchange={(next) => {
 							rules[index] = next;
@@ -515,28 +545,9 @@
 					/>
 				</div>
 			{:else if expandedIndex === index}
-				{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
 				<div class="px-3 pb-3 pt-1 border-t border-surface-200-800 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
-						<label class="block">
-							<span class="text-xs text-surface-600-400">{m.frameworkRefId()}</span>
-							<input
-								type="text"
-								value={rule.ref_id}
-								aria-invalid={!!idProblem}
-								data-testid="outcome-rule-id"
-								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => {
-									rules[index].ref_id = e.currentTarget.value.trim();
-									persist();
-								}}
-							/>
-							{#if idProblem}
-								<span class="text-xs text-error-600 dark:text-error-400"
-									>{safeTranslate(idProblem)}</span
-								>
-							{/if}
-						</label>
+						{@render idField(rule, index)}
 						<label class="block">
 							<span class="text-xs text-surface-600-400">{m.builderLabel()}</span>
 							<input
