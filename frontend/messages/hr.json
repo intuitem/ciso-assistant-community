@@ -2651,8 +2651,6 @@
 	"createIncident": "Kreiraj incident",
 	"createIncidents": "Kreirajte incidente da bi vidjeli analitiku",
 	"createNewDomain": "Kreiraj novu domenu",
-	"createRemoteObject": "Kreiraj udaljeni objekt",
-	"createRemoteObjectHelpText": "Kad je omogućeno, pripadajući objekt će biti kreiran u sustav treće strane kad se ova stavka kreira.",
 	"createUnderlyingObjects": "Kreiraj temeljne objekte",
 	"createUnderlyingObjectsHelp": "Kad nije označeno, Staza je kreirana kao čista check-lista bez automatskog kreiranja procjena, imovine ili drugih objekata.",
 	"createWebhookEndpoint": "Kreiraj webhook endpoint",
