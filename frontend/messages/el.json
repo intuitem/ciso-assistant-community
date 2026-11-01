@@ -2299,8 +2299,6 @@
 	"builderUnsavedChangesNavigation": "Έχετε μη αποθηκευμένες αλλαγές που θα χαθούν. Έξοδος ούτως ή άλλως;",
 	"fieldVisibility": "Ορατότητα πεδίων",
 	"fieldVisibilityHelpText": "Ελέγξτε ποια πεδία μπορεί να βλέπει και να επεξεργάζεται κάθε ρόλος.",
-	"visibilityAuditorRespondent": "Επιθεωρητής + Ερωτώμενος",
-	"visibilityAuditorOnly": "Μόνο επιθεωρητής",
 	"visibilityHidden": "Κρυφό",
 	"answers": "Απαντήσεις",
 	"respondentAlignment": "Συμφωνία ερωτώμενου",

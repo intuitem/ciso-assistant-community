@@ -3913,6 +3913,24 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'genericcollection',
 				urlModel: 'policies',
 				addExisting: { parentField: 'policies' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'applied-controls',
+				addExisting: {
+					parentField: 'applied_controls',
+					optionsEndpoint: 'applied-controls?exclude_category=policy'
+				}
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'document-containers',
+				addExisting: { parentField: 'document_containers' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'business-impact-analysis',
+				addExisting: { parentField: 'business_impact_analyses' }
 			}
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]

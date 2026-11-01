@@ -3,7 +3,7 @@ import { writable, type Writable } from 'svelte/store';
 import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
 import { m } from '#paraglide/messages.js';
 import { safeTranslate } from '#lib/utils/i18n.js';
-import { resolveComputeResult } from '#lib/utils/helpers.js';
+import { resolveComputeResult, type VisibilityMap } from '#lib/utils/helpers.js';
 
 // --- Types ---
 
@@ -162,9 +162,9 @@ export interface Framework {
 	subject_question_urn?: string | null;
 	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
 	on_accept?: Record<string, unknown>[];
+	field_visibility: VisibilityMap;
 	/** Quick forms: ordered levels questions share (`config.scale`). */
 	scales_definition?: Scale[];
-	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
 	available_languages?: string[];

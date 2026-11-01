@@ -311,6 +311,15 @@ class BaseModelSerializer(serializers.ModelSerializer):
                     }
                 )
 
+    def _viewable_ids(self, model: type[models.Model]) -> models.QuerySet:
+        cache = self.context.setdefault("viewable_ids", {})
+        if model not in cache:
+            request = self.context.get("request")
+            cache[model] = RoleAssignment.get_viewable_object_ids(
+                request.user if request is not None else None, model
+            )
+        return cache[model]
+
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
@@ -369,6 +378,63 @@ class ReferentialSerializer(BaseModelSerializer):
     class Meta:
         model: ReferentialObjectMixin
         exclude = ["translations"]
+
+
+class CollectionMembershipMixin(serializers.Serializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
+    def _resolve_collections(self, collections: list) -> list:
+        request = self.context.get("request")
+        if request is None:
+            return collections
+        current = (
+            set(GenericCollection.containing(self.instance))
+            if isinstance(self.instance, models.Model)
+            else set()
+        )
+        viewable = set(self._viewable_ids(GenericCollection))
+        final = set(collections) | {c for c in current if c.pk not in viewable}
+        if final == current:
+            return list(final)
+        changeable = set(
+            RoleAssignment.get_changeable_object_ids(request.user, GenericCollection)
+        )
+        if {c.pk for c in final ^ current} - changeable:
+            raise PermissionDenied(
+                {
+                    "genericcollection": "You do not have permission to change this genericcollection"
+                }
+            )
+        return list(final)
+
+    def validate(self, data):
+        data = super().validate(data)
+        if "genericcollection" in data:
+            data["genericcollection"] = self._resolve_collections(
+                data["genericcollection"]
+            )
+        return data
+
+    def create(self, validated_data):
+        collections = validated_data.pop("genericcollection", None)
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            if collections is not None:
+                GenericCollection.set_collections_of(instance, collections)
+        return instance
+
+    def update(self, instance, validated_data):
+        collections = validated_data.pop("genericcollection", None)
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if collections is not None:
+                GenericCollection.set_collections_of(instance, collections)
+        return instance
 
 
 class AssignmentNotificationMixin:
@@ -767,18 +833,13 @@ class PerimeterImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class RiskAssessmentWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+class RiskAssessmentWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
     assignment_notifications = {
         "authors": "object_assignment",
         "reviewers": "object_review_assignment",
     }
-
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
 
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
@@ -1789,7 +1850,10 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class AppliedControlWriteSerializer(
-    CommitmentSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+    CollectionMembershipMixin,
+    CommitmentSerializerMixin,
+    CustomFieldsSerializerMixin,
+    BaseModelSerializer,
 ):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
@@ -2412,13 +2476,6 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
-
     class Meta:
         model = Policy
         fields = "__all__"
@@ -3454,6 +3511,11 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
         "implementation_groups_definition",
     )
 
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
+
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if any(field in attrs for field in self.SCORING_DEFAULT_FIELDS):
@@ -3585,7 +3647,9 @@ class EvidenceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class EvidenceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+class EvidenceWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
     assignment_notifications = {"owner": "object_assignment"}
 
     applied_controls = serializers.PrimaryKeyRelatedField(
@@ -3615,12 +3679,6 @@ class EvidenceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
     )
     vulnerabilities = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Vulnerability.objects.all(), required=False
-    )
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
     )
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Actor.objects.all(), required=False
@@ -4131,15 +4189,11 @@ class ScoreRescaleConfirmationRequired(APIException):
         }
 
 
-class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+class ComplianceAssessmentWriteSerializer(
+    CollectionMembershipMixin, BaseModelSerializer
+):
     confirm_rescale = serializers.BooleanField(
         write_only=True, required=False, default=False
-    )
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
     )
     baseline = serializers.PrimaryKeyRelatedField(
         write_only=True,
@@ -4157,6 +4211,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     create_applied_controls_from_suggestions = serializers.BooleanField(
         write_only=True, required=False, default=False
     )
+
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
 
     def validate(self, attrs):
         # Drop implementation groups that don't exist in the framework.
@@ -4772,6 +4831,22 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         many=True, required=False, queryset=Finding.objects.all()
     )
 
+    def _writes_as_assignee(self, field):
+        """Whether an auditor may write `field` as this requirement's assignee: the
+        assignment page shows them the respondent view, so what the respondent may
+        write must work there whatever other role they hold."""
+        from core.utils import is_field_editable_by, is_open_assignee
+
+        if not is_field_editable_by(
+            self.instance.compliance_assessment, field, "respondent"
+        ):
+            return False
+        if not hasattr(self, "_open_assignee"):
+            self._open_assignee = is_open_assignee(
+                self.context["request"].user, self.instance
+            )
+        return self._open_assignee
+
     def to_internal_value(self, data):
         # Strip fields the respondent isn't allowed to write before DRF validates
         # individual field choices — a placeholder value in a disabled select
@@ -4782,6 +4857,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             from core.utils import (
                 get_respondent_scoped_folder_ids,
                 is_field_editable_by,
+                is_field_read_only_for,
             )
 
             ca = self.instance.compliance_assessment
@@ -4795,6 +4871,15 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     k: v
                     for k, v in data.items()
                     if is_field_editable_by(ca, k, "respondent")
+                }
+            else:
+                # Only fields explicitly read-only for the auditor: the defaults hide
+                # some fields from the auditor (e.g. score) and imports still write them.
+                data = {
+                    k: v
+                    for k, v in data.items()
+                    if not is_field_read_only_for(ca, k, "auditor")
+                    or self._writes_as_assignee(k)
                 }
 
         # A relation the submitting role cannot see must not be writable by it: the
@@ -4812,7 +4897,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 if respondent_folders and ca.folder_id in respondent_folders
                 else "auditor"
             )
-            if not is_field_editable_by(ca, "task_templates", role):
+            if not is_field_editable_by(ca, "task_templates", role) and not (
+                role == "auditor" and self._writes_as_assignee("task_templates")
+            ):
                 data = {k: v for k, v in data.items() if k != "task_templates"}
 
         # The reviewer's, unconditionally: not routed through field_visibility so it
@@ -5325,6 +5412,37 @@ class AnswerWriteSerializer(BaseModelSerializer):
                         raise serializers.ValidationError(
                             "Cannot modify: this requirement's assignment has been submitted or closed."
                         )
+
+                # 4. Same field visibility guard as the `answers` key of the requirement
+                # assessment: this route writes the same data.
+                from core.utils import (
+                    is_field_editable_by,
+                    is_field_read_only_for,
+                    is_open_assignee,
+                )
+
+                is_respondent = (
+                    respondent_folders
+                    and requirement_assessment.folder_id in respondent_folders
+                )
+                respondent_may_edit = is_field_editable_by(
+                    compliance_assessment, "answers", "respondent"
+                )
+                if is_respondent:
+                    blocked = not respondent_may_edit
+                else:
+                    # An auditor answering through an open assignment works from the
+                    # respondent view: what the respondent may write works there too.
+                    blocked = is_field_read_only_for(
+                        compliance_assessment, "answers", "auditor"
+                    ) and not (
+                        respondent_may_edit
+                        and is_open_assignee(request.user, requirement_assessment)
+                    )
+                if blocked:
+                    raise serializers.ValidationError(
+                        "Cannot modify: answers are not editable for your role on this audit."
+                    )
 
         if question:
             q_type = question.type
@@ -6058,14 +6176,8 @@ class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
 
 
 class SecurityExceptionWriteSerializer(
-    CustomFieldsSerializerMixin, BaseModelSerializer
+    CollectionMembershipMixin, CustomFieldsSerializerMixin, BaseModelSerializer
 ):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
@@ -6267,19 +6379,12 @@ class SecurityExceptionReadSerializer(
 
 
 class FindingsAssessmentWriteSerializer(
-    AssignmentNotificationMixin, BaseModelSerializer
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
 ):
     assignment_notifications = {
         "authors": "object_assignment",
         "reviewers": "object_review_assignment",
     }
-
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
 
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:

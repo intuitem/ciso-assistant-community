@@ -56,27 +56,38 @@ def _level(entry, ref_id):
         "label": entry["name"],
         "description": entry["description"],
     }
-    fr = (entry.get("translations") or {}).get("fr")
-    if fr:
-        level["translations"] = {
-            "fr": {"label": fr["name"], "description": fr["description"]}
-        }
+    translations = {
+        locale: {"label": t["name"], "description": t["description"]}
+        for locale, t in (entry.get("translations") or {}).items()
+    }
+    if translations:
+        level["translations"] = translations
     return level
 
 
-def _scale(ref_id, label, fr_label, entries):
+def _scale(ref_id, label, labels, entries):
     keys = ["negligible", "limited", "significant", "maximum"]
     return {
         "ref_id": ref_id,
         "label": label,
-        "translations": {"fr": {"label": fr_label}},
+        "translations": {locale: {"label": t} for locale, t in labels.items()},
         "levels": [_level(e, k) for e, k in zip(entries, keys)],
     }
 
 
 SCALES = [
-    _scale("severity", "Severity", "Gravité", _matrix["impact"]),
-    _scale("likelihood", "Likelihood", "Vraisemblance", _matrix["probability"]),
+    _scale(
+        "severity",
+        "Severity",
+        {"fr": "Gravité", "nb": "Alvorlighet"},
+        _matrix["impact"],
+    ),
+    _scale(
+        "likelihood",
+        "Likelihood",
+        {"fr": "Vraisemblance", "nb": "Sannsynlighet"},
+        _matrix["probability"],
+    ),
 ]
 RISK_LEVELS = [
     {**_level(r, SLUG[r["name"]]), "color": r["hexcolor"]} for r in _matrix["risk"]
@@ -417,8 +428,8 @@ library = {
     "risks to data subjects and validation. Accepting a response records it as the "
     "processing's DPIA and adds the measures it picks to the processing.",
     "copyright": "© intuitem",
-    "version": 7,
-    "publication_date": "2026-10-13",
+    "version": 9,
+    "publication_date": "2026-10-29",
     "provider": "intuitem",
     "packager": "intuitem",
     "objects": {
@@ -440,7 +451,10 @@ library = {
                         "ref_id": "privacy_risk",
                         "kind": "rating",
                         "label": "Privacy risk",
-                        "translations": {"fr": {"label": "Risque vie privée"}},
+                        "translations": {
+                            "fr": {"label": "Risque vie privée"},
+                            "nb": {"label": "Personvernrisiko"},
+                        },
                         "dimensions": ["severity", "likelihood"],
                         "levels": RISK_LEVELS,
                         "grid": GRID,
@@ -571,17 +585,134 @@ for _en, _what in (
         "planned measures are implemented."
     ] = _feared_fr(_what)
 
+RECORD_NB = (
+    "Hentet fra behandlingens oppføring. Endre behandlingen for å rette den: "
+    "når skjemaet sendes inn, lagres en kopi av det som ble vurdert."
+)
+
+
+def _feared_nb(what):
+    return (
+        f"Analyser årsakene til og konsekvensene av {what}, og anslå deretter alvorlighet og "
+        "sannsynlighet ut fra tiltakene som er på plass. Anslå dem så på nytt slik de vil være "
+        "når de planlagte tiltakene er gjennomført."
+    )
+
+
+# Norwegian Bokmål, by English text. Terms follow the Norwegian GDPR text
+# (personvernombud, atferdsnormer, tilsynsmyndigheten) and the nb UI glossary.
+NB = {
+    "Data protection impact assessment (DPIA)": "Vurdering av personvernkonsekvenser (DPIA)",
+    "A DPIA following the structure of the CNIL PIA method: context, core principles, "
+    "risks to data subjects and validation. Accepting a response records it as the "
+    "processing's DPIA and adds the measures it picks to the processing.": "En DPIA etter strukturen i CNILs PIA-metode: kontekst, grunnleggende prinsipper, "
+    "risiko for de registrerte og godkjenning. Når et svar godtas, registreres det som "
+    "behandlingens DPIA, og tiltakene som er valgt, legges til behandlingen.",
+    "DPIA": "DPIA",
+    "Data protection impact assessment of a processing.": "Vurdering av personvernkonsekvensene av en behandling.",
+    "Residual risk unacceptable: consult the supervisory authority": "Restrisiko uakseptabel: forhåndsdrøft med tilsynsmyndigheten",
+    "A risk stays unacceptable once the planned measures are in place. Article 36 GDPR "
+    "requires prior consultation of the supervisory authority.": "En risiko er fortsatt uakseptabel når de planlagte tiltakene er på plass. GDPR art. 36 "
+    "krever forhåndsdrøfting med tilsynsmyndigheten.",
+    "Context: overview": "Kontekst: oversikt",
+    "Identify the processing under study. Its purposes, data, parties and measures come from "
+    "its record: the following pages show them for you to assess.\n\n"
+    "Keep the completed response as the record of the assessment: Article 35 GDPR requires it.": "Velg behandlingen som vurderes. Formål, opplysninger, parter og tiltak hentes fra "
+    "behandlingens oppføring: de neste sidene viser dem slik at du kan vurdere dem.\n\n"
+    "Ta vare på det utfylte svaret som dokumentasjon av vurderingen, jf. GDPR art. 35 nr. 7 og "
+    "ansvarsprinsippet i art. 5 nr. 2.",
+    "Processing": "Behandling",
+    "What benefits are expected from the processing, and in what context is it used?": "Hvilke fordeler forventes av behandlingen, og i hvilken sammenheng brukes den?",
+    "Which standards apply to the processing? (approved codes of conduct, certifications…)": "Hvilke normer gjelder for behandlingen? (godkjente atferdsnormer, sertifiseringer …)",
+    "Context: data, processes and supports": "Kontekst: opplysninger, prosesser og støtteverdier",
+    f"The data processed, about whom and for whom. {RECORD}": f"Opplysningene som behandles, om hvem og for hvem. {RECORD_NB}",
+    "Who can access the data, beyond the recipients listed?": "Hvem har tilgang til opplysningene, utover mottakerne som er oppført?",
+    "How does the data lifecycle unfold, from collection to deletion?": "Hvordan er livsløpet til opplysningene, fra innsamling til sletting?",
+    "What else does the data rely on, beyond the assets listed? (people, paper…)": "Hva annet er opplysningene avhengige av, utover verdiene som er oppført? (personer, papir …)",
+    "Core principles: proportionality and necessity": "Grunnleggende prinsipper: forholdsmessighet og nødvendighet",
+    f"Show that the processing complies with the core data protection principles. {RECORD}": f"Vis at behandlingen oppfyller de grunnleggende prinsippene for personvern. {RECORD_NB}",
+    "Are these purposes specified, explicit and legitimate, and does each rest on the right legal basis?": "Er formålene spesifikke, uttrykkelig angitte og berettigede, og har hvert av dem riktig behandlingsgrunnlag?",
+    "Is the data adequate, relevant and limited to what is necessary for the purposes?": "Er opplysningene adekvate, relevante og begrenset til det som er nødvendig for formålene?",
+    "Is the data accurate and kept up to date?": "Er opplysningene korrekte og oppdaterte?",
+    "Why are the retention periods recorded for each kind of data necessary?": "Hvorfor er lagringstidene som er registrert for hver type opplysninger, nødvendige?",
+    "Core principles: measures protecting data subjects' rights": "Grunnleggende prinsipper: tiltak som ivaretar de registrertes rettigheter",
+    f"Show how data subjects can exercise their rights. {RECORD}": f"Vis hvordan de registrerte kan utøve rettighetene sine. {RECORD_NB}",
+    "How are data subjects informed about the processing?": "Hvordan informeres de registrerte om behandlingen?",
+    "If applicable, how is the data subjects' consent obtained?": "Hvis det er aktuelt: Hvordan innhentes samtykke fra de registrerte?",
+    "How can data subjects exercise their rights of access and to data portability?": "Hvordan kan de registrerte utøve retten til innsyn og dataportabilitet?",
+    "How can data subjects exercise their rights to rectification and erasure?": "Hvordan kan de registrerte utøve retten til retting og sletting?",
+    "How can data subjects exercise their rights to restriction and to object?": "Hvordan kan de registrerte utøve retten til begrensning av behandling og retten til å protestere?",
+    "Is a contract setting out their obligations in place with each of these parties?": "Er det inngått en avtale med hver av disse partene som fastsetter pliktene deres?",
+    "Do the safeguards listed protect the data transferred outside the EU adequately?": "Gir garantiene som er oppført, tilstrekkelig vern for opplysninger som overføres ut av EU/EØS?",
+    "Risks: existing or planned measures": "Risiko: eksisterende eller planlagte tiltak",
+    "The measures the processing already has, existing or planned. Each is an applied "
+    "control, so its owner, due date and status are tracked like any other. Measures picked "
+    "in this form join the processing once the DPIA is accepted.": "Tiltakene behandlingen allerede har, eksisterende eller planlagte. Hvert av dem er et "
+    "tiltak i CISO Assistant, så eier, frist og status følges opp som for andre tiltak. Tiltak "
+    "som velges i dette skjemaet, legges til behandlingen når DPIA-en er godtatt.",
+    "Which measures should the processing add?": "Hvilke tiltak bør legges til behandlingen?",
+    "Anything to add about these measures?": "Noe å tilføye om disse tiltakene?",
+    "Risks: illegitimate access to data": "Risiko: uberettiget tilgang til opplysninger",
+    "Risks: unwanted modification of data": "Risiko: uønsket endring av opplysninger",
+    "Risks: disappearance of data": "Risiko: tap av opplysninger",
+    "What would the main impacts on the data subjects be if this happened?": "Hva ville de viktigste konsekvensene for de registrerte være hvis dette skjedde?",
+    "What are the main threats that could make it happen?": "Hvilke trusler kan føre til at det skjer?",
+    "Which risk sources could be behind it (internal or external people, non-human sources)?": "Hvilke risikokilder kan stå bak (interne eller eksterne personer, ikke-menneskelige kilder)?",
+    "Which measures treat this risk?": "Hvilke tiltak håndterer denne risikoen?",
+    "How severe is the risk, given the potential impacts and the measures in place?": "Hvor alvorlig er risikoen, gitt de mulige konsekvensene og tiltakene som er på plass?",
+    "Justify the severity": "Begrunn alvorligheten",
+    "How likely is the risk, given the threats, the risk sources and the measures in place?": "Hvor sannsynlig er risikoen, gitt truslene, risikokildene og tiltakene som er på plass?",
+    "Justify the likelihood": "Begrunn sannsynligheten",
+    "Severity once the planned measures are implemented": "Alvorlighet når de planlagte tiltakene er gjennomført",
+    "Likelihood once the planned measures are implemented": "Sannsynlighet når de planlagte tiltakene er gjennomført",
+    "Risks: by-design risks": "Risiko: utformingsrisiko",
+    "Risks the processing creates for data subjects even when everything works as intended "
+    "(profiling, excessive monitoring, unfair automated decisions…), beyond security incidents.": "Risiko som behandlingen skaper for de registrerte selv når alt fungerer som tiltenkt "
+    "(profilering, overdreven overvåking, urettferdige automatiserte avgjørelser …), utover "
+    "sikkerhetshendelser.",
+    "Which risks does the processing create by design?": "Hvilken risiko skaper behandlingen gjennom selve utformingen?",
+    "Which measures treat them?": "Hvilke tiltak håndterer den?",
+    "Validation": "Godkjenning",
+    "Record the opinions sought and the decision on the processing.": "Registrer uttalelsene som er innhentet, og beslutningen om behandlingen.",
+    "What is the DPO's opinion?": "Hva er personvernombudets uttalelse?",
+    "How was the DPO's advice applied, or why not?": "Hvordan ble personvernombudets råd fulgt, eller hvorfor ble det ikke fulgt?",
+    "What are the views of the data subjects or their representatives?": "Hva mener de registrerte eller deres representanter?",
+    "If their views were not sought, why not?": "Hvis synspunktene deres ikke ble innhentet: Hvorfor ikke?",
+    "Decision": "Beslutning",
+    "Proceed": "Gå videre",
+    "Proceed with conditions": "Gå videre med vilkår",
+    "Consult the supervisory authority": "Forhåndsdrøft med tilsynsmyndigheten",
+    "Abandon": "Ikke gå videre",
+    "Conditions and action plan": "Vilkår og handlingsplan",
+}
+for _en, _what in (
+    ("an illegitimate access to data", "uberettiget tilgang til opplysninger"),
+    ("an unwanted modification of data", "uønsket endring av opplysninger"),
+    ("a disappearance of data", "tap av opplysninger"),
+):
+    NB[
+        f"Analyse the causes and consequences of {_en}, then estimate its severity and likelihood "
+        "given the measures in place. Then estimate them again as they will stand once the "
+        "planned measures are implemented."
+    ] = _feared_nb(_what)
+
+TRANSLATIONS = {"fr": FR, "nb": NB}
+
 
 def _translate(node: dict, fields: dict) -> None:
-    """Add `translations.fr` for `fields` ({key in node: key in translations})."""
-    fr = {}
-    for key, tkey in fields.items():
-        if node.get(key):
-            if node[key] not in FR:
-                raise SystemExit(f"No French for: {node[key]!r}")
-            fr[tkey] = FR[node[key]]
-    if fr:
-        node.setdefault("translations", {}).setdefault("fr", {}).update(fr)
+    """Add `translations.<locale>` for `fields` ({key in node: key in translations}),
+    unless the node already has that locale."""
+    for locale, table in TRANSLATIONS.items():
+        if locale in (node.get("translations") or {}):
+            continue
+        tr = {}
+        for key, tkey in fields.items():
+            if node.get(key):
+                if node[key] not in table:
+                    raise SystemExit(f"No {locale} translation for: {node[key]!r}")
+                tr[tkey] = table[node[key]]
+        if tr:
+            node.setdefault("translations", {})[locale] = tr
 
 
 def translate_library(lib: dict) -> dict:
@@ -589,18 +720,41 @@ def translate_library(lib: dict) -> dict:
     form = lib["objects"]["quick_forms"][0]
     _translate(form, {"name": "name", "description": "description"})
     for outcome in form["outcomes_definition"]:
-        if "fr" not in (outcome.get("translations") or {}):
-            _translate(outcome, {"label": "label", "description": "description"})
+        _translate(outcome, {"label": "label", "description": "description"})
     for p in form["pages"]:
         _translate(p, {"name": "name", "description": "description"})
         for question in p["questions"].values():
             _translate(question, {"text": "text"})
             for choice in question.get("choices") or []:
-                if not choice.get("translations"):
-                    _translate(choice, {"value": "value"})
+                _translate(choice, {"value": "value"})
     return lib
 
 
+def _identity(item):
+    return (item.get("urn") or item.get("ref_id")) if isinstance(item, dict) else None
+
+
+def keep_other_locales(new, old) -> None:
+    """Carry over translations the script does not generate (added to the YAML by
+    hand, like `it`), so rebuilding does not drop them. List items are matched by
+    `urn` or `ref_id`, so an inserted or reordered item keeps its own text."""
+    if isinstance(new, dict) and isinstance(old, dict):
+        for key, value in new.items():
+            if key == "translations" and isinstance(old.get(key), dict):
+                new[key] = dict(sorted({**old[key], **value}.items()))
+            elif key in old:
+                keep_other_locales(value, old[key])
+    elif isinstance(new, list) and isinstance(old, list):
+        old_by_id = {_identity(o): o for o in old if _identity(o)}
+        for n in new:
+            if _identity(n) in old_by_id:
+                keep_other_locales(n, old_by_id[_identity(n)])
+
+
 translate_library(library)
+# Read the checked-in library, not OUTPUT, so writing to another path keeps them too
+CURRENT = LIBRARIES / "quick-form-dpia.yaml"
+if CURRENT.exists():
+    keep_other_locales(library, yaml.safe_load(CURRENT.read_text()))
 with OUTPUT.open("w") as out:
     yaml.safe_dump(library, out, sort_keys=False, allow_unicode=True, width=100)
