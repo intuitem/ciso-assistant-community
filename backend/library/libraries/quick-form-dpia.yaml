@@ -295,7 +295,7 @@ objects:
             it:
               text: Quali benefici si prevedono dal trattamento e in quale contesto viene svolto?
             nb:
-              text: Hvilke fordeler ventes av behandlingen, og i hvilken sammenheng brukes den?
+              text: Hvilke fordeler forventes av behandlingen, og i hvilken sammenheng brukes den?
         urn:intuitem:risk:qf_page:dpia:overview:question:standards:
           type: text
           text: Which standards apply to the processing? (approved codes of conduct, certifications…)
@@ -1144,7 +1144,7 @@ objects:
             it:
               text: Qual è il parere del Responsabile della protezione dei dati (RPD/DPO)?
             nb:
-              text: Hva er personvernombudets råd?
+              text: Hva er personvernombudets uttalelse?
         urn:intuitem:risk:qf_page:dpia:validation:question:dpo_advice_applied:
           type: text
           text: How was the DPO's advice applied, or why not?
@@ -1246,7 +1246,7 @@ objects:
           description: Registrare i pareri acquisiti e la decisione relativa al trattamento.
         nb:
           name: Godkjenning
-          description: Registrer rådene som er innhentet, og beslutningen om behandlingen.
+          description: Registrer uttalelsene som er innhentet, og beslutningen om behandlingen.
     translations:
       fr:
         name: AIPD

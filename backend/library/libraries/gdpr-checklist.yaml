@@ -151,17 +151,18 @@ objects:
           name: Kartlegg hvilke opplysninger dere behandler, og hvem som har tilgang
             til dem.
           description: 'Virksomheter med minst 250 ansatte, eller som utfører behandling
-            som sannsynligvis vil medføre en risiko for de registrerte, som ikke skjer
-            leilighetsvis eller som omfatter særlige kategorier av personopplysninger,
-            må føre en oppdatert og detaljert protokoll over behandlingsaktivitetene
-            sine (art. 30) og gjøre den tilgjengelig for tilsynsmyndigheten på
-            anmodning. Den beste måten å dokumentere etterlevelse av GDPR på er en
-            vurdering av personvernkonsekvenser (art. 35).
+            som sannsynligvis vil medføre en risiko for de registrertes rettigheter og
+            friheter, som ikke skjer leilighetsvis, eller som omfatter særlige
+            kategorier av personopplysninger eller personopplysninger om straffedommer
+            og lovovertredelser, må føre en oppdatert og detaljert protokoll over
+            behandlingsaktivitetene sine (art. 30) og gjøre den tilgjengelig for
+            tilsynsmyndigheten på anmodning. Den beste måten å dokumentere etterlevelse
+            av GDPR på er en vurdering av personvernkonsekvenser (art. 35).
 
-            Virksomheter med færre enn 250 ansatte bør også gjøre en slik
-            kartlegging, fordi den gjør det lettere å oppfylle de andre kravene i GDPR.
-            Oversikten bør inneholde: formålene med behandlingen, hvilke opplysninger
-            dere behandler, hvem i virksomheten som har tilgang til dem, eventuelle
+            Virksomheter med færre enn 250 ansatte bør også gjøre en slik kartlegging,
+            fordi den gjør det lettere å oppfylle de andre kravene i GDPR. Oversikten
+            bør inneholde: formålene med behandlingen, hvilke opplysninger dere
+            behandler, hvem i virksomheten som har tilgang til dem, eventuelle
             tredjeparter som har tilgang (og hvor de holder til), hva dere gjør for å
             beskytte opplysningene (f.eks. kryptering), og når dere planlegger å slette
             dem (hvis mulig).'
@@ -544,15 +545,15 @@ objects:
           description: Ved brudd på personopplysningssikkerheten må dere uten ugrunnet
             opphold, og om mulig senest 72 timer etter at dere fikk kjennskap til
             bruddet, melde det til tilsynsmyndigheten der dere hører hjemme (art. 33 nr.
-            1), med mindre bruddet sannsynligvis ikke vil medføre en risiko for de
-            registrerte. En oversikt over tilsynsmyndighetene i mange av EUs
-            medlemsstater finnes her. GDPR sier ikke hvem dere skal melde til hvis
-            virksomheten ikke er etablert i EU. For virksomheter i engelskspråklige land
-            utenfor EU kan det være enklest å melde til det irske datatilsynet (Data
-            Protection Commission). Dere må også uten ugrunnet opphold underrette de
-            registrerte om bruddet dersom det er sannsynlig at det vil medføre en høy
-            risiko for dem (art. 34). Underretning er for eksempel ikke påkrevd hvis de
-            stjålne opplysningene er kryptert.
+            1), med mindre bruddet sannsynligvis ikke vil medføre en risiko for fysiske
+            personers rettigheter og friheter. En oversikt over tilsynsmyndighetene i
+            mange av EUs medlemsstater finnes her. GDPR sier ikke hvem dere skal melde
+            til hvis virksomheten ikke er etablert i EU. For virksomheter i
+            engelskspråklige land utenfor EU kan det være enklest å melde til det irske
+            datatilsynet (Data Protection Commission). Dere må også uten ugrunnet
+            opphold underrette de registrerte om bruddet dersom det er sannsynlig at det
+            vil medføre en høy risiko for dem (art. 34). Underretning er for eksempel
+            ikke påkrevd hvis de stjålne opplysningene er kryptert.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
       assessable: false
       depth: 1

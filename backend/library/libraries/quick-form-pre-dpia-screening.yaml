@@ -429,7 +429,7 @@ objects:
                 nb:
                   text: Dokumentasjon
                   annotation: En e-post eller en PDF som underbygger beslutningen,
-                    for eksempel personvernombudets råd.
+                    for eksempel personvernombudets uttalelse.
               required: false
               annotation: An email or a PDF that backs the decision, such as the DPO's opinion.
               config:
