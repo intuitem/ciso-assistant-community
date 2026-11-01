@@ -50,9 +50,9 @@ NODES = [
 ]
 
 
-def run(results, rule=RULE):
+def run(results, rule=RULE, scope=None):
     ras = {f"urn:intuitem:risk:req_node:f:{k}": (k, v) for k, v in results.items()}
-    return compute_staircase(rule, NODES, ras)
+    return compute_staircase(rule, NODES, ras, scope)
 
 
 def levels(out):
@@ -222,3 +222,13 @@ def test_requirements_outside_the_selected_groups_are_out_of_scope():
         "2": "out_of_scope",
         "3": "out_of_scope",
     }
+
+
+def test_levels_above_the_audit_target_do_not_count():
+    out = run(ALL_MET, scope={"1"})
+    assert out["units"][0]["levels"] == {
+        "1": "met",
+        "2": "out_of_scope",
+        "3": "out_of_scope",
+    }
+    assert out["level"] == 1

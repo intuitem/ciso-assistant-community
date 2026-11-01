@@ -75,7 +75,7 @@ def _level_status(results: list) -> str:
     return "pending"
 
 
-def compute_staircase(rule: dict, nodes: list[dict], ras: dict) -> dict:
+def compute_staircase(rule: dict, nodes: list[dict], ras: dict, scope=None) -> dict:
     """nodes: the framework's requirement nodes (urn, parent_urn, ref_id, name,
     assessable, implementation_groups); ras: {requirement urn: (ra id, result)}
     for the audit's requirement assessments."""
@@ -116,7 +116,11 @@ def compute_staircase(rule: dict, nodes: list[dict], ras: dict) -> dict:
                 if wanted & {str(g) for g in m.get("implementation_groups") or []}
             ]
             results = [ras.get(m["urn"], (None, None))[1] for m in members]
-            statuses[lv] = _level_status(results)
+            statuses[lv] = (
+                _level_status(results)
+                if scope is None or lv in scope
+                else "out_of_scope"
+            )
             progress[lv] = [sum(r in PASS for r in results), len(results)]
             if climbing and statuses[lv] == "met":
                 level += 1
@@ -183,7 +187,10 @@ def evaluate_staircases(ca, rules) -> tuple[dict, list]:
     }
     values, details = {}, []
     for rule in rules:
-        result = compute_staircase(rule, nodes, ras)
+        levels = [str(level) for level in rule["levels"]]
+        picked = [i for i, level in enumerate(levels) if level in selected]
+        scope = set(levels[: max(picked) + 1] if picked else []) if selected else None
+        result = compute_staircase(rule, nodes, ras, scope)
         values[rule["ref_id"]] = float(result["level"])
         details.append({"ref_id": rule["ref_id"], **result})
     return values, details
