@@ -45,7 +45,7 @@ copyright: "Terms and conditions\n\nThe following terms and conditions govern al
   \ to the Agreement shall be subject to the jurisdiction of the competent courts\
   \ of the Canton of Geneva, the jurisdiction of the Swiss Federal Court being expressly\
   \ reserved."
-version: 2
+version: 3
 publication_date: 2024-03-17
 provider: GDPR.EU
 packager: intuitem
@@ -58,6 +58,9 @@ translations:
       es"
     description: "Liste de contr\xF4le RGPD pour les responsables du traitement des\
       \ donn\xE9es  (https://gdpr.eu/checklist/)"
+  nb:
+    name: GDPR-sjekkliste for behandlingsansvarlige
+    description: GDPR.EU-sjekkliste for behandlingsansvarlige (https://gdpr.eu/checklist/)
 objects:
   framework:
     urn: urn:intuitem:risk:framework:gdpr-checklist
@@ -73,6 +76,9 @@ objects:
           es"
         description: "Liste de contr\xF4le RGPD pour les responsables du traitement\
           \ des donn\xE9es  (https://gdpr.eu/checklist/)"
+      nb:
+        name: GDPR-sjekkliste for behandlingsansvarlige
+        description: GDPR.EU-sjekkliste for behandlingsansvarlige (https://gdpr.eu/checklist/)
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node2
       assessable: false
@@ -84,6 +90,9 @@ objects:
           description: null
         fr:
           name: "Base l\xE9gale et transparence"
+          description: null
+        nb:
+          name: Behandlingsgrunnlag og åpenhet
           description: null
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node3
       assessable: true
@@ -138,6 +147,24 @@ objects:
             \ organisation, les tiers (et o\xF9 ils se trouvent) qui y ont acc\xE8\
             s, ce que vous faites pour prot\xE9ger les donn\xE9es (par exemple, le\
             \ cryptage) et quand vous pr\xE9voyez de les effacer (si possible)."
+        nb:
+          name: Kartlegg hvilke opplysninger dere behandler, og hvem som har tilgang
+            til dem.
+          description: 'Virksomheter med minst 250 ansatte, eller som utfører behandling
+            som sannsynligvis vil medføre en risiko for de registrerte, som ikke skjer
+            leilighetsvis eller som omfatter særlige kategorier av personopplysninger,
+            må føre en oppdatert og detaljert protokoll over behandlingsaktivitetene
+            sine (art. 30) og gjøre den tilgjengelig for tilsynsmyndigheten på
+            anmodning. Den beste måten å dokumentere etterlevelse av GDPR på er en
+            vurdering av personvernkonsekvenser (art. 35).
+
+            Virksomheter med færre enn 250 ansatte bør også gjøre en slik
+            kartlegging, fordi den gjør det lettere å oppfylle de andre kravene i GDPR.
+            Oversikten bør inneholde: formålene med behandlingen, hvilke opplysninger
+            dere behandler, hvem i virksomheten som har tilgang til dem, eventuelle
+            tredjeparter som har tilgang (og hvor de holder til), hva dere gjør for å
+            beskytte opplysningene (f.eks. kryptering), og når dere planlegger å slette
+            dem (hvis mulig).'
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node4
       assessable: true
       depth: 2
@@ -185,6 +212,17 @@ objects:
             galit\xE9 des \xAB int\xE9r\xEAts l\xE9gitimes \xBB, vous devez \xEAtre\
             \ en mesure de d\xE9montrer que vous avez effectu\xE9 une \xE9valuation\
             \ des facteurs relatifs \xE0 la vie priv\xE9e."
+        nb:
+          name: Ha et rettslig grunnlag for behandlingsaktivitetene.
+          description: Behandling av personopplysninger er ulovlig etter GDPR med mindre
+            den har grunnlag i ett av de seks vilkårene i art. 6 nr. 1. Art. 7–11 har
+            flere bestemmelser om barn og særlige kategorier av personopplysninger. Gå
+            gjennom disse bestemmelsene, velg et behandlingsgrunnlag og dokumenter
+            begrunnelsen. Merk at samtykke som behandlingsgrunnlag gir ekstra plikter,
+            blant annet at de registrerte til enhver tid skal kunne trekke samtykket
+            tilbake. Bruker dere «berettigede interesser» som behandlingsgrunnlag, må
+            dere kunne vise at dere har gjort en interesseavveining (art. 6 nr. 1
+            bokstav f).
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node5
       assessable: true
       depth: 2
@@ -224,6 +262,16 @@ objects:
             \ concise, transparente, intelligible et facilement accessible, dans un\
             \ langage clair et simple, notamment pour toute information s\u2019adressant\
             \ sp\xE9cifiquement \xE0 un enfant \xBB."
+        nb:
+          name: Gi tydelig informasjon om behandlingen og behandlingsgrunnlaget i
+            personvernerklæringen.
+          description: Dere må fortelle folk at dere samler inn opplysninger om dem, og
+            hvorfor (art. 12–14). Forklar hvordan opplysningene behandles, hvem som har
+            tilgang til dem, og hvordan dere sikrer dem. Denne informasjonen bør stå i
+            personvernerklæringen og gis til de registrerte når opplysningene samles
+            inn. Den skal gis «på en kortfattet, åpen, forståelig og lett tilgjengelig
+            måte og på et klart og enkelt språk, især når det gjelder informasjon som
+            spesifikt er rettet mot et barn» (art. 12 nr. 1).
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
       assessable: false
       depth: 1
@@ -234,6 +282,9 @@ objects:
           description: null
         fr:
           name: "S\xE9curit\xE9 des donn\xE9es"
+          description: null
+        nb:
+          name: Informasjonssikkerhet
           description: null
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node7
       assessable: true
@@ -287,6 +338,19 @@ objects:
             \ de donn\xE9es personnelles que vous collectez ou \xE0 supprimer les\
             \ donn\xE9es dont vous n\u2019avez plus besoin. Le fait est que vous et\
             \ vos employ\xE9s devez en \xEAtre toujours conscients."
+        nb:
+          name: Ta hensyn til personvern hele tiden, fra dere begynner å utvikle et
+            produkt til hver gang dere behandler opplysninger.
+          description: Dere må følge prinsippene om «innebygd personvern og personvern
+            som standardinnstilling», blant annet ved å gjennomføre «egnede tekniske
+            og organisatoriske tiltak» for å beskytte opplysningene. Personvern er
+            med andre ord noe dere må tenke på hver gang dere gjør noe med andres
+            personopplysninger. Dere må også sørge for at all behandling av personopplysninger
+            følger prinsippene i art. 5. Tekniske tiltak er for eksempel kryptering,
+            og organisatoriske tiltak er for eksempel å begrense hvor mye personopplysninger
+            dere samler inn, eller å slette opplysninger dere ikke lenger trenger.
+            Poenget er at dette er noe dere og de ansatte alltid må være bevisste
+            på.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node8
       assessable: true
       depth: 2
@@ -313,6 +377,14 @@ objects:
             \ en bout int\xE9gr\xE9, notamment les e-mails, la messagerie, les notes\
             \ et le stockage dans le cloud. Le RGPD exige que les organisations utilisent\
             \ le cryptage ou la pseudeonymisation chaque fois que cela est possible."
+        nb:
+          name: Krypter, pseudonymiser eller anonymiser personopplysninger der det
+            er mulig.
+          description: De fleste produktivitetsverktøyene virksomheter bruker, finnes nå
+            med innebygd ende-til-ende-kryptering, blant annet e-post,
+            meldingstjenester, notater og skylagring. GDPR nevner pseudonymisering og
+            kryptering som eksempler på egnede tiltak (art. 32 nr. 1 bokstav a), og
+            virksomheter bør bruke dem der det er hensiktsmessig.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node9
       assessable: true
       depth: 2
@@ -352,6 +424,15 @@ objects:
             \ des appareils et les VPN. Les employ\xE9s qui ont acc\xE8s aux donn\xE9\
             es personnelles et les employ\xE9s non techniques doivent recevoir une\
             \ formation suppl\xE9mentaire sur les exigences du RGPD."
+        nb:
+          name: Lag en intern sikkerhetspolicy for de ansatte, og øk bevisstheten om
+            personvern.
+          description: Selv om den tekniske sikkerheten er god, kan den operative
+            sikkerheten være et svakt ledd. Lag en sikkerhetspolicy som sørger for
+            at de ansatte har kunnskap om informasjonssikkerhet. Den bør gi veiledning
+            om e-postsikkerhet, passord, tofaktorautentisering, kryptering av enheter
+            og VPN. Ansatte som har tilgang til personopplysninger, og ansatte uten
+            teknisk bakgrunn, bør få ekstra opplæring i kravene i GDPR.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node10
       assessable: true
       depth: 2
@@ -398,6 +479,17 @@ objects:
             \ d\u2019entra\xEEner un risque \xE9lev\xE9 pour [leurs] droits et libert\xE9\
             s \xBB. L\u2019ICO recommande de le faire \xE0 tout moment lorsque vous\
             \ \xEAtes sur le point de traiter des donn\xE9es personnelles."
+        nb:
+          name: Vit når dere skal gjennomføre en vurdering av personvernkonsekvenser,
+            og ha en prosess for å gjennomføre den.
+          description: En vurdering av personvernkonsekvenser (DPIA) hjelper dere å
+            forstå hvordan produktet eller tjenesten deres kan sette kundenes
+            opplysninger i fare, og hvordan dere kan redusere den risikoen. Det britiske
+            datatilsynet (ICO) har en sjekkliste for DPIA på nettsidene sine. GDPR
+            krever at virksomheter gjør en slik analyse når de planlegger å bruke
+            personopplysninger på en måte der det er sannsynlig at det «vil medføre en
+            høy risiko for fysiske personers rettigheter og friheter». ICO anbefaler å
+            gjøre det hver gang dere skal behandle personopplysninger.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node11
       assessable: true
       depth: 2
@@ -446,6 +538,21 @@ objects:
             \ personnes concern\xE9es, sauf si la violation n\u2019est pas susceptible\
             \ de les mettre en danger (par exemple, si les donn\xE9es vol\xE9es sont\
             \ crypt\xE9es)."
+        nb:
+          name: Ha en prosess for å melde fra til tilsynsmyndigheten og
+            underrette de registrerte ved brudd på personopplysningssikkerheten.
+          description: Ved brudd på personopplysningssikkerheten må dere uten ugrunnet
+            opphold, og om mulig senest 72 timer etter at dere fikk kjennskap til
+            bruddet, melde det til tilsynsmyndigheten der dere hører hjemme (art. 33 nr.
+            1), med mindre bruddet sannsynligvis ikke vil medføre en risiko for de
+            registrerte. En oversikt over tilsynsmyndighetene i mange av EUs
+            medlemsstater finnes her. GDPR sier ikke hvem dere skal melde til hvis
+            virksomheten ikke er etablert i EU. For virksomheter i engelskspråklige land
+            utenfor EU kan det være enklest å melde til det irske datatilsynet (Data
+            Protection Commission). Dere må også uten ugrunnet opphold underrette de
+            registrerte om bruddet dersom det er sannsynlig at det vil medføre en høy
+            risiko for dem (art. 34). Underretning er for eksempel ikke påkrevd hvis de
+            stjålne opplysningene er kryptert.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
       assessable: false
       depth: 1
@@ -456,6 +563,9 @@ objects:
           description: null
         fr:
           name: Responsabilisation et gouvernance
+          description: null
+        nb:
+          name: Ansvar og styring
           description: null
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node13
       assessable: true
@@ -485,6 +595,12 @@ objects:
             \ la conformit\xE9 au RGPD. Cette personne devrait \xEAtre habilit\xE9\
             e \xE0 \xE9valuer les politiques de protection des donn\xE9es et la mise\
             \ en \u0153uvre de ces politiques."
+        nb:
+          name: Utpek en som har ansvaret for at hele virksomheten etterlever GDPR.
+          description: En annen del av «innebygd personvern og personvern som standardinnstilling»
+            (art. 25) er å sørge for at noen i virksomheten har ansvaret for etterlevelsen
+            av GDPR. Denne personen bør ha myndighet til å vurdere personvernpolicyer
+            og hvordan de gjennomføres.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node14
       assessable: true
       depth: 2
@@ -524,6 +640,16 @@ objects:
             \ en mati\xE8re de conformit\xE9 au RGPD. Vous ne devez faire appel qu\u2019\
             \xE0 des tiers fiables et capables d\u2019apporter des garanties suffisantes\
             \ en mati\xE8re de protection des donn\xE9es."
+        nb:
+          name: Inngå en databehandleravtale med alle databehandlere som
+            behandler personopplysninger på vegne av virksomheten.
+          description: Dette gjelder alle leverandører som behandler personopplysninger
+            om de registrerte på vegne av dere (databehandlere), blant annet
+            analyseverktøy, e-posttjenester og skytjenester. De aller fleste tjenester
+            har en standard databehandleravtale på nettsidene sine som dere kan gå
+            gjennom. Den fastsetter rettighetene og pliktene til hver part for å
+            etterleve GDPR. Bruk bare databehandlere som er pålitelige og gir
+            tilstrekkelige garantier for personvernet (art. 28 nr. 1).
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node15
       assessable: true
       depth: 2
@@ -566,6 +692,17 @@ objects:
             \ qui utilise votre langue. Certaines organisations, comme les organismes\
             \ publics, ne sont pas tenues de d\xE9signer un repr\xE9sentant dans l\u2019\
             UE."
+        nb:
+          name: Hvis virksomheten er etablert utenfor EU/EØS, utpek en representant
+            i en av medlemsstatene.
+          description: Behandler dere opplysninger om personer i én bestemt medlemsstat,
+            må dere utpeke en representant i det landet som kan kommunisere med
+            tilsynsmyndighetene på deres vegne. Berører behandlingen personer i flere
+            medlemsstater, skal representanten være etablert i en av medlemsstatene der
+            de registrerte befinner seg (art. 27 nr. 3); det kan være lurt å velge en
+            medlemsstat som bruker deres språk. Enkelte virksomheter, for eksempel
+            offentlige organer, trenger ikke å utpeke en representant i EU/EØS (art. 27
+            nr. 2).
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node16
       assessable: true
       depth: 2
@@ -600,6 +737,13 @@ objects:
             es, \xE0 donner des conseils sur les analyses d\u2019impact relatives\
             \ \xE0 la protection des donn\xE9es et \xE0 coop\xE9rer avec les r\xE9\
             gulateurs."
+        nb:
+          name: Utpek et personvernombud (hvis nødvendig)
+          description: Virksomheter må ha et personvernombud i tre tilfeller, men
+            det kan være lurt å ha et selv om regelen ikke gjelder for dere. Personvernombudet
+            bør være ekspert på personvern og har som oppgave å overvåke etterlevelsen
+            av GDPR, vurdere personvernrisiko, gi råd om vurderinger av personvernkonsekvenser
+            og samarbeide med tilsynsmyndigheten.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       assessable: false
       depth: 1
@@ -610,6 +754,9 @@ objects:
           description: null
         fr:
           name: "Droits \xE0 la vie priv\xE9e"
+          description: null
+        nb:
+          name: De registrertes rettigheter
           description: null
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
       assessable: true
@@ -650,6 +797,15 @@ objects:
             \ de pouvoir v\xE9rifier l\u2019identit\xE9 de la personne qui demande\
             \ les donn\xE9es. Vous devriez \xEAtre en mesure de donner suite \xE0\
             \ ces demandes dans un d\xE9lai d\u2019un mois."
+        nb:
+          name: Kundene kan enkelt be om og få alle opplysningene dere har om dem.
+          description: Folk har rett til innsyn i hvilke personopplysninger dere har om
+            dem (art. 15), og i hvordan dere bruker dem. De har også rett til å vite
+            hvor lenge dere planlegger å lagre opplysningene, og hvorfor. Den første
+            kopien skal være gratis, men dere kan ta et rimelig gebyr for flere kopier.
+            Sørg for at dere kan bekrefte identiteten til den som ber om opplysningene.
+            Dere må svare på slike forespørsler uten ugrunnet opphold og senest innen én
+            måned (art. 12 nr. 3).
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node19
       assessable: true
       depth: 2
@@ -684,6 +840,15 @@ objects:
             \ v\xE9rifier l\u2019identit\xE9 de la personne qui demande les donn\xE9\
             es. Vous devriez \xEAtre en mesure de donner suite aux demandes au titre\
             \ de l\u2019article 16 dans un d\xE9lai d\u2019un mois."
+        nb:
+          name: Kundene kan enkelt rette eller oppdatere uriktige eller ufullstendige
+            opplysninger.
+          description: Gjør det dere kan for å holde opplysningene oppdatert ved å ha en
+            prosess for datakvalitet, og gjør det enkelt for kundene å se (art. 15) og
+            oppdatere personopplysningene sine slik at de er korrekte og fullstendige.
+            Sørg for at dere kan bekrefte identiteten til den som ber om opplysningene.
+            Dere må svare på forespørsler etter art. 16 uten ugrunnet opphold og senest
+            innen én måned (art. 12 nr. 3).
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node20
       assessable: true
       depth: 2
@@ -715,6 +880,15 @@ objects:
             \ tels que l\u2019exercice de la libert\xE9 d\u2019expression ou le respect\
             \ d\u2019une obligation l\xE9gale. Vous devez \xE9galement tenter de v\xE9\
             rifier l\u2019identit\xE9 de la personne qui fait la demande."
+        nb:
+          name: Kundene kan enkelt be om å få personopplysningene sine slettet.
+          description: Folk har som hovedregel rett til å be dere slette alle
+            personopplysningene dere har om dem, og dere må etterkomme forespørselen
+            uten ugrunnet opphold og senest innen én måned (art. 12 nr. 3). Det finnes
+            fem grunner til å avslå forespørselen (art. 17 nr. 3), for eksempel utøvelse
+            av ytrings- og informasjonsfriheten eller oppfyllelse av en rettslig
+            forpliktelse. Dere må også forsøke å bekrefte identiteten til den som ber om
+            slettingen.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node21
       assessable: true
       depth: 2
@@ -750,6 +924,15 @@ objects:
             \ autoris\xE9 \xE0 continuer \xE0 stocker leurs donn\xE9es. Vous devez\
             \ informer la personne concern\xE9e avant de recommencer \xE0 traiter\
             \ ses donn\xE9es."
+        nb:
+          name: Kundene kan enkelt be dere stanse behandlingen av opplysningene deres.
+          description: De registrerte kan kreve at behandlingen av opplysningene deres
+            begrenses (art. 18) når visse vilkår er oppfylt, hovedsakelig når de
+            bestrider at behandlingen er lovlig eller at opplysningene er riktige. Dere
+            må etterkomme forespørselen uten ugrunnet opphold og senest innen én måned
+            (art. 12 nr. 3). Mens behandlingen er begrenset, kan dere fortsatt lagre
+            opplysningene. Dere må underrette den registrerte før begrensningen av
+            behandlingen oppheves.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node22
       assessable: true
       depth: 2
@@ -787,6 +970,16 @@ objects:
             \ point de vue de la protection de la vie priv\xE9e, l\u2019id\xE9e est\
             \ que ce sont les gens qui sont propri\xE9taires de leurs donn\xE9es,\
             \ pas vous."
+        nb:
+          name: Kundene kan enkelt få en kopi av personopplysningene sine i et format
+            som lett kan overføres til en annen virksomhet.
+          description: Det betyr at dere skal kunne utlevere personopplysningene deres
+            (art. 20) i et strukturert, alminnelig anvendt og maskinlesbart format
+            (f.eks. et regneark), enten til dem selv eller, når det er teknisk mulig,
+            direkte til en annen behandlingsansvarlig de utpeker. Fra et
+            forretningsperspektiv kan det virke urimelig at dere kanskje må gi kundenes
+            opplysninger til en konkurrent. Men fra et personvernperspektiv er tanken at
+            det er folk selv som eier opplysningene sine, ikke dere.
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node23
       assessable: true
       depth: 2
@@ -813,6 +1006,13 @@ objects:
             \ \xE0 cette fin. Sinon, vous pourrez peut-\xEAtre contester leur objection\
             \ si vous pouvez d\xE9montrer l\u2019existence de \xAB motifs l\xE9gitimes\
             \ imp\xE9rieux \xBB."
+        nb:
+          name: Kundene kan enkelt protestere mot at dere behandler opplysningene
+            deres.
+          description: Behandler dere opplysningene deres for direkte markedsføring,
+            må dere straks stanse behandlingen for det formålet (art. 21). Ellers
+            kan dere avvise protesten hvis dere kan påvise «tvingende berettigede
+            grunner».
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node24
       assessable: true
       depth: 2
@@ -850,3 +1050,15 @@ objects:
             gitimes. Vous devez permettre aux gens de demander facilement une intervention\
             \ humaine, de peser sur les d\xE9cisions et de remettre en question les\
             \ d\xE9cisions que vous avez d\xE9j\xE0 prises."
+
+        nb:
+          name: Tar dere avgjørelser om personer basert på automatiserte prosesser,
+            har dere en prosedyre for å ivareta rettighetene deres.
+          description: Noen typer virksomheter bruker automatiserte prosesser (art. 22)
+            til å ta avgjørelser om personer som har rettsvirkning for dem
+            eller «på tilsvarende måte i betydelig grad påvirker» dem.
+            Gjelder det dere, må dere ha en prosedyre som ivaretar
+            rettighetene, frihetene og de berettigede interessene deres. Det
+            må være enkelt for folk å be om menneskelig inngripen, å uttale
+            seg om avgjørelser og å bestride avgjørelser som allerede er
+            tatt.

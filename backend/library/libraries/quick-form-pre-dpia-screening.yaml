@@ -7,8 +7,8 @@ description: >
   WP29/EDPB criteria as CNIL applies them. Two or more criteria met means a
   DPIA is required.
 copyright: © intuitem
-version: 5
-publication_date: 2026-10-28
+version: 6
+publication_date: 2026-10-29
 provider: intuitem
 packager: intuitem
 objects:
@@ -24,6 +24,10 @@ objects:
         it:
           name: Verifica preliminare DPIA
           description: È necessaria una valutazione d'impatto sulla protezione dei dati (DPIA) per questo trattamento?
+        nb:
+          name: Screening før DPIA
+          description: Kreves det en vurdering av personvernkonsekvenser (DPIA) for
+            denne behandlingen?
       description: Is a data protection impact assessment required for this processing?
       ref_id_prefix: PDS
       subject_question_urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:processing
@@ -54,6 +58,10 @@ objects:
             it:
               label: DPIA obbligatoria
               description: 'Sono soddisfatti almeno due criteri: prima di avviare il trattamento è necessario effettuare una DPIA completa.'
+            nb:
+              label: DPIA kreves
+              description: To eller flere kriterier er oppfylt – en full DPIA må gjennomføres
+                før behandlingen starter.
           color: '#dc2626'
           description: Two or more criteria are met — a full DPIA must be carried out before the processing starts.
           expression: 'response.score_sum >= 2 && !("exemption:question:exemption" in answers && answers["exemption:question:exemption"].answered && !("exemption:question:exemption:choice:none" in answers["exemption:question:exemption"].selected_choices))'
@@ -67,6 +75,11 @@ objects:
             it:
               label: DPIA raccomandata
               description: Un solo criterio è soddisfatto. La DPIA non è automaticamente obbligatoria, ma per prudenza la verifica preliminare la indica come necessaria; modificare manualmente l'esito se il RPD/DPO valuta diversamente.
+            nb:
+              label: DPIA anbefales
+              description: Ett kriterium er oppfylt. En DPIA er ikke automatisk påkrevd,
+                men screeningen er føre var og markerer den som påkrevd. Endre utfallet
+                manuelt hvis personvernombudet vurderer det annerledes.
           color: '#ea580c'
           description: One criterion is met. A DPIA is not mandatory, but the screening errs on the safe side and marks it required; set it manually if the DPO decides otherwise.
           expression: 'response.score_sum == 1'
@@ -79,6 +92,10 @@ objects:
             it:
               label: DPIA non necessaria
               description: Nessun criterio è soddisfatto. Conservare questa verifica preliminare a supporto della decisione.
+            nb:
+              label: DPIA kreves ikke
+              description: Ingen kriterier er oppfylt. Ta vare på denne screeningen
+                som begrunnelse.
           color: '#16a34a'
           description: No criterion is met. Record this screening as the justification.
           expression: 'response.complete && response.score_sum == 0'
@@ -92,6 +109,10 @@ objects:
             it:
               label: Esenzione dichiarata — DPIA non necessaria
               description: Sono soddisfatti almeno due criteri, ma si applica un'esenzione. Conservare il relativo riferimento insieme a questa verifica preliminare.
+            nb:
+              label: Unntak påberopt – DPIA kreves ikke
+              description: To eller flere kriterier er oppfylt, men et unntak gjelder.
+                Oppbevar henvisningen til unntaket sammen med denne screeningen.
           description: Two or more criteria are met but an exemption applies. Keep its reference with this screening.
           color: '#7c3aed'
           expression: '"exemption:question:exemption" in answers && answers["exemption:question:exemption"].answered && !("exemption:question:exemption:choice:none" in answers["exemption:question:exemption"].selected_choices)'
@@ -117,6 +138,14 @@ objects:
                 necessaria per un trattamento di dati personali. Conservare il
                 questionario compilato come evidenza della decisione: ai sensi
                 dell'articolo 35, paragrafo 1, del GDPR occorre poterla motivare.
+            nb:
+              name: Identifisering av behandlingen
+              description: |
+                # Screening før DPIA
+
+                Dette korte skjemaet dokumenterer **hvorfor** en DPIA kreves eller ikke kreves for en
+                behandling. Ta vare på det utfylte svaret som dokumentasjon på beslutningen – du må kunne
+                begrunne den, jf. GDPR art. 35 nr. 1 og ansvarsprinsippet i art. 5 nr. 2.
           description: |
             # Pre-DPIA screening
 
@@ -132,6 +161,8 @@ objects:
                   text: Traitement
                 it:
                   text: Trattamento
+                nb:
+                  text: Behandling
               config:
                 model: processing
             urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:
@@ -142,6 +173,8 @@ objects:
                   text: Notre rôle
                 it:
                   text: Ruolo dell'organizzazione
+                nb:
+                  text: Vår rolle
               choices:
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:choice:controller
                   value: Controller
@@ -150,6 +183,8 @@ objects:
                       value: Responsable de traitement
                     it:
                       value: Titolare del trattamento
+                    nb:
+                      value: Behandlingsansvarlig
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:choice:joint
                   value: Joint controller
                   translations:
@@ -157,6 +192,8 @@ objects:
                       value: Responsable conjoint
                     it:
                       value: Contitolare del trattamento
+                    nb:
+                      value: Felles behandlingsansvarlig
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:choice:processor
                   value: Processor
                   translations:
@@ -164,6 +201,8 @@ objects:
                       value: Sous-traitant
                     it:
                       value: Responsabile del trattamento
+                    nb:
+                      value: Databehandler
             urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:
               type: unique_choice
               text: Stage
@@ -171,6 +210,8 @@ objects:
                 fr:
                   text: Étape
                 it:
+                  text: Fase
+                nb:
                   text: Fase
               choices:
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:choice:new
@@ -180,6 +221,8 @@ objects:
                       value: Nouveau traitement
                     it:
                       value: Nuovo trattamento
+                    nb:
+                      value: Ny behandling
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:choice:changed
                   value: Existing processing being changed
                   translations:
@@ -187,6 +230,8 @@ objects:
                       value: Traitement existant en cours de modification
                     it:
                       value: Modifica di un trattamento esistente
+                    nb:
+                      value: Eksisterende behandling som endres
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:choice:review
                   value: Periodic review
                   translations:
@@ -194,6 +239,8 @@ objects:
                       value: Revue périodique
                     it:
                       value: Riesame periodico
+                    nb:
+                      value: Periodisk gjennomgang
             urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:start_date:
               type: date
               text: Planned start date
@@ -202,6 +249,8 @@ objects:
                   text: Date de démarrage prévue
                 it:
                   text: Data prevista di avvio del trattamento
+                nb:
+                  text: Planlagt startdato
               required: false
         - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria
           ref_id: criteria
@@ -221,6 +270,17 @@ objects:
                 delle linee guida del Gruppo di lavoro Articolo 29 (WP248 rev.01),
                 approvate dal Comitato europeo per la protezione dei dati (EDPB) e
                 applicate dalla CNIL.
+            nb:
+              name: Kriteriene fra Artikkel 29-gruppen
+              description: 'Kryss av for hvert kriterium behandlingen oppfyller. **To
+                eller flere betyr at en DPIA
+            
+                kreves.** Dette er de ni kriteriene i retningslinjene fra Artikkel
+                29-gruppen
+            
+                (WP248 rev.01), som EDPB har sluttet seg til og CNIL anvender.
+            
+                '
           description: |
             Tick every criterion the processing meets. **Two or more means a DPIA
             is required.** These are the nine criteria of the WP29 guidelines
@@ -234,6 +294,8 @@ objects:
                   text: Lesquels de ces critères s'appliquent au traitement ?
                 it:
                   text: Quali dei seguenti criteri si applicano al trattamento?
+                nb:
+                  text: Hvilke av disse gjelder for behandlingen?
               choices:
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:evaluation_scoring
                   value: Evaluation or scoring, including profiling and prediction
@@ -242,6 +304,9 @@ objects:
                       value: Évaluation ou notation, y compris le profilage et la prédiction
                     it:
                       value: Valutazione o attribuzione di punteggi, comprese la profilazione e la previsione
+                    nb:
+                      value: Evaluering eller poengsetting, inkludert profilering
+                        og forutsigelser
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:automated_decision
                   value: Automated decision-making with legal or similarly significant effect
@@ -250,6 +315,9 @@ objects:
                       value: Décision automatisée avec effet juridique ou effet similaire significatif
                     it:
                       value: Processo decisionale automatizzato con effetti giuridici o analogamente significativi
+                    nb:
+                      value: Automatiske beslutninger med rettslig eller tilsvarende
+                        betydelig virkning
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:systematic_monitoring
                   value: Systematic monitoring, including of a publicly accessible area
@@ -258,6 +326,9 @@ objects:
                       value: Surveillance systématique, y compris d'une zone accessible au public
                     it:
                       value: Monitoraggio sistematico, anche di aree accessibili al pubblico
+                    nb:
+                      value: Systematisk monitorering, også av offentlig tilgjengelige
+                        områder
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:sensitive_data
                   value: Sensitive data or data of a highly personal nature
@@ -266,6 +337,9 @@ objects:
                       value: Données sensibles ou à caractère hautement personnel
                     it:
                       value: Dati sensibili o di natura altamente personale
+                    nb:
+                      value: Særlige kategorier av personopplysninger eller opplysninger
+                        av svært personlig karakter
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:large_scale
                   value: Data processed on a large scale
@@ -274,6 +348,8 @@ objects:
                       value: Données traitées à grande échelle
                     it:
                       value: Trattamento di dati su larga scala
+                    nb:
+                      value: Personopplysninger som behandles i stor skala
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:matching_datasets
                   value: Matching or combining datasets from different sources
@@ -282,6 +358,9 @@ objects:
                       value: Croisement ou combinaison d'ensembles de données issus de sources différentes
                     it:
                       value: Incrocio o combinazione di insiemi di dati provenienti da fonti diverse
+                    nb:
+                      value: Matching eller sammenstilling av datasett fra ulike
+                        kilder
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:vulnerable_subjects
                   value: Data concerning vulnerable data subjects (children, employees, patients...)
@@ -290,6 +369,9 @@ objects:
                       value: Données concernant des personnes vulnérables (enfants, salariés, patients...)
                     it:
                       value: Dati relativi a interessati vulnerabili (minori, dipendenti, pazienti...)
+                    nb:
+                      value: Personopplysninger om sårbare registrerte (barn, ansatte,
+                        pasienter …)
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:innovative_technology
                   value: Innovative use or new technological or organisational solutions
@@ -298,6 +380,9 @@ objects:
                       value: Usage innovant ou application de nouvelles solutions technologiques ou organisationnelles
                     it:
                       value: Utilizzo innovativo o applicazione di nuove soluzioni tecnologiche od organizzative
+                    nb:
+                      value: Innovativ bruk eller anvendelse av nye teknologiske eller
+                        organisatoriske løsninger
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:prevents_rights
                   value: Processing that prevents data subjects from exercising a right or using a service
@@ -306,6 +391,9 @@ objects:
                       value: Traitement qui empêche les personnes d'exercer un droit ou de bénéficier d'un service
                     it:
                       value: Trattamento che impedisce agli interessati di esercitare un diritto o di accedere a un servizio
+                    nb:
+                      value: Behandling som hindrer de registrerte i å utøve en
+                        rettighet eller gjøre bruk av en tjeneste eller en avtale
                   add_score: 1
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:none
                   value: None of these criteria applies
@@ -314,6 +402,8 @@ objects:
                       value: Aucun de ces critères ne s'applique
                     it:
                       value: Nessuno dei criteri indicati è applicabile
+                    nb:
+                      value: Ingen av disse kriteriene gjelder
                   add_score: 0
             urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:evidence:
               type: text
@@ -323,6 +413,8 @@ objects:
                   text: Justifiez brièvement les critères cochés
                 it:
                   text: Motivare brevemente i criteri selezionati
+                nb:
+                  text: Begrunn kort kriteriene du krysset av for
               required: false
             urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:supporting_document:
               type: file
@@ -334,6 +426,10 @@ objects:
                 it:
                   text: Documento a supporto
                   annotation: Un messaggio di posta elettronica o un PDF a supporto della decisione, ad esempio il parere del RPD/DPO.
+                nb:
+                  text: Dokumentasjon
+                  annotation: En e-post eller en PDF som underbygger beslutningen,
+                    for eksempel personvernombudets råd.
               required: false
               annotation: An email or a PDF that backs the decision, such as the DPO's opinion.
               config:
@@ -353,6 +449,12 @@ objects:
                 La DPIA risulta necessaria. Prima di procedere, verificare se il trattamento
                 rientra nell'elenco della CNIL delle tipologie di trattamenti **esonerati**
                 dall'obbligo di DPIA.
+            nb:
+              name: Unntak
+              description: |
+                Det ser ut til at en DPIA kreves. Før du går videre, sjekk om behandlingen står på en
+                liste fra tilsynsmyndigheten over behandlinger som er **unntatt** fra DPIA (art. 35 nr. 5,
+                for eksempel CNILs liste).
           visibility_expression: 'response.score_sum >= 2'
           description: |
             A DPIA looks required. Before proceeding, check whether the processing
@@ -366,6 +468,8 @@ objects:
                   text: Une exemption s'applique-t-elle ?
                 it:
                   text: Si applica un'esenzione?
+                nb:
+                  text: Gjelder et unntak?
               choices:
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:none
                   value: No exemption applies
@@ -374,6 +478,8 @@ objects:
                       value: Aucune exemption ne s'applique
                     it:
                       value: Non si applica alcuna esenzione
+                    nb:
+                      value: Ingen unntak gjelder
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:legal
                   value: Processing has a legal basis with a DPIA already carried out by the legislator
                   translations:
@@ -381,6 +487,10 @@ objects:
                       value: Le traitement repose sur une base légale pour laquelle le législateur a déjà mené une AIPD
                     it:
                       value: Il trattamento si fonda su una base giuridica per la quale il legislatore ha già effettuato una DPIA
+                    nb:
+                      value: Behandlingen har grunnlag i art. 6 nr. 1 bokstav c eller e,
+                        og en DPIA ble gjort da rettsgrunnlaget ble vedtatt (art. 35 nr.
+                        10)
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:list
                   value: Processing appears on the supervisory authority's exemption list
                   translations:
@@ -388,6 +498,8 @@ objects:
                       value: Le traitement figure sur la liste d'exemptions de l'autorité de contrôle
                     it:
                       value: Il trattamento figura nell'elenco delle esenzioni pubblicato dall'autorità di controllo
+                    nb:
+                      value: Behandlingen står på tilsynsmyndighetens unntaksliste
                 - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:prior
                   value: An equivalent DPIA already covers this processing
                   translations:
@@ -395,6 +507,8 @@ objects:
                       value: Une AIPD équivalente couvre déjà ce traitement
                     it:
                       value: Il trattamento è già coperto da una DPIA equivalente
+                    nb:
+                      value: En tilsvarende DPIA dekker allerede denne behandlingen
             urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:reference:
               type: text
               text: Reference of the exemption or of the existing DPIA
@@ -403,6 +517,8 @@ objects:
                   text: Référence de l'exemption ou de l'AIPD existante
                 it:
                   text: Riferimento dell'esenzione o della DPIA già effettuata
+                nb:
+                  text: Henvisning til unntaket eller til den eksisterende DPIA-en
               required: false
 translations:
   fr:
@@ -417,3 +533,9 @@ translations:
       Gruppo di lavoro Articolo 29 (WP29) / Comitato europeo per la protezione
       dei dati (EDPB) applicati dalla CNIL. Se sono soddisfatti almeno due
       criteri, è necessaria una DPIA.
+
+  nb:
+    name: Screening før DPIA
+    description: Avgjør om en behandling trenger en full DPIA, ut fra de ni kriteriene
+      fra Artikkel 29-gruppen/EDPB slik CNIL anvender dem. Er to eller flere kriterier
+      oppfylt, kreves en DPIA.
