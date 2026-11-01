@@ -2791,7 +2791,7 @@
 	"vulnerabilityOpenWithRemediationDate": "Açık zafiyetin giderme tarihi var",
 	"vulnerabilityResolvedWithoutRemediationDate": "Çözülmüş zafiyetin giderme tarihi yok",
 	"reportTimezone": "Rapor saat dilimi",
-	"reportTimezoneHelpText": "Raporlarda ve dışa aktarımlarda yazılan saatler için kullanılan bölge. Her saat, UTC'ye göre farkını gösterir. Ekrandaki saatler etkilenmez."
+	"reportTimezoneHelpText": "Raporlarda ve dışa aktarımlarda yazılan saatler için kullanılan bölge. Her saat, UTC'ye göre farkını gösterir. Ekrandaki saatler etkilenmez.",
 	"chinese": "Çince (Basitleştirilmiş)",
 	"lithuanian": "Litvanca",
 	"defaultRoleMustContainOnlyViewPermissions": "Varsayılan rol yalnızca görüntüleme izinleri içerebilir.",
