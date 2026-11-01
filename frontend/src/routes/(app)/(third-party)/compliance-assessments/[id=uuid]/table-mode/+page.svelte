@@ -43,6 +43,7 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
 	import { onMount, tick } from 'svelte';
@@ -1367,69 +1368,9 @@
 															</div>
 														{/if}
 														{#if requirementAssessment.mapping_inference?.result}
-															<div class="my-2">
-																<p class="font-medium">
-																	<i class="fa-solid fa-link"></i>
-																	{m.mappingInference()}
-																</p>
-																<span class="text-xs text-surface-500"
-																	><i class="fa-solid fa-circle-info"></i>
-																	{m.mappingInferenceHelpText()}</span
-																>
-																<ul class="list-disc ml-4">
-																	<li>
-																		<p>
-																			<a
-																				class="anchor"
-																				href="/requirement-assessments/{requirementAssessment
-																					.mapping_inference.source_requirement_assessment.id}"
-																			>
-																				{requirementAssessment.mapping_inference
-																					.source_requirement_assessment.str}
-																			</a>
-																		</p>
-																		<p class="whitespace-pre-line py-1">
-																			<span class="italic">{m.coverageColon()}</span>
-																			<span class="badge h-fit">
-																				{safeTranslate(
-																					requirementAssessment.mapping_inference
-																						.source_requirement_assessment.coverage
-																				)}
-																			</span>
-																		</p>
-																		{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
-																			<p class="whitespace-pre-line py-1">
-																				<span class="italic">{m.scoreSemiColon()}</span>
-																				<span class="badge h-fit">
-																					{safeTranslate(
-																						requirementAssessment.mapping_inference
-																							.source_requirement_assessment.score
-																					)}
-																				</span>
-																			</p>
-																		{/if}
-																		<p class="whitespace-pre-line py-1">
-																			<span class="italic">{m.suggestionColon()}</span>
-																			<span
-																				class="badge h-fit"
-																				style={resultBadgeStyle(
-																					requirementAssessment.mapping_inference.result
-																				)}
-																			>
-																				{safeTranslate(
-																					requirementAssessment.mapping_inference.result
-																				)}
-																			</span>
-																		</p>
-																		{#if requirementAssessment.mapping_inference.annotation}
-																			<p class="whitespace-pre-line py-1">
-																				<span class="italic">{m.annotationColon()}</span>
-																				{requirementAssessment.mapping_inference.annotation}
-																			</p>
-																		{/if}
-																	</li>
-																</ul>
-															</div>
+															<MappingInferenceView
+																mappingInference={requirementAssessment.mapping_inference}
+															/>
 														{/if}
 													{/if}
 												</div>
