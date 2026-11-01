@@ -182,6 +182,42 @@ class TestCustomFieldsAPI:
         names = {p["name"] for p in filtered.json()["results"]}
         assert names == {"Gold project"}
 
+    def test_multi_choice_in_filter_returns_each_object_once(
+        self, authenticated_client
+    ):
+        root = Folder.get_root_folder()
+        resp = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "pmbok.project",
+                "key": "regions",
+                "label": "Regions",
+                "field_type": "multi_choice",
+                "filterable": True,
+                "folder": str(root.id),
+                "choices": [
+                    {"value": "eu", "label": "EU"},
+                    {"value": "us", "label": "US"},
+                ],
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+        create = authenticated_client.post(
+            PROJECTS_URL,
+            {
+                "name": "Global project",
+                "folder": str(root.id),
+                "custom_fields": {"regions": ["eu", "us"]},
+            },
+            format="json",
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+
+        filtered = authenticated_client.get(PROJECTS_URL, {"cf__regions__in": "eu,us"})
+        ids = [p["id"] for p in filtered.json()["results"]]
+        assert ids == [create.json()["id"]]
+
     def test_invalid_choice_value_rejected(self, authenticated_client):
         root = Folder.get_root_folder()
         self._make_choice_def(authenticated_client, str(root.id))

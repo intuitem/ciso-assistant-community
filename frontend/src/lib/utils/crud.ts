@@ -1875,7 +1875,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
-			{ field: 'validation_flows', urlModel: 'validation-flows' }
+			{ field: 'validation_flows', urlModel: 'validation-flows' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'conclusion' }],
 		// The first ten show without expanding, so they carry what an analyst reads
@@ -1899,6 +1900,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'observation' },
 			{ field: 'reference_link' },
 			{ field: 'evidence' },
+			{ field: 'filtering_labels' },
 			{ field: 'is_locked' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
@@ -3915,6 +3917,24 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'genericcollection',
 				urlModel: 'policies',
 				addExisting: { parentField: 'policies' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'applied-controls',
+				addExisting: {
+					parentField: 'applied_controls',
+					optionsEndpoint: 'applied-controls?exclude_category=policy'
+				}
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'document-containers',
+				addExisting: { parentField: 'document_containers' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'business-impact-analysis',
+				addExisting: { parentField: 'business_impact_analyses' }
 			}
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
