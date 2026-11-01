@@ -4125,8 +4125,6 @@
 	"builderUnsavedChangesNavigation": "Imate nespremljene promjene koje će biti izgubljene. Svejedno otići?",
 	"fieldVisibility": "Vidljivost polja",
 	"fieldVisibilityHelpText": "Kontrolirajte koja polja svaka uloga može vidjeti i uređivati.",
-	"visibilityAuditorRespondent": "Revizor + ispunjavatelj",
-	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skriveno",
 	"answers": "Odgovori",
 	"respondentAlignment": "Usklađenost ispunjavatelja",
