@@ -14,6 +14,10 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 - **Default language** — fallback locale for users who haven't picked a preference and for system-generated emails. Must be one of the languages enabled in the instance build.
 
+## Reports
+
+- **Report time zone**: the time zone used for the times printed in reports and exports, `UTC` by default. See [Report time zone](../report-time-zone.md).
+
 ## Money
 
 - **Currency** — the unit used when displaying applied-control costs and quantitative-risk amounts.

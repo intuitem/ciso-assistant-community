@@ -5896,5 +5896,7 @@
 	"dpiaRequirementChanges": "História požiadaviek na DPIA",
 	"previously": "Predtým",
 	"vulnerabilityOpenWithRemediationDate": "Otvorená zraniteľnosť má dátum nápravy",
-	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy"
+	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy",
+	"reportTimezone": "Časové pásmo reportov",
+	"reportTimezoneHelpText": "Oblasť použitá pre časy uvedené v reportoch a exportoch. Každý čas zobrazuje svoj posun voči UTC. Časy na obrazovke nie sú ovplyvnené."
 }

@@ -6289,5 +6289,7 @@
 	"notificationsDescription": "Zaken die uw aandacht vragen",
 	"unread": "Ongelezen",
 	"vulnerabilityOpenWithRemediationDate": "Open kwetsbaarheid heeft een hersteldatum",
-	"vulnerabilityResolvedWithoutRemediationDate": "Opgeloste kwetsbaarheid heeft geen hersteldatum"
+	"vulnerabilityResolvedWithoutRemediationDate": "Opgeloste kwetsbaarheid heeft geen hersteldatum",
+	"reportTimezone": "Tijdzone voor rapporten",
+	"reportTimezoneHelpText": "Regio die wordt gebruikt voor de tijden in rapporten en exports. Elke tijd toont zijn afwijking ten opzichte van UTC. Tijden op het scherm worden niet beïnvloed."
 }

@@ -2190,5 +2190,7 @@
 	"dpiaRequirementChanges": "Istoricul cerinței DPIA",
 	"previously": "Anterior",
 	"vulnerabilityOpenWithRemediationDate": "Vulnerabilitate deschisă cu dată de remediere",
-	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilitate rezolvată fără dată de remediere"
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilitate rezolvată fără dată de remediere",
+	"reportTimezone": "Fusul orar al rapoartelor",
+	"reportTimezoneHelpText": "Regiunea folosită pentru orele afișate în rapoarte și exporturi. Fiecare oră își arată decalajul față de UTC. Orele afișate pe ecran nu sunt afectate."
 }

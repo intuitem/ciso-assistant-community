@@ -2322,5 +2322,7 @@
 	"dpiaRequirementChanges": "Riwayat persyaratan DPIA",
 	"previously": "Sebelumnya",
 	"vulnerabilityOpenWithRemediationDate": "Kerentanan terbuka memiliki tanggal remediasi",
-	"vulnerabilityResolvedWithoutRemediationDate": "Kerentanan yang selesai tidak memiliki tanggal remediasi"
+	"vulnerabilityResolvedWithoutRemediationDate": "Kerentanan yang selesai tidak memiliki tanggal remediasi",
+	"reportTimezone": "Zona waktu laporan",
+	"reportTimezoneHelpText": "Wilayah yang digunakan untuk waktu yang tercetak dalam laporan dan ekspor. Setiap waktu menampilkan selisihnya terhadap UTC. Waktu di layar tidak terpengaruh."
 }

@@ -60,7 +60,7 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      d.date, align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone], align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -106,6 +106,7 @@
           row-gutter: 3pt,
           column-gutter: 12pt,
           [Generated at], [#d.generated_at],
+          [Time zone], [#d.timezone - each time shows its UTC offset],
           [Document ID], [#raw(d.id)],
         )
       ]

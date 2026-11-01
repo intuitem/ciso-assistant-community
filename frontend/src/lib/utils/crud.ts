@@ -1764,7 +1764,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'generalSettings',
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
-		selectFields: [{ field: 'security_objective_scale' }, { field: 'default_language' }]
+		selectFields: [
+			{ field: 'security_objective_scale' },
+			{ field: 'default_language' },
+			{ field: 'report_timezone' }
+		]
 	},
 	'feature-flags': {
 		name: 'featureFlags',

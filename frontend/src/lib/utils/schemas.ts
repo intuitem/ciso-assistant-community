@@ -742,6 +742,7 @@ export const GeneralSettingsSchema = z.object({
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
 	default_date_format: z.string().default('auto').optional(),
+	report_timezone: z.string().default('UTC').optional(),
 	default_packager: z
 		.string()
 		// eslint-disable-next-line no-useless-escape

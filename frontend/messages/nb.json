@@ -363,6 +363,8 @@
 	"dateFormatSettings": "Datoformat",
 	"defaultDateFormat": "Standard datoformat",
 	"defaultDateFormatHelpText": "Datoformat som nye brukere får. Bruk knappen nedenfor for å ta det i bruk for alle eksisterende brukere.",
+	"reportTimezone": "Tidssone for rapporter",
+	"reportTimezoneHelpText": "Region som brukes for tidspunktene i rapporter og eksporter. Hvert tidspunkt viser sin forskyvning fra UTC. Tidspunkter på skjermen påvirkes ikke.",
 	"forceDateFormatForAllUsers": "Tving datoformat for alle brukere",
 	"forceDateFormatHelpText": "Overstyr datoformatvalget for alle eksisterende brukere med den lagrede standarden ovenfor.",
 	"forceDateFormatConfirmTitle": "Tving datoformat for alle brukere",

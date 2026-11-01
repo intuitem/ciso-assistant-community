@@ -13,12 +13,17 @@ TYPST_AUDIT_VARIABLES = [
     {
         "name": "date",
         "type": "string",
-        "description": "Export date formatted as DD/MM/YYYY",
+        "description": "Export date in the report time zone, formatted as DD/MM/YYYY",
     },
     {
         "name": "generated_at",
         "type": "string",
-        "description": "Full generation timestamp",
+        "description": "Generation timestamp in the report time zone, with its UTC offset (2026-10-23 09:58:11 (UTC+02:00))",
+    },
+    {
+        "name": "timezone",
+        "type": "string",
+        "description": "Report time zone, an IANA name such as Europe/Paris",
     },
     {
         "name": "contributors",
@@ -101,7 +106,17 @@ WORD_TEMPLATE_REGISTRY = {
             {
                 "name": "date",
                 "type": "string",
-                "description": "Current date formatted as DD/MM/YYYY",
+                "description": "Current date in the report time zone, formatted as DD/MM/YYYY",
+            },
+            {
+                "name": "generated_at",
+                "type": "string",
+                "description": "Generation timestamp in the report time zone, with its UTC offset (2026-10-23 09:58:11 (UTC+02:00))",
+            },
+            {
+                "name": "timezone",
+                "type": "string",
+                "description": "Report time zone, an IANA name such as Europe/Paris",
             },
             {
                 "name": "contributors",

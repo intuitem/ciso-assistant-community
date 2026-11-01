@@ -439,6 +439,8 @@
 	"dateFormatSettings": "Format daty",
 	"defaultDateFormat": "Domyślny format daty",
 	"defaultDateFormatHelpText": "Format daty stosowany dla nowych użytkowników. Użyj przycisku poniżej, aby zastosować go do wszystkich istniejących użytkowników.",
+	"reportTimezone": "Strefa czasowa raportów",
+	"reportTimezoneHelpText": "Region używany dla godzin podawanych w raportach i eksportach. Każda godzina pokazuje swoje przesunięcie względem UTC. Nie wpływa to na godziny wyświetlane na ekranie.",
 	"forceDateFormatForAllUsers": "Wymuś format daty dla wszystkich użytkowników",
 	"forceDateFormatHelpText": "Nadpisz preferencję formatu daty wszystkich istniejących użytkowników zapisanym powyżej formatem domyślnym.",
 	"forceDateFormatConfirmTitle": "Wymuś format daty dla wszystkich użytkowników",

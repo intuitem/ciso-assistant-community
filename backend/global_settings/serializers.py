@@ -13,6 +13,7 @@ from rest_framework import serializers
 
 from urllib.parse import urlparse
 
+from core.utils import get_report_timezone, get_report_timezone_names
 from core.net_safety import (
     BlockedRequestError,
     DnsLookupError,
@@ -94,6 +95,7 @@ GENERAL_SETTINGS_KEYS = [
     "enforce_mfa",
     "default_language",
     "default_date_format",
+    "report_timezone",
     "llm_provider",
     "ollama_base_url",
     "ollama_model",
@@ -253,6 +255,19 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {
                             "default_date_format": f"Invalid date format. Must be one of: {sorted(User.DATE_FORMATS)}"
+                        }
+                    )
+            if key == "report_timezone":
+                # A stored name that still loads (a renamed region) stays accepted:
+                # the form sends every key, so rejecting it would block saving any
+                # other general setting.
+                if not isinstance(value, str) or (
+                    value not in get_report_timezone_names()
+                    and value != get_report_timezone().key
+                ):
+                    raise serializers.ValidationError(
+                        {
+                            "report_timezone": "Invalid time zone. Must be an IANA region such as Europe/Paris."
                         }
                     )
             if key == "default_packager":

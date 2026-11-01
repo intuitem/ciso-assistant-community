@@ -6398,6 +6398,8 @@
 	"dateFormatSettings": "Datumsformat",
 	"defaultDateFormat": "Standard-Datumsformat",
 	"defaultDateFormatHelpText": "Datumsformat für neue Benutzer. Mit der Schaltfläche unten kann es für alle bestehenden Benutzer übernommen werden.",
+	"reportTimezone": "Zeitzone für Berichte",
+	"reportTimezoneHelpText": "Region für die in Berichten und Exporten ausgegebenen Uhrzeiten. Jede Uhrzeit zeigt ihren Versatz zu UTC. Die Anzeige auf dem Bildschirm ist nicht betroffen.",
 	"forceDateFormatForAllUsers": "Datumsformat für alle Benutzer festlegen",
 	"forceDateFormatHelpText": "Das oben gespeicherte Standardformat für alle bestehenden Benutzer übernehmen.",
 	"forceDateFormatConfirmTitle": "Datumsformat für alle Benutzer festlegen",

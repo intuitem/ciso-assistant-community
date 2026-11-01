@@ -4321,6 +4321,8 @@
 	"dateFormatSettings": "Formato della data",
 	"defaultDateFormat": "Formato della data predefinito",
 	"defaultDateFormatHelpText": "Formato della data assegnato ai nuovi utenti. Utilizza il pulsante sottostante per applicarlo a tutti gli utenti esistenti.",
+	"reportTimezone": "Fuso orario dei report",
+	"reportTimezoneHelpText": "Regione usata per gli orari riportati nei report e nelle esportazioni. Ogni orario indica il proprio scostamento da UTC. Gli orari visualizzati a schermo non cambiano.",
 	"forceDateFormatForAllUsers": "Imponi il formato della data a tutti gli utenti",
 	"forceDateFormatHelpText": "Sostituisce le preferenze sul formato della data di tutti gli utenti esistenti con il valore predefinito salvato sopra.",
 	"forceDateFormatConfirmTitle": "Imponi il formato della data a tutti gli utenti",

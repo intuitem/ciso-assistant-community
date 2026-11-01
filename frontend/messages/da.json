@@ -2417,5 +2417,7 @@
 	"dpiaRequirementChanges": "Historik over DPIA-krav",
 	"previously": "Tidligere",
 	"vulnerabilityOpenWithRemediationDate": "Åben sårbarhed har en udbedringsdato",
-	"vulnerabilityResolvedWithoutRemediationDate": "Løst sårbarhed har ingen udbedringsdato"
+	"vulnerabilityResolvedWithoutRemediationDate": "Løst sårbarhed har ingen udbedringsdato",
+	"reportTimezone": "Tidszone for rapporter",
+	"reportTimezoneHelpText": "Region, der bruges til tidspunkter i rapporter og eksporter. Hvert tidspunkt viser sin forskydning fra UTC. Tidspunkter på skærmen påvirkes ikke."
 }
