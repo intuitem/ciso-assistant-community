@@ -1597,8 +1597,11 @@ def update_selected_implementation_groups(compliance_assessment):
     current = set(compliance_assessment.selected_implementation_groups or [])
     manual_only = current - dynamic_eligible_igs
 
-    compliance_assessment.selected_implementation_groups = list(
-        manual_only | igs_to_select
+    from core.staircase import expand_scope
+
+    compliance_assessment.selected_implementation_groups = expand_scope(
+        compliance_assessment.framework.outcomes_definition,
+        list(manual_only | igs_to_select),
     )
     # Answer.save() defers this to on_commit, so the outer transaction is gone.
     with transaction.atomic():

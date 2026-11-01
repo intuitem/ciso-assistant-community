@@ -141,7 +141,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
         )
         if folder is None:
             return attrs
-        from core.utils import get_respondent_scoped_folder_ids
+        from core.utils import get_respondent_scoped_folder_ids, is_field_visible_to
 
         if folder.id not in get_respondent_scoped_folder_ids(request.user):
             return attrs
@@ -4082,7 +4082,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
 
     def get_staircases(self, obj):
         from core.staircase import evaluate_staircases
-        from core.utils import get_respondent_scoped_folder_ids
+        from core.utils import get_respondent_scoped_folder_ids, is_field_visible_to
 
         view = self.context.get("view")
         request = self.context.get("request")
@@ -4090,7 +4090,12 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return []
         if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
             return []
-        return evaluate_staircases(obj, obj.outcome_rules)[1]
+        details = evaluate_staircases(obj, obj.outcome_rules)[1]
+        if not is_field_visible_to(obj, "result", "auditor"):
+            for detail in details:
+                for unit in detail["units"]:
+                    unit["blocking"] = []
+        return details
 
     scores_definition = serializers.SerializerMethodField()
 

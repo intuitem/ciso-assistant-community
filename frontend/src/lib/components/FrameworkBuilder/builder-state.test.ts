@@ -1578,20 +1578,29 @@ describe('staircaseCoverage', () => {
 });
 
 describe('levelsInGroupOrder', () => {
-	test('staircase levels follow the group order, unknown ids are kept last', () => {
-		const rules = [
-			{
-				ref_id: 'ml',
-				annotation: '',
-				color: null,
-				expression: '',
-				kind: 'staircase' as const,
-				levels: ['1', 'x', '2'] as unknown as OutcomeRule['levels']
-			},
-			{ ref_id: 'flag', annotation: '', color: null, expression: 'true' }
-		];
-		const [ml, flag] = levelsInGroupOrder(rules, ['2', '1', '3']);
-		expect(ml.levels).toEqual(['2', '1', 'x']);
+	const rules = [
+		{
+			ref_id: 'ml',
+			annotation: '',
+			color: null,
+			expression: '',
+			kind: 'staircase' as const,
+			levels: ['1', '2'] as unknown as OutcomeRule['levels']
+		},
+		{ ref_id: 'flag', annotation: '', color: null, expression: 'true' }
+	];
+	const levelsAfter = (before: string[], after: string[]) =>
+		levelsInGroupOrder(rules, before, after)[0].levels;
+
+	test('levels follow a reorder and leave other rules alone', () => {
+		const [ml, flag] = levelsInGroupOrder(rules, ['1', '2', '3'], ['2', '1', '3']);
+		expect(ml.levels).toEqual(['2', '1']);
 		expect(flag).toBe(rules[1]);
+	});
+
+	test('a renamed group renames its level, a deleted one drops it', () => {
+		expect(levelsAfter(['1', '2', '3'], ['one', '2', '3'])).toEqual(['one', '2']);
+		expect(levelsAfter(['1', '2', '3'], ['1', '3'])).toEqual(['1']);
+		expect(levelsAfter(['1', '2'], ['1', '1', '2'])).toEqual(['1', '2']);
 	});
 });

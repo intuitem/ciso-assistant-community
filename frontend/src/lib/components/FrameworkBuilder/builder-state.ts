@@ -2392,14 +2392,23 @@ export function staircaseCoverage(
 	return { sections, counts };
 }
 
-export function levelsInGroupOrder(rules: OutcomeRule[], order: string[]): OutcomeRule[] {
+export function levelsInGroupOrder(
+	rules: OutcomeRule[],
+	before: string[],
+	after: string[]
+): OutcomeRule[] {
+	const removed = before.filter((id) => !after.includes(id));
+	const added = after.filter((id) => !before.includes(id));
+	const renamed =
+		before.length === after.length && removed.length === 1 && added.length === 1
+			? { [removed[0]]: added[0] }
+			: {};
 	return rules.map((rule) => {
 		if (rule.kind !== 'staircase') return rule;
-		const levels = ((rule.levels ?? []) as unknown[]).map(String);
-		const sorted = [
-			...order.filter((id) => levels.includes(id)),
-			...levels.filter((id) => !order.includes(id))
-		];
+		const levels = ((rule.levels ?? []) as unknown[]).map(
+			(id) => renamed[String(id)] ?? String(id)
+		);
+		const sorted = [...new Set(after.filter((id) => levels.includes(id)))];
 		return { ...rule, levels: sorted as unknown as OutcomeRule['levels'] };
 	});
 }

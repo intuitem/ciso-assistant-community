@@ -1141,6 +1141,9 @@
 												implementation_groups_definition: groups,
 												outcomes_definition: levelsInGroupOrder(
 													$frameworkStore.outcomes_definition ?? [],
+													($frameworkStore.implementation_groups_definition ?? []).map((g) =>
+														String((g as Record<string, unknown>).ref_id ?? '')
+													),
 													groups.map((g) => g.ref_id)
 												)
 											})}

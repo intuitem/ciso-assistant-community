@@ -27,7 +27,9 @@
 	);
 	const groupName = (id: string) => groups.find((g) => g.ref_id === id)?.name || id;
 	const levelName = (level: number) =>
-		level === 0 ? (rule.floor_label ?? '0') : groupName(levels[level - 1]);
+		level === 0
+			? rule.translations?.[getLocale()]?.floor_label || rule.floor_label || '0'
+			: groupName(levels[level - 1]);
 
 	const STATUS: Record<string, { icon: string; color: string; label: () => string }> = {
 		met: {

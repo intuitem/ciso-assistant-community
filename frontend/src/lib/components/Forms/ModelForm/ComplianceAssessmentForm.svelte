@@ -340,9 +340,11 @@
 					};
 					if (!object.id) loadBaselineScale(id, request);
 
-					defaultImplementationGroups = implementation_groups
-						.filter((group) => group.default_selected)
-						.map((group) => group.ref_id);
+					defaultImplementationGroups = withLowerLevels(
+						implementation_groups
+							.filter((group) => group.default_selected)
+							.map((group) => group.ref_id)
+					);
 
 					if (!object.id) {
 						proposedTarget = defaultTarget(defaultImplementationGroups);

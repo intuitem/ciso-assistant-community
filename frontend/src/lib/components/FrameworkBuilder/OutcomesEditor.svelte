@@ -176,7 +176,10 @@
 				label: rule.annotation || m.builderRuleKindStaircase(),
 				levels: groups.map((g) => g.id) as unknown as OutcomeRule['levels'],
 				per: 'depth_1',
-				...(rule.implementation_groups ? { implementation_groups: rule.implementation_groups } : {})
+				...(rule.implementation_groups
+					? { implementation_groups: rule.implementation_groups }
+					: {}),
+				...(rule.translations ? { translations: rule.translations } : {})
 			};
 		} else {
 			const next: OutcomeRule = {

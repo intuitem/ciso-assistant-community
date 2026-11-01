@@ -184,7 +184,8 @@
 			: []
 	);
 	const staircaseLevelName = (s: Record<string, any>) => {
-		if (s.level === 0) return s.rule.floor_label ?? '0';
+		if (s.level === 0)
+			return s.rule.translations?.[getLocale()]?.floor_label || s.rule.floor_label || '0';
 		const id = String(s.rule.levels[s.level - 1]);
 		const groups = (compliance_assessment.framework.implementation_groups_definition ??
 			[]) as Record<string, any>[];
