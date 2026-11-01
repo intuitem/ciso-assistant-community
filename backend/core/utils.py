@@ -2025,6 +2025,21 @@ def is_field_read_only_for(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "read"
 
 
+def is_open_assignee(user, requirement_assessment):
+    """Whether the user answers this requirement through an assignment that is still
+    open (not submitted or closed): the assignment page shows them the respondent
+    view whatever other role they hold."""
+    from core.models import Actor
+
+    return (
+        requirement_assessment.assignments.filter(
+            actor__in=Actor.get_all_for_user(user)
+        )
+        .exclude(status__in=["submitted", "closed"])
+        .exists()
+    )
+
+
 VISIBILITY_ROLES = ("auditor", "respondent")
 VISIBILITY_ACCESS = ("edit", "read", "hidden")
 

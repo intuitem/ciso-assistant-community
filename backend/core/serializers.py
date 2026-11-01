@@ -4831,6 +4831,22 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         many=True, required=False, queryset=Finding.objects.all()
     )
 
+    def _writes_as_assignee(self, field):
+        """Whether an auditor may write `field` as this requirement's assignee: the
+        assignment page shows them the respondent view, so what the respondent may
+        write must work there whatever other role they hold."""
+        from core.utils import is_field_editable_by, is_open_assignee
+
+        if not is_field_editable_by(
+            self.instance.compliance_assessment, field, "respondent"
+        ):
+            return False
+        if not hasattr(self, "_open_assignee"):
+            self._open_assignee = is_open_assignee(
+                self.context["request"].user, self.instance
+            )
+        return self._open_assignee
+
     def to_internal_value(self, data):
         # Strip fields the respondent isn't allowed to write before DRF validates
         # individual field choices — a placeholder value in a disabled select
@@ -4863,6 +4879,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     k: v
                     for k, v in data.items()
                     if not is_field_read_only_for(ca, k, "auditor")
+                    or self._writes_as_assignee(k)
                 }
 
         # A relation the submitting role cannot see must not be writable by it: the
@@ -4880,7 +4897,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 if respondent_folders and ca.folder_id in respondent_folders
                 else "auditor"
             )
-            if not is_field_editable_by(ca, "task_templates", role):
+            if not is_field_editable_by(ca, "task_templates", role) and not (
+                role == "auditor" and self._writes_as_assignee("task_templates")
+            ):
                 data = {k: v for k, v in data.items() if k != "task_templates"}
 
         # The reviewer's, unconditionally: not routed through field_visibility so it
@@ -5396,21 +5415,30 @@ class AnswerWriteSerializer(BaseModelSerializer):
 
                 # 4. Same field visibility guard as the `answers` key of the requirement
                 # assessment: this route writes the same data.
-                from core.utils import is_field_editable_by, is_field_read_only_for
+                from core.utils import (
+                    is_field_editable_by,
+                    is_field_read_only_for,
+                    is_open_assignee,
+                )
 
                 is_respondent = (
                     respondent_folders
                     and requirement_assessment.folder_id in respondent_folders
                 )
-                blocked = (
-                    not is_field_editable_by(
-                        compliance_assessment, "answers", "respondent"
-                    )
-                    if is_respondent
-                    else is_field_read_only_for(
-                        compliance_assessment, "answers", "auditor"
-                    )
+                respondent_may_edit = is_field_editable_by(
+                    compliance_assessment, "answers", "respondent"
                 )
+                if is_respondent:
+                    blocked = not respondent_may_edit
+                else:
+                    # An auditor answering through an open assignment works from the
+                    # respondent view: what the respondent may write works there too.
+                    blocked = is_field_read_only_for(
+                        compliance_assessment, "answers", "auditor"
+                    ) and not (
+                        respondent_may_edit
+                        and is_open_assignee(request.user, requirement_assessment)
+                    )
                 if blocked:
                     raise serializers.ValidationError(
                         "Cannot modify: answers are not editable for your role on this audit."
