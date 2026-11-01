@@ -4078,6 +4078,13 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return None
         return obj.answers_progress
 
+    staircases = serializers.SerializerMethodField()
+
+    def get_staircases(self, obj):
+        from core.staircase import evaluate_staircases
+
+        return evaluate_staircases(obj, obj.outcome_rules)[1]
+
     scores_definition = serializers.SerializerMethodField()
 
     def get_scores_definition(self, obj):
@@ -4226,9 +4233,12 @@ class ComplianceAssessmentWriteSerializer(
                 getattr(self.instance, "selected_implementation_groups", None),
             )
             selected = selected if isinstance(selected, list) else []
-            attrs["selected_implementation_groups"] = [
-                g for g in selected if isinstance(g, str) and g in defined
-            ]
+            from core.staircase import expand_scope
+
+            attrs["selected_implementation_groups"] = expand_scope(
+                getattr(framework, "outcomes_definition", None),
+                [g for g in selected if isinstance(g, str) and g in defined],
+            )
 
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # Unlocking may come with other changes in the same save; they still

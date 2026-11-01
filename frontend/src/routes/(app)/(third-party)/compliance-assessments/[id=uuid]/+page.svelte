@@ -18,6 +18,7 @@
 
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
+	import MaturityStaircase from './MaturityStaircase.svelte';
 
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
@@ -125,11 +126,13 @@
 	// Verdicts follow the result's visibility, computed numbers the score's.
 	const shownRules = $derived(
 		outcomeRules.filter((rule) =>
-			rule.kind === 'number'
-				? showScore &&
-					(rule.annotation || rule.label) &&
-					compliance_assessment.computed_values?.[rule.ref_id] != null
-				: showResult
+			rule.kind === 'staircase'
+				? false
+				: rule.kind === 'number'
+					? showScore &&
+						(rule.annotation || rule.label) &&
+						compliance_assessment.computed_values?.[rule.ref_id] != null
+					: showResult
 		)
 	);
 	const outcomeMet = (rule: Record<string, any>) =>
@@ -170,6 +173,29 @@
 	const objectsNotVisibleLabel = (count: number): string => {
 		return m.objectsNotVisible({ count });
 	};
+
+	// Staircase rules (levels reached per section) get their own tile and grid.
+	const staircases = $derived(
+		showResult
+			? ((compliance_assessment.staircases ?? []) as Record<string, any>[]).flatMap((s) => {
+					const rule = outcomeRules.find((r) => r.ref_id === s.ref_id);
+					return rule && s.units.length ? [{ ...s, rule }] : [];
+				})
+			: []
+	);
+	const staircaseLevelName = (s: Record<string, any>) => {
+		if (s.level === 0) return s.rule.floor_label ?? '0';
+		const id = String(s.rule.levels[s.level - 1]);
+		const groups = (compliance_assessment.framework.implementation_groups_definition ??
+			[]) as Record<string, any>[];
+		return groups.find((g) => g.ref_id === id)?.name || id;
+	};
+	let openStaircase = $state<Record<string, any> | null>(null);
+	let staircaseDialog: HTMLDialogElement | undefined = $state();
+	function openStaircaseDialog(s: Record<string, any>) {
+		openStaircase = s;
+		setTimeout(() => staircaseDialog?.showModal(), 0);
+	}
 
 	let verdictsDialogOpen = $state(false);
 	let verdictsDialog: HTMLDialogElement | undefined = $state();
@@ -1219,13 +1245,35 @@
 					{/if}
 
 					<!-- Insights -->
-					{#if showVerdicts || ((has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party)}
+					{#if staircases.length || showVerdicts || ((has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party)}
 						<div>
 							<span
 								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
 								>{m.insights()}</span
 							>
 							<div class="grid grid-cols-2 gap-2">
+								{#each staircases as staircase (staircase.ref_id)}
+									<button
+										type="button"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer text-left"
+										onclick={() => openStaircaseDialog(staircase)}
+										data-testid="staircase-tile"
+									>
+										<div
+											class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-500 text-white font-bold tabular-nums shrink-0"
+										>
+											{staircase.level}
+										</div>
+										<div class="flex flex-col">
+											<span class="text-sm font-semibold leading-tight"
+												>{staircaseLevelName(staircase)}</span
+											>
+											<span class="text-xs opacity-80"
+												>{ruleLabel(staircase.rule, staircase.ref_id)}</span
+											>
+										</div>
+									</button>
+								{/each}
 								{#if showVerdicts}
 									{@const allMet = verdictCount > 0 && verdictsMet === verdictCount}
 									<button
@@ -1572,6 +1620,34 @@
 					</div>
 				{/each}
 			</div>
+		</div>
+	</dialog>
+{/if}
+{#if openStaircase}
+	<dialog
+		bind:this={staircaseDialog}
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl max-h-[85vh] rounded-2xl bg-surface-50-950 shadow-2xl border border-surface-200-800 p-0 overflow-hidden backdrop:bg-black/40"
+		aria-labelledby="staircase-dialog-title"
+		onclose={() => (openStaircase = null)}
+	>
+		<div class="flex justify-between items-center px-6 py-4 border-b border-surface-100-900">
+			<h3 id="staircase-dialog-title" class="text-lg font-bold text-surface-900-100">
+				{ruleLabel(openStaircase.rule, openStaircase.ref_id)}
+			</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-600-400 hover:text-surface-700-300"
+				aria-label={m.close()}
+				onclick={() => staircaseDialog?.close()}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 max-h-[calc(85vh-64px)] overflow-auto">
+			<MaturityStaircase
+				staircase={openStaircase}
+				rule={openStaircase.rule}
+				groups={compliance_assessment.framework.implementation_groups_definition ?? []}
+			/>
 		</div>
 	</dialog>
 {/if}

@@ -17,6 +17,7 @@ from core.quick_form_ratings import (
     scales_error,
     value_names,
 )
+from core.staircase import evaluate_staircases, staircase_errors, staircase_rules
 
 from core.quick_form_scoring import (
     aggregate_form,
@@ -532,13 +533,15 @@ def evaluate_outcomes(compliance_assessment) -> None:
     if rules:
         context, _hidden = build_cel_context(ca)
         _add_scores(context, ca, framework, rules)
+        staircase_values, _details = evaluate_staircases(ca, rules)
         computed, values = _evaluate_rules(
             celpy.Environment(),
             rules,
             context,
+            seed_values=staircase_values,
             compliance_assessment_id=str(ca.pk),
         )
-        if not any(is_numeric_rule(rule) for rule in rules):
+        if not staircase_values and not any(is_numeric_rule(r) for r in rules):
             values = None
 
     if ca.computed_outcome != computed or ca.computed_values != values:
@@ -1122,11 +1125,12 @@ def _check_rules(rules, probe: dict, check, error, rating_values=()) -> None:
     rules above it."""
     for rule in rules:
         kind = rule.get("kind")
-        if kind not in (None, "", "boolean", "number", "rating"):
+        if kind not in (None, "", "boolean", "number", "rating", "staircase"):
             error(
                 str(rule.get("ref_id") or ""),
                 str(rule.get("expression") or ""),
-                f"Unknown rule kind '{kind}': use 'number', 'rating' or leave it empty",
+                f"Unknown rule kind '{kind}': use 'number', 'rating', 'staircase' "
+                "or leave it empty",
             )
     # Rating outcomes are computed before any rule, from their scales.
     values: dict[str, float] = {name: 1.0 for name in rating_values}
@@ -1232,6 +1236,11 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
             unknown,
         )
 
+    for rule in rules:
+        if rule.get("kind") == "staircase":
+            for message in staircase_errors(rule, known_groups):
+                _error("outcome", str(rule.get("ref_id") or ""), "", message)
+
     _check_rules(
         rules,
         probe,
@@ -1241,6 +1250,8 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
         lambda ref_id, expression, message: _error(
             "outcome", ref_id, expression, message
         ),
+        # Staircase levels are computed before any rule, as ratings are.
+        rating_values=[rule["ref_id"] for rule in staircase_rules(rules)],
     )
     return errors
 

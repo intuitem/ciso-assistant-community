@@ -101,7 +101,12 @@ export function buildCelCatalog(
 export function readableValues(rules: OutcomeRule[], index: number): string[] {
 	const rule = rules[index];
 	return rules
-		.filter((r, i) => r.kind === 'number' && r.ref_id && (rule?.kind !== 'number' || i < index))
+		.filter(
+			(r, i) =>
+				r.ref_id &&
+				// staircases are computed before every rule
+				(r.kind === 'staircase' || (r.kind === 'number' && (rule?.kind !== 'number' || i < index)))
+		)
 		.map((r) => r.ref_id);
 }
 

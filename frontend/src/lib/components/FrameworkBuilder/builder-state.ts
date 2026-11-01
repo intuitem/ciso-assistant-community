@@ -121,8 +121,14 @@ export interface OutcomeRule {
 	color: string | null;
 	expression: string;
 	/** 'number' rules compute a value instead of firing; 'rating' classifies the
-	 *  answers to its scales into named levels (see core.quick_form_ratings). */
-	kind?: 'number' | 'rating';
+	 *  answers to its scales into named levels (see core.quick_form_ratings);
+	 *  'staircase' gives the level reached, its `levels` being implementation group ids
+	 *  (see core.staircase). */
+	kind?: 'number' | 'rating' | 'staircase';
+	per?: 'depth_1';
+	cumulative?: boolean;
+	unit_label?: string;
+	floor_label?: string;
 	/** Ratings: the scales measured, their named levels, and either a grid (two
 	 *  dimensions; rows: the first, low to high) or rules (`when` CEL over `dims`),
 	 *  plus, optionally, the page ids that feed it. */

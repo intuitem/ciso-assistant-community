@@ -284,6 +284,20 @@
 		);
 	}
 
+	// Staircase rules' levels, lowest first: a target level brings those below it,
+	// as the backend does (core/staircase.py expand_scope).
+	let staircaseLevels = $state<string[][]>([]);
+	function withLowerLevels(selected: string[]): string[] {
+		if (!staircaseLevels.length) return selected ?? [];
+		const next = [...(selected ?? [])];
+		for (const levels of staircaseLevels) {
+			const top = Math.max(-1, ...next.map((g) => levels.indexOf(g)));
+			for (const level of levels.slice(0, top)) if (!next.includes(level)) next.push(level);
+		}
+		const order = implementationGroupsChoices.map((c) => c.value);
+		return next.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+	}
+
 	async function handleFrameworkChange(id: string) {
 		const request = ++frameworkRequest;
 		if (!object?.id) {
@@ -301,6 +315,9 @@
 					if (request !== frameworkRequest) return;
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
+					staircaseLevels = (r['outcomes_definition'] || [])
+						.filter((rule) => rule?.kind === 'staircase' && Array.isArray(rule.levels))
+						.map((rule) => rule.levels.map(String));
 					implementationGroupsChoices = implementation_groups.map((group) => ({
 						label: group.name,
 						value: group.ref_id
@@ -411,7 +428,16 @@
 		cacheLock={cacheLocks['selected_implementation_groups']}
 		bind:cachedValue={formDataCache['selected_implementation_groups']}
 		label={m.selectedImplementationGroups()}
-		helpText={is_dynamic ? m.selectedImplementationGroupsDynamicHelpText() : undefined}
+		helpText={is_dynamic
+			? m.selectedImplementationGroupsDynamicHelpText()
+			: staircaseLevels.length
+				? m.staircaseLowerLevelsHelpText()
+				: undefined}
+		onChange={(value) => {
+			const next = withLowerLevels(value);
+			if (next.join() !== (value ?? []).join())
+				form.form.update((d) => ({ ...d, selected_implementation_groups: next }));
+		}}
 	/>
 {/if}
 <TextField
