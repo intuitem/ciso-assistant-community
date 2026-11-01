@@ -12,6 +12,7 @@ from core.views import (
     GenericFilterSet,
     SmartOrderingFilter,
     actor_prefetch,
+    check_folder_add_permission,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -19,7 +20,11 @@ from core.models import Asset, Terminology
 from openpyxl.styles import Alignment
 from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
-from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
+from .helpers import (
+    ecosystem_radar_chart_data,
+    ebios_rm_visual_analysis,
+    duplicate_ebios_rm_study,
+)
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -32,7 +37,10 @@ from .models import (
     OperatingMode,
     KillChain,
 )
-from .serializers import EbiosRMStudyReadSerializer
+from .serializers import (
+    EbiosRMStudyReadSerializer,
+    EbiosRMStudyDuplicateSerializer,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -141,6 +149,42 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         with transaction.atomic():
             self._process_responsibility_matrix(request)
             return super().update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Duplicate EBIOS RM study",
+        serializer_class=EbiosRMStudyDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        source = self.get_object()  # 404s when the study is not viewable
+        serializer = EbiosRMStudyDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # the clone stays in the source's folder; check add there for every owned model
+        check_folder_add_permission(
+            request.user,
+            source.folder,
+            EbiosRMStudy,
+            FearedEvent,
+            RoTo,
+            Stakeholder,
+            StrategicScenario,
+            AttackPath,
+            OperationalScenario,
+            OperatingMode,
+            KillChain,
+        )
+
+        clone = duplicate_ebios_rm_study(
+            source,
+            name=data["name"],
+            description=data.get("description", source.description),
+            ref_id=data.get("ref_id", source.ref_id),
+            version=data.get("version", source.version),
+        )
+        return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")

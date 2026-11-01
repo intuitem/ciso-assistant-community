@@ -404,6 +404,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Risk assessments',
 		foreignKeyFields: [{ field: 'perimeter', urlModel: 'perimeters' }]
 	},
+	'ebios-rm_duplicate': {
+		endpointUrl: 'ebios-rm/studies',
+		name: 'ebiosrmstudy',
+		localName: 'ebiosRmStudy',
+		localNamePlural: 'ebiosRmStudies',
+		verboseName: 'Ebios RM study',
+		verboseNamePlural: 'Ebios RM study'
+	},
 	threats: {
 		name: 'threat',
 		localName: 'threat',

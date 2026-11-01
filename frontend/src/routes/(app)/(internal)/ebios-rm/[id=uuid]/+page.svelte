@@ -9,6 +9,8 @@
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import Card from '#lib/components/DataViz/Card.svelte';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -26,6 +28,36 @@
 	}
 
 	let { data, form }: Props = $props();
+
+	const canDuplicate = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'ebiosrmstudy',
+			object: data.data
+		})
+	);
+
+	function modalDuplicateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.ebiosRmStudyDuplicateForm,
+				model: data.ebiosRmStudyDuplicateModel,
+				// getModelInfo normalizes urlModel to 'ebios-rm', so ModelForm would
+				// otherwise validate against the full study schema; pass the minimal
+				// duplicate schema explicitly so name/version is all that's required.
+				schema: modelSchema('ebios-rm_duplicate'),
+				duplicate: true,
+				formAction: '?/duplicate'
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.duplicateEbiosRmStudy()
+		});
+	}
 
 	const workshopsData = {
 		ws1: [
@@ -361,6 +393,16 @@
 						<i class="fa-solid fa-file-lines"></i>
 						<span>{m.report()}</span>
 					</a>
+					{#if canDuplicate}
+						<button
+							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+							onclick={modalDuplicateForm}
+							data-testid="duplicate-button"
+						>
+							<i class="fa-solid fa-copy"></i>
+							<span>{m.duplicate()}</span>
+						</button>
+					{/if}
 					<!-- Export dropdown -->
 					<div class="relative">
 						<button
