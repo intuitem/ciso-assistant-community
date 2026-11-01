@@ -4090,12 +4090,9 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return []
         if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
             return []
-        details = evaluate_staircases(obj, obj.outcome_rules)[1]
         if not is_field_visible_to(obj, "result", "auditor"):
-            for detail in details:
-                for unit in detail["units"]:
-                    unit["blocking"] = []
-        return details
+            return []
+        return evaluate_staircases(obj, obj.outcome_rules)[1]
 
     scores_definition = serializers.SerializerMethodField()
 
