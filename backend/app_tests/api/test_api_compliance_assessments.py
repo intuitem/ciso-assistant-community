@@ -875,3 +875,58 @@ class TestComplianceAssessmentDetailActionAuthorization:
                 f"/api/compliance-assessments/{missing}/{action}/"
             )
             assert resp.status_code == status.HTTP_404_NOT_FOUND, action
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentCreationScoring:
+    """Creation seeds the minimum score only where nobody else sets it:
+    question-driven requirements are scored by their answers, as when scoring
+    is turned on (a checklist without scores must never count as a 0)."""
+
+    def test_question_requirements_are_not_seeded(self, authenticated_client):
+        from core.models import Question, QuestionChoice
+        from core.utils import AUDITOR_ONLY
+
+        framework = _make_framework()
+        framework.field_visibility = {"score": AUDITOR_ONLY, "is_scored": AUDITOR_ONLY}
+        framework.save()
+        manual = _make_requirement(framework, "MANUAL")
+        for ref_id, add_scores in (("SCORED", (0, 4)), ("CHECKLIST", (None, None))):
+            node = _make_requirement(framework, ref_id)
+            question = Question.objects.create(
+                requirement_node=node,
+                urn=f"{node.urn}:question:1",
+                type=Question.Type.UNIQUE_CHOICE
+                if ref_id == "SCORED"
+                else Question.Type.MULTIPLE_CHOICE,
+            )
+            for i, add_score in enumerate(add_scores):
+                QuestionChoice.objects.create(
+                    question=question,
+                    urn=f"{question.urn}:choice:{i}",
+                    value=str(i),
+                    add_score=add_score,
+                    order=i,
+                )
+
+        response = authenticated_client.post(
+            "/api/compliance-assessments/",
+            {
+                "name": "seeding",
+                "folder": str(Folder.get_root_folder().id),
+                "framework": str(framework.id),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
+        ras = {
+            ra.requirement.ref_id: (ra.score, ra.is_scored)
+            for ra in RequirementAssessment.objects.filter(
+                compliance_assessment_id=response.json()["id"]
+            ).select_related("requirement")
+        }
+        assert ras == {
+            manual.ref_id: (0, True),
+            "SCORED": (None, False),
+            "CHECKLIST": (None, False),
+        }

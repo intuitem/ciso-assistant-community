@@ -1555,8 +1555,6 @@
 	"builderUnsavedChangesNavigation": "आपके पास असहेजे गए परिवर्तन हैं जो खो जाएंगे। फिर भी छोड़ें?",
 	"fieldVisibility": "फ़ील्ड दृश्यता",
 	"fieldVisibilityHelpText": "नियंत्रित करें कि कौन से फ़ील्ड प्रत्येक भूमिका देख और संपादित कर सकती है।",
-	"visibilityAuditorRespondent": "ऑडिटर + उत्तरदाता",
-	"visibilityAuditorOnly": "केवल ऑडिटर",
 	"visibilityHidden": "छिपा हुआ",
 	"answers": "उत्तर",
 	"respondentAlignment": "उत्तरदाता संरेखण",
@@ -2175,5 +2173,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "बाहरी पहचान प्रदाता का `sub` क्लेम जो इस खाते की पहचान करता है।",
 	"socialAppRequired": "फ़ेडरेटेड सेवा खाते के लिए पहचान प्रदाता आवश्यक है।",
-	"federatedSubjectRequired": "फ़ेडरेटेड सेवा खाते के लिए subject मान आवश्यक है।"
+	"federatedSubjectRequired": "फ़ेडरेटेड सेवा खाते के लिए subject मान आवश्यक है।",
+	"reportTimezone": "रिपोर्ट का समय क्षेत्र",
+	"reportTimezoneHelpText": "रिपोर्ट और निर्यात में छपे समय के लिए उपयोग किया जाने वाला क्षेत्र। हर समय UTC से अपना अंतर दिखाता है। स्क्रीन पर दिखने वाले समय प्रभावित नहीं होते।"
 }

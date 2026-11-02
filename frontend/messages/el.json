@@ -2299,8 +2299,6 @@
 	"builderUnsavedChangesNavigation": "Έχετε μη αποθηκευμένες αλλαγές που θα χαθούν. Έξοδος ούτως ή άλλως;",
 	"fieldVisibility": "Ορατότητα πεδίων",
 	"fieldVisibilityHelpText": "Ελέγξτε ποια πεδία μπορεί να βλέπει και να επεξεργάζεται κάθε ρόλος.",
-	"visibilityAuditorRespondent": "Επιθεωρητής + Ερωτώμενος",
-	"visibilityAuditorOnly": "Μόνο επιθεωρητής",
 	"visibilityHidden": "Κρυφό",
 	"answers": "Απαντήσεις",
 	"respondentAlignment": "Συμφωνία ερωτώμενου",
@@ -2764,5 +2762,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "Η αξίωση `sub` του εξωτερικού παρόχου ταυτότητας που προσδιορίζει αυτόν τον λογαριασμό.",
 	"socialAppRequired": "Ένας ομόσπονδος λογαριασμός υπηρεσίας απαιτεί πάροχο ταυτότητας.",
-	"federatedSubjectRequired": "Ένας ομόσπονδος λογαριασμός υπηρεσίας απαιτεί τιμή subject."
+	"federatedSubjectRequired": "Ένας ομόσπονδος λογαριασμός υπηρεσίας απαιτεί τιμή subject.",
+	"reportTimezone": "Ζώνη ώρας αναφορών",
+	"reportTimezoneHelpText": "Περιοχή που χρησιμοποιείται για τις ώρες στις αναφορές και τις εξαγωγές. Κάθε ώρα εμφανίζει τη διαφορά της από την UTC. Οι ώρες στην οθόνη δεν επηρεάζονται."
 }

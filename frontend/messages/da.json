@@ -1881,8 +1881,6 @@
 	"builderUnsavedChangesNavigation": "Du har ikke-gemte ændringer, der vil gå tabt. Forlad alligevel?",
 	"fieldVisibility": "Felternes synlighed",
 	"fieldVisibilityHelpText": "Bestem hvilke felter hver rolle kan se og redigere.",
-	"visibilityAuditorRespondent": "Revisor + Respondent",
-	"visibilityAuditorOnly": "Kun revisor",
 	"visibilityHidden": "Skjult",
 	"answers": "Svar",
 	"respondentAlignment": "Respondentens overensstemmelse",
@@ -2434,5 +2432,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "Den eksterne identitetsudbyders `sub`-claim, der identificerer denne konto.",
 	"socialAppRequired": "En fødereret servicekonto kræver en identitetsudbyder.",
-	"federatedSubjectRequired": "En fødereret servicekonto kræver en subject-værdi."
+	"federatedSubjectRequired": "En fødereret servicekonto kræver en subject-værdi.",
+	"reportTimezone": "Tidszone for rapporter",
+	"reportTimezoneHelpText": "Region, der bruges til tidspunkter i rapporter og eksporter. Hvert tidspunkt viser sin forskydning fra UTC. Tidspunkter på skærmen påvirkes ikke."
 }

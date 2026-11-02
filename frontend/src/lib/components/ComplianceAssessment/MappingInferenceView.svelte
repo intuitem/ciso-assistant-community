@@ -80,7 +80,7 @@
 	>
 	<button
 		onclick={() => (expandedInferences = !expandedInferences)}
-		class="block mt-2 text-blue-800"
+		class="block mt-2 text-blue-800 dark:text-blue-300"
 		aria-expanded={expandedInferences}
 	>
 		<i class="h-full {expandedInferences ? 'fas fa-chevron-up' : 'fas fa-chevron-down'}"></i>

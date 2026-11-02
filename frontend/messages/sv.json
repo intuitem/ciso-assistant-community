@@ -1597,8 +1597,6 @@
 	"builderUnsavedChangesNavigation": "Du har osparade ändringar som kommer att gå förlorade. Lämna ändå?",
 	"fieldVisibility": "Fältens synlighet",
 	"fieldVisibilityHelpText": "Bestäm vilka fält varje roll kan se och redigera.",
-	"visibilityAuditorRespondent": "Revisor + Svarande",
-	"visibilityAuditorOnly": "Endast revisor",
 	"visibilityHidden": "Dold",
 	"answers": "Svar",
 	"respondentAlignment": "Svarandes inriktning",
@@ -2202,5 +2200,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "Den externa identitetsleverantörens `sub`-claim som identifierar det här kontot.",
 	"socialAppRequired": "Ett federerat tjänstekonto kräver en identitetsleverantör.",
-	"federatedSubjectRequired": "Ett federerat tjänstekonto kräver ett subject-värde."
+	"federatedSubjectRequired": "Ett federerat tjänstekonto kräver ett subject-värde.",
+	"reportTimezone": "Tidszon för rapporter",
+	"reportTimezoneHelpText": "Region som används för tider i rapporter och exporter. Varje tid visar sin förskjutning från UTC. Tider på skärmen påverkas inte."
 }

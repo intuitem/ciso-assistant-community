@@ -3641,8 +3641,6 @@
 	"builderUnsavedChangesNavigation": "Tiene cambios sin guardar que se perderán. ¿Salir de todos modos?",
 	"fieldVisibility": "Visibilidad de campos",
 	"fieldVisibilityHelpText": "Controle qué campos puede ver y editar cada rol.",
-	"visibilityAuditorRespondent": "Auditor + Encuestado",
-	"visibilityAuditorOnly": "Solo auditor",
 	"visibilityHidden": "Oculto",
 	"answers": "Respuestas",
 	"respondentAlignment": "Alineación del encuestado",
@@ -3941,5 +3939,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "La reclamación `sub` del proveedor de identidad externo que identifica esta cuenta.",
 	"socialAppRequired": "Se requiere un proveedor de identidad para una cuenta de servicio federada.",
-	"federatedSubjectRequired": "Se requiere un subject para una cuenta de servicio federada."
+	"federatedSubjectRequired": "Se requiere un subject para una cuenta de servicio federada.",
+	"reportTimezone": "Zona horaria de los informes",
+	"reportTimezoneHelpText": "Región utilizada para las horas impresas en informes y exportaciones. Cada hora muestra su desfase respecto a UTC. Las horas en pantalla no se ven afectadas."
 }

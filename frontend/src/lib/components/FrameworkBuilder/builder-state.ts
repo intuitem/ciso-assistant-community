@@ -3,7 +3,7 @@ import { writable, type Writable } from 'svelte/store';
 import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
 import { m } from '#paraglide/messages.js';
 import { safeTranslate } from '#lib/utils/i18n.js';
-import { resolveComputeResult } from '#lib/utils/helpers.js';
+import { resolveComputeResult, type VisibilityMap } from '#lib/utils/helpers.js';
 
 // --- Types ---
 
@@ -87,6 +87,8 @@ export interface RequirementNode {
 	/** Quick-form pages only: how question scores combine into the page score. */
 	aggregation?: 'sum' | 'max' | 'mean' | null;
 	typical_evidence: string | null;
+	/** Assessable requirements only: submission is refused while no evidence is attached. */
+	evidence_required: boolean;
 	weight: number;
 	importance: string;
 	display_mode: 'default' | 'splash';
@@ -118,18 +120,31 @@ export interface OutcomeRule {
 	annotation: string;
 	color: string | null;
 	expression: string;
-	/** 'number' rules compute a value instead of firing; 'rating' classifies the
-	 *  answers to its scales into named levels (see core.quick_form_ratings). */
-	kind?: 'number' | 'rating';
+	/** Absent: a yes/no rule, firing when `expression` is true. 'number' computes a value
+	 *  instead; 'rating' classifies the answers to its scales into named levels (see
+	 *  core.quick_form_ratings); 'staircase' gives the level reached over implementation
+	 *  groups (see core.staircase).
+	 *  A kind reuses another kind's key only with the same meaning and shape; otherwise the
+	 *  key is prefixed with the kind (`staircase_levels`, not `levels`). */
+	kind?: 'number' | 'rating' | 'staircase';
+	label?: string;
 	/** Ratings: the scales measured, their named levels, and either a grid (two
 	 *  dimensions; rows: the first, low to high) or rules (`when` CEL over `dims`),
 	 *  plus, optionally, the page ids that feed it. */
 	dimensions?: string[];
-	label?: string;
 	levels?: { ref_id: string; label: string; color?: string; translations?: Translations }[];
 	grid?: string[][];
 	rules?: { level: string; when: string }[];
 	pages?: string[];
+	/** Staircases: the implementation groups that are its levels, lowest first; a level per
+	 *  top-level section (`per`) or one for the whole audit; whether requirements tagged with
+	 *  a lower level count at higher levels too (`cumulative`); the names of level 0 and of
+	 *  the sections. */
+	staircase_levels?: string[];
+	per?: 'depth_1';
+	cumulative?: boolean;
+	floor_label?: string;
+	section_label?: string;
 	/** Frameworks: the rule applies only to audits whose scope includes one of these groups. */
 	implementation_groups?: string[];
 	translations?: Translations | null;
@@ -160,9 +175,9 @@ export interface Framework {
 	subject_question_urn?: string | null;
 	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
 	on_accept?: Record<string, unknown>[];
+	field_visibility: VisibilityMap;
 	/** Quick forms: ordered levels questions share (`config.scale`). */
 	scales_definition?: Scale[];
-	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
 	available_languages?: string[];
@@ -762,6 +777,7 @@ export function serializeNode(n: RequirementNode): Record<string, unknown> {
 		visibility_expression: n.visibility_expression,
 		aggregation: n.aggregation ?? null,
 		typical_evidence: n.typical_evidence,
+		evidence_required: n.evidence_required,
 		weight: n.weight,
 		importance: n.importance,
 		display_mode: n.display_mode,
@@ -954,6 +970,7 @@ export function hydrateDraft(
 		visibility_expression: (n.visibility_expression ?? null) as string | null,
 		aggregation: (n.aggregation ?? null) as RequirementNode['aggregation'],
 		typical_evidence: (n.typical_evidence ?? null) as string | null,
+		evidence_required: (n.evidence_required ?? false) as boolean,
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,
 		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
@@ -1380,6 +1397,7 @@ export function createBuilderState(
 			implementation_groups: null,
 			visibility_expression: null,
 			typical_evidence: null,
+			evidence_required: false,
 			weight: 1,
 			importance: '',
 			display_mode: defaults.display_mode,
@@ -1921,13 +1939,14 @@ export function createBuilderState(
 			['name', 'description']
 		);
 		// Swap nested translations in outcomes_definition entries, and in a rating's levels
+		// (a staircase's levels are implementation group ids, with nothing to translate)
 		const swappedOutcomes = swapJsonArrayTranslations(
 			fw.outcomes_definition as Record<string, unknown>[] | null,
 			oldLocale,
 			newLocale,
-			['annotation', 'label']
+			['annotation', 'label', 'section_label', 'floor_label']
 		)?.map((rule) =>
-			Array.isArray(rule.levels)
+			rule.kind === 'rating' && Array.isArray(rule.levels)
 				? {
 						...rule,
 						levels: swapJsonArrayTranslations(rule.levels, oldLocale, newLocale, ['label'])
@@ -2345,4 +2364,57 @@ export function rulesToGrid(rule: OutcomeRule, scales: Scale[]): string[][] | nu
 		}
 	}
 	return fitGrid({ ...rule, grid }, scales);
+}
+
+/** What a staircase rule covers, as core/staircase.py counts it: the sections that get
+ *  a level, and per level the requirements that must pass. */
+export function staircaseCoverage(
+	rule: OutcomeRule,
+	roots: BuilderNode[]
+): { sections: number; counts: number[] } {
+	const levels = (rule.staircase_levels ?? []).map(String);
+	const tagsBySection: string[][][] = [];
+	const collect = (bn: BuilderNode, into: string[][]) => {
+		if (bn.node.assessable) into.push((bn.node.implementation_groups ?? []).map(String));
+		bn.children.forEach((c) => collect(c, into));
+	};
+	if (rule.per === 'depth_1') {
+		for (const root of roots) {
+			const tags: string[][] = [];
+			collect(root, tags);
+			tagsBySection.push(tags);
+		}
+	} else {
+		const tags: string[][] = [];
+		roots.forEach((r) => collect(r, tags));
+		tagsBySection.push(tags);
+	}
+	const memberOf = (tags: string[], index: number) =>
+		(rule.cumulative ? levels.slice(0, index + 1) : [levels[index]]).some((l) => tags.includes(l));
+	const counts = levels.map((_, i) =>
+		tagsBySection.reduce((sum, section) => sum + section.filter((t) => memberOf(t, i)).length, 0)
+	);
+	const sections = tagsBySection.filter((section) =>
+		section.some((t) => levels.some((_, i) => memberOf(t, i)))
+	).length;
+	return { sections, counts };
+}
+
+export function levelsInGroupOrder(
+	rules: OutcomeRule[],
+	before: string[],
+	after: string[]
+): OutcomeRule[] {
+	const removed = before.filter((id) => !after.includes(id));
+	const added = after.filter((id) => !before.includes(id));
+	const renamed =
+		before.length === after.length && removed.length === 1 && added.length === 1
+			? { [removed[0]]: added[0] }
+			: {};
+	return rules.map((rule) => {
+		if (rule.kind !== 'staircase') return rule;
+		const levels = (rule.staircase_levels ?? []).map((id) => renamed[String(id)] ?? String(id));
+		const sorted = [...new Set(after.filter((id) => levels.includes(id)))];
+		return { ...rule, staircase_levels: sorted };
+	});
 }

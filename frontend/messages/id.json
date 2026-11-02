@@ -1765,8 +1765,6 @@
 	"builderUnsavedChangesNavigation": "Anda memiliki perubahan yang belum disimpan dan akan hilang. Tetap keluar?",
 	"fieldVisibility": "Visibilitas bidang",
 	"fieldVisibilityHelpText": "Kontrol bidang mana yang dapat dilihat dan diedit oleh setiap peran.",
-	"visibilityAuditorRespondent": "Auditor + Responden",
-	"visibilityAuditorOnly": "Hanya auditor",
 	"visibilityHidden": "Tersembunyi",
 	"answers": "Jawaban",
 	"respondentAlignment": "Penyelarasan responden",
@@ -2339,5 +2337,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "Klaim `sub` dari penyedia identitas eksternal yang mengidentifikasi akun ini.",
 	"socialAppRequired": "Akun layanan terfederasi memerlukan penyedia identitas.",
-	"federatedSubjectRequired": "Akun layanan terfederasi memerlukan nilai subject."
+	"federatedSubjectRequired": "Akun layanan terfederasi memerlukan nilai subject.",
+	"reportTimezone": "Zona waktu laporan",
+	"reportTimezoneHelpText": "Wilayah yang digunakan untuk waktu yang tercetak dalam laporan dan ekspor. Setiap waktu menampilkan selisihnya terhadap UTC. Waktu di layar tidak terpengaruh."
 }

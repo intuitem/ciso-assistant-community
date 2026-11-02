@@ -3627,8 +3627,6 @@
 	"builderUnsavedChangesNavigation": "您有未保存的更改将会丢失。仍要离开吗？",
 	"fieldVisibility": "字段可见性",
 	"fieldVisibilityHelpText": "控制每个角色可以查看和编辑哪些字段。",
-	"visibilityAuditorRespondent": "审计员 + 答复方",
-	"visibilityAuditorOnly": "仅审计员",
 	"visibilityHidden": "隐藏",
 	"answers": "答案",
 	"respondentAlignment": "答复方一致性",
@@ -3933,5 +3931,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "外部身份提供商用于标识此账号的 `sub` 声明。",
 	"socialAppRequired": "联合服务账号需要指定身份提供商。",
-	"federatedSubjectRequired": "联合服务账号需要指定 subject 值。"
+	"federatedSubjectRequired": "联合服务账号需要指定 subject 值。",
+	"reportTimezone": "报告时区",
+	"reportTimezoneHelpText": "用于报告和导出中所印时间的地区。每个时间都会显示其相对于 UTC 的偏移量。屏幕上显示的时间不受影响。"
 }

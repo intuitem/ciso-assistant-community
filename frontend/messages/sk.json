@@ -4825,8 +4825,6 @@
 	"skip": "Preskočiť",
 	"fieldVisibility": "Viditeľnosť poľa",
 	"fieldVisibilityHelpText": "Ovládajte, ktoré polia hodnotenia môžu jednotlivé role diváka vidieť a upravovať.",
-	"visibilityAuditorRespondent": "Audítor + Respondent",
-	"visibilityAuditorOnly": "Iba audítor",
 	"visibilityHidden": "Skryté",
 	"answers": "Odpovede",
 	"respondentAlignment": "Zarovnanie respondentov",
@@ -5913,5 +5911,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "Nárok `sub` od externého poskytovateľa identity, ktorý identifikuje toto konto.",
 	"socialAppRequired": "Federované servisné konto vyžaduje poskytovateľa identity.",
-	"federatedSubjectRequired": "Federované servisné konto vyžaduje hodnotu subject."
+	"federatedSubjectRequired": "Federované servisné konto vyžaduje hodnotu subject.",
+	"reportTimezone": "Časové pásmo reportov",
+	"reportTimezoneHelpText": "Oblasť použitá pre časy uvedené v reportoch a exportoch. Každý čas zobrazuje svoj posun voči UTC. Časy na obrazovke nie sú ovplyvnené."
 }

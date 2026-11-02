@@ -4852,8 +4852,6 @@
 	"skip": "Jäta vahele",
 	"fieldVisibility": "Väljade nähtavus",
 	"fieldVisibilityHelpText": "Määra, milliseid hinnangu välju saab iga vaatajaroll näha ja muuta.",
-	"visibilityAuditorRespondent": "Audiitor + vastaja",
-	"visibilityAuditorOnly": "Ainult audiitor",
 	"visibilityHidden": "Peidetud",
 	"answers": "Vastused",
 	"respondentAlignment": "Vastaja hinnang",
@@ -5054,5 +5052,7 @@
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "Välise identiteedipakkuja `sub` väide, mis identifitseerib selle konto.",
 	"socialAppRequired": "Föderatiivne teenusekonto nõuab identiteedipakkujat.",
-	"federatedSubjectRequired": "Föderatiivne teenusekonto nõuab subject-väärtust."
+	"federatedSubjectRequired": "Föderatiivne teenusekonto nõuab subject-väärtust.",
+	"reportTimezone": "Aruannete ajavöönd",
+	"reportTimezoneHelpText": "Piirkond, mida kasutatakse aruannetes ja eksportides näidatud kellaaegade jaoks. Iga kellaaeg näitab oma nihet UTC suhtes. Ekraanil kuvatavaid aegu see ei mõjuta."
 }
