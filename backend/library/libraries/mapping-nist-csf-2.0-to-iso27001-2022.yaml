@@ -46,7 +46,7 @@ objects:
       strength_of_relationship: 9
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
-      relationship: equal
+      relationship: superset
       rationale: semantic
       annotation: Legal, regulatory and contractual requirements identified and managed
       strength_of_relationship: 9
@@ -125,7 +125,7 @@ objects:
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
-      relationship: equal
+      relationship: intersect
       rationale: semantic
       annotation: Top management leadership and commitment
       strength_of_relationship: 9
@@ -137,7 +137,7 @@ objects:
       strength_of_relationship: 7
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
-      relationship: equal
+      relationship: intersect
       rationale: semantic
       annotation: Roles, responsibilities and authorities
       strength_of_relationship: 9
@@ -161,37 +161,37 @@ objects:
       strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
       annotation: Screening is one HR practice
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
-      relationship: superset
+      relationship: intersect
       rationale: semantic
       annotation: Terms of employment
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
-      relationship: superset
+      relationship: intersect
       rationale: semantic
       annotation: Disciplinary process
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
-      relationship: superset
+      relationship: intersect
       rationale: semantic
       annotation: Post-termination responsibilities
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
-      relationship: superset
+      relationship: intersect
       rationale: semantic
       annotation: NDAs signed by personnel
       strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
-      relationship: equal
+      relationship: intersect
       rationale: semantic
       annotation: Information security policy established and communicated
       strength_of_relationship: 9
@@ -561,6 +561,18 @@ objects:
       rationale: semantic
       annotation: Corrective action from nonconformities
       strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Internal audits are evaluations that yield improvements
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Audit programme results feed improvements
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       relationship: intersect
@@ -621,6 +633,12 @@ objects:
       rationale: semantic
       annotation: Secure authentication
       strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: semantic
+      annotation: Authentication protocols protect and verify identity assertions
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       relationship: intersect
@@ -891,6 +909,12 @@ objects:
       rationale: semantic
       annotation: Web filtering
       strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: semantic
+      annotation: Remote access protection (NIST CSF 1.1 PR.AC-3 maps to PR.IR-01)
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       relationship: equal
@@ -1065,6 +1089,12 @@ objects:
       rationale: semantic
       annotation: Escalation
       strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: semantic
+      annotation: Response procedures include the decision to move to recovery
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       relationship: intersect
@@ -1316,7 +1346,7 @@ objects:
       strength_of_relationship: 9
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
-      relationship: equal
+      relationship: subset
       rationale: semantic
       annotation: Legal, regulatory and contractual requirements identified and managed
       strength_of_relationship: 9
@@ -1395,7 +1425,7 @@ objects:
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
-      relationship: equal
+      relationship: intersect
       rationale: semantic
       annotation: Top management leadership and commitment
       strength_of_relationship: 9
@@ -1407,7 +1437,7 @@ objects:
       strength_of_relationship: 7
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
-      relationship: equal
+      relationship: intersect
       rationale: semantic
       annotation: Roles, responsibilities and authorities
       strength_of_relationship: 9
@@ -1431,37 +1461,37 @@ objects:
       strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
-      relationship: subset
+      relationship: intersect
       rationale: semantic
       annotation: Screening is one HR practice
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
-      relationship: subset
+      relationship: intersect
       rationale: semantic
       annotation: Terms of employment
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
-      relationship: subset
+      relationship: intersect
       rationale: semantic
       annotation: Disciplinary process
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
-      relationship: subset
+      relationship: intersect
       rationale: semantic
       annotation: Post-termination responsibilities
       strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
-      relationship: subset
+      relationship: intersect
       rationale: semantic
       annotation: NDAs signed by personnel
       strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
-      relationship: equal
+      relationship: intersect
       rationale: semantic
       annotation: Information security policy established and communicated
       strength_of_relationship: 9
@@ -1831,6 +1861,18 @@ objects:
       rationale: semantic
       annotation: Corrective action from nonconformities
       strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+      rationale: semantic
+      annotation: Internal audits are evaluations that yield improvements
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+      rationale: semantic
+      annotation: Audit programme results feed improvements
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       relationship: intersect
@@ -1891,6 +1933,12 @@ objects:
       rationale: semantic
       annotation: Secure authentication
       strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-04
+      relationship: intersect
+      rationale: semantic
+      annotation: Authentication protocols protect and verify identity assertions
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
       relationship: intersect
@@ -2161,6 +2209,12 @@ objects:
       rationale: semantic
       annotation: Web filtering
       strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      rationale: semantic
+      annotation: Remote access protection (NIST CSF 1.1 PR.AC-3 maps to PR.IR-01)
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
       relationship: equal
@@ -2335,6 +2389,12 @@ objects:
       rationale: semantic
       annotation: Escalation
       strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-05
+      relationship: intersect
+      rationale: semantic
+      annotation: Response procedures include the decision to move to recovery
+      strength_of_relationship: 6
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
       relationship: intersect
