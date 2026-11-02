@@ -1874,11 +1874,13 @@ async def create_evidence(
             hidden directory. The server checks the file type and size
         name: Evidence name (defaults to the file name)
         description: Description
-        folder_id: Folder ID/name
+        folder_id: Folder ID/name (defaults to the folder of the given
+            findings assessments, else Global)
         status: draft | missing | in_review | approved | rejected | expired
             (default: draft)
         findings_assessments: List of findings assessment IDs/names the
-            evidence is attached to
+            evidence is attached to; without folder_id they must share one
+            folder
     """
     try:
         path = Path(file_path).expanduser().resolve()
@@ -1893,6 +1895,35 @@ async def create_evidence(
 
         # Opened before creating the evidence: an unreadable file leaves no record.
         with path.open("rb") as f:
+            binder_ids = None
+            if findings_assessments is not None:
+                from ..resolvers import resolve_findings_assessment_id
+
+                binder_ids = [
+                    resolve_findings_assessment_id(x) for x in findings_assessments
+                ]
+
+            # Keep the evidence in its binders' folder rather than in Global.
+            if not folder_id and binder_ids:
+                binder_folders = set()
+                for binder_id in binder_ids:
+                    binder_res = make_get_request(f"/findings-assessments/{binder_id}/")
+                    if binder_res.status_code != 200:
+                        return (
+                            f"Error creating evidence: {binder_res.status_code} - "
+                            f"{binder_res.text}"
+                        )
+                    folder = binder_res.json().get("folder")
+                    if isinstance(folder, dict):
+                        folder = folder.get("id")
+                    binder_folders.add(folder)
+                if len(binder_folders) > 1:
+                    return (
+                        "Error: the findings assessments are in different folders, "
+                        "pass folder_id"
+                    )
+                folder_id = binder_folders.pop()
+
             if not folder_id and GLOBAL_FOLDER_ID:
                 folder_id = GLOBAL_FOLDER_ID
 
@@ -1903,12 +1934,8 @@ async def create_evidence(
                 payload["description"] = description
             if status is not None:
                 payload["status"] = status
-            if findings_assessments is not None:
-                from ..resolvers import resolve_findings_assessment_id
-
-                payload["findings_assessments"] = [
-                    resolve_findings_assessment_id(x) for x in findings_assessments
-                ]
+            if binder_ids is not None:
+                payload["findings_assessments"] = binder_ids
 
             res = make_post_request("/evidences/", payload)
             if res.status_code != 201:
