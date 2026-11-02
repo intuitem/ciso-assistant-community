@@ -189,11 +189,8 @@ objects:
       description: "Internet access from other components (middleware servers or the\
         \ virtualisation platform \u2013 Advisory)"
       implementation_groups:
-      - A1
-      - A2
-      - A3
-      - A4
-      - B
+      - A
+      - AAB
     - urn: urn:intuitem:risk:req_node:swift-cscf-v2025:1.5
       assessable: false
       depth: 2
