@@ -7749,6 +7749,7 @@
 	"viewComplianceAssessmentFull": "See all requirements (auditor view)",
 	"viewCentralAuditlog": "View central audit log",
 	"viewObjectAudittrail": "View object audit trail",
+	"viewPublishedDocumentcontainer": "View published version only",
 	"customDocHtmlTemplate": "Document template (HTML)",
 	"customEmailTemplate": "Email template",
 	"customWordTemplate": "Document template (Word)",
