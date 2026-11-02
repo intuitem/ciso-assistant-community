@@ -10,8 +10,6 @@ export const folderBatchActions: BatchActionConfig[] = [
 		label: 'changeParentDomain',
 		icon: 'fa-solid fa-folder-tree',
 		field: 'parent_folder',
-		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
-		excludeSelectedSubtree: true,
-		movePreview: true
+		moveFolders: true
 	}
 ];

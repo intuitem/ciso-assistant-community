@@ -31,6 +31,8 @@
 		 * Accepts the object itself or a plain UUID string.
 		 */
 		optionsSelf?: any;
+		/** Further folders to exclude with their subtree, as `optionsSelf` is. */
+		excludedIds?: string[];
 		/**
 		 * Defaults to ['DO', 'GL']
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
@@ -67,6 +69,7 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
+		excludedIds = [],
 		contentTypes = ['DO', 'GL'],
 		writePermission = undefined,
 		allowedIds = null
@@ -127,21 +130,25 @@
 	);
 	const hasNodes = $derived(topNodes.length > 0);
 
-	//  optionsSelf exclusion
-	const excludedId = $derived(
+	//  optionsSelf / excludedIds exclusion
+	const excludedSelf = $derived(
 		optionsSelf
-			? String(
-					typeof optionsSelf === 'object' ? (optionsSelf?.id ?? optionsSelf?.uuid) : optionsSelf
-				)
-			: null
+			? [
+					String(
+						typeof optionsSelf === 'object' ? (optionsSelf?.id ?? optionsSelf?.uuid) : optionsSelf
+					)
+				]
+			: []
+	);
+	const excluded: ReadonlySet<string> = $derived(
+		new Set([...excludedSelf, ...excludedIds.map(String)])
 	);
 
-	/** Recursively prune the excluded node (and its subtree) from a node list. */
+	/** Recursively prune the excluded nodes (and their subtrees) from a node list. */
 	function pruneExcluded(nodes: TreeNode[]): TreeNode[] {
-		const eid = excludedId;
-		if (!eid) return nodes;
+		if (excluded.size === 0) return nodes;
 		return nodes
-			.filter((n) => n.uuid !== eid)
+			.filter((n) => !excluded.has(String(n.uuid)))
 			.map((n) => ({
 				...n,
 				children: n.children ? pruneExcluded(n.children) : undefined
@@ -163,9 +170,11 @@
 		if (!q) return null;
 		const results: SearchResult[] = [];
 		function visit(n: TreeNode, ancestors: string[]) {
+			// An excluded node's descendants are excluded too, as in the tree view.
+			if (excluded.has(String(n.uuid))) return;
 			const selectable =
 				(!n.content_type || contentTypes.includes(n.content_type)) && n.writable !== false;
-			if (selectable && n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
+			if (selectable && n.uuid && n.name.toLowerCase().includes(q)) {
 				results.push({ node: n, path: ancestors });
 			}
 			(n.children ?? []).forEach((c) => visit(c, [...ancestors, n.name]));

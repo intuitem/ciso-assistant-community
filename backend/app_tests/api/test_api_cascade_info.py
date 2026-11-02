@@ -1,10 +1,12 @@
 import pytest
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.apps import startup
 from core.models import AppliedControl, Asset, ReferenceControl
+from custom_fields.models import CustomFieldDefinition
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
@@ -235,7 +237,15 @@ def domain_tree(target_folder: Folder) -> dict[str, Folder]:
     return {"target": target_folder, "sub": sub, "sub_sub": sub_sub}
 
 
-BATCH_URL = "/api/folders/batch-cascade-info/"
+MOVE_PREVIEW_URL = "/api/folders/move-preview/"
+
+
+def _carried_names(payload: dict) -> set[str]:
+    return {
+        o["name"]
+        for group in payload["carried"]["grouped_objects"]
+        for o in group["objects"]
+    }
 
 
 def test_single_delete_preview_still_names_what_a_non_recursive_role_destroys(
@@ -259,36 +269,44 @@ def test_single_delete_preview_still_names_what_a_non_recursive_role_destroys(
     assert "hidden_count" not in deleted
 
 
-def test_batch_preview_lists_sub_domains_and_their_content_once(
+def test_move_preview_lists_sub_domains_and_their_content_once(
     admin_client: APIClient, domain_tree: dict[str, Folder]
 ) -> None:
     """Selecting a domain and one of its descendants must not count the shared
-    subtree twice, and the selected domains are the subject, not the cascade."""
+    subtree twice, and the selected domains are the subjects, not what they carry."""
     res = admin_client.post(
-        BATCH_URL,
+        MOVE_PREVIEW_URL,
         {"ids": [str(domain_tree["target"].id), str(domain_tree["sub"].id)]},
         format="json",
     )
 
     assert res.status_code == 200, res.content
-    deleted = res.json()["deleted"]
-    names = [o["name"] for o in deleted["related_objects"]]
+    payload = res.json()
+    names = [
+        o["name"]
+        for group in payload["carried"]["grouped_objects"]
+        for o in group["objects"]
+    ]
     assert sorted(names) == sorted(set(names))
     assert {"SUB-SUB-DOMAIN", "CANARY-ASSET", "SUB-ASSET", "SUB-SUB-ASSET"} <= set(
         names
     )
     assert not {"Target", "SUB-DOMAIN"} & set(names)
-    assert deleted["count"] == len(names)
+    assert payload["carried"]["count"] == len(names)
+
+    subjects = {s["name"]: s for s in payload["subjects"]}
+    assert subjects["SUB-DOMAIN"]["below_selected"] is True
+    assert subjects["Target"]["below_selected"] is False
 
 
-def test_batch_preview_is_denied_to_a_view_only_role(
+def test_move_preview_is_denied_to_a_view_only_role(
     app_ready: Folder, domain_tree: dict[str, Folder]
 ) -> None:
     client = _scoped_client(
         "aud-batch@cascade.test", "BI-RL-AUD", domain_tree["target"], app_ready
     )
     res = client.post(
-        BATCH_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
     )
 
     assert res.status_code == 403
@@ -312,8 +330,11 @@ def test_entity_assessment_batch_delete_removes_enclave_audit(
     assert not ComplianceAssessment.objects.filter(pk=audit_id).exists()
 
 
-def _folder_group(bucket: dict) -> dict | None:
-    return next((g for g in bucket["grouped_objects"] if g["model"] == "Folder"), None)
+def _folder_group(payload: dict) -> dict | None:
+    return next(
+        (g for g in payload["carried"]["grouped_objects"] if g["model"] == "Folder"),
+        None,
+    )
 
 
 def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
@@ -326,16 +347,16 @@ def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
     )
 
     res = admin_client.post(
-        BATCH_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
     )
 
     assert res.status_code == 200, res.content
-    group = _folder_group(res.json()["deleted"])
+    group = _folder_group(res.json())
     assert group["verbose_name"] == "Domain"
     assert {o["name"] for o in group["objects"]} == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
 
 
-def test_batch_preview_needs_the_change_permission_not_the_delete_one(
+def test_move_preview_needs_the_change_permission_not_the_delete_one(
     app_ready: Folder, domain_tree: dict[str, Folder]
 ) -> None:
     mover = Role.objects.create(name="MOVER", folder=app_ready)
@@ -348,13 +369,40 @@ def test_batch_preview_needs_the_change_permission_not_the_delete_one(
         "mover@cascade.test", "MOVER", domain_tree["target"], app_ready
     )
 
-    res = client.post(BATCH_URL, {"ids": [str(domain_tree["sub"].id)]}, format="json")
+    res = client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["sub"].id)]}, format="json"
+    )
 
     assert res.status_code == 200, res.content
-    assert "SUB-SUB-ASSET" in _bucket_names(res.json()["deleted"])
+    assert "SUB-SUB-ASSET" in _carried_names(res.json())
 
 
-def test_batch_preview_leaves_out_what_stays_in_other_domains(
+def test_move_preview_names_only_the_models_the_caller_may_view(
+    app_ready: Folder, domain_tree: dict[str, Folder]
+) -> None:
+    """view_folder shows the sub-domains, not what they hold: a role allowed to move
+    a domain without view_asset or view_roleassignment only gets counts for those."""
+    mover = Role.objects.create(name="BLIND-MOVER", folder=app_ready)
+    mover.permissions.set(
+        Permission.objects.filter(codename__in=["view_folder", "change_folder"])
+    )
+    client = _scoped_client(
+        "blind-mover@cascade.test", "BLIND-MOVER", domain_tree["target"], app_ready
+    )
+
+    res = client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    payload = res.json()
+    assert _carried_names(payload) == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
+    # Three assets, plus the mover's own role assignment and group in Target.
+    assert payload["carried"]["hidden_count"] == 5
+    assert "blind-mover@cascade.test" not in res.content.decode()
+
+
+def test_move_preview_leaves_out_what_stays_in_other_domains(
     admin_client: APIClient, app_ready: Folder, target_folder: Folder
 ) -> None:
     elsewhere = Folder.objects.create(
@@ -369,15 +417,17 @@ def test_batch_preview_leaves_out_what_stays_in_other_domains(
         name="FOREIGN-CONTROL", folder=elsewhere, reference_control=reference
     )
 
-    res = admin_client.post(BATCH_URL, {"ids": [str(target_folder.id)]}, format="json")
+    res = admin_client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(target_folder.id)]}, format="json"
+    )
 
     assert res.status_code == 200, res.content
-    carried = _bucket_names(res.json()["deleted"])
+    carried = _carried_names(res.json())
     assert "LOCAL-REFERENCE" in carried
     assert "FOREIGN-CONTROL" not in carried
 
 
-def test_batch_preview_only_names_what_the_caller_may_view(
+def test_move_preview_only_names_what_the_caller_may_view(
     app_ready: Folder, domain_tree: dict[str, Folder]
 ) -> None:
     """A non-recursive role grants nothing on the sub-domains: their names and
@@ -391,20 +441,52 @@ def test_batch_preview_only_names_what_the_caller_may_view(
     )
 
     res = client.post(
-        BATCH_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
     )
 
     assert res.status_code == 200, res.content
-    deleted = res.json()["deleted"]
-    names = _bucket_names(deleted)
+    payload = res.json()
+    names = _carried_names(payload)
     assert "CANARY-ASSET" in names
     assert not {"SUB-DOMAIN", "SUB-SUB-DOMAIN", "SUB-ASSET", "SUB-SUB-ASSET"} & names
-    assert deleted["hidden_count"] == 4
+    # The four above, plus the caller's role assignment: the role lacks
+    # view_roleassignment.
+    assert payload["carried"]["hidden_count"] == 5
 
 
-def test_batch_preview_refuses_builtin_domains(
+def test_move_preview_does_not_name_custom_field_values(
+    app_ready: Folder, domain_tree: dict[str, Folder]
+) -> None:
+    """Custom field values have no folder of their own: they must not slip past the
+    visibility check of the object they describe."""
+    definition = CustomFieldDefinition.objects.create(
+        content_type=ContentType.objects.get_for_model(Asset),
+        key="vendor_contract",
+        label="Vendor contract",
+        field_type="text",
+    )
+    Asset.objects.get(name="SUB-ASSET").set_custom_field(definition, "SECRET-4242")
+    client = _scoped_client(
+        "non-recursive-cf@cascade.test",
+        "BI-RL-DMA",
+        domain_tree["target"],
+        app_ready,
+        is_recursive=False,
+    )
+
+    res = client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    assert "SECRET-4242" not in res.content.decode()
+
+
+def test_move_preview_refuses_builtin_domains(
     admin_client: APIClient, app_ready: Folder
 ) -> None:
-    res = admin_client.post(BATCH_URL, {"ids": [str(app_ready.id)]}, format="json")
+    res = admin_client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(app_ready.id)]}, format="json"
+    )
 
     assert res.status_code == 403

@@ -4156,13 +4156,9 @@ export interface BatchActionConfig {
 	minSelection?: number;
 	maxSelection?: number;
 	confirmMessage?: string; // i18n key for an extra confirm warning, receives {count}
-	/** Drop the selected rows, and everything filed below them, from the target
-	 * picker: reparenting a row into its own descendant is a cycle the API rejects.
-	 * Reads each option's `parent_folder`, so it only fits models keyed on that. */
-	excludeSelectedSubtree?: boolean;
-	/** Before a domain move is confirmed, list what the selected domains carry along
-	 * and which of them leave a selected parent. Only fits the folders endpoint. */
-	movePreview?: boolean;
+	/** A change_field on `parent_folder` of domains: picked from the domain tree with
+	 * the selection's subtrees pruned, after a preview of what the domains carry along. */
+	moveFolders?: boolean;
 }
 
 export interface ParentActionConfig {

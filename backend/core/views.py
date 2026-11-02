@@ -2118,6 +2118,18 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         return Response({"succeeded": succeeded, "failed": failed})
 
+    @staticmethod
+    def _cascade_display_name(obj: models.Model) -> str:
+        """How a cascade or move preview names an object."""
+        if isinstance(obj, RoleAssignment):
+            role_name = getattr(getattr(obj, "role", None), "name", "") or ""
+            if getattr(obj, "user", None):
+                return f"{role_name} → {getattr(obj.user, 'email', '')}"
+            if getattr(obj, "user_group", None):
+                return f"{role_name} → {getattr(obj.user_group, 'name', '')}"
+            return role_name
+        return getattr(obj, "name", None) or getattr(obj, "email", None) or str(obj)
+
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
         """
@@ -2139,58 +2151,28 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        return Response(self._cascade_preview([instance], request.user))
+        collector = NestedObjects(using=router.db_for_write(instance))
+        collector.collect([instance])
 
-    def _cascade_preview(
-        self, subjects: list[models.Model], user: User, carried_only: bool = False
-    ) -> dict:
-        """Deleted, affected and blocked buckets for deleting `subjects` together.
-
-        With `carried_only`, the deleted bucket instead lists what moving the
-        subjects carries along: their sub-domains and what is filed under them, not
-        what deleting them would cascade onto in other domains. Objects in domains
-        the user may not view (a role is not always recursive) are then counted in
-        `hidden_count` rather than named. Callers check their own permission on
-        each subject beforehand.
-        """
-        using = router.db_for_write(subjects[0])
-        collector = NestedObjects(using=using)
-        collector.collect(subjects)
-
-        subject_keys = {(type(s), str(s.pk)) for s in subjects}
-        subject_types = tuple({type(s) for s in subjects})
-        # Hidden as collateral elsewhere, but a domain's sub-domains are the first
-        # thing moving it carries along.
-        show_deleted_folders = carried_only and any(
-            isinstance(s, Folder) for s in subjects
+        scope_folder = (
+            instance if isinstance(instance, Folder) else Folder.get_folder(instance)
         )
-
-        subject_folder_ids = set()
         in_scope_folder_ids = set()
-        for subject in subjects:
-            scope_folder = (
-                subject if isinstance(subject, Folder) else Folder.get_folder(subject)
-            )
-            if scope_folder is not None:
-                subject_folder_ids.add(str(scope_folder.id))
-                in_scope_folder_ids |= {str(scope_folder.id)} | {
-                    str(f.id) for f in scope_folder.get_sub_folders()
-                }
+        if scope_folder is not None:
+            in_scope_folder_ids = {str(scope_folder.id)} | {
+                str(f.id) for f in scope_folder.get_sub_folders()
+            }
         viewable_folder_ids = {
-            str(fid) for fid in RoleAssignment.get_viewable_object_ids(user, Folder)
+            str(fid)
+            for fid in RoleAssignment.get_viewable_object_ids(request.user, Folder)
         }
-        visible_folder_ids = subject_folder_ids if carried_only else in_scope_folder_ids
 
         def is_visible(obj):
             folder = Folder.get_folder(obj)
             if folder is None:
                 return True
             folder_id = str(folder.id)
-            return folder_id in visible_folder_ids or folder_id in viewable_folder_ids
-
-        def is_outside_subjects(obj):
-            folder = Folder.get_folder(obj)
-            return folder is not None and str(folder.id) not in in_scope_folder_ids
+            return folder_id in in_scope_folder_ids or folder_id in viewable_folder_ids
 
         skip_model_names = {
             "Token",
@@ -2211,19 +2193,17 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             )
 
         # Build index of concrete objects that will be deleted
-        # Excludes the previewed objects only, not their whole model: a
+        # Excludes the previewed object only, not its whole model: a
         # self-referential cascade would otherwise hide every descendant.
         def is_the_subject(model, obj):
-            return (model, str(getattr(obj, "pk", ""))) in subject_keys
+            return model is type(instance) and str(getattr(obj, "pk", "")) == str(
+                instance.pk
+            )
 
         # Roots a destroy override deletes explicitly cascade like the subject.
-        extra_roots = [
-            root
-            for subject in subjects
-            for root in self.cascade_extra_deletions(subject)
-        ]
+        extra_roots = list(self.cascade_extra_deletions(instance))
         if extra_roots:
-            extra_collector = NestedObjects(using=using)
+            extra_collector = NestedObjects(using=router.db_for_write(instance))
             extra_collector.collect(extra_roots)
             for model, objs in extra_collector.model_objs.items():
                 collector.model_objs.setdefault(model, set()).update(objs)
@@ -2242,45 +2222,22 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         def add_grouped(bucket, obj):
             model = obj.__class__
-            if is_hidden_model(model) and not (
-                show_deleted_folders and model is Folder and bucket is deleted_bucket
-            ):
+            if is_hidden_model(model):
                 return
-            if carried_only and bucket is deleted_bucket and is_outside_subjects(obj):
-                return
-            if model is Folder and obj.content_type != Folder.ContentType.DOMAIN:
+            if not is_visible(obj):
                 return
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
-            if not is_visible(obj):
-                if carried_only:
-                    bucket["_hidden"].add((key, pk))
-                return
             if (key, pk) in bucket["_seen"]:
                 return
 
-            if key == "RoleAssignment":
-                role_name = getattr(getattr(obj, "role", None), "name", "") or ""
-                if getattr(obj, "user", None):
-                    display = f"{role_name} → {getattr(obj.user, 'email', '')}"
-                elif getattr(obj, "user_group", None):
-                    display = f"{role_name} → {getattr(obj.user_group, 'name', '')}"
-                else:
-                    display = role_name
-            else:
-                display = (
-                    getattr(obj, "name", None)
-                    or getattr(obj, "email", None)
-                    or str(obj)
-                )
+            display = self._cascade_display_name(obj)
 
             group = bucket["by_model"].setdefault(
                 key,
                 {
                     "model": key,
-                    "verbose_name": str(
-                        _("Domain") if model is Folder else model._meta.verbose_name
-                    ),
+                    "verbose_name": str(model._meta.verbose_name),
                     "objects": [],
                 },
             )
@@ -2295,22 +2252,19 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             count = sum(len(g["objects"]) for g in groups)
             return groups, count
 
-        deleted_bucket = {"by_model": {}, "_seen": set(), "_hidden": set()}
-        affected_bucket = {"by_model": {}, "_seen": set(), "_hidden": set()}
-        blocked_bucket = {"by_model": {}, "_seen": set(), "_hidden": set()}
+        deleted_bucket = {"by_model": {}, "_seen": set()}
+        affected_bucket = {"by_model": {}, "_seen": set()}
+        blocked_bucket = {"by_model": {}, "_seen": set()}
 
         # Cleared before the cascade (see cascade_preclear), so gone by the
         # time the PROTECT would be evaluated.
         precleared_index = set()
-        for subject in subjects:
-            for queryset in self.cascade_preclear(subject):
-                pre_collector = NestedObjects(using=using)
-                pre_collector.collect(list(queryset))
-                for model, objs in pre_collector.model_objs.items():
-                    for o in objs:
-                        precleared_index.add(
-                            (model.__name__, str(getattr(o, "pk", "")))
-                        )
+        for queryset in self.cascade_preclear(instance):
+            pre_collector = NestedObjects(using=router.db_for_write(instance))
+            pre_collector.collect(list(queryset))
+            for model, objs in pre_collector.model_objs.items():
+                for o in objs:
+                    precleared_index.add((model.__name__, str(getattr(o, "pk", ""))))
 
         # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
         # ProtectedError and parks the blockers here.
@@ -2327,9 +2281,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             if getattr(model._meta, "auto_created", False):
                 through_rows.append((model, list(instances)))
                 continue
-            if is_hidden_model(model) and not (
-                show_deleted_folders and model is Folder
-            ):
+            if is_hidden_model(model):
                 continue
             for obj in instances:
                 if is_the_subject(model, obj):
@@ -2356,7 +2308,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                         rel_obj = None
                     if not rel_obj:
                         continue
-                    if isinstance(rel_obj, subject_types):
+                    if isinstance(rel_obj, type(instance)):
                         continue
                     if getattr(rel_obj._meta, "auto_created", False):
                         continue
@@ -2413,36 +2365,34 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 # Unknown shape; ignore safely
                 pass
 
-        def add_affected_unless_deleted(rel_obj):
-            if is_the_subject(type(rel_obj), rel_obj):
-                return
-            key = rel_obj.__class__.__name__
-            pk = str(getattr(rel_obj, "pk", "")) or ""
-            if (key, pk) not in deleted_index:
-                add_grouped(affected_bucket, rel_obj)
+        # 2c) Outgoing links from the instance (FK/O2O/M2M)
+        for f in instance._meta.get_fields():
+            if getattr(f, "auto_created", False):
+                continue  # skip reverse relations
 
-        # 2c) Outgoing links from the subjects (FK/O2O/M2M)
-        for subject in subjects:
-            for f in subject._meta.get_fields():
-                if getattr(f, "auto_created", False):
-                    continue  # skip reverse relations
+            # Local FK/O2O targets: will remain but lose the link to this instance.
+            if isinstance(f, (ForeignKey, OneToOneField)):
+                try:
+                    rel_obj = getattr(instance, f.name, None)
+                except Exception:
+                    rel_obj = None
+                if rel_obj:
+                    key = rel_obj.__class__.__name__
+                    pk = str(getattr(rel_obj, "pk", "")) or ""
+                    if (key, pk) not in deleted_index:
+                        add_grouped(affected_bucket, rel_obj)
 
-                # Local FK/O2O targets: will remain but lose the link to this subject.
-                if isinstance(f, (ForeignKey, OneToOneField)):
-                    try:
-                        rel_obj = getattr(subject, f.name, None)
-                    except Exception:
-                        rel_obj = None
-                    if rel_obj:
-                        add_affected_unless_deleted(rel_obj)
-
-                # Local M2M targets: will remain; join rows are removed.
-                elif isinstance(f, ManyToManyField):
-                    try:
-                        for rel_obj in getattr(subject, f.name).all():
-                            add_affected_unless_deleted(rel_obj)
-                    except Exception:
-                        pass
+            # Local M2M targets: will remain; join rows are removed.
+            elif isinstance(f, ManyToManyField):
+                try:
+                    manager = getattr(instance, f.name)
+                    for rel_obj in manager.all():
+                        key = rel_obj.__class__.__name__
+                        pk = str(getattr(rel_obj, "pk", "")) or ""
+                        if (key, pk) not in deleted_index:
+                            add_grouped(affected_bucket, rel_obj)
+                except Exception:
+                    pass
 
         # 3) Sort and respond
         deleted_groups, deleted_count = finalize(deleted_bucket)
@@ -2483,9 +2433,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 "level": "error",
             },
         }
-        if carried_only:
-            payload["deleted"]["hidden_count"] = len(deleted_bucket["_hidden"])
-        return payload
+        return Response(payload)
 
     def _get_optimized_object_data(self, queryset):
         """Serializer context for list(); viewsets extend it with their own data."""
@@ -9604,14 +9552,19 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
-    @action(detail=False, methods=["post"], url_path="batch-cascade-info")
-    def batch_cascade_info(self, request: Request) -> Response:
-        """What moving the listed domains carries along, in the `cascade_info` format.
+    # One per requirement and implied by the audit they belong to: naming them would
+    # bury the rest of the move preview.
+    MOVE_PREVIEW_EXEMPT_MODELS = frozenset({"core.RequirementAssessment"})
 
-        The `deleted` bucket holds the sub-domains and everything filed under them;
-        the other buckets are not meaningful for a move. Covers the listed domains
-        the caller may change, collected in one pass so a subtree shared by two of
-        them is reported once. 400 if `ids` is empty or longer than
+    @action(detail=False, methods=["post"], url_path="move-preview")
+    def move_preview(self, request: Request) -> Response:
+        """What moving the listed domains together carries along.
+
+        Covers the listed domains the caller may change. `subjects` says for each one
+        whether it sits below another listed domain: moved to a common target, it
+        leaves that subtree. `carried` groups the sub-domains and everything filed
+        under the moved subtrees; what the caller may not view is counted in
+        `hidden_count`, never named. 400 if `ids` is empty or longer than
         `BATCH_SIZE_LIMIT`, 403 if none is changeable.
         """
         ids = request.data.get("ids")
@@ -9626,18 +9579,103 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
             )
 
         perm = Permission.objects.get(codename="change_folder")
-        subjects = [
-            obj
-            for obj in self.get_queryset().filter(id__in=ids, builtin=False)
-            if RoleAssignment.is_access_allowed(
-                user=request.user, perm=perm, folder=Folder.get_folder(obj)
-            )
-        ]
+        subjects = sorted(
+            (
+                folder
+                for folder in self.get_queryset().filter(id__in=ids, builtin=False)
+                if RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=folder
+                )
+            ),
+            key=lambda folder: folder.name.lower(),
+        )
         if not subjects:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
+        subject_ids = {folder.id for folder in subjects}
+        subtree_ids = set(subject_ids)
+        below_selected = set()
+        for folder_id in Folder.descendants.through.objects.filter(
+            from_folder_id__in=subject_ids
+        ).values_list("to_folder_id", flat=True):
+            subtree_ids.add(folder_id)
+            if folder_id in subject_ids:
+                below_selected.add(folder_id)
+
+        # Per model, not per folder: view_folder alone does not let a role read what
+        # a domain holds.
+        granted = RoleAssignment.get_permissions_per_folder(
+            request.user, is_recursive=True
+        )
+
+        def viewable_folder_ids(model) -> set:
+            codename = f"view_{model._meta.model_name}"
+            return {
+                folder_id
+                for folder_id in subtree_ids
+                if codename in granted.get(str(folder_id), ())
+            }
+
+        groups = []
+        hidden_count = 0
+
+        def add_group(model, verbose_name, queryset, viewable) -> None:
+            nonlocal hidden_count
+            if viewable != subtree_ids:
+                hidden_count += queryset.exclude(folder_id__in=viewable).count()
+            if not viewable:
+                return
+            objects = [
+                {"id": str(obj.pk), "name": self._cascade_display_name(obj)}
+                for obj in queryset.filter(folder_id__in=viewable)
+            ]
+            if objects:
+                objects.sort(key=lambda o: (o["name"] or "").lower())
+                groups.append(
+                    {
+                        "model": model.__name__,
+                        "verbose_name": str(verbose_name),
+                        "objects": objects,
+                    }
+                )
+
+        # A folder's own folder is itself, so view_folder is checked on the sub-domain.
+        add_group(
+            Folder,
+            _("Domain"),
+            Folder.objects.filter(
+                id__in=subtree_ids - subject_ids,
+                content_type=Folder.ContentType.DOMAIN,
+            ).annotate(folder_id=F("id")),
+            viewable_folder_ids(Folder),
+        )
+        for model in self._folder_content_models(
+            exempt=self.MOVE_PREVIEW_EXEMPT_MODELS
+        ):
+            queryset = model._base_manager.filter(folder_id__in=subtree_ids)
+            if model is RoleAssignment:
+                queryset = queryset.select_related("role", "user", "user_group")
+            add_group(
+                model, model._meta.verbose_name, queryset, viewable_folder_ids(model)
+            )
+
+        groups.sort(key=lambda g: g["verbose_name"].lower())
         return Response(
-            self._cascade_preview(subjects, request.user, carried_only=True)
+            {
+                "subjects": [
+                    {
+                        "id": str(folder.id),
+                        "name": folder.name,
+                        "below_selected": folder.id in below_selected,
+                    }
+                    for folder in subjects
+                ],
+                "carried": {
+                    "count": sum(len(g["objects"]) for g in groups),
+                    "hidden_count": hidden_count,
+                    "grouped_objects": groups,
+                },
+            }
         )
 
     def cascade_preclear(self, instance):
@@ -9826,20 +9864,21 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         )
 
     @staticmethod
-    def _folder_content_models() -> list:
-        """Every model that could hold a folder's content.
+    def _folder_content_models(
+        exempt: frozenset[str] = frozenset({"iam.UserGroup", "iam.RoleAssignment"}),
+    ) -> list:
+        """Every model that could hold a folder's content, except the `exempt` labels.
 
-        Exhaustive rather than curated: deletion cascades through every FK. The IAM
-        objects every domain auto-provisions are exempt, or nothing would be deletable.
-        Models whose table this edition never created are dropped up front: probing one
-        raises, and on PostgreSQL that aborts the surrounding transaction, so the error
-        cannot simply be caught and skipped.
+        Exhaustive rather than curated: deletion cascades through every FK. By default
+        the IAM objects every domain auto-provisions are exempt, or nothing would be
+        deletable. Models whose table this edition never created are dropped up front:
+        probing one raises, and on PostgreSQL that aborts the surrounding transaction,
+        so the error cannot simply be caught and skipped.
         """
         from django.apps import apps
         from django.db import connection
 
         tables = set(connection.introspection.table_names())
-        exempt = {"iam.UserGroup", "iam.RoleAssignment"}
         return [
             model
             for model in apps.get_models()

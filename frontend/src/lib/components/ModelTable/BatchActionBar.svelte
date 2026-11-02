@@ -14,6 +14,7 @@
 	import MergeAppliedControlsModal from '#lib/components/Modals/MergeAppliedControlsModal.svelte';
 	import MergeLabelsModal from '#lib/components/Modals/MergeLabelsModal.svelte';
 	import ComposeMetricModal from '#lib/components/Modals/ComposeMetricModal.svelte';
+	import BatchMoveFoldersModal from '#lib/components/Modals/BatchMoveFoldersModal.svelte';
 	import type { BatchActionConfig, TableBatchAction } from '#lib/utils/table.js';
 	import type { urlModel } from '#lib/utils/types.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
@@ -159,80 +160,81 @@
 			return;
 		}
 
-		const modalComponent: ModalComponent = {
-			ref: BatchActionModal,
-			props: {
-				actionType: action.type,
-				count,
-				optionsEndpoint: action.optionsEndpoint,
-				excludeIds: action.excludeSelectedSubtree ? ids : [],
-				enableDoubleDash: action.enableDoubleDash ?? false,
-				multiSelect: action.multiSelect ?? false,
-				inputType: action.inputType,
-				confirmMessage: action.confirmMessage,
-				fixedValue: action.value,
-				URLModel,
-				movePreviewIds: action.movePreview ? ids : [],
-				onConfirm: async (value?: string | string[]) => {
-					try {
-						const res = await fetch(`/${URLModel}/batch-action`, {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({
-								action: action.type,
-								ids,
-								field: action.field ?? null,
-								value: value ?? null
-							})
-						});
+		const onConfirm = async (value?: string | string[]) => {
+			try {
+				const res = await fetch(`/${URLModel}/batch-action`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						action: action.type,
+						ids,
+						field: action.field ?? null,
+						value: value ?? null
+					})
+				});
 
-						if (!res.ok) {
-							toastStore.trigger({
-								message: m.batchActionAllFailed({ count }),
-								background: 'preset-filled-error-500'
-							});
-							return;
-						}
-
-						const result = await res.json();
-						// Any endpoint reporting an unread count updates the badge.
-						applyUnreadCount(result);
-						const succeededCount = result.succeeded?.length ?? 0;
-						const failedCount = result.failed?.length ?? 0;
-
-						if (failedCount === 0) {
-							toastStore.trigger({
-								message: m.batchActionSuccess({ count: succeededCount }),
-								background: 'preset-filled-success-500'
-							});
-						} else if (succeededCount === 0) {
-							toastStore.trigger({
-								message: m.batchActionAllFailed({ count: failedCount }),
-								background: 'preset-filled-error-500'
-							});
-						} else {
-							toastStore.trigger({
-								message: m.batchActionPartialSuccess({
-									succeeded: succeededCount,
-									failed: failedCount
-								}),
-								background: 'preset-filled-warning-500'
-							});
-						}
-
-						handler.invalidate();
-						await refreshAll();
-						onClearSelection();
-					} catch (e) {
-						console.error('Batch action failed', e);
-						toastStore.trigger({
-							message: m.batchActionAllFailed({ count }),
-							background: 'preset-filled-error-500'
-						});
-					}
+				if (!res.ok) {
+					toastStore.trigger({
+						message: m.batchActionAllFailed({ count }),
+						background: 'preset-filled-error-500'
+					});
+					return;
 				}
+
+				const result = await res.json();
+				// Any endpoint reporting an unread count updates the badge.
+				applyUnreadCount(result);
+				const succeededCount = result.succeeded?.length ?? 0;
+				const failedCount = result.failed?.length ?? 0;
+
+				if (failedCount === 0) {
+					toastStore.trigger({
+						message: m.batchActionSuccess({ count: succeededCount }),
+						background: 'preset-filled-success-500'
+					});
+				} else if (succeededCount === 0) {
+					toastStore.trigger({
+						message: m.batchActionAllFailed({ count: failedCount }),
+						background: 'preset-filled-error-500'
+					});
+				} else {
+					toastStore.trigger({
+						message: m.batchActionPartialSuccess({
+							succeeded: succeededCount,
+							failed: failedCount
+						}),
+						background: 'preset-filled-warning-500'
+					});
+				}
+
+				handler.invalidate();
+				await refreshAll();
+				onClearSelection();
+			} catch (e) {
+				console.error('Batch action failed', e);
+				toastStore.trigger({
+					message: m.batchActionAllFailed({ count }),
+					background: 'preset-filled-error-500'
+				});
 			}
 		};
+
+		const modalComponent: ModalComponent = action.moveFolders
+			? { ref: BatchMoveFoldersModal, props: { ids, onConfirm } }
+			: {
+					ref: BatchActionModal,
+					props: {
+						actionType: action.type,
+						count,
+						optionsEndpoint: action.optionsEndpoint,
+						enableDoubleDash: action.enableDoubleDash ?? false,
+						multiSelect: action.multiSelect ?? false,
+						inputType: action.inputType,
+						confirmMessage: action.confirmMessage,
+						fixedValue: action.value,
+						onConfirm
+					}
+				};
 
 		const title = action.type === 'delete' ? m.delete() : safeTranslate(action.label);
 
