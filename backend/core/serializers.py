@@ -2334,6 +2334,7 @@ class UserReadSerializer(BaseModelSerializer):
             "user_groups",
             "idp_groups",
             "keep_local_login",
+            "can_connect_apps",
             "is_third_party",
             "observation",
             "has_mfa_enabled",
@@ -2383,6 +2384,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "date_joined",
             "user_groups",
             "keep_local_login",
+            "can_connect_apps",
             "is_third_party",
             "is_local",
             "observation",
@@ -2753,7 +2755,25 @@ class UserWriteSerializer(BaseModelSerializer):
         self._enforce_last_active_admin(attrs)
         self._enforce_lifecycle_field_rights(attrs)
         self._enforce_email_change_rights(attrs)
+        self._enforce_connect_apps_rights(attrs)
         return attrs
+
+    def _enforce_connect_apps_rights(self, attrs: dict) -> None:
+        """Who may connect AI apps is an admin decision, like who keeps a local
+        login when SSO is forced."""
+        if "can_connect_apps" not in attrs:
+            return
+        current = self.instance.can_connect_apps if self.instance else False
+        request = self.context.get("request")
+        if (
+            attrs["can_connect_apps"] != current
+            and request is not None
+            and not request.user.is_admin()
+        ):
+            self._deny(
+                "connect_apps",
+                {"can_connect_apps": ["connectAppsRequiresAdmin"]},
+            )
 
     def to_representation(self, instance):
         # write_only so DRF never looks for a `language` attribute; the edit form

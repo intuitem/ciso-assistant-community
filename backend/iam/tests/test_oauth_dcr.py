@@ -13,7 +13,7 @@ from knox.models import AuthToken
 from iam.models import User
 from iam.oidc_adapter import CISOOIDCAdapter, mcp_resource
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
 
 AUTHORIZE_URL = "/api/identity/o/authorize"
 TOKEN_URL = "/api/identity/o/api/token"
@@ -29,7 +29,11 @@ def _clear_cache():
 @pytest.fixture
 def knox_token():
     user = User.objects._create_user(
-        email="dcr@example.com", password=None, mailing=False, initial_group=None
+        email="dcr@example.com",
+        password=None,
+        mailing=False,
+        initial_group=None,
+        can_connect_apps=True,
     )
     return AuthToken.objects.create(user=user)[1]
 

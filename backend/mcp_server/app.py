@@ -40,7 +40,40 @@ def build_app():
         issuer_url=issuer,
         resource_url=mcp_resource(),
     )
+    app = _with_kill_switch(app, urlsplit(mcp_resource()).path)
     return _with_authorization_server_metadata(app, urlsplit(issuer).path)
+
+
+def _with_kill_switch(app, mcp_path):
+    """403 with a reason on the MCP endpoint while the admin keeps MCP off; the
+    metadata documents stay up so clients report this instead of a discovery error."""
+    from asgiref.sync import sync_to_async
+    from django.db import close_old_connections
+    from starlette.responses import JSONResponse
+
+    from iam.mcp_access import mcp_enabled
+
+    def enabled():
+        close_old_connections()
+        try:
+            return mcp_enabled()
+        finally:
+            close_old_connections()
+
+    async def asgi(scope, receive, send):
+        if (
+            scope["type"] == "http"
+            and scope["path"].rstrip("/") == mcp_path.rstrip("/")
+            and not await sync_to_async(enabled)()
+        ):
+            response = JSONResponse(
+                {"error": "MCP is disabled by your administrator."}, status_code=403
+            )
+            await response(scope, receive, send)
+            return
+        await app(scope, receive, send)
+
+    return asgi
 
 
 def _with_authorization_server_metadata(app, issuer_path):

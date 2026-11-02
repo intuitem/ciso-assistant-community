@@ -868,6 +868,7 @@ class UserManager(BaseUserManager):
                 observation=extra_fields.get("observation"),
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
+                can_connect_apps=extra_fields.get("can_connect_apps", False),
                 expiry_date=extra_fields.get("expiry_date"),
                 is_jit_provisioned=extra_fields.get("is_jit_provisioned", False),
             ),
@@ -966,6 +967,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         default=False,
         help_text=_(
             "If True allow the user to log in using the normal login form even with SSO forced."
+        ),
+    )
+    can_connect_apps = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True allow the user to connect AI apps (MCP) with their account."
         ),
     )
     is_third_party = models.BooleanField(default=False)
@@ -2442,7 +2449,7 @@ class ServiceAccount(AbstractBaseModel):
 
 
 class ConnectedAppUse(models.Model):
-    """When a user's OAuth tokens for an app were last accepted.
+    """When a user authorized an app, and when its tokens were last accepted.
 
     Kept apart from allauth's Token rows: access tokens are replaced every hour,
     and the date would go with them.
@@ -2454,7 +2461,8 @@ class ConnectedAppUse(models.Model):
         User, on_delete=models.CASCADE, related_name="connected_app_uses"
     )
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
-    last_used_at = models.DateTimeField()
+    authorized_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -2467,13 +2475,25 @@ class ConnectedAppUse(models.Model):
     def record(cls, user_id, client_id) -> None:
         # at most one write per app and user per THROTTLE: this runs on every call
         now = timezone.now()
-        updated = cls.objects.filter(
-            user_id=user_id, client_id=client_id, last_used_at__lt=now - cls.THROTTLE
-        ).update(last_used_at=now)
+        updated = (
+            cls.objects.filter(user_id=user_id, client_id=client_id)
+            .filter(
+                Q(last_used_at__isnull=True) | Q(last_used_at__lt=now - cls.THROTTLE)
+            )
+            .update(last_used_at=now)
+        )
         if not updated:
             cls.objects.get_or_create(
                 user_id=user_id, client_id=client_id, defaults={"last_used_at": now}
             )
+
+    @classmethod
+    def record_authorization(cls, user_id, client_id) -> None:
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"authorized_at": timezone.now()},
+        )
 
 
 common_exclude = ["created_at", "updated_at"]
@@ -2518,3 +2538,31 @@ def _skip_builtin_rbac(sender, instance, **kwargs):
 
 for _rbac_model in (RoleAssignment, Role, UserGroup):
     pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)
+
+
+_APP_ACCESS_FIELDS = ("can_connect_apps", "is_active")
+
+
+def _note_lost_app_access(sender, instance, update_fields=None, **kwargs):
+    # unticking the flag or deactivating is a decision about this person: their
+    # connections must not come back if it is reverted, so the tokens go
+    if not instance.pk or (
+        update_fields is not None and not set(update_fields) & set(_APP_ACCESS_FIELDS)
+    ):
+        return
+    before = User.objects.filter(pk=instance.pk).values(*_APP_ACCESS_FIELDS).first()
+    instance._lost_app_access = bool(before) and any(
+        before[field] and not getattr(instance, field) for field in _APP_ACCESS_FIELDS
+    )
+
+
+def _revoke_lost_app_access(sender, instance, **kwargs):
+    if getattr(instance, "_lost_app_access", False):
+        from iam.mcp_access import revoke_app_tokens
+
+        instance._lost_app_access = False
+        revoke_app_tokens([instance.pk])
+
+
+models.signals.pre_save.connect(_note_lost_app_access, sender=User)
+models.signals.post_save.connect(_revoke_lost_app_access, sender=User)

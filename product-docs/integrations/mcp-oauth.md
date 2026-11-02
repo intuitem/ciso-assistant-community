@@ -136,6 +136,24 @@ reconnect to be offered write access.
 
 {% step %}
 
+#### Turn MCP on and choose who may connect
+
+Both are **off by default**: an instance does not accept any AI app until an
+administrator decides so.
+
+1. Go to **Extra** > **Settings** > **Feature flags** and turn on **AI app
+   connections (MCP)**.
+2. Allow the users who may connect an app: in **Organization** > **Users**,
+   edit a user and tick **Can connect AI apps (MCP)**, or select several users
+   and use **Allow AI apps**. Users who can connect show an **AI apps** badge.
+
+Unticking a user, or deactivating them, disconnects all their apps at once.
+Turning the feature flag off blocks every connection but keeps them: they work
+again when you turn it back on.
+{% endstep %}
+
+{% step %}
+
 #### Check the setup
 
 Each of these must return `200`:
@@ -149,7 +167,7 @@ for p in /.well-known/oauth-protected-resource/mcp \
 done
 ```
 
-`/mcp` without a token must return `401`.
+`/mcp` without a token must return `401` (`403` means the feature flag is off).
 {% endstep %}
 {% endstepper %}
 
@@ -212,6 +230,9 @@ every app that can access your account:
 
 <figure><img src="../.gitbook/assets/mcp-oauth-connected-apps.png" alt=""><figcaption><p>Connected apps in the security settings: Claude Code with read and write access, and apps that are authorized but not used yet</p></figcaption></figure>
 
+If your administrator has not allowed your account to connect apps, this
+section says so instead of showing the table.
+
 To cut an app's access, click the trash icon on its row, then **Submit**. It
 stops working right away. To connect again, it must ask for your approval
 again.
@@ -224,6 +245,21 @@ Revoke it, or clear its sign-in in the client (in Claude Code: `/mcp` > **Clear
 authentication**), then connect again and grant the access you want.
 {% endhint %}
 
+### Manage connections (administrators)
+
+Go to **Organization** > **Connected apps**. The page lists the connections of
+every user: user, app, where it sends users back, access, the date it was
+authorized and when it was last used. Search by user or app, or show only the
+apps that registered themselves.
+
+- The **trash icon** revokes one user's connection to one app.
+- The **revoke for everyone** icon cuts an app for all its users, for example
+  after an incident. Copilot Studio registers again for each connection, so
+  CISO Assistant groups the registrations that share the same name and the same
+  return address, and tells you how many users and registrations are affected
+  before you confirm. An app that registered itself is also deleted; it can
+  register again later, and users have to approve it again.
+
 ### Personal Access Tokens still work
 
 `backend-mcp` also accepts a PAT, sent as `Authorization: Bearer <PAT>`. Existing
@@ -231,6 +267,16 @@ setups that use **API key** authentication keep working. A PAT gets read and
 write access, within the user's permissions.
 
 ### Troubleshooting
+
+#### "You cannot connect this app" during sign-in
+
+The user's account is not allowed to connect AI apps, or the feature is off for
+the whole instance. The page says which. See
+[Turn MCP on and choose who may connect](#turn-mcp-on-and-choose-who-may-connect).
+
+#### `/mcp` answers `403` "MCP is disabled by your administrator."
+
+The **AI app connections (MCP)** feature flag is off.
 
 #### The client says the server has no registration endpoint
 

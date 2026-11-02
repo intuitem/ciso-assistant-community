@@ -9,7 +9,7 @@ from knox.models import AuthToken
 from iam.models import ConnectedAppUse, User
 from mcp_server.oauth import verify
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
 
 LIST_URL = "/api/iam/connected-apps/"
 COPILOT_REDIRECT = "https://global.consent.azure-apim.net/redirect/new-abc"
@@ -17,7 +17,11 @@ COPILOT_REDIRECT = "https://global.consent.azure-apim.net/redirect/new-abc"
 
 def _user(email):
     return User.objects._create_user(
-        email=email, password=None, mailing=False, initial_group=None
+        email=email,
+        password=None,
+        mailing=False,
+        initial_group=None,
+        can_connect_apps=True,
     )
 
 

@@ -36,6 +36,10 @@ class CISOOIDCAdapter(DefaultOIDCAdapter):
                 raise ValidationError(f"Unknown resource: {uri}")
 
     def validate_client_registration(self, *, client, **kwargs) -> None:
+        from iam.mcp_access import mcp_enabled
+
+        if not mcp_enabled():
+            raise ValidationError("MCP is disabled on this instance.")
         # allauth's DCR form only checks that redirect_uris is a list of strings.
         allowed_hosts = settings.OAUTH_DCR_ALLOWED_REDIRECT_HOSTS
         for uri in client.get_redirect_uris():

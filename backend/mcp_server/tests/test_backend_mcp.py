@@ -21,6 +21,8 @@ AUTHORIZE_URL = "/api/identity/o/authorize"
 TOKEN_URL = "/api/identity/o/api/token"
 REDIRECT_URI = "http://localhost:9999/callback"
 METADATA_PATH = "/.well-known/oauth-protected-resource/mcp"
+pytestmark = pytest.mark.usefixtures("mcp_on")
+
 MCP_HEADERS = {
     "Accept": "application/json, text/event-stream",
     "Content-Type": "application/json",
@@ -35,7 +37,11 @@ def _clear_cache():
 @pytest.fixture
 def user():
     return User.objects._create_user(
-        email="mcp@example.com", password=None, mailing=False, initial_group=None
+        email="mcp@example.com",
+        password=None,
+        mailing=False,
+        initial_group=None,
+        can_connect_apps=True,
     )
 
 
@@ -146,6 +152,7 @@ class TestTransport:
         assert response.status_code == 403
 
 
+@pytest.mark.django_db(transaction=True)
 def test_unauthenticated_call_gets_401_with_metadata_pointer(app):
     with TestClient(app, base_url="http://localhost:8001") as http:
         response = http.post("/mcp", headers=MCP_HEADERS, json={})
@@ -153,6 +160,30 @@ def test_unauthenticated_call_gets_401_with_metadata_pointer(app):
     assert METADATA_PATH in response.headers["www-authenticate"]
 
 
+@pytest.mark.django_db(transaction=True)
+def test_mcp_answers_403_while_turned_off(app, pat):
+    from global_settings.models import GlobalSettings
+    from global_settings.utils import clear_feature_flags_cache
+
+    flags = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
+    flags.value = {**flags.value, "mcp": False}
+    flags.save()
+    clear_feature_flags_cache()
+
+    with TestClient(app, base_url="http://localhost:8001") as http:
+        response = http.post(
+            "/mcp",
+            headers={**MCP_HEADERS, "Authorization": f"Bearer {pat}"},
+            json={},
+        )
+        metadata = http.get(METADATA_PATH)
+
+    assert response.status_code == 403
+    assert response.json() == {"error": "MCP is disabled by your administrator."}
+    assert metadata.status_code == 200
+
+
+@pytest.mark.django_db(transaction=True)
 def test_protected_resource_metadata(app):
     with TestClient(app, base_url="http://localhost:8001") as http:
         metadata = http.get(METADATA_PATH).json()

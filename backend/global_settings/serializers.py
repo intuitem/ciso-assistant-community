@@ -567,6 +567,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     relations_graph = serializers.BooleanField(
         source="value.relations_graph", required=False, default=False
     )
+    mcp = serializers.BooleanField(source="value.mcp", required=False, default=False)
 
     # Flags a user may switch off for themselves. Opt-in, like batch actions: a
     # new flag is not hideable until listed. Eligible means it hides a navigation

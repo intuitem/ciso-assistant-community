@@ -10,7 +10,7 @@ from knox.models import AuthToken
 
 from iam.models import User
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
 
 AUTHORIZE_URL = "/api/identity/o/authorize"
 REDIRECT_URI = "http://localhost:9999/callback"
@@ -28,7 +28,11 @@ def oauth_client():
 @pytest.fixture
 def knox_token():
     user = User.objects._create_user(
-        email="oauth@example.com", password=None, mailing=False, initial_group=None
+        email="oauth@example.com",
+        password=None,
+        mailing=False,
+        initial_group=None,
+        can_connect_apps=True,
     )
     return AuthToken.objects.create(user=user)[1]
 

@@ -27,6 +27,10 @@ class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):
             if client is not None:
                 from iam.models import ConnectedAppUse
 
+                if not user.can_connect_apps:
+                    raise exceptions.AuthenticationFailed(
+                        "Connecting apps is not allowed for this user."
+                    )
                 ConnectedAppUse.record(user.pk, client.pk)
             # User-bound OIDC token (e.g. authorization_code): honor as-is.
             return (user, token)

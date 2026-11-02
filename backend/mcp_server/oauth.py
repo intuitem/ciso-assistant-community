@@ -5,6 +5,7 @@ from knox.auth import TokenAuthentication
 from mcp.server.auth.provider import AccessToken
 from rest_framework.exceptions import AuthenticationFailed
 
+from iam.mcp_access import mcp_enabled
 from iam.models import ConnectedAppUse
 from iam.oidc_adapter import MCP_SCOPES, mcp_resource
 
@@ -14,7 +15,7 @@ PAT_CLIENT_ID = "personal-access-token"
 def _from_oauth(raw: str, token: Token) -> AccessToken | None:
     user = token.user
     # client_credentials tokens carry no user: service accounts are not wired to MCP
-    if user is None or not user.is_active:
+    if user is None or not user.is_active or not user.can_connect_apps:
         return None
     resources = token.get_resources()
     scopes = token.get_scopes()
@@ -41,7 +42,7 @@ def _from_personal_access_token(raw: str) -> AccessToken | None:
         user, auth_token = TokenAuthentication().authenticate_credentials(raw.encode())
     except AuthenticationFailed:
         return None
-    if not user.is_active:
+    if not user.is_active or not user.can_connect_apps:
         return None
     return AccessToken(
         token=raw,
@@ -54,6 +55,8 @@ def _from_personal_access_token(raw: str) -> AccessToken | None:
 
 
 def verify(raw: str) -> AccessToken | None:
+    if not mcp_enabled():
+        return None
     token = (
         Token.objects.select_related("user")
         .valid()
