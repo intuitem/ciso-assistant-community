@@ -8,7 +8,7 @@
  * The editor itself is exercised by visibility-editor.test.ts.
  *
  * Companion tests:
- *   - visibility-editor.test.ts verifies the editor UI (pill state, cascade,
+ *   - visibility-editor.test.ts verifies the editor UI (per-role state, cascade,
  *     persistence) for one save cycle.
  *   - test_field_visibility.py (backend) covers the resolver helpers.
  */

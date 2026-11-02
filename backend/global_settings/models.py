@@ -74,6 +74,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         "enforce_mfa": False,
         "default_language": "en",
         "default_date_format": "auto",
+        "report_timezone": "UTC",
         "default_custom_analytics_dashboard": None,
         "default_packager": "custom",
         "disable_partially_compliant_result": False,
