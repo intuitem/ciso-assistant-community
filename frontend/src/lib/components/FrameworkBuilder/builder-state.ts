@@ -121,8 +121,14 @@ export interface OutcomeRule {
 	color: string | null;
 	expression: string;
 	/** 'number' rules compute a value instead of firing; 'rating' classifies the
-	 *  answers to its scales into named levels (see core.quick_form_ratings). */
-	kind?: 'number' | 'rating';
+	 *  answers to its scales into named levels (see core.quick_form_ratings);
+	 *  'staircase' gives the level reached, its `levels` being implementation group ids
+	 *  (see core.staircase). */
+	kind?: 'number' | 'rating' | 'staircase';
+	per?: 'depth_1';
+	cumulative?: boolean;
+	unit_label?: string;
+	floor_label?: string;
 	/** Ratings: the scales measured, their named levels, and either a grid (two
 	 *  dimensions; rows: the first, low to high) or rules (`when` CEL over `dims`),
 	 *  plus, optionally, the page ids that feed it. */
@@ -1926,13 +1932,14 @@ export function createBuilderState(
 			['name', 'description']
 		);
 		// Swap nested translations in outcomes_definition entries, and in a rating's levels
+		// (a staircase's levels are implementation group ids, with nothing to translate)
 		const swappedOutcomes = swapJsonArrayTranslations(
 			fw.outcomes_definition as Record<string, unknown>[] | null,
 			oldLocale,
 			newLocale,
-			['annotation', 'label']
+			['annotation', 'label', 'unit_label', 'floor_label']
 		)?.map((rule) =>
-			Array.isArray(rule.levels)
+			rule.kind === 'rating' && Array.isArray(rule.levels)
 				? {
 						...rule,
 						levels: swapJsonArrayTranslations(rule.levels, oldLocale, newLocale, ['label'])
@@ -2350,4 +2357,59 @@ export function rulesToGrid(rule: OutcomeRule, scales: Scale[]): string[][] | nu
 		}
 	}
 	return fitGrid({ ...rule, grid }, scales);
+}
+
+/** What a staircase rule covers, as core/staircase.py counts it: the sections that get
+ *  a level, and per level the requirements that must pass. */
+export function staircaseCoverage(
+	rule: OutcomeRule,
+	roots: BuilderNode[]
+): { sections: number; counts: number[] } {
+	const levels = ((rule.levels ?? []) as unknown[]).map(String);
+	const units: string[][][] = [];
+	const collect = (bn: BuilderNode, into: string[][]) => {
+		if (bn.node.assessable) into.push((bn.node.implementation_groups ?? []).map(String));
+		bn.children.forEach((c) => collect(c, into));
+	};
+	if (rule.per === 'depth_1') {
+		for (const root of roots) {
+			const tags: string[][] = [];
+			collect(root, tags);
+			units.push(tags);
+		}
+	} else {
+		const tags: string[][] = [];
+		roots.forEach((r) => collect(r, tags));
+		units.push(tags);
+	}
+	const memberOf = (tags: string[], index: number) =>
+		(rule.cumulative ? levels.slice(0, index + 1) : [levels[index]]).some((l) => tags.includes(l));
+	const counts = levels.map((_, i) =>
+		units.reduce((sum, unit) => sum + unit.filter((t) => memberOf(t, i)).length, 0)
+	);
+	const sections = units.filter((unit) =>
+		unit.some((t) => levels.some((_, i) => memberOf(t, i)))
+	).length;
+	return { sections, counts };
+}
+
+export function levelsInGroupOrder(
+	rules: OutcomeRule[],
+	before: string[],
+	after: string[]
+): OutcomeRule[] {
+	const removed = before.filter((id) => !after.includes(id));
+	const added = after.filter((id) => !before.includes(id));
+	const renamed =
+		before.length === after.length && removed.length === 1 && added.length === 1
+			? { [removed[0]]: added[0] }
+			: {};
+	return rules.map((rule) => {
+		if (rule.kind !== 'staircase') return rule;
+		const levels = ((rule.levels ?? []) as unknown[]).map(
+			(id) => renamed[String(id)] ?? String(id)
+		);
+		const sorted = [...new Set(after.filter((id) => levels.includes(id)))];
+		return { ...rule, levels: sorted as unknown as OutcomeRule['levels'] };
+	});
 }

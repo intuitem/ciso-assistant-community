@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, test, expect } from 'vitest';
 import { get } from 'svelte/store';
 import {
 	slugifyFrameworkName,
@@ -14,6 +14,9 @@ import {
 	applyUrnMap,
 	describeSaveError,
 	rebaseExpression,
+	staircaseCoverage,
+	levelsInGroupOrder,
+	type OutcomeRule,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -1536,5 +1539,123 @@ describe('nodePassesIgFilter', () => {
 		expect(nodePassesIgFilter(null, new Set(['A']))).toBe(false);
 		expect(nodePassesIgFilter(undefined, new Set(['A']))).toBe(false);
 		expect(nodePassesIgFilter([], new Set(['A']))).toBe(false);
+	});
+});
+
+describe('staircaseCoverage', () => {
+	const leaf = (groups: string[]) =>
+		({
+			node: { assessable: true, implementation_groups: groups },
+			questions: [],
+			children: [],
+			depth: 2
+		}) as unknown as BuilderNode;
+	const section = (...children: BuilderNode[]) =>
+		({ node: { assessable: false }, questions: [], children, depth: 1 }) as unknown as BuilderNode;
+	const roots = [section(leaf(['1', '2']), leaf(['3'])), section(leaf(['2'])), section()];
+	const rule = {
+		ref_id: 'ml',
+		annotation: '',
+		color: null,
+		expression: '',
+		kind: 'staircase' as const,
+		levels: ['1', '2', '3'] as unknown as OutcomeRule['levels']
+	};
+
+	test('counts per section, listed tags', () => {
+		expect(staircaseCoverage({ ...rule, per: 'depth_1' }, roots)).toEqual({
+			sections: 2,
+			counts: [1, 2, 1]
+		});
+	});
+
+	test('cumulative tags count at higher levels, whole audit is one section', () => {
+		expect(staircaseCoverage({ ...rule, cumulative: true }, roots)).toEqual({
+			sections: 1,
+			counts: [1, 2, 3]
+		});
+	});
+});
+
+describe('levelsInGroupOrder', () => {
+	const rules = [
+		{
+			ref_id: 'ml',
+			annotation: '',
+			color: null,
+			expression: '',
+			kind: 'staircase' as const,
+			levels: ['1', '2'] as unknown as OutcomeRule['levels']
+		},
+		{ ref_id: 'flag', annotation: '', color: null, expression: 'true' }
+	];
+	const levelsAfter = (before: string[], after: string[]) =>
+		levelsInGroupOrder(rules, before, after)[0].levels;
+
+	test('levels follow a reorder and leave other rules alone', () => {
+		const [ml, flag] = levelsInGroupOrder(rules, ['1', '2', '3'], ['2', '1', '3']);
+		expect(ml.levels).toEqual(['2', '1']);
+		expect(flag).toBe(rules[1]);
+	});
+
+	test('a renamed group renames its level, a deleted one drops it', () => {
+		expect(levelsAfter(['1', '2', '3'], ['one', '2', '3'])).toEqual(['one', '2']);
+		expect(levelsAfter(['1', '2', '3'], ['1', '3'])).toEqual(['1']);
+		expect(levelsAfter(['1', '2'], ['1', '1', '2'])).toEqual(['1', '2']);
+	});
+});
+
+describe('setBaseLocale on outcome rules', () => {
+	test('keeps staircase levels as group ids and swaps their labels', () => {
+		const rules = [
+			{
+				ref_id: 'ml',
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'staircase' as const,
+				label: 'Maturity level',
+				levels: ['1', '2'] as unknown as OutcomeRule['levels'],
+				per: 'depth_1' as const,
+				floor_label: 'Level zero',
+				unit_label: 'strategies',
+				translations: {
+					fr: { label: 'Niveau de maturité', floor_label: 'Niveau zéro', unit_label: 'stratégies' }
+				}
+			},
+			{
+				ref_id: 'risk',
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'rating' as const,
+				levels: [{ ref_id: 'low', label: 'Low', translations: { fr: { label: 'Faible' } } }]
+			}
+		];
+		const s = createBuilderState(
+			makeFramework({
+				available_languages: ['en', 'fr'],
+				outcomes_definition: rules as unknown as OutcomeRule[]
+			}),
+			[],
+			[]
+		);
+		s.setBaseLocale('fr');
+		const [ml, risk] = get(s.framework).outcomes_definition ?? [];
+		expect(ml.levels).toEqual(['1', '2']);
+		expect([ml.label, ml.floor_label, ml.unit_label]).toEqual([
+			'Niveau de maturité',
+			'Niveau zéro',
+			'stratégies'
+		]);
+		expect(ml.translations?.en).toEqual({
+			label: 'Maturity level',
+			floor_label: 'Level zero',
+			unit_label: 'strategies'
+		});
+		expect(risk.levels?.[0]).toMatchObject({
+			label: 'Faible',
+			translations: { en: { label: 'Low' } }
+		});
 	});
 });

@@ -7,14 +7,14 @@ description: |-
 
   The Essential Eight has been designed to protect organisations’ internet-connected information technology networks. While the principles behind the Essential Eight may be applied to enterprise mobility and operational technology networks, it was not designed for such purposes and alternative mitigation strategies may be more appropriate to defend against unique cyber threats to these environments.
 
-  Select a single target maturity level when creating an audit: requirements are tagged with the exact levels at which ASD lists them, so statements superseded at a higher level are not asked there. Requirement ref_ids are the ISM controls from ASD's Essential Eight maturity model and ISM mapping.
+  Select a target maturity level when creating an audit: the levels below it are added, as the maturity level reached by each mitigation strategy needs them. Requirements are tagged with the exact levels at which ASD lists them. Requirement ref_ids are the ISM controls from ASD's Essential Eight maturity model and ISM mapping.
 
   Assessment (Essential Eight assessment process guide): a mitigation strategy is implemented at a maturity level only when all of its controls for that level are assessed as effective or alternate control; if one or more mitigation strategies are not implemented, the target maturity level for the system cannot be claimed.
-  https://www.cyber.gov.au/business-government/asds-cyber-security-frameworks/essential-eight/essential-eight-maturity-model
+  https://www.cyber.gov.au/publication/essential-eight-maturity-model
 copyright: © Commonwealth of Australia. Material from cyber.gov.au is provided under a Creative Commons
   Attribution 4.0 International licence and is attributed to the Australian Signals Directorate.
-version: 1
-publication_date: '2026-09-29'
+version: 2
+publication_date: '2026-11-01'
 provider: Australian Signals Directorate (ASD)
 packager: intuitem
 objects:
@@ -27,10 +27,10 @@ objects:
 
       The Essential Eight has been designed to protect organisations’ internet-connected information technology networks. While the principles behind the Essential Eight may be applied to enterprise mobility and operational technology networks, it was not designed for such purposes and alternative mitigation strategies may be more appropriate to defend against unique cyber threats to these environments.
 
-      Select a single target maturity level when creating an audit: requirements are tagged with the exact levels at which ASD lists them, so statements superseded at a higher level are not asked there. Requirement ref_ids are the ISM controls from ASD's Essential Eight maturity model and ISM mapping.
+      Select a target maturity level when creating an audit: the levels below it are added, as the maturity level reached by each mitigation strategy needs them. Requirements are tagged with the exact levels at which ASD lists them. Requirement ref_ids are the ISM controls from ASD's Essential Eight maturity model and ISM mapping.
 
       Assessment (Essential Eight assessment process guide): a mitigation strategy is implemented at a maturity level only when all of its controls for that level are assessed as effective or alternate control; if one or more mitigation strategies are not implemented, the target maturity level for the system cannot be claimed.
-      https://www.cyber.gov.au/business-government/asds-cyber-security-frameworks/essential-eight/essential-eight-maturity-model
+      https://www.cyber.gov.au/publication/essential-eight-maturity-model
     implementation_groups_definition:
     - ref_id: '1'
       name: Maturity Level One
@@ -50,6 +50,18 @@ objects:
         The focus of this maturity level is malicious actors who are more adaptive and much less reliant on public tools and techniques. These malicious actors are able to exploit the opportunities provided by weaknesses in their target’s cyber security posture, such as the existence of older software or inadequate logging and monitoring. Malicious actors do this to not only extend their access once initial access has been gained to a target, but to evade detection and solidify their presence. Malicious actors make swift use of exploits when they become publicly available as well as other tradecraft that can improve their chance of success.
 
         Generally, malicious actors may be more focused on particular targets and, more importantly, are willing and able to invest some effort into circumventing the idiosyncrasies and particular policy and technical controls implemented by their targets. For example, this includes social engineering a user to not only open a malicious document but also to unknowingly assist in bypassing controls. This can also include circumventing stronger multi-factor authentication by stealing authentication token values to impersonate a user. Once a foothold is gained on a system, malicious actors will seek to gain privileged credentials or password hashes, pivot to other parts of a network, and cover their tracks. Depending on their intent, malicious actors may also destroy all data (including backups).
+    outcomes_definition:
+    - ref_id: maturity_level
+      kind: staircase
+      label: Maturity level
+      levels:
+      - '1'
+      - '2'
+      - '3'
+      per: depth_1
+      floor_label: Maturity Level Zero
+      unit_label: mitigation strategies
+      annotation: 'A mitigation strategy reaches a maturity level when all its requirements at that level and below are compliant or not applicable; the overall maturity level is the lowest across the eight strategies.'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa
       assessable: false
