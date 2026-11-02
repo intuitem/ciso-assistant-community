@@ -1917,6 +1917,20 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     }
 
 
+def restrict_to_respondent_assignments(user, qs, actor_lookup: str):
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if not respondent_folders:
+        return qs
+    from django.db.models import Q
+
+    from core.models import Actor
+
+    return qs.filter(
+        ~Q(folder_id__in=respondent_folders)
+        | Q(**{actor_lookup: Actor.get_all_for_user(user)})
+    ).distinct()
+
+
 # --- Field Visibility ---
 #
 # The compliance assessment's `field_visibility` is the single source of truth

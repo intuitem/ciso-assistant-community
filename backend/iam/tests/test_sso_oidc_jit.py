@@ -73,6 +73,24 @@ class TestOIDCPreSSOMainBehavior:
         assert sociallogin.user == user
         sociallogin.connect.assert_called_once_with(request, user)
 
+    @pytest.mark.parametrize(
+        "extra_data",
+        [
+            {"email": "alice@example.com", "email_verified": False},
+            {"userinfo": {"email": "alice@example.com", "email_verified": "false"}},
+        ],
+    )
+    def test_unverified_email_is_not_linked(self, extra_data):
+        User.objects.create_user(email="alice@example.com", password="pw")
+        sociallogin = FakeSocialLogin(extra_data=extra_data)
+
+        response = SocialAccountAdapter().pre_social_login(
+            RequestFactory().get("/"), sociallogin
+        )
+
+        assert response.status_code == 401
+        sociallogin.connect.assert_not_called()
+
     def test_unknown_email_without_sso_settings_returns_401(self):
         sociallogin = FakeSocialLogin(extra_data={"email": "ghost@example.com"})
         request = RequestFactory().get("/")

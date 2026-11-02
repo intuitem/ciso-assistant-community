@@ -18,9 +18,30 @@ from typing import Iterator
 
 from django.apps import apps
 
-from iam.models import Folder
+from django.contrib.auth.models import Permission
+
+from iam.models import Folder, RoleAssignment
 from ..page_context import ParsedContext
 from .base import Workflow, WorkflowContext, SSEEvent
+
+WORKSHOP_ADD_PERMS = (
+    "add_asset",
+    "add_fearedevent",
+    "add_roto",
+    "add_strategicscenario",
+    "add_attackpath",
+    "add_operationalscenario",
+)
+
+
+def _can_write(user, folder, codenames) -> bool:
+    return all(
+        RoleAssignment.is_access_allowed(
+            user=user, perm=Permission.objects.get(codename=c), folder=folder
+        )
+        for c in codenames
+    )
+
 
 logger = structlog.get_logger(__name__)
 
@@ -194,6 +215,13 @@ class EbiosRMAssistWorkflow(Workflow):
         except Folder.DoesNotExist:
             yield self._token("I couldn't find this domain.")
             return
+        if not _can_write(
+            ctx.scope.user, folder, ("add_ebiosrmstudy", *WORKSHOP_ADD_PERMS)
+        ):
+            yield self._token(
+                "You don't have permission to create an EBIOS RM study in this domain."
+            )
+            return
 
         # Check for existing assets in this domain
         Asset = apps.get_model("core", "Asset")
@@ -351,6 +379,13 @@ class EbiosRMAssistWorkflow(Workflow):
                 "I couldn't find the EBIOS RM study. "
                 "Please make sure you're on a study page."
             )
+            return
+        if not _can_write(
+            ctx.scope.user,
+            study["obj"].folder,
+            ("change_ebiosrmstudy", *WORKSHOP_ADD_PERMS),
+        ):
+            yield self._token("You don't have permission to edit this EBIOS RM study.")
             return
 
         state = self._get_study_state(study)
