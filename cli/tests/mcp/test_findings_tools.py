@@ -482,6 +482,7 @@ class TestCreateEvidenceInBinder:
         )
         assert result.startswith(f"Created evidence: Report (ID: {UUID_B})")
         resolve.assert_called_once_with("folder-client")
+        assert post.call_args.args[1]["folder"] == UUID_F
         assert post.call_args.args[1]["findings_assessments"] == ["fa-Pentest Q4"]
 
     def test_explicit_folder_skips_binder_lookup(self, tmp_path):
@@ -499,6 +500,7 @@ class TestCreateEvidenceInBinder:
             for c in get_mock.call_args_list
         )
         assert post.call_args.args[1]["folder"] == UUID_F
+        assert post.call_args.args[1]["findings_assessments"] == ["fa-Pentest Q4"]
 
     def test_binders_in_different_folders_refused(self, tmp_path):
         result, post, _, _ = self._run(
