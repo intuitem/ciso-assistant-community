@@ -4083,6 +4083,26 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return None
         return obj.answers_progress
 
+    staircases = serializers.SerializerMethodField()
+
+    def get_staircases(self, obj):
+        from core.staircase import evaluate_staircases, staircase_rules
+        from core.utils import get_respondent_scoped_folder_ids, is_field_visible_to
+
+        view = self.context.get("view")
+        request = self.context.get("request")
+        if getattr(view, "action", None) != "retrieve" or request is None:
+            return []
+        # Before the permission lookup, which every other audit would pay for.
+        rules = staircase_rules(obj.outcome_rules)
+        if not rules:
+            return []
+        if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return []
+        if not is_field_visible_to(obj, "result", "auditor"):
+            return []
+        return evaluate_staircases(obj, rules)[1]
+
     scores_definition = serializers.SerializerMethodField()
 
     def get_scores_definition(self, obj):
@@ -4236,9 +4256,12 @@ class ComplianceAssessmentWriteSerializer(
                 getattr(self.instance, "selected_implementation_groups", None),
             )
             selected = selected if isinstance(selected, list) else []
-            attrs["selected_implementation_groups"] = [
-                g for g in selected if isinstance(g, str) and g in defined
-            ]
+            from core.staircase import expand_scope
+
+            attrs["selected_implementation_groups"] = expand_scope(
+                getattr(framework, "outcomes_definition", None),
+                [g for g in selected if isinstance(g, str) and g in defined],
+            )
 
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # Unlocking may come with other changes in the same save; they still
@@ -4466,7 +4489,11 @@ class ComplianceAssessmentWriteSerializer(
             for ig in assessment.framework.implementation_groups_definition:
                 if ig.get("default_selected", False):
                     default_implementation_groups += [ig["ref_id"]]
-            assessment.selected_implementation_groups = default_implementation_groups
+            from core.staircase import expand_scope
+
+            assessment.selected_implementation_groups = expand_scope(
+                assessment.framework.outcomes_definition, default_implementation_groups
+            )
             assessment.save()
 
         return assessment
