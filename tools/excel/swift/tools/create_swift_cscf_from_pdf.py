@@ -346,6 +346,20 @@ def append_metadata(sheet, values: list[tuple[str, str]]) -> None:
     sheet.sheet_view.showGridLines = True
 
 
+def enforce_assessable_markers(sheet) -> None:
+    """Keep only the explicit ``x`` marker in the assessable column.
+
+    ``convert_library_v2.py`` evaluates any non-empty cell as true.  In
+    particular, a stray space would turn a principle or a non-assessable parent
+    node into an assessable requirement.  The generated workbook deliberately
+    uses only ``x`` for assessable nodes and a truly empty cell for all others.
+    """
+    for row_number in range(2, sheet.max_row + 1):
+        marker = sheet.cell(row=row_number, column=1)
+        if marker.value != "x":
+            marker.value = None
+
+
 def build_workbook(
     rows: list[SummaryRow],
     subsections_by_control: dict[str, list[Subsection]],
@@ -410,6 +424,7 @@ def build_workbook(
             measures_content.append(
                 ("x", 2, row.ref_id, None, row.label, ",".join(implementation_groups(row)))
             )
+    enforce_assessable_markers(measures_content)
     apply_sheet_style(measures_content, [12, 9, 12, 58, 72, 30])
 
     implementation_meta = workbook.create_sheet("imp_grp_meta")
