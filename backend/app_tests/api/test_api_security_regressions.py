@@ -169,10 +169,19 @@ def test_password_change_revokes_other_login_tokens(app_config):
     assert current.get("/api/iam/current-user/").status_code == 200
 
 
-def test_docx_report_escapes_stored_strings():
+HYPERLINK_PAYLOAD = (
+    "Audit Q4</w:t></w:r><w:r><w:fldSimple w:instr=' HYPERLINK "
+    '"https://example.com/phishing-test" \'><w:r><w:rPr><w:rStyle w:val="Hyperlink"/>'
+    "</w:rPr><w:t>CLICK HERE TO RE-AUTHENTICATE</w:t></w:r></w:fldSimple></w:r>"
+    "<w:r><w:t>"
+)
+
+
+@pytest.mark.parametrize("payload", [PAYLOAD, HYPERLINK_PAYLOAD])
+def test_docx_report_escapes_stored_strings(payload):
     doc = DocxTemplate(BACKEND / "core/templates/core/audit_report_template_en.docx")
     item = {
-        "name": PAYLOAD,
+        "name": payload,
         "description": "d",
         "prio": "P1",
         "status": "s",
@@ -183,7 +192,7 @@ def test_docx_report_escapes_stored_strings():
     render_docx_report(
         doc,
         {
-            "audit": {"name": "R&D", "framework": {"name": "F"}},
+            "audit": {"name": payload, "framework": {"name": "F"}},
             "req": {},
             "p1_controls": [item],
             "full_controls": [item],
@@ -192,10 +201,13 @@ def test_docx_report_escapes_stored_strings():
     )
     out = io.BytesIO()
     doc.save(out)
-    xml = zipfile.ZipFile(out).read("word/document.xml")
+    archive = zipfile.ZipFile(out)
+    xml = archive.read("word/document.xml")
     root = etree.fromstring(xml)
-    assert not root.findall(".//{*}fldSimple")
-    assert b"INCLUDEPICTURE" in xml
+    for tag in ("fldSimple", "fldChar", "instrText", "hyperlink"):
+        assert not root.findall(f".//{{*}}{tag}"), tag
+    assert b"example.com" not in archive.read("word/_rels/document.xml.rels")
+    assert b"INCLUDEPICTURE" in xml or b"HYPERLINK" in xml
 
 
 @pytest.mark.django_db

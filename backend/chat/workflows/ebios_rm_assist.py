@@ -135,7 +135,7 @@ class EbiosRMAssistWorkflow(Workflow):
 
     def _resume_matrix_choice(self, ctx, data) -> Iterator[SSEEvent]:
         RiskMatrix = apps.get_model("core", "RiskMatrix")
-        matrices = list(RiskMatrix.objects.filter(is_enabled=True))
+        matrices = list(ctx.scope.queryset(RiskMatrix).filter(is_enabled=True))
         picked = self._match_choice(ctx.user_message, matrices)
         if not picked:
             self._clear_state(ctx)
@@ -149,7 +149,9 @@ class EbiosRMAssistWorkflow(Workflow):
 
     def _resume_framing(self, ctx, data) -> Iterator[SSEEvent]:
         RiskMatrix = apps.get_model("core", "RiskMatrix")
-        matrix = RiskMatrix.objects.filter(id=data.get("risk_matrix_id")).first()
+        matrix = (
+            ctx.scope.queryset(RiskMatrix).filter(id=data.get("risk_matrix_id")).first()
+        )
         ctx.parsed_context = ParsedContext(
             model_key="folder", object_id=data.get("folder_id"), page_type="detail"
         )
@@ -236,15 +238,10 @@ class EbiosRMAssistWorkflow(Workflow):
         if not risk_matrix:
             RiskMatrix = apps.get_model("core", "RiskMatrix")
             available_matrices = list(
-                RiskMatrix.objects.filter(
-                    is_enabled=True,
-                    folder_id__in=ctx.scope.folder_ids,
-                ).order_by("name")[:20]
+                ctx.scope.queryset(RiskMatrix)
+                .filter(is_enabled=True)
+                .order_by("name")[:20]
             )
-            if not available_matrices:
-                available_matrices = list(
-                    RiskMatrix.objects.filter(is_enabled=True).order_by("name")[:20]
-                )
             if not available_matrices:
                 yield self._token(
                     "No risk matrix is available. Please load a risk matrix "
