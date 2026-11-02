@@ -36,6 +36,15 @@ DESCRIPTION = (
     "Knowledge Base article 5021823 which provides additional valuable information."
 )
 
+# Add a source URL here when a new CSCF edition is published.  The generator
+# deliberately does not infer URLs from PDF names: Swift publication paths are
+# not guaranteed to follow a stable naming convention.
+SOURCE_URLS_BY_YEAR: dict[str, str] = {
+    "2025": "https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2025_20240701.pdf?logDownload=true",
+    "2026": "https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2026_202507015.pdf?logDownload=true",
+    "2027": "https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2027_20260710.pdf?logDownload=true",
+}
+
 ARCHITECTURES = ("A1", "A2", "A3", "A4", "B")
 ARCHITECTURE_CENTERS = {
     "A1": 372.0,
@@ -45,6 +54,7 @@ ARCHITECTURE_CENTERS = {
     "B": 512.0,
 }
 PRIMARY_CENTER = 220.0
+ADVISORY_FILL = PatternFill("solid", fgColor="D9D9D9")
 CONTROL_PATTERN = re.compile(r"^\d+(?:\.\d+)?A?$")
 DATE_PATTERN = re.compile(
     r"\b\d{1,2} (?:January|February|March|April|May|June|July|August|"
@@ -360,11 +370,26 @@ def enforce_assessable_markers(sheet) -> None:
             marker.value = None
 
 
+def shade_advisory_requirement(sheet, groups: tuple[str, ...]) -> None:
+    """Reflect advisory applicability in the generated requirement row."""
+    if groups == ("A",):
+        for cell in sheet[sheet.max_row]:
+            cell.fill = ADVISORY_FILL
+    elif "AA4" in groups or "AB" in groups:
+        sheet.cell(row=sheet.max_row, column=6).fill = ADVISORY_FILL
+
+
+def description_with_source(source_url: str | None) -> str:
+    """Append the known source URL to the library and framework description."""
+    return f"{DESCRIPTION}\n\nSource: {source_url}" if source_url else DESCRIPTION
+
+
 def build_workbook(
     rows: list[SummaryRow],
     subsections_by_control: dict[str, list[Subsection]],
     year: str,
     issue_date: str,
+    source_url: str | None,
 ) -> Workbook:
     """Create the complete CISO Assistant workbook without loading a template."""
     framework_id = f"swift-cscf-v{year}"
@@ -372,6 +397,7 @@ def build_workbook(
         f"Swift Customer Security Controls Framework (CSCF) v{year} "
         f"[{issue_date}] - Outline"
     )
+    description = description_with_source(source_url)
 
     workbook = Workbook()
     library_meta = workbook.active
@@ -385,7 +411,7 @@ def build_workbook(
             ("locale", "en"),
             ("ref_id", framework_id),
             ("name", title),
-            ("description", DESCRIPTION),
+            ("description", description),
             ("copyright", "SWIFT"),
             ("provider", "SWIFT"),
             ("packager", "intuitem"),
@@ -401,7 +427,7 @@ def build_workbook(
             ("urn", f"urn:intuitem:risk:framework:{framework_id}"),
             ("ref_id", framework_id),
             ("name", title),
-            ("description", DESCRIPTION),
+            ("description", description),
             ("implementation_groups_definition", "imp_grp"),
         ],
     )
@@ -415,15 +441,19 @@ def build_workbook(
             measures_content.append((None, 1, int(row.ref_id), row.label, None, None))
         elif subsections := subsections_by_control[row.ref_id]:
             measures_content.append((None, 2, row.ref_id, None, row.label, None))
-            groups = ",".join(implementation_groups(row))
+            groups = implementation_groups(row)
+            group_value = ",".join(groups)
             for subsection in subsections:
                 measures_content.append(
-                    ("x", 3, subsection.ref_id, None, subsection.label, groups)
+                    ("x", 3, subsection.ref_id, None, subsection.label, group_value)
                 )
+                shade_advisory_requirement(measures_content, groups)
         else:
+            groups = implementation_groups(row)
             measures_content.append(
-                ("x", 2, row.ref_id, None, row.label, ",".join(implementation_groups(row)))
+                ("x", 2, row.ref_id, None, row.label, ",".join(groups))
             )
+            shade_advisory_requirement(measures_content, groups)
     enforce_assessable_markers(measures_content)
     apply_sheet_style(measures_content, [12, 9, 12, 58, 72, 30])
 
@@ -435,17 +465,25 @@ def build_workbook(
 
     implementation_content = workbook.create_sheet("imp_grp_content")
     implementation_content.append(("ref_id", "name", "description"))
-    for ref_id, name in (
-        ("A", "Advisory Controls"),
-        ("A1", "Architecture A1"),
-        ("A2", "Architecture A2"),
-        ("A3", "Architecture A3"),
-        ("A4", "Architecture A4"),
-        ("B", "Architecture B"),
-        ("AB", "Architecture B (Advisory)"),
-        ("AA4", "Architecture A4 (Advisory)"),
+    for ref_id, name, group_description in (
+        ("A", "Advisory Controls", "Advisory controls for all architecture types."),
+        ("A1", "Architecture A1", "Mandatory controls for architecture A1."),
+        ("A2", "Architecture A2", "Mandatory controls for architecture A2."),
+        ("A3", "Architecture A3", "Mandatory controls for architecture A3."),
+        ("A4", "Architecture A4", "Mandatory controls for architecture A4."),
+        ("B", "Architecture B", "Mandatory controls for architecture B."),
+        (
+            "AB",
+            "Architecture B (Advisory)",
+            "Advisory controls for architecture B (mandatory controls for at least one other architecture type).",
+        ),
+        (
+            "AA4",
+            "Architecture A4 (Advisory)",
+            "Advisory controls for architecture A4 (mandatory controls for at least one other architecture type).",
+        ),
     ):
-        implementation_content.append((ref_id, name, None))
+        implementation_content.append((ref_id, name, group_description))
     apply_sheet_style(implementation_content, [12, 38, 55])
 
     return workbook
@@ -457,13 +495,22 @@ def convert(pdf_path: Path, year: str, output_path: Path) -> None:
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
     if not re.fullmatch(r"20\d{2}", year):
         raise ValueError("The year must have four digits, for example 2026.")
+    source_url = SOURCE_URLS_BY_YEAR.get(year)
+    if source_url is None:
+        print(
+            f"Warning: no source URL is configured for CSCF v{year}; "
+            "the workbook will not include a Source line.",
+            file=sys.stderr,
+        )
 
     with pymupdf.open(pdf_path) as document:
         issue_date = extract_issue_date(document)
         rows = extract_summary_rows(find_summary_page(document))
         subsections_by_control = extract_subsections(document, rows)
 
-    workbook = build_workbook(rows, subsections_by_control, year, issue_date)
+    workbook = build_workbook(
+        rows, subsections_by_control, year, issue_date, source_url
+    )
     workbook.save(output_path)
 
     controls = sum(row.depth == 2 for row in rows)

@@ -16,7 +16,7 @@ description: 'This document establishes a set of mandatory and advisory security
   Source: https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2026_202507015.pdf?logDownload=true'
 copyright: SWIFT
 version: 1
-publication_date: 2026-10-29
+publication_date: 2026-11-02
 provider: SWIFT
 packager: intuitem
 objects:
@@ -38,28 +38,30 @@ objects:
     implementation_groups_definition:
     - ref_id: A
       name: Advisory Controls
-      description: null
+      description: Advisory controls for all architecture types.
     - ref_id: A1
       name: Architecture A1
-      description: null
+      description: Mandatory controls for architecture A1.
     - ref_id: A2
       name: Architecture A2
-      description: null
+      description: Mandatory controls for architecture A2.
     - ref_id: A3
       name: Architecture A3
-      description: null
+      description: Mandatory controls for architecture A3.
     - ref_id: A4
       name: Architecture A4
-      description: null
+      description: Mandatory controls for architecture A4.
     - ref_id: B
       name: Architecture B
-      description: null
+      description: Mandatory controls for architecture B.
     - ref_id: AB
       name: Architecture B (Advisory)
-      description: null
+      description: Advisory controls for architecture B (mandatory controls for at
+        least one other architecture type).
     - ref_id: AA4
       name: Architecture A4 (Advisory)
-      description: null
+      description: Advisory controls for architecture A4 (mandatory controls for at
+        least one other architecture type).
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:swift-cscf-v2026:1
       assessable: false
