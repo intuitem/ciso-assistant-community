@@ -219,7 +219,7 @@ objects:
               it:
                 value: Fornitura di beni o strutture
               de:
-                value: Sachgüter oder Gebäudedienstleistungen
+                value: Sachgüter oder Räumlichkeiten
           translations:
             fr:
               text: Type de service
