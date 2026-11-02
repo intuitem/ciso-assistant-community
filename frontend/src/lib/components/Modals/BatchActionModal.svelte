@@ -3,6 +3,11 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
 	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import { nestedIds, subtreeIds } from '#lib/utils/tree.js';
+	import type { urlModel } from '#lib/utils/types.js';
+	import BatchMovePreview, {
+		type BatchMovePreviewInfo
+	} from '#lib/components/Modals/BatchMovePreview.svelte';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {
@@ -20,6 +25,9 @@
 			'delete' | 'change_field' | 'change_m2m' | 'add_m2m' | 'remove_m2m' | 'change_folder';
 		count: number;
 		optionsEndpoint?: string;
+		/** Rows the picker must not offer as a target, together with everything filed
+		 * below them. */
+		excludeIds?: string[];
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
 		inputType?: 'date';
@@ -29,6 +37,10 @@
 		// Value fixed by config ("mark as read"): skips the picker, so the modal is a
 		// plain confirmation and this is what gets sent.
 		fixedValue?: string;
+		URLModel?: urlModel;
+		/** Domains whose move is previewed (what they carry along) before it is
+		 * confirmed. Empty means no preview. */
+		movePreviewIds?: string[];
 		onConfirm: (value?: string | string[]) => void;
 	}
 
@@ -37,13 +49,22 @@
 		actionType,
 		count,
 		optionsEndpoint,
+		excludeIds = [],
 		enableDoubleDash = false,
 		multiSelect = false,
 		inputType = undefined,
 		confirmMessage = undefined,
 		fixedValue = undefined,
+		URLModel = undefined,
+		movePreviewIds = [],
 		onConfirm
 	}: Props = $props();
+
+	const showsMovePreview = URLModel !== undefined && movePreviewIds.length > 0;
+	let movePreview: BatchMovePreviewInfo | null = $state(null);
+	let movePreviewLoading = $state(false);
+	let movePreviewError = $state(false);
+	let flattenedNames: string[] = $state([]);
 
 	let options: { label: string; value: string }[] = $state([]);
 	let selectedValue: string = $state('');
@@ -92,7 +113,25 @@
 		return opts;
 	}
 
-	onMount(async () => {
+	async function loadMovePreview(): Promise<void> {
+		movePreviewLoading = true;
+		try {
+			const res = await fetch(`/fe-api/batch-cascade-info/${URLModel}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ ids: movePreviewIds })
+			});
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			movePreview = await res.json();
+		} catch (e) {
+			movePreviewError = true;
+			console.error('Failed to fetch the move preview', e);
+		} finally {
+			movePreviewLoading = false;
+		}
+	}
+
+	async function loadOptions(): Promise<void> {
 		if (needsSelection && optionsEndpoint) {
 			loading = true;
 			try {
@@ -102,7 +141,19 @@
 					// Choice endpoints return dicts and stay as-is; paginated list endpoints
 					// with more than one page need the remaining pages fetched.
 					const items = data?.next ? await fetchAllPages(fetch, `/${optionsEndpoint}`) : data;
-					options = withDoubleDash(parseOptions(items));
+					const parsed = parseOptions(items);
+					const rows = items?.results ?? items;
+					const excluded =
+						excludeIds.length > 0 && Array.isArray(rows)
+							? subtreeIds(rows, excludeIds)
+							: new Set<string>();
+					if (showsMovePreview && excludeIds.length > 0 && Array.isArray(rows)) {
+						const nested = nestedIds(rows, excludeIds);
+						flattenedNames = rows
+							.filter((row) => nested.has(String(row.id)))
+							.map((row) => row.str ?? row.name);
+					}
+					options = withDoubleDash(parsed.filter((o) => !excluded.has(o.value)));
 				}
 			} catch (e) {
 				console.error('Failed to fetch options', e);
@@ -110,6 +161,10 @@
 				loading = false;
 			}
 		}
+	}
+
+	onMount(async () => {
+		await Promise.all([showsMovePreview ? loadMovePreview() : undefined, loadOptions()]);
 	});
 
 	function handleConfirm() {
@@ -135,13 +190,14 @@
 	}
 
 	const canConfirm = $derived(
-		actionType === 'delete'
-			? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
-			: fixedValue !== undefined
-				? true
-				: multiSelect
-					? selectedValues.length > 0
-					: selectedValue !== ''
+		(!showsMovePreview || movePreview !== null) &&
+			(actionType === 'delete'
+				? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
+				: fixedValue !== undefined
+					? true
+					: multiSelect
+						? selectedValues.length > 0
+						: selectedValue !== '')
 	);
 </script>
 
@@ -181,6 +237,20 @@
 					{safeTranslate(confirmMessage, { count })}
 				</article>
 			{/if}
+			{#if flattenedNames.length > 0}
+				<p class="text-sm font-medium text-amber-600" data-testid="batch-move-flatten-warning">
+					{m.batchMoveFlattenWarning({ names: flattenedNames.join(', ') })}
+				</p>
+			{/if}
+			{#if movePreviewLoading}
+				<div class="text-sm text-surface-600-400">{m.loading()}</div>
+			{:else if movePreviewError}
+				<div class="p-4 bg-error-50-950 text-error-900-100 text-sm">
+					{m.errorFetching()}
+				</div>
+			{:else if movePreview}
+				<BatchMovePreview preview={movePreview} />
+			{/if}
 
 			{#if !needsSelection}
 				<!-- value comes from the action's config; nothing to pick -->
@@ -193,7 +263,7 @@
 					bind:value={selectedValue}
 				/>
 			{:else if loading}
-				<div class="text-sm text-surface-600-400">Loading...</div>
+				<div class="text-sm text-surface-600-400">{m.loading()}</div>
 			{:else if multiSelect}
 				<div class="space-y-2">
 					<input

@@ -3107,6 +3107,7 @@
 	"changeAttackStage": "Changer la phase d'attaque",
 	"changeOwner": "Changer le propriétaire",
 	"changeDomain": "Changer le domaine",
+	"changeParentDomain": "Changer le domaine parent",
 	"batchChangePriority": "Changer la priorité",
 	"changeEta": "Changer l'ETA",
 	"changeDocumentType": "Changer le type de document",
@@ -5123,6 +5124,8 @@
 	"workshopTwo": "Atelier 2",
 	"cascadeDeleteWarning": "Attention : La suppression de cet élément entraînera également la suppression définitive de {count} objet(s) associé(s) :",
 	"cascadeBlockedWarning": "Suppression impossible : {count} objet(s) y font encore référence. Supprimez-les ou rattachez-les ailleurs au préalable.",
+	"cascadeHiddenObjects": "+ {count} objet(s) dans des domaines auxquels vous n'avez pas accès",
+	"batchMoveCarriedNotice": "{count} objet(s) associé(s) classé(s) sous les domaines sélectionnés seront déplacé(s) avec eux :",
 	"errorFetching": "Impossible de charger les informations de cascade. Veuillez réessayer.",
 	"cascadeAffectedNotice": [
 		{
@@ -5239,6 +5242,7 @@
 	"membersAdded": "Membres ajoutés",
 	"membersRemoved": "Membres retirés",
 	"confirmRemoveSelected": "Voulez-vous vraiment retirer {count} élément(s) sélectionné(s) ?",
+	"batchMoveFlattenWarning": "Ces domaines quitteront leur parent, lui aussi sélectionné, et seront placés directement sous la cible : {names}",
 	"confirmRemoveAssetAssessments": "Les actifs ne seront pas supprimés, mais leurs évaluations et seuils d'escalade dans ce BIA le seront.",
 	"includeInactive": "Inclure les inactifs",
 	"noResults": "Aucun résultat. Affinez votre recherche.",
