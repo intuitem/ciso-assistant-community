@@ -19,7 +19,7 @@ objects:
 
       Each scored answer runs from 1 (low) to 4 (critical). Business impact and data exposure are each the average of their three answers, and the inherent risk is the higher of the two: a vendor that runs a critical process matters even if it holds no data, and the reverse.
 
-      Some answers raise the tier on their own: a regulated critical function, a sole supplier behind a critical process, special-category personal data, payment or health data, credentials or secrets, or privileged access to your systems.
+      Some answers or answer combinations raise the tier directly: a regulated critical function; a vendor whose failure stops a critical or customer-facing process and that is either the sole supplier or takes more than six months to replace; special-category personal data, payment or health data, credentials or secrets; or privileged access to your systems.
     annotation: 'An accepted response sets the vendor''s tier on the default scale: Critical from an inherent
       risk of 3.3, Important from 2.6, Standard from 2.0, Low impact below. A regulated critical function
       or a single point of failure makes the vendor at least Critical; special-category personal data,
@@ -653,7 +653,7 @@ objects:
 
           Jede bewertete Antwort erhält 1 (niedrig) bis 4 (kritisch) Punkte. Geschäftliche Auswirkungen und Datenexposition ergeben sich jeweils aus dem Mittelwert ihrer drei Antworten. Das inhärente Risiko ist der höhere der beiden Werte: Ein Anbieter, der einen kritischen Prozess betreibt, ist auch ohne Datenhaltung bedeutsam – und umgekehrt.
 
-          Einige Antworten erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion, ein alleiniger Anbieter für einen kritischen Prozess, besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten oder Geheimnisse sowie privilegierter Zugriff auf Ihre Systeme.
+          Einige Antworten oder Antwortkombinationen erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion; ein Anbieter, dessen Ausfall einen kritischen Prozess oder einen Prozess mit direktem Kundenkontakt zum Stillstand bringt und für den entweder keine alternative Bezugsquelle besteht oder ein Wechsel mehr als sechs Monate dauert; besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten oder Geheimnisse; oder privilegierter Zugriff auf Ihre Systeme.
 
           Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
         annotation: 'Eine angenommene Antwort setzt die Stufe des Anbieters auf der Standardskala:
