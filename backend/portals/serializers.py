@@ -170,7 +170,7 @@ def _tile_refs(content):
             if item.get("kind") == "framework" and target.get("snapshot"):
                 snapshots.add(str(target["snapshot"]))
             if item.get("kind") == "certificationDocument" and target.get("token"):
-                tokens.add(target["token"])
+                tokens.add(str(target["token"]))
     return snapshots, tokens
 
 

@@ -217,7 +217,7 @@
 					const data = params[0];
 					return `
 						<div style="font-weight: bold">${escapeHtml(data.data.name)}</div>
-						<div>ALE: ${formatCurrency(data.data.value)}</div>
+						<div>ALE: ${escapeHtml(formatCurrency(data.data.value))}</div>
 						<div style="color: #666; font-size: 12px">${escapeHtml(data.data.status)}</div>
 					`;
 				}

@@ -1928,10 +1928,12 @@ def restrict_to_respondent_assignments(user, qs, actor_lookup: str):
 
     from core.models import Actor
 
-    return qs.filter(
-        ~Q(folder_id__in=respondent_folders)
-        | Q(**{actor_lookup: Actor.get_all_for_user(user)})
-    ).distinct()
+    return qs.model.objects.filter(
+        id__in=qs.filter(
+            ~Q(folder_id__in=respondent_folders)
+            | Q(**{actor_lookup: Actor.get_all_for_user(user)})
+        ).values("id")
+    )
 
 
 # --- Field Visibility ---

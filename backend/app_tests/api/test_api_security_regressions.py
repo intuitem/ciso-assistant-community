@@ -125,6 +125,10 @@ def test_audit_analytics_respect_respondent_scope(app_config):
     a.requirement_assessments.set(
         RequirementAssessment.objects.filter(compliance_assessment=mine)
     )
+    RequirementAssignment.objects.create(
+        compliance_assessment=mine, folder=dom
+    ).actor.add(actor)
+    ComplianceAssessment.objects.filter(id=mine.id).update(status="in_progress")
     UserGroup.objects.get(name="BI-UG-ADE", folder=dom).user_set.add(u)
     c = _client(u)
 
@@ -136,6 +140,9 @@ def test_audit_analytics_respect_respondent_scope(app_config):
     compliance = c.get("/api/get_metrics/").json()["results"]["compliance"]
     assert compliance["audits"] == 1
     assert compliance["non_compliant_items"] == 0
+    series = c.get("/api/get_combined_assessments_status/").json()["results"]["series"]
+    audits = next(s for s in series if s["name"] == "complianceAssessments")
+    assert sum(audits["data"]) == 1
 
 
 @pytest.mark.django_db
