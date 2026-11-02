@@ -6,7 +6,7 @@ description: Risk to the rights and freedoms of data subjects, for data protecti
   impact assessments. Four levels of severity and likelihood; a maximum severity is
   never acceptable, whatever its likelihood.
 copyright: intuitem
-version: 1
+version: 2
 publication_date: 2026-09-28
 provider: intuitem
 packager: intuitem
@@ -17,6 +17,11 @@ translations:
       analyses d'impact relatives à la protection des données. Quatre niveaux de gravité
       et de vraisemblance ; une gravité maximale n'est jamais acceptable, quelle que
       soit sa vraisemblance.
+  nb:
+    name: 4x4-risikomatrise for personvern (DPIA)
+    description: Risiko for de registrertes rettigheter og friheter, for vurderinger
+      av personvernkonsekvenser. Fire nivåer for alvorlighet og sannsynlighet; maksimal
+      alvorlighet er aldri akseptabel, uansett sannsynlighet.
 objects:
   risk_matrix:
   - urn: urn:intuitem:risk:matrix:risk-matrix-4x4-privacy
@@ -34,6 +39,10 @@ objects:
           name: Négligeable
           description: L'événement redouté ne semble pas pouvoir se produire compte tenu
             des propriétés des supports.
+        nb:
+          name: Ubetydelig
+          description: Den uønskede hendelsen virker ikke mulig ut fra egenskapene
+            til støtteverdiene.
       hexcolor: '#F0F4E8'
     - id: 1
       abbreviation: L2
@@ -45,6 +54,10 @@ objects:
           name: Limitée
           description: L'événement redouté semble difficile à provoquer compte tenu des
             propriétés des supports.
+        nb:
+          name: Begrenset
+          description: Den uønskede hendelsen virker vanskelig å utløse ut fra
+            egenskapene til støtteverdiene.
       hexcolor: '#DDE8C8'
     - id: 2
       abbreviation: L3
@@ -56,6 +69,10 @@ objects:
           name: Importante
           description: L'événement redouté semble possible compte tenu des propriétés
             des supports.
+        nb:
+          name: Betydelig
+          description: Den uønskede hendelsen virker mulig ut fra egenskapene til
+            støtteverdiene.
       hexcolor: '#C3D69F'
     - id: 3
       abbreviation: L4
@@ -67,6 +84,10 @@ objects:
           name: Maximale
           description: L'événement redouté semble facile à provoquer compte tenu des
             propriétés des supports.
+        nb:
+          name: Maksimal
+          description: Den uønskede hendelsen virker lett å utløse ut fra egenskapene
+            til støtteverdiene.
       hexcolor: '#A4C170'
     impact:
     - id: 0
@@ -79,6 +100,10 @@ objects:
           name: Négligeable
           description: Les personnes ne sont pas impactées ou subissent des désagréments
             mineurs qu'elles surmontent sans difficulté.
+        nb:
+          name: Ubetydelig
+          description: De registrerte påvirkes ikke, eller får mindre ulemper som
+            de kommer over uten problemer.
       hexcolor: '#E8F0F8'
     - id: 1
       abbreviation: S2
@@ -90,6 +115,10 @@ objects:
           name: Limitée
           description: Les personnes subissent des désagréments significatifs qu'elles
             surmontent malgré quelques difficultés.
+        nb:
+          name: Begrenset
+          description: De registrerte får merkbare ulemper som de kommer over, men
+            med noen vanskeligheter.
       hexcolor: '#C6DAEE'
     - id: 2
       abbreviation: S3
@@ -101,6 +130,10 @@ objects:
           name: Importante
           description: Les personnes subissent des conséquences significatives qu'elles
             ne surmontent qu'avec de sérieuses difficultés.
+        nb:
+          name: Betydelig
+          description: De registrerte får alvorlige konsekvenser som de bare kommer
+            over med store vanskeligheter.
       hexcolor: '#94BBE0'
     - id: 3
       abbreviation: S4
@@ -112,6 +145,10 @@ objects:
           name: Maximale
           description: Les personnes subissent des conséquences significatives, voire
             irrémédiables, qu'elles pourraient ne pas surmonter.
+        nb:
+          name: Maksimal
+          description: De registrerte får alvorlige, muligens uopprettelige konsekvenser
+            som de kanskje ikke kommer over.
       hexcolor: '#5E97CF'
     risk:
     - id: 0
@@ -122,6 +159,9 @@ objects:
         fr:
           name: Acceptable
           description: Le risque peut être accepté avec les mesures en place.
+        nb:
+          name: Akseptabel
+          description: Risikoen kan aksepteres med tiltakene som er på plass.
       hexcolor: '#BBF7D0'
     - id: 1
       abbreviation: R
@@ -133,6 +173,10 @@ objects:
           name: À réduire
           description: Des mesures complémentaires doivent réduire le risque avant la
             mise en œuvre du traitement.
+        nb:
+          name: Må reduseres
+          description: Risikoen må reduseres med ytterligere tiltak før behandlingen
+            settes i gang.
       hexcolor: '#FEF08A'
     - id: 2
       abbreviation: U
@@ -144,6 +188,10 @@ objects:
           name: Inacceptable
           description: Le risque n'est pas acceptable. Le réduire ou consulter l'autorité
             de contrôle.
+        nb:
+          name: Uakseptabel
+          description: Risikoen er ikke akseptabel. Reduser den, eller forhåndsdrøft
+            behandlingen med tilsynsmyndigheten.
       hexcolor: '#FCA5A5'
     grid:
     - - 0
@@ -166,3 +214,7 @@ objects:
       fr:
         name: Matrice 4x4 de risque vie privée (AIPD)
         description: Risque pour les droits et libertés des personnes concernées.
+
+      nb:
+        name: 4x4-risikomatrise for personvern (DPIA)
+        description: Risiko for de registrertes rettigheter og friheter.
