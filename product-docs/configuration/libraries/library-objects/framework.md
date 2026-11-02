@@ -38,7 +38,7 @@ The metadata sheet is a key-value table with one property per row.
 | `target_score` | Rarely used. Target score proposed for new audits | Number between `min_score` and `max_score` |
 | `anchor_na_to_target` | Rarely used. Counts not applicable requirements as the target score in new audits | Enter `x` to enable. Requires `target_score`. |
 | `score_scale_locked` | Rarely used. Keeps the framework's score scale in its audits, when the standard defines it | Enter `x` to enable |
-| `field_visibility` | Rarely used. Initial field visibility for auditors and respondents in new audits | JSON object, e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}` |
+| `field_visibility` | Rarely used. Initial field visibility for auditors and respondents in new audits | JSON object, e.g. `{"score": {"auditor": "edit", "respondent": "read"}}`. Roles: `auditor`, `respondent`; access: `edit`, `read`, `hidden`. A field hidden from the auditor must be hidden from the respondent too. |
 
 For example, if `implementation_groups_definition` is `imp_grp`, the framework uses the sheets `imp_grp_meta` and `imp_grp_content`.
 

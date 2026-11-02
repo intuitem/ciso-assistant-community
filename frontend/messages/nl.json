@@ -3451,8 +3451,6 @@
 	"builderUnsavedChangesNavigation": "Je hebt niet-opgeslagen wijzigingen die verloren gaan. Toch verlaten?",
 	"fieldVisibility": "Veldzichtbaarheid",
 	"fieldVisibilityHelpText": "Bepaal welke velden elke rol kan zien en bewerken.",
-	"visibilityAuditorRespondent": "Auditor + Respondent",
-	"visibilityAuditorOnly": "Alleen auditor",
 	"visibilityHidden": "Verborgen",
 	"answers": "Antwoorden",
 	"respondentAlignment": "Afstemming respondent",
@@ -6291,5 +6289,7 @@
 	"notificationsDescription": "Zaken die uw aandacht vragen",
 	"unread": "Ongelezen",
 	"vulnerabilityOpenWithRemediationDate": "Open kwetsbaarheid heeft een hersteldatum",
-	"vulnerabilityResolvedWithoutRemediationDate": "Opgeloste kwetsbaarheid heeft geen hersteldatum"
+	"vulnerabilityResolvedWithoutRemediationDate": "Opgeloste kwetsbaarheid heeft geen hersteldatum",
+	"reportTimezone": "Tijdzone voor rapporten",
+	"reportTimezoneHelpText": "Regio die wordt gebruikt voor de tijden in rapporten en exports. Elke tijd toont zijn afwijking ten opzichte van UTC. Tijden op het scherm worden niet beïnvloed."
 }
