@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { unreadNotificationCount } from '$lib/utils/stores';
+	import { m } from '#paraglide/messages.js';
+	import { unreadNotificationCount } from '#lib/utils/stores.js';
 	import { onMount } from 'svelte';
 
 	/**

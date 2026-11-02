@@ -1,15 +1,15 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import {
 		getModalStore,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { invalidateAll } from '$app/navigation';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/components/Modals/stores.js';
+	import { refreshAll } from '$app/navigation';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { superForm } from 'sveltekit-superforms';
 	import { get } from 'svelte/store';
 	import type { PageData } from './$types';
@@ -412,7 +412,7 @@
 			await ops('reorder-activities', { ids: activities.map((a) => a.id) });
 		} catch (e) {
 			console.error(e);
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 
@@ -442,7 +442,7 @@
 			await ops('reorder-actors', { ids: matrixActors.map((a) => a.id) });
 		} catch (e) {
 			console.error(e);
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 

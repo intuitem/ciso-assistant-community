@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Preuve '${evidence_name}' : ${decision}"
+body: |
+  Bonjour,
+
+  Une preuve dont vous êtes responsable a été examinée :
+
+  - Nom : ${evidence_name}
+  - Statut : ${decision}
+  - Examinée par : ${actor_name}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour la consulter : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

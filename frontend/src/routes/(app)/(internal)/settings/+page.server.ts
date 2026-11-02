@@ -1,10 +1,10 @@
-import { handleErrorResponse } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { getModelInfo } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { handleErrorResponse } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import {
 	FeatureFlagsSchema,
 	GeneralSettingsSchema,
@@ -13,7 +13,7 @@ import {
 	SecIntelFeedsSchema,
 	webhookEndpointSchema,
 	auditSinkSchema
-} from '$lib/utils/schemas';
+} from '#lib/utils/schemas.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate } from 'sveltekit-superforms';

@@ -11,11 +11,13 @@ Two things outside the project force a change. Microsoft 365 and Google Workspac
 
 Our own production sends through SendGrid's SMTP relay. Neither change affects it. It must keep working with its current configuration.
 
+Our production also routes outbound traffic through an HTTP proxy. SMTP cannot cross an HTTP proxy, so mail is the one flow that needs its own egress exception. Some customer tenants forbid SMTP AUTH altogether, which OAuth over SMTP still requires on the sending mailbox. Both call for a transport that sends mail over HTTPS.
+
 ## Decision
 
 We will build one mail service in `core`. Every outbound message goes through it. The service reads the mailers from `MAILERS` and tries them in order until one accepts the message. There is no dedicated rescue mailer: a second mailer is just the next entry in the list.
 
-Operators keep using environment variables. The existing SMTP variables keep working unchanged. A new variable, `EMAIL_TRANSPORT`, selects the type of the first mailer and defaults to `smtp`. The allowed values are a fixed list in the code. The existing `_RESCUE` variables keep working and define a second mailer, with its own `EMAIL_TRANSPORT_RESCUE`. Besides plain SMTP, we add OAuth over SMTP for Microsoft 365 and Google Workspace. Templates, i18n and the task queue do not change.
+Operators keep using environment variables. The existing SMTP variables keep working unchanged. A new variable, `EMAIL_TRANSPORT`, selects the type of the first mailer and defaults to `smtp`. The allowed values are a fixed list in the code. The existing `_RESCUE` variables keep working and define a second mailer, with its own `EMAIL_TRANSPORT_RESCUE`. Besides plain SMTP, we add OAuth over SMTP for Microsoft 365 and Google Workspace, and Microsoft Graph, which sends over HTTPS. Templates, i18n and the task queue do not change.
 
 ## Consequences
 
@@ -35,10 +37,10 @@ Operators keep using environment variables. The existing SMTP variables keep wor
 - One function, `mailing_enabled()`, replaces every "is mail configured?" check. If no transport is configured, or the sender address is missing, mail is off and the test-send action says why. Startup fails only on contradictory configuration that a running instance cannot already have.
 - The service is synchronous and raises on failure. Callers that must not block wrap it in a Huey task that reports the outcome, as the workflow `send_email` action does since #4654. A task that swallows the error and reports success is not acceptable. Password reset and invitations stay inline, as today. The reset endpoint keeps its neutral response so it never reveals whether an address exists.
 - A "send test email" action for administrators. It sends only to their own address and reports the mailer used and the error, if any.
+- Microsoft Graph, written by us on Django's base backend. It obtains a token with Entra client credentials and posts each message to the sending mailbox's `sendMail` endpoint. Obtaining the token and connecting to Graph is the "open" step, so a token failure or an unreachable Graph fails over like a refused SMTP connection, even when the token comes from the cache; a rejected send after that is final. Configuration is a tenant ID, a client ID, a client secret and the mailbox; the operator supplies no URL. It follows the standard proxy environment variables, like every other HTTPS call the backend makes. Attachments are refused, since nothing in the product sends any. The settings panel of [custom-mailer-settings](custom-mailer-settings.md) offers it too.
 
 ### Later
 
-- A Microsoft Graph backend, written by us, for tenants whose policy forbids SMTP AUTH entirely or whose network blocks outbound SMTP. OAuth over SMTP needs SMTP AUTH enabled on the sending mailbox; Graph does not.
 - Declaring any number of mailers of any type from the environment, when a customer needs a fallback that is not SMTP.
 
 ### Out of scope
@@ -50,7 +52,7 @@ Operators keep using environment variables. The existing SMTP variables keep wor
 
 Running instances upgrade by pulling a new version. They must not need to touch their configuration, rolling back must be as simple as running the previous image, and no phase adds a migration.
 
-Order of delivery: first the service, the test-send action and OAuth over SMTP, with guides for Microsoft 365 and Google Workspace, before Microsoft disables basic authentication by default. Existing configurations see no change other than failover now covering every message. The Later items follow as demand appears. The first phase is accepted on an end-to-end test against the mailpit container in the compose stack, plus unit tests for failover order and the cases that must not fail over. Its release notes say no action is required.
+Order of delivery: first the service, the test-send action and OAuth over SMTP, with guides for Microsoft 365 and Google Workspace, before Microsoft disables basic authentication by default. Existing configurations see no change other than failover now covering every message. Microsoft Graph follows as its own delivery, with one schema migration for the panel. The Later items follow as demand appears. The first phase is accepted on an end-to-end test against the mailpit container in the compose stack, plus unit tests for failover order and the cases that must not fail over. Its release notes say no action is required.
 
 Django 7.0 removes what 6.1 deprecated: the `EMAIL_*` settings except `DEFAULT_FROM_EMAIL`, `get_connection()`, the `connection` and `fail_silently` arguments, and direct construction of the SMTP backend. After the first phase our code uses none of them. Our environment variables share their spelling with the removed settings but are ours: our settings module reads them and never hands them to Django under those names.
 
@@ -59,13 +61,14 @@ Django 7.0 removes what 6.1 deprecated: the `EMAIL_*` settings except `DEFAULT_F
 - New secrets in the environment: an Entra client secret or a Google service account key. Same handling as the SMTP password: environment only, never logged, never exposed through the API.
 - On Microsoft 365, a tenant-wide `SMTP.SendAsApp` grant in Entra lets a leaked secret send as any mailbox. The customer guide requires Exchange RBAC for Applications with a scope limited to the sending mailbox and no grant in Entra, since grants from the two systems add up, and tells the admin to enable SMTP AUTH on that one mailbox only. We cannot verify that the customer did this.
 - On Google Workspace, SMTP with OAuth requires the full mail scope and domain-wide delegation, which cannot be limited to one mailbox. A leaked key can read and send as any user in the domain. The guide says this plainly. Customers who cannot accept it use the IP-allowlisted relay instead.
+- On Microsoft Graph, the `Mail.Send` application permission is tenant-wide when granted in Entra. As for SMTP, the customer guide requires Exchange RBAC for Applications with a scope limited to the sending mailbox and no grant in Entra. It does not use Application Access Policies, which Microsoft is replacing with RBAC for Applications. We cannot verify that the customer did this either.
 - The fixed transport list prevents loading arbitrary classes from an environment variable. The test-send action is admin-only, own address only and rate limited, so it cannot relay.
 - A later mailer can silently carry all traffic when the first is misconfigured. The error log on every failover is the mitigation.
 
 ## Alternatives considered
 
 - **SMTP only, pointing Microsoft 365 customers at High Volume Email or a local relay**: rejected. HVE only delivers to internal recipients. A relay moves the problem to the customer.
-- **A Microsoft Graph backend in the first build**: deferred. Microsoft supports OAuth over SMTP and has not announced its retirement. Graph only helps tenants that forbid SMTP AUTH, and we have not met one. If we build it, we write it ourselves rather than depend on a single-maintainer package for credential-handling code.
+- **Keeping Microsoft Graph for later**: reversed. It was deferred because Microsoft supports OAuth over SMTP and Graph only helps tenants that forbid SMTP AUTH. Our own proxy-only egress is the other case Graph solves, and it is ours. We write it ourselves rather than depend on a single-maintainer package for credential-handling code.
 - **Provider HTTP APIs through django-anymail**: rejected. SMTP with an API key reaches every provider, and what the APIs add, tracking, webhooks and provider-side templates, is outside the product.
 - **Configuring mail in the admin UI instead of environment variables**: rejected for now. It puts secrets in the database and changes when configuration takes effect. Revisit if customers ask.
 - **A dedicated rescue mailer**: rejected. A special case of an ordered list, limited to one fallback.

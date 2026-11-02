@@ -130,3 +130,11 @@ def validate_html_template_file_name(value):
     here even though it is excluded from the general upload allowlist.
     """
     return _validate_file_extension_and_sanitize(value, ["html"])
+
+
+def validate_report_template_file_name(value):
+    """
+    Filename check for report templates (.docx, or .typ Typst source rendered
+    server-side and never served as an attachment).
+    """
+    return _validate_file_extension_and_sanitize(value, ["docx", "typ"])

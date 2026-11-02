@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { PageServerLoad } from './$types';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 function buildMultiParam(key: string, values: string[]): string {
 	if (!values || values.length === 0) return '';

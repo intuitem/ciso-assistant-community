@@ -1,5 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { json } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 const POST_ACTIONS: Record<string, string> = {
@@ -31,7 +30,7 @@ async function forward(url: string, method: string, body: unknown, fetchFn: type
 		return new Response(null, { status: r.status });
 	}
 	try {
-		return json(JSON.parse(text), { status: r.status });
+		return Response.json(JSON.parse(text), { status: r.status });
 	} catch {
 		// Non-JSON body (e.g. an upstream error page): pass it through with
 		// the original status instead of masking it with a parse 500.
@@ -49,7 +48,7 @@ export const GET: RequestHandler = async ({ params, url, fetch }) => {
 	const action = url.searchParams.get('action') ?? 'read';
 	const path = GET_ACTIONS[action];
 	if (path === undefined) {
-		return json({ error: `unknown action '${action}'` }, { status: 400 });
+		return Response.json({ error: `unknown action '${action}'` }, { status: 400 });
 	}
 	const suffix = path ? `${path}/` : '';
 	return forward(`${BASE_API_URL}/library-drafts/${params.id}/${suffix}`, 'GET', undefined, fetch);
@@ -60,7 +59,7 @@ export const POST: RequestHandler = async ({ params, request, fetch }) => {
 	const action = body.action;
 	const path = POST_ACTIONS[action];
 	if (!path) {
-		return json({ error: `unknown action '${action}'` }, { status: 400 });
+		return Response.json({ error: `unknown action '${action}'` }, { status: 400 });
 	}
 	delete body.action;
 	return forward(

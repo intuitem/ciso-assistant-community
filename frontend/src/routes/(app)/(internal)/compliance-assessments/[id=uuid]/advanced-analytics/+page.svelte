@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { roundScore } from '$lib/utils/helpers';
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { complianceResultColorMap } from '$lib/utils/constants';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { roundScore } from '#lib/utils/helpers.js';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import StackedBarsNormalized from '#lib/components/Chart/StackedBarsNormalized.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import RadarChart from '#lib/components/Chart/RadarChart.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {

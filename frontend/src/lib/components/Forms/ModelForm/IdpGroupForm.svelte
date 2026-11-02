@@ -1,8 +1,8 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -28,6 +28,7 @@
 		{form}
 		multiple
 		optionsEndpoint="user-groups"
+		lazy
 		field="user_groups"
 		pathField="path"
 		cacheLock={cacheLocks['user_groups']}

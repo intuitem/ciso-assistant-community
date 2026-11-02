@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { canPerformAction } from '#lib/utils/access-control.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Tier {
@@ -17,6 +17,7 @@
 		rank: number;
 		hexcolor: string;
 		is_visible: boolean;
+		compliance_target: number | null;
 		builtin: boolean;
 		entities_count: number;
 		solutions_count?: number;
@@ -95,7 +96,12 @@
 				const detail =
 					result.type === 'failure' ? (result.data?.error as Record<string, any>) : undefined;
 				const message =
-					detail?.error ?? detail?.detail ?? detail?.name?.[0] ?? detail?.rank?.[0] ?? undefined;
+					detail?.error ??
+					detail?.detail ??
+					detail?.name?.[0] ??
+					detail?.rank?.[0] ??
+					detail?.compliance_target?.[0] ??
+					undefined;
 				toastStore.trigger({
 					message: message ? safeTranslate(String(message)) : m.anErrorOccurred(),
 					background: 'preset-filled-error-500'
@@ -104,7 +110,7 @@
 			}
 			return true;
 		} finally {
-			await invalidateAll();
+			await refreshAll();
 			busy = false;
 		}
 	}
@@ -297,6 +303,46 @@
 										>{m.entitiesCountLabel({ count: tier.entities_count })}</span
 									>
 								</a>
+
+								{#if canEdit}
+									<label
+										class="flex items-center gap-1.5 text-sm text-surface-600-400"
+										title={m.complianceTargetHelp()}
+									>
+										<span class="whitespace-nowrap">{m.complianceTarget()}</span>
+										<input
+											type="number"
+											min="0"
+											max="100"
+											step="1"
+											class="input w-20 px-2 py-1 text-sm tabular-nums"
+											value={tier.compliance_target ?? ''}
+											placeholder="—"
+											disabled={busy}
+											data-testid="tier-compliance-target"
+											onchange={async (e) => {
+												const input = e.currentTarget;
+												const raw = input.value.trim();
+												const value = raw === '' ? null : Number(raw);
+												// Svelte skips rewriting an unchanged value, so a rejected entry would stay on screen.
+												const reset = () => (input.value = String(tier.compliance_target ?? ''));
+												// Unparseable text reads as '' and would clear the target.
+												if (input.validity.badInput) return reset();
+												if (
+													value !== tier.compliance_target &&
+													!(await update(tier, { compliance_target: value }))
+												)
+													reset();
+											}}
+										/>
+										<span aria-hidden="true">%</span>
+									</label>
+								{:else if tier.compliance_target != null}
+									<span class="text-sm text-surface-600-400 whitespace-nowrap">
+										{m.complianceTarget()}
+										<span class="font-semibold tabular-nums">{tier.compliance_target}%</span>
+									</span>
+								{/if}
 
 								{#if canEdit}
 									<button

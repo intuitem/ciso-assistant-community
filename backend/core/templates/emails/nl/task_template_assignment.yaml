@@ -1,0 +1,16 @@
+subject: "CISO Assistant: U bent toegewezen aan '${task_name}'"
+body: |
+  Hallo,
+
+  U bent toegewezen aan de volgende taak:
+
+  - Naam: ${task_name}
+  - Beschrijving: ${task_description}
+  - Ref ID: ${task_ref_id}
+  - Datum: ${task_date}
+  - Terugkerend: ${is_recurrent}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om deze taak te bekijken en te beheren: [Naar CISO Assistant](${ciso_assistant_url}/task-templates/${task_id})
+
+  Bedankt.

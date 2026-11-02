@@ -1,14 +1,14 @@
-import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { modelSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { handleErrorResponse, nestedWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import type { ModelInfo } from '$lib/utils/types';
+import type { ModelInfo } from '#lib/utils/types.js';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {

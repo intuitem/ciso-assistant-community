@@ -6,6 +6,8 @@ description: "Symptoms and fixes: triggers that do not fire, failed runs, empty 
 
 Symptoms first, causes second. Most answers are one panel away: the Runs panel shows what a run did, the Triggers panel shows why a trigger did or did not fire.
 
+Quick reference: [cheat sheet](cheat-sheet.md#quick-fixes).
+
 ## The Workflows entry is not in the sidebar
 
 - The **Workflows** feature flag is off. Turn it on under **Extra > Settings > Feature flags**.

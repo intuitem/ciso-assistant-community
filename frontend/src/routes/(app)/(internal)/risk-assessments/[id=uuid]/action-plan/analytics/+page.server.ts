@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { discardBody } from '$lib/utils/responses';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { discardBody } from '#lib/utils/responses.js';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

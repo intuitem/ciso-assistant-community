@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
 	import { localeLabel } from './builder-utils.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		frameworkId: string;

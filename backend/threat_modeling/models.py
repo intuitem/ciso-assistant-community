@@ -2,12 +2,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
-from core.models import NameDescriptionMixin
+from core.models import FilteringLabelMixin, NameDescriptionMixin
 from iam.models import FolderMixin
 from sec_intel.models import TTPCatalog, Tactic, Technique
 
 
-class ThreatModel(NameDescriptionMixin, FolderMixin):
+class ThreatModel(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )

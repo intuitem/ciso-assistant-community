@@ -6,6 +6,8 @@ description: "Every action type with its settings, outputs and the permission it
 
 This page lists every action type, its settings as they appear in the inspector, what it writes to `{{nodes.<ref>}}` and the permission the run identity must hold.
 
+Quick reference: [cheat sheet](cheat-sheet.md#actions).
+
 Fields marked *expr* accept [expressions](expressions.md).
 
 ## Data steps

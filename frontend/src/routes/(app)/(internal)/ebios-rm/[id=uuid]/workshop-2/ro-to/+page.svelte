@@ -1,12 +1,12 @@
 <script lang="ts">
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import RoToRadarChart from '$lib/components/Chart/RoToRadarChart.svelte';
-	import { ratingLevelLabel } from '$lib/utils/ebios-rating-kit';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import RoToRadarChart from '#lib/components/Chart/RoToRadarChart.svelte';
+	import { ratingLevelLabel } from '#lib/utils/ebios-rating-kit.js';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
 	import {
@@ -14,7 +14,7 @@
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 

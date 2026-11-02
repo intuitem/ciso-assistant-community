@@ -2,14 +2,14 @@
 	import { createEventDispatcher } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import * as m from '$paraglide/messages.js';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import * as m from '#paraglide/messages.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -34,6 +34,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -264,6 +265,7 @@
 					field="evidences"
 					multiple
 					optionsEndpoint="evidences"
+					lazy
 					optionsExtraFields={[['folder', 'str']]}
 					cacheLock={cacheLocks['evidences']}
 					bind:cachedValue={formDataCache['evidences']}

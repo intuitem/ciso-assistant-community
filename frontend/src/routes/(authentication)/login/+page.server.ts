@@ -1,9 +1,9 @@
-import { getSecureRedirect } from '$lib/utils/helpers';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
 
-import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { logger } from '$lib/server/logger';
-import { loginSchema } from '$lib/utils/schemas';
-import type { LoginRequestBody } from '$lib/utils/types';
+import { ALLAUTH_API_URL, BASE_API_URL } from '#lib/utils/constants.js';
+import { logger } from '#lib/server/logger.js';
+import { loginSchema } from '#lib/utils/schemas.js';
+import type { LoginRequestBody } from '#lib/utils/types.js';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';

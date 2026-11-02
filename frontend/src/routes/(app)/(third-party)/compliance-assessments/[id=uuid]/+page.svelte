@@ -1,67 +1,69 @@
 <script lang="ts">
-	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
+	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
 	import RecursiveTreeView, {
 		setContextRecursiveTreeView,
 		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
-	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	} from '#lib/components/TreeView/RecursiveTreeView.svelte';
 
 	import { onMount } from 'svelte';
 
-	import type { TreeViewNode } from '$lib/components/TreeView/types';
+	import type { TreeViewNode } from '#lib/components/TreeView/types.js';
 
 	import { Switch, Progress, Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
+	import MaturityStaircase from './MaturityStaircase.svelte';
+	import type { StaircaseResult } from './staircase';
 
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import ExportModal, {
 		type ExportFormat,
 		type ExportGroup
-	} from '$lib/components/Modals/ExportModal.svelte';
+	} from '#lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,
 		complianceStatusColorMap,
 		extendedResultColorMap
-	} from '$lib/utils/constants';
+	} from '#lib/utils/constants.js';
 
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import { URL_MODEL_MAP, getModelInfo, getMarkdownFields } from '$lib/utils/crud';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import RingProgress from '#lib/components/DataViz/RingProgress.svelte';
+	import { URL_MODEL_MAP, getModelInfo, getMarkdownFields } from '#lib/utils/crud.js';
 	import type { Node } from './types';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import SuggestControlsModal from '#lib/components/Modals/SuggestControlsModal.svelte';
 	import {
 		displayScoreColor,
 		darkenColor,
 		getScoreHexColor,
 		getFieldVisibility,
 		roundScore
-	} from '$lib/utils/helpers';
-	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
-	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+	} from '#lib/utils/helpers.js';
+	import { auditFiltersStore, expandedNodesState } from '#lib/utils/stores.js';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import ExcludeNotApplicableRequirements from '#lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
 
 	import { derived } from 'svelte/store';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 
 	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
 
@@ -125,11 +127,13 @@
 	// Verdicts follow the result's visibility, computed numbers the score's.
 	const shownRules = $derived(
 		outcomeRules.filter((rule) =>
-			rule.kind === 'number'
-				? showScore &&
-					(rule.annotation || rule.label) &&
-					compliance_assessment.computed_values?.[rule.ref_id] != null
-				: showResult
+			rule.kind === 'staircase'
+				? false
+				: rule.kind === 'number'
+					? showScore &&
+						(rule.annotation || rule.label) &&
+						compliance_assessment.computed_values?.[rule.ref_id] != null
+					: showResult
 		)
 	);
 	const outcomeMet = (rule: Record<string, any>) =>
@@ -143,7 +147,7 @@
 			[]) as Record<string, any>[];
 		const groupName = (id: string) => {
 			const group = definitions.find((g) => g.ref_id === id);
-			return group?.translations?.[getLocale()]?.name || group?.name || id;
+			return group?.name || id;
 		};
 		const columns = new Map<string, { key: string; title: string; rules: Record<string, any>[] }>();
 		for (const rule of shownRules) {
@@ -171,6 +175,32 @@
 		return m.objectsNotVisible({ count });
 	};
 
+	// Staircase rules (levels reached per section) get their own tile and grid.
+	type ShownStaircase = StaircaseResult & { rule: Record<string, any> };
+	const staircases = $derived(
+		showResult
+			? ((compliance_assessment.staircases ?? []) as StaircaseResult[]).flatMap((s) => {
+					const rule = outcomeRules.find((r) => r.ref_id === s.ref_id);
+					return rule && s.sections.length ? [{ ...s, rule }] : [];
+				})
+			: []
+	);
+	const staircaseLevelName = (s: ShownStaircase) => {
+		if (s.level === null) return m.staircaseNotDetermined();
+		if (s.level === 0)
+			return s.rule.translations?.[getLocale()]?.floor_label || s.rule.floor_label || '0';
+		const id = String(s.rule.staircase_levels[s.level - 1]);
+		const groups = (compliance_assessment.framework.implementation_groups_definition ??
+			[]) as Record<string, any>[];
+		return groups.find((g) => g.ref_id === id)?.name || id;
+	};
+	let openStaircase = $state<ShownStaircase | null>(null);
+	let staircaseDialog: HTMLDialogElement | undefined = $state();
+	function openStaircaseDialog(s: ShownStaircase) {
+		openStaircase = s;
+		setTimeout(() => staircaseDialog?.showModal(), 0);
+	}
+
 	let verdictsDialogOpen = $state(false);
 	let verdictsDialog: HTMLDialogElement | undefined = $state();
 
@@ -195,16 +225,16 @@
 		if (dialogElement) dialogElement.close();
 	}
 
-	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
+	import ForceCirclePacking from '#lib/components/DataViz/ForceCirclePacking.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
-	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
-	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import CompareAuditModal from '#lib/components/Modals/CompareAuditModal.svelte';
+	import MapFromAuditModal from '#lib/components/Modals/MapFromAuditModal.svelte';
+	import MappingDirectionModal from '#lib/components/Modals/MappingDirectionModal.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -606,7 +636,7 @@
 				formAction: '/validation-flows?/create',
 				invalidateAll: true,
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -1219,13 +1249,35 @@
 					{/if}
 
 					<!-- Insights -->
-					{#if showVerdicts || ((has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party)}
+					{#if staircases.length || showVerdicts || ((has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party)}
 						<div>
 							<span
 								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
 								>{m.insights()}</span
 							>
 							<div class="grid grid-cols-2 gap-2">
+								{#each staircases as staircase (staircase.ref_id)}
+									<button
+										type="button"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer text-left"
+										onclick={() => openStaircaseDialog(staircase)}
+										data-testid="staircase-tile"
+									>
+										<div
+											class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-500 text-white font-bold tabular-nums shrink-0"
+										>
+											{staircase.level ?? '—'}
+										</div>
+										<div class="flex flex-col">
+											<span class="text-sm font-semibold leading-tight"
+												>{staircaseLevelName(staircase)}</span
+											>
+											<span class="text-xs opacity-80"
+												>{ruleLabel(staircase.rule, staircase.ref_id)}</span
+											>
+										</div>
+									</button>
+								{/each}
 								{#if showVerdicts}
 									{@const allMet = verdictCount > 0 && verdictsMet === verdictCount}
 									<button
@@ -1572,6 +1624,34 @@
 					</div>
 				{/each}
 			</div>
+		</div>
+	</dialog>
+{/if}
+{#if openStaircase}
+	<dialog
+		bind:this={staircaseDialog}
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl max-h-[85vh] rounded-2xl bg-surface-50-950 shadow-2xl border border-surface-200-800 p-0 overflow-hidden backdrop:bg-black/40"
+		aria-labelledby="staircase-dialog-title"
+		onclose={() => (openStaircase = null)}
+	>
+		<div class="flex justify-between items-center px-6 py-4 border-b border-surface-100-900">
+			<h3 id="staircase-dialog-title" class="text-lg font-bold text-surface-900-100">
+				{ruleLabel(openStaircase.rule, openStaircase.ref_id)}
+			</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-600-400 hover:text-surface-700-300"
+				aria-label={m.close()}
+				onclick={() => staircaseDialog?.close()}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 max-h-[calc(85vh-64px)] overflow-auto">
+			<MaturityStaircase
+				staircase={openStaircase}
+				rule={openStaircase.rule}
+				groups={compliance_assessment.framework.implementation_groups_definition ?? []}
+			/>
 		</div>
 	</dialog>
 {/if}

@@ -30,6 +30,8 @@ def reauthenticate(user, authentication_method="password"):
     request.session["account_authentication_methods"] = [
         {"method": authentication_method, "at": 0}
     ]
+    # allauth >= 65.21 only trusts records bound to this user.
+    request.session["account_authentication_methods_user"] = str(user.pk)
     with context.request_context(request):
         return get_adapter().reauthenticate(user, PASSWORD)
 
@@ -69,6 +71,8 @@ def reauthentication_flows(user, authentication_method="socialaccount"):
     request.session["account_authentication_methods"] = [
         {"method": authentication_method, "at": 0}
     ]
+    # allauth >= 65.21 only trusts records bound to this user.
+    request.session["account_authentication_methods_user"] = str(user.pk)
     with context.request_context(request):
         return get_reauthentication_flows(user)
 

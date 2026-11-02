@@ -32,7 +32,7 @@ from doc_management.models import DocumentContainer
 from ebios_rm.models import Stakeholder
 from iam.models import Folder, RoleAssignment
 from integrations.models import SyncMapping
-from pmbok.models import GenericCollection, ResponsibilityMatrixActivity
+from pmbok.models import CollectionItem, ResponsibilityMatrixActivity
 from privacy.models import DataBreach, Processing
 from resilience.models import AssetAssessment
 from threat_modeling.models import ThreatModelNode
@@ -74,7 +74,6 @@ def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
         ),
         # Through Policy (a proxy of AppliedControl — same table).
         (ValidationFlow.policies.through, "ValidationFlow_policies"),
-        (GenericCollection.policies.through, "GenericCollection_policies"),
         # Document links (Stream E.1) — associative, unioned onto the target.
         (DocumentContainer.policies.through, "DocumentContainer_policies"),
         (
@@ -195,6 +194,20 @@ def _rewire_sync_mappings(source_ids: list, target_id) -> dict[str, int]:
             target_configs.add(sm.configuration_id)
             moved += 1
     return {"moved": moved, "deleted": deleted}
+
+
+def _rewire_collection_items(source_ids: list, target_id) -> int:
+    content_type = ContentType.objects.get_for_model(AppliedControl)
+    items = CollectionItem.objects.filter(
+        content_type=content_type, object_id__in=source_ids
+    )
+    for collection_id in set(items.values_list("collection_id", flat=True)):
+        CollectionItem.objects.get_or_create(
+            collection_id=collection_id,
+            content_type=content_type,
+            object_id=target_id,
+        )
+    return items.delete()[0]
 
 
 def _union_direct_m2ms(target, sources) -> dict[str, int]:
@@ -366,6 +379,9 @@ def merge_applied_controls(
         rewired["Comment"] = _rewire_fk(
             Comment, "applied_control_id", source_id_list, target_obj.id
         )
+        rewired["GenericCollection"] = _rewire_collection_items(
+            source_id_list, target_obj.id
+        )
 
         sync_result = _rewire_sync_mappings(source_id_list, target_obj.id)
 
@@ -426,6 +442,10 @@ def _compute_rewire_preview(source_ids: list) -> dict[str, int]:
         ).count()
     counts["Comment"] = Comment.objects.filter(
         applied_control_id__in=source_ids
+    ).count()
+    counts["GenericCollection"] = CollectionItem.objects.filter(
+        content_type=ContentType.objects.get_for_model(AppliedControl),
+        object_id__in=source_ids,
     ).count()
     return counts
 

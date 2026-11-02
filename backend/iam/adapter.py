@@ -78,7 +78,7 @@ class MFAAdapter(DefaultMFAAdapter):
 
         # Skip local MFA challenge for SSO logins — the IdP already
         # authenticated the user.
-        records = get_authentication_records(context.request)
+        records = get_authentication_records(context.request, user)
         if any(r.get("method") == "socialaccount" for r in records):
             return False
 

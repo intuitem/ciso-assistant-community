@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { ResetPasswordSchema } from '$lib/utils/schemas';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import { ResetPasswordSchema } from '#lib/utils/schemas.js';
 	import Typewriter from 'sv-typewriter';
 
-	import { m } from '$paraglide/messages.js';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import Logo from '$lib/components/Logo/Logo.svelte';
+	import Logo from '#lib/components/Logo/Logo.svelte';
 
 	interface Props {
 		data: PageData;

@@ -251,6 +251,8 @@ class CWEViewSet(BaseModelViewSet):
     )
     def sync_catalog(self, request):
         """Sync CWE catalog from MITRE."""
+        import httpx
+
         from sec_intel.feeds import CWEFeed
 
         try:
@@ -260,6 +262,12 @@ class CWEViewSet(BaseModelViewSet):
                     "detail": f"CWE sync complete: {result['created']} created, {result['updated']} updated",
                     **result,
                 }
+            )
+        except httpx.HTTPError:
+            logger.warning("CWE feed unreachable", exc_info=True)
+            return Response(
+                {"error": "CWE feed is unreachable, try again later"},
+                status=503,
             )
         except Exception:
             logger.warning("CWE sync failed", exc_info=True)

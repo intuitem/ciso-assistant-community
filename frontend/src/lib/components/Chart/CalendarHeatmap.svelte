@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
 	interface Props {
 		name: string;

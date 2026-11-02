@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { isDarkTheme, mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { roundScore } from '$lib/utils/helpers';
+	import { isDarkTheme, mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { roundScore } from '#lib/utils/helpers.js';
 
 	interface Props {
 		width?: string;
@@ -18,6 +18,7 @@
 		strokeWidth?: number;
 		fontSize?: number;
 		title?: string;
+		radius?: string;
 	}
 
 	let {
@@ -33,7 +34,8 @@
 		backgroundColor,
 		strokeWidth = 20,
 		fontSize = 32,
-		title = ''
+		title = '',
+		radius = '65%'
 	}: Props = $props();
 
 	const chart_id = `${name}_${crypto.randomUUID().slice(0, 8)}_div`;
@@ -65,7 +67,7 @@
 			series: [
 				{
 					type: 'gauge',
-					radius: '65%',
+					radius: radius,
 					center: ['50%', '45%'],
 					startAngle: 90,
 					endAngle: -270,

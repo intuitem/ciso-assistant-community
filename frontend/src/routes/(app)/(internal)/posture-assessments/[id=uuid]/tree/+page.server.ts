@@ -1,12 +1,12 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { PageServerLoad } from './$types';
-import { error, fail, type Actions, type NumericRange } from '@sveltejs/kit';
+import { fail, type Actions } from '@sveltejs/kit';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}`;
 	const assessmentRes = await event.fetch(`${endpoint}/`);
-	if (!assessmentRes.ok)
-		error(assessmentRes.status as NumericRange<400, 599>, await assessmentRes.json());
+	if (!assessmentRes.ok) errorFromBody(assessmentRes.status, await assessmentRes.json());
 	const assessment = await assessmentRes.json();
 	const asset =
 		event.url.searchParams.get('asset') ??
@@ -14,7 +14,7 @@ export const load: PageServerLoad = async (event) => {
 	const treeRes = await event.fetch(
 		`${endpoint}/tree/${asset ? `?asset=${encodeURIComponent(asset)}` : ''}`
 	);
-	if (!treeRes.ok) error(treeRes.status as NumericRange<400, 599>, await treeRes.json());
+	if (!treeRes.ok) errorFromBody(treeRes.status, await treeRes.json());
 	const tree = await treeRes.json();
 	return {
 		assessment,

@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 
 from core.permissions import IsGlobalAdmin
+from core.utils import get_report_timezone, get_report_timezone_choices
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
@@ -208,6 +209,10 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     def default_language(self, request, pk=None):
         choices = {code: name for code, name in settings.LANGUAGES}
         return Response(choices)
+
+    @action(detail=True, name="Get report time zones")
+    def report_timezone(self, request, pk=None):
+        return Response(get_report_timezone_choices(current=get_report_timezone().key))
 
     @action(
         detail=True,
@@ -423,7 +428,11 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
+        # PATCH must not fill in defaults for fields it leaves out: a full update
+        # would reset the anchor and day counts the request doesn't mention.
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=kwargs.get("partial", False)
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

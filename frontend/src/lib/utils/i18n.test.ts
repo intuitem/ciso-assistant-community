@@ -1,6 +1,6 @@
 import { describe, it, expect, afterAll, afterEach } from 'vitest';
 
-import { baseLocale, overwriteGetLocale } from '$paraglide/runtime';
+import { baseLocale, overwriteGetLocale } from '#paraglide/runtime.js';
 import { safeTranslate, setUseRiskCategoryLabel, translateChoiceLabel } from './i18n';
 
 describe('use_risk_category_label wording swap', () => {

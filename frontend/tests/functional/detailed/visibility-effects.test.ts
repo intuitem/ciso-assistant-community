@@ -8,7 +8,7 @@
  * The editor itself is exercised by visibility-editor.test.ts.
  *
  * Companion tests:
- *   - visibility-editor.test.ts verifies the editor UI (pill state, cascade,
+ *   - visibility-editor.test.ts verifies the editor UI (per-role state, cascade,
  *     persistence) for one save cycle.
  *   - test_field_visibility.py (backend) covers the resolver helpers.
  */
@@ -16,7 +16,7 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { Page, BrowserContext } from '@playwright/test';
 
 const vars = TestContent.generateTestVars();

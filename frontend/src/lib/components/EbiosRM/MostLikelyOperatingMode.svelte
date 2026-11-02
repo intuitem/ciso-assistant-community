@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { isDark } from '$lib/utils/helpers';
+	import { m } from '#paraglide/messages.js';
+	import { isDark } from '#lib/utils/helpers.js';
 
 	interface Props {
 		operatingMode: {

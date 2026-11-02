@@ -1,16 +1,16 @@
 import { type Actions } from '@sveltejs/kit';
 
-import { defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import type { LayoutServerLoad } from './$types';
-import { getSecureRedirect } from '$lib/utils/helpers';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
 import { redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async (event) => {

@@ -1,0 +1,15 @@
+subject: "CISO Assistant: Ihnen wurde '${incident_name}' zugewiesen"
+body: |
+  Hallo,
+
+  Ihnen wurde folgender Vorfall zugewiesen:
+
+  - Name: ${incident_name}
+  - Referenz-ID: ${incident_ref_id}
+  - Schweregrad: ${incident_severity}
+  - Status: ${incident_status}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diesen Vorfall anzuzeigen und zu verwalten: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

@@ -2,8 +2,8 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 	import type { ValidationAdapter } from 'sveltekit-superforms/adapters';
 
 	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {

@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { mountThemeAwareChart, isDarkTheme } from '$lib/utils/echartsTheme';
+	import { mountThemeAwareChart, isDarkTheme } from '#lib/utils/echartsTheme.js';
 	interface Props {
 		classesContainer?: string;
 		name?: string;
 		metrics: any;
 	}
 
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	let { classesContainer = '', name = 'metrics_tracker', metrics }: Props = $props();
 	const chart_id = `${name}_div`;
 

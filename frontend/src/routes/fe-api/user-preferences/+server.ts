@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { toLocale } from '$paraglide/runtime';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { toLocale } from '#paraglide/runtime.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, request }) => {

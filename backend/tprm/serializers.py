@@ -18,10 +18,14 @@ from core.models import (
     Terminology,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
-from core.serializers import BaseModelSerializer
+from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+)
+from custom_fields.serializers import CustomFieldsSerializerMixin
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from pmbok.models import GenericCollection
 from tprm.models import (
     Contract,
     Entity,
@@ -442,17 +446,19 @@ class ContractImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class EntityAssessmentReadSerializer(BaseModelSerializer):
+class EntityAssessmentReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     # Bare, so the value carries `str` and the table can render it as a link to the
     # audit. Only `.id` is read elsewhere.
     compliance_assessment = FieldsRelatedField()
     completion = serializers.SerializerMethodField()
     review_progress = serializers.SerializerMethodField()
     assignment_status = serializers.SerializerMethodField()
+    compliance_overview = serializers.SerializerMethodField()
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     solutions = FieldsRelatedField(many=True)
     representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
@@ -493,6 +499,32 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
             return cached[audit_id]
         return obj.compliance_assessment.progress
 
+    def get_compliance_overview(self, obj):
+        """The questionnaire's compliance split and global score, so the third-party
+        record shows what the audit page shows. None when there is no questionnaire,
+        or when the questionnaire's own folder is out of the reader's reach."""
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        from core.models import ComplianceAssessment
+        from core.utils import compliance_overview
+        from iam.models import RoleAssignment
+
+        optimized = self.context.get("optimized_data") or {}
+        viewable = optimized.get("viewable_audits")
+        if viewable is None:
+            request = self.context.get("request")
+            if not RoleAssignment.is_object_accessible(
+                getattr(request, "user", None), "view", ComplianceAssessment, audit_id
+            ):
+                return None
+        elif audit_id not in viewable:
+            return None
+        cached = optimized.get("compliance_overview")
+        if cached is not None:
+            return cached.get(audit_id)
+        return compliance_overview(obj.compliance_assessment)
+
     def get_assignment_status(self, obj):
         """Where the questionnaire stands with its respondent: the least advanced assignment."""
         audit_id = obj.compliance_assessment_id
@@ -517,13 +549,17 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
-class EntityAssessmentWriteSerializer(BaseModelSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
+class EntityAssessmentWriteSerializer(
+    CollectionMembershipMixin,
+    CustomFieldsSerializerMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     create_audit = serializers.BooleanField(default=False)
     framework = serializers.PrimaryKeyRelatedField(
         queryset=Framework.objects.all(), required=False
@@ -537,6 +573,36 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     # Set on the audit the assessment creates, so the analyst configures respondent
     # visibility here instead of opening the audit afterwards.
     field_visibility = serializers.JSONField(required=False)
+
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
+
+    def validate(self, attrs):
+        # Before super(): custom fields are scoped against attrs["folder"].
+        instance = self.instance
+        perimeter = attrs.get("perimeter", getattr(instance, "perimeter", None))
+        folder = attrs.get("folder", getattr(instance, "folder", None))
+        new_perimeter = (
+            instance is not None
+            and "perimeter" in attrs
+            and perimeter != instance.perimeter
+        )
+        # Global or no folder follows the perimeter, as in Assessment.save().
+        if (
+            perimeter
+            and perimeter.folder
+            and (new_perimeter or folder in (None, Folder.get_root_folder()))
+        ):
+            # Permission is checked only for a move the request asked for.
+            requested = "folder" in attrs or "perimeter" in attrs
+            attrs["folder"] = (
+                self.validate_folder(perimeter.folder)
+                if requested
+                else perimeter.folder
+            )
+        return super().validate(attrs)
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -696,12 +762,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         old_representatives = set(instance.representatives.all()) - set(
             validated_data.get("representatives", [])
         )
-
-        # If perimeter is being changed, update folder to match the new perimeter's folder
-        if "perimeter" in validated_data:
-            new_perimeter = validated_data["perimeter"]
-            if new_perimeter and new_perimeter.folder:
-                validated_data["folder"] = new_perimeter.folder
 
         with transaction.atomic():
             instance = super().update(instance, validated_data)
@@ -1129,7 +1189,9 @@ class SolutionReadSerializer(BaseModelSerializer):
         exclude = []
 
 
-class SolutionWriteSerializer(BaseModelSerializer):
+class SolutionWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     # The chain is handled manually in create()/update() below. Declared here
     # so that `initial_data.get("subcontracting_chain")` is the surface we
     # inspect.
@@ -1390,7 +1452,9 @@ class ContractReadSerializer(BaseModelSerializer):
         exclude = []
 
 
-class ContractWriteSerializer(BaseModelSerializer):
+class ContractWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     class Meta:
         model = Contract
         exclude = []

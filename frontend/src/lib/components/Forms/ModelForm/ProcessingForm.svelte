@@ -1,13 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -84,6 +84,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -150,6 +151,7 @@
 	{form}
 	multiple
 	optionsEndpoint="evidences"
+	lazy
 	optionsExtraFields={[['folder', 'str']]}
 	field="evidences"
 	cacheLock={cacheLocks['evidences']}

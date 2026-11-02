@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Validatiedeadline over ${days} ${days_unit}"
+body: |
+  Hallo,
+
+  De deadline van de volgende validatieverzoeken verstrijkt over ${days} ${days_unit}. Aantal: ${validation_count}
+
+  ${validation_list}
+
+  Controleer en behandel deze verzoeken vóór de deadline: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import CalendarHeatmap from '$lib/components/Chart/CalendarHeatmap.svelte';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	import CalendarHeatmap from '#lib/components/Chart/CalendarHeatmap.svelte';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 
 	const currentYear = new Date().getFullYear();
 	let selectedDate = $state<string | null>(null);

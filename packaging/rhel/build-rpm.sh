@@ -113,6 +113,7 @@ pnpm run build
 echo "[6/8] Copying frontend build..."
 mkdir -p "$SOURCES_DIR/frontend/build"
 cp -r build/* "$SOURCES_DIR/frontend/build/"
+cp -r server "$SOURCES_DIR/frontend/"
 cp package.json "$SOURCES_DIR/frontend/"
 
 # Copy only production node_modules

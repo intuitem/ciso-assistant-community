@@ -1,4 +1,6 @@
+import functools
 import hashlib
+from importlib.resources import files
 from decimal import Decimal
 from enum import Enum
 
@@ -6,7 +8,8 @@ import json
 import re
 from re import sub
 from typing import Literal
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone, tzinfo
+from zoneinfo import ZoneInfo
 
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
@@ -2020,6 +2023,62 @@ def is_field_editable_by(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
+def is_field_read_only_for(compliance_assessment, field_name, role):
+    """Whether a field is shown to the given role without being writable by it."""
+    return _role_access(compliance_assessment, field_name, role) == "read"
+
+
+def is_open_assignee(user, requirement_assessment):
+    """Whether the user answers this requirement through an assignment that is still
+    open (not submitted or closed): the assignment page shows them the respondent
+    view whatever other role they hold."""
+    from core.models import Actor
+
+    return (
+        requirement_assessment.assignments.filter(
+            actor__in=Actor.get_all_for_user(user)
+        )
+        .exclude(status__in=["submitted", "closed"])
+        .exists()
+    )
+
+
+VISIBILITY_ROLES = ("auditor", "respondent")
+VISIBILITY_ACCESS = ("edit", "read", "hidden")
+
+
+def validate_field_visibility(value):
+    """Reject `field_visibility` maps the visibility editor cannot produce.
+
+    Pairs may be partial (a framework can override a single role). A missing
+    role resolves to "edit" at runtime, so hiding the auditor requires the
+    respondent to be explicitly hidden too.
+    """
+    from rest_framework import serializers
+
+    if value is None:
+        return value
+    if not isinstance(value, dict):
+        raise serializers.ValidationError("Field visibility must be an object.")
+    for field_name, pair in value.items():
+        if not isinstance(pair, dict):
+            raise serializers.ValidationError(
+                f"{field_name}: expected an object mapping roles to access levels."
+            )
+        for role, access in pair.items():
+            if role not in VISIBILITY_ROLES or access not in VISIBILITY_ACCESS:
+                raise serializers.ValidationError(
+                    f"{field_name}: invalid access '{access}' for role '{role}'."
+                )
+        # The auditor sees at least what the respondent sees.
+        auditor_hidden = pair.get("auditor") == "hidden"
+        if auditor_hidden and pair.get("respondent", "edit") != "hidden":
+            raise serializers.ValidationError(
+                f"{field_name}: cannot be visible to the respondent while hidden from the auditor."
+            )
+    return value
+
+
 def build_initial_field_visibility(framework, base=None):
     """Build the initial `field_visibility` map for a new CA.
 
@@ -2090,6 +2149,112 @@ def compute_respondent_progress(compliance_assessment, requirement_assessments) 
         compliance_assessment, requirement_assessments
     )
     return int(answered_q / total_q * 100) if total_q else 0
+
+
+def assessable_requirement_assessments(audit):
+    """The rows an audit's own aggregates expect, read off a caller's prefetch:
+    assessable, and within the selected implementation groups.
+
+    Same selection rules as `get_requirement_assessments(include_non_assessable=False)`,
+    which would re-query per audit.
+    """
+    rows = [
+        ra for ra in audit.requirement_assessments.all() if ra.requirement.assessable
+    ]
+    selected = set(audit.selected_implementation_groups or [])
+    if not selected:
+        return rows
+    return [
+        ra for ra in rows if selected & set(ra.requirement.implementation_groups or [])
+    ]
+
+
+def viewable_audit_ids(user, audit_ids) -> set:
+    """Which of `audit_ids` the user may read.
+
+    Seeing a third-party assessment does not carry the right to read its
+    questionnaire: the audit sits in an enclave folder of its own, and a role
+    assignment only reaches sub-folders when it is recursive.
+    """
+    from core.models import ComplianceAssessment
+    from iam.models import RoleAssignment
+
+    audit_ids = list(audit_ids)
+    if not audit_ids or user is None:
+        return set()
+    return set(
+        ComplianceAssessment.objects.filter(id__in=audit_ids)
+        .filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
+        )
+        .values_list("id", flat=True)
+    )
+
+
+def compliance_overview(audit, requirement_assessments=None) -> dict:
+    """The questionnaire's compliance split and global score, as its own page shows them.
+
+    Built from the audit's own methods, so a third-party card and the audit
+    page cannot drift apart. Pass `requirement_assessments` to read a caller's
+    prefetch; left out, the rows are fetched in one query.
+    """
+    if requirement_assessments is None:
+        from core.models import RequirementAssessment
+
+        requirement_assessments = list(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=audit, requirement__assessable=True
+            ).select_related("requirement", "compliance_assessment")
+        )
+    return {
+        "donut": audit.get_donut_data(requirement_assessments)["result"],
+        "global_score": {
+            **audit.get_global_score(requirement_assessments),
+            "min_score": audit.min_score,
+            "max_score": audit.max_score,
+            "total_max_score": audit.get_total_max_score(requirement_assessments),
+            "score_calculation_method": audit.score_calculation_method,
+        },
+        "show_result": is_field_visible_to(audit, "result", "auditor"),
+        "show_score": is_field_visible_to(audit, "score", "auditor"),
+    }
+
+
+def compliance_overviews(audits) -> dict:
+    """`compliance_overview` for a page of audits, keyed by audit id.
+
+    Reads the requirement rows off the caller's prefetch and primes the
+    framework trees AVG_OF_AVG needs in a single query, so the cost stays flat
+    as the page grows.
+    """
+    from core.models import ComplianceAssessment
+
+    audits = list(audits)
+    tree_frameworks = {
+        audit.framework_id
+        for audit in audits
+        if audit.score_calculation_method
+        == ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+    }
+    trees = (
+        ComplianceAssessment.framework_node_trees(tree_frameworks)
+        if tree_frameworks
+        else {}
+    )
+    overviews = {}
+    for audit in audits:
+        tree = trees.get(audit.framework_id)
+        if tree is not None:
+            audit.__dict__["framework_node_tree"] = tree
+        overviews[audit.id] = compliance_overview(
+            audit,
+            [
+                ra
+                for ra in audit.requirement_assessments.all()
+                if ra.requirement.assessable
+            ],
+        )
+    return overviews
 
 
 def build_third_party_field_visibility(framework):
@@ -2236,3 +2401,76 @@ def sanitize_xlsx_value(value):
     if isinstance(value, str):
         return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
     return value
+
+
+def get_report_timezone() -> ZoneInfo:
+    """Return the instance time zone used for times printed in reports and exports.
+
+    Falls back to UTC when the setting is missing or holds an unknown region, so a
+    corrupted setting never breaks an export.
+    """
+    from global_settings.models import GlobalSettings
+
+    general = GlobalSettings.objects.filter(name=GlobalSettings.Names.GENERAL).first()
+    value = general.value if general and isinstance(general.value, dict) else {}
+    try:
+        return ZoneInfo(str(value.get("report_timezone") or "UTC"))
+    except ValueError, KeyError, OSError:
+        return ZoneInfo("UTC")
+
+
+def _utc_offset(local: datetime) -> str:
+    """Return `UTC` for a zero offset, else `UTC+hh:mm` (with seconds for the
+    historical offsets that had them)."""
+    return f"UTC{local:%:z}" if local.utcoffset() else "UTC"
+
+
+def format_report_timestamp(
+    value: datetime | None, tz: tzinfo, empty: str = "-"
+) -> str:
+    """Return the timezone-aware `value` as `YYYY-MM-DD HH:MM:SS (UTC+hh:mm)` in
+    `tz`, or `empty` when it is None.
+
+    The offset is worked out per timestamp because it changes at clock changes.
+    """
+    if value is None:
+        return empty
+    local = value.astimezone(tz)
+    return f"{local:%Y-%m-%d %H:%M:%S} ({_utc_offset(local)})"
+
+
+@functools.cache
+def get_report_timezone_names() -> tuple[str, ...]:
+    """Return `UTC` and the current IANA region names, one per zone and country.
+
+    Read from tzdata's `zone.tab` rather than `available_timezones()`, which also
+    holds the renamed regions (`Europe/Kiev`) and aliases (`US/Eastern`, `Factory`).
+    """
+    zone_tab = files("tzdata").joinpath("zoneinfo/zone.tab").read_text()
+    regions = {
+        line.split("\t")[2]
+        for line in zone_tab.splitlines()
+        if line and not line.startswith("#")
+    }
+    return ("UTC", *sorted(regions))
+
+
+def get_report_timezone_choices(
+    at: datetime | None = None, current: str | None = None
+) -> dict[str, str]:
+    """Return the report time zones as `{name: "(UTC+hh:mm) name"}`, from west to
+    east, labelled with the offset in force at `at` (now by default).
+
+    `current`, the stored zone, is offered even when renamed since (`Europe/Kiev`),
+    so the settings form can still show it.
+    """
+    moment = at or datetime.now(timezone.utc)
+    names = get_report_timezone_names()
+    if current and current not in names:
+        names = (*names, current)
+    offsets = {name: moment.astimezone(ZoneInfo(name)) for name in names}
+    ordered = sorted(
+        offsets,
+        key=lambda name: (offsets[name].utcoffset(), name != "UTC", name),
+    )
+    return {name: f"({_utc_offset(offsets[name])}) {name}" for name in ordered}

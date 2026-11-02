@@ -1,7 +1,7 @@
-import { ALLAUTH_API_URL } from '$lib/utils/constants';
-import { getSecureRedirect } from '$lib/utils/helpers';
-import { reauthenticateSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
+import { ALLAUTH_API_URL } from '#lib/utils/constants.js';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
+import { reauthenticateSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -10,11 +10,15 @@ import type { Actions, PageServerLoad } from './$types';
 const MFA_TYPES = ['webauthn', 'totp', 'recovery_codes'];
 
 export const load: PageServerLoad = async ({ url, fetch }) => {
-	const form = await superValidate(zod(reauthenticateSchema));
 	const mfaTypes =
 		url.searchParams.get('method') === 'mfa'
 			? MFA_TYPES.filter((type) => url.searchParams.get('types')?.split(',').includes(type))
 			: [];
+	const form = await superValidate(
+		{ mode: (mfaTypes[0] ?? 'password') as 'webauthn' | 'totp' | 'recovery_codes' | 'password' },
+		zod(reauthenticateSchema),
+		{ errors: false }
+	);
 	let requestOptions = null;
 	if (mfaTypes.includes('webauthn')) {
 		const res = await fetch(`${ALLAUTH_API_URL}/auth/webauthn/reauthenticate`).then((res) =>

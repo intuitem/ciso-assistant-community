@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext, tick, untrack } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -44,15 +44,15 @@
 		type DraftBaseline,
 		type DeleteDraft
 	} from './tree';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import ApplyConfirmModal from './ApplyConfirmModal.svelte';
-	import { resolvedTheme } from '$lib/utils/theme';
+	import { resolvedTheme } from '#lib/utils/theme.js';
 
 	interface Props {
 		movableTree: OrgTreeNode | null;
@@ -435,7 +435,7 @@
 			message: `Applied ${parts.join(' and ') || 'nothing'}.`,
 			background: 'preset-tonal-success'
 		});
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	/** The one irreversible step, so it asks for a typed confirmation. No undo: an
@@ -565,7 +565,7 @@
 			nodes = nodes.map((n) =>
 				n.id === folderId ? { ...n, data: { ...n.data, label: name } } : n
 			);
-			void invalidateAll();
+			void refreshAll();
 			return true;
 		} catch {
 			toastStore.trigger({

@@ -24,7 +24,9 @@ from .utils import (
 from auditlog.registry import auditlog
 
 
-class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
+class QuantitativeRiskStudy(
+    NameDescriptionMixin, ETADueDateMixin, FolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")

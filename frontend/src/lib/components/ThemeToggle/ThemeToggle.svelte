@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
-	import { resolvedTheme, setTheme } from '$lib/utils/theme';
-	import { m } from '$paraglide/messages';
+	import { resolvedTheme, setTheme } from '#lib/utils/theme.js';
+	import { m } from '#paraglide/messages.js';
 
 	// A switch reads as "current state" (knob position), which sidesteps the
 	// "describe state vs action" ambiguity of a single icon button. ON = dark.

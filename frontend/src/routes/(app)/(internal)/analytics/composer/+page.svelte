@@ -1,8 +1,8 @@
 <script lang="ts">
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import { m } from '$paraglide/messages';
-	import type { AppliedControlStatus } from '$lib/utils/types';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import { m } from '#paraglide/messages.js';
+	import type { AppliedControlStatus } from '#lib/utils/types.js';
 
 	interface Props {
 		// Props

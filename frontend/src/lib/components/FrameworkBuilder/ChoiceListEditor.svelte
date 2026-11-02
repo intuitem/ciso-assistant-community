@@ -8,7 +8,7 @@
 	} from './builder-state';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		choices: QuestionChoice[];

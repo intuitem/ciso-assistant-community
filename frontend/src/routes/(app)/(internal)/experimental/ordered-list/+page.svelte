@@ -1,5 +1,5 @@
 <script lang="ts">
-	import OrderedEntryList from '$lib/components/OrderedEntryList.svelte';
+	import OrderedEntryList from '#lib/components/OrderedEntryList.svelte';
 
 	let entries = $state([
 		{ ref_id: 'REF-001', name: 'First Entry' },

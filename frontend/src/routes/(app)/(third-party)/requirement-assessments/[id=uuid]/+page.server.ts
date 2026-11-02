@@ -1,10 +1,10 @@
 import type { PageServerLoad } from './$types';
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { type TableSource } from '$lib/components/ModelTable/types';
-import { headData } from '$lib/utils/table';
-import { discardBody } from '$lib/utils/responses';
-import type { urlModel } from '$lib/utils/types';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { headData } from '#lib/utils/table.js';
+import { discardBody } from '#lib/utils/responses.js';
+import type { urlModel } from '#lib/utils/types.js';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'requirement-assessments';

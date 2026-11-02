@@ -1,5 +1,5 @@
-import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-import { m } from '$paraglide/messages';
+import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
+import { m } from '#paraglide/messages.js';
 
 // ----- locale helpers (F1) -----
 

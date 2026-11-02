@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import NumberField from '../NumberField.svelte';
-	import { m } from '$paraglide/messages';
-	import type { ModelInfo } from '$lib/utils/types';
+	import { m } from '#paraglide/messages.js';
+	import type { ModelInfo } from '#lib/utils/types.js';
 	import type { SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
