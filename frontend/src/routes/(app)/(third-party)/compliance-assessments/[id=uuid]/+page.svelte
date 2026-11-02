@@ -19,6 +19,7 @@
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import MaturityStaircase from './MaturityStaircase.svelte';
+	import type { StaircaseResult } from './staircase';
 
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
@@ -175,26 +176,27 @@
 	};
 
 	// Staircase rules (levels reached per section) get their own tile and grid.
+	type ShownStaircase = StaircaseResult & { rule: Record<string, any> };
 	const staircases = $derived(
 		showResult
-			? ((compliance_assessment.staircases ?? []) as Record<string, any>[]).flatMap((s) => {
+			? ((compliance_assessment.staircases ?? []) as StaircaseResult[]).flatMap((s) => {
 					const rule = outcomeRules.find((r) => r.ref_id === s.ref_id);
-					return rule && s.units.length ? [{ ...s, rule }] : [];
+					return rule && s.sections.length ? [{ ...s, rule }] : [];
 				})
 			: []
 	);
-	const staircaseLevelName = (s: Record<string, any>) => {
+	const staircaseLevelName = (s: ShownStaircase) => {
 		if (s.level === null) return m.staircaseNotDetermined();
 		if (s.level === 0)
 			return s.rule.translations?.[getLocale()]?.floor_label || s.rule.floor_label || '0';
-		const id = String(s.rule.levels[s.level - 1]);
+		const id = String(s.rule.staircase_levels[s.level - 1]);
 		const groups = (compliance_assessment.framework.implementation_groups_definition ??
 			[]) as Record<string, any>[];
 		return groups.find((g) => g.ref_id === id)?.name || id;
 	};
-	let openStaircase = $state<Record<string, any> | null>(null);
+	let openStaircase = $state<ShownStaircase | null>(null);
 	let staircaseDialog: HTMLDialogElement | undefined = $state();
-	function openStaircaseDialog(s: Record<string, any>) {
+	function openStaircaseDialog(s: ShownStaircase) {
 		openStaircase = s;
 		setTimeout(() => staircaseDialog?.showModal(), 0);
 	}

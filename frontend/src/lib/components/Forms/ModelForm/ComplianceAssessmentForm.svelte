@@ -319,9 +319,9 @@
 					staircaseLevels = (r['outcomes_definition'] || [])
 						.filter(
 							(rule: Record<string, any>) =>
-								rule?.kind === 'staircase' && Array.isArray(rule.levels)
+								rule?.kind === 'staircase' && Array.isArray(rule.staircase_levels)
 						)
-						.map((rule: Record<string, any>) => rule.levels.map(String));
+						.map((rule: Record<string, any>) => rule.staircase_levels.map(String));
 					implementationGroupsChoices = implementation_groups.map((group) => ({
 						label: group.name,
 						value: group.ref_id

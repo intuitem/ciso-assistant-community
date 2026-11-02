@@ -26,7 +26,7 @@ from iam.models import Folder
 RULE = {
     "ref_id": "ml",
     "kind": "staircase",
-    "levels": ["1", "2", "3"],
+    "staircase_levels": ["1", "2", "3"],
     "per": "depth_1",
 }
 
@@ -59,8 +59,16 @@ def run(results, rule=RULE, scope=None):
     return compute_staircase(rule, NODES, ras, scope)
 
 
-def levels(out):
-    return {u["node_id"]: u["level"] for u in out["units"]}
+def reached(out):
+    """{section node id: level reached}."""
+    return {
+        (s["urn"].rsplit(":", 1)[-1] if s["urn"] else None): s["level"]
+        for s in out["sections"]
+    }
+
+
+def statuses(section):
+    return {step["implementation_group"]: step["status"] for step in section["levels"]}
 
 
 ALL_MET = {k: "compliant" for k in ("a1", "a2", "a3", "b1", "b2")}
@@ -68,35 +76,36 @@ ALL_MET = {k: "compliant" for k in ("a1", "a2", "a3", "b1", "b2")}
 
 def test_all_met():
     out = run(ALL_MET)
-    assert levels(out) == {"a": 3, "b": 3} and out["level"] == 3
+    assert reached(out) == {"a": 3, "b": 3} and out["level"] == 3
 
 
 def test_failing_lowest_level_gives_zero_even_if_higher_met():
     out = run({**ALL_MET, "a1": "non_compliant"})
-    assert levels(out)["a"] == 0
-    unit = out["units"][0]
-    assert unit["levels"] == {"1": "not_met", "2": "not_met", "3": "met"}
-    assert [b["ref_id"] for b in unit["blocking"]] == ["a1"]
+    assert reached(out)["a"] == 0
+    section = out["sections"][0]
+    assert statuses(section) == {"1": "not_met", "2": "not_met", "3": "met"}
+    assert [b["ref_id"] for b in section["blocking"]] == ["a1"]
     assert out["level"] == 0
 
 
 def test_listed_tags_are_not_cumulative():
     # a1 only counts up to ML2: failing it does not affect ML3's own set.
     out = run({**ALL_MET, "a2": "partially_compliant"})
-    assert out["units"][0]["levels"] == {"1": "met", "2": "not_met", "3": "not_met"}
-    assert levels(out)["a"] == 1
+    assert statuses(out["sections"][0]) == {"1": "met", "2": "not_met", "3": "not_met"}
+    assert reached(out)["a"] == 1
 
 
 def test_not_applicable_passes_and_partial_fails():
-    assert levels(run({**ALL_MET, "b2": "not_applicable"}))["b"] == 3
-    assert levels(run({**ALL_MET, "b2": "partially_compliant"}))["b"] == 2
+    assert reached(run({**ALL_MET, "b2": "not_applicable"}))["b"] == 3
+    assert reached(run({**ALL_MET, "b2": "partially_compliant"}))["b"] == 2
 
 
 def test_unassessed_is_pending():
     out = run({**ALL_MET, "a3": "not_assessed"})
-    assert out["units"][0]["levels"]["3"] == "pending"
-    assert out["units"][0]["progress"]["3"] == [1, 2]
-    assert levels(out)["a"] == 2
+    assert statuses(out["sections"][0])["3"] == "pending"
+    step = out["sections"][0]["levels"][2]
+    assert (step["passing"], step["total"]) == (1, 2)
+    assert reached(out)["a"] == 2
 
 
 def test_overall_is_minimum():
@@ -105,23 +114,23 @@ def test_overall_is_minimum():
 
 def test_requirements_outside_the_audit_are_out_of_scope():
     out = run({"a1": "compliant", "b1": "compliant"})
-    assert out["units"][0]["levels"] == {
+    assert statuses(out["sections"][0]) == {
         "1": "met",
         "2": "out_of_scope",
         "3": "out_of_scope",
     }
-    assert out["units"][0]["blocking"] == []
+    assert out["sections"][0]["blocking"] == []
 
 
 def test_lower_levels_missing_from_the_audit_leave_the_level_unknown():
     # An ML3-only audit: a1 (tagged 1,2) is not in it, so strategy "a" cannot be told.
     out = run({k: "compliant" for k in ("a2", "a3", "b1", "b2")}, scope={"1", "2", "3"})
-    assert levels(out) == {"a": None, "b": 3}
-    assert out["units"][0]["levels"]["1"] == "out_of_scope"
+    assert reached(out) == {"a": None, "b": 3}
+    assert statuses(out["sections"][0])["1"] == "out_of_scope"
     assert out["level"] is None
 
 
-def test_a_level_with_nothing_tagged_in_a_unit_is_met():
+def test_a_level_with_nothing_tagged_in_a_section_is_met():
     nodes = [
         *NODES,
         node("c"),  # nothing tagged 1, as ASVS V1 or most CMMC domains
@@ -132,23 +141,35 @@ def test_a_level_with_nothing_tagged_in_a_unit_is_met():
     ]
     ras = {n["urn"]: (n["ref_id"], "compliant") for n in nodes if n["assessable"]}
     out = compute_staircase(RULE, nodes, ras)
-    assert levels(out) == {"a": 3, "b": 3, "c": 3}
-    assert out["units"][2]["levels"]["1"] == "met"
-    assert out["units"][2]["progress"]["1"] == [0, 0]
+    assert reached(out) == {"a": 3, "b": 3, "c": 3}
+    step = out["sections"][2]["levels"][0]
+    assert (step["status"], step["passing"], step["total"]) == ("met", 0, 0)
     assert out["level"] == 3
+
+
+def test_levels_are_listed_in_order_and_not_counted_outside_the_audit():
+    out = run({"a1": "compliant", "b1": "compliant"}, scope={"1"})
+    section = out["sections"][0]
+    assert section["urn"] == "urn:intuitem:risk:req_node:f:a"
+    not_counted = {"status": "out_of_scope", "passing": None, "total": None}
+    assert section["levels"] == [
+        {"implementation_group": "1", "status": "met", "passing": 1, "total": 1},
+        {"implementation_group": "2", **not_counted},
+        {"implementation_group": "3", **not_counted},
+    ]
 
 
 def test_cumulative_and_whole_audit():
     rule = {
         "ref_id": "ml",
         "kind": "staircase",
-        "levels": ["1", "2"],
+        "staircase_levels": ["1", "2"],
         "cumulative": True,
     }
     nodes_results = {**ALL_MET, "a1": "non_compliant"}
     out = run(nodes_results, rule)
-    assert len(out["units"]) == 1 and out["units"][0]["node_id"] is None
-    assert out["units"][0]["levels"] == {"1": "not_met", "2": "not_met"}
+    assert len(out["sections"]) == 1 and out["sections"][0]["urn"] is None
+    assert statuses(out["sections"][0]) == {"1": "not_met", "2": "not_met"}
 
 
 def test_expand_scope_pulls_lower_levels():
@@ -165,23 +186,26 @@ def test_essential_eight_library_rule_validates():
     )
     framework = yaml.safe_load(path.read_text())["objects"]["framework"]
     assert validate_framework_expressions(framework) == []
-    bad = {**framework, "outcomes_definition": [{**RULE, "levels": ["1", "9"]}]}
+    bad = {
+        **framework,
+        "outcomes_definition": [{**RULE, "staircase_levels": ["1", "9"]}],
+    }
     assert validate_framework_expressions(bad)
     nodes = [
         {**n, "parent_urn": n.get("parent_urn")} for n in framework["requirement_nodes"]
     ]
     rule = framework["outcomes_definition"][0]
     out = compute_staircase(rule, nodes, {})
-    assert out["units"] == []  # nothing in scope without requirement assessments
+    assert out["sections"] == []  # nothing in scope without requirement assessments
     in_scope = {n["urn"]: (n["urn"], "compliant") for n in nodes if n.get("assessable")}
     out = compute_staircase(rule, nodes, in_scope)
-    assert len(out["units"]) == 8 and out["level"] == 3
+    assert len(out["sections"]) == 8 and out["level"] == 3
     assert len(in_scope) == 152
 
 
 def test_failed_requirement_with_missing_row_at_same_level():
     out = run({"a1": "non_compliant", "b1": "compliant"})
-    assert out["units"][0]["levels"] == {
+    assert statuses(out["sections"][0]) == {
         "1": "not_met",
         "2": "out_of_scope",
         "3": "out_of_scope",
@@ -190,7 +214,7 @@ def test_failed_requirement_with_missing_row_at_same_level():
 
 def test_duplicate_levels_and_non_boolean_cumulative_are_rejected():
     groups = {"1", "2", "3"}
-    assert staircase_errors({**RULE, "levels": ["1", "1"]}, groups)
+    assert staircase_errors({**RULE, "staircase_levels": ["1", "1"]}, groups)
     assert staircase_errors({**RULE, "cumulative": "false"}, groups)
     assert staircase_errors({**RULE, "cumulative": True}, groups) == []
 
@@ -246,7 +270,7 @@ def test_requirements_outside_the_selected_groups_are_out_of_scope():
         )
     values, details = evaluate_staircases(audit, [RULE])
     assert values == {"ml": 1.0}
-    assert details[0]["units"][0]["levels"] == {
+    assert statuses(details[0]["sections"][0]) == {
         "1": "met",
         "2": "out_of_scope",
         "3": "out_of_scope",
@@ -266,7 +290,7 @@ def test_requirements_outside_the_selected_groups_are_out_of_scope():
 
     def section_name(language):
         with translation.override(language):
-            return evaluate_staircases(audit, [RULE])[1][0]["units"][0]["name"]
+            return evaluate_staircases(audit, [RULE])[1][0]["sections"][0]["name"]
 
     assert section_name("fr") == "Stratégie"
     assert section_name("en") == "Strategy"
@@ -306,7 +330,7 @@ def test_audits_created_outside_the_api_get_the_lower_levels():
 
 def test_levels_above_the_audit_target_do_not_count():
     out = run(ALL_MET, scope={"1"})
-    assert out["units"][0]["levels"] == {
+    assert statuses(out["sections"][0]) == {
         "1": "met",
         "2": "out_of_scope",
         "3": "out_of_scope",

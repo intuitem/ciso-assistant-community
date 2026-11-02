@@ -174,7 +174,7 @@
 				expression: '',
 				kind: 'staircase',
 				label: rule.annotation || m.builderRuleKindStaircase(),
-				levels: groups.map((g) => g.id) as unknown as OutcomeRule['levels'],
+				staircase_levels: groups.map((g) => g.id),
 				per: 'depth_1',
 				...(rule.implementation_groups
 					? { implementation_groups: rule.implementation_groups }
@@ -500,7 +500,7 @@
 					{rule.kind === 'rating'
 						? (rule.dimensions ?? []).join(' × ')
 						: rule.kind === 'staircase'
-							? ((rule.levels ?? []) as unknown[]).join(' → ')
+							? (rule.staircase_levels ?? []).join(' → ')
 							: rule.expression || '...'}
 				</span>
 

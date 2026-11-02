@@ -1559,7 +1559,7 @@ describe('staircaseCoverage', () => {
 		color: null,
 		expression: '',
 		kind: 'staircase' as const,
-		levels: ['1', '2', '3'] as unknown as OutcomeRule['levels']
+		staircase_levels: ['1', '2', '3']
 	};
 
 	test('counts per section, listed tags', () => {
@@ -1585,16 +1585,16 @@ describe('levelsInGroupOrder', () => {
 			color: null,
 			expression: '',
 			kind: 'staircase' as const,
-			levels: ['1', '2'] as unknown as OutcomeRule['levels']
+			staircase_levels: ['1', '2']
 		},
 		{ ref_id: 'flag', annotation: '', color: null, expression: 'true' }
 	];
 	const levelsAfter = (before: string[], after: string[]) =>
-		levelsInGroupOrder(rules, before, after)[0].levels;
+		levelsInGroupOrder(rules, before, after)[0].staircase_levels;
 
 	test('levels follow a reorder and leave other rules alone', () => {
 		const [ml, flag] = levelsInGroupOrder(rules, ['1', '2', '3'], ['2', '1', '3']);
-		expect(ml.levels).toEqual(['2', '1']);
+		expect(ml.staircase_levels).toEqual(['2', '1']);
 		expect(flag).toBe(rules[1]);
 	});
 
@@ -1615,12 +1615,16 @@ describe('setBaseLocale on outcome rules', () => {
 				expression: '',
 				kind: 'staircase' as const,
 				label: 'Maturity level',
-				levels: ['1', '2'] as unknown as OutcomeRule['levels'],
+				staircase_levels: ['1', '2'],
 				per: 'depth_1' as const,
 				floor_label: 'Level zero',
-				unit_label: 'strategies',
+				section_label: 'strategies',
 				translations: {
-					fr: { label: 'Niveau de maturité', floor_label: 'Niveau zéro', unit_label: 'stratégies' }
+					fr: {
+						label: 'Niveau de maturité',
+						floor_label: 'Niveau zéro',
+						section_label: 'stratégies'
+					}
 				}
 			},
 			{
@@ -1642,8 +1646,8 @@ describe('setBaseLocale on outcome rules', () => {
 		);
 		s.setBaseLocale('fr');
 		const [ml, risk] = get(s.framework).outcomes_definition ?? [];
-		expect(ml.levels).toEqual(['1', '2']);
-		expect([ml.label, ml.floor_label, ml.unit_label]).toEqual([
+		expect(ml.staircase_levels).toEqual(['1', '2']);
+		expect([ml.label, ml.floor_label, ml.section_label]).toEqual([
 			'Niveau de maturité',
 			'Niveau zéro',
 			'stratégies'
@@ -1651,7 +1655,7 @@ describe('setBaseLocale on outcome rules', () => {
 		expect(ml.translations?.en).toEqual({
 			label: 'Maturity level',
 			floor_label: 'Level zero',
-			unit_label: 'strategies'
+			section_label: 'strategies'
 		});
 		expect(risk.levels?.[0]).toMatchObject({
 			label: 'Faible',

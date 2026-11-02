@@ -21,7 +21,7 @@
 
 	let { rule, groups, activeLanguage = null, nodes = [], onchange }: Props = $props();
 
-	const levels = $derived(((rule.levels ?? []) as unknown[]).map(String));
+	const levels = $derived((rule.staircase_levels ?? []).map(String));
 
 	function update(patch: Partial<OutcomeRule>) {
 		const next: OutcomeRule = { ...rule, ...patch };
@@ -34,11 +34,7 @@
 	// shortcut: levels follow the order of the implementation groups, reorder those to change it.
 	function toggleLevel(id: string) {
 		const picked = levels.includes(id) ? levels.filter((l) => l !== id) : [...levels, id];
-		update({
-			levels: groups
-				.map((g) => g.id)
-				.filter((g) => picked.includes(g)) as unknown as OutcomeRule['levels']
-		});
+		update({ staircase_levels: groups.map((g) => g.id).filter((g) => picked.includes(g)) });
 	}
 
 	const coverage = $derived(staircaseCoverage(rule, nodes));
@@ -49,7 +45,7 @@
 	const TEXTS = [
 		['label', () => m.builderRatingLabel()],
 		['annotation', () => m.description()],
-		['unit_label', () => m.builderStaircaseUnitLabel()],
+		['section_label', () => m.builderStaircaseSectionLabel()],
 		['floor_label', () => m.builderStaircaseFloorLabel()]
 	] as const;
 </script>
@@ -65,7 +61,7 @@
 				{rule.per === 'depth_1'
 					? m.builderStaircaseHowPer({
 							count: coverage.sections,
-							unit: rule.unit_label || m.staircaseSections(),
+							unit: rule.section_label || m.staircaseSections(),
 							max: levels.length
 						})
 					: m.builderStaircaseHowWhole({ max: levels.length })}
@@ -99,7 +95,7 @@
 	{/if}
 
 	{#each TEXTS as [key, title] (key)}
-		{#if key !== 'unit_label' || rule.per === 'depth_1'}
+		{#if key !== 'section_label' || rule.per === 'depth_1'}
 			<div class="flex flex-wrap gap-3">
 				<label class="flex flex-col gap-1">
 					<span class="text-xs text-surface-600-400">{title()}</span>

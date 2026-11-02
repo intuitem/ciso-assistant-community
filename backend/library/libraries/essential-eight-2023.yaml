@@ -54,13 +54,13 @@ objects:
     - ref_id: maturity_level
       kind: staircase
       label: Maturity level
-      levels:
+      staircase_levels:
       - '1'
       - '2'
       - '3'
       per: depth_1
       floor_label: Maturity Level Zero
-      unit_label: mitigation strategies
+      section_label: mitigation strategies
       annotation: 'A mitigation strategy reaches a maturity level when all its requirements at that level and below are compliant or not applicable; the overall maturity level is the lowest across the eight strategies.'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa

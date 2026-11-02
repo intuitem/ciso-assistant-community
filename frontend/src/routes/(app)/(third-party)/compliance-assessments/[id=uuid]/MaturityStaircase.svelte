@@ -4,23 +4,22 @@
 	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import type { StaircaseResult } from './staircase';
 
 	interface Props {
-		staircase: Record<string, any>;
+		staircase: StaircaseResult;
 		rule: Record<string, any>;
 		groups: Record<string, any>[];
 	}
 
 	let { staircase, rule, groups }: Props = $props();
 
-	const levels = $derived((rule.levels ?? []).map(String) as string[]);
-	const unitLabel = $derived(
-		rule.translations?.[getLocale()]?.unit_label || rule.unit_label || m.staircaseSections()
+	const levels = $derived((rule.staircase_levels ?? []).map(String) as string[]);
+	const sectionLabel = $derived(
+		rule.translations?.[getLocale()]?.section_label || rule.section_label || m.staircaseSections()
 	);
 	// The backend leaves a level unknown (null) when lower levels are missing from the audit.
-	const lowerOutOfScope = $derived(
-		staircase.units.some((u: Record<string, any>) => u.level === null)
-	);
+	const lowerOutOfScope = $derived(staircase.sections.some((s) => s.level === null));
 	const groupName = (id: string) => groups.find((g) => g.ref_id === id)?.name || id;
 	const levelName = (level: number | null) =>
 		level === null
@@ -67,9 +66,9 @@
 				>{ruleLabel(rule, rule.ref_id)}</span
 			>
 			<span class="text-lg font-semibold text-surface-900-50">{levelName(staircase.level)}</span>
-			{#if staircase.units.length > 1}
+			{#if staircase.sections.length > 1}
 				<span class="text-xs text-surface-600-400"
-					>{m.staircaseOverall({ count: staircase.units.length, unit: unitLabel })}</span
+					>{m.staircaseOverall({ count: staircase.sections.length, unit: sectionLabel })}</span
 				>
 			{/if}
 		</div>
@@ -97,19 +96,19 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each staircase.units as unit (unit.node_id)}
+				{#each staircase.sections as section (section.urn)}
 					<tr class="border-t border-surface-200-800 align-top">
 						<td class="py-2 pr-3">
 							<div class="font-medium text-surface-900-50">
-								{unit.name ?? ruleLabel(rule, rule.ref_id)}
+								{section.name ?? ruleLabel(rule, rule.ref_id)}
 							</div>
-							{#if unit.blocking.length}
+							{#if section.blocking.length}
 								<details class="mt-1">
 									<summary class="cursor-pointer text-xs text-surface-600-400">
-										{m.staircaseBlocking({ count: unit.blocking.length })}
+										{m.staircaseBlocking({ count: section.blocking.length })}
 									</summary>
 									<ul class="mt-1 space-y-0.5">
-										{#each unit.blocking as item (item.urn)}
+										{#each section.blocking as item (item.urn)}
 											<li class="flex items-baseline gap-2 text-xs">
 												<i
 													class="{STATUS[item.result === 'not_assessed' ? 'pending' : 'not_met']
@@ -133,26 +132,26 @@
 								</details>
 							{/if}
 						</td>
-						{#each levels as level (level)}
-							{@const status = STATUS[unit.levels[level]] ?? STATUS.out_of_scope}
+						{#each section.levels as step (step.implementation_group)}
+							{@const status = STATUS[step.status] ?? STATUS.out_of_scope}
 							<td class="py-2 px-2 text-center">
 								<i class="{status.icon} {status.color}" title={status.label()} aria-hidden="true"
 								></i>
 								<span class="sr-only">{status.label()}</span>
-								{#if unit.levels[level] !== 'out_of_scope' && unit.progress?.[level]}
+								{#if step.passing !== null && step.total !== null}
 									<div class="text-[11px] tabular-nums text-surface-600-400">
-										{unit.progress[level][0]}/{unit.progress[level][1]}
+										{step.passing}/{step.total}
 									</div>
 								{/if}
 							</td>
 						{/each}
 						<td class="py-2 pl-3 text-right whitespace-nowrap">
 							<span
-								class="inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-lg font-semibold tabular-nums {unit.level ===
+								class="inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-lg font-semibold tabular-nums {section.level ===
 								staircase.level
 									? 'bg-primary-500 text-white'
 									: 'bg-surface-200-800 text-surface-900-50'}"
-								title={levelName(unit.level)}>{unit.level ?? '—'}</span
+								title={levelName(section.level)}>{section.level ?? '—'}</span
 							>
 						</td>
 					</tr>
