@@ -6,6 +6,7 @@ import pymupdf
 import pytest
 from django.urls import reverse
 from rest_framework import status as http
+from rest_framework.test import APIClient
 
 from core.generators import incident_context
 from core.models import Incident, Terminology, TimelineEntry
@@ -14,6 +15,7 @@ from core.tests.test_audit_word_export import (  # noqa: F401
     admin_client,
     app_config,
 )
+from global_settings.models import GlobalSettings
 from iam.models import Folder
 
 ENTRY_TYPES = [
@@ -167,3 +169,63 @@ def test_incident_enums_are_localised(incident, lang, severity, status, detectio
 
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
     assert severity in text and status in text and detection in text
+
+
+SUMMER_MORNING_UTC = datetime(2026, 7, 1, 8, 0, tzinfo=timezone.utc)
+
+
+def _set_report_timezone(zone: str) -> None:
+    settings, _ = GlobalSettings.objects.get_or_create(name="general")
+    settings.value = {**(settings.value or {}), "report_timezone": zone}
+    settings.save()
+
+
+def _summer_incident(incident_obj: Incident) -> Incident:
+    incident_obj.occurred_at = SUMMER_MORNING_UTC
+    incident_obj.save()
+    TimelineEntry.objects.create(
+        incident=incident_obj,
+        folder=incident_obj.folder,
+        entry="Encryption detected",
+        entry_type="detection",
+        timestamp=SUMMER_MORNING_UTC,
+    )
+    return incident_obj
+
+
+def _pdf_text(content: bytes) -> str:
+    return "".join(
+        page.get_text() for page in pymupdf.open(stream=content, filetype="pdf")
+    )
+
+
+@pytest.mark.django_db
+def test_pdf_prints_times_in_the_instance_timezone(
+    admin_client: APIClient,  # noqa: F811
+    incident: Incident,
+) -> None:
+    _set_report_timezone("Europe/Paris")
+    _summer_incident(incident)
+    url = reverse("incidents-pdf", kwargs={"pk": str(incident.pk)})
+
+    text = _pdf_text(admin_client.get(url).content)
+
+    assert "2026-07-01 10:00:00 (UTC+02:00)" in text
+    assert "Europe/Paris" in text
+
+
+@pytest.mark.django_db
+def test_markdown_prints_times_in_the_instance_timezone(
+    admin_client: APIClient,  # noqa: F811
+    incident: Incident,
+) -> None:
+    _set_report_timezone("Europe/Paris")
+    _summer_incident(incident)
+    url = reverse("incidents-md", kwargs={"pk": str(incident.pk)})
+
+    content = admin_client.get(url).content.decode()
+
+    assert "2026-07-01 10:00:00 (UTC+02:00)" in content
+    assert content.index("- **Time Zone**: Europe/Paris") < content.index(
+        "## Incident Information"
+    )
