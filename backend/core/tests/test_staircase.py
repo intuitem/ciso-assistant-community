@@ -1,7 +1,10 @@
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 import yaml
+from django.utils import translation
 
 from core.cel_service import validate_framework_expressions
 from core.models import (
@@ -11,6 +14,7 @@ from core.models import (
     RequirementAssessment,
     RequirementNode,
 )
+from core.serializers import ComplianceAssessmentReadSerializer
 from core.staircase import (
     compute_staircase,
     evaluate_staircases,
@@ -107,6 +111,31 @@ def test_requirements_outside_the_audit_are_out_of_scope():
         "3": "out_of_scope",
     }
     assert out["units"][0]["blocking"] == []
+
+
+def test_lower_levels_missing_from_the_audit_leave_the_level_unknown():
+    # An ML3-only audit: a1 (tagged 1,2) is not in it, so strategy "a" cannot be told.
+    out = run({k: "compliant" for k in ("a2", "a3", "b1", "b2")}, scope={"1", "2", "3"})
+    assert levels(out) == {"a": None, "b": 3}
+    assert out["units"][0]["levels"]["1"] == "out_of_scope"
+    assert out["level"] is None
+
+
+def test_a_level_with_nothing_tagged_in_a_unit_is_met():
+    nodes = [
+        *NODES,
+        node("c"),  # nothing tagged 1, as ASVS V1 or most CMMC domains
+        node("c1", "c", ["2", "3"]),
+        node("d"),  # no requirement at all
+        node("e"),
+        node("e1", "e", ["x"]),  # tagged with no level
+    ]
+    ras = {n["urn"]: (n["ref_id"], "compliant") for n in nodes if n["assessable"]}
+    out = compute_staircase(RULE, nodes, ras)
+    assert levels(out) == {"a": 3, "b": 3, "c": 3}
+    assert out["units"][2]["levels"]["1"] == "met"
+    assert out["units"][2]["progress"]["1"] == [0, 0]
+    assert out["level"] == 3
 
 
 def test_cumulative_and_whole_audit():
@@ -223,6 +252,57 @@ def test_requirements_outside_the_selected_groups_are_out_of_scope():
         "3": "out_of_scope",
     }
 
+    # Scoped to ML3 alone (as library v1 advised): s1 and s2 are out of the audit,
+    # so no level is stored rather than a false 0.
+    audit.selected_implementation_groups = ["3"]
+    values, details = evaluate_staircases(audit, [RULE])
+    assert values == {}
+    assert details[0]["level"] is None
+
+    # Section names follow the request's language.
+    RequirementNode.objects.filter(pk=nodes["s"].pk).update(
+        name="Strategy", translations={"fr": {"name": "Stratégie"}}
+    )
+
+    def section_name(language):
+        with translation.override(language):
+            return evaluate_staircases(audit, [RULE])[1][0]["units"][0]["name"]
+
+    assert section_name("fr") == "Stratégie"
+    assert section_name("en") == "Strategy"
+
+
+@pytest.mark.django_db
+def test_audits_created_outside_the_api_get_the_lower_levels():
+    # Campaigns, third parties and automation create audits with objects.create().
+    folder = Folder.get_root_folder()
+    framework = Framework.objects.create(
+        name="Staircase",
+        folder=folder,
+        min_score=0,
+        max_score=100,
+        implementation_groups_definition=[{"ref_id": g, "name": g} for g in "123"],
+        outcomes_definition=[RULE],
+    )
+    perimeter = Perimeter.objects.create(name="Staircase", folder=folder)
+
+    def audit(groups):
+        created = ComplianceAssessment.objects.create(
+            name=str(groups),
+            framework=framework,
+            folder=folder,
+            perimeter=perimeter,
+            min_score=0,
+            max_score=100,
+            selected_implementation_groups=groups,
+        )
+        created.refresh_from_db()
+        return created.selected_implementation_groups
+
+    assert sorted(audit(["3"])) == ["1", "2", "3"]
+    assert audit(["1"]) == ["1"]
+    assert audit(None) is None
+
 
 def test_levels_above_the_audit_target_do_not_count():
     out = run(ALL_MET, scope={"1"})
@@ -232,3 +312,25 @@ def test_levels_above_the_audit_target_do_not_count():
         "3": "out_of_scope",
     }
     assert out["level"] == 1
+
+
+def test_audits_without_a_staircase_skip_the_respondent_lookup():
+    serializer = ComplianceAssessmentReadSerializer(
+        context={
+            "view": SimpleNamespace(action="retrieve"),
+            "request": SimpleNamespace(user=None),
+        }
+    )
+    audit = SimpleNamespace(
+        outcome_rules=[{"ref_id": "flag", "expression": "true"}], folder_id="f"
+    )
+    with patch("core.utils.get_respondent_scoped_folder_ids") as lookup:
+        assert serializer.get_staircases(audit) == []
+    lookup.assert_not_called()
+
+    audit.outcome_rules = [RULE]
+    with patch(
+        "core.utils.get_respondent_scoped_folder_ids", return_value={"f"}
+    ) as lookup:
+        assert serializer.get_staircases(audit) == []  # respondents get no grid
+    lookup.assert_called_once()

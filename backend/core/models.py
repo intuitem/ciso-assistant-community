@@ -63,6 +63,7 @@ from core.quick_form_scoring import (
     normalize_page_aggregation,
     score_bounds,
 )
+from core.staircase import expand_scope
 from global_settings.models import GlobalSettings
 from integrations.sync_mixin import IntegrationSyncableMixin
 
@@ -9527,6 +9528,12 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
         creating = self._state.adding
+        if creating and self.selected_implementation_groups:
+            # A target level brings the levels below it, whatever creates the
+            # audit (campaigns, third parties, automation, imports).
+            self.selected_implementation_groups = expand_scope(
+                self.framework.outcomes_definition, self.selected_implementation_groups
+            )
         loaded = getattr(self, "_loaded_cel_values", {})
         update_fields = kwargs.get("update_fields")
         saved = self._CEL_RELEVANT_FIELDS & set(

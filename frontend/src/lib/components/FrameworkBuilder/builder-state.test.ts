@@ -1604,3 +1604,58 @@ describe('levelsInGroupOrder', () => {
 		expect(levelsAfter(['1', '2'], ['1', '1', '2'])).toEqual(['1', '2']);
 	});
 });
+
+describe('setBaseLocale on outcome rules', () => {
+	test('keeps staircase levels as group ids and swaps their labels', () => {
+		const rules = [
+			{
+				ref_id: 'ml',
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'staircase' as const,
+				label: 'Maturity level',
+				levels: ['1', '2'] as unknown as OutcomeRule['levels'],
+				per: 'depth_1' as const,
+				floor_label: 'Level zero',
+				unit_label: 'strategies',
+				translations: {
+					fr: { label: 'Niveau de maturité', floor_label: 'Niveau zéro', unit_label: 'stratégies' }
+				}
+			},
+			{
+				ref_id: 'risk',
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'rating' as const,
+				levels: [{ ref_id: 'low', label: 'Low', translations: { fr: { label: 'Faible' } } }]
+			}
+		];
+		const s = createBuilderState(
+			makeFramework({
+				available_languages: ['en', 'fr'],
+				outcomes_definition: rules as unknown as OutcomeRule[]
+			}),
+			[],
+			[]
+		);
+		s.setBaseLocale('fr');
+		const [ml, risk] = get(s.framework).outcomes_definition ?? [];
+		expect(ml.levels).toEqual(['1', '2']);
+		expect([ml.label, ml.floor_label, ml.unit_label]).toEqual([
+			'Niveau de maturité',
+			'Niveau zéro',
+			'stratégies'
+		]);
+		expect(ml.translations?.en).toEqual({
+			label: 'Maturity level',
+			floor_label: 'Level zero',
+			unit_label: 'strategies'
+		});
+		expect(risk.levels?.[0]).toMatchObject({
+			label: 'Faible',
+			translations: { en: { label: 'Low' } }
+		});
+	});
+});

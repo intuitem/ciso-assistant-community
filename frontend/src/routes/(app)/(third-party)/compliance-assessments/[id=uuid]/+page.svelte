@@ -184,6 +184,7 @@
 			: []
 	);
 	const staircaseLevelName = (s: Record<string, any>) => {
+		if (s.level === null) return m.staircaseNotDetermined();
 		if (s.level === 0)
 			return s.rule.translations?.[getLocale()]?.floor_label || s.rule.floor_label || '0';
 		const id = String(s.rule.levels[s.level - 1]);
@@ -1263,7 +1264,7 @@
 										<div
 											class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-500 text-white font-bold tabular-nums shrink-0"
 										>
-											{staircase.level}
+											{staircase.level ?? '—'}
 										</div>
 										<div class="flex flex-col">
 											<span class="text-sm font-semibold leading-tight"

@@ -17,19 +17,17 @@
 	const unitLabel = $derived(
 		rule.translations?.[getLocale()]?.unit_label || rule.unit_label || m.staircaseSections()
 	);
+	// The backend leaves a level unknown (null) when lower levels are missing from the audit.
 	const lowerOutOfScope = $derived(
-		levels.length > 0 &&
-			staircase.units.some(
-				(u: Record<string, any>) =>
-					u.levels[levels[0]] === 'out_of_scope' &&
-					levels.some((l: string) => u.levels[l] !== 'out_of_scope')
-			)
+		staircase.units.some((u: Record<string, any>) => u.level === null)
 	);
 	const groupName = (id: string) => groups.find((g) => g.ref_id === id)?.name || id;
-	const levelName = (level: number) =>
-		level === 0
-			? rule.translations?.[getLocale()]?.floor_label || rule.floor_label || '0'
-			: groupName(levels[level - 1]);
+	const levelName = (level: number | null) =>
+		level === null
+			? m.staircaseNotDetermined()
+			: level === 0
+				? rule.translations?.[getLocale()]?.floor_label || rule.floor_label || '0'
+				: groupName(levels[level - 1]);
 
 	const STATUS: Record<string, { icon: string; color: string; label: () => string }> = {
 		met: {
@@ -62,7 +60,7 @@
 		<div
 			class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary-500 text-white text-2xl font-bold tabular-nums shrink-0"
 		>
-			{staircase.level}
+			{staircase.level ?? '—'}
 		</div>
 		<div class="flex flex-col">
 			<span class="text-xs uppercase tracking-wide text-surface-600-400"
@@ -154,7 +152,7 @@
 								staircase.level
 									? 'bg-primary-500 text-white'
 									: 'bg-surface-200-800 text-surface-900-50'}"
-								title={levelName(unit.level)}>{unit.level}</span
+								title={levelName(unit.level)}>{unit.level ?? '—'}</span
 							>
 						</td>
 					</tr>

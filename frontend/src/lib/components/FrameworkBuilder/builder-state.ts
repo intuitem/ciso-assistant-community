@@ -1932,13 +1932,14 @@ export function createBuilderState(
 			['name', 'description']
 		);
 		// Swap nested translations in outcomes_definition entries, and in a rating's levels
+		// (a staircase's levels are implementation group ids, with nothing to translate)
 		const swappedOutcomes = swapJsonArrayTranslations(
 			fw.outcomes_definition as Record<string, unknown>[] | null,
 			oldLocale,
 			newLocale,
-			['annotation', 'label']
+			['annotation', 'label', 'unit_label', 'floor_label']
 		)?.map((rule) =>
-			Array.isArray(rule.levels)
+			rule.kind === 'rating' && Array.isArray(rule.levels)
 				? {
 						...rule,
 						levels: swapJsonArrayTranslations(rule.levels, oldLocale, newLocale, ['label'])

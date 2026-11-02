@@ -13,11 +13,14 @@ level below it is reached too (ASD Essential Eight, ASVS, CMMC style):
       unit_label: mitigation strategies  # optional: what the units are called
 
 Per unit and level, `progress` is [passing, total] and the status is `met` when
-all pass (compliant or not applicable), `not_met` when one fails, `pending` when none fails but some are not assessed, `out_of_scope`
-when the audit does not include them. A unit's level is the number of levels met
-in a row from the lowest; the overall level is the lowest unit level. Only the
-overall level is stored (`computed_values[ref_id]`, readable as `values.<ref_id>`);
-the grid is computed on read.
+all pass (compliant or not applicable, or none is tagged with that level in the
+unit), `not_met` when one fails, `pending` when none fails but some are not
+assessed, `out_of_scope` when the audit does not include them. A unit's level is
+the number of levels met in a row from the lowest. When that climb stops at a
+level of the audit's target that the audit does not include, the level reached
+cannot be told and is None. The overall level is the lowest unit level, None when
+one is. Only a known overall level is stored (`computed_values[ref_id]`, readable
+as `values.<ref_id>`); the grid is computed on read.
 """
 
 PASS = {"compliant", "not_applicable"}
@@ -66,7 +69,7 @@ def staircase_errors(rule, known_groups) -> list[str]:
 
 
 def _level_status(results: list) -> str:
-    if not results or any(r is None for r in results):
+    if any(r is None for r in results):
         return "out_of_scope"
     if any(r in FAIL for r in results):
         return "not_met"
@@ -108,6 +111,7 @@ def compute_staircase(rule: dict, nodes: list[dict], ras: dict, scope=None) -> d
     out = []
     for unit in units.values():
         statuses, progress, level, blocking, climbing = {}, {}, 0, [], True
+        in_audit = False
         for index, lv in enumerate(levels):
             wanted = set(levels[: index + 1]) if rule.get("cumulative") else {lv}
             members = [
@@ -116,16 +120,17 @@ def compute_staircase(rule: dict, nodes: list[dict], ras: dict, scope=None) -> d
                 if wanted & {str(g) for g in m.get("implementation_groups") or []}
             ]
             results = [ras.get(m["urn"], (None, None))[1] for m in members]
-            statuses[lv] = (
-                _level_status(results)
-                if scope is None or lv in scope
-                else "out_of_scope"
-            )
+            in_target = scope is None or lv in scope
+            in_audit = in_audit or (in_target and any(r is not None for r in results))
+            statuses[lv] = _level_status(results) if in_target else "out_of_scope"
             progress[lv] = [sum(r in PASS for r in results), len(results)]
             if climbing and statuses[lv] == "met":
                 level += 1
             elif climbing:
                 climbing = False
+                if in_target and statuses[lv] == "out_of_scope":
+                    # A level below the target is missing from the audit.
+                    level = None
                 blocking = (
                     [
                         {
@@ -141,6 +146,9 @@ def compute_staircase(rule: dict, nodes: list[dict], ras: dict, scope=None) -> d
                     if statuses[lv] != "out_of_scope"
                     else []
                 )
+        # Units the audit does not reach, or with nothing tagged with a level.
+        if not in_audit:
+            continue
         node = unit["node"] or {}
         out.append(
             {
@@ -153,25 +161,36 @@ def compute_staircase(rule: dict, nodes: list[dict], ras: dict, scope=None) -> d
                 "blocking": blocking,
             }
         )
-    out = [u for u in out if any(s != "out_of_scope" for s in u["levels"].values())]
+    unit_levels = [u["level"] for u in out]
     return {
-        "level": min((u["level"] for u in out), default=0),
+        "level": None if None in unit_levels else min(unit_levels, default=0),
         "units": out,
     }
 
 
 def evaluate_staircases(ca, rules) -> tuple[dict, list]:
     """({ref_id: overall level}, [detail per rule]) for an audit's staircase rules."""
+    from django.utils.translation import get_language
+
     from core.models import RequirementAssessment, RequirementNode
 
     rules = staircase_rules(rules)
     if not rules:
         return {}, []
-    nodes = list(
-        RequirementNode.objects.filter(framework_id=ca.framework_id).values(
-            "urn", "parent_urn", "ref_id", "name", "assessable", "implementation_groups"
-        )
-    )
+    # Names in the request's language, as get_name_translated gives them.
+    language = get_language()
+    nodes = []
+    for node in RequirementNode.objects.filter(framework_id=ca.framework_id).values(
+        "urn",
+        "parent_urn",
+        "ref_id",
+        "name",
+        "assessable",
+        "implementation_groups",
+        "translations",
+    ):
+        translated = (node.pop("translations") or {}).get(language) or {}
+        nodes.append({**node, "name": translated.get("name", node["name"])})
     selected = set(ca.selected_implementation_groups or [])
     in_scope = {
         n["urn"]
@@ -191,6 +210,7 @@ def evaluate_staircases(ca, rules) -> tuple[dict, list]:
         picked = [i for i, level in enumerate(levels) if level in selected]
         scope = set(levels[: max(picked) + 1] if picked else []) if selected else None
         result = compute_staircase(rule, nodes, ras, scope)
-        values[rule["ref_id"]] = float(result["level"])
+        if result["level"] is not None:
+            values[rule["ref_id"]] = float(result["level"])
         details.append({"ref_id": rule["ref_id"], **result})
     return values, details
