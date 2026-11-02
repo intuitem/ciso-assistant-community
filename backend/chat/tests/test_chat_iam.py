@@ -305,6 +305,7 @@ def test_rag_search_hides_audits_from_a_respondent_with_another_role(
             {"attack_path_count", "operational_scenario_count"},
             ["change_ebiosrmstudy", "add_attackpath", "add_operationalscenario"],
         ),
+        ({"feared_event_count"}, ["change_ebiosrmstudy", "add_fearedevent"]),
         (set(), ["change_ebiosrmstudy"]),
     ],
 )

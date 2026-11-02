@@ -32,13 +32,14 @@ WORKSHOP_ADD_PERMS = (
     "add_attackpath",
     "add_operationalscenario",
 )
-WORKSHOP_STEPS = [
-    "feared_events",
-    "rotos",
-    "strategic_scenarios",
-    "attack_paths",
-    "operational_scenarios",
-]
+WORKSHOP_COUNTS = (
+    "asset_count",
+    "feared_event_count",
+    "roto_count",
+    "strategic_scenario_count",
+    "attack_path_count",
+    "operational_scenario_count",
+)
 
 
 def _can_write(user, folder, codenames) -> bool:
@@ -394,11 +395,11 @@ class EbiosRMAssistWorkflow(Workflow):
             start = "attack_paths"
         if start is None and state["operational_scenario_count"] == 0:
             start = "operational_scenarios"
-        needed = ["change_ebiosrmstudy"]
-        if state["asset_count"] == 0:
-            needed.append("add_asset")
-        if start:
-            needed += WORKSHOP_ADD_PERMS[1:][WORKSHOP_STEPS.index(start) :]
+        needed = ["change_ebiosrmstudy"] + [
+            perm
+            for perm, count in zip(WORKSHOP_ADD_PERMS, WORKSHOP_COUNTS)
+            if state[count] == 0
+        ]
         if not _can_write(ctx.scope.user, study["obj"].folder, needed):
             yield self._token("You don't have permission to edit this EBIOS RM study.")
             return
