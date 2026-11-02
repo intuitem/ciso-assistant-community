@@ -5,7 +5,7 @@ name: Vendor tiering
 description: |
   A short starter form to tier a vendor by its inherent risk: three questions on business and operations impact, three on data, privacy and security. Start it from a vendor with "Assess tier"; an accepted response writes the tier onto the vendor.
 copyright: © intuitem
-version: 2
+version: 3
 publication_date: 2026-10-04
 provider: intuitem
 packager: intuitem
@@ -64,6 +64,8 @@ objects:
           label: Impact métier
         it:
           label: Impatto aziendale
+        de:
+          label: Geschäftliche Auswirkungen
     - ref_id: data
       label: Data exposure
       kind: number
@@ -73,6 +75,8 @@ objects:
           label: Exposition des données
         it:
           label: Esposizione dei dati
+        de:
+          label: Datenexposition
     - ref_id: inherent
       label: Inherent risk
       kind: number
@@ -82,6 +86,8 @@ objects:
           label: Risque intrinsèque
         it:
           label: Rischio intrinseco
+        de:
+          label: Inhärentes Risiko
     - ref_id: regulated_function
       label: Regulated critical function
       color: '#dc2626'
@@ -91,6 +97,8 @@ objects:
           label: Fonction critique réglementée
         it:
           label: Funzione critica soggetta a normativa
+        de:
+          label: Regulierte kritische Funktion
     - ref_id: single_point_of_failure
       label: Single point of failure
       color: '#dc2626'
@@ -101,6 +109,8 @@ objects:
           label: Point de défaillance unique
         it:
           label: Punto singolo di guasto
+        de:
+          label: Single Point of Failure
     - ref_id: special_data
       label: Special-category data
       color: '#ea580c'
@@ -110,6 +120,8 @@ objects:
           label: Données sensibles
         it:
           label: Dati personali appartenenti a categorie particolari
+        de:
+          label: Besondere Datenkategorien
     - ref_id: privileged_access
       label: Privileged access
       color: '#ea580c'
@@ -119,6 +131,8 @@ objects:
           label: Accès à privilèges
         it:
           label: Accesso privilegiato
+        de:
+          label: Privilegierter Zugriff
     - ref_id: regulated_unsure
       label: Regulated function to confirm
       color: '#ca8a04'
@@ -128,6 +142,8 @@ objects:
           label: Fonction réglementée à confirmer
         it:
           label: Funzione soggetta a normativa da confermare
+        de:
+          label: Regulierte Funktion zu bestätigen
     pages:
     - urn: urn:intuitem:risk:qf_page:vendor-tiering:context
       ref_id: context
@@ -143,6 +159,8 @@ objects:
               text: Fournisseur
             it:
               text: Fornitore
+            de:
+              text: Anbieter
         urn:intuitem:risk:qf_page:vendor-tiering:context:question:service:
           type: text
           text: What service does the vendor provide?
@@ -151,6 +169,8 @@ objects:
               text: Quel service le fournisseur assure-t-il ?
             it:
               text: Quale servizio fornisce questo fornitore?
+            de:
+              text: Welche Leistung erbringt der Anbieter?
         urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:
           type: unique_choice
           text: Type of service
@@ -162,6 +182,8 @@ objects:
                 value: Service SaaS ou cloud
               it:
                 value: Servizio SaaS o cloud
+              de:
+                value: SaaS oder Cloud-Dienst
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:managed
             value: Managed service or outsourcing
             translations:
@@ -169,6 +191,8 @@ objects:
                 value: Service managé ou infogérance
               it:
                 value: Servizio gestito o outsourcing
+              de:
+                value: Managed Service oder Outsourcing
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:on_premise
             value: Software or hardware installed on site
             translations:
@@ -176,6 +200,8 @@ objects:
                 value: Logiciel ou matériel installé sur site
               it:
                 value: Software o hardware installato in sede
+              de:
+                value: Vor Ort installierte Software oder Hardware
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:professional
             value: Professional services
             translations:
@@ -183,6 +209,8 @@ objects:
                 value: Prestations intellectuelles
               it:
                 value: Servizi professionali
+              de:
+                value: Fachliche Dienstleistungen
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:goods
             value: Goods or facilities
             translations:
@@ -190,11 +218,15 @@ objects:
                 value: Fournitures ou locaux
               it:
                 value: Fornitura di beni o strutture
+              de:
+                value: Sachgüter oder Gebäudedienstleistungen
           translations:
             fr:
               text: Type de service
             it:
               text: Tipologia di servizio
+            de:
+              text: Art der Leistung
         urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:
           type: unique_choice
           text: Does the service support a regulated critical function, such as a DORA critical or important
@@ -207,6 +239,8 @@ objects:
                 value: Oui
               it:
                 value: Sì
+              de:
+                value: Ja
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:no
             value: 'No'
             translations:
@@ -214,6 +248,8 @@ objects:
                 value: Non
               it:
                 value: 'No'
+              de:
+                value: Nein
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:unsure
             value: Unsure
             translations:
@@ -221,6 +257,8 @@ objects:
                 value: Je ne sais pas
               it:
                 value: Non so
+              de:
+                value: Unklar
           translations:
             fr:
               text: Le service soutient-il une fonction critique réglementée, comme une fonction critique
@@ -228,11 +266,16 @@ objects:
             it:
               text: Il servizio supporta una funzione critica soggetta a normativa, ad esempio una funzione
                 critica o importante ai sensi di DORA oppure un servizio essenziale ai sensi della NIS2?
+            de:
+              text: Unterstützt die Leistung eine regulierte kritische Funktion, etwa eine kritische oder
+                wichtige Funktion nach DORA oder einen wesentlichen Dienst nach NIS2?
       translations:
         fr:
           name: Contexte
         it:
           name: Contesto
+        de:
+          name: Kontext
     - urn: urn:intuitem:risk:qf_page:vendor-tiering:business
       ref_id: business
       name: Business and operations impact
@@ -250,6 +293,8 @@ objects:
                 value: Négligeable
               it:
                 value: Trascurabile
+              de:
+                value: Vernachlässigbar
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:workaround
             value: An inconvenience, a workaround exists
             add_score: 2
@@ -258,6 +303,8 @@ objects:
                 value: Une gêne, une solution de contournement existe
               it:
                 value: Un disagio, esiste una soluzione alternativa
+              de:
+                value: Unannehmlichkeiten, eine Ausweichlösung ist vorhanden
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:disruption
             value: Significant disruption to a business process
             add_score: 3
@@ -266,6 +313,8 @@ objects:
                 value: Une perturbation importante d'un processus métier
               it:
                 value: Interruzione significativa di un processo aziendale
+              de:
+                value: Erhebliche Störung eines Geschäftsprozesses
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:stops
             value: A critical or customer-facing process stops
             add_score: 4
@@ -274,11 +323,15 @@ objects:
                 value: Un processus critique ou au contact des clients s'arrête
               it:
                 value: Si interrompe un processo critico o rivolto ai clienti
+              de:
+                value: Ein kritischer oder kundenbezogener Prozess kommt zum Stillstand
           translations:
             fr:
               text: Si le service s'arrêtait, quel en serait l'impact ?
             it:
               text: Se il servizio si interrompesse, quale sarebbe l’impatto?
+            de:
+              text: Welche Auswirkungen hätte ein Ausfall der Leistung?
         urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:
           type: unique_choice
           text: How long could you operate without it?
@@ -291,6 +344,8 @@ objects:
                 value: Plus d'un mois
               it:
                 value: Oltre un mese
+              de:
+                value: Mehr als einen Monat
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:weeks
             value: One week to one month
             add_score: 2
@@ -299,6 +354,8 @@ objects:
                 value: D'une semaine à un mois
               it:
                 value: Da una settimana a un mese
+              de:
+                value: Eine Woche bis einen Monat
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:days
             value: One day to one week
             add_score: 3
@@ -307,6 +364,8 @@ objects:
                 value: D'un jour à une semaine
               it:
                 value: Da un giorno a una settimana
+              de:
+                value: Einen Tag bis eine Woche
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:hours
             value: Less than a day
             add_score: 4
@@ -315,11 +374,15 @@ objects:
                 value: Moins d'un jour
               it:
                 value: Meno di un giorno
+              de:
+                value: Weniger als einen Tag
           translations:
             fr:
               text: Combien de temps pourriez-vous fonctionner sans lui ?
             it:
               text: Per quanto tempo potresti operare senza questo servizio?
+            de:
+              text: Wie lange könnten Sie ohne diese Leistung weiterarbeiten?
         urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:
           type: unique_choice
           text: How hard would it be to replace the vendor?
@@ -332,6 +395,8 @@ objects:
                 value: Nombreuses alternatives, un changement prend quelques jours
               it:
                 value: Molte alternative disponibili, la sostituzione richiede pochi giorni
+              de:
+                value: Viele Alternativen, ein Wechsel dauert Tage
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:weeks
             value: A switch takes weeks
             add_score: 2
@@ -340,6 +405,8 @@ objects:
                 value: Un changement prend quelques semaines
               it:
                 value: La sostituzione richiede alcune settimane
+              de:
+                value: Ein Wechsel dauert Wochen
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:months
             value: A switch takes months
             add_score: 3
@@ -348,6 +415,8 @@ objects:
                 value: Un changement prend plusieurs mois
               it:
                 value: La sostituzione richiede alcuni mesi
+              de:
+                value: Ein Wechsel dauert Monate
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:sole
             value: Sole source, or more than six months to switch
             add_score: 4
@@ -356,16 +425,22 @@ objects:
                 value: Fournisseur unique, ou plus de six mois pour en changer
               it:
                 value: Fornitore unico, oppure oltre sei mesi per sostituirlo
+              de:
+                value: Keine alternative Bezugsquelle oder mehr als sechs Monate für einen Wechsel
           translations:
             fr:
               text: Quelle serait la difficulté de remplacer ce fournisseur ?
             it:
               text: Quanto sarebbe difficile sostituire il fornitore?
+            de:
+              text: Wie schwierig wäre es, den Anbieter zu ersetzen?
       translations:
         fr:
           name: Impact métier et opérationnel
         it:
           name: Impatto aziendale e operativo
+        de:
+          name: Geschäftliche und betriebliche Auswirkungen
     - urn: urn:intuitem:risk:qf_page:vendor-tiering:data
       ref_id: data
       name: Data, privacy and security
@@ -383,6 +458,8 @@ objects:
                 value: Aucune, ou uniquement des données publiques
               it:
                 value: Nessun dato oppure solo dati pubblici
+              de:
+                value: Keine oder nur öffentliche Daten
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:internal
             value: Internal data
             add_score: 2
@@ -391,6 +468,8 @@ objects:
                 value: Données internes
               it:
                 value: Dati interni
+              de:
+                value: Interne Daten
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:confidential
             value: Confidential or personal data
             add_score: 3
@@ -399,6 +478,8 @@ objects:
                 value: Données confidentielles ou personnelles
               it:
                 value: Dati riservati o personali
+              de:
+                value: Vertrauliche oder personenbezogene Daten
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:special
             value: Special-category personal data, payment or health data, credentials or secrets
             add_score: 4
@@ -409,12 +490,18 @@ objects:
               it:
                 value: Dati personali appartenenti a categorie particolari, dati di pagamento o sanitari,
                   credenziali o segreti
+              de:
+                value: Besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten
+                  oder Geheimnisse
           translations:
             fr:
               text: Quelles sont les données les plus sensibles auxquelles le fournisseur accède, qu'il
                 stocke ou qu'il traite ?
             it:
               text: Quali sono i dati più sensibili a cui il fornitore accede, che conserva o che tratta?
+            de:
+              text: Welche Daten sind am sensibelsten unter denen, auf die der Anbieter zugreift oder
+                die er speichert oder verarbeitet?
         urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:
           type: unique_choice
           text: How many people's personal data does the vendor handle?
@@ -427,6 +514,8 @@ objects:
                 value: Aucune
               it:
                 value: Nessuna
+              de:
+                value: Keine
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:small
             value: Fewer than 1,000
             add_score: 2
@@ -435,6 +524,8 @@ objects:
                 value: Moins de 1 000
               it:
                 value: Meno di 1.000
+              de:
+                value: Weniger als 1.000
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:medium
             value: 1,000 to 100,000
             add_score: 3
@@ -443,6 +534,8 @@ objects:
                 value: De 1 000 à 100 000
               it:
                 value: Da 1.000 a 100.000
+              de:
+                value: 1.000 bis 100.000
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:large
             value: More than 100,000
             add_score: 4
@@ -451,12 +544,16 @@ objects:
                 value: Plus de 100 000
               it:
                 value: Oltre 100.000
+              de:
+                value: Mehr als 100.000
           translations:
             fr:
               text: Combien de personnes sont concernées par les données personnelles que traite le fournisseur
                 ?
             it:
               text: Di quante persone il fornitore tratta i dati personali?
+            de:
+              text: Von wie vielen Personen verarbeitet der Anbieter personenbezogene Daten?
         urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:
           type: unique_choice
           text: What access does the vendor have to your systems or network?
@@ -469,6 +566,8 @@ objects:
                 value: Aucun
               it:
                 value: Nessuno
+              de:
+                value: Keine
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:portal
             value: User accounts on the vendor's own platform
             add_score: 2
@@ -477,6 +576,8 @@ objects:
                 value: Des comptes utilisateurs sur sa propre plateforme
               it:
                 value: Account utente sulla piattaforma del fornitore
+              de:
+                value: Benutzerkonten auf der eigenen Plattform des Anbieters
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:integration
             value: An integration (API) or remote access
             add_score: 3
@@ -485,6 +586,8 @@ objects:
                 value: Une intégration (API) ou un accès à distance
               it:
                 value: Un’integrazione (API) o un accesso remoto
+              de:
+                value: Eine Integration (API) oder Fernzugriff
           - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:privileged
             value: Privileged or administrator access, or a presence on your network
             add_score: 4
@@ -493,16 +596,22 @@ objects:
                 value: Un accès à privilèges ou administrateur, ou une présence sur votre réseau
               it:
                 value: Accesso privilegiato o amministrativo oppure presenza sulla tua rete
+              de:
+                value: Privilegierter Zugriff, Administratorzugriff oder Präsenz in Ihrem Netzwerk
           translations:
             fr:
               text: De quel accès le fournisseur dispose-t-il à vos systèmes ou à votre réseau ?
             it:
               text: Che livello di accesso alla tua infrastruttura ha il fornitore?
+            de:
+              text: Welchen Zugriff hat der Anbieter auf Ihre Systeme oder Ihr Netzwerk?
       translations:
         fr:
           name: Données, vie privée et sécurité
         it:
           name: Dati, privacy e sicurezza
+        de:
+          name: Daten, Datenschutz und Sicherheit
     translations:
       fr:
         name: Criticité des fournisseurs
@@ -536,6 +645,25 @@ objects:
           risposte e varia quindi per incrementi di un terzo: 3,3 si raggiunge con 4-4-2 o 3-3-4, 2,6 con
           3-3-2. I livelli sono identificati tramite chiave: la scala continua a funzionare anche se
           rinominata o riordinata; una scala priva di queste chiavi invia le risposte a revisione.'
+      de:
+        name: Anbietereinstufung
+        description: |-
+          Stuft einen Anbieter nach seinem inhärenten Risiko ein, bevor sein Sicherheitsstatus geprüft wird.
+
+          Jede bewertete Antwort erhält 1 (niedrig) bis 4 (kritisch) Punkte. Geschäftliche Auswirkungen und Datenexposition ergeben sich jeweils aus dem Mittelwert ihrer drei Antworten. Das inhärente Risiko ist der höhere der beiden Werte: Ein Anbieter, der einen kritischen Prozess betreibt, ist auch ohne Datenhaltung bedeutsam – und umgekehrt.
+
+          Einige Antworten erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion, ein alleiniger Anbieter für einen kritischen Prozess, besondere Kategorien personenbezogener Daten oder privilegierter Zugriff auf Ihre Systeme.
+
+          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
+        annotation: 'Eine angenommene Antwort setzt die Stufe des Anbieters auf der Standardskala:
+          Kritisch ab einem inhärenten Risiko von 3,3, Wichtig ab 2,6, Standard ab 2,0, darunter
+          Geringe Auswirkungen. Eine regulierte kritische Funktion oder ein Single Point of Failure
+          führt mindestens zu Kritisch; besondere Kategorien personenbezogener Daten oder privilegierter
+          Zugriff mindestens zu Wichtig. Es gilt jeweils die höchste Stufe. Jede Dimension ist der
+          Mittelwert von drei Antworten und verändert sich daher in Drittelschritten: 3,3 wird mit
+          4-4-2 oder 3-3-4 erreicht, 2,6 mit 3-3-2. Die Stufen werden über ihre Schlüssel referenziert,
+          sodass umbenannte oder neu geordnete Skalen weiterhin funktionieren. Bei einer Skala ohne
+          diese Schlüssel werden die Antworten zur Prüfung weitergeleitet.'
 translations:
   fr:
     name: Criticité des fournisseurs
@@ -548,3 +676,9 @@ translations:
     description: 'Un breve modulo iniziale per classificare un fornitore in base al rischio intrinseco: tre domande
       sull’impatto aziendale e operativo e tre su dati, privacy e sicurezza. Avvialo dalla scheda del
       fornitore con «Valuta il livello»; una risposta approvata assegna il livello al fornitore.'
+  de:
+    name: Anbietereinstufung
+    description: |-
+      Ein kurzes Einstiegsformular zur Einstufung eines Anbieters nach seinem inhärenten Risiko: drei Fragen zu geschäftlichen und betrieblichen Auswirkungen sowie drei zu Daten, Datenschutz und Sicherheit. Starten Sie es bei einem Anbieter über „Stufe bewerten“; eine angenommene Antwort überträgt die Stufe auf den Anbieter.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
