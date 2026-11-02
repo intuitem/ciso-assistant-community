@@ -7600,7 +7600,7 @@
 	"resultNumber": "Zahl",
 	"resultLevel": "Stufe",
 	"levels": "Stufen",
-	"levelsHelpText": "Werden aus den von Ihrer Formel zurückgegebenen Texten übernommen. Ordnen Sie sie vom schlechtesten zum besten Wert: Ist „Höher ist besser“ aktiviert, ist die letzte Stufe die beste.",
+	"levelsHelpText": "Werden aus den von Ihrer Formel zurückgegebenen Texten übernommen. Ordnen Sie sie nach Wert. Ist „Höher ist besser“ aktiviert, ist die letzte Stufe die beste. Ist es deaktiviert, ist die erste Stufe die beste.",
 	"levelsCopiedHelpText": "Die Stufen von {name}. Ihre Formel gibt deren Namen oder Referenzen zurück.",
 	"useLevelsOf": "Stufen übernehmen von …",
 	"notALevel": "„{text}“ ist keine der Stufen",
