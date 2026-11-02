@@ -168,6 +168,7 @@ from rest_framework.exceptions import (
 
 from core.helpers import *
 from core.validators import sanitize_file_name
+from core.markdown_utils import render_markdown_as_text
 from core.answer_attachments import (
     answer_for_upload,
     AttachmentError,
@@ -17032,7 +17033,13 @@ def generate_html(
 
     def generate_data_rec(requirement_node: RequirementNode, depth: int = 0):
         selected_evidences = []
-        toc_entry = {"node": requirement_node, "depth": depth, "assessment": None}
+        toc_entry = {
+            "node": requirement_node,
+            "label": requirement_node.display_short
+            or render_markdown_as_text(requirement_node.get_description_translated),
+            "depth": depth,
+            "assessment": None,
+        }
         toc.append(toc_entry)
         children_nodes = [
             req for req in requirement_nodes if req.parent_urn == requirement_node.urn

@@ -181,7 +181,7 @@
                     {% if entry.assessment %}
                         <tr>
                             <td style="--depth: {{ entry.depth }}">
-                                <a href="#req-{{ entry.node.id }}">{{ entry.node.display_short|default:entry.node.get_description_translated|truncatechars:120 }}</a>
+                                <a href="#req-{{ entry.node.id }}">{{ entry.label|truncatechars:120 }}</a>
                             </td>
                             <td><span class="badge status--{{ entry.assessment.status }}">{{ entry.assessment.get_status_display }}</span></td>
                             <td><span class="badge result--{{ entry.assessment.result }}">{{ entry.assessment.get_result_display }}</span></td>
@@ -189,7 +189,7 @@
                     {% elif not entry.node.assessable %}
                         <tr class="toc-group">
                             <td colspan="3" style="--depth: {{ entry.depth }}">
-                                <a href="#req-{{ entry.node.id }}">{{ entry.node.display_short|default:entry.node.get_description_translated|truncatechars:120 }}</a>
+                                <a href="#req-{{ entry.node.id }}">{{ entry.label|truncatechars:120 }}</a>
                             </td>
                         </tr>
                     {% endif %}

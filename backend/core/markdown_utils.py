@@ -1,4 +1,7 @@
+from html import unescape
 from urllib.parse import urlsplit
+
+from django.utils.html import strip_tags
 
 from markdown_it import MarkdownIt
 from markdown_it.rules_core import StateCore
@@ -57,3 +60,10 @@ def render_safe_markdown(text: str | None) -> str:
     if not text:
         return ""
     return _MARKDOWN.render(text)
+
+
+def render_markdown_as_text(text: str | None) -> str:
+    """Return `text` rendered from Markdown to plain text on a single line, or an
+    empty string, for places such as link labels where markup cannot be shown.
+    """
+    return " ".join(unescape(strip_tags(render_safe_markdown(text))).split())

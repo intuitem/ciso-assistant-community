@@ -219,6 +219,12 @@ def _toc(index: str) -> str:
     return index[start : index.index("</nav>", start)]
 
 
+def _toc_row(toc: str, anchor: str) -> str:
+    """Return the table of contents row that links to `anchor`."""
+    start = toc.index(f'href="#{anchor}"')
+    return toc[start : toc.index("</tr>", start)]
+
+
 def _first_requirement(audit: ComplianceAssessment) -> RequirementAssessment:
     return RequirementAssessment.objects.filter(
         compliance_assessment=audit, requirement__assessable=True
@@ -357,10 +363,26 @@ class TestAuditArchiveReportReadability:
         ra.status = RequirementAssessment.Status.IN_REVIEW
         ra.save()
 
-        toc = _toc(_index(admin_client, audit))
+        row = _toc_row(_toc(_index(admin_client, audit)), f"req-{ra.requirement.id}")
 
-        assert "Non-compliant" in toc
-        assert "In review" in toc
+        assert "Non-compliant" in row
+        assert "In review" in row
+
+    def test_table_of_contents_falls_back_to_the_description_as_plain_text(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        requirement = ra.requirement
+        requirement.ref_id = ""
+        requirement.name = ""
+        requirement.description = "**Access control** policy"
+        requirement.save()
+
+        row = _toc_row(_toc(_index(admin_client, audit)), f"req-{requirement.id}")
+
+        assert "Access control policy" in row
+        assert "**" not in row
+        assert "<strong>" not in row
 
     def test_requirement_description_is_rendered_as_markdown(
         self, admin_client: APIClient, audit: ComplianceAssessment
