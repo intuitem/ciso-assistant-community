@@ -314,7 +314,13 @@ def implementation_groups(row: SummaryRow) -> tuple[str, ...]:
             raise ValueError(
                 f"{row.ref_id} is advisory but its complete row is not shaded in the PDF."
             )
-        return ("A",)
+        advisory_a_architectures = set(ARCHITECTURES[:-1])
+        if not advisory_a_architectures.issubset(row.architectures):
+            raise ValueError(
+                f"{row.ref_id} is advisory for an unsupported architecture combination: "
+                f"{', '.join(row.architectures)}."
+            )
+        return ("A", "AAB") if "B" in row.architectures else ("A",)
 
     groups = []
     for architecture in row.architectures:
@@ -372,7 +378,7 @@ def enforce_assessable_markers(sheet) -> None:
 
 def shade_advisory_requirement(sheet, groups: tuple[str, ...]) -> None:
     """Reflect advisory applicability in the generated requirement row."""
-    if groups == ("A",):
+    if groups and groups[0] == "A":
         for cell in sheet[sheet.max_row]:
             cell.fill = ADVISORY_FILL
     elif "AA4" in groups or "AB" in groups:
@@ -466,7 +472,17 @@ def build_workbook(
     implementation_content = workbook.create_sheet("imp_grp_content")
     implementation_content.append(("ref_id", "name", "description"))
     for ref_id, name, group_description in (
-        ("A", "Advisory Controls", "Advisory controls for all architecture types."),
+        (
+            "A",
+            "Advisory Controls (A1-A4)",
+            "Fully advisory controls applicable to architectures A1, A2, A3 or A4. "
+            "Controls also applicable to B additionally use \"Advisory Controls (B)\".",
+        ),
+        (
+            "AAB",
+            "Advisory Controls (B)",
+            "Fully advisory controls applicable to architecture B.",
+        ),
         ("A1", "Architecture A1", "Mandatory controls for architecture A1."),
         ("A2", "Architecture A2", "Mandatory controls for architecture A2."),
         ("A3", "Architecture A3", "Mandatory controls for architecture A3."),
@@ -475,12 +491,12 @@ def build_workbook(
         (
             "AB",
             "Architecture B (Advisory)",
-            "Advisory controls for architecture B (mandatory controls for at least one other architecture type).",
+            "Mandatory controls that are advisory for architecture B.",
         ),
         (
             "AA4",
             "Architecture A4 (Advisory)",
-            "Advisory controls for architecture A4 (mandatory controls for at least one other architecture type).",
+            "Mandatory controls that are advisory for architecture A4.",
         ),
     ):
         implementation_content.append((ref_id, name, group_description))

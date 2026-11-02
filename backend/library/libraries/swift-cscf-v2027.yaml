@@ -37,8 +37,12 @@ objects:
       Source: https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2027_20260710.pdf?logDownload=true'
     implementation_groups_definition:
     - ref_id: A
-      name: Advisory Controls
-      description: Advisory controls for all architecture types.
+      name: Advisory Controls (A1-A4)
+      description: Fully advisory controls applicable to architectures A1, A2, A3
+        or A4. Controls also applicable to B additionally use "Advisory Controls (B)".
+    - ref_id: AAB
+      name: Advisory Controls (B)
+      description: Fully advisory controls applicable to architecture B.
     - ref_id: A1
       name: Architecture A1
       description: Mandatory controls for architecture A1.
@@ -56,12 +60,10 @@ objects:
       description: Mandatory controls for architecture B.
     - ref_id: AB
       name: Architecture B (Advisory)
-      description: Advisory controls for architecture B (mandatory controls for at
-        least one other architecture type).
+      description: Mandatory controls that are advisory for architecture B.
     - ref_id: AA4
       name: Architecture A4 (Advisory)
-      description: Advisory controls for architecture A4 (mandatory controls for at
-        least one other architecture type).
+      description: Mandatory controls that are advisory for architecture A4.
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:1
       assessable: false
@@ -362,6 +364,7 @@ objects:
       description: RMA Business Controls
       implementation_groups:
       - A
+      - AAB
     - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:3
       assessable: false
       depth: 1
@@ -445,6 +448,7 @@ objects:
       description: Staff Screening Process
       implementation_groups:
       - A
+      - AAB
     - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:5.4
       assessable: true
       depth: 2
@@ -552,6 +556,7 @@ objects:
       description: Penetration Testing
       implementation_groups:
       - A
+      - AAB
     - urn: urn:intuitem:risk:req_node:swift-cscf-v2027:7.4a
       assessable: true
       depth: 2
@@ -560,3 +565,4 @@ objects:
       description: Scenario-based Risk Assessment
       implementation_groups:
       - A
+      - AAB
