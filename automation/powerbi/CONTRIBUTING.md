@@ -189,6 +189,9 @@ present), uploads artifacts, and creates the GitHub Release with
 `CisoAssistant.mez` + `CisoAssistant.pqx` attached atomically (releases are
 immutable once published — assets cannot be added afterwards).
 
+After the release is published, update the "latest" release links in
+`README.md` and `product-docs/integrations/powerbi.md` to the new tag.
+
 > **Warning**: deleting a published (immutable) release **permanently
 > reserves its tag name** — GitHub blocks re-creating that tag forever
 > (learned the hard way with `powerbi-v1.0.0`). A botched release is never

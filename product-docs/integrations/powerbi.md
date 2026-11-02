@@ -13,7 +13,7 @@ The connector adds **CISO Assistant** to Power BI's *Get Data* dialog. It handle
 
 ### Install the connector
 
-Both files are attached to each connector release on GitHub. Pick one path:
+Both files are attached to each connector release on GitHub (latest: [powerbi-v1.1.0](https://github.com/intuitem/ciso-assistant-community/releases/tag/powerbi-v1.1.0)). Pick one path:
 
 | | Path A — signed `.pqx` (recommended) | Path B — `.mez` |
 | --- | --- | --- |
@@ -72,7 +72,7 @@ Some audit fields (e.g. scores) can be hidden per audit by its field visibility 
 
 ### Start from the template
 
-Every connector release also ships `CisoAssistant-starter.pbit`, a template with a curated set of tables, correct relationships, base measures and four ready-made pages (compliance results, control status, threat coverage, incidents & vulnerabilities). It is the fastest way to a working report and a reference for how the model is meant to be wired. It needs the connector installed, but is not tied to a particular version of it.
+Every connector release (latest: [powerbi-v1.1.0](https://github.com/intuitem/ciso-assistant-community/releases/tag/powerbi-v1.1.0)) also ships `CisoAssistant-starter.pbit`, a template with a curated set of tables, correct relationships, base measures and four ready-made pages (compliance results, control status, threat coverage, incidents & vulnerabilities). It is the fastest way to a working report and a reference for how the model is meant to be wired. It needs the connector installed, but is not tied to a particular version of it.
 
 Opening it asks for a `BaseUrl` parameter — enter your instance URL, the same one you would type in the connector dialog — then for your token, and the report loads against your data. To point an existing report at another instance later, use **Transform data → Manage parameters** and change `BaseUrl`; every query follows.
 
