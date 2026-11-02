@@ -147,6 +147,12 @@ def test_a_level_with_nothing_tagged_in_a_section_is_met():
     assert out["level"] == 3
 
 
+def test_an_audit_with_none_of_the_levels_has_no_level():
+    # Its selected groups include none of the staircase's levels: no false 0.
+    out = run(ALL_MET, scope=set())
+    assert out["sections"] == [] and out["level"] is None
+
+
 def test_levels_are_listed_in_order_and_not_counted_outside_the_audit():
     out = run({"a1": "compliant", "b1": "compliant"}, scope={"1"})
     section = out["sections"][0]

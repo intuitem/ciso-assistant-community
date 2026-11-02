@@ -24,9 +24,10 @@ not assessed, `out_of_scope` when the audit does not include them. A section's
 level is the number of levels met in a row from the lowest, and `blocking` lists
 what keeps it from the next one. When that climb stops at a level of the audit's
 target that the audit does not include, the level reached cannot be told and is
-None. The overall level is the lowest section level, None when one is. Only a
-known overall level is stored (`computed_values[ref_id]`, readable as
-`values.<ref_id>`); the sections are computed on read.
+None. The overall level is the lowest section level, None when one is or when
+the audit includes none of the levels. Only a known overall level is stored
+(`computed_values[ref_id]`, readable as `values.<ref_id>`); the sections are
+computed on read.
 """
 
 PASS = {"compliant", "not_applicable"}
@@ -174,7 +175,8 @@ def compute_staircase(rule: dict, nodes: list[dict], ras: dict, scope=None) -> d
         )
     section_levels = [s["level"] for s in out]
     return {
-        "level": None if None in section_levels else min(section_levels, default=0),
+        # No section in the audit (none of its levels selected): nothing to tell.
+        "level": None if None in section_levels else min(section_levels, default=None),
         "sections": out,
     }
 
