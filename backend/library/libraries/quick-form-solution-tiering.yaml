@@ -19,11 +19,12 @@ objects:
 
       Each scored answer runs from 1 (low) to 4 (critical). Business impact and data exposure are each the average of their three answers, and the inherent risk is the higher of the two: a solution that runs a critical process matters even if it holds no data, and the reverse.
 
-      Some answers raise the tier on their own: a regulated critical function, a sole-source solution behind a critical process, special-category data, or privileged access to your systems.
+      Some answers raise the tier on their own: a regulated critical function, a sole-source solution behind a critical process, special-category personal data, payment or health data, credentials or secrets, or privileged access to your systems.
     annotation: 'An accepted response sets the solution''s tier on the default scale: Critical from an inherent
       risk of 3.3, Important from 2.6, Standard from 2.0, Low impact below. A regulated critical function
-      or a single point of failure makes the solution at least Critical; special-category data or privileged
-      access at least Important. The tier is the highest of these. Each dimension averages three answers,
+      or a single point of failure makes the solution at least Critical; special-category personal data,
+      payment or health data, credentials or secrets, or privileged access at least Important. The tier
+      is the highest of these. Each dimension averages three answers,
       so it moves in steps of a third: 3.3 is reached by 4-4-2 or 3-3-4, 2.6 by 3-3-2. The tiers are named
       by key, so a renamed or reordered scale keeps working; a scale without these keys sends responses
       to review.'
@@ -221,7 +222,7 @@ objects:
               fr:
                 value: Un processus critique ou au contact des clients s'arrête
               de:
-                value: Ein kritischer oder kundenbezogener Prozess kommt zum Stillstand
+                value: Ein kritischer Prozess oder ein Prozess mit direktem Kundenkontakt kommt zum Stillstand
           translations:
             fr:
               text: Si la solution s'arrêtait, quel en serait l'impact ?
@@ -476,14 +477,15 @@ objects:
 
           Jede bewertete Antwort erhält 1 (niedrig) bis 4 (kritisch) Punkte. Geschäftliche Auswirkungen und Datenexposition ergeben sich jeweils aus dem Mittelwert ihrer drei Antworten. Das inhärente Risiko ist der höhere der beiden Werte: Eine Lösung, die einen kritischen Prozess betreibt, ist auch ohne Datenhaltung bedeutsam – und umgekehrt.
 
-          Einige Antworten erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion, eine nur aus einer Quelle verfügbare Lösung für einen kritischen Prozess, besondere Kategorien personenbezogener Daten oder privilegierter Zugriff auf Ihre Systeme.
+          Einige Antworten erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion, eine nur aus einer Quelle verfügbare Lösung für einen kritischen Prozess, besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten oder Geheimnisse sowie privilegierter Zugriff auf Ihre Systeme.
 
           Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
         annotation: 'Eine angenommene Antwort setzt die Stufe der Lösung auf der Standardskala:
           Kritisch ab einem inhärenten Risiko von 3,3, Wichtig ab 2,6, Standard ab 2,0, darunter
           Geringe Auswirkungen. Eine regulierte kritische Funktion oder ein Single Point of Failure
-          führt mindestens zu Kritisch; besondere Kategorien personenbezogener Daten oder privilegierter
-          Zugriff mindestens zu Wichtig. Es gilt jeweils die höchste Stufe. Jede Dimension ist der
+          führt mindestens zu Kritisch; besondere Kategorien personenbezogener Daten, Zahlungs- oder
+          Gesundheitsdaten, Zugangsdaten oder Geheimnisse sowie privilegierter Zugriff mindestens zu
+          Wichtig. Es gilt jeweils die höchste Stufe. Jede Dimension ist der
           Mittelwert von drei Antworten und verändert sich daher in Drittelschritten: 3,3 wird mit
           4-4-2 oder 3-3-4 erreicht, 2,6 mit 3-3-2. Die Stufen werden über ihre Schlüssel referenziert,
           sodass umbenannte oder neu geordnete Skalen weiterhin funktionieren. Bei einer Skala ohne
