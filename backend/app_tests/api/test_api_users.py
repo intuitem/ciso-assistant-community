@@ -1776,13 +1776,15 @@ class TestUserAccountFieldsVisibility:
         "observation",
     }
     # Directory only: the ambient baseline role, a domain Reader, the Global
-    # analyst group and a custom role holding only the restricted view on Global.
-    VIEWERS = ["ambient", "reader", "global_analyst", "restricted"]
+    # analyst and approver groups and a custom role holding only the restricted
+    # view on Global.
+    VIEWERS = ["ambient", "reader", "global_analyst", "global_approver", "restricted"]
     # Account fields through `view_user` or `change_user` on Global.
     ACCOUNT_VIEWERS = [
         "superuser",
         "manager",
         "full_viewer",
+        "change_only",
         "global_reader",
         "creator",
     ]
@@ -1825,6 +1827,10 @@ class TestUserAccountFieldsVisibility:
         UserGroup.objects.get(name="BI-UG-ANA", folder=root).user_set.add(
             global_analyst
         )
+        global_approver = User.objects.create_user("global.approver@tests.com")
+        UserGroup.objects.get(name="BI-UG-GAP", folder=root).user_set.add(
+            global_approver
+        )
         restricted = _make_user_manager(
             "restricted@tests.com", ["view_user_restricted"]
         )
@@ -1834,19 +1840,24 @@ class TestUserAccountFieldsVisibility:
         ensure_user_creator_group()
         creator = User.objects.create_user("creator@tests.com")
         UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
-        # Not superusers: account access from change_user, or view_user alone.
+        # Not superusers: account access from view_user, change_user, or both.
         manager = _make_user_manager("manager@tests.com", ["view_user", "change_user"])
         full_viewer = _make_user_manager("full.viewer@tests.com", ["view_user"])
+        change_only = _make_user_manager(
+            "change.only@tests.com", ["view_user_restricted", "change_user"]
+        )
 
         users = {
             "ambient": ambient,
             "reader": reader,
             "global_analyst": global_analyst,
+            "global_approver": global_approver,
             "restricted": restricted,
         }
         account_viewers = {
             "manager": manager,
             "full_viewer": full_viewer,
+            "change_only": change_only,
             "global_reader": global_reader,
             "creator": creator,
         }
