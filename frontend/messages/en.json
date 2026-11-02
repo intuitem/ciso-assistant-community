@@ -1248,6 +1248,8 @@
 	"socialAppHelpText": "The registered external client (identity provider application) this account authenticates as.",
 	"federatedSubject": "Subject",
 	"federatedSubjectHelpText": "The external identity provider's `sub` claim identifying this account.",
+	"socialAppRequired": "An identity provider is required for a federated service account.",
+	"federatedSubjectRequired": "A subject is required for a federated service account.",
 	"clientIDHelpText": "App ID, or consumer key",
 	"secretHelpText": "API secret, client secret, or consumer secret",
 	"SAMLIdPConfiguration": "SAML IdP configuration",

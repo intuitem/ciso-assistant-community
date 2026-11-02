@@ -2243,19 +2243,36 @@ export const IdentityProviderSchema = z.object({
 	server_url: z.string().url().max(1024)
 });
 
-export const ServiceAccountSchema = z.object({
-	name: z.string().min(1).max(100),
-	description: z.string().optional().nullable(),
-	authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
-	identity_source: z.enum(['local', 'federated']).default('local'),
-	social_app: z.coerce.number().int().positive().optional().nullable(),
-	federated_subject: z.string().max(255).optional().nullable(),
-	permissions: z.array(z.number()).optional(),
-	role: z.string().uuid().optional().nullable(),
-	folders: z.array(z.string().uuid()).min(1),
-	is_recursive: z.boolean().default(true),
-	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
-});
+export const ServiceAccountSchema = z
+	.object({
+		name: z.string().min(1).max(100),
+		description: z.string().optional().nullable(),
+		authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
+		identity_source: z.enum(['local', 'federated']).default('local'),
+		social_app: z.coerce.number().int().positive().optional().nullable(),
+		federated_subject: z.string().max(255).optional().nullable(),
+		permissions: z.array(z.number()).optional(),
+		role: z.string().uuid().optional().nullable(),
+		folders: z.array(z.string().uuid()).min(1),
+		is_recursive: z.boolean().default(true),
+		expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+	})
+	// Mirrors the backend check: both are required together for a federated account.
+	// A blank input reaches us as null (superforms nullifies empty strings), so a
+	// per-field min(1) would never fire.
+	.superRefine((data, ctx) => {
+		if (data.identity_source !== 'federated') return;
+		if (data.social_app == null) {
+			ctx.addIssue({ code: 'custom', path: ['social_app'], message: 'socialAppRequired' });
+		}
+		if (!data.federated_subject) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['federated_subject'],
+				message: 'federatedSubjectRequired'
+			});
+		}
+	});
 
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,

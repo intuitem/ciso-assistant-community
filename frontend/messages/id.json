@@ -2324,5 +2324,20 @@
 	"dpiaRequirementChanges": "Riwayat persyaratan DPIA",
 	"previously": "Sebelumnya",
 	"vulnerabilityOpenWithRemediationDate": "Kerentanan terbuka memiliki tanggal remediasi",
-	"vulnerabilityResolvedWithoutRemediationDate": "Kerentanan yang selesai tidak memiliki tanggal remediasi"
+	"vulnerabilityResolvedWithoutRemediationDate": "Kerentanan yang selesai tidak memiliki tanggal remediasi",
+	"socialApp": "Penyedia identitas",
+	"identityProvidersDescription": "Daftarkan penyedia identitas OIDC eksternal yang digunakan akun layanan terfederasi untuk autentikasi.",
+	"addIdentityProvider": "Tambah penyedia identitas",
+	"providerId": "ID penyedia",
+	"providerIdHelpText": "Slug huruf kecil unik yang mengidentifikasi penyedia ini (mis. \"keycloak-prod\").",
+	"serverUrlHelpText": "URL dasar penerbit atau URL penemuan /.well-known/openid-configuration miliknya. Diverifikasi secara langsung saat disimpan.",
+	"identitySource": "Sumber identitas",
+	"identitySourceHelpText": "Lokal: sebuah secret dibuat dan disimpan di sini. Terfederasi: penyedia identitas eksternal menerbitkan token, diverifikasi dengan kunci penandatanganannya sendiri; tidak ada secret yang disimpan secara lokal.",
+	"local": "Lokal",
+	"federated": "Terfederasi",
+	"socialAppHelpText": "Klien eksternal terdaftar (aplikasi penyedia identitas) yang digunakan akun ini untuk autentikasi.",
+	"federatedSubject": "Subject",
+	"federatedSubjectHelpText": "Klaim `sub` dari penyedia identitas eksternal yang mengidentifikasi akun ini.",
+	"socialAppRequired": "Akun layanan terfederasi memerlukan penyedia identitas.",
+	"federatedSubjectRequired": "Akun layanan terfederasi memerlukan nilai subject."
 }

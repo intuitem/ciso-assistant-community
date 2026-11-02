@@ -4,8 +4,8 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import ListSelector from '../ListSelector.svelte';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 	import { m } from '#paraglide/messages.js';

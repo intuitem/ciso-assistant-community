@@ -1,12 +1,12 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 
 	interface Props {

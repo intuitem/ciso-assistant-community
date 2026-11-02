@@ -5898,5 +5898,20 @@
 	"dpiaRequirementChanges": "História požiadaviek na DPIA",
 	"previously": "Predtým",
 	"vulnerabilityOpenWithRemediationDate": "Otvorená zraniteľnosť má dátum nápravy",
-	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy"
+	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy",
+	"socialApp": "Poskytovateľ identity",
+	"identityProvidersDescription": "Zaregistrujte externých poskytovateľov identity OIDC, voči ktorým sa overujú federované servisné kontá.",
+	"addIdentityProvider": "Pridať poskytovateľa identity",
+	"providerId": "ID poskytovateľa",
+	"providerIdHelpText": "Jedinečný identifikátor malými písmenami pre tohto poskytovateľa (napr. \"keycloak-prod\").",
+	"serverUrlHelpText": "Základná URL vydavateľa alebo jeho discovery URL /.well-known/openid-configuration. Overuje sa naživo pri uložení.",
+	"identitySource": "Zdroj identity",
+	"identitySourceHelpText": "Lokálne: tajný kľúč sa vygeneruje a uloží tu. Federované: token vydáva externý poskytovateľ identity a overuje sa jeho vlastnými podpisovými kľúčmi; lokálne sa neukladá žiadny tajný kľúč.",
+	"local": "Lokálne",
+	"federated": "Federované",
+	"socialAppHelpText": "Registrovaný externý klient (aplikácia poskytovateľa identity), pod ktorým sa toto konto overuje.",
+	"federatedSubject": "Subject",
+	"federatedSubjectHelpText": "Nárok `sub` od externého poskytovateľa identity, ktorý identifikuje toto konto.",
+	"socialAppRequired": "Federované servisné konto vyžaduje poskytovateľa identity.",
+	"federatedSubjectRequired": "Federované servisné konto vyžaduje hodnotu subject."
 }

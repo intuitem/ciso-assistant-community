@@ -6291,5 +6291,20 @@
 	"notificationsDescription": "Zaken die uw aandacht vragen",
 	"unread": "Ongelezen",
 	"vulnerabilityOpenWithRemediationDate": "Open kwetsbaarheid heeft een hersteldatum",
-	"vulnerabilityResolvedWithoutRemediationDate": "Opgeloste kwetsbaarheid heeft geen hersteldatum"
+	"vulnerabilityResolvedWithoutRemediationDate": "Opgeloste kwetsbaarheid heeft geen hersteldatum",
+	"socialApp": "Identiteitsprovider",
+	"identityProvidersDescription": "Registreer de externe OIDC-identiteitsproviders waartegen gefedereerde serviceaccounts zich authenticeren.",
+	"addIdentityProvider": "Identiteitsprovider toevoegen",
+	"providerId": "Provider-ID",
+	"providerIdHelpText": "Unieke slug in kleine letters die deze provider identificeert (bijv. \"keycloak-prod\").",
+	"serverUrlHelpText": "De basis-URL van de uitgever of de discovery-URL /.well-known/openid-configuration. Wordt live gecontroleerd bij het opslaan.",
+	"identitySource": "Identiteitsbron",
+	"identitySourceHelpText": "Lokaal: er wordt hier een secret gegenereerd en opgeslagen. Gefedereerd: een externe identiteitsprovider geeft het token uit, geverifieerd met zijn eigen ondertekeningssleutels; er wordt lokaal geen secret opgeslagen.",
+	"local": "Lokaal",
+	"federated": "Gefedereerd",
+	"socialAppHelpText": "De geregistreerde externe client (applicatie van de identiteitsprovider) waarmee dit account zich authenticeert.",
+	"federatedSubject": "Subject",
+	"federatedSubjectHelpText": "De `sub`-claim van de externe identiteitsprovider die dit account identificeert.",
+	"socialAppRequired": "Voor een gefedereerd serviceaccount is een identiteitsprovider vereist.",
+	"federatedSubjectRequired": "Voor een gefedereerd serviceaccount is een subject vereist."
 }

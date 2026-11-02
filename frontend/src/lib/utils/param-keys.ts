@@ -116,6 +116,7 @@ export const FIELD_KEYS = new Set([
 	'health',
 	'hexcolor',
 	'icon_fa_class',
+	'identity_source',
 	'idp_groups',
 	'incident',
 	'incident_submission',

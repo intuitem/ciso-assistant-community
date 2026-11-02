@@ -7363,5 +7363,20 @@
 	"dpiaRequiredNo": "RIPD não necessário",
 	"dpiaRequirementChange": "Alteração da exigência de RIPD",
 	"dpiaRequirementChanges": "Histórico da exigência de RIPD",
-	"previously": "Anteriormente"
+	"previously": "Anteriormente",
+	"socialApp": "Fornecedor de identidade",
+	"identityProvidersDescription": "Registe os fornecedores de identidade OIDC externos com os quais as contas de serviço federadas se autenticam.",
+	"addIdentityProvider": "Adicionar fornecedor de identidade",
+	"providerId": "ID do fornecedor",
+	"providerIdHelpText": "Identificador único em minúsculas para este fornecedor (ex.: \"keycloak-prod\").",
+	"serverUrlHelpText": "O URL base do emissor ou o seu URL de descoberta /.well-known/openid-configuration. Verificado em tempo real ao guardar.",
+	"identitySource": "Origem da identidade",
+	"identitySourceHelpText": "Local: é gerado e armazenado aqui um segredo. Federado: um fornecedor de identidade externo emite o token, verificado com as suas próprias chaves de assinatura; não é armazenado qualquer segredo localmente.",
+	"local": "Local",
+	"federated": "Federado",
+	"socialAppHelpText": "O cliente externo registado (aplicação do fornecedor de identidade) com o qual esta conta se autentica.",
+	"federatedSubject": "Subject",
+	"federatedSubjectHelpText": "A declaração `sub` do fornecedor de identidade externo que identifica esta conta.",
+	"socialAppRequired": "É necessário um fornecedor de identidade para uma conta de serviço federada.",
+	"federatedSubjectRequired": "É necessário um subject para uma conta de serviço federada."
 }
