@@ -1655,6 +1655,163 @@ async def create_vulnerability(
         return f"Error in create_vulnerability: {str(e)}"
 
 
+# ---------------------------------------------------------------------------
+# Findings (severity given and returned as a label, shared with update_finding)
+# ---------------------------------------------------------------------------
+
+# Backend core.models.Severity
+SEVERITY_LEVELS = {
+    "undefined": -1,
+    "info": 0,
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "critical": 4,
+}
+
+
+def _severity_value(label):
+    """Severity label (case-insensitive) to its backend value, None if unknown."""
+    if not isinstance(label, str):
+        return None
+    return SEVERITY_LEVELS.get(label.strip().lower())
+
+
+def _severity_label(value) -> str:
+    """Backend severity value to its label (the raw value if unknown)."""
+    for label, level in SEVERITY_LEVELS.items():
+        if level == value:
+            return label
+    return str(value)
+
+
+def _invalid_severity_error(label) -> str:
+    return f"Error: invalid severity '{label}' (allowed: {', '.join(SEVERITY_LEVELS)})"
+
+
+async def create_findings_assessment(
+    name: str,
+    folder_id: str = None,
+    category: str = None,
+    status: str = None,
+    start_date: str = None,
+    reported_at: str = None,
+    description: str = None,
+    ref_id: str = None,
+) -> str:
+    """Create a new findings assessment (findings binder, e.g. a pentest report)
+
+    The backend refuses a second binder with the same name and version in the
+    same folder; its error is returned as is.
+
+    Args:
+        name: Findings assessment name (required)
+        folder_id: Folder ID/name (default: Global)
+        category: -- | pentest | threat_hunting | red_teaming | audit | self_identified | posture | responsible_disclosure (default: --)
+        status: planned | in_progress | in_review | done | deprecated
+        start_date: Start date (YYYY-MM-DD)
+        reported_at: Report date (YYYY-MM-DD)
+        description: Description
+        ref_id: Reference ID
+    """
+    try:
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+
+        optional = {
+            "category": category,
+            "status": status,
+            "start_date": start_date,
+            "reported_at": reported_at,
+            "description": description,
+            "ref_id": ref_id,
+        }
+        payload.update({k: v for k, v in optional.items() if v is not None})
+
+        res = make_post_request("/findings-assessments/", payload)
+
+        if res.status_code == 201:
+            binder = res.json()
+            return (
+                f"Created findings assessment: {binder.get('name')} "
+                f"(ID: {binder.get('id')})"
+            )
+        else:
+            return f"Error creating findings assessment: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_findings_assessment: {str(e)}"
+
+
+async def create_finding(
+    name: str,
+    findings_assessment_id: str,
+    severity: str = None,
+    description: str = None,
+    status: str = None,
+    eta: str = None,
+    evidences: list = None,
+    ref_id: str = None,
+) -> str:
+    """Create a new finding in a findings assessment (binder)
+
+    No duplicate check on the name: like the app, two findings may share the
+    same name in one binder. Callers that must not create duplicates (e.g.
+    report imports) have to check the existing findings first.
+    The finding takes the folder of its binder. A locked binder is refused by
+    the backend, whose error is returned as is.
+
+    Args:
+        name: Finding name (required)
+        findings_assessment_id: Findings assessment UUID or exact name (required)
+        severity: undefined | info | low | medium | high | critical (case-insensitive, default: undefined)
+        description: Description
+        status: -- | identified | confirmed | dismissed | assigned | in_progress | mitigated | resolved | closed | deprecated (default: --)
+        eta: Expected resolution date (YYYY-MM-DD)
+        evidences: List of evidence IDs/names
+        ref_id: Reference ID
+    """
+    if severity is not None and _severity_value(severity) is None:
+        return _invalid_severity_error(severity)
+    try:
+        from ..resolvers import resolve_evidence_id, resolve_findings_assessment_id
+
+        payload = {
+            "name": name,
+            "findings_assessment": resolve_findings_assessment_id(
+                findings_assessment_id
+            ),
+        }
+        if severity is not None:
+            payload["severity"] = _severity_value(severity)
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            payload["status"] = status
+        if eta is not None:
+            payload["eta"] = eta
+        if evidences is not None:
+            payload["evidences"] = [resolve_evidence_id(x) for x in evidences]
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+
+        res = make_post_request("/findings/", payload)
+
+        if res.status_code == 201:
+            finding = res.json()
+            return (
+                f"Created finding: {finding.get('name')} (ID: {finding.get('id')}, "
+                f"severity: {_severity_label(finding.get('severity'))})"
+            )
+        else:
+            return f"Error creating finding: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_finding: {str(e)}"
+
+
 def _human_size(num_bytes: int) -> str:
     """Decimal units, matching the backend's ATTACHMENT_MAX_SIZE_MB check."""
     if num_bytes < 1000:
@@ -1696,6 +1853,8 @@ async def create_evidence(
     name: str = None,
     description: str = None,
     folder_id: str = None,
+    status: str = None,
+    findings_assessments: list = None,
 ) -> str:
     """Create a new evidence with one attachment read from a local file
 
@@ -1716,6 +1875,10 @@ async def create_evidence(
         name: Evidence name (defaults to the file name)
         description: Description
         folder_id: Folder ID/name
+        status: draft | missing | in_review | approved | rejected | expired
+            (default: draft)
+        findings_assessments: List of findings assessment IDs/names the
+            evidence is attached to
     """
     try:
         path = Path(file_path).expanduser().resolve()
@@ -1738,6 +1901,14 @@ async def create_evidence(
                 payload["folder"] = resolve_folder_id(folder_id)
             if description is not None:
                 payload["description"] = description
+            if status is not None:
+                payload["status"] = status
+            if findings_assessments is not None:
+                from ..resolvers import resolve_findings_assessment_id
+
+                payload["findings_assessments"] = [
+                    resolve_findings_assessment_id(x) for x in findings_assessments
+                ]
 
             res = make_post_request("/evidences/", payload)
             if res.status_code != 201:
