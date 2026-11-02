@@ -52,6 +52,7 @@
 	"estonian": "Estų",
 	"slovak": "Slovakų",
 	"slovenian": "Slovėnų",
+	"norwegian": "Norvegų",
 	"addThreat": "Pridėti grėsmę",
 	"addVulnerability": "Pridėti pažeidžiamumą",
 	"addReferenceControl": "Pridėti pamatinę kontrolę",
@@ -1175,8 +1176,6 @@
 	"templateAuditReportDescription": "Atitikties vertinimo Word ataskaita",
 	"templateVulnerabilityAssignmentName": "Pažeidžiamumo priskyrimas",
 	"templateVulnerabilityAssignmentDescription": "Siunčiamas, kai priskiriamas pažeidžiamumas",
-	"wordTemplates": "Word ataskaitų šablonai",
-	"wordTemplatesDescription": "Tinkinti Word ataskaitų šablonus (.docx), naudojamus ataskaitoms generuoti. Įkelkite savo šablonus, kad perrašytumėte įtaisytuosius numatytuosius.",
 	"wordTemplatesWarning": "Prieš naudodami atidžiai peržiūrėkite šablono turinį ir įsitikinkite, kad jis atitinka jūsų organizacijos saugumo ir atitikties politiką.",
 	"uploadTemplate": "Įkelti šabloną",
 	"wordTemplateUploadHelp": "Įkelkite .docx failą, naudodami tuos pačius šablono kintamuosius kaip numatytasis. Pirmiausia atsisiųskite numatytąjį, kad naudotumėte jį kaip atskaitos tašką.",
@@ -4601,8 +4600,6 @@
 	"builderUnsavedChangesNavigation": "Turite neišsaugotų pakeitimų, kurie bus prarasti. Vis tiek išeiti?",
 	"fieldVisibility": "Laukų matomumas",
 	"fieldVisibilityHelpText": "Valdykite, kuriuos laukus kiekvienas vaidmuo gali matyti ir redaguoti.",
-	"visibilityAuditorRespondent": "Auditorius + Respondentas",
-	"visibilityAuditorOnly": "Tik auditorius",
 	"visibilityHidden": "Paslėpta",
 	"answers": "Atsakymai",
 	"respondentAlignment": "Respondento suderinimas",
@@ -4817,5 +4814,7 @@
 	"dpiaRequirementChanges": "DPIA reikalavimo istorija",
 	"previously": "Anksčiau",
 	"vulnerabilityOpenWithRemediationDate": "Atviras pažeidžiamumas turi ištaisymo datą",
-	"vulnerabilityResolvedWithoutRemediationDate": "Išspręstas pažeidžiamumas neturi ištaisymo datos"
+	"vulnerabilityResolvedWithoutRemediationDate": "Išspręstas pažeidžiamumas neturi ištaisymo datos",
+	"reportTimezone": "Ataskaitų laiko juosta",
+	"reportTimezoneHelpText": "Regionas, naudojamas ataskaitose ir eksportuose nurodytiems laikams. Kiekvienas laikas rodo savo poslinkį nuo UTC. Ekrane rodomiems laikams tai neturi įtakos."
 }

@@ -3,7 +3,7 @@ import { writable, type Writable } from 'svelte/store';
 import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
 import { m } from '#paraglide/messages.js';
 import { safeTranslate } from '#lib/utils/i18n.js';
-import { resolveComputeResult } from '#lib/utils/helpers.js';
+import { resolveComputeResult, type VisibilityMap } from '#lib/utils/helpers.js';
 
 // --- Types ---
 
@@ -87,6 +87,8 @@ export interface RequirementNode {
 	/** Quick-form pages only: how question scores combine into the page score. */
 	aggregation?: 'sum' | 'max' | 'mean' | null;
 	typical_evidence: string | null;
+	/** Assessable requirements only: submission is refused while no evidence is attached. */
+	evidence_required: boolean;
 	weight: number;
 	importance: string;
 	display_mode: 'default' | 'splash';
@@ -160,9 +162,9 @@ export interface Framework {
 	subject_question_urn?: string | null;
 	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
 	on_accept?: Record<string, unknown>[];
+	field_visibility: VisibilityMap;
 	/** Quick forms: ordered levels questions share (`config.scale`). */
 	scales_definition?: Scale[];
-	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
 	available_languages?: string[];
@@ -762,6 +764,7 @@ export function serializeNode(n: RequirementNode): Record<string, unknown> {
 		visibility_expression: n.visibility_expression,
 		aggregation: n.aggregation ?? null,
 		typical_evidence: n.typical_evidence,
+		evidence_required: n.evidence_required,
 		weight: n.weight,
 		importance: n.importance,
 		display_mode: n.display_mode,
@@ -954,6 +957,7 @@ export function hydrateDraft(
 		visibility_expression: (n.visibility_expression ?? null) as string | null,
 		aggregation: (n.aggregation ?? null) as RequirementNode['aggregation'],
 		typical_evidence: (n.typical_evidence ?? null) as string | null,
+		evidence_required: (n.evidence_required ?? false) as boolean,
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,
 		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
@@ -1380,6 +1384,7 @@ export function createBuilderState(
 			implementation_groups: null,
 			visibility_expression: null,
 			typical_evidence: null,
+			evidence_required: false,
 			weight: 1,
 			importance: '',
 			display_mode: defaults.display_mode,

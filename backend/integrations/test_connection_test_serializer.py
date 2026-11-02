@@ -105,3 +105,56 @@ def test_rejects_backfill_through_a_different_provider():
 def test_no_config_leaves_credentials_untouched():
     data = _validate({"server_url": "https://anywhere.example"}, config=None)
     assert data["credentials"] == {"server_url": "https://anywhere.example"}
+
+
+def test_ignores_stale_empty_stored_keys():
+    # Older saves wrote ``password: None`` into Jira rows; it is not a secret to
+    # replay and must not block testing a rotated token.
+    class StaleConfig(StubConfig):
+        credentials = {**STORED, "password": None}
+
+    data = _validate(
+        {
+            "server_url": STORED["server_url"],
+            "email": STORED["email"],
+            "api_token": "rotated",
+        },
+        config=StaleConfig(),
+    )
+    assert data["credentials"]["api_token"] == "rotated"
+    assert "password" not in data["credentials"]
+
+
+def test_refuses_replay_when_a_submitted_key_is_not_stored():
+    # A key the stored row lacks still pins the replay: nothing stored can
+    # vouch for it, so the secret must be re-entered.
+    class StaleConfig(StubConfig):
+        credentials = {**STORED, "password": None}
+
+    with pytest.raises(serializers.ValidationError):
+        _validate(
+            {
+                "server_url": STORED["server_url"],
+                "email": STORED["email"],
+                "api_token": "",
+                "password": "rotated",
+            },
+            config=StaleConfig(),
+        )
+
+
+def test_refuses_replay_when_the_stored_host_is_empty():
+    # Rows with an empty host (not producible from the UI, possible via PATCH)
+    # must not let the stored token be replayed to an arbitrary host.
+    class EmptyHostConfig(StubConfig):
+        credentials = {**STORED, "server_url": ""}
+
+    with pytest.raises(serializers.ValidationError):
+        _validate(
+            {
+                "server_url": "https://attacker.example",
+                "email": STORED["email"],
+                "api_token": "",
+            },
+            config=EmptyHostConfig(),
+        )

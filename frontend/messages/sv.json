@@ -52,6 +52,7 @@
 	"estonian": "Estniska",
 	"slovak": "Slovakiska",
 	"slovenian": "Slovenska",
+	"norwegian": "Norska",
 	"addThreat": "Lägg till hot",
 	"addVulnerability": "Lägg till sårbarhet",
 	"addReferenceControl": "Lägg till referenskontroll",
@@ -1596,8 +1597,6 @@
 	"builderUnsavedChangesNavigation": "Du har osparade ändringar som kommer att gå förlorade. Lämna ändå?",
 	"fieldVisibility": "Fältens synlighet",
 	"fieldVisibilityHelpText": "Bestäm vilka fält varje roll kan se och redigera.",
-	"visibilityAuditorRespondent": "Revisor + Svarande",
-	"visibilityAuditorOnly": "Endast revisor",
 	"visibilityHidden": "Dold",
 	"answers": "Svar",
 	"respondentAlignment": "Svarandes inriktning",
@@ -2186,5 +2185,7 @@
 	"dpiaRequirementChanges": "Historik över DPIA-krav",
 	"previously": "Tidigare",
 	"vulnerabilityOpenWithRemediationDate": "Öppen sårbarhet har ett åtgärdsdatum",
-	"vulnerabilityResolvedWithoutRemediationDate": "Löst sårbarhet saknar åtgärdsdatum"
+	"vulnerabilityResolvedWithoutRemediationDate": "Löst sårbarhet saknar åtgärdsdatum",
+	"reportTimezone": "Tidszon för rapporter",
+	"reportTimezoneHelpText": "Region som används för tider i rapporter och exporter. Varje tid visar sin förskjutning från UTC. Tider på skärmen påverkas inte."
 }

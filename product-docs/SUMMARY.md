@@ -141,6 +141,7 @@
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
 * [Date format](configuration/date-format.md)
+* [Report time zone](configuration/report-time-zone.md)
 
 ## Guides
 
@@ -215,6 +216,7 @@
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
 * [Workflow builder](features/workflows/README.md)
+  * [Cheat sheet](features/workflows/cheat-sheet.md)
   * [Triggers](features/workflows/triggers.md)
   * [Steps](features/workflows/steps.md)
   * [Expressions](features/workflows/expressions.md)

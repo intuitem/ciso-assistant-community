@@ -59,7 +59,7 @@ test('compliance assessments scoring is working properly', async ({
 	// (auditor edit access on the score field).
 	await page.getByTestId('edit-button').click();
 	await page.getByText('More').click();
-	await page.getByTestId('visibility-score-everyone').click();
+	await page.getByTestId('visibility-score-auditor-edit').click();
 	await page.getByTestId('save-button').click();
 	await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 

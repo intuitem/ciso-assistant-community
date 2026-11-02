@@ -27,6 +27,7 @@
 	"estonian": "Estonščina",
 	"slovak": "Slovaščina",
 	"slovenian": "Slovenščina",
+	"norwegian": "Norveščina",
 	"addThreat": "Dodaj grožnjo",
 	"addVulnerability": "Dodaj ranljivost",
 	"addReferenceControl": "Dodaj referenčni ukrep",
@@ -1308,8 +1309,6 @@
 	"docHtmlTemplatesDescription": "Prilagodite postavitev HTML/CSS, ki se uporablja pri izvozu dokumentov v PDF (naslovna stran, glave, noge, blagovna znamka). Naložite svojo predlogo, da prepišete vgrajeno privzeto.",
 	"docHtmlTemplateUploadHelp": "Naložite datoteko .html (sintaksa predloge Django) z uporabo istih spremenljivk kot privzeta. Prenesite privzeto predlogo kot izhodiščno točko.",
 	"docHtmlTemplateSyntaxHelp": "Predloge uporabljajo sintakso Django, ki jo izriše WeasyPrint. Vstavite CSS v oznako <style> in uporabite spodnje spremenljivke za sestavo postavitve.",
-	"wordTemplates": "Wordove predloge poročil",
-	"wordTemplatesDescription": "Prilagodite Wordove predloge poročil (.docx), ki se uporabljajo za generiranje poročil. Naložite svoje predloge, da prepišete vgrajene privzete.",
 	"wordTemplatesWarning": "Pred uporabo skrbno preglejte vsebino predloge in se prepričajte, da je skladna z varnostnimi in skladnostnimi politikami vaše organizacije.",
 	"uploadTemplate": "Naloži predlogo",
 	"wordTemplateUploadHelp": "Naložite datoteko .docx z uporabo istih spremenljivk predloge kot privzeta. Najprej prenesite privzeto, da jo uporabite kot izhodišče.",
@@ -5280,8 +5279,6 @@
 	"skip": "Preskoči",
 	"fieldVisibility": "Vidnost polja",
 	"fieldVisibilityHelpText": "Nadzorujte, katera polja ocenjevanja lahko vidi in ureja posamezna vloga ocenjevalca.",
-	"visibilityAuditorRespondent": "Revizor + Anketiranec",
-	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skrito",
 	"answers": "Odgovori",
 	"respondentAlignment": "Usklajenost anketiranca",
@@ -5803,5 +5800,7 @@
 	"dpiaRequirementChanges": "Zgodovina zahtev za DPIA",
 	"previously": "Prej",
 	"vulnerabilityOpenWithRemediationDate": "Odprta ranljivost ima datum odprave",
-	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave"
+	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave",
+	"reportTimezone": "Časovni pas poročil",
+	"reportTimezoneHelpText": "Regija, uporabljena za čase, izpisane v poročilih in izvozih. Vsak čas prikazuje svoj zamik glede na UTC. Časi na zaslonu se ne spremenijo."
 }

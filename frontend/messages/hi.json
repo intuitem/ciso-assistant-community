@@ -52,6 +52,7 @@
 	"estonian": "एस्टोनियाई",
 	"slovak": "स्लोवाक",
 	"slovenian": "स्लोवेनियाई",
+	"norwegian": "नॉर्वेजियन",
 	"addThreat": "खतरा जोड़ें",
 	"addVulnerability": "भेद्यता जोड़ें",
 	"addReferenceControl": "संदर्भ नियंत्रण जोड़ें",
@@ -1554,8 +1555,6 @@
 	"builderUnsavedChangesNavigation": "आपके पास असहेजे गए परिवर्तन हैं जो खो जाएंगे। फिर भी छोड़ें?",
 	"fieldVisibility": "फ़ील्ड दृश्यता",
 	"fieldVisibilityHelpText": "नियंत्रित करें कि कौन से फ़ील्ड प्रत्येक भूमिका देख और संपादित कर सकती है।",
-	"visibilityAuditorRespondent": "ऑडिटर + उत्तरदाता",
-	"visibilityAuditorOnly": "केवल ऑडिटर",
 	"visibilityHidden": "छिपा हुआ",
 	"answers": "उत्तर",
 	"respondentAlignment": "उत्तरदाता संरेखण",
@@ -2159,5 +2158,7 @@
 	"dpiaRequirementChanges": "DPIA आवश्यकता का इतिहास",
 	"previously": "पहले",
 	"vulnerabilityOpenWithRemediationDate": "खुली भेद्यता की निवारण तिथि है",
-	"vulnerabilityResolvedWithoutRemediationDate": "हल हो चुकी भेद्यता की कोई निवारण तिथि नहीं है"
+	"vulnerabilityResolvedWithoutRemediationDate": "हल हो चुकी भेद्यता की कोई निवारण तिथि नहीं है",
+	"reportTimezone": "रिपोर्ट का समय क्षेत्र",
+	"reportTimezoneHelpText": "रिपोर्ट और निर्यात में छपे समय के लिए उपयोग किया जाने वाला क्षेत्र। हर समय UTC से अपना अंतर दिखाता है। स्क्रीन पर दिखने वाले समय प्रभावित नहीं होते।"
 }

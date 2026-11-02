@@ -14,6 +14,10 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 - **Default language** — fallback locale for users who haven't picked a preference and for system-generated emails. Must be one of the languages enabled in the instance build.
 
+## Reports
+
+- **Report time zone**: the time zone used for the times printed in reports and exports, `UTC` by default. See [Report time zone](../report-time-zone.md).
+
 ## Money
 
 - **Currency** — the unit used when displaying applied-control costs and quantitative-risk amounts.
@@ -42,7 +46,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 These settings drive the optional AI features (chat mode, agentic workflows, RAG over the knowledge base):
 
-- **LLM provider** — which model server the platform calls: `Ollama`, or `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)` for any server speaking the OpenAI chat completions API, hosted or local.
+- **LLM provider** — which model server the platform calls: `Ollama`, or `OpenAI-compatible (hosted gateway or local server)` for any server speaking the OpenAI chat completions API, hosted or local.
 - **Ollama base URL**, **Ollama model**, **Ollama embedding model** — used when the provider is Ollama.
 - **API base URL**, **Model name**, **API key** — used when the provider is OpenAI-compatible. The key is write-only and never returned by GET.
 - **Embedding backend** — which backend powers semantic search over knowledge. Local sentence transformers or Ollama; hosted providers are not offered here, so selecting one for the LLM leaves embeddings where they are.

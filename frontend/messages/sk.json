@@ -27,6 +27,7 @@
 	"estonian": "estónsky",
 	"slovak": "slovenský",
 	"slovenian": "slovinský",
+	"norwegian": "nórsky",
 	"addThreat": "Pridať hrozbu",
 	"addVulnerability": "Pridať zraniteľnosť",
 	"addReferenceControl": "Pridať referenčné opatrenie",
@@ -1168,8 +1169,6 @@
 	"templateValidationFlowUpdatedDescription": "Odoslané, keď sa zmení stav overovacieho postupu",
 	"templateAuditReportName": "Auditná správa",
 	"templateAuditReportDescription": "Auditná správa o hodnotení súladu",
-	"wordTemplates": "Šablóny Word dokumentov",
-	"wordTemplatesDescription": "Prispôsobte si šablóny reportov programu Word (.docx), ktoré sa používajú na generovanie reportov. Nahrajte svoje vlastné šablóny na prepísanie vstavaných predvolených nastavení.",
 	"wordTemplatesWarning": "Pred použitím starostlivo skontrolujte obsah šablóny a uistite sa, že je v súlade so zásadami bezpečnosti a súladu vašej organizácie.",
 	"uploadTemplate": "Nahrajte šablónu",
 	"wordTemplateUploadHelp": "Nahrajte súbor .docx pomocou rovnakých premenných šablóny, aké sú predvolené. Najprv si stiahnite predvolené nastavenie a použite ho ako východiskový bod.",
@@ -4826,8 +4825,6 @@
 	"skip": "Preskočiť",
 	"fieldVisibility": "Viditeľnosť poľa",
 	"fieldVisibilityHelpText": "Ovládajte, ktoré polia hodnotenia môžu jednotlivé role diváka vidieť a upravovať.",
-	"visibilityAuditorRespondent": "Audítor + Respondent",
-	"visibilityAuditorOnly": "Iba audítor",
 	"visibilityHidden": "Skryté",
 	"answers": "Odpovede",
 	"respondentAlignment": "Zarovnanie respondentov",
@@ -5899,5 +5896,7 @@
 	"dpiaRequirementChanges": "História požiadaviek na DPIA",
 	"previously": "Predtým",
 	"vulnerabilityOpenWithRemediationDate": "Otvorená zraniteľnosť má dátum nápravy",
-	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy"
+	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy",
+	"reportTimezone": "Časové pásmo reportov",
+	"reportTimezoneHelpText": "Oblasť použitá pre časy uvedené v reportoch a exportoch. Každý čas zobrazuje svoj posun voči UTC. Časy na obrazovke nie sú ovplyvnené."
 }

@@ -83,6 +83,24 @@
 			label: m.policies(),
 			urlPattern: '/policies/',
 			icon: 'fa-solid fa-book'
+		},
+		{
+			key: 'applied_controls',
+			label: m.appliedControls(),
+			urlPattern: '/applied-controls/',
+			icon: 'fa-solid fa-fire-extinguisher'
+		},
+		{
+			key: 'document_containers',
+			label: m.documentContainers(),
+			urlPattern: '/document-containers/',
+			icon: 'fa-solid fa-file-lines'
+		},
+		{
+			key: 'business_impact_analyses',
+			label: m.businessImpactAnalyses(),
+			urlPattern: '/business-impact-analysis/',
+			icon: 'fa-solid fa-arrows-to-eye'
 		}
 	];
 

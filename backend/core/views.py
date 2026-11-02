@@ -44,6 +44,7 @@ from django.db.models import (
     Prefetch,
 )
 from django.db.models.functions import Coalesce, Concat
+from django.contrib.contenttypes.models import ContentType
 
 from collections import defaultdict, deque
 import pytz
@@ -135,6 +136,7 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
     domain_quality_checks,
@@ -201,6 +203,8 @@ from core.utils import (
     sanitize_xlsx_value,
     bulk_update_with_log,
     compare_schema_versions,
+    format_report_timestamp,
+    get_report_timezone,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
     render_answers_cell,
@@ -797,6 +801,7 @@ class GenericFilterSet(df.FilterSet):
         pass
 
     id = UUIDInFilter(field_name="id", lookup_expr="in")
+    genericcollection = UUIDInFilter(method="filter_genericcollection")
 
     # Range lookups every date column gets, so listing a date in filterset_fields is
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
@@ -836,6 +841,29 @@ class GenericFilterSet(df.FilterSet):
                 continue
             fields[name] = list(dict.fromkeys([*fields.get(name, []), *extra]))
         return fields
+
+    def filter_genericcollection(self, queryset, name, value):
+        allowed = next(
+            (
+                item_queryset
+                for item_queryset in GenericCollection.ITEM_TYPES.values()
+                if item_queryset.model is queryset.model
+            ),
+            None,
+        )
+        if allowed is None:
+            return queryset.none()
+        items = CollectionItem.objects.filter(
+            collection_id__in=value,
+            content_type=ContentType.objects.get_for_model(queryset.model),
+        ).filter(
+            collection_id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, GenericCollection
+            )
+        )
+        return queryset.filter(pk__in=items.values("object_id")).filter(
+            pk__in=allowed.values("pk")
+        )
 
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
@@ -2761,6 +2789,7 @@ class AssetFilter(GenericFilterSet):
 
 class AssetCapabilityViewSet(BaseModelViewSet):
     model = AssetCapability
+    http_method_names = ["get", "head", "options"]
     search_fields = ["name"]
 
 
@@ -4581,7 +4610,6 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "ref_id": ["exact"],
             "authors": ["exact"],
             "reviewers": ["exact"],
-            "genericcollection": ["exact"],
             "due_date": ["exact", "year", "month"],
             "eta": ["exact"],
             "filtering_labels": ["exact"],
@@ -5224,6 +5252,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 use_risk_category_label=settings_value.get(
                     "use_risk_category_label", False
                 ),
+                tz=get_report_timezone(),
             )
             response = HttpResponse(
                 render_pdf(localized_template("risk_report", lang), payload),
@@ -5262,7 +5291,11 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             }
             lang = request.user.preferences.get("lang") or "en"
             payload = action_plan_context(
-                risk_assessment, applied_controls, lang, linked
+                risk_assessment,
+                applied_controls,
+                lang,
+                linked,
+                tz=get_report_timezone(),
             )
             response = HttpResponse(
                 render_pdf(localized_template("action_plan", lang), payload),
@@ -5902,6 +5935,9 @@ class AppliedControlFilterSet(GenericFilterSet):
     )
     # Nullable choice filters that support filtering for unset values using "--"
     category = NullableChoiceFilter(choices=AppliedControl.CATEGORY)
+    exclude_category = df.MultipleChoiceFilter(
+        field_name="category", choices=AppliedControl.CATEGORY, exclude=True
+    )
     csf_function = NullableChoiceFilter(choices=AppliedControl.CSF_FUNCTION)
     priority = NullableChoiceFilter(choices=AppliedControl.PRIORITY)
     effort = NullableChoiceFilter(choices=AppliedControl.EFFORT)
@@ -6042,7 +6078,6 @@ class AppliedControlFilterSet(GenericFilterSet):
             "expiry_date": ["exact"],
             "ref_id": ["exact"],
             "processings": ["exact"],
-            "genericcollection": ["exact"],
         }
 
 
@@ -7949,7 +7984,6 @@ class PolicyViewSet(AppliedControlViewSet):
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
-        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -8424,6 +8458,26 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
+    def perform_create(self, serializer):
+        instance = super().perform_create(serializer)
+        if instance.state == "submitted":
+            self._notify_state(self.request, instance, "submitted")
+        return instance
+
+    def perform_update(self, serializer):
+        old_approver_id = serializer.instance.approver_id
+        instance = super().perform_update(serializer)
+        if instance.state == "submitted" and instance.approver_id != old_approver_id:
+            from notifications.models import Notification
+
+            Notification.objects.filter(
+                recipient_id=old_approver_id,
+                type="risk_acceptance_submitted",
+                object_id=instance.id,
+            ).delete()
+            self._notify_state(self.request, instance, "submitted")
+        return instance
+
     def _get_justification(self, request):
         raw_justification = request.data.get("justification", "")
         if not isinstance(raw_justification, str):
@@ -8468,10 +8522,44 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         return Response({"results": acceptances})
 
+    @staticmethod
+    def _notify_state(request, risk_acceptance, state):
+        from .tasks import (
+            send_risk_acceptance_decided_notification,
+            send_risk_acceptance_submitted_notification,
+        )
+
+        user = request.user
+        actor_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        acceptance_id = risk_acceptance.id
+        try:
+            if state == "submitted":
+                transaction.on_commit(
+                    lambda: send_risk_acceptance_submitted_notification(
+                        acceptance_id, actor_name
+                    ),
+                    robust=True,
+                )
+            else:
+                transaction.on_commit(
+                    lambda: send_risk_acceptance_decided_notification(
+                        acceptance_id, state, actor_name
+                    ),
+                    robust=True,
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to queue risk acceptance notification",
+                risk_acceptance_id=acceptance_id,
+                error=e,
+            )
+
     @action(detail=True, methods=["post"], name="Submit risk acceptance")
     def submit(self, request, pk):
         if self.get_object().approver:
-            self.get_object().set_state("submitted")
+            risk_acceptance = self.get_object()
+            risk_acceptance.set_state("submitted")
+            self._notify_state(request, risk_acceptance, "submitted")
             return Response({"results": "state updated to submitted"})
         else:
             return Response(
@@ -8502,6 +8590,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         risk_acceptance = self.get_object()
         risk_acceptance.justification = justification
         risk_acceptance.set_state("accepted")
+        self._notify_state(request, risk_acceptance, "accepted")
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
@@ -8522,6 +8611,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         risk_acceptance = self.get_object()
         risk_acceptance.justification = justification
         risk_acceptance.set_state("rejected")
+        self._notify_state(request, risk_acceptance, "rejected")
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
@@ -8541,6 +8631,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         risk_acceptance = self.get_object()
         risk_acceptance.justification = justification
         risk_acceptance.set_state("revoked")
+        self._notify_state(request, risk_acceptance, "revoked")
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
@@ -10895,6 +10986,13 @@ class FrameworkViewSet(BaseModelViewSet):
             has_compliance_assessments_flag=Exists(
                 ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
             ),
+            has_required_evidence=Exists(
+                RequirementNode.objects.filter(
+                    framework=OuterRef("pk"),
+                    assessable=True,
+                    evidence_required=True,
+                )
+            ),
             scale_bound_flag=ExpressionWrapper(
                 Framework.scale_bound_q(OuterRef("pk")),
                 output_field=models.BooleanField(),
@@ -11646,7 +11744,6 @@ class EvidenceFilterSet(GenericFilterSet):
             "findings",
             "findings_assessments",
             "task_templates",
-            "genericcollection",
             "expiry_date",
             "contracts",
             "status",
@@ -12999,7 +13096,6 @@ class ComplianceAssessmentFilterSet(GenericFilterSet):
             "evidences",
             "authors",
             "reviewers",
-            "genericcollection",
             "filtering_labels",
             "due_date",
             "eta",
@@ -13648,7 +13744,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
-        context = gen_audit_context(pk, tree, user_lang)
+        context = gen_audit_context(pk, tree, user_lang, tz=get_report_timezone())
 
         # Custom overrides support any language; auto-generated strings only en/fr.
         custom_template = None
@@ -13747,20 +13843,38 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         lang = request.user.preferences.get("lang") or "en"
         wants_charts = "charts" in REPORT_PROFILES[profile]["sections"]
         context = gen_audit_context(
-            pk, tree, lang, assessments=assessments, charts=wants_charts
+            pk,
+            tree,
+            lang,
+            assessments=assessments,
+            charts=wants_charts,
+            tz=get_report_timezone(),
         )
         payload, images = audit_context_for_typst(
             context, audit, role, lang, profile, assessments=assessments
         )
 
-        response = HttpResponse(
-            render_pdf(
-                localized_template(REPORT_PROFILES[profile]["template"], lang),
-                payload,
-                images=images,
-            ),
-            content_type="application/pdf",
-        )
+        template = localized_template(REPORT_PROFILES[profile]["template"], lang)
+        pdf = None
+        custom = CustomWordTemplate.objects.filter(
+            template_key=REPORT_PROFILES[profile]["override_key"],
+            language=lang,
+            is_active=True,
+        ).first()
+        if custom and custom.file:
+            try:
+                with custom.file.open("rb") as f:
+                    pdf = render_pdf(template, payload, images=images, source=f.read())
+            except Exception as e:
+                logger.warning(
+                    "Custom Typst template failed, falling back to default",
+                    template_key=custom.template_key,
+                    error=e,
+                )
+        if pdf is None:
+            pdf = render_pdf(template, payload, images=images)
+
+        response = HttpResponse(pdf, content_type="application/pdf")
         safe_name = slugify(audit.name) or "audit"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_{profile}.pdf"'
@@ -13991,7 +14105,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 for control in applied_controls
             }
             lang = request.user.preferences.get("lang") or "en"
-            payload = action_plan_context(audit, applied_controls, lang, linked)
+            payload = action_plan_context(
+                audit, applied_controls, lang, linked, tz=get_report_timezone()
+            )
             response = HttpResponse(
                 render_pdf(localized_template("action_plan", lang), payload),
                 content_type="application/pdf",
@@ -14389,14 +14505,22 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 result=RequirementAssessment.Result.NOT_APPLICABLE,
             )
             if instance.scoring_enabled:
-                assessable_ras.update(is_scored=True)
+                # Question RAs are scored only where the recompute committed a
+                # score (a baseline copy), as when scoring is turned on.
+                manual_ras = assessable_ras.exclude(
+                    requirement__questions__isnull=False
+                )
+                question_ras = assessable_ras.filter(
+                    requirement__questions__isnull=False
+                )
+                manual_ras.update(is_scored=True)
+                question_ras.filter(score__isnull=False).update(is_scored=True)
+                question_ras.filter(score__isnull=True).update(is_scored=False)
                 # Seed missing scores at the RA's resolved min (Node override
                 # if present, CA min otherwise) so overridden ranges like
                 # 2..5 don't start below their valid floor.
                 ras_to_init = list(
-                    assessable_ras.filter(score__isnull=True).select_related(
-                        "requirement"
-                    )
+                    manual_ras.filter(score__isnull=True).select_related("requirement")
                 )
                 ca_min = instance.min_score if instance.min_score is not None else 0
                 for ra in ras_to_init:
@@ -17508,7 +17632,6 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "folder": ["exact"],
         "severity": ["exact"],
         "status": ["exact"],
-        "genericcollection": ["exact"],
         "expiration_date": ["exact"],
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
@@ -17674,7 +17797,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "compliance_assessment",
         "filtering_labels",
-        "genericcollection",
         "reported_at",
     ]
     search_fields = ["name", "description", "ref_id"]
@@ -17811,6 +17933,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         )
 
         # Prepare data for Excel export
+        tz = get_report_timezone()
         entries = []
         for finding in findings:
             entry = {
@@ -17844,9 +17967,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 ),
                 "observation": escape_excel_formula(finding.observation),
                 "recommendation": escape_excel_formula(finding.recommendation),
-                "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
-                if finding.created_at
-                else "",
+                "created_at": format_report_timestamp(finding.created_at, tz, ""),
                 "eta": finding.eta.strftime("%Y-%m-%d") if finding.eta else "",
                 "due_date": finding.due_date.strftime("%Y-%m-%d")
                 if finding.due_date
@@ -17951,10 +18072,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         closed_findings_count = findings.filter(status__in=closed_statuses).count()
         open_findings_count = findings.filter(status__in=open_statuses).count()
 
+        tz = get_report_timezone()
+
         # Generate Markdown content
         md_content = f"# {findings_assessment.name}\n\n"
 
         # Assessment metadata
+        md_content += f"- **Time Zone**: {tz} - each time shows its UTC offset\n\n"
         md_content += "## Assessment Information\n\n"
         md_content += f"- **Name**: {findings_assessment.name}\n"
         md_content += f"- **Reference ID**: {findings_assessment.ref_id or 'N/A'}\n"
@@ -17966,7 +18090,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"- **Authors**: {', '.join([str(actor) for actor in findings_assessment.authors.all()])}\n"
         if findings_assessment.reviewers.exists():
             md_content += f"- **Reviewers**: {', '.join([str(actor) for actor in findings_assessment.reviewers.all()])}\n"
-        md_content += f"- **Created**: {findings_assessment.created_at.strftime('%Y-%m-%d %H:%M:%S') if findings_assessment.created_at else 'N/A'}\n\n"
+        md_content += f"- **Created**: {format_report_timestamp(findings_assessment.created_at, tz, 'N/A')}\n\n"
 
         # Metrics summary
         metrics = findings_assessment.get_findings_metrics()
@@ -18053,7 +18177,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .order_by("ref_id")
         )
         lang = request.user.preferences.get("lang") or "en"
-        payload = findings_assessment_context(findings_assessment, findings, lang)
+        payload = findings_assessment_context(
+            findings_assessment, findings, lang, tz=get_report_timezone()
+        )
         response = HttpResponse(
             render_pdf(localized_template("findings_report", lang), payload),
             content_type="application/pdf",
@@ -18529,7 +18655,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         )
 
         lang = request.user.preferences.get("lang") or "en"
-        payload = incident_context(incident, timeline_entries, lang)
+        payload = incident_context(
+            incident, timeline_entries, lang, tz=get_report_timezone()
+        )
         response = HttpResponse(
             render_pdf(localized_template("incident_report", lang), payload),
             content_type="application/pdf",
@@ -18562,10 +18690,13 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             .order_by("timestamp")
         )
 
+        tz = get_report_timezone()
+
         # Generate Markdown content
         md_content = f"# {incident.name}\n\n"
 
         # Incident metadata
+        md_content += f"- **Time Zone**: {tz} - each time shows its UTC offset\n\n"
         md_content += "## Incident Information\n\n"
         md_content += f"- **Name**: {incident.name}\n"
         md_content += f"- **Reference ID**: {incident.ref_id or 'N/A'}\n"
@@ -18583,15 +18714,15 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         if incident.entities.exists():
             md_content += f"- **Related Entities**: {', '.join([entity.name for entity in incident.entities.all()])}\n"
 
-        md_content += f"- **Reported At**: {incident.reported_at.strftime('%Y-%m-%d %H:%M:%S') if incident.reported_at else 'N/A'}\n"
-        md_content += f"- **Occurred At**: {incident.occurred_at.strftime('%Y-%m-%d %H:%M:%S') if incident.occurred_at else 'N/A'}\n"
-        md_content += f"- **Resolved At**: {incident.resolved_at.strftime('%Y-%m-%d %H:%M:%S') if incident.resolved_at else 'N/A'}\n"
+        md_content += f"- **Reported At**: {format_report_timestamp(incident.reported_at, tz, 'N/A')}\n"
+        md_content += f"- **Occurred At**: {format_report_timestamp(incident.occurred_at, tz, 'N/A')}\n"
+        md_content += f"- **Resolved At**: {format_report_timestamp(incident.resolved_at, tz, 'N/A')}\n"
         if incident.is_bcp_activated is not None:
             md_content += (
                 f"- **BCP Activated**: {'Yes' if incident.is_bcp_activated else 'No'}\n"
             )
-        md_content += f"- **Created**: {incident.created_at.strftime('%Y-%m-%d %H:%M:%S') if incident.created_at else 'N/A'}\n"
-        md_content += f"- **Last Updated**: {incident.updated_at.strftime('%Y-%m-%d %H:%M:%S') if incident.updated_at else 'N/A'}\n"
+        md_content += f"- **Created**: {format_report_timestamp(incident.created_at, tz, 'N/A')}\n"
+        md_content += f"- **Last Updated**: {format_report_timestamp(incident.updated_at, tz, 'N/A')}\n"
         if incident.resolution:
             md_content += f"\n### Resolution\n\n{incident.resolution}\n"
         md_content += "\n"
@@ -18620,7 +18751,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             md_content += "*Events are listed in chronological order*\n\n"
 
             for entry in timeline_entries:
-                md_content += f"### {entry.timestamp.strftime('%Y-%m-%d %H:%M:%S')} - {entry.entry}\n\n"
+                md_content += f"### {format_report_timestamp(entry.timestamp, tz)} - {entry.entry}\n\n"
                 md_content += f"**Type**: {entry.get_entry_type_display()}\n\n"
 
                 if entry.author:
@@ -20408,6 +20539,15 @@ class ClassificationLevelViewSet(BaseModelViewSet):
     ordering = ["object_classification", "rank"]
 
 
+def _ra_ids_with_usable_evidence(ra_ids) -> set[str]:
+    return {
+        str(ra_id)
+        for ra_id in EvidenceRevision.current_with_content()
+        .filter(evidence__requirement_assessments__in=ra_ids)
+        .values_list("evidence__requirement_assessments", flat=True)
+    }
+
+
 class RequirementAssignmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirement assignments to be viewed or edited.
@@ -20504,17 +20644,20 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
-    # check_completion: all assessable requirements must be assessed
+    # check_evidence: every visible requirement flagged `evidence_required` must
+    #                 carry an evidence holding a file or a link
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
     TRANSITIONS = {
         ("draft", "in_progress"): {"reviewer_only": True},
         ("in_progress", "submitted"): {
             "actor_only": True,
             "observation": "clear",
+            "check_evidence": True,
         },
         ("changes_requested", "submitted"): {
             "actor_only": True,
             "observation": "clear",
+            "check_evidence": True,
         },
         ("submitted", "closed"): {
             "reviewer_only": True,
@@ -20592,6 +20735,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
+        if config.get("check_evidence"):
+            missing_evidence = self._requirements_missing_evidence(assignment)
+            if missing_evidence:
+                return Response(
+                    {
+                        "error": "evidenceRequired",
+                        "missing_evidence": missing_evidence,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         # Handle reviewer_observation (stored as event_notes)
         obs_rule = config.get("observation")
         observation = request.data.get("reviewer_observation")
@@ -20628,6 +20782,32 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
         return Response({"status": target})
 
+    @staticmethod
+    def _requirements_missing_evidence(assignment):
+        """Visible assigned requirements that ask for an evidence and hold none.
+
+        An evidence with no file and no link is an empty shell, so it does not
+        satisfy the obligation.
+        """
+        flagged = [
+            ra
+            for ra in assignment.get_visible_requirement_assessments(lightweight=True)
+            if ra.requirement.assessable and ra.requirement.evidence_required
+        ]
+        if not flagged:
+            return []
+        with_evidence = _ra_ids_with_usable_evidence([ra.id for ra in flagged])
+        return [
+            {
+                "id": str(ra.id),
+                "urn": ra.requirement.urn,
+                "ref_id": ra.requirement.ref_id,
+                "name": ra.requirement.safe_display_str,
+            }
+            for ra in flagged
+            if str(ra.id) not in with_evidence
+        ]
+
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk=None):
         """Returns the scoped requirements list for this assignment.
@@ -20645,29 +20825,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         ).exists()
         viewer_role = "respondent" if is_assigned_actor else "auditor"
 
-        assigned_ra_ids = set(
-            assignment.requirement_assessments.values_list("id", flat=True)
-        )
-
-        requirement_assessments_objects = list(
-            compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True
-            )
-        )
-        requirement_assessments_objects = [
-            ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
-        ]
-
-        # CEL visibility filtering: exclude requirements hidden by visibility_expression
         from core.cel_service import build_cel_context
 
         _ctx, hidden_urns = build_cel_context(compliance_assessment)
-        if hidden_urns:
-            requirement_assessments_objects = [
-                ra
-                for ra in requirement_assessments_objects
-                if ra.requirement.urn not in hidden_urns
-            ]
+        requirement_assessments_objects = (
+            assignment.get_visible_requirement_assessments(hidden_urns=hidden_urns)
+        )
 
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
@@ -20718,6 +20881,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             total_visible_questions += visible
             total_answered_questions += answered
 
+        # Same verdict the submission check applies, so the respondent cannot be
+        # shown a satisfied requirement that submission then refuses.
+        ra_ids_with_usable_evidence = _ra_ids_with_usable_evidence(
+            [ra.id for ra in requirement_assessments_objects]
+        )
+
         for ra_data in requirement_assessments:
             ra_id = str(ra_data["id"])
             if ra_id in question_counts:
@@ -20727,6 +20896,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ra_data["answered_questions"] = question_counts[ra_id][
                     "answered_questions"
                 ]
+            ra_data["has_usable_evidence"] = ra_id in ra_ids_with_usable_evidence
 
         return Response(
             {
