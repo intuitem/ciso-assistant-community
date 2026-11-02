@@ -296,3 +296,45 @@ def test_rag_search_hides_audits_from_a_respondent_with_another_role(
 
     names = {r["name"] for r in rag.search("q", user, source_type="model")}
     assert names == {"backups"}
+
+
+@pytest.mark.parametrize(
+    "missing, expected",
+    [
+        (
+            {"attack_path_count", "operational_scenario_count"},
+            ["change_ebiosrmstudy", "add_attackpath", "add_operationalscenario"],
+        ),
+        (set(), ["change_ebiosrmstudy"]),
+    ],
+)
+def test_existing_study_requires_only_the_permissions_it_writes(
+    monkeypatch, missing, expected
+):
+    import chat.workflows.ebios_rm_assist as assist
+
+    counts = {
+        k: 0 if k in missing else 1
+        for k in (
+            "asset_count",
+            "feared_event_count",
+            "roto_count",
+            "strategic_scenario_count",
+            "attack_path_count",
+            "operational_scenario_count",
+        )
+    }
+    checked = []
+    workflow = assist.EbiosRMAssistWorkflow()
+    monkeypatch.setattr(
+        workflow,
+        "_fetch_study",
+        lambda ctx: {"obj": SimpleNamespace(folder=None), "name": "s"},
+    )
+    monkeypatch.setattr(workflow, "_get_study_state", lambda study: counts)
+    monkeypatch.setattr(
+        assist, "_can_write", lambda user, folder, perms: checked.append(perms)
+    )
+
+    list(workflow._run_from_study(SimpleNamespace(scope=SimpleNamespace(user=None))))
+    assert list(checked[0]) == expected

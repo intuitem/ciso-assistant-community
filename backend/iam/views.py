@@ -419,9 +419,10 @@ class ResetPasswordConfirmView(views.APIView):
             user is not None and user.is_local
         ):  # Only local user can reset their password.
             if self.token_generator.check_token(user, token):
-                user.set_password(new_password)
-                user.save()
-                _revoke_login_tokens(user)
+                with transaction.atomic():
+                    user.set_password(new_password)
+                    user.save()
+                    _revoke_login_tokens(user)
                 return Response(status=status.HTTP_200_OK)
         return Response(
             data={"error": "The link is invalid or has expired."},
@@ -460,9 +461,12 @@ class ChangePasswordView(views.APIView):
             raise serializers.ValidationError(
                 "Your old password was entered incorrectly. Please enter it again."
             )
-        user.set_password(new_password)
-        user.save()
-        _revoke_login_tokens(user, keep_digest=getattr(request.auth, "digest", None))
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            _revoke_login_tokens(
+                user, keep_digest=getattr(request.auth, "digest", None)
+            )
         return Response(status=status.HTTP_200_OK)
 
 
@@ -480,9 +484,10 @@ class SetPasswordView(views.APIView):
         serializer.is_valid(raise_exception=True)
         new_password = serializer.validated_data.get("new_password")
         user = serializer.validated_data.get("user")
-        user.set_password(new_password)
-        user.save()
-        _revoke_login_tokens(user)
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            _revoke_login_tokens(user)
         try:
             email_address = EmailAddress.objects.get(user=user, primary=True)
             email_address.verified = True

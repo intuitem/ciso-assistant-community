@@ -32,6 +32,13 @@ WORKSHOP_ADD_PERMS = (
     "add_attackpath",
     "add_operationalscenario",
 )
+WORKSHOP_STEPS = [
+    "feared_events",
+    "rotos",
+    "strategic_scenarios",
+    "attack_paths",
+    "operational_scenarios",
+]
 
 
 def _can_write(user, folder, codenames) -> bool:
@@ -377,15 +384,25 @@ class EbiosRMAssistWorkflow(Workflow):
                 "Please make sure you're on a study page."
             )
             return
-        if not _can_write(
-            ctx.scope.user,
-            study["obj"].folder,
-            ("change_ebiosrmstudy", *WORKSHOP_ADD_PERMS),
-        ):
+        state = self._get_study_state(study)
+        start = "feared_events" if state["feared_event_count"] == 0 else None
+        if start is None and state["roto_count"] == 0:
+            start = "rotos"
+        if start is None and state["strategic_scenario_count"] == 0:
+            start = "strategic_scenarios"
+        if start is None and state["attack_path_count"] == 0:
+            start = "attack_paths"
+        if start is None and state["operational_scenario_count"] == 0:
+            start = "operational_scenarios"
+        needed = ["change_ebiosrmstudy"]
+        if state["asset_count"] == 0:
+            needed.append("add_asset")
+        if start:
+            needed += WORKSHOP_ADD_PERMS[1:][WORKSHOP_STEPS.index(start) :]
+        if not _can_write(ctx.scope.user, study["obj"].folder, needed):
             yield self._token("You don't have permission to edit this EBIOS RM study.")
             return
 
-        state = self._get_study_state(study)
         yield self._thinking(
             f"Study: {study['name']}\n"
             f"Assets: {state['asset_count']}, "
@@ -419,17 +436,6 @@ class EbiosRMAssistWorkflow(Workflow):
             if assets:
                 created["assets"] = self._create_assets(study, assets)
                 yield self._thinking(f"Created {len(created['assets'])} assets.")
-
-        # Run remaining workshops
-        start = "feared_events" if state["feared_event_count"] == 0 else None
-        if start is None and state["roto_count"] == 0:
-            start = "rotos"
-        if start is None and state["strategic_scenario_count"] == 0:
-            start = "strategic_scenarios"
-        if start is None and state["attack_path_count"] == 0:
-            start = "attack_paths"
-        if start is None and state["operational_scenario_count"] == 0:
-            start = "operational_scenarios"
 
         if start:
             yield from self._run_workshops(ctx, study, created, start_from=start)
