@@ -407,11 +407,11 @@ class TestUpdateFinding:
 
 
 class TestCreateEvidenceInBinder:
-    def _run(self, tmp_path, **kwargs):
+    def _run(self, tmp_path, global_folder=None, **kwargs):
         file = tmp_path / "report.png"
         file.write_bytes(PNG_BYTES)
         with (
-            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", global_folder),
             patch.object(write_tools, "resolve_folder_id", return_value=UUID_F),
             patch.object(
                 write_tools,
@@ -458,6 +458,23 @@ class TestCreateEvidenceInBinder:
         assert post.call_args.args == (
             "/evidences/",
             {"name": "Report", "folder": UUID_F},
+        )
+
+    def test_global_default_folder_with_binders(self, tmp_path):
+        result, post = self._run(
+            tmp_path,
+            global_folder=GLOBAL,
+            name="Report",
+            findings_assessments=["Pentest Q4"],
+        )
+        assert result.startswith(f"Created evidence: Report (ID: {UUID_B})")
+        assert post.call_args.args == (
+            "/evidences/",
+            {
+                "name": "Report",
+                "folder": UUID_F,
+                "findings_assessments": ["fa-Pentest Q4"],
+            },
         )
 
 
