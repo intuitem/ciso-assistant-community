@@ -59,7 +59,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     filterset_fields = [
         "folder",
         "assets",
-        "genericcollection",
         "classification",
         "filtering_labels",
     ]

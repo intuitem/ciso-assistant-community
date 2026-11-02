@@ -493,7 +493,6 @@ INSTALLED_APPS = [
     "django.forms",
     "django_structlog",
     "auditlog",
-    "tailwind",
     "iam",
     "sec_intel",
     "threat_modeling",

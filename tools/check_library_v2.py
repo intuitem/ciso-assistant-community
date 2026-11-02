@@ -454,6 +454,7 @@ class FrameworkContentColumns(ContentColumn):
     DESCRIPTION = "description"
     ANNOTATION = "annotation"
     TYPICAL_EVIDENCE = "typical_evidence"
+    EVIDENCE_REQUIRED = "evidence_required"
     IMPORTANCE = "importance"
     WEIGHT = "weight"
     MIN_SCORE = "min_score"
