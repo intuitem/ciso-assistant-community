@@ -412,7 +412,9 @@ class TestCreateEvidenceInBinder:
         file.write_bytes(PNG_BYTES)
         with (
             patch.object(write_tools, "GLOBAL_FOLDER_ID", global_folder),
-            patch.object(write_tools, "resolve_folder_id", return_value=UUID_F),
+            patch.object(
+                write_tools, "resolve_folder_id", return_value=UUID_F
+            ) as resolve,
             patch.object(
                 write_tools,
                 "make_post_request",
@@ -433,10 +435,10 @@ class TestCreateEvidenceInBinder:
             ),
         ):
             result = run(write_tools.create_evidence(file_path=str(file), **kwargs))
-        return result, post
+        return result, post, resolve
 
     def test_status_and_binders_in_first_post(self, tmp_path):
-        result, post = self._run(
+        result, post, _ = self._run(
             tmp_path,
             name="Report",
             status="in_review",
@@ -454,20 +456,21 @@ class TestCreateEvidenceInBinder:
         )
 
     def test_payload_unchanged_without_new_parameters(self, tmp_path):
-        _, post = self._run(tmp_path, name="Report", folder_id="Security")
+        _, post, _ = self._run(tmp_path, name="Report", folder_id="Security")
         assert post.call_args.args == (
             "/evidences/",
             {"name": "Report", "folder": UUID_F},
         )
 
     def test_global_default_folder_with_binders(self, tmp_path):
-        result, post = self._run(
+        result, post, resolve = self._run(
             tmp_path,
             global_folder=GLOBAL,
             name="Report",
             findings_assessments=["Pentest Q4"],
         )
         assert result.startswith(f"Created evidence: Report (ID: {UUID_B})")
+        resolve.assert_called_once_with(GLOBAL)
         assert post.call_args.args == (
             "/evidences/",
             {
