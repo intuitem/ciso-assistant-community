@@ -323,6 +323,18 @@ class TestAuditArchiveReportReadability:
         assert "Policy" in index
         assert "Reviewed yearly by HR" not in index
 
+    def test_document_language_follows_the_export_language(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        url = reverse("compliance-assessments-export", kwargs={"pk": str(audit.pk)})
+        response = admin_client.get(url, HTTP_ACCEPT_LANGUAGE="fr")
+        body = b"".join(response.streaming_content)
+        with zipfile.ZipFile(io.BytesIO(body)) as archive:
+            index = archive.read("index.html").decode("utf-8")
+
+        assert '<html lang="fr">' in index
+        assert "Sommaire" in index
+
     def test_table_of_contents_links_to_every_requirement(
         self, admin_client: APIClient, audit: ComplianceAssessment
     ) -> None:
