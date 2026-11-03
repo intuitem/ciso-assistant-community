@@ -16,6 +16,7 @@ from core.views import (
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from core.models import Asset, Terminology
+from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
 from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
@@ -560,6 +561,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         buffer = io.BytesIO()
 
+        def esc(value):
+            return escape_excel_formula(value) if isinstance(value, str) else value
+
         # Sheet names prefixed with workshop.activity for i18n and organization
         SHEET_NAMES = {
             "study": "1.1 Study",
@@ -601,7 +605,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 }
             ]
             df_study = pd.DataFrame(study_data)
-            df_study.to_excel(writer, sheet_name=SHEET_NAMES["study"], index=False)
+            df_study.map(esc).to_excel(
+                writer, sheet_name=SHEET_NAMES["study"], index=False
+            )
 
             # 1.2 Assets sheet
             assets_data = []
@@ -620,7 +626,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if assets_data:
                 df_assets = pd.DataFrame(assets_data)
-                df_assets.to_excel(
+                df_assets.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["assets"], index=False
                 )
 
@@ -642,7 +648,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if fe_data:
                 df_fe = pd.DataFrame(fe_data)
-                df_fe.to_excel(
+                df_fe.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["feared_events"], index=False
                 )
 
@@ -684,7 +690,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         :31
                     ]
                     df_ca = pd.DataFrame(ca_data)
-                    df_ca.to_excel(writer, sheet_name=sheet_name, index=False)
+                    df_ca.map(esc).to_excel(writer, sheet_name=sheet_name, index=False)
 
             # 2.1 RO/TO Couples sheet
             roto_data = []
@@ -711,7 +717,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if roto_data:
                 df_roto = pd.DataFrame(roto_data)
-                df_roto.to_excel(writer, sheet_name=SHEET_NAMES["ro_to"], index=False)
+                df_roto.map(esc).to_excel(
+                    writer, sheet_name=SHEET_NAMES["ro_to"], index=False
+                )
 
             # 3.1 Stakeholders sheet
             sh_data = []
@@ -738,7 +746,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if sh_data:
                 df_sh = pd.DataFrame(sh_data)
-                df_sh.to_excel(
+                df_sh.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["stakeholders"], index=False
                 )
 
@@ -760,7 +768,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ss_data:
                 df_ss = pd.DataFrame(ss_data)
-                df_ss.to_excel(
+                df_ss.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["strategic_scenarios"], index=False
                 )
 
@@ -784,7 +792,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ap_data:
                 df_ap = pd.DataFrame(ap_data)
-                df_ap.to_excel(
+                df_ap.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["attack_paths"], index=False
                 )
 
@@ -810,7 +818,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if sc_data:
                 df_sc = pd.DataFrame(sc_data)
-                df_sc.to_excel(
+                df_sc.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["stakeholder_controls"], index=False
                 )
 
@@ -832,7 +840,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ea_data:
                 df_ea = pd.DataFrame(ea_data)
-                df_ea.to_excel(
+                df_ea.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["elementary_actions"], index=False
                 )
 
@@ -869,7 +877,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if os_data:
                 df_os = pd.DataFrame(os_data)
-                df_os.to_excel(
+                df_os.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["operational_scenarios"], index=False
                 )
 
@@ -903,7 +911,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if om_data:
                 df_om = pd.DataFrame(om_data)
-                df_om.to_excel(
+                df_om.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["operating_modes"], index=False
                 )
 
@@ -923,7 +931,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                             "description": risk_assessment.description or "",
                         }
                     ]
-                ).to_excel(
+                ).map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["risk_assessment"], index=False
                 )
 
@@ -974,7 +982,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         }
                     )
                 if rs_data:
-                    pd.DataFrame(rs_data).to_excel(
+                    pd.DataFrame(rs_data).map(esc).to_excel(
                         writer, sheet_name=SHEET_NAMES["risk_scenarios"], index=False
                     )
 
@@ -999,7 +1007,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     for ac in measures
                 ]
                 if measures_data:
-                    pd.DataFrame(measures_data).to_excel(
+                    pd.DataFrame(measures_data).map(esc).to_excel(
                         writer, sheet_name=SHEET_NAMES["security_measures"], index=False
                     )
 

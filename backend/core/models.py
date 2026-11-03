@@ -687,8 +687,9 @@ def _translate_questions(owner) -> dict | None:
             choice_data["select_implementation_groups"] = (
                 choice.select_implementation_groups
             )
-        if choice.annotation:
-            choice_data["annotation"] = choice.annotation
+        annotation = tr.get("annotation", choice.annotation)
+        if annotation:
+            choice_data["annotation"] = annotation
         return choice_data
 
     result = {}
@@ -701,8 +702,12 @@ def _translate_questions(owner) -> dict | None:
         }
         if not question.required:
             q_data["required"] = False
-        if question.annotation:
-            q_data["annotation"] = question.annotation
+        annotation = q_tr.get("annotation")
+        # sync copies the text into an empty annotation; that copy is no help text
+        if not annotation and question.annotation != question.text:
+            annotation = question.annotation
+        if annotation:
+            q_data["annotation"] = annotation
         if question.config is not None:
             q_data["config"] = question.config
         choices = [_translate_choice(c) for c in question.choices.all()]
