@@ -876,6 +876,8 @@ class RiskAssessmentWriteSerializer(
         return super().validate(attrs)
 
     def update(self, instance, validated_data):
+        # Track old folder before update
+        old_folder_id = instance.folder_id
         # Check if status is changing to deprecated
         old_status = instance.status
         new_status = validated_data.get("status", old_status)
@@ -890,13 +892,15 @@ class RiskAssessmentWriteSerializer(
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
 
-        # Check if folder is being changed (either directly or via perimeter)
-        new_folder = validated_data.get("folder")
-        if new_folder and new_folder != instance.folder:
-            # Cascade folder change to all child RiskScenarios
-            instance.risk_scenarios.update(folder=new_folder)
+        # Cascade only after the folder move has passed the permission checks
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
 
-        return super().update(instance, validated_data)
+            # Cascade folder change (direct or via perimeter) to risk scenarios
+            if old_folder_id != updated_instance.folder_id:
+                updated_instance.risk_scenarios.update(folder=updated_instance.folder)
+
+        return updated_instance
 
     class Meta:
         model = RiskAssessment

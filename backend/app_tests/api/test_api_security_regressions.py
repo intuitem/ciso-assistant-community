@@ -27,6 +27,7 @@ from core.models import (
     RequirementAssignment,
     RiskAssessment,
     RiskMatrix,
+    RiskScenario,
     StoredLibrary,
     TimelineEntry,
 )
@@ -366,6 +367,41 @@ def test_child_cannot_be_written_into_parent_folder_without_rights(app_config):
         format="json",
     )
     assert r.status_code == 201
+
+
+@pytest.mark.django_db
+def test_refused_risk_assessment_move_leaves_its_scenarios(app_config):
+    a, b = _domain("dom-A"), _domain("dom-B")
+    u = User.objects.create_user("ana@tests.com")
+    UserGroup.objects.get(name="BI-UG-ANA", folder=a).user_set.add(u)
+    c = _client(u)
+    ra = RiskAssessment.objects.create(
+        name="ra",
+        folder=a,
+        perimeter=Perimeter.objects.create(name="pa", folder=a),
+        risk_matrix=RiskMatrix.objects.create(
+            name="ma", folder=a, json_definition=RISK_MATRIX_JSON_DEFINITION
+        ),
+    )
+    scenario = RiskScenario.objects.create(name="rs", risk_assessment=ra)
+    pb = Perimeter.objects.create(name="pb", folder=b)
+
+    r = c.patch(
+        f"/api/risk-assessments/{ra.id}/", {"perimeter": str(pb.id)}, format="json"
+    )
+    assert r.status_code == 403
+    ra.refresh_from_db()
+    scenario.refresh_from_db()
+    assert ra.folder_id == a.id
+    assert scenario.folder_id == a.id
+
+    UserGroup.objects.get(name="BI-UG-ANA", folder=b).user_set.add(u)
+    r = c.patch(
+        f"/api/risk-assessments/{ra.id}/", {"perimeter": str(pb.id)}, format="json"
+    )
+    assert r.status_code == 200
+    scenario.refresh_from_db()
+    assert scenario.folder_id == b.id
 
 
 @pytest.mark.django_db
