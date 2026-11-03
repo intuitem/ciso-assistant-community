@@ -187,5 +187,117 @@ export const shots: Shot[] = [
 			page
 				.getByRole('button', { name: 'Processor register' })
 				.locator('xpath=ancestor::div[contains(@class,"card")][1]')
+	},
+	// ---- metrics: one-step creation, recording, merge, widgets (attach mode, dev data) ----
+	{
+		slug: 'metrics-new-metric',
+		url: '/metric-instances',
+		usedBy: ['features/metrics/creating-a-metric.md', 'concepts/metrics.md'],
+		act: async (page) => {
+			// The form is taller than the default viewport; show it whole.
+			await page.setViewportSize({ width: 1440, height: 1180 });
+			await page.getByRole('button', { name: 'Add a metric instance' }).click();
+			const dialog = page.getByRole('dialog').last();
+			await dialog.getByTestId('form-input-name').fill('Number of assets');
+			await dialog.getByRole('button', { name: 'Domain' }).click();
+			await dialog.getByPlaceholder('Search...').fill('Spain');
+			await dialog.getByRole('option', { name: /ACME Spain/ }).click();
+			await dialog.getByRole('combobox', { name: 'Unit' }).fill('Count');
+			await page.getByRole('option', { name: 'Count', exact: true }).first().click();
+			await page.getByTestId('similar-definition-hint').waitFor();
+			await page.getByTestId('similar-definition-hint').scrollIntoViewIfNeeded();
+		},
+		// The outer dialog: the inner one re-renders as the form settles.
+		clip: (page) => page.getByRole('dialog').first()
+	},
+	{
+		slug: 'metrics-new-metric-from-definition',
+		url: '/metric-instances',
+		usedBy: ['features/metrics/creating-a-metric.md'],
+		act: async (page) => {
+			// The form is taller than the default viewport; show it whole.
+			await page.setViewportSize({ width: 1440, height: 1180 });
+			await page.getByRole('button', { name: 'Add a metric instance' }).click();
+			const dialog = page.getByRole('dialog').last();
+			await dialog.getByRole('button', { name: 'Domain' }).click();
+			await dialog.getByPlaceholder('Search...').fill('Spain');
+			await dialog.getByRole('option', { name: /ACME Spain/ }).click();
+			await dialog.getByRole('radio', { name: 'Use an existing definition' }).click();
+			await dialog.getByRole('combobox', { name: 'Metric definition' }).fill('Training');
+			await page
+				.getByRole('option', { name: /Training coverage/ })
+				.first()
+				.click();
+			await page.getByTestId('copied-from-definition').waitFor();
+			await page.getByTestId('copied-from-definition').scrollIntoViewIfNeeded();
+		},
+		// The outer dialog: the inner one re-renders as the form settles.
+		clip: (page) => page.getByRole('dialog').first()
+	},
+	{
+		slug: 'metrics-record-value',
+		url: '/metric-instances/597d588f-e161-46e5-9f66-53f7b632bfc2',
+		usedBy: ['features/metrics/recording-values.md', 'concepts/metrics.md'],
+		act: async (page) => {
+			await page.getByTestId('record-value-input').fill('1310');
+		},
+		clip: (page) => page.getByTestId('record-value-strip')
+	},
+	{
+		slug: 'metrics-merge',
+		url: '/metric-definitions/f2355942-3463-47b1-85a2-f072784290c2',
+		usedBy: ['features/metrics/creating-a-metric.md'],
+		act: async (page) => {
+			await page.getByTestId('merge-definition-button').click();
+			await page.getByTestId('merge-definition-modal').getByRole('radio').first().click();
+		},
+		clip: (page) => page.getByTestId('merge-definition-modal')
+	},
+	{
+		slug: 'metrics-widget-preview',
+		url: '/dashboards/84d92700-b6a1-4641-aa2c-e4648f80c2f2/layout',
+		usedBy: ['features/dashboards.md'],
+		act: async (page) => {
+			await page.getByRole('button', { name: 'Add custom metric' }).click();
+			const dialog = page.getByRole('dialog').last();
+			await page.setViewportSize({ width: 1440, height: 1000 });
+			await dialog.getByRole('combobox', { name: 'Metric Instance' }).fill('Training');
+			await page
+				.getByRole('option', { name: /Training coverage/ })
+				.first()
+				.click();
+			await dialog
+				.locator('select')
+				.filter({ has: page.locator('option[value="line"]') })
+				.selectOption('line');
+			await dialog
+				.locator('select')
+				.filter({ has: page.locator('option[value="all_time"]') })
+				.selectOption('all_time');
+			await dialog.getByRole('checkbox').first().check();
+			// ECharts renders the preview as an SVG image.
+			await dialog
+				.getByTestId('widget-preview')
+				.locator('svg, canvas')
+				.first()
+				.waitFor({ state: 'attached' });
+			// ECharts draws a frame after it measures its container.
+			await page.waitForTimeout(1500);
+		},
+		// The outer dialog: the inner one re-renders as the form settles.
+		clip: (page) => page.getByRole('dialog').first()
+	},
+	{
+		slug: 'metrics-widget-link',
+		url: '/dashboards/84d92700-b6a1-4641-aa2c-e4648f80c2f2',
+		usedBy: ['features/dashboards.md'],
+		act: async (page) => {
+			await page.getByTestId('widget-source-link').first().hover();
+		},
+		clip: (page) =>
+			page
+				.getByTestId('widget-source-link')
+				.first()
+				.locator('xpath=ancestor::div[contains(@class,"card")][1]')
 	}
 ];
