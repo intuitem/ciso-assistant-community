@@ -33,13 +33,23 @@
 	let periodDay = $state(new Date().toISOString().slice(0, 10));
 	let saving = $state(false);
 	let error = $state('');
-	const period = $derived(
-		byPeriod ? periodStart(new Date(`${periodDay}T12:00:00Z`), frequency) : null
-	);
+	// An empty or unparsable date names no period: nothing is derived, and
+	// the save asks for one.
+	const period = $derived.by(() => {
+		if (!byPeriod || !periodDay) return null;
+		const noon = new Date(`${periodDay}T12:00:00Z`);
+		return Number.isNaN(noon.getTime()) ? null : periodStart(noon, frequency);
+	});
 	const label = $derived(period ? periodLabel(period, frequency) : '');
 
 	async function save() {
+		// One request at a time: a second Enter must not race the first.
+		if (saving) return;
 		error = '';
+		if (byPeriod && !period) {
+			error = m.forPeriod();
+			return;
+		}
 		const body: Record<string, unknown> = {
 			metric_instance: metricInstance.id,
 			timestamp: new Date().toISOString(),
@@ -72,11 +82,17 @@
 			value = '';
 			choice = '';
 			observation = '';
-			await onSaved?.();
 		} catch {
 			error = m.valueNotSaved();
+			return;
 		} finally {
 			saving = false;
+		}
+		// Saved: a refresh that fails is the page's problem, not the value's.
+		try {
+			await onSaved?.();
+		} catch {
+			/* the page reloads on its own next navigation */
 		}
 	}
 

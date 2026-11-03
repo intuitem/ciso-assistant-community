@@ -43,12 +43,21 @@ test('user can add a custom metric sample to a metric instance', async ({
 	await test.step('create metric instance', async () => {
 		await metricInstancesPage.goto();
 		await metricInstancesPage.hasUrl();
-		await metricInstancesPage.createItem({
+		// The form defines a metric in one step by default: this one uses the
+		// definition created above.
+		await metricInstancesPage.addButton.first().click();
+		await metricInstancesPage.form.hasTitle();
+		await page.getByRole('radio', { name: 'Use an existing definition' }).click();
+		await metricInstancesPage.form.fill({
 			name: vars.metricInstanceName,
 			description: vars.description,
 			folder: vars.folderName,
 			metric_definition: vars.metricDefinitionName
 		});
+		await metricInstancesPage.form.saveButton.click();
+		await metricInstancesPage.isToastVisible(
+			'The metric instance object has been successfully created'
+		);
 	});
 
 	await test.step('add a custom metric sample', async () => {

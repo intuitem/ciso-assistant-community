@@ -24,11 +24,17 @@ export function formatMetricNumber(value: unknown, definition: any): string {
 	}
 	const decimals = displayDecimals(definition);
 	if (decimals === null) return String(n);
-	// toFixed rounds binary floats (1.005 -> 1.00); nudge with a tiny epsilon
-	// in the value's own direction so .5 cases round half up as the backend does.
-	const factor = 10 ** decimals;
-	const rounded = Math.round((Math.abs(n) + Number.EPSILON) * factor) / factor;
-	return (n < 0 ? -rounded : rounded).toFixed(decimals);
+	return roundHalfUp(n, decimals).toFixed(decimals);
+}
+
+/** Half up, away from zero, on the decimal digits rather than the binary
+ * float: 1.005 -> 1.01 and 10.075 -> 10.08, as the backend's Decimal does.
+ * Shifting through the exponent notation keeps the digits as written. */
+export function roundHalfUp(n: number, decimals: number): number {
+	const shifted = Number(`${Math.abs(n)}e${decimals}`);
+	if (!Number.isFinite(shifted)) return n;
+	const rounded = Number(`${Math.round(shifted)}e-${decimals}`);
+	return n < 0 ? -rounded : rounded;
 }
 
 export function directionOf(definition: any): Direction {

@@ -5198,6 +5198,7 @@
 	"mergeTarget": "Fusionner dans",
 	"mergeTargetSearch": "Chercher une définition par nom",
 	"mergeDone": "Fusion faite : {count} métrique(s) déplacée(s)",
+	"mergeFailed": "La fusion n'a pas pu être faite",
 	"mergeRequirements": "Même type et même unité, et le droit de modifier les deux définitions et les métriques déplacées.",
 	"openMetric": "Ouvrir la métrique",
 	"openObject": "Ouvrir {name}",

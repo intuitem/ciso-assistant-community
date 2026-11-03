@@ -270,7 +270,7 @@
 			<div class="card p-4 bg-surface-50-950 shadow-sm">
 				<h3 class="text-lg font-semibold mb-3">{m.sampleTimeline()}</h3>
 				<!-- A recomputation can rewrite values without changing their count. -->
-				{#key `${samples.length}|${metricInstance?.last_computed_at ?? ''}`}
+				{#key `${samples.length}|${metricInstance?.last_computed_at ?? ''}|${metricInstance?.updated_at ?? ''}`}
 					<MetricSampleChart {samples} {metricDefinition} height="h-80" />
 				{/key}
 			</div>

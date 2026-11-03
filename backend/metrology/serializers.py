@@ -71,6 +71,15 @@ def coerce_sample_value(value):
 
 # MetricDefinition serializers
 class MetricDefinitionWriteSerializer(BaseModelSerializer):
+    def validate_decimals(self, value):
+        from metrology.models import MAX_DECIMALS
+
+        if value is not None and value > MAX_DECIMALS:
+            raise serializers.ValidationError(
+                _("At most %(max)d decimals") % {"max": MAX_DECIMALS}
+            )
+        return value
+
     def validate_choices_definition(self, value):
         if value is None:
             return value
@@ -185,11 +194,16 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
         return super().to_internal_value(data)
 
     def create(self, validated_data):
+        from django.db import transaction
+
         from metrology.definitions import definition_name
 
         inline = validated_data.pop("definition", None)
         folder = validated_data["folder"]
         if inline is not None:
+            # Both rights before either write, and both writes in one
+            # transaction: a refused metric leaves no definition behind.
+            self._check_object_perm(validated_data, "add", folder=folder)
             self._check_object_perm(
                 validated_data, "add", folder=folder, model=MetricDefinition
             )
@@ -204,7 +218,12 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
             nested = MetricDefinitionWriteSerializer(data=data, context=self.context)
             if not nested.is_valid():
                 raise serializers.ValidationError({"definition": nested.errors})
-            validated_data["metric_definition"] = nested.save()
+            with transaction.atomic():
+                validated_data["metric_definition"] = nested.save()
+                return self._create_with_defaults(validated_data)
+        return self._create_with_defaults(validated_data)
+
+    def _create_with_defaults(self, validated_data):
         definition = validated_data["metric_definition"]
         # A metric from a definition starts with the definition's defaults
         # unless the form says otherwise.
@@ -245,6 +264,14 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
         if self.instance is None and not attrs.get("metric_definition") and not inline:
             raise serializers.ValidationError(
                 {"metric_definition": [_("This field is required.")]}
+            )
+        if (
+            self.instance is not None
+            and "metric_definition" in attrs
+            and attrs["metric_definition"] is None
+        ):
+            raise serializers.ValidationError(
+                {"metric_definition": [_("This field may not be null.")]}
             )
         if inline and attrs.get("metric_definition") and self.instance is None:
             raise serializers.ValidationError(

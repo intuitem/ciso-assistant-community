@@ -280,6 +280,55 @@ class TestMerge:
         assert reason in response.data["into"][0]
         assert MetricDefinition.objects.filter(id=source.id).exists()
 
+    def test_a_definition_read_by_a_formula_is_not_merged_away(self):
+        group = make_domain("ACME")
+        es = make_domain("Spain", group)
+        kept = MetricDefinition.objects.create(name="Assets", folder=group)
+        mine = MetricDefinition.objects.create(name="Assets", folder=es)
+        make_definition(
+            "Rate",
+            inputs=[{"key": "a", "definition": str(mine.id)}],
+            expression="a * 2",
+        )
+        response = call(
+            MetricDefinitionViewSet,
+            "post",
+            "merge",
+            {"into": str(kept.id)},
+            admin(),
+            pk=mine.id,
+        )
+        assert response.status_code == 400
+        assert "formula" in response.data["into"][0]
+        assert MetricDefinition.objects.filter(id=mine.id).exists()
+
+    def test_level_definitions_merge_only_with_the_same_levels(self):
+        group = make_domain("ACME")
+        es = make_domain("Spain", group)
+        levels = [{"ref_id": "l", "name": "Low"}, {"ref_id": "h", "name": "High"}]
+        kept = MetricDefinition.objects.create(
+            name="Maturity",
+            folder=group,
+            category="qualitative",
+            choices_definition=levels,
+        )
+        mine = MetricDefinition.objects.create(
+            name="Maturity",
+            folder=es,
+            category="qualitative",
+            choices_definition=list(reversed(levels)),
+        )
+        response = call(
+            MetricDefinitionViewSet,
+            "post",
+            "merge",
+            {"into": str(kept.id)},
+            admin(),
+            pk=mine.id,
+        )
+        assert response.status_code == 400
+        assert "levels" in response.data["into"][0]
+
     def test_the_merge_takes_change_rights_on_both_and_on_the_metrics(self):
         group = make_domain("ACME")
         es = make_domain("Spain", group)
@@ -370,6 +419,44 @@ class TestPeriodOnEnteredValues:
         assert response.status_code == 400
         assert "period_start" in response.data
 
+    def test_two_periods_typed_in_the_same_second_both_keep_their_value(self, frozen):  # noqa: F811
+        es = make_domain("Spain")
+        instance = make_instance(es, make_definition())
+        for period, value in ((at(2026, 3, 1), 10), (at(2026, 4, 1), 20)):
+            data = {
+                "metric_instance": str(instance.id),
+                "timestamp": at(2026, 5, 3, 10, 0, 0).isoformat(),
+                "period_start": period.isoformat(),
+                "value": {"result": value},
+            }
+            response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
+            assert response.status_code == 201, response.data
+        assert sorted(s.raw_value() for s in instance.samples.all()) == [10, 20]
+
+    def test_a_value_typed_without_a_period_over_a_period_s_second_drops_the_period(
+        self, frozen
+    ):  # noqa: F811
+        es = make_domain("Spain")
+        instance = make_instance(es, make_definition())
+        moment = at(2026, 5, 3, 10)
+        CustomMetricSample.objects.create(
+            metric_instance=instance,
+            folder=es,
+            timestamp=moment,
+            period_start=at(2026, 4, 1),
+            value={"result": 1},
+        )
+        data = {
+            "metric_instance": str(instance.id),
+            "timestamp": moment.isoformat(),
+            "value": {"result": 2},
+        }
+        response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
+        assert response.status_code == 201, response.data
+        stored = instance.samples.get()
+        assert stored.raw_value() == 2
+        assert stored.period_start is None
+
     def test_a_value_without_a_period_keeps_today_s_rule(self, frozen):  # noqa: F811
         es = make_domain("Spain")
         instance = make_instance(es, make_definition())
@@ -394,6 +481,27 @@ class TestDirectionAndDecimals:
             is None
         )
 
+    def test_more_than_six_decimals_is_refused(self):
+        es = make_domain("Spain")
+        data = {"name": "Assets", "folder": str(es.id), "decimals": 9}
+        response = call(MetricDefinitionViewSet, "post", "create", data, admin())
+        assert response.status_code == 400
+        assert "decimals" in response.data
+
+    def test_a_metric_cannot_lose_its_definition_on_edit(self):
+        es = make_domain("Spain")
+        instance = make_instance(es, make_definition())
+        response = call(
+            MetricInstanceViewSet,
+            "patch",
+            "partial_update",
+            {"metric_definition": None},
+            admin(),
+            pk=instance.id,
+        )
+        assert response.status_code == 400
+        assert "metric_definition" in response.data
+
     def test_direction_can_be_unset(self):
         es = make_domain("Spain")
         data = {"name": "Assets", "folder": str(es.id), "higher_is_better": None}
@@ -413,6 +521,8 @@ class TestDirectionAndDecimals:
             ("count", None, 1290.5, "1291"),
             ("users", None, 12.3456, "12.3456 users"),
             ("users", 1, 12.3456, "12.3 users"),
+            ("percentage", 2, 1, "1.00 %"),
+            ("count", None, 1e30, "1e+30"),
         ],
     )
     def test_shown_values_round_to_the_definition_s_decimals(

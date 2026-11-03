@@ -48,6 +48,9 @@
 			samples = [];
 			return;
 		}
+		// The previous metric's preview goes before the next one loads.
+		pickedInstance = null;
+		samples = [];
 		let alive = true;
 		Promise.all([
 			fetch(`/fe-api/metrology/instance/${id}`).then((r) => (r.ok ? r.json() : null)),

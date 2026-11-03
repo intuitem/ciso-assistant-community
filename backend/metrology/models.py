@@ -432,14 +432,25 @@ def quantitative_result(value):
     return result
 
 
+# Decimals a definition may show: beyond this the display is noise and the
+# quantize below would need more precision than the default context holds.
+MAX_DECIMALS = 6
+
+
 def _rounded(result, decimals):
     """``result`` rounded half up to ``decimals``, an int when none are
-    shown: 89.0756 -> 89.1, 1290.0 -> 1290."""
-    from decimal import ROUND_HALF_UP, Decimal
+    shown, a Decimal keeping its trailing zeros otherwise: 89.0756 -> 89.1,
+    1290.0 -> 1290, 1 at two decimals -> 1.00. A value too large to quantize
+    is shown as entered."""
+    from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
+    decimals = min(decimals, MAX_DECIMALS)
     quantum = Decimal(1).scaleb(-decimals)
-    rounded = Decimal(str(result)).quantize(quantum, rounding=ROUND_HALF_UP)
-    return int(rounded) if decimals == 0 else float(rounded)
+    try:
+        rounded = Decimal(str(result)).quantize(quantum, rounding=ROUND_HALF_UP)
+    except InvalidOperation:
+        return result
+    return int(rounded) if decimals == 0 else rounded
 
 
 class CustomMetricSample(AbstractBaseModel, FolderMixin):
@@ -537,18 +548,30 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
             **fields,
         }
         period_start = defaults.pop("period_start", None)
+        timestamp = whole_second(timestamp)
         if period_start is not None:
             # A value answering for a period: one per instance and period,
-            # the last one written wins, whenever it was typed.
+            # the last one written wins, whenever it was typed. Its second
+            # must still be its own: another entered sample holding it (a
+            # value typed in the same second) moves this one a second on.
+            taken = (
+                entered.exclude(period_start=period_start)
+                .filter(metric_instance=metric_instance)
+                .values_list("timestamp", flat=True)
+            )
+            while timestamp in taken:
+                timestamp += timedelta(seconds=1)
             return entered.update_or_create(
                 metric_instance=metric_instance,
                 period_start=period_start,
-                defaults={"timestamp": whole_second(timestamp), **defaults},
+                defaults={"timestamp": timestamp, **defaults},
             )
+        # A value typed without a period answers for its moment only: a
+        # period sample replaced this way loses its period too.
         return entered.update_or_create(
             metric_instance=metric_instance,
-            timestamp=whole_second(timestamp),
-            defaults=defaults,
+            timestamp=timestamp,
+            defaults={"period_start": None, **defaults},
         )
 
     def raw_value(self):

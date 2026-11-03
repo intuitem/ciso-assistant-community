@@ -306,7 +306,7 @@
 
 				if (isQualitative && choiceNames && choiceNames[value - 1]) {
 					displayValue = `${value}. ${choiceNames[value - 1]}`;
-				} else if (!isQualitative && unitSymbol) {
+				} else if (!isQualitative) {
 					displayValue = formatValueWithUnit(value);
 				}
 
@@ -630,12 +630,7 @@
 							},
 							detail: {
 								valueAnimation: true,
-								formatter:
-									unitName === 'percentage'
-										? '{value}%'
-										: unitSymbol
-											? `{value} ${unitSymbol}`
-											: '{value}',
+								formatter: (value: number) => formatValueWithUnit(value),
 								fontSize: 20,
 								offsetCenter: [0, '40%'],
 								color: gaugeColor

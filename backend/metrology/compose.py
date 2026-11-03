@@ -384,6 +384,12 @@ def compose(user, data, instance=None):
     if errors:
         raise CompositionError(errors)
 
+    direction = data.get("higher_is_better")
+    if direction is not None and not isinstance(direction, bool):
+        raise CompositionError(
+            {"higher_is_better": ["The direction is true, false or unset"]}
+        )
+
     name = name.strip()
     shape = {
         "category": category,

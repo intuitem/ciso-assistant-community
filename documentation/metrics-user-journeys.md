@@ -15,7 +15,7 @@ Given I am on the metrics list of ACME Spain,
 when I click New metric, type "Number of assets", pick the unit Count and the direction None, and click Create,
 then I am on the metric's page, it has no value yet, and the page shows one strip asking for the first value.
 When I type 1290 and press Enter,
-then the metric shows 1 290 assets as its current value, with today as its date.
+then the metric shows 1290 as its current value, for the current period.
 
 Also:
 - While I type the name, a readable definition with a similar name and the same kind is offered under the field. Ignoring it costs nothing.

@@ -269,18 +269,23 @@ class MetricDefinitionViewSet(BaseModelViewSet):
             }
         )
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    # Per user: never cached.
     @action(detail=False, methods=["get"], url_path="similar")
     def similar(self, request):
         """Readable definitions whose name contains the one being typed, with
-        the domains measuring them: the hint under a new metric's name."""
+        the domains measuring them: the hint under a new metric's name, and
+        the candidates of a merge (``mergeable=1`` leaves out formulas and
+        ``exclude`` the definition being merged)."""
         from metrology.definitions import similar_definitions
 
+        params = request.query_params
         return Response(
             similar_definitions(
                 request.user,
-                request.query_params.get("name", ""),
-                request.query_params.get("category") or None,
+                params.get("name", ""),
+                params.get("category") or None,
+                exclude=_as_uuid(params.get("exclude")),
+                mergeable=params.get("mergeable") in ("1", "true"),
             )
         )
 
@@ -314,6 +319,7 @@ class MetricDefinitionViewSet(BaseModelViewSet):
     def default_collection_frequency(self, request):
         return Response(dict(MetricInstance.Frequency.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(MetricDefinition.Category.choices))

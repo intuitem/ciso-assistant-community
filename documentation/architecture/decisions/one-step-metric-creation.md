@@ -23,7 +23,7 @@ A definition carries a number of decimals, defaulted by unit: one for a percenta
 ## Consequences
 
 - A domain manager creates and feeds a metric without meeting a definition.
-- The similar-name hint reaches library, global and group-level definitions only. Two sibling domains defining the same metric independently is caught after the fact, by the merge, by someone who sees both domains.
+- The similar-name hint reaches every definition the user can read: library, global and group-level ones, and sibling domains only for someone who reads them. Two sibling domains defining the same metric independently is caught after the fact, by the merge, by someone who sees both domains.
 - A merge keeps the chosen definition's direction, decimals and default target. An instance with a target of its own keeps it.
 - Readers of `higher_is_better` handle null. Existing definitions keep their direction; a new one without a stated direction has none, library definitions included.
 - Schema: the direction boolean becomes nullable and the definition gains decimals. One migration, no data step.

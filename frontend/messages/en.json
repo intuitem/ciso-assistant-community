@@ -4658,6 +4658,7 @@
 	"mergeTarget": "Merge into",
 	"mergeTargetSearch": "Search a definition by name",
 	"mergeDone": "Merged: {count} metric(s) moved",
+	"mergeFailed": "The merge could not be done",
 	"mergeRequirements": "Same kind and unit, and the right to change both definitions and the metrics that move.",
 	"openMetric": "Open the metric",
 	"openObject": "Open {name}",

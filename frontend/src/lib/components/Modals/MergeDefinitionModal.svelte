@@ -39,14 +39,20 @@
 		}
 		const timer = setTimeout(async () => {
 			try {
-				const params = new URLSearchParams({ name, category: definition.category ?? '' });
+				const params = new URLSearchParams({
+					name,
+					category: definition.category ?? '',
+					exclude: definition.id,
+					mergeable: '1'
+				});
 				const res = await fetch(`/fe-api/metrology/similar-definitions?${params}`);
 				if (!res.ok || current !== run) return;
-				const found: Candidate[] = await res.json();
-				candidates = found.filter((c) => c.id !== definition.id && !c.is_derived);
+				candidates = await res.json();
 			} catch {
 				candidates = [];
 			}
+			// A target that left the list is no target.
+			if (!candidates.some((c) => c.id === into)) into = '';
 		}, 250);
 		return () => clearTimeout(timer);
 	});
@@ -57,28 +63,33 @@
 		if (!into) return;
 		busy = true;
 		error = '';
+		let data: Record<string, unknown> = {};
 		try {
 			const res = await fetch(`/fe-api/metrology/merge/${definition.id}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ into })
 			});
-			const data = await res.json().catch(() => ({}));
+			data = await res.json().catch(() => ({}));
 			if (!res.ok) {
 				const first = Object.values(data)[0];
 				error = Array.isArray(first) ? safeTranslate(String(first[0])) : m.mergeRequirements();
 				return;
 			}
-			toastStore.trigger({
-				message: m.mergeDone({ count: data.moved }),
-				background: 'preset-filled-success-500'
-			});
-			modalStore.close();
-			await goto(`/metric-definitions/${data.into}`);
-			await invalidateAll();
+		} catch {
+			error = m.mergeFailed();
+			return;
 		} finally {
 			busy = false;
 		}
+		// Merged: what follows is navigation, never a merge failure.
+		toastStore.trigger({
+			message: m.mergeDone({ count: Number(data.moved ?? 0) }),
+			background: 'preset-filled-success-500'
+		});
+		modalStore.close();
+		await goto(`/metric-definitions/${data.into}`);
+		await invalidateAll();
 	}
 </script>
 

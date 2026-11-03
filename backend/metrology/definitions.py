@@ -23,10 +23,12 @@ class MergeError(Exception):
         self.message = message
 
 
-def similar_definitions(user, name, category=None):
+def similar_definitions(user, name, category=None, exclude=None, mergeable=False):
     """Definitions the user can read whose name contains ``name``, with the
     domains measuring them: the hint shown while a metric's name is typed.
-    Never a definition from a domain the user cannot read."""
+    Never a definition from a domain the user cannot read. ``exclude`` and
+    ``mergeable`` narrow the list before it is cut, so a merge target is never
+    pushed out by what the modal would drop anyway."""
     name = (name or "").strip()
     if len(name) < SIMILAR_MIN_LENGTH:
         return []
@@ -38,6 +40,10 @@ def similar_definitions(user, name, category=None):
     )
     if category:
         definitions = definitions.filter(category=category)
+    if exclude is not None:
+        definitions = definitions.exclude(id=exclude)
+    if mergeable:
+        definitions = definitions.filter(expression="")
     definitions = list(definitions[:SIMILAR_LIMIT])
     if not definitions:
         return []
@@ -83,9 +89,11 @@ def merge_definitions(user, source, target):
     target's direction, decimals and defaults apply from now on. Returns
     the number of instances moved. Raises MergeError with the reason, or
     PermissionError."""
+    from metrology.series import dependents_of
+
     if source.id == target.id:
         raise MergeError("A definition cannot be merged into itself")
-    if source.library_id is not None:
+    if source.library_id is not None or source.urn:
         raise MergeError("A definition from a library cannot be merged away")
     if source.is_derived or target.is_derived:
         raise MergeError("A computed definition cannot be merged")
@@ -93,21 +101,44 @@ def merge_definitions(user, source, target):
         raise MergeError("The two definitions must have the same kind")
     if source.unit_id != target.unit_id:
         raise MergeError("The two definitions must have the same unit")
+    if source.category == MetricDefinition.Category.QUALITATIVE and _level_names(
+        source
+    ) != _level_names(target):
+        # A level value is an index into its definition's levels: moved under
+        # other levels, every past value would read as another level.
+        raise MergeError("The two definitions must have the same levels")
+    if dependents_of(source):
+        # A formula names the definition it reads; deleting it would leave
+        # that input dangling.
+        raise MergeError("A formula reads this definition; it cannot be merged away")
     if not RoleAssignment.is_object_readable(user, MetricDefinition, target.id):
         raise PermissionError
     for definition in (source, target):
         if not permitted(user, ["change_metricdefinition"], definition.folder):
             raise PermissionError
-    instances = list(source.metricinstance_set.select_related("folder"))
-    for instance in instances:
-        if not permitted(user, ["change_metricinstance"], instance.folder):
-            raise PermissionError
     with transaction.atomic():
-        moved = MetricInstance.objects.filter(
-            id__in=[instance.id for instance in instances]
-        ).update(metric_definition=target)
+        # Checked and moved under one lock: an instance added or moved to
+        # another domain meanwhile is seen here, not in a stale snapshot.
+        instances = list(
+            source.metricinstance_set.select_for_update().select_related("folder")
+        )
+        for instance in instances:
+            if not permitted(user, ["change_metricinstance"], instance.folder):
+                raise PermissionError
+        for instance in instances:
+            # Saved one by one: the signals mark the formulas reading the
+            # target, whose combined inputs just gained an instance.
+            instance.metric_definition = target
+            instance.save(update_fields=["metric_definition", "updated_at"])
         source.delete()
-    return moved
+    return len(instances)
+
+
+def _level_names(definition):
+    levels = definition.choices_definition
+    if not isinstance(levels, list):
+        return []
+    return [level.get("name") if isinstance(level, dict) else None for level in levels]
 
 
 def definition_name(name, folder):

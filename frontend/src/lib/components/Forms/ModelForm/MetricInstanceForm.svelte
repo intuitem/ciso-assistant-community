@@ -137,6 +137,8 @@
 	let dismissedFor = $state('');
 	let lookup = 0;
 	$effect(() => {
+		// Every change outdates a lookup in flight, even one that ends the hint.
+		const run = ++lookup;
 		if (!isCreate || mode !== 'define') {
 			similar = null;
 			return;
@@ -147,7 +149,6 @@
 			similar = null;
 			return;
 		}
-		const run = ++lookup;
 		const timer = setTimeout(async () => {
 			try {
 				const params = new URLSearchParams({ name, category });
