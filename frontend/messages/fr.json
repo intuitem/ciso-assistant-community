@@ -7767,5 +7767,12 @@
 	"maintain": "Maintenir",
 	"improveWhenDue": "Améliorer en temps voulu",
 	"lowConcern": "Peu préoccupant",
-	"notPlotted": "Non représentés"
+	"notPlotted": "Non représentés",
+	"terminologyFieldsDescription": "Les champs dont votre organisation peut adapter les valeurs. Ouvrez un champ pour recolorer, réordonner, masquer ou ajouter ses valeurs.",
+	"terminologyFieldDescription": "Glissez une valeur ou utilisez les flèches pour la déplacer. Les valeurs livrées peuvent être recolorées, réordonnées et masquées, mais ni renommées ni supprimées.",
+	"terminologyValuesCount": "{count} valeurs",
+	"terminologyHiddenCount": "{count} masquées",
+	"addTerminologyValue": "Ajouter une valeur",
+	"noTerminologyValues": "Aucune valeur pour l'instant.",
+	"idsMustListEveryTerminology": "Le nouvel ordre doit inclure toutes les valeurs de ce champ."
 }

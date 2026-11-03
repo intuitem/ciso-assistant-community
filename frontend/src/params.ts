@@ -3,6 +3,7 @@ import { defineParams } from '@sveltejs/kit/params';
 // with plain Node (sveltejs/kit#17442)
 import { isLocale } from '#paraglide/runtime.js';
 import { FIELD_KEYS, FILTER_KEYS } from '#lib/utils/param-keys.ts';
+import { isTerminologyField } from '#lib/utils/terminology-fields.ts';
 import {
 	THIRD_PARTY_URL_MODEL,
 	type thirdPartyUrlModel,
@@ -54,6 +55,7 @@ export const params = defineParams({
 	filters: (param) => (matchFilters(param) ? param : undefined),
 	integration_field: (param) => (matchIntegration_field(param) ? param : undefined),
 	lang: (param) => (matchLang(param) ? param : undefined),
+	terminologyfield: (param) => (isTerminologyField(param) ? param : undefined),
 	thirdparty_urlmodels: (param) => (matchThirdparty_urlmodels(param) ? param : undefined),
 	urlmodel: (param) => (matchUrlmodel(param) ? param : undefined),
 	urn: (param) => (matchUrn(param) ? param : undefined),

@@ -7288,14 +7288,20 @@ class TerminologyReadSerializer(BaseModelSerializer):
 
 
 class TerminologyWriteSerializer(BaseModelSerializer):
-    # Built-in terminologies are seeded at startup; users may only toggle their
-    # visibility, not rename or otherwise modify them.
-    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
+    # Built-in terminologies are seeded at startup: not renamable, but restylable.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible", "hexcolor", "order"}
     builtin = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Terminology
         exclude = ["folder"]
+
+    def create(self, validated_data):
+        if "order" not in validated_data:
+            validated_data["order"] = Terminology.next_order(
+                validated_data["field_path"]
+            )
+        return super().create(validated_data)
 
 
 class ClassificationLevelReadSerializer(BaseModelSerializer):

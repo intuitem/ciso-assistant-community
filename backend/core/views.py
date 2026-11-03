@@ -20364,12 +20364,79 @@ class TerminologyViewSet(BaseModelViewSet):
     model = Terminology
     filterset_fields = ["field_path", "folder", "is_visible", "builtin"]
     search_fields = ["name", "description"]
-    ordering = ["field_path", "name"]
+    ordering = ["field_path", "order", "name"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get class name choices")
     def field_path(self, request):
         return Response(dict(Terminology.FieldPath.choices))
+
+    @action(detail=False, name="Terminologies per field path")
+    def summary(self, request):
+        """Every field path with its value count and colours, in rank order."""
+        rows = {value: [] for value in Terminology.FieldPath.values}
+        for field_path, hexcolor, is_visible in (
+            self.get_queryset()
+            .order_by("field_path", "order", "name")
+            .values_list("field_path", "hexcolor", "is_visible")
+        ):
+            rows.setdefault(field_path, []).append((hexcolor, is_visible))
+        labels = dict(Terminology.FieldPath.choices)
+        return Response(
+            [
+                {
+                    "field_path": field_path,
+                    "label": labels.get(field_path, field_path),
+                    "count": len(values),
+                    "visible_count": sum(1 for _, visible in values if visible),
+                    "colors": [color for color, visible in values if visible],
+                }
+                for field_path, values in rows.items()
+            ]
+        )
+
+    @action(detail=False, methods=["post"], name="Reorder terminologies")
+    def reorder(self, request):
+        """Takes every id of one field path, first first, and renumbers their
+        order. Partial lists are refused."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_terminology"),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied()
+        field_path = request.data.get("field_path")
+        raw_ids = request.data.get("ids")
+        if field_path not in Terminology.FieldPath.values or not isinstance(
+            raw_ids, list
+        ):
+            return Response(
+                {"error": "idsMustListEveryTerminology"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        ids = [str(i) for i in raw_ids]
+        with transaction.atomic():
+            terminologies = {
+                str(t.id): t
+                for t in Terminology.objects.select_for_update().filter(
+                    field_path=field_path
+                )
+            }
+            if len(ids) != len(set(ids)) or set(ids) != set(terminologies):
+                return Response(
+                    {"error": "idsMustListEveryTerminology"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            for position, terminology_id in enumerate(ids, start=1):
+                terminologies[terminology_id].order = position
+            Terminology.objects.bulk_update(terminologies.values(), ["order"])
+        return Response(
+            TerminologyReadSerializer(
+                self.get_queryset().filter(field_path=field_path),
+                many=True,
+                context=self.get_serializer_context(),
+            ).data
+        )
 
 
 class ObjectClassificationViewSet(BaseModelViewSet):

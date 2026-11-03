@@ -3600,18 +3600,102 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Translations"),
         help_text=_("JSON field to store translations for different languages"),
     )
+    hexcolor = models.CharField(
+        max_length=9, blank=True, default="", verbose_name=_("Color")
+    )
+    order = models.PositiveIntegerField(default=0, verbose_name=_("Order"))
 
     fields_to_check = ["name", "field_path"]
 
+    # Mirrored in migration 0203: update both together.
+    DEFAULT_HEXCOLORS = {
+        FieldPath.PROJECT_STATUS: {
+            "draft": "#f3f4f6",
+            "initiated": "#eff6ff",
+            "planning": "#e0e7ff",
+            "in_progress": "#dbeafe",
+            "on_hold": "#fef3c7",
+            "closing": "#f3e8ff",
+            "closed": "#dcfce7",
+            "cancelled": "#fee2e2",
+        },
+        FieldPath.PROJECT_HEALTH: {
+            "green": "#dcfce7",
+            "amber": "#fef3c7",
+            "red": "#fee2e2",
+        },
+        FieldPath.ACCREDITATION_STATUS: {
+            "draft": "#f3f4f6",
+            "in_progress": "#dbeafe",
+            "accredited": "#dcfce7",
+            "not_accredited": "#fee2e2",
+            "obsolete": "#ffedd5",
+        },
+        FieldPath.ACCREDITATION_CATEGORY: {
+            "accreditation_simplified": "#e0f2fe",
+            "accreditation_elaborated": "#dbeafe",
+            "accreditation_advanced": "#e0e7ff",
+            "accreditation_sensitive": "#fef3c7",
+            "accreditation_restricted": "#fee2e2",
+            "other": "#f3f4f6",
+        },
+    }
+    # Fallback for nominal vocabularies, cycled by seed position.
+    NEUTRAL_HEXCOLORS = [
+        "#dbeafe",
+        "#e0e7ff",
+        "#ede9fe",
+        "#f3e8ff",
+        "#fce7f3",
+        "#ffe4e6",
+        "#ffedd5",
+        "#fef3c7",
+        "#fef9c3",
+        "#ecfccb",
+        "#dcfce7",
+        "#d1fae5",
+        "#ccfbf1",
+        "#cffafe",
+        "#e0f2fe",
+    ]
+    # Owned by the organisation once seeded: set on insert, never on update.
+    USER_OWNED_FIELDS = {"is_visible", "hexcolor", "order"}
+
+    class Meta:
+        ordering = ["field_path", "order", "name"]
+
+    @classmethod
+    def default_hexcolor(cls, field_path: str, name: str, position: int) -> str:
+        colors = cls.DEFAULT_HEXCOLORS.get(field_path)
+        if colors is not None:
+            return colors.get(name, "")
+        return cls.NEUTRAL_HEXCOLORS[(position - 1) % len(cls.NEUTRAL_HEXCOLORS)]
+
+    @classmethod
+    def next_order(cls, field_path: str) -> int:
+        top = cls.objects.filter(field_path=field_path).aggregate(
+            top=models.Max("order")
+        )["top"]
+        return (top or 0) + 1
+
     @classmethod
     def _seed_defaults(cls, items):
-        # is_visible is user-controlled — only set on insert, never on update.
-        for item in items:
+        # Rank follows the list's position, which is the business order.
+        for position, item in enumerate(items, start=1):
+            seeded = {
+                "order": position,
+                "hexcolor": cls.default_hexcolor(
+                    item["field_path"], item["name"], position
+                ),
+                **item,
+            }
             cls.objects.update_or_create(
                 name=item["name"],
                 field_path=item["field_path"],
-                defaults={k: v for k, v in item.items() if k != "is_visible"},
-                create_defaults=item,
+                defaults={
+                    k: v for k, v in item.items() if k not in cls.USER_OWNED_FIELDS
+                },
+                create_defaults=seeded,
             )
 
     @classmethod

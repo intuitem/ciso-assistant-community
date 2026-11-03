@@ -7767,5 +7767,12 @@
 	"maintain": "Maintain",
 	"improveWhenDue": "Improve when due",
 	"lowConcern": "Low concern",
-	"notPlotted": "Not plotted"
+	"notPlotted": "Not plotted",
+	"terminologyFieldsDescription": "The fields whose values your organisation can adapt. Open a field to recolour, reorder, hide or add its values.",
+	"terminologyFieldDescription": "Drag a value or use the arrows to reorder. Built-in values can be recoloured, reordered and hidden, but not renamed or deleted.",
+	"terminologyValuesCount": "{count} values",
+	"terminologyHiddenCount": "{count} hidden",
+	"addTerminologyValue": "Add value",
+	"noTerminologyValues": "No value yet.",
+	"idsMustListEveryTerminology": "The new order must include every value of this field."
 }

@@ -17,14 +17,12 @@ export const load: PageServerLoad = async (event) => {
 		event.fetch(`${BASE_API_URL}/pmbok/projects/priority/`),
 		event.fetch(`${BASE_API_URL}/pmbok/projects/kind/`),
 		event.fetch(`${BASE_API_URL}/pmbok/projects/currencies/`),
-		fetchAllPages(
-			event.fetch,
-			`${BASE_API_URL}/terminologies/?field_path=project.status&is_visible=true`
-		).catch(() => []),
-		fetchAllPages(
-			event.fetch,
-			`${BASE_API_URL}/terminologies/?field_path=project.health&is_visible=true`
-		).catch(() => [])
+		fetchAllPages(event.fetch, `${BASE_API_URL}/terminologies/?field_path=project.status`).catch(
+			() => []
+		),
+		fetchAllPages(event.fetch, `${BASE_API_URL}/terminologies/?field_path=project.health`).catch(
+			() => []
+		)
 	]);
 
 	const priorityOptions = priorityRes.ok ? await priorityRes.json() : [];
@@ -32,10 +30,17 @@ export const load: PageServerLoad = async (event) => {
 	const currencyOptions = currenciesRes.ok ? await currenciesRes.json() : [];
 
 	function toEnumOptions(items: any[]): { value: string; label: string }[] {
-		return items.map((t: any) => ({ value: t.id, label: t.translated_name ?? t.name }));
+		return items
+			.filter((t: any) => t.is_visible)
+			.map((t: any) => ({ value: t.id, label: t.translated_name ?? t.name }));
 	}
 	const statusOptions = toEnumOptions(statusTerms);
 	const healthOptions = toEnumOptions(healthTerms);
+	// Snapshots store the value's name: colours are looked up by it.
+	const toColors = (items: { name: string; hexcolor?: string }[]): Record<string, string> =>
+		Object.fromEntries(items.map((t) => [t.name, t.hexcolor ?? '']));
+	const statusColors = toColors(statusTerms);
+	const healthColors = toColors(healthTerms);
 
 	const snapshotsRes = await event.fetch(
 		`${BASE_API_URL}/metrology/builtin-metric-samples/for_object/?model=project&object_id=${event.params.id}`
@@ -50,6 +55,8 @@ export const load: PageServerLoad = async (event) => {
 		currencyOptions,
 		statusOptions,
 		healthOptions,
+		statusColors,
+		healthColors,
 		snapshots
 	};
 };
