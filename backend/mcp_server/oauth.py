@@ -42,7 +42,11 @@ def _from_oauth(raw: str, token: Token) -> AccessToken | None:
         resource=mcp_resource(),
         subject=str(user.pk),
         # read at every call, so an admin's change to the profile applies at once
-        claims={"level": grant.profile.level, "profile": grant.profile.name},
+        claims={
+            "level": grant.profile.level,
+            "profile": grant.profile.name,
+            "app": token.client.name,
+        },
     )
 
 
@@ -62,7 +66,10 @@ def _from_personal_access_token(raw: str) -> AccessToken | None:
         resource=mcp_resource(),
         subject=str(user.pk),
         # a PAT has no client, so no profile: the user's full rights, as before
-        claims={"level": ConnectionProfile.Level.APPROVE.value},
+        claims={
+            "level": ConnectionProfile.Level.APPROVE.value,
+            "app": "Personal access token",
+        },
     )
 
 
@@ -70,7 +77,7 @@ def verify(raw: str) -> AccessToken | None:
     if not mcp_enabled():
         return None
     token = (
-        Token.objects.select_related("user")
+        Token.objects.select_related("user", "client")
         .valid()
         .by_value(raw)
         .filter(type=Token.Type.ACCESS_TOKEN)

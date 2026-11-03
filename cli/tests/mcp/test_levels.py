@@ -86,3 +86,50 @@ def test_get_my_access_says_what_is_missing(connected):
     text = asyncio.run(server.get_my_access())
     assert text.startswith('Profile "Read only" (read).')
     assert "does not allow creating data" in text
+
+
+class _Hooks:
+    def __init__(self, refusal=None):
+        self.refusal = refusal
+        self.calls = []
+
+    def before(self, tool, access):
+        return self.refusal
+
+    def after(self, tool, access, result, seconds, error):
+        self.calls.append((tool, result, error))
+
+
+def test_hooks_record_every_call(connected):
+    async def tool():
+        return "rows"
+
+    hooks = _Hooks()
+    connected(_access(level=levels.READ))
+    assert asyncio.run(server._with_hooks(tool, "get_folders", hooks)()) == "rows"
+    assert hooks.calls == [("get_folders", "rows", None)]
+
+
+def test_a_hook_refusal_stops_the_call(connected):
+    ran = []
+
+    async def tool():
+        ran.append(True)
+
+    hooks = _Hooks(refusal="Error: too many calls")
+    connected(_access(level=levels.READ))
+    result = asyncio.run(server._with_hooks(tool, "get_folders", hooks)())
+    assert result == "Error: too many calls"
+    assert not ran
+    assert hooks.calls == [("get_folders", "Error: too many calls", "limited")]
+
+
+def test_a_failing_tool_is_recorded_then_raises(connected):
+    async def tool():
+        raise RuntimeError("boom")
+
+    hooks = _Hooks()
+    connected(_access(level=levels.READ))
+    with pytest.raises(RuntimeError):
+        asyncio.run(server._with_hooks(tool, "get_folders", hooks)())
+    assert hooks.calls == [("get_folders", None, "RuntimeError")]

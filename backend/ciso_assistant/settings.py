@@ -912,6 +912,13 @@ OAUTH_DCR_ALLOWED_REDIRECT_HOSTS = [
     if host.strip()
 ]
 
+# Per-connection budget on the MCP server (backend-mcp), on top of the per-call
+# caps in ca_mcp: an agent could otherwise page through everything. 0 = no limit.
+MCP_MAX_CALLS_PER_MINUTE = int(os.environ.get("MCP_MAX_CALLS_PER_MINUTE", "60"))
+MCP_MAX_RESPONSE_CHARS_PER_HOUR = int(
+    os.environ.get("MCP_MAX_RESPONSE_CHARS_PER_HOUR", "2000000")
+)
+
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
 MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev

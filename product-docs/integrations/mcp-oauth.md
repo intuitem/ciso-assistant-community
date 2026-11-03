@@ -285,6 +285,30 @@ apps that registered themselves.
   before you confirm. An app that registered itself is also deleted; it can
   register again later, and users have to approve it again.
 
+### Audit and limits
+
+**Changes made through an app say so.** When an AI app creates or changes data,
+the audit log entry keeps the user as the actor and also records the app: its
+name, its client ID and the profile used (`via_app` in the entry). Audit events
+forwarded to a SIEM carry it too: as `actor.app_name` and `actor.app_uid` in
+OCSF, and as `via_app` in the raw format.
+
+**Every tool call is logged**, reads included, in the `backend-mcp` logs. Each
+`mcp tool call` line has the user, the app, the profile and level, the tool, the
+outcome (`ok`, `refused`, `limited` or `error`), the duration and the size of
+the answer. Collect these logs like the other service logs to see what an app
+read, not only what it changed.
+
+**Each connection has a budget**, on top of the size limit of a single answer:
+
+- at most 60 tool calls per minute (`MCP_MAX_CALLS_PER_MINUTE`);
+- at most 2,000,000 characters returned per hour, about a hundred full pages
+  (`MCP_MAX_RESPONSE_CHARS_PER_HOUR`).
+
+A connection is one user with one app. When it goes over, the tool answers with
+an error that tells the agent to wait, and the call is logged as `limited`. Set
+a variable to `0` to turn that limit off.
+
 ### Personal Access Tokens still work
 
 `backend-mcp` also accepts a PAT, sent as `Authorization: Bearer <PAT>`. Existing
@@ -318,6 +342,12 @@ the instance, the client and the setting.
 The client's callback host is not in `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS`. Add it,
 or leave the variable empty.
 
+#### A tool says the connection made too many calls, or read its data budget
+
+The connection went over one of the limits in [Audit and limits](#audit-and-limits).
+The agent can wait and continue. If normal use hits it, raise
+`MCP_MAX_CALLS_PER_MINUTE` or `MCP_MAX_RESPONSE_CHARS_PER_HOUR` on `backend-mcp`.
+
 #### A tool says the connection's profile does not allow it
 
 The user picked a profile with a lower level. They can reconnect and pick
@@ -349,3 +379,5 @@ or remove the `Link` header at your proxy. It's only a speed hint.
 | `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` | backend              | -                            | Comma-separated hosts a self-registered client may redirect to. Empty means any |
 | `CA_MCP_READ_ONLY`                 | backend-mcp          | `true`                       | Hide the write tools and offer only `mcp:read`                                  |
 | `CA_MCP_ALLOWED_HOSTS`             | backend-mcp          | host of `CISO_ASSISTANT_URL` | Accepted `Host` headers, port included                                          |
+| `MCP_MAX_CALLS_PER_MINUTE`         | backend-mcp          | `60`                         | Tool calls allowed per connection per minute. `0` means no limit                |
+| `MCP_MAX_RESPONSE_CHARS_PER_HOUR`  | backend-mcp          | `2000000`                    | Characters returned per connection per hour. `0` means no limit                 |

@@ -31,6 +31,7 @@ def build_app():
     from ca_mcp.server import build_oauth_http_app
 
     from mcp_server.oauth import CISOTokenVerifier
+    from mcp_server.tool_calls import ToolCallHooks
     from mcp_server.transport import dispatch
 
     client.set_transport(dispatch)
@@ -39,6 +40,7 @@ def build_app():
         token_verifier=CISOTokenVerifier(),
         issuer_url=issuer,
         resource_url=mcp_resource(),
+        hooks=ToolCallHooks(),
     )
     app = _with_kill_switch(app, urlsplit(mcp_resource()).path)
     return _with_authorization_server_metadata(app, urlsplit(issuer).path)

@@ -4,6 +4,7 @@ import asyncio
 import contextvars
 import functools
 import logging
+import time
 from urllib.parse import urlsplit
 
 import anyio.to_thread
@@ -370,9 +371,14 @@ def _offload(fn):
     return runner
 
 
-def _register_on(server, read_only, guard_write=None):
+def _register_on(server, read_only, guard_write=None, hooks=None):
+    def add(tool, runner, is_read):
+        if hooks:
+            runner = _with_hooks(runner, tool.__name__, hooks)
+        server.tool(annotations=_annotations(tool, is_read=is_read))(runner)
+
     for tool in READ_TOOLS:
-        server.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
+        add(tool, _offload(tool), is_read=True)
     if read_only:
         return
     for tool in WRITE_TOOLS:
@@ -381,7 +387,40 @@ def _register_on(server, read_only, guard_write=None):
         runner = _offload(tool)
         if guard_write:
             runner = guard_write(runner, TOOL_LEVELS[tool.__name__])
-        server.tool(annotations=_annotations(tool, is_read=False))(runner)
+        add(tool, runner, is_read=False)
+
+
+def _with_hooks(runner, name, hooks):
+    """Let the host refuse a call before it runs (limits) and record it after
+    (logging). Outermost, so refusals by the level guard are recorded too. The
+    hooks may block (database, cache): they run in a thread."""
+    from mcp.server.auth.middleware.auth_context import get_access_token
+
+    @functools.wraps(runner)
+    async def hooked(*args, **kwargs):
+        access = get_access_token()
+        refusal = await anyio.to_thread.run_sync(hooks.before, name, access)
+        if refusal:
+            await anyio.to_thread.run_sync(
+                lambda: hooks.after(name, access, refusal, 0.0, "limited")
+            )
+            return refusal
+        start = time.monotonic()
+        try:
+            result = await runner(*args, **kwargs)
+        except Exception as e:
+            failure = type(e).__name__
+            elapsed = time.monotonic() - start
+            await anyio.to_thread.run_sync(
+                lambda: hooks.after(name, access, None, elapsed, failure)
+            )
+            raise
+        await anyio.to_thread.run_sync(
+            lambda: hooks.after(name, access, result, time.monotonic() - start, None)
+        )
+        return result
+
+    return hooked
 
 
 def register_tools(read_only: bool = False):
@@ -506,8 +545,11 @@ async def get_my_access() -> str:
     return levels.summary(get_access_token())
 
 
-def build_oauth_http_app(token_verifier, issuer_url, resource_url):
-    """Streamable HTTP app for a host that authenticates callers with OAuth."""
+def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
+    """Streamable HTTP app for a host that authenticates callers with OAuth.
+
+    `hooks`, if given, has `before(tool, access) -> refusal or None` and
+    `after(tool, access, result, seconds, error)`, called around every tool."""
     from mcp.server.auth.settings import AuthSettings
     from starlette.responses import JSONResponse
 
@@ -523,7 +565,7 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url):
             validate_token_resource=True,
         ),
     )
-    _register_on(server, read_only, guard_write=_require_level)
+    _register_on(server, read_only, guard_write=_require_level, hooks=hooks)
     server.tool(annotations=_annotations(get_my_access, is_read=True))(get_my_access)
     _log_startup(
         f"MCP Streamable HTTP (OAuth) on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"

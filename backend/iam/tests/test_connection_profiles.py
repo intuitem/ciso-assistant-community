@@ -204,7 +204,11 @@ class TestBackendMcp:
     def test_the_level_comes_from_the_profile(self):
         profile = _profile("Vendor helper", "create")
         access = verify(_token(_client(), _user(), profile))
-        assert access.claims == {"level": "create", "profile": "Vendor helper"}
+        assert access.claims == {
+            "level": "create",
+            "profile": "Vendor helper",
+            "app": "Claude Code",
+        }
 
     def test_a_profile_change_applies_on_the_next_call(self):
         profile = _profile("Vendor helper", "create")
