@@ -73,12 +73,12 @@
 		{ value: 'qualitative', label: m.level() }
 	]);
 	const directionOptions = $derived([
+		{ value: 'none', label: m.noDirection() },
 		{ value: 'higher', label: m.higherIsBetter() },
-		{ value: 'lower', label: m.lowerIsBetter() },
-		{ value: 'none', label: m.noDirection() }
+		{ value: 'lower', label: m.lowerIsBetter() }
 	]);
 
-	let direction = $state<Direction>('higher');
+	let direction = $state<Direction>('none');
 	let levels = $state<Array<{ ref_id: string; name: string }>>([]);
 
 	function setMode(next: 'define' | 'existing') {
@@ -90,7 +90,7 @@
 					category: 'quantitative',
 					unit: null,
 					decimals: null,
-					higher_is_better: true,
+					higher_is_better: null,
 					choices_definition: null,
 					default_target: null,
 					default_collection_frequency: $frequencyValue ?? null

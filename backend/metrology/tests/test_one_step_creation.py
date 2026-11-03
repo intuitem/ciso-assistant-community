@@ -384,6 +384,16 @@ class TestPeriodOnEnteredValues:
 
 
 class TestDirectionAndDecimals:
+    def test_a_definition_has_no_direction_unless_one_is_stated(self):
+        es = make_domain("Spain")
+        data = {"name": "Assets", "folder": str(es.id)}
+        response = call(MetricDefinitionViewSet, "post", "create", data, admin())
+        assert response.status_code == 201, response.data
+        assert (
+            MetricDefinition.objects.get(id=response.data["id"]).higher_is_better
+            is None
+        )
+
     def test_direction_can_be_unset(self):
         es = make_domain("Spain")
         data = {"name": "Assets", "folder": str(es.id), "higher_is_better": None}

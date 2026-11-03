@@ -41,9 +41,9 @@
 	const { value: higherIsBetterValue } = formFieldProxy(form, 'higher_is_better');
 	let direction = $state<Direction>(directionOf({ higher_is_better: $higherIsBetterValue }));
 	const directionOptions = $derived([
+		{ value: 'none', label: m.noDirection() },
 		{ value: 'higher', label: m.higherIsBetter() },
-		{ value: 'lower', label: m.lowerIsBetter() },
-		{ value: 'none', label: m.noDirection() }
+		{ value: 'lower', label: m.lowerIsBetter() }
 	]);
 	function setDirection(value: string) {
 		direction = value as Direction;

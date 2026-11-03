@@ -2111,7 +2111,7 @@ export const MetricDefinitionSchema = z.object({
 	unit: z.string().optional().nullable(),
 	choices_definition: jsonSchema.optional().nullable(),
 	provider: z.string().optional().nullable(),
-	higher_is_better: z.boolean().nullable().default(true),
+	higher_is_better: z.boolean().nullable().default(null),
 	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
 	default_target: z.number().optional().nullable(),
 	default_collection_frequency: z.string().optional().nullable(),
@@ -2126,7 +2126,7 @@ export const InlineMetricDefinitionSchema = z.object({
 	category: z.string().default('quantitative'),
 	unit: z.string().optional().nullable(),
 	choices_definition: jsonSchema.optional().nullable(),
-	higher_is_better: z.boolean().nullable().default(true),
+	higher_is_better: z.boolean().nullable().default(null),
 	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
 	default_target: z.coerce.number().optional().nullable(),
 	default_collection_frequency: z.string().optional().nullable()

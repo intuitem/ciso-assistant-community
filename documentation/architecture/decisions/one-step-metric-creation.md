@@ -16,7 +16,7 @@ How a definition is spread across a group's domains and monitored there is decid
 
 A metric is created in one form: name, domain, kind, unit, decimals, frequency, direction, target. The form creates a definition in the metric's domain, named after the metric and suffixed when the domain already has one, as compose does. While the name is typed, the form offers a definition the user can read with a similar name and the same kind; the hint never blocks. A definition gains a merge action: its instances move to the chosen definition and it is deleted; kind and unit must match.
 
-Direction becomes three-way: higher is better, lower is better, none. None means no good or bad colouring, no trend colour, and an optional target. It is stored as the existing boolean made nullable.
+Direction becomes three-way: higher is better, lower is better, none. None means no good or bad colouring, no trend colour, and an optional target. It is stored as the existing boolean made nullable, with none as the default.
 
 A definition carries a number of decimals, defaulted by unit: one for a percentage, zero for a count. It applies wherever a value is shown. Stored values and exports keep full precision, and formulas read raw values.
 
@@ -25,7 +25,7 @@ A definition carries a number of decimals, defaulted by unit: one for a percenta
 - A domain manager creates and feeds a metric without meeting a definition.
 - The similar-name hint reaches library, global and group-level definitions only. Two sibling domains defining the same metric independently is caught after the fact, by the merge, by someone who sees both domains.
 - A merge keeps the chosen definition's direction, decimals and default target. An instance with a target of its own keeps it.
-- Readers of `higher_is_better` handle null. A library definition without a direction keeps today's default, higher.
+- Readers of `higher_is_better` handle null. Existing definitions keep their direction; a new one without a stated direction has none, library definitions included.
 - Schema: the direction boolean becomes nullable and the definition gains decimals. One migration, no data step.
 - The merge ships with the creation release, not later.
 

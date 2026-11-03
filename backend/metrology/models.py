@@ -103,14 +103,14 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         ),
     )
     higher_is_better = models.BooleanField(
-        default=True,
+        default=None,
         null=True,
         blank=True,
         verbose_name=_("Higher is better"),
         help_text=_(
             "If true, an increase in value is considered positive (e.g., compliance score). "
             "If false, a decrease is considered positive (e.g., number of vulnerabilities). "
-            "If unset, the metric has no direction: the value is informational."
+            "Unset, the default, means no direction: the value is informational."
         ),
     )
     decimals = models.PositiveSmallIntegerField(

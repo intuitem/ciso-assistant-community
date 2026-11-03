@@ -390,7 +390,7 @@ def compose(user, data, instance=None):
         "levels": levels,
         "unit": unit,
         # Three-way: True, False, or None for a metric without a direction.
-        "higher_is_better": _direction(data.get("higher_is_better", True)),
+        "higher_is_better": _direction(data.get("higher_is_better")),
     }
     picks = {key: {"pick": str(picked.id)} for key, picked in pairs}
     try:
