@@ -49,10 +49,10 @@ class EbiosRMStudyWriteSerializer(AssignmentNotificationMixin, BaseModelSerializ
 
 
 class EbiosRMStudyDuplicateSerializer(BaseModelSerializer):
-    # the clone always lands in the source's folder, so no folder field here
+    # `folder` is the destination domain; it defaults to the source's folder
     class Meta:
         model = EbiosRMStudy
-        fields = ["name", "ref_id", "version", "description"]
+        fields = ["name", "ref_id", "version", "description", "folder"]
 
 
 class EbiosRMStudyReadSerializer(BaseModelSerializer):

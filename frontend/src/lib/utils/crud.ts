@@ -410,7 +410,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'ebiosRmStudy',
 		localNamePlural: 'ebiosRmStudies',
 		verboseName: 'Ebios RM study',
-		verboseNamePlural: 'Ebios RM study'
+		verboseNamePlural: 'Ebios RM study',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
 	},
 	threats: {
 		name: 'threat',

@@ -1212,6 +1212,10 @@
 								e.stopPropagation();
 								return;
 							}
+							// only enter the busy state once the form is valid; otherwise the browser
+							// blocks the submit (e.g. empty required name), superForm never runs and
+							// isLoading would stay stuck on "loading" until the modal is closed
+							if (!modelSchema(URLModel).safeParse($formData).success) return;
 							isLoading = true;
 							return;
 						}

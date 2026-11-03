@@ -163,10 +163,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        # the clone stays in the source's folder; check add there for every owned model
+        # the user picks the destination domain; default to the source's folder
+        target_folder = data.get("folder") or source.folder
+        # the clone and every owned object are created in the target folder,
+        # so the add permission is checked there (not on the source)
         check_folder_add_permission(
             request.user,
-            source.folder,
+            target_folder,
             EbiosRMStudy,
             FearedEvent,
             RoTo,
@@ -184,6 +187,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             description=data.get("description", source.description),
             ref_id=data.get("ref_id", source.ref_id),
             version=data.get("version", source.version),
+            folder=target_folder,
         )
         return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 

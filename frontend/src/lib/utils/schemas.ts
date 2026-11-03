@@ -1456,11 +1456,12 @@ export const ebiosRMSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
-// the clone stays in the source's folder, so only name/version/ref_id/description are asked
+// the user picks the destination domain (folder); it defaults to the source's
 export const ebiosRMDuplicateSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
-	version: z.string().optional()
+	version: z.string().optional(),
+	folder: z.string().optional()
 });
 
 export const fearedEventsSchema = z.object({

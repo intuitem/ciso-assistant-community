@@ -1,6 +1,6 @@
 import pytest
 
-from core.models import AppliedControl, Asset, Terminology, Threat
+from core.models import AppliedControl, Asset, RiskAssessment, Terminology, Threat
 from ebios_rm.helpers import duplicate_ebios_rm_study
 from ebios_rm.models import (
     AttackPath,
@@ -13,7 +13,9 @@ from ebios_rm.models import (
     RoTo,
     Stakeholder,
     StrategicScenario,
+    get_initial_meta,
 )
+from iam.models import Folder
 from tprm.models import Entity
 
 
@@ -247,6 +249,79 @@ class TestCloneStudy:
             is_highlighted=True,
         )
         assert enter.antecedents.count() == 1
+
+    @pytest.mark.usefixtures("basic_ebios_rm_study_fixture")
+    def test_clone_resets_status_and_workshop_progress(self):
+        source = EbiosRMStudy.objects.get(name="test study")
+        _build_full_study(source)
+        source.status = EbiosRMStudy.Status.DONE
+        source.update_workshop_step_status(1, 1, "done")  # saves source
+
+        clone = duplicate_ebios_rm_study(
+            source, name="test study (copy)", version="2.0"
+        )
+
+        clone.refresh_from_db()
+        assert clone.status == EbiosRMStudy.Status.PLANNED
+        assert clone.meta == get_initial_meta()
+
+    @pytest.mark.usefixtures("basic_ebios_rm_study_fixture")
+    def test_clone_does_not_copy_the_risk_assessment(self):
+        # workshop 5 is left empty on the clone, regenerable from its scenarios
+        _, clone, _ = self._clone()
+        assert RiskAssessment.objects.filter(ebios_rm_study=clone).count() == 0
+
+    @pytest.mark.usefixtures("basic_ebios_rm_study_fixture")
+    def test_clone_tolerates_out_of_study_references(self):
+        source = EbiosRMStudy.objects.get(name="test study")
+        _build_full_study(source)
+        # the API does not forbid a child from pointing at another study's object
+        other = EbiosRMStudy.objects.create(
+            name="other study",
+            risk_matrix=source.risk_matrix,
+            folder=source.folder,
+        )
+        foreign_fe = FearedEvent.objects.create(name="foreign FE", ebios_rm_study=other)
+        source_ro_to = RoTo.objects.get(ebios_rm_study=source)
+        source_ro_to.feared_events.add(foreign_fe)
+
+        # the id -> copy maps only hold the source study, so a direct lookup would
+        # raise KeyError; the clone must fall back to the original instead.
+        clone = duplicate_ebios_rm_study(
+            source, name="test study (copy)", version="2.0"
+        )
+
+        clone_ro_to = RoTo.objects.get(ebios_rm_study=clone)
+        assert foreign_fe in clone_ro_to.feared_events.all()
+        assert clone_ro_to.feared_events.filter(ebios_rm_study=clone).count() == 2
+
+    @pytest.mark.usefixtures("basic_ebios_rm_study_fixture")
+    def test_clone_into_another_domain_places_the_aggregate_there(self):
+        source = EbiosRMStudy.objects.get(name="test study")
+        _build_full_study(source)
+        target = Folder.objects.create(
+            name="target domain", parent_folder=source.folder
+        )
+
+        clone = duplicate_ebios_rm_study(
+            source, name="test study (copy)", version="2.0", folder=target
+        )
+
+        assert clone.folder == target
+        # owned objects follow the study into the target folder (set in save())
+        assert set(
+            FearedEvent.objects.filter(ebios_rm_study=clone).values_list(
+                "folder", flat=True
+            )
+        ) == {target.id}
+        assert set(
+            KillChain.objects.filter(
+                operating_mode__operational_scenario__ebios_rm_study=clone
+            ).values_list("folder", flat=True)
+        ) == {target.id}
+        # shared objects are carried over without raising (relinked or deep-copied
+        # into the target domain by duplicate_related_objects)
+        assert clone.assets.exists()
 
 
 @pytest.mark.django_db

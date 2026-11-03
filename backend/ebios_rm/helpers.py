@@ -15,6 +15,7 @@ from .models import (
     RoTo,
     Stakeholder,
     StrategicScenario,
+    get_initial_meta,
 )
 from core.models import AppliedControl, Asset, RiskScenario
 
@@ -1112,6 +1113,11 @@ def duplicate_ebios_rm_study(
             "description": description,
             "ref_id": ref_id,
             "version": version,
+            # the clone starts fresh: reset the study status and the workshop-step
+            # progress. Keeping them would leave workshop 5 marked done while its
+            # risk assessment is not copied over (see below).
+            "status": EbiosRMStudy.Status.PLANNED,
+            "meta": get_initial_meta(),
         },
         folder=folder or source.folder,
         risk_matrix=source.risk_matrix,
@@ -1119,7 +1125,24 @@ def duplicate_ebios_rm_study(
         responsibility_matrix=source.responsibility_matrix,
         classification=source.classification,
     )
-    clone.assets.set(source.assets.all())
+
+    # Shared M2M objects: a same-domain clone relinks the very same objects
+    # (unchanged behavior). A cross-domain clone goes through
+    # duplicate_related_objects, which relinks an object when it is visible from
+    # the target folder and otherwise deep-copies it into the target domain, so
+    # the clone never points at objects invisible in its new domain. FK-referenced
+    # shared objects (risk_matrix, entity, ...) are relinked as-is either way.
+    cross_domain = clone.folder_id != source.folder_id
+
+    def carry_shared(src_obj, dup_obj, field):
+        if cross_domain:
+            from core.helpers import duplicate_related_objects
+
+            duplicate_related_objects(src_obj, dup_obj, clone.folder, field)
+        else:
+            getattr(dup_obj, field).set(getattr(src_obj, field).all())
+
+    carry_shared(source, clone, "assets")
     clone.compliance_assessments.set(source.compliance_assessments.all())
     clone.authors.set(source.authors.all())
     clone.reviewers.set(source.reviewers.all())
@@ -1130,7 +1153,7 @@ def duplicate_ebios_rm_study(
         new_fe = FearedEvent.objects.create(
             **_copy_scalar_fields(fe), ebios_rm_study=clone
         )
-        new_fe.assets.set(fe.assets.all())
+        carry_shared(fe, new_fe, "assets")
         new_fe.qualifications.set(fe.qualifications.all())
         feared_events[fe.id] = new_fe
 
@@ -1142,10 +1165,11 @@ def duplicate_ebios_rm_study(
             risk_origin=ro_to.risk_origin,
             target_objective_category=ro_to.target_objective_category,
         )
+        # the id -> copy maps only hold this study's objects; the API does not
+        # forbid out-of-study references, so fall back to the original object
+        # (map.get(id, original)) rather than raising a KeyError.
         new_ro_to.feared_events.set(
-            feared_events[fe.id]
-            for fe in ro_to.feared_events.all()
-            if fe.id in feared_events
+            feared_events.get(fe.id, fe) for fe in ro_to.feared_events.all()
         )
         ro_tos[ro_to.id] = new_ro_to
 
@@ -1157,7 +1181,7 @@ def duplicate_ebios_rm_study(
             entity=stakeholder.entity,
             category=stakeholder.category,
         )
-        new_stakeholder.applied_controls.set(stakeholder.applied_controls.all())
+        carry_shared(stakeholder, new_stakeholder, "applied_controls")
         stakeholders[stakeholder.id] = new_stakeholder
 
     strategic_scenarios = {}
@@ -1165,8 +1189,10 @@ def duplicate_ebios_rm_study(
         new_ss = StrategicScenario.objects.create(
             **_copy_scalar_fields(ss),
             ebios_rm_study=clone,
-            ro_to_couple=ro_tos[ss.ro_to_couple_id],
-            focused_feared_event=feared_events.get(ss.focused_feared_event_id),
+            ro_to_couple=ro_tos.get(ss.ro_to_couple_id, ss.ro_to_couple),
+            focused_feared_event=feared_events.get(
+                ss.focused_feared_event_id, ss.focused_feared_event
+            ),
         )
         strategic_scenarios[ss.id] = new_ss
 
@@ -1177,7 +1203,9 @@ def duplicate_ebios_rm_study(
             **_copy_scalar_fields(ap),
             strategic_scenario=strategic_scenarios[ap.strategic_scenario_id],
         )
-        new_ap.stakeholders.set(stakeholders[sh.id] for sh in ap.stakeholders.all())
+        new_ap.stakeholders.set(
+            stakeholders.get(sh.id, sh) for sh in ap.stakeholders.all()
+        )
         attack_paths[ap.id] = new_ap
 
     operational_scenarios = {}
@@ -1187,7 +1215,7 @@ def duplicate_ebios_rm_study(
             ebios_rm_study=clone,
             attack_path=attack_paths[scenario.attack_path_id],
         )
-        new_scenario.threats.set(scenario.threats.all())
+        carry_shared(scenario, new_scenario, "threats")
         new_scenario.techniques.set(scenario.techniques.all())
         operational_scenarios[scenario.id] = new_scenario
 
@@ -1209,7 +1237,7 @@ def duplicate_ebios_rm_study(
             operating_mode=operating_modes[step.operating_mode_id],
             elementary_action=step.elementary_action,
         )
-        new_step.assets.set(step.assets.all())
+        carry_shared(step, new_step, "assets")
         steps[step.id] = new_step
     # antecedents point at other steps, so wire them once every step exists
     for step in source_steps:

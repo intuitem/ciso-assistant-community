@@ -74,7 +74,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			name: `${data.name} (copy)`,
 			description: data.description ?? '',
 			version: data.version ?? '',
-			ref_id: data.ref_id ?? ''
+			ref_id: data.ref_id ?? '',
+			folder: data.folder?.id ?? data.folder ?? ''
 		},
 		zod(modelSchema('ebios-rm_duplicate')),
 		{ errors: false }
