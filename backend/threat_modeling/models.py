@@ -130,6 +130,8 @@ class ThreatModelNode(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return self.label or str(self.technique or self.get_kind_display())
 
+    folder_from = "threat_model"
+
     def save(self, *args, **kwargs):
         self.folder = self.threat_model.folder
         super().save(*args, **kwargs)
@@ -154,6 +156,8 @@ class ThreatModelEdge(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.source} → {self.target}"
+
+    folder_from = "threat_model"
 
     def save(self, *args, **kwargs):
         self.folder = self.threat_model.folder
