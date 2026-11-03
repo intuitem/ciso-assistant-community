@@ -74,6 +74,13 @@ test('user can add a custom metric sample to a metric instance', async ({
 		await metricInstancesPage.isToastVisible(
 			'The metric instance object has been successfully created'
 		);
+		// The definition was created with it, under the metric's name.
+		await page.waitForURL(/\/metric-instances\/[0-9a-f-]{36}$/);
+		await expect(
+			page.locator('a[href^="/metric-definitions/"]', {
+				hasText: vars.metricInstanceName + ' one step'
+			})
+		).toBeVisible();
 	});
 
 	await test.step('add a custom metric sample', async () => {

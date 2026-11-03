@@ -47,8 +47,10 @@
 					mergeable: '1'
 				});
 				const res = await fetch(`/fe-api/metrology/similar-definitions?${params}`);
-				if (!res.ok || current !== run) return;
-				candidates = await res.json();
+				if (current !== run) return;
+				const found: Candidate[] = res.ok ? await res.json() : [];
+				if (current !== run) return;
+				candidates = found;
 			} catch {
 				if (current !== run) return;
 				candidates = [];

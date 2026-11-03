@@ -37,6 +37,7 @@ export function roundHalfUp(n: number, decimals: number): number {
 	const shifted = Number(`${mantissa}e${Number(exponent) + decimals}`);
 	if (!Number.isFinite(shifted)) return n;
 	const rounded = Number(`${Math.round(shifted)}e-${decimals}`);
+	if (!Number.isFinite(rounded)) return n;
 	return n < 0 ? -rounded : rounded;
 }
 

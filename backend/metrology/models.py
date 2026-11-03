@@ -504,18 +504,23 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = _("Custom metric sample")
         verbose_name_plural = _("Custom metric samples")
-        ordering = ["-timestamp"]  # Most recent first
+        # Most recent first; two values typed in the same second (for two
+        # periods) rank by entry.
+        ordering = ["-timestamp", "-created_at"]
         constraints = [
             models.UniqueConstraint(
                 fields=["metric_instance", "period_start"],
                 condition=models.Q(period_start__isnull=False),
                 name="unique_metric_sample_per_period",
             ),
-            # One entered sample per instance and second (record()); a
-            # formula's samples keep their own rule, one per period.
+            # One entered sample per instance and second (record()) for the
+            # values typed without a period; a value answering for a period
+            # has its own rule above, one per period, as a formula's samples
+            # do, so two periods typed in the same second never collide.
             models.UniqueConstraint(
                 fields=["metric_instance", "timestamp"],
-                condition=~models.Q(source="derived"),
+                condition=~models.Q(source="derived")
+                & models.Q(period_start__isnull=True),
                 name="unique_entered_sample_per_second",
             ),
         ]
@@ -551,20 +556,9 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         timestamp = whole_second(timestamp)
         if period_start is not None:
             # A value answering for a period: one per instance and period,
-            # the last one written wins, whenever it was typed. Its second
-            # must still be its own: another entered sample holding it (a
-            # value typed in the same second) is moved a second back, so the
-            # new value is the latest and no sample is dated after its entry.
-            others = entered.exclude(period_start=period_start).filter(
-                metric_instance=metric_instance
-            )
-            holder = others.filter(timestamp=timestamp).first()
-            if holder is not None:
-                free = timestamp - timedelta(seconds=1)
-                while others.filter(timestamp=free).exists():
-                    free -= timedelta(seconds=1)
-                holder.timestamp = free
-                holder.save(update_fields=["timestamp"])
+            # the last one written wins, whenever it was typed. Its second is
+            # not unique (the per-second rule is for periodless values), so
+            # two periods typed in the same second both keep their entry time.
             return entered.update_or_create(
                 metric_instance=metric_instance,
                 period_start=period_start,

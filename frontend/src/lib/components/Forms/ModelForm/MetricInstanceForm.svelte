@@ -155,6 +155,8 @@
 				const res = await fetch(`/fe-api/metrology/similar-definitions?${params}`);
 				if (!res.ok || run !== lookup) return;
 				const found: Similar[] = await res.json();
+				// The name may have changed while the body was read.
+				if (run !== lookup) return;
 				similar = found[0] ?? null;
 			} catch {
 				// An older lookup failing must not hide a newer hint.

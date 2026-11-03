@@ -43,14 +43,20 @@ def similar_definitions(user, name, category=None, exclude=None, mergeable=False
     if exclude is not None:
         definitions = definitions.exclude(id=exclude)
     if mergeable:
-        # A merge target has the source's kind and unit: anything else would
-        # be shown disabled, and could push a real target past the cut.
-        definitions = definitions.filter(expression="")
+        # A merge target is what merge_definitions accepts: no formula (a
+        # blank expression is none, as is_derived reads it), the source's
+        # kind and unit, and for levels the same list. Filtered before the
+        # cut, so a real target is never pushed out by a refused one.
+        definitions = definitions.exclude(expression__regex=r"\S")
         source = MetricDefinition.objects.filter(id=exclude).first()
         if source is not None:
             definitions = definitions.filter(
                 category=source.category, unit_id=source.unit_id
             )
+            if source.category == MetricDefinition.Category.QUALITATIVE:
+                definitions = definitions.filter(
+                    choices_definition=source.choices_definition
+                )
     definitions = list(definitions[:SIMILAR_LIMIT])
     if not definitions:
         return []

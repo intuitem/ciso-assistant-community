@@ -368,6 +368,12 @@ class TestMerge:
         same = MetricDefinition.objects.create(
             name="Assets z", folder=group, unit=count
         )
+        MetricDefinition.objects.create(
+            name="Assets q", folder=group, unit=count, category="qualitative"
+        )
+        MetricDefinition.objects.create(
+            name="Assets f", folder=group, unit=count, expression="1 + 1"
+        )
         response = call(
             MetricDefinitionViewSet,
             "get",
