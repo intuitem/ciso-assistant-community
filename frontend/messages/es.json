@@ -3642,8 +3642,6 @@
 	"builderUnsavedChangesNavigation": "Tiene cambios sin guardar que se perderán. ¿Salir de todos modos?",
 	"fieldVisibility": "Visibilidad de campos",
 	"fieldVisibilityHelpText": "Controle qué campos puede ver y editar cada rol.",
-	"visibilityAuditorRespondent": "Auditor + Encuestado",
-	"visibilityAuditorOnly": "Solo auditor",
 	"visibilityHidden": "Oculto",
 	"answers": "Respuestas",
 	"respondentAlignment": "Alineación del encuestado",
@@ -3927,5 +3925,7 @@
 	"dpiaRequirementChanges": "Historial del requisito de EIPD",
 	"previously": "Anteriormente",
 	"vulnerabilityOpenWithRemediationDate": "Vulnerabilidad abierta con fecha de remediación",
-	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidad resuelta sin fecha de remediación"
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidad resuelta sin fecha de remediación",
+	"reportTimezone": "Zona horaria de los informes",
+	"reportTimezoneHelpText": "Región utilizada para las horas impresas en informes y exportaciones. Cada hora muestra su desfase respecto a UTC. Las horas en pantalla no se ven afectadas."
 }
