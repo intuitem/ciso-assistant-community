@@ -4103,6 +4103,25 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return []
         return evaluate_staircases(obj, rules)[1]
 
+    weakest_links = serializers.SerializerMethodField()
+
+    def get_weakest_links(self, obj):
+        from core.utils import get_respondent_scoped_folder_ids, is_field_visible_to
+        from core.weakest_link import evaluate_weakest_links, weakest_link_rules
+
+        view = self.context.get("view")
+        request = self.context.get("request")
+        if getattr(view, "action", None) != "retrieve" or request is None:
+            return []
+        rules = weakest_link_rules(obj.outcome_rules)
+        if not rules:
+            return []
+        if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return []
+        if not is_field_visible_to(obj, "result", "auditor"):
+            return []
+        return evaluate_weakest_links(obj, rules)[1]
+
     scores_definition = serializers.SerializerMethodField()
 
     def get_scores_definition(self, obj):

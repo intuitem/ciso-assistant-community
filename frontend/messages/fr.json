@@ -7807,5 +7807,21 @@
 	"staircaseBlocking": "{count} exigence(s) bloquant le niveau suivant",
 	"staircaseOverall": "Niveau le plus bas parmi les {count} {unit}",
 	"staircaseSections": "sections",
-	"staircaseLowerLevelsHelpText": "Les niveaux inférieurs à la cible sont ajoutés : ils servent à déterminer le niveau atteint."
+	"staircaseLowerLevelsHelpText": "Les niveaux inférieurs à la cible sont ajoutés : ils servent à déterminer le niveau atteint.",
+	"weakestLinkOverall": "Sur l'ensemble des {count} {unit}",
+	"weakestLinkDrivers": "Déterminé par {count} exigence(s) :",
+	"builderRuleKindWeakestLink": "Maillon faible",
+	"builderWeakestLinkSummary": "notation au niveau {depth}",
+	"builderWeakestLinkHowRate": "Chaque nœud de niveau {depth} de l'arborescence (1 = premier niveau) est noté d'après les exigences qu'il contient :",
+	"builderWeakestLinkHowNotAssessed": "non évalué tant que l'une d'elles n'est pas évaluée ;",
+	"builderWeakestLinkHowWorst": "sinon, le moins bon de leurs résultats : {worst}, puis {middle}, puis {best}. Les exigences non applicables sont écartées.",
+	"builderWeakestLinkHowPer": "Pour chaque élément des {unit}, le score est la moyenne de ses nœuds notés, avec les poids :",
+	"builderWeakestLinkHowWhole": "Le score de l'audit est la moyenne de ses nœuds notés, avec les poids :",
+	"builderWeakestLinkHowUnassessed": "Les nœuds non évalués sont comptés à part, et non comme 0. Le score global, en pourcentage, est lisible par les règles numériques via values suivi de l'identifiant de cette règle.",
+	"builderWeakestLinkDepth": "Niveau des nœuds notés",
+	"builderWeakestLinkDepthHint": "1 = nœuds de premier niveau, 2 = leurs enfants, etc.",
+	"builderWeakestLinkPerSectionHint": "Chaque nœud de premier niveau a sa propre synthèse et son propre score.",
+	"builderWeakestLinkResultLabels": "Noms des résultats (facultatif)",
+	"builderWeakestLinkHowTitle": "Calcul de la notation",
+	"builderWeakestLinkPerSection": "Une synthèse par section de premier niveau"
 }

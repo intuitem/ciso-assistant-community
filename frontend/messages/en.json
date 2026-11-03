@@ -7807,5 +7807,21 @@
 	"staircaseBlocking": "{count} requirement(s) blocking the next level",
 	"staircaseOverall": "Lowest level across the {count} {unit}",
 	"staircaseSections": "sections",
-	"staircaseLowerLevelsHelpText": "Levels below the target are added: they are needed to tell which level is reached."
+	"staircaseLowerLevelsHelpText": "Levels below the target are added: they are needed to tell which level is reached.",
+	"weakestLinkOverall": "Across the {count} {unit}",
+	"weakestLinkDrivers": "Set by {count} requirement(s):",
+	"builderRuleKindWeakestLink": "Weakest link",
+	"builderWeakestLinkSummary": "rated at depth {depth}",
+	"builderWeakestLinkHowRate": "Each node at depth {depth} of the tree (1 = top level) is rated from the requirements below it:",
+	"builderWeakestLinkHowNotAssessed": "not assessed while any of them is not assessed;",
+	"builderWeakestLinkHowWorst": "otherwise the worst of their results: {worst}, then {middle}, then {best}. Not applicable requirements are set aside.",
+	"builderWeakestLinkHowPer": "Every one of the {unit} is scored as the mean of its rated nodes, weighted:",
+	"builderWeakestLinkHowWhole": "The audit is scored as the mean of its rated nodes, weighted:",
+	"builderWeakestLinkHowUnassessed": "Not assessed nodes are counted apart, not as 0. The overall score, as a percentage, can be read by number rules as values followed by this rule's ID.",
+	"builderWeakestLinkDepth": "Depth of the rated nodes",
+	"builderWeakestLinkDepthHint": "1 = top-level nodes, 2 = their children, and so on.",
+	"builderWeakestLinkPerSectionHint": "Each top-level node gets its own summary and score.",
+	"builderWeakestLinkResultLabels": "Result names (optional)",
+	"builderWeakestLinkHowTitle": "How the rating is computed",
+	"builderWeakestLinkPerSection": "One summary per top-level section"
 }

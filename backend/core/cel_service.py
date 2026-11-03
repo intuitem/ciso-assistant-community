@@ -18,6 +18,11 @@ from core.quick_form_ratings import (
     value_names,
 )
 from core.staircase import evaluate_staircases, staircase_errors, staircase_rules
+from core.weakest_link import (
+    evaluate_weakest_links,
+    weakest_link_errors,
+    weakest_link_rules,
+)
 
 from core.quick_form_scoring import (
     aggregate_form,
@@ -534,6 +539,7 @@ def evaluate_outcomes(compliance_assessment) -> None:
         context, _hidden = build_cel_context(ca)
         _add_scores(context, ca, framework, rules)
         staircase_values, _details = evaluate_staircases(ca, rules)
+        staircase_values.update(evaluate_weakest_links(ca, rules)[0])
         computed, values = _evaluate_rules(
             celpy.Environment(),
             rules,
@@ -849,7 +855,9 @@ def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
     rules = [
         r
         for r in rules or []
-        if r.get("expression") and r.get("ref_id") and r.get("kind") != "staircase"
+        if r.get("expression")
+        and r.get("ref_id")
+        and r.get("kind") not in ("staircase", "weakest_link")
     ]
     base = {
         k: _python_to_cel(v)
@@ -1129,16 +1137,27 @@ def _check_rules(rules, probe: dict, check, error, rating_values=()) -> None:
     rules above it."""
     for rule in rules:
         kind = rule.get("kind")
-        if kind not in (None, "", "boolean", "number", "rating", "staircase"):
+        if kind not in (
+            None,
+            "",
+            "boolean",
+            "number",
+            "rating",
+            "staircase",
+            "weakest_link",
+        ):
             error(
                 str(rule.get("ref_id") or ""),
                 str(rule.get("expression") or ""),
-                f"Unknown rule kind '{kind}': use 'number', 'rating', 'staircase' "
+                f"Unknown rule kind '{kind}': use 'number', 'rating', 'staircase', "
+                "'weakest_link' "
                 "or leave it empty",
             )
     # Rating outcomes are computed before any rule, from their scales.
     values: dict[str, float] = {name: 1.0 for name in rating_values}
-    rules = [r for r in rules if r.get("kind") not in ("rating", "staircase")]
+    rules = [
+        r for r in rules if r.get("kind") not in ("rating", "staircase", "weakest_link")
+    ]
     for rule in [r for r in rules if is_numeric_rule(r)]:
         ref_id = str(rule.get("ref_id") or "")
         expression = str(rule.get("expression") or "")
@@ -1244,6 +1263,9 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
         if rule.get("kind") == "staircase":
             for message in staircase_errors(rule, known_groups):
                 _error("outcome", str(rule.get("ref_id") or ""), "", message)
+        if rule.get("kind") == "weakest_link":
+            for message in weakest_link_errors(rule):
+                _error("outcome", str(rule.get("ref_id") or ""), "", message)
 
     _check_rules(
         rules,
@@ -1255,7 +1277,10 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
             "outcome", ref_id, expression, message
         ),
         # Staircase levels are computed before any rule, as ratings are.
-        rating_values=[rule["ref_id"] for rule in staircase_rules(rules)],
+        rating_values=[
+            rule["ref_id"]
+            for rule in [*staircase_rules(rules), *weakest_link_rules(rules)]
+        ],
     )
     return errors
 

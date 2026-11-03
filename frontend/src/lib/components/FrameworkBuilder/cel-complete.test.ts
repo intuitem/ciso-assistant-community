@@ -87,6 +87,14 @@ describe('catalog', () => {
 		];
 		expect(readableValues(rules, 0)).toEqual(['ml']);
 	});
+
+	test('a weakest-link score is readable from every rule, even above it', () => {
+		const rules = [
+			{ ref_id: 'a', kind: 'number' as const, annotation: '', color: null, expression: '' },
+			{ ref_id: 'eff', kind: 'weakest_link' as const, annotation: '', color: null, expression: '' }
+		];
+		expect(readableValues(rules, 0)).toEqual(['eff']);
+	});
 });
 
 describe('suggestions', () => {
