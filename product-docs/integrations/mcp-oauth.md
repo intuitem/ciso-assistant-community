@@ -17,7 +17,8 @@ or paste a Personal Access Token (PAT).
 - **Each user approves the app themselves**, on a consent page in CISO Assistant.
 - **The app gets that user's permissions.** It sees the same domains and objects
   as the user in the UI, no more.
-- **The user picks read or write access** when they approve.
+- **The app can get less than the user.** The administrator sets up profiles
+  (for example "Read only"), and the user picks one when they approve.
 - **The user can revoke the app at any time** from their profile settings.
 
 This page covers the OAuth setup. For the MCP server itself, the tools and the
@@ -33,7 +34,7 @@ stdio setup, see the [MCP setup guide](mcp.md).
    Client Registration (DCR).
 4. A browser opens on the CISO Assistant login page. The user signs in as usual,
    including MFA or SSO.
-5. CISO Assistant shows a consent page. The user picks the access and clicks
+5. CISO Assistant shows a consent page. The user picks a profile and clicks
    **Authorize**.
 6. The client gets a token and uses it for every MCP call, until the user
    revokes it.
@@ -46,20 +47,38 @@ The MCP server runs as its own service, `backend-mcp`, next to the backend. It
 shares the backend's database and checks each token there. Tool calls run inside
 CISO Assistant as the signed-in user, with the same permission checks as the UI.
 
-### Access levels
+### Profiles
 
-The consent page offers two levels:
+A profile says what an app may do once connected. Administrators manage them in
+**Organization** > **Connected apps** > **Profiles**. Each profile has a
+**level**:
 
-| Scope       | Shown as                                 | What the app can do                         |
-| ----------- | ---------------------------------------- | ------------------------------------------- |
-| `mcp:read`  | Read your CISO Assistant data            | Use the read tools: list, get, count        |
-| `mcp:write` | Create and change data in CISO Assistant | Use the tools that create, change or delete |
+| Level   | What the app can do                                                  |
+| ------- | -------------------------------------------------------------------- |
+| Read    | Use the read tools: list, get, count                                 |
+| Create  | Also create data. It can't change or delete existing data            |
+| Update  | Also change and delete data                                          |
+| Approve | Also approve or move items through a workflow. No tool needs it yet  |
 
-Write access never adds permissions. A user who can't edit a folder in the UI
-can't edit it through MCP either.
+Two profiles exist from the start: **Read only** (the default) and **Read and
+change** (Update level). Add, edit or delete profiles to match your needs.
 
-If the server runs read-only (`CA_MCP_READ_ONLY=true`), only `mcp:read` is
-offered and the write tools are hidden.
+- On the consent page, the user picks one of the profiles. The default is
+  preselected. When there is only one profile, there is nothing to pick.
+- A profile only removes access. A user who can't edit a folder in the UI can't
+  edit it through MCP either, whatever the profile.
+- Changing a profile's level applies at once to the apps that use it.
+- Deleting a profile revokes every connection that uses it. Their users must
+  connect again and pick another profile.
+- Apps that skip the consent page get the default profile.
+- The app only sees the tools its profile allows. It can call `get_my_access`
+  to learn what it may do.
+
+Every profile is offered to every app. Tying a profile to specific apps is not
+available yet.
+
+If the server runs read-only (`CA_MCP_READ_ONLY=true`), the write tools are
+hidden whatever the profile.
 
 ### Enable it (administrators)
 
@@ -122,16 +141,14 @@ to accept any host. Redirects must use HTTPS, except for loopback addresses.
 
 {% step %}
 
-#### Choose read-only or read and write
+#### Allow the write tools
 
-`backend-mcp` is read-only by default. To let users grant write access:
+`backend-mcp` is read-only by default: the write tools are hidden whatever the
+profile. To make them available to profiles above **Read**:
 
 ```env
 CA_MCP_READ_ONLY=false
 ```
-
-Users who connected before the change keep their read-only access. They must
-reconnect to be offered write access.
 {% endstep %}
 
 {% step %}
@@ -150,6 +167,14 @@ administrator decides so.
 Unticking a user, or deactivating them, disconnects all their apps at once.
 Turning the feature flag off blocks every connection but keeps them: they work
 again when you turn it back on.
+{% endstep %}
+
+{% step %}
+
+#### Review the profiles
+
+Go to **Organization** > **Connected apps** > **Profiles**. Keep the two
+profiles that exist from the start, or change them. See [Profiles](#profiles).
 {% endstep %}
 
 {% step %}
@@ -225,7 +250,7 @@ every app that can access your account:
 | ---------- | -------------------------------------------------------------------- |
 | App        | The name the app gave. **Registered itself** means nobody checked it |
 | Returns to | Where the app sends you back after sign-in. This identifies the app  |
-| Access     | **Read your data**, and **Create and change data** if granted        |
+| Profile    | The profile you picked when you approved the app                     |
 | Last used  | The last call the app made. Updated at most once a minute            |
 
 <figure><img src="../.gitbook/assets/mcp-oauth-connected-apps.png" alt=""><figcaption><p>Connected apps in the security settings: Claude Code with read and write access, and apps that are authorized but not used yet</p></figcaption></figure>
@@ -240,15 +265,15 @@ again.
 <figure><img src="../.gitbook/assets/mcp-oauth-revoke-confirm.png" alt=""><figcaption><p>Revoking MCP Inspector asks for confirmation first</p></figcaption></figure>
 
 {% hint style="info" %}
-An app that says it has no access, or only read access, will not fix itself.
-Revoke it, or clear its sign-in in the client (in Claude Code: `/mcp` > **Clear
-authentication**), then connect again and grant the access you want.
+An app whose profile doesn't allow what you need will not fix itself. Revoke
+it, or clear its sign-in in the client (in Claude Code: `/mcp` > **Clear
+authentication**), then connect again and pick another profile.
 {% endhint %}
 
 ### Manage connections (administrators)
 
 Go to **Organization** > **Connected apps**. The page lists the connections of
-every user: user, app, where it sends users back, access, the date it was
+every user: user, app, where it sends users back, profile, the date it was
 authorized and when it was last used. Search by user or app, or show only the
 apps that registered themselves.
 
@@ -263,15 +288,15 @@ apps that registered themselves.
 ### Personal Access Tokens still work
 
 `backend-mcp` also accepts a PAT, sent as `Authorization: Bearer <PAT>`. Existing
-setups that use **API key** authentication keep working. A PAT gets read and
-write access, within the user's permissions.
+setups that use **API key** authentication keep working. Profiles don't apply
+to a PAT: it gets the user's full permissions.
 
 ### Troubleshooting
 
 #### "You cannot connect this app" during sign-in
 
-The user's account is not allowed to connect AI apps, or the feature is off for
-the whole instance. The page says which. See
+The user's account is not allowed to connect AI apps, the feature is off for
+the whole instance, or there is no profile left. The page says which. See
 [Turn MCP on and choose who may connect](#turn-mcp-on-and-choose-who-may-connect).
 
 #### `/mcp` answers `403` "MCP is disabled by your administrator."
@@ -293,10 +318,11 @@ the instance, the client and the setting.
 The client's callback host is not in `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS`. Add it,
 or leave the variable empty.
 
-#### The write tools say they need the `mcp:write` scope
+#### A tool says the connection's profile does not allow it
 
-The app was granted read access only. Check that `CA_MCP_READ_ONLY=false`, then
-reconnect and grant write access on the consent page.
+The user picked a profile with a lower level. They can reconnect and pick
+another profile, or an administrator can raise the level of that profile. If the
+write tools are missing entirely, check that `CA_MCP_READ_ONLY=false`.
 
 #### `/api` answers "This client can only access the MCP endpoint."
 

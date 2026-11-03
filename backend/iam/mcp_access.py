@@ -11,6 +11,7 @@ MCP_FLAG = "mcp"
 
 MCP_DISABLED = "mcp_disabled"
 NOT_ALLOWED = "not_allowed"
+NO_PROFILE = "no_profile"
 
 
 def mcp_enabled() -> bool:
@@ -31,21 +32,30 @@ def refusal_reason(user, mcp_request: bool) -> str | None:
         return MCP_DISABLED
     if not user.can_connect_apps:
         return NOT_ALLOWED
+    if mcp_request:
+        from iam.models import ConnectionProfile
+
+        if not ConnectionProfile.objects.exists():
+            return NO_PROFILE
     return None
 
 
 def revoke_app_tokens(user_ids, client_ids=None) -> int:
     """Delete every token type (a pending code could still be redeemed) and the
-    usage rows. Service-account tokens carry no user and are never matched."""
-    from iam.models import ConnectedAppUse
+    usage and grant rows. Service-account tokens carry no user and are never
+    matched."""
+    from iam.models import AppGrant, ConnectedAppUse
 
     tokens = Token.objects.filter(user_id__in=user_ids, client__isnull=False)
     uses = ConnectedAppUse.objects.filter(user_id__in=user_ids)
+    grants = AppGrant.objects.filter(user_id__in=user_ids)
     if client_ids is not None:
         tokens = tokens.filter(client_id__in=client_ids)
         uses = uses.filter(client_id__in=client_ids)
+        grants = grants.filter(client_id__in=client_ids)
     deleted, _ = tokens.delete()
     uses.delete()
+    grants.delete()
     logger.info(
         "app tokens revoked",
         users=[str(u) for u in user_ids],
@@ -53,3 +63,12 @@ def revoke_app_tokens(user_ids, client_ids=None) -> int:
         deleted_tokens=deleted,
     )
     return deleted
+
+
+def revoke_grants(grants) -> int:
+    """Revoke each (user, client) of the grants, and nothing across them: user A
+    on app X and user B on app Y must not revoke A on Y."""
+    return sum(
+        revoke_app_tokens([user_id], [client_id])
+        for user_id, client_id in set(grants.values_list("user_id", "client_id"))
+    )

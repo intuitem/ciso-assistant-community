@@ -316,11 +316,6 @@
 		modalStore.trigger(modal);
 	}
 
-	const connectedAppScopeLabels: Record<string, () => string> = {
-		'mcp:read': m.connectedAppScopeRead,
-		'mcp:write': m.connectedAppScopeWrite
-	};
-
 	function modalRegisterWebAuthn(): void {
 		const modalComponent: ModalComponent = {
 			ref: RegisterWebAuthnModal,
@@ -583,7 +578,7 @@
 												<tr class="text-left border-b border-surface-200-800">
 													<th class="py-2 pr-4">{m.connectedAppName()}</th>
 													<th class="py-2 pr-4">{m.connectedAppRedirectsTo()}</th>
-													<th class="py-2 pr-4">{m.connectedAppAccess()}</th>
+													<th class="py-2 pr-4">{m.connectionProfile()}</th>
 													<th class="py-2 pr-4">{m.connectedAppLastUsed()}</th>
 													<th class="py-2"></th>
 												</tr>
@@ -605,9 +600,7 @@
 															{/each}
 														</td>
 														<td class="py-2 pr-4">
-															{#each app.scopes.filter((scope: string) => connectedAppScopeLabels[scope]) as scope}
-																<span class="block">{connectedAppScopeLabels[scope]()}</span>
-															{/each}
+															{app.profile?.name ?? '--'}
 														</td>
 														<td class="py-2 pr-4">
 															{#if app.last_used_at}

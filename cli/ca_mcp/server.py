@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 import anyio.to_thread
 from mcp.server.mcpserver import MCPServer
 
-from . import config
+from . import config, levels
 from .auth import capture_headers
 from .utils.response_formatter import _cap
 
@@ -224,35 +224,55 @@ READ_TOOLS = [
     get_operating_mode_quotation,
 ]
 
-WRITE_TOOLS = [
+# Each write tool's level is declared here, not guessed from its name: a tool
+# missing from both lists fails tests/mcp/test_levels.py.
+CREATE_TOOLS = [
     import_stored_library,
     create_folder,
-    update_folder,
     create_team,
-    update_team,
-    update_user,
     create_perimeter,
     create_asset,
     create_threat,
     create_applied_control,
     create_risk_assessment,
-    sync_risk_assessment_from_ebios_rm,
     create_risk_scenario,
     create_business_impact_analysis,
     create_compliance_assessment,
     create_quantitative_risk_study,
     create_quantitative_risk_scenario,
     create_quantitative_risk_hypothesis,
-    refresh_quantitative_risk_study_simulations,
     create_task_template,
     create_vulnerability,
+    create_evidence,
+    create_incident,
+    create_timeline_entry,
+    create_entity,
+    create_entity_assessment,
+    create_representative,
+    create_solution,
+    create_contract,
+    create_ebios_rm_study,
+    create_feared_event,
+    create_ro_to_couple,
+    create_stakeholder,
+    create_strategic_scenario,
+    create_attack_path,
+    create_operational_scenario,
+    create_elementary_action,
+    create_operating_mode,
+    create_kill_chain_step,
+]
+
+UPDATE_TOOLS = [
+    update_folder,
+    update_team,
+    update_user,
+    sync_risk_assessment_from_ebios_rm,
+    refresh_quantitative_risk_study_simulations,
     update_vulnerability,
     delete_vulnerability,
-    create_evidence,
     update_evidence,
-    create_incident,
     update_incident,
-    create_timeline_entry,
     update_timeline_entry,
     update_asset,
     update_risk_scenario,
@@ -266,26 +286,11 @@ WRITE_TOOLS = [
     update_quantitative_risk_hypothesis,
     update_task_template,
     delete_task_template,
-    create_entity,
-    create_entity_assessment,
-    create_representative,
-    create_solution,
-    create_contract,
     update_entity,
     update_entity_assessment,
     update_representative,
     update_solution,
     update_contract,
-    create_ebios_rm_study,
-    create_feared_event,
-    create_ro_to_couple,
-    create_stakeholder,
-    create_strategic_scenario,
-    create_attack_path,
-    create_operational_scenario,
-    create_elementary_action,
-    create_operating_mode,
-    create_kill_chain_step,
     update_ebios_rm_study,
     update_feared_event,
     update_ro_to_couple,
@@ -297,6 +302,18 @@ WRITE_TOOLS = [
     update_kill_chain_step,
 ]
 
+# Approving or moving objects through a workflow. No tool needs it yet.
+APPROVE_TOOLS = []
+
+WRITE_TOOLS = CREATE_TOOLS + UPDATE_TOOLS + APPROVE_TOOLS
+
+TOOL_LEVELS = {
+    **{tool.__name__: levels.READ for tool in READ_TOOLS},
+    **{tool.__name__: levels.CREATE for tool in CREATE_TOOLS},
+    **{tool.__name__: levels.UPDATE for tool in UPDATE_TOOLS},
+    **{tool.__name__: levels.APPROVE for tool in APPROVE_TOOLS},
+}
+
 
 LOOPBACK_HOSTS = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
 LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
@@ -304,7 +321,7 @@ LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"
 _registered = False
 
 READ_SCOPE = "mcp:read"
-WRITE_SCOPE = "mcp:write"
+WRITE_SCOPE = levels.WRITE_SCOPE
 
 
 def _annotations(fn, is_read):
@@ -363,7 +380,7 @@ def _register_on(server, read_only, guard_write=None):
             continue
         runner = _offload(tool)
         if guard_write:
-            runner = guard_write(runner)
+            runner = guard_write(runner, TOOL_LEVELS[tool.__name__])
         server.tool(annotations=_annotations(tool, is_read=False))(runner)
 
 
@@ -453,20 +470,40 @@ def build_http_app():
     )
 
 
-def _require_write_scope(runner):
+def _require_level(runner, needed):
     from mcp.server.auth.middleware.auth_context import get_access_token
 
     @functools.wraps(runner)
     async def guarded(*args, **kwargs):
         access = get_access_token()
-        if access is None or WRITE_SCOPE not in access.scopes:
-            return (
-                f"Error: this tool changes data and needs the '{WRITE_SCOPE}' scope. "
-                "Reconnect and grant write access to use it."
-            )
+        if not levels.allows(levels.granted_level(access), needed):
+            return levels.refusal(access, needed)
         return await runner(*args, **kwargs)
 
     return guarded
+
+
+class LevelFilteredServer(MCPServer):
+    """Lists only the tools the connection's level allows, so the agent does not
+    try the others. The guard on each tool is the boundary; this is for the agent."""
+
+    async def list_tools(self):
+        from mcp.server.auth.middleware.auth_context import get_access_token
+
+        level = levels.granted_level(get_access_token())
+        return [
+            tool
+            for tool in await super().list_tools()
+            if levels.allows(level, TOOL_LEVELS.get(tool.name, levels.READ))
+        ]
+
+
+async def get_my_access() -> str:
+    """What this connection may do in CISO Assistant (read, create, change,
+    approve), and which profile it uses. Call it before planning changes."""
+    from mcp.server.auth.middleware.auth_context import get_access_token
+
+    return levels.summary(get_access_token())
 
 
 def build_oauth_http_app(token_verifier, issuer_url, resource_url):
@@ -475,8 +512,9 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url):
     from starlette.responses import JSONResponse
 
     read_only = config.READ_ONLY
-    server = MCPServer(
+    server = LevelFilteredServer(
         "ciso-assistant",
+        instructions="Call get_my_access to see what this connection may do.",
         token_verifier=token_verifier,
         auth=AuthSettings(
             issuer_url=issuer_url,
@@ -485,7 +523,8 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url):
             validate_token_resource=True,
         ),
     )
-    _register_on(server, read_only, guard_write=_require_write_scope)
+    _register_on(server, read_only, guard_write=_require_level)
+    server.tool(annotations=_annotations(get_my_access, is_read=True))(get_my_access)
     _log_startup(
         f"MCP Streamable HTTP (OAuth) on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
     )

@@ -14,6 +14,12 @@
                padding: .75rem 1rem; margin-bottom: 1.5rem; font-size: .9rem; }
     .warning ul { margin: .5rem 0 0; padding-left: 1.2rem; word-break: break-all; }
     form ul { list-style: none; padding: 0; }
+    fieldset { border: 1px solid #d1d5db; border-radius: 8px; padding: .75rem 1rem; }
+    legend { font-weight: 600; padding: 0 .25rem; }
+    .profile { display: flex; gap: .6rem; align-items: flex-start; padding: .5rem 0; }
+    .profile input { margin-top: .3rem; }
+    .profile p { margin: .15rem 0 0; font-size: .9rem; color: #4b5563; }
+    .errors { color: #b91c1c; font-size: .9rem; }
     .actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
     button { border-radius: 8px; padding: .6rem 1.2rem; font-size: 1rem; cursor: pointer; }
     .primary { background: #7c3aed; color: #fff; border: none; }
@@ -33,7 +39,39 @@
     {% endif %}
     <form method="post" action="{% url 'idp:oidc:authorization' %}">
       {% csrf_token %}
-      {{ form }}
+      {% if form.mcp_request %}
+        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+        {% if form.email %}<p>{{ form.email.label_tag }} {{ form.email }}</p>{% endif %}
+        <fieldset>
+          <legend>{% translate "What this app may do" %}</legend>
+          {% if profiles|length == 1 %}
+            {% with item=profiles.0 %}
+              <input type="hidden" name="profile" value="{{ item.profile.pk }}">
+              <div class="profile">
+                <div>
+                  <strong>{{ item.profile.name }}</strong>
+                  <p>{{ item.summary }}</p>
+                  {% if item.profile.description %}<p>{{ item.profile.description }}</p>{% endif %}
+                </div>
+              </div>
+            {% endwith %}
+          {% else %}
+            {% for item in profiles %}
+              <label class="profile">
+                <input type="radio" name="profile" value="{{ item.profile.pk }}"{% if item.checked %} checked{% endif %} required>
+                <div>
+                  <strong>{{ item.profile.name }}</strong>
+                  <p>{{ item.summary }}</p>
+                  {% if item.profile.description %}<p>{{ item.profile.description }}</p>{% endif %}
+                </div>
+              </label>
+            {% endfor %}
+          {% endif %}
+        </fieldset>
+        {% if form.errors %}<div class="errors">{{ form.non_field_errors }}{{ form.profile.errors }}</div>{% endif %}
+      {% else %}
+        {{ form }}
+      {% endif %}
       <div class="actions">
         <button type="submit" name="action" value="cancel" class="secondary">{% translate "Cancel" %}</button>
         <button type="submit" name="action" value="grant" class="primary">{% translate "Authorize" %}</button>

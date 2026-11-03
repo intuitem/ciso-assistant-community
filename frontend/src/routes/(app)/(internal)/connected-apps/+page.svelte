@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ConnectedAppsTabs from '$lib/components/ConnectedApps/ConnectedAppsTabs.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -9,6 +10,7 @@
 	} from '$lib/components/Modals/stores';
 	import { page } from '$app/state';
 	import { formatDate } from '$lib/utils/datetime';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { defaults } from 'sveltekit-superforms';
@@ -24,11 +26,6 @@
 
 	const modalStore: ModalStore = getModalStore();
 	const idSchema = zod(z.object({ id: z.string() }));
-
-	const scopeLabels: Record<string, () => string> = {
-		'mcp:read': m.connectedAppScopeRead,
-		'mcp:write': m.connectedAppScopeWrite
-	};
 
 	function pageHref(target: number): string {
 		const params = new URLSearchParams(page.url.searchParams);
@@ -82,6 +79,7 @@
 	}
 </script>
 
+<ConnectedAppsTabs />
 <div class="card bg-white shadow-sm p-4 space-y-4">
 	<p class="text-sm text-surface-700-300">{m.connectedAppsAdminDescription()}</p>
 
@@ -117,7 +115,7 @@
 					<th class="py-2 pr-4">{m.user()}</th>
 					<th class="py-2 pr-4">{m.connectedAppName()}</th>
 					<th class="py-2 pr-4">{m.connectedAppRedirectsTo()}</th>
-					<th class="py-2 pr-4">{m.connectedAppAccess()}</th>
+					<th class="py-2 pr-4">{m.connectionProfile()}</th>
 					<th class="py-2 pr-4">{m.connectedAppAuthorized()}</th>
 					<th class="py-2 pr-4">{m.connectedAppLastUsed()}</th>
 					<th class="py-2"></th>
@@ -145,9 +143,12 @@
 							{/each}
 						</td>
 						<td class="py-2 pr-4">
-							{#each row.scopes.filter((scope: string) => scopeLabels[scope]) as scope}
-								<span class="block">{scopeLabels[scope]()}</span>
-							{/each}
+							{#if row.profile}
+								<p>{row.profile.name}</p>
+								<span class="text-xs text-surface-600-400">{safeTranslate(row.profile.level)}</span>
+							{:else}
+								<span class="text-surface-600-400">--</span>
+							{/if}
 						</td>
 						<td class="py-2 pr-4">
 							{#if row.authorized_at}

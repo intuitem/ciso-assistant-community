@@ -27,6 +27,8 @@
     <div class="reason">
       {% if reason == "mcp_disabled" %}
         {% translate "Your administrator has not enabled AI app connections on this instance." %}
+      {% elif reason == "no_profile" %}
+        {% translate "Your administrator has not set up what AI apps may do yet. Contact them if you need it." %}
       {% else %}
         {% translate "Your administrator has not allowed your account to connect AI apps. Contact them if you need it." %}
       {% endif %}

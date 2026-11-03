@@ -2333,6 +2333,10 @@ export const listViewFields = {
 		head: ['name', 'userGroups'],
 		body: ['name', 'user_groups']
 	},
+	'connection-profiles': {
+		head: ['name', 'level', 'isDefault', 'connections'],
+		body: ['name', 'level', 'is_default', 'connections']
+	},
 	'service-accounts': {
 		head: ['name', 'clientId', 'secretPreview', 'isActive', 'expiryDate', 'createdAt'],
 		body: ['name', 'client_id', 'secret_preview', 'is_active', 'expiry_date', 'created_at']

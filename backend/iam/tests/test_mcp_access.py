@@ -17,7 +17,7 @@ from rest_framework.test import APIClient
 
 from core.serializers import UserWriteSerializer
 from core.startup import startup
-from iam.models import ConnectedAppUse, User, UserGroup
+from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile, User, UserGroup
 from iam.oidc_adapter import CISOOIDCAdapter
 from mcp_server.oauth import verify
 
@@ -74,6 +74,13 @@ def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",)):
     token.set_value(raw)
     token.set_scopes(list(scopes))
     token.save()
+    if user is not None:
+        profile, _ = ConnectionProfile.objects.get_or_create(
+            name="Read and change", defaults={"level": "update"}
+        )
+        AppGrant.objects.get_or_create(
+            user=user, client=client, defaults={"profile": profile}
+        )
     return raw
 
 

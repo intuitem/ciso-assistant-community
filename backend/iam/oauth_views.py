@@ -2,17 +2,21 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from allauth.account.internal.decorators import login_not_required
 from allauth.idp.oidc.adapter import get_adapter
+from allauth.idp.oidc.forms import AuthorizationForm
 from allauth.idp.oidc.internal.oauthlib.server import get_server
 from allauth.idp.oidc.internal.oauthlib.utils import extract_params
 from allauth.idp.oidc.internal.resources import get_resources
 from allauth.idp.oidc.models import Client
 from allauth.idp.oidc.views import AuthorizationView
+from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_deny
 from django.views.decorators.csrf import csrf_exempt
 from knox.auth import TokenAuthentication
@@ -20,7 +24,70 @@ from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from rest_framework.exceptions import AuthenticationFailed
 
 from iam.mcp_access import is_mcp_request, refusal_reason
-from iam.models import ConnectedAppUse
+from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
+from iam.oidc_adapter import MCP_SCOPES
+
+LEVEL_SUMMARY = {
+    ConnectionProfile.Level.READ: _(
+        "This app will be able to read your CISO Assistant data."
+    ),
+    ConnectionProfile.Level.CREATE: _(
+        "This app will be able to read and create data in CISO Assistant."
+    ),
+    ConnectionProfile.Level.UPDATE: _(
+        "This app will be able to read, create, change and delete data in "
+        "CISO Assistant."
+    ),
+    ConnectionProfile.Level.APPROVE: _(
+        "This app will be able to read, create, change and delete data in "
+        "CISO Assistant, and approve or move items through a workflow."
+    ),
+}
+
+
+def profile_scopes(profile, requested, allowed) -> list[str]:
+    """The scopes follow the profile so other tools see a sensible value; the
+    profile, not the scope, is what backend-mcp enforces."""
+    scopes = {s for s in requested if s not in MCP_SCOPES} | {"mcp:read"}
+    if profile.rank >= list(ConnectionProfile.Level.values).index(
+        ConnectionProfile.Level.CREATE
+    ):
+        scopes.add("mcp:write")
+    return sorted(scopes & set(allowed))
+
+
+class CISOAuthorizationForm(AuthorizationForm):
+    """For MCP requests the user picks a profile instead of ticking scopes."""
+
+    def __init__(self, *args, mcp_request=False, client_scopes=(), **kwargs):
+        self._requested = kwargs["requested_scopes"]
+        self._client_scopes = client_scopes
+        super().__init__(*args, **kwargs)
+        self.mcp_request = mcp_request
+        if mcp_request:
+            del self.fields["scopes"]
+            default = ConnectionProfile.default()
+            # not required: a skip-consent client posts no profile and gets the default
+            self.fields["profile"] = forms.ModelChoiceField(
+                queryset=ConnectionProfile.objects.all(),
+                widget=forms.RadioSelect,
+                empty_label=None,
+                initial=default.pk if default else None,
+                required=False,
+            )
+
+    def clean(self):
+        data = super().clean()
+        if self.mcp_request and not self.errors:
+            profile = data.get("profile") or ConnectionProfile.default()
+            if profile is None:
+                raise forms.ValidationError(_("No profile is available."))
+            data["profile"] = profile
+            data["scopes"] = profile_scopes(
+                profile, self._requested, self._client_scopes
+            )
+        return data
+
 
 KNOX_COOKIE = "token"
 
@@ -88,6 +155,35 @@ class CISOAuthorizationView(AuthorizationView):
     cookie here, and only here: honouring it API-wide would open a CSRF hole.
     """
 
+    form_class = CISOAuthorizationForm
+
+    def _is_mcp_request(self) -> bool:
+        return is_mcp_request(self._scopes, self._request_info.get("resources"))
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        client = Client.objects.filter(id=self._request_info.get("client_id")).first()
+        kwargs["mcp_request"] = self._is_mcp_request()
+        kwargs["client_scopes"] = client.get_scopes() if client else []
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = context["form"]
+        if form.mcp_request:
+            selected = form["profile"].value()
+            context["profiles"] = [
+                {
+                    "profile": profile,
+                    "summary": LEVEL_SUMMARY[profile.level],
+                    "checked": str(profile.pk) == str(selected),
+                }
+                for profile in sorted(
+                    ConnectionProfile.objects.all(), key=lambda p: p.rank
+                )
+            ]
+        return context
+
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             user = _user_from_knox_cookie(request)
@@ -131,9 +227,17 @@ class CISOAuthorizationView(AuthorizationView):
         response = super().form_valid(form)
         location = response.get("Location") or ""
         if any(key == "code" for key, _ in parse_qsl(urlsplit(location).query)):
-            ConnectedAppUse.record_authorization(
-                self.request.user.pk, self._request_info["client_id"]
-            )
+            user_id, client_id = self.request.user.pk, self._request_info["client_id"]
+            ConnectedAppUse.record_authorization(user_id, client_id)
+            if form.mcp_request:
+                AppGrant.objects.update_or_create(
+                    user_id=user_id,
+                    client_id=client_id,
+                    defaults={
+                        "profile": form.cleaned_data["profile"],
+                        "granted_at": timezone.now(),
+                    },
+                )
         return response
 
     def _login_required(self, request):

@@ -21,7 +21,7 @@ AUTHORIZE_URL = "/api/identity/o/authorize"
 TOKEN_URL = "/api/identity/o/api/token"
 REDIRECT_URI = "http://localhost:9999/callback"
 METADATA_PATH = "/.well-known/oauth-protected-resource/mcp"
-pytestmark = pytest.mark.usefixtures("mcp_on")
+pytestmark = pytest.mark.usefixtures("mcp_on", "app_profile")
 
 MCP_HEADERS = {
     "Accept": "application/json, text/event-stream",

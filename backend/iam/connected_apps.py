@@ -3,15 +3,15 @@ from urllib.parse import urlsplit
 import structlog
 from allauth.idp.oidc.models import Client, Token
 from django.db import transaction
-from django.db.models import Q
-from rest_framework import status, views
+from django.db.models import Count, Q
+from rest_framework import filters, serializers, status, views, viewsets
 from rest_framework.response import Response
 
 from core.pagination import CustomLimitOffsetPagination
 from core.permissions import IsGlobalAdmin
 from iam.authentication import is_self_registered
-from iam.mcp_access import revoke_app_tokens
-from iam.models import ConnectedAppUse
+from iam.mcp_access import revoke_app_tokens, revoke_grants
+from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
 
 logger = structlog.get_logger(__name__)
 
@@ -39,16 +39,23 @@ def _connections(tokens, with_user=False) -> list[dict]:
             (token.user_id, token.client_id), {"token": token, "scopes": set()}
         )
         row["scopes"].update(token.get_scopes())
+    users = {user for user, _ in grouped}
+    clients = {client for _, client in grouped}
     uses = {
         (use.user_id, use.client_id): use
         for use in ConnectedAppUse.objects.filter(
-            user_id__in={user for user, _ in grouped},
-            client_id__in={client for _, client in grouped},
+            user_id__in=users, client_id__in=clients
         )
+    }
+    grants = {
+        (grant.user_id, grant.client_id): grant.profile
+        for grant in AppGrant.objects.filter(
+            user_id__in=users, client_id__in=clients
+        ).select_related("profile")
     }
     rows = []
     for key, row in grouped.items():
-        token, use = row["token"], uses.get(key)
+        token, use, profile = row["token"], uses.get(key), grants.get(key)
         item = {
             "client_id": token.client_id,
             "name": token.client.name,
@@ -59,6 +66,11 @@ def _connections(tokens, with_user=False) -> list[dict]:
             "scopes": sorted(row["scopes"]),
             "authorized_at": use.authorized_at if use else None,
             "last_used_at": use.last_used_at if use else None,
+            "profile": (
+                {"id": profile.id, "name": profile.name, "level": profile.level}
+                if profile
+                else None
+            ),
         }
         if with_user:
             item["user"] = {"id": token.user_id, "email": token.user.email}
@@ -201,3 +213,49 @@ class ConnectedAppGroupView(views.APIView):
             {"registrations": len(client_ids), "users": len(user_ids)},
             status=status.HTTP_200_OK,
         )
+
+
+class ConnectionProfileSerializer(serializers.ModelSerializer):
+    connections = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = ConnectionProfile
+        fields = [
+            "id",
+            "name",
+            "description",
+            "level",
+            "is_default",
+            "connections",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class ConnectionProfileViewSet(viewsets.ModelViewSet):
+    """Profiles an administrator sets up; changes apply to existing connections
+    at once, and deleting one revokes the connections that use it."""
+
+    permission_classes = [IsGlobalAdmin]
+    serializer_class = ConnectionProfileSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "level", "is_default", "connections"]
+
+    def get_queryset(self):
+        return ConnectionProfile.objects.annotate(connections=Count("grants"))
+
+    def destroy(self, request, *args, **kwargs):
+        profile = self.get_object()
+        with transaction.atomic():
+            revoked = len(set(profile.grants.values_list("user_id", "client_id")))
+            revoke_grants(profile.grants.all())
+            profile.delete()
+        logger.info(
+            "connection profile deleted",
+            admin=request.user.id,
+            profile=profile.name,
+            revoked=revoked,
+        )
+        return Response({"revoked": revoked}, status=status.HTTP_200_OK)

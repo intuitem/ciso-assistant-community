@@ -2496,6 +2496,69 @@ class ConnectedAppUse(models.Model):
         )
 
 
+class ConnectionProfile(models.Model):
+    """What an AI app may do once connected, set by an administrator. It only
+    narrows: the app never gets more than the user who connects it."""
+
+    class Level(models.TextChoices):
+        READ = "read", _("Read")
+        CREATE = "create", _("Create")
+        UPDATE = "update", _("Update")
+        APPROVE = "approve", _("Approve")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, default="")
+    level = models.CharField(max_length=20, choices=Level.choices, default=Level.READ)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def rank(self) -> int:
+        return list(self.Level.values).index(self.level)
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            if self.is_default:
+                ConnectionProfile.objects.exclude(pk=self.pk).filter(
+                    is_default=True
+                ).update(is_default=False)
+            super().save(*args, **kwargs)
+
+    @classmethod
+    def default(cls) -> "ConnectionProfile | None":
+        """The marked default, else the lowest level."""
+        profiles = list(cls.objects.all())
+        marked = [p for p in profiles if p.is_default]
+        if marked:
+            return marked[0]
+        return min(profiles, key=lambda p: p.rank, default=None)
+
+
+class AppGrant(models.Model):
+    """Which profile a connection uses. Keyed by user and client, not by token:
+    allauth issues new tokens at each refresh and copies no data across."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="app_grants")
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    profile = models.ForeignKey(
+        ConnectionProfile, on_delete=models.CASCADE, related_name="grants"
+    )
+    granted_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "client"], name="unique_app_grant")
+        ]
+
+
 common_exclude = ["created_at", "updated_at"]
 # `preferences` is personal UI state (language, theme, date format, hidden
 # modules) with no security meaning, and every toggle would otherwise log the
@@ -2524,6 +2587,7 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(Role, exclude_fields=common_exclude)
+auditlog.register(ConnectionProfile, exclude_fields=common_exclude)
 auditlog.register(UserGroup, exclude_fields=common_exclude)
 auditlog.register(PersonalAccessToken)
 auditlog.register(SCIMToken)

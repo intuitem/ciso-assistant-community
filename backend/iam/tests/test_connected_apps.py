@@ -6,7 +6,7 @@ from allauth.idp.oidc.models import Client, Token
 from django.utils import timezone
 from knox.models import AuthToken
 
-from iam.models import ConnectedAppUse, User
+from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile, User
 from mcp_server.oauth import verify
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
@@ -47,6 +47,13 @@ def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",), **k
     token.set_value(raw)
     token.set_scopes(list(scopes))
     token.save()
+    if user is not None:
+        profile, _ = ConnectionProfile.objects.get_or_create(
+            name="Read and change", defaults={"level": "update"}
+        )
+        AppGrant.objects.get_or_create(
+            user=user, client=client, defaults={"profile": profile}
+        )
     return raw
 
 

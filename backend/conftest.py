@@ -23,3 +23,15 @@ def mcp_on(db):
     settings_row.value = {**(settings_row.value or {}), "mcp": True}
     settings_row.save()
     clear_feature_flags_cache()
+
+
+@pytest.fixture
+def app_profile(db):
+    """A profile for the connections a test makes: a transactional test flushes
+    the ones the migration seeds."""
+    from iam.models import ConnectionProfile
+
+    profile, _ = ConnectionProfile.objects.get_or_create(
+        name="Read and change", defaults={"level": "update", "is_default": True}
+    )
+    return profile
