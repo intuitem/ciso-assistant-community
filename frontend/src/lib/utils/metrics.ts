@@ -31,7 +31,10 @@ export function formatMetricNumber(value: unknown, definition: any): string {
  * float: 1.005 -> 1.01 and 10.075 -> 10.08, as the backend's Decimal does.
  * Shifting through the exponent notation keeps the digits as written. */
 export function roundHalfUp(n: number, decimals: number): number {
-	const shifted = Number(`${Math.abs(n)}e${decimals}`);
+	// The exponent form holds for every magnitude, 5e-7 included: its
+	// exponent is moved by `decimals` rather than appended to.
+	const [mantissa, exponent] = Math.abs(n).toExponential().split('e');
+	const shifted = Number(`${mantissa}e${Number(exponent) + decimals}`);
 	if (!Number.isFinite(shifted)) return n;
 	const rounded = Number(`${Math.round(shifted)}e-${decimals}`);
 	return n < 0 ? -rounded : rounded;

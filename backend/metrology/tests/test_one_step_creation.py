@@ -336,6 +336,42 @@ class TestMerge:
         assert response.status_code == 400
         assert "levels" in response.data["into"][0]
 
+    def test_the_merge_takes_the_right_to_delete_the_source(self):
+        group = make_domain("ACME")
+        kept = MetricDefinition.objects.create(name="Assets", folder=group)
+        mine = MetricDefinition.objects.create(name="Assets (mine)", folder=group)
+        user = member(group, WRITE)  # change but not delete
+        response = call(
+            MetricDefinitionViewSet,
+            "post",
+            "merge",
+            {"into": str(kept.id)},
+            user,
+            pk=mine.id,
+        )
+        assert response.status_code == 403
+        assert MetricDefinition.objects.filter(id=mine.id).exists()
+
+    def test_merge_candidates_share_the_source_s_kind_and_unit(self):
+        group = make_domain("ACME")
+        count, pct = unit("count"), unit("percentage")
+        source = MetricDefinition.objects.create(
+            name="Assets", folder=group, unit=count
+        )
+        for i in range(6):
+            MetricDefinition.objects.create(name=f"Assets {i}", folder=group, unit=pct)
+        same = MetricDefinition.objects.create(
+            name="Assets z", folder=group, unit=count
+        )
+        response = call(
+            MetricDefinitionViewSet,
+            "get",
+            "similar",
+            {"name": "assets", "exclude": str(source.id), "mergeable": "1"},
+            admin(),
+        )
+        assert [d["id"] for d in response.data] == [str(same.id)]
+
     def test_the_merge_takes_change_rights_on_both_and_on_the_metrics(self):
         group = make_domain("ACME")
         es = make_domain("Spain", group)
@@ -439,6 +475,23 @@ class TestPeriodOnEnteredValues:
             response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
             assert response.status_code == 201, response.data
         assert sorted(s.raw_value() for s in instance.samples.all()) == [10, 20]
+        assert instance.get_latest_sample().raw_value() == 20
+        assert max(s.timestamp for s in instance.samples.all()) == at(2026, 5, 3, 10)
+
+    def test_a_period_write_on_a_taken_second_needs_no_right_to_change(self, frozen):  # noqa: F811
+        es = make_domain("Spain")
+        instance = make_instance(es, make_definition())
+        sample(instance, 1, at(2026, 5, 3, 10))
+        data = {
+            "metric_instance": str(instance.id),
+            "timestamp": at(2026, 5, 3, 10).isoformat(),
+            "period_start": at(2026, 4, 1).isoformat(),
+            "value": {"result": 2},
+        }
+        user = member(es, ["view_metricinstance", "add_custommetricsample"])
+        response = call(CustomMetricSampleViewSet, "post", "create", data, user)
+        assert response.status_code == 201, response.data
+        assert instance.samples.count() == 2
 
     def test_a_value_typed_without_a_period_over_a_period_s_second_drops_the_period(
         self, frozen

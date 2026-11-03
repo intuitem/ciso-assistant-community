@@ -60,6 +60,22 @@ test('user can add a custom metric sample to a metric instance', async ({
 		);
 	});
 
+	await test.step('create a metric in one step', async () => {
+		// The default mode: the definition is created with the metric.
+		await metricInstancesPage.goto();
+		await metricInstancesPage.hasUrl();
+		await metricInstancesPage.addButton.first().click();
+		await metricInstancesPage.form.hasTitle();
+		await metricInstancesPage.form.fill({
+			name: vars.metricInstanceName + ' one step',
+			folder: vars.folderName
+		});
+		await metricInstancesPage.form.saveButton.click();
+		await metricInstancesPage.isToastVisible(
+			'The metric instance object has been successfully created'
+		);
+	});
+
 	await test.step('add a custom metric sample', async () => {
 		await metricInstancesPage.viewItemDetail(vars.metricInstanceName);
 		await customMetricSamplesPage.createItem(

@@ -43,7 +43,14 @@ def similar_definitions(user, name, category=None, exclude=None, mergeable=False
     if exclude is not None:
         definitions = definitions.exclude(id=exclude)
     if mergeable:
+        # A merge target has the source's kind and unit: anything else would
+        # be shown disabled, and could push a real target past the cut.
         definitions = definitions.filter(expression="")
+        source = MetricDefinition.objects.filter(id=exclude).first()
+        if source is not None:
+            definitions = definitions.filter(
+                category=source.category, unit_id=source.unit_id
+            )
     definitions = list(definitions[:SIMILAR_LIMIT])
     if not definitions:
         return []
@@ -113,9 +120,13 @@ def merge_definitions(user, source, target):
         raise MergeError("A formula reads this definition; it cannot be merged away")
     if not RoleAssignment.is_object_readable(user, MetricDefinition, target.id):
         raise PermissionError
-    for definition in (source, target):
-        if not permitted(user, ["change_metricdefinition"], definition.folder):
-            raise PermissionError
+    # The source is deleted and the target changed: each takes its right.
+    if not permitted(
+        user, ["change_metricdefinition", "delete_metricdefinition"], source.folder
+    ):
+        raise PermissionError
+    if not permitted(user, ["change_metricdefinition"], target.folder):
+        raise PermissionError
     with transaction.atomic():
         # Checked and moved under one lock: an instance added or moved to
         # another domain meanwhile is seen here, not in a stale snapshot.

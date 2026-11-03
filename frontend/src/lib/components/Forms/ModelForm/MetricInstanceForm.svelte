@@ -157,7 +157,8 @@
 				const found: Similar[] = await res.json();
 				similar = found[0] ?? null;
 			} catch {
-				similar = null;
+				// An older lookup failing must not hide a newer hint.
+				if (run === lookup) similar = null;
 			}
 		}, 300);
 		return () => clearTimeout(timer);

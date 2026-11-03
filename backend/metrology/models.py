@@ -553,14 +553,18 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
             # A value answering for a period: one per instance and period,
             # the last one written wins, whenever it was typed. Its second
             # must still be its own: another entered sample holding it (a
-            # value typed in the same second) moves this one a second on.
-            taken = (
-                entered.exclude(period_start=period_start)
-                .filter(metric_instance=metric_instance)
-                .values_list("timestamp", flat=True)
+            # value typed in the same second) is moved a second back, so the
+            # new value is the latest and no sample is dated after its entry.
+            others = entered.exclude(period_start=period_start).filter(
+                metric_instance=metric_instance
             )
-            while timestamp in taken:
-                timestamp += timedelta(seconds=1)
+            holder = others.filter(timestamp=timestamp).first()
+            if holder is not None:
+                free = timestamp - timedelta(seconds=1)
+                while others.filter(timestamp=free).exists():
+                    free -= timedelta(seconds=1)
+                holder.timestamp = free
+                holder.save(update_fields=["timestamp"])
             return entered.update_or_create(
                 metric_instance=metric_instance,
                 period_start=period_start,

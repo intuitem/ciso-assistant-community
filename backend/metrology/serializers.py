@@ -400,10 +400,16 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
         timestamp = whole_second(validated_data.pop("timestamp"))
         folder = metric_instance.folder
         self._check_object_perm(validated_data, "add", folder=folder)
+        # A period write replaces the period's value, a plain write the
+        # second's: either takes the right to change. A period write landing
+        # on a taken second replaces nothing (record() makes room for it).
         period = validated_data.get("period_start")
-        if self._taken(metric_instance, timestamp) or (
-            period is not None and self._period_taken(metric_instance, period)
-        ):
+        replaces = (
+            self._period_taken(metric_instance, period)
+            if period is not None
+            else self._taken(metric_instance, timestamp)
+        )
+        if replaces:
             self._check_object_perm(validated_data, "change", folder=folder)
         sample, _created = CustomMetricSample.record(
             metric_instance, timestamp, **validated_data

@@ -35,6 +35,7 @@
 		const current = ++run;
 		if (name.length < 3) {
 			candidates = [];
+			into = '';
 			return;
 		}
 		const timer = setTimeout(async () => {
@@ -49,6 +50,7 @@
 				if (!res.ok || current !== run) return;
 				candidates = await res.json();
 			} catch {
+				if (current !== run) return;
 				candidates = [];
 			}
 			// A target that left the list is no target.
