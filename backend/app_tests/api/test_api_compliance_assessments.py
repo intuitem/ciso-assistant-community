@@ -181,9 +181,7 @@ class TestComplianceAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework2")
         perimeter = Perimeter.objects.create(name="test", folder=test.folder)
-        perimeter2 = Perimeter.objects.create(
-            name="test2", folder=Folder.objects.create(name="test2")
-        )
+        perimeter2 = Perimeter.objects.create(name="test2", folder=test.folder)
         # Framework has no Meta ordering, so all()[0]/all()[1] are
         # nondeterministic on PostgreSQL — pin the import order explicitly.
         frameworks = list(Framework.objects.order_by("created_at", "pk"))
