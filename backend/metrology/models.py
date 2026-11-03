@@ -44,6 +44,18 @@ from iam.models import Folder, FolderMixin
 logger = structlog.getLogger(__name__)
 
 
+class Frequency(models.TextChoices):
+    # Named by their period: a value never changes meaning, since it also
+    # sets when a metric turns stale (STALENESS_THRESHOLDS).
+    EVERY_15_MINUTES = "15min", _("Every 15 minutes")
+    HOURLY = "hourly", _("Hourly")
+    DAILY = "daily", _("Daily")
+    WEEKLY = "weekly", _("Weekly")
+    MONTHLY = "monthly", _("Monthly")
+    QUARTERLY = "quarterly", _("Quarterly")
+    YEARLY = "yearly", _("Yearly")
+
+
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
     class Category(models.TextChoices):
         QUALITATIVE = "qualitative", _("Qualitative (Level)")
@@ -87,11 +99,32 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     )
     higher_is_better = models.BooleanField(
         default=True,
+        null=True,
+        blank=True,
         verbose_name=_("Higher is better"),
         help_text=_(
             "If true, an increase in value is considered positive (e.g., compliance score). "
-            "If false, a decrease is considered positive (e.g., number of vulnerabilities)."
+            "If false, a decrease is considered positive (e.g., number of vulnerabilities). "
+            "If unset, the metric has no direction: the value is informational."
         ),
+    )
+    decimals = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("Decimals"),
+        help_text=_(
+            "Decimals shown wherever a value is displayed. Unset: one for a "
+            "percentage, none for a count, as entered otherwise. Stored values "
+            "keep their precision."
+        ),
+    )
+    default_collection_frequency = models.CharField(
+        max_length=20,
+        choices=Frequency.choices,
+        blank=True,
+        null=True,
+        verbose_name=_("Default collection frequency"),
+        help_text=_("Copied to metrics created from this definition"),
     )
     default_target = models.FloatField(
         blank=True,
@@ -161,16 +194,7 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         STALE = "stale", _("Stale")
         DEPRECATED = "deprecated", _("Deprecated")
 
-    class Frequency(models.TextChoices):
-        # Named by their period: a value never changes meaning, since it also
-        # sets when a metric turns stale (STALENESS_THRESHOLDS).
-        EVERY_15_MINUTES = "15min", _("Every 15 minutes")
-        HOURLY = "hourly", _("Hourly")
-        DAILY = "daily", _("Daily")
-        WEEKLY = "weekly", _("Weekly")
-        MONTHLY = "monthly", _("Monthly")
-        QUARTERLY = "quarterly", _("Quarterly")
-        YEARLY = "yearly", _("Yearly")
+    Frequency = Frequency
 
     metric_definition = models.ForeignKey(
         MetricDefinition,
@@ -214,6 +238,23 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="metric_instances",
         blank=True,
         null=True,
+    )
+    # Collection through tasks: a period's value is due this many days
+    # after the period ends (unset: the frequency's default), and the task
+    # template generated for the metric, when it has one.
+    collection_grace_days = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("Collection grace (days)"),
+        help_text=_("Days after a period ends before its value is late"),
+    )
+    collection_task = models.ForeignKey(
+        "core.TaskTemplate",
+        on_delete=models.SET_NULL,
+        related_name="metric_instances",
+        blank=True,
+        null=True,
+        verbose_name=_("Collection task"),
     )
     # Derived metrics: when the sampler last ran for this instance, and what
     # went wrong if no sample came out of it.
