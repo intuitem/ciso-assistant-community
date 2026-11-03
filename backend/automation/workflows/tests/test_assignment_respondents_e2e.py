@@ -16,6 +16,7 @@ from core.models import (
     Team,
 )
 from iam.models import Folder, User, UserGroup
+from tprm.models import Entity, Representative
 from automation.workflows.engine import run_instance
 from automation.workflows.events import payload_from_log_entry
 from automation.workflows.import_export import import_workflow
@@ -40,10 +41,10 @@ def run_now(monkeypatch):
     )
 
 
-def make_domain(name):
+def make_domain(name, parent=None):
     domain = Folder.objects.create(
         name=name,
-        parent_folder=Folder.get_root_folder(),
+        parent_folder=parent or Folder.get_root_folder(),
         content_type=Folder.ContentType.DOMAIN,
         create_iam_groups=True,
     )
@@ -108,8 +109,13 @@ class TestAssignmentRespondents:
         vendor = User.objects.create_user(
             email="vendor@example.com", is_third_party=True
         )
+        rep_user = User.objects.create_user(email="rep@example.com")
         team = Team.objects.create(name="In scope", folder=domain, leader=leader)
         far_team = Team.objects.create(name="Far", folder=sibling, leader=outsider)
+        entity = Entity.objects.create(name="Vendor", folder=domain)
+        Representative.objects.create(
+            entity=entity, email="rep@example.com", user=rep_user
+        )
         assignment = RequirementAssignment.objects.create(
             compliance_assessment=make_audit(domain), folder=domain
         )
@@ -119,6 +125,7 @@ class TestAssignmentRespondents:
                 Actor.objects.get(user=vendor),
                 Actor.objects.get(team=team),
                 Actor.objects.get(team=far_team),
+                Actor.objects.get(entity=entity),
             ]
         )
 
@@ -126,7 +133,58 @@ class TestAssignmentRespondents:
 
         instance = WorkflowInstance.objects.get(workflow=workflow)
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
-        assert respondents(domain) == {"direct@example.com", "leader@example.com"}
+        assert respondents(domain) == {
+            "direct@example.com",
+            "leader@example.com",
+            "rep@example.com",
+        }
+
+    def test_a_replacing_actor_becomes_respondent(self, run_now):
+        domain = make_domain("Domain")
+        install(domain)
+        first = User.objects.create_user(email="first@example.com")
+        second = User.objects.create_user(email="second@example.com")
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=make_audit(domain), folder=domain
+        )
+        assignment.actor.set([Actor.objects.get(user=first)])
+        assignment.actor.set([Actor.objects.get(user=second)])
+
+        dispatch_internal_event_task.call_local(last_update(assignment).pk, 0)
+
+        assert "second@example.com" in respondents(domain)
+
+    def test_the_grant_lands_in_the_audit_domain(self, run_now):
+        domain = make_domain("Domain")
+        child = make_domain("Child", parent=domain)
+        install(domain)
+        user = User.objects.create_user(email="direct@example.com")
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=make_audit(domain), folder=child
+        )
+        assignment.actor.add(Actor.objects.get(user=user))
+
+        dispatch_internal_event_task.call_local(last_update(assignment).pk, 0)
+
+        assert respondents(domain) == {"direct@example.com"}
+        assert respondents(child) == set()
+
+    def test_an_audit_out_of_reach_is_not_read(self, run_now):
+        domain = make_domain("Domain")
+        sibling = make_domain("Sibling")
+        workflow = install(domain)
+        user = User.objects.create_user(email="direct@example.com")
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=make_audit(sibling), folder=domain
+        )
+        assignment.actor.add(Actor.objects.get(user=user))
+
+        dispatch_internal_event_task.call_local(last_update(assignment).pk, 0)
+
+        instance = WorkflowInstance.objects.get(workflow=workflow)
+        assert instance.variables["framework_urn"] in (None, "")
+        assert respondents(domain) == set()
+        assert respondents(sibling) == set()
 
     def test_a_status_change_starts_no_run(self, run_now):
         domain = make_domain("Domain")

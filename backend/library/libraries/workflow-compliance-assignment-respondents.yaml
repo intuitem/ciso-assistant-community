@@ -3,7 +3,7 @@ locale: en
 ref_id: workflow-compliance-assignment-respondents
 name: Assignment actors become respondents
 description: 'When actors are added to a requirement assignment on an audit of a chosen framework, add
-  the people behind them to the Respondent group of the audit''s domain.
+  everyone behind the assignment''s actors to the Respondent group of the audit''s domain.
 
   Set framework_urns to the URNs of the frameworks concerned, comma separated. Left empty, the workflow
   does nothing. Actors resolve to the user, the team''s leader, deputies and members, or the entity''s

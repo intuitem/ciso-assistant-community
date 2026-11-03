@@ -33,6 +33,7 @@ from core.models import (
     EvidenceRevision,
     Finding,
     FindingsAssessment,
+    Framework,
     Incident,
     QuickFormResponse,
     RequirementAssessment,
@@ -249,6 +250,26 @@ def _requirements_breakdown(assessment):
         by_result[result] = count
         total += count
     return {"total": total, **by_result}
+
+
+def _assignment_audit(assignment):
+    audit = assignment.compliance_assessment
+    if audit is None:
+        return None
+    return {"str": str(audit), "id": str(audit.id), "name": audit.name}
+
+
+def _assignment_framework(assignment):
+    audit = assignment.compliance_assessment
+    framework = audit.framework if audit else None
+    if framework is None:
+        return None
+    return {
+        "id": str(framework.id),
+        "urn": framework.urn,
+        "ref_id": framework.ref_id,
+        "name": framework.name,
+    }
 
 
 def _assignment_users(assignment):
@@ -565,26 +586,26 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     "requirement_assignment": ReadEntry(
         model=RequirementAssignment,
         fields=["status", "compliance_assessment", "folder"],
+        # The audit and its framework are scoped too: None when out of reach.
         computed={
             # Not str(): it walks the actors, which the scope may have cut.
-            "name": lambda a: str(a.compliance_assessment),
-            "compliance_assessment": lambda a: {
-                "str": str(a.compliance_assessment),
-                "id": str(a.compliance_assessment_id),
-                "name": a.compliance_assessment.name,
-            },
-            "framework": lambda a: {
-                "id": str(a.compliance_assessment.framework_id),
-                "urn": a.compliance_assessment.framework.urn,
-                "ref_id": a.compliance_assessment.framework.ref_id,
-                "name": a.compliance_assessment.framework.name,
-            },
-            "audit_folder": lambda a: str(a.compliance_assessment.folder_id),
+            "name": lambda a: str(a.compliance_assessment or ""),
+            "compliance_assessment": _assignment_audit,
+            "framework": _assignment_framework,
+            "audit_folder": lambda a: (
+                str(a.compliance_assessment.folder_id)
+                if a.compliance_assessment
+                else None
+            ),
             "actors": lambda a: [str(actor.id) for actor in a.actor.all()],
         },
         optional_computed={"users": _assignment_users},
-        select_related=["compliance_assessment__framework", "folder"],
+        select_related=["folder"],
         prefetch_scoped={
+            "compliance_assessment": {
+                "compliance_assessment": ComplianceAssessment,
+                "compliance_assessment__framework": Framework,
+            },
             "actors": {"actor": Actor},
             "users": {
                 "actor": Actor,
