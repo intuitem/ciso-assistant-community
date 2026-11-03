@@ -8,6 +8,7 @@ from allauth.idp.oidc.contrib.rest_framework.authentication import (
     TokenAuthentication as OIDCTokenAuthentication,
 )
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
+from knox.auth import TokenAuthentication
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 
@@ -19,6 +20,14 @@ from iam.oidc_federation import (
 )
 
 MAX_AUDIENCE_CANDIDATES = 10
+
+
+class KnoxTokenAuthentication(TokenAuthentication):
+    def authenticate_credentials(self, token):
+        user, auth_token = super().authenticate_credentials(token)
+        if auth_token.scim_token.exists():
+            raise exceptions.AuthenticationFailed("Invalid token.")
+        return user, auth_token
 
 
 class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):

@@ -5,11 +5,11 @@ name: Derogation request
 description: >
   Ask for a temporary exemption from a control or policy, and give the reviewer what
   they need to decide: what cannot be met, why, for how long, and what is being done
-  instead. Pair it with the "Derogation — approve and attach the compensating control"
+  instead. Pair it with the "Derogation — attach a compensating control"
   workflow, which is offered on a request whose answers said no compensating control is
   in place.
 copyright: © intuitem
-version: 2
+version: 3
 publication_date: 2026-09-12
 provider: intuitem
 packager: intuitem
@@ -37,11 +37,17 @@ objects:
       expression: >-
         answers["mitigation:question:has_compensating"].answered &&
         answers["mitigation:question:has_compensating"].value == false
+      translations:
+        de:
+          label: Keine kompensierende Maßnahme
     - ref_id: high_risk
       label: High residual risk
       expression: >-
         "risk:question:severity:choice:high" in answers["risk:question:severity"].selected_choices ||
         "risk:question:severity:choice:critical" in answers["risk:question:severity"].selected_choices
+      translations:
+        de:
+          label: Hohes Restrisiko
     pages:
     - urn: urn:intuitem:risk:qf_page:derogation-request:request
       ref_id: request
@@ -54,16 +60,27 @@ objects:
           type: text
           text: In one line, what cannot be met?
           annotation: e.g. "TLS 1.2 on the legacy billing gateway"
+          translations:
+            de:
+              text: Was kann nicht eingehalten werden? Bitte in einer Zeile beschreiben.
+              annotation: z. B. „TLS 1.2 auf dem veralteten Abrechnungs-Gateway“
         urn:intuitem:risk:qf_page:derogation-request:request:question:control:
           type: text
           text: Which control or requirement is this about?
           required: false
           annotation: >-
             Its reference if you have one, otherwise describe it.
+          translations:
+            de:
+              text: Um welche Maßnahme oder Anforderung geht es?
+              annotation: Geben Sie die Referenz an, falls vorhanden; andernfalls beschreiben Sie sie.
         urn:intuitem:risk:qf_page:derogation-request:request:question:scope:
           type: text
           text: Which systems, services or assets are affected?
           required: false
+          translations:
+            de:
+              text: Welche Systeme, Dienste oder Assets sind betroffen?
         urn:intuitem:risk:qf_page:derogation-request:request:question:justification:
           type: text
           text: Why can the requirement not be met as written?
@@ -71,6 +88,16 @@ objects:
             The business or technical reason. "It is expensive" is a reason; say how much
             and until when.
 
+          translations:
+            de:
+              text: Warum kann die Anforderung nicht wie vorgegeben eingehalten werden?
+              annotation: Der geschäftliche oder technische Grund. „Es ist teuer“ ist ein Grund; geben
+                Sie die Kosten und den Zeitraum an.
+      translations:
+        de:
+          name: Benötigte Ausnahme
+          description: |
+            Beschreiben Sie die beantragte Ausnahme. Eine prüfende Person, die Ihr System nicht kennt, sollte sie allein anhand dieser Seite verstehen können.
     - urn: urn:intuitem:risk:qf_page:derogation-request:risk
       ref_id: risk
       name: Risk and duration
@@ -84,21 +111,47 @@ objects:
           - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:low
             value: Low — contained, no data at risk
             add_score: 10
+            translations:
+              de:
+                value: Niedrig – begrenzte Folgen, keine Daten gefährdet
           - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:medium
             value: Medium — limited data or availability impact
             add_score: 30
+            translations:
+              de:
+                value: Mittel – begrenzte Auswirkungen auf Daten oder Verfügbarkeit
           - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:high
             value: High — regulated data or a core service
             add_score: 60
+            translations:
+              de:
+                value: Hoch – regulierte Daten oder ein zentraler Dienst betroffen
           - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:critical
             value: Critical — safety, solvency or mass data loss
             add_score: 100
+            translations:
+              de:
+                value: Kritisch – Gefährdung der Sicherheit von Personen, der Zahlungsfähigkeit oder umfangreicher
+                  Datenverlust
+          translations:
+            de:
+              text: Wie schwerwiegend wären die Folgen, wenn diese Schwäche ausgenutzt wird?
         urn:intuitem:risk:qf_page:derogation-request:risk:question:expires_on:
           type: date
           text: Target date for returning to compliance
           annotation: >-
             A derogation is temporary. Ask for the date the fix needs, not more.
 
+          translations:
+            de:
+              text: Zieltermin für die erneute Einhaltung
+              annotation: Eine Ausnahme ist befristet. Beantragen Sie nur den Zeitraum, der zur Behebung
+                benötigt wird.
+      translations:
+        de:
+          name: Risiko und Dauer
+          description: |
+            Was die Organisation akzeptiert und für wie lange.
     - urn: urn:intuitem:risk:qf_page:derogation-request:mitigation
       ref_id: mitigation
       name: What you are doing instead
@@ -111,6 +164,9 @@ objects:
           text: Is a compensating control already in place?
         # `depends_on` addresses the parent by full URN and matches the stored answer
         # value, unlike the CEL expressions above which use the short key.
+          translations:
+            de:
+              text: Ist bereits eine kompensierende Maßnahme umgesetzt?
         urn:intuitem:risk:qf_page:derogation-request:mitigation:question:compensating_control:
           type: text
           text: Which control compensates for this?
@@ -118,6 +174,9 @@ objects:
           depends_on:
             question: urn:intuitem:risk:qf_page:derogation-request:mitigation:question:has_compensating
             answers: [true]
+          translations:
+            de:
+              text: Welche Maßnahme gleicht die Abweichung aus?
         urn:intuitem:risk:qf_page:derogation-request:mitigation:question:compensating_plan:
           type: text
           text: What will you put in place, and by when?
@@ -125,6 +184,9 @@ objects:
           depends_on:
             question: urn:intuitem:risk:qf_page:derogation-request:mitigation:question:has_compensating
             answers: [false]
+          translations:
+            de:
+              text: Was werden Sie bis wann umsetzen?
         urn:intuitem:risk:qf_page:derogation-request:mitigation:question:evidence:
           type: file
           text: Supporting document
@@ -132,3 +194,25 @@ objects:
           annotation: Architecture note, vendor statement, risk analysis — whatever backs the request.
           config:
             accept: .pdf,.png,.jpg,image/*
+          translations:
+            de:
+              text: Belegendes Dokument
+              annotation: Architekturbeschreibung, Stellungnahme des Anbieters, Risikoanalyse – alles,
+                was den Antrag stützt.
+      translations:
+        de:
+          name: Kompensierende Maßnahmen
+          description: |
+            Eine Ausnahme ohne kompensierende Maßnahme ist letztlich eine Risikoakzeptanz mit zusätzlichen Schritten. Falls noch nichts umgesetzt ist, geben Sie das an – die prüfende Person kann die Maßnahme für Sie anlegen.
+    translations:
+      de:
+        name: Ausnahmeantrag
+        description: |-
+          Entspricht dem Datensatz einer Sicherheitsausnahme, sodass ein angenommener Antrag alle dafür erforderlichen Angaben enthält.
+translations:
+  de:
+    name: Ausnahmeantrag
+    description: |-
+      Beantragen Sie eine befristete Ausnahme von einer Maßnahme oder Richtlinie und liefern Sie der prüfenden Person die nötige Entscheidungsgrundlage: Was kann nicht eingehalten werden, warum, für wie lange und was wird stattdessen getan? Verwenden Sie dazu den Workflow „Derogation — attach a compensating control“. Dieser wird für Anträge angeboten, deren Antworten angeben, dass noch keine kompensierende Maßnahme umgesetzt ist.
+
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

@@ -601,7 +601,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "knox.auth.TokenAuthentication",
+        "iam.authentication.KnoxTokenAuthentication",
         "iam.authentication.OIDCServiceAccountAuthentication",
         "iam.authentication.FederatedServiceAccountAuthentication",
     ],
