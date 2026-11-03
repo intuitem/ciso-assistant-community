@@ -8,6 +8,7 @@
 	import { getModalStore } from '#lib/components/Modals/stores.js';
 	import ComposeMetricModal from '#lib/components/Modals/ComposeMetricModal.svelte';
 	import FormulaDrawer from '#lib/components/Metrology/FormulaDrawer.svelte';
+	import RecordValueStrip from '#lib/components/Metrology/RecordValueStrip.svelte';
 	import type { Composition } from '#lib/components/Metrology/ComposeMetricEditor.svelte';
 	import type { DefinitionComposition } from '#lib/components/Metrology/DefinitionFormulaPanel.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
@@ -231,6 +232,16 @@
 	{/snippet}
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
+			{#if !metricInstance?.is_derived}
+				<RecordValueStrip
+					{metricInstance}
+					onSaved={async () => {
+						refreshSampleTables();
+						await invalidate('metric-instance:samples');
+						await refreshAll();
+					}}
+				/>
+			{/if}
 			<!-- Current Value -->
 			<div class="card p-4 bg-surface-50-950 shadow-sm">
 				<h3 class="text-lg font-semibold mb-3">{m.currentValue()}</h3>

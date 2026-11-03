@@ -270,6 +270,50 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, methods=["get"], url_path="similar")
+    def similar(self, request):
+        """Readable definitions whose name contains the one being typed, with
+        the domains measuring them: the hint under a new metric's name."""
+        from metrology.definitions import similar_definitions
+
+        return Response(
+            similar_definitions(
+                request.user,
+                request.query_params.get("name", ""),
+                request.query_params.get("category") or None,
+            )
+        )
+
+    @action(detail=True, methods=["post"], url_path="merge")
+    def merge(self, request, pk=None):
+        """Move this definition's metrics under another and delete it: two
+        domains defined the same thing, the group keeps one."""
+        from metrology.definitions import MERGE_FIELD, MergeError, merge_definitions
+
+        source = self.get_object()
+        target = MetricDefinition.objects.filter(
+            id=_as_uuid(request.data.get(MERGE_FIELD))
+        ).first()
+        if target is None:
+            return Response(
+                {MERGE_FIELD: ["Pick the definition to merge into"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            moved = merge_definitions(request.user, source, target)
+        except PermissionError:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        except MergeError as e:
+            return Response(
+                {MERGE_FIELD: [e.message]}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response({"into": str(target.id), "moved": moved})
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get default collection frequency choices")
+    def default_collection_frequency(self, request):
+        return Response(dict(MetricInstance.Frequency.choices))
+
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(MetricDefinition.Category.choices))

@@ -56,6 +56,11 @@ class Frequency(models.TextChoices):
     YEARLY = "yearly", _("Yearly")
 
 
+# Decimals shown for a definition that sets none, by unit name. Other units
+# keep the value as entered.
+UNIT_DEFAULT_DECIMALS = {"percentage": 1, "count": 0}
+
+
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
     class Category(models.TextChoices):
         QUALITATIVE = "qualitative", _("Qualitative (Level)")
@@ -165,6 +170,14 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     )
 
     fields_to_check = ["ref_id", "name"]
+
+    def display_decimals(self):
+        """Decimals a shown value is rounded to, or None to show it as is."""
+        if self.decimals is not None:
+            return self.decimals
+        if self.unit_id and self.unit:
+            return UNIT_DEFAULT_DECIMALS.get(self.unit.name)
+        return None
 
     @property
     def is_derived(self) -> bool:
@@ -419,6 +432,16 @@ def quantitative_result(value):
     return result
 
 
+def _rounded(result, decimals):
+    """``result`` rounded half up to ``decimals``, an int when none are
+    shown: 89.0756 -> 89.1, 1290.0 -> 1290."""
+    from decimal import ROUND_HALF_UP, Decimal
+
+    quantum = Decimal(1).scaleb(-decimals)
+    rounded = Decimal(str(result)).quantize(quantum, rounding=ROUND_HALF_UP)
+    return int(rounded) if decimals == 0 else float(rounded)
+
+
 class CustomMetricSample(AbstractBaseModel, FolderMixin):
     metric_instance = models.ForeignKey(
         MetricInstance,
@@ -505,16 +528,27 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         source), so a source writing faster than once a second keeps one
         sample a second. Safe under concurrent writes: the unique constraint
         turns the second insert into an update. Returns (sample, created)."""
-        return cls.objects.exclude(source=cls.Source.DERIVED).update_or_create(
+        entered = cls.objects.exclude(source=cls.Source.DERIVED)
+        defaults = {
+            "folder": metric_instance.folder,
+            "observation": None,
+            "evidence_revision": None,
+            "source": cls.Source.MANUAL,
+            **fields,
+        }
+        period_start = defaults.pop("period_start", None)
+        if period_start is not None:
+            # A value answering for a period: one per instance and period,
+            # the last one written wins, whenever it was typed.
+            return entered.update_or_create(
+                metric_instance=metric_instance,
+                period_start=period_start,
+                defaults={"timestamp": whole_second(timestamp), **defaults},
+            )
+        return entered.update_or_create(
             metric_instance=metric_instance,
             timestamp=whole_second(timestamp),
-            defaults={
-                "folder": metric_instance.folder,
-                "observation": None,
-                "evidence_revision": None,
-                "source": cls.Source.MANUAL,
-                **fields,
-            },
+            defaults=defaults,
         )
 
     def raw_value(self):
@@ -607,6 +641,9 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                 )
                 result = None
             if result is not None:
+                decimals = metric_definition.display_decimals()
+                if decimals is not None:
+                    result = _rounded(result, decimals)
                 if metric_definition.unit:
                     unit = (
                         metric_definition.unit.get_name_translated

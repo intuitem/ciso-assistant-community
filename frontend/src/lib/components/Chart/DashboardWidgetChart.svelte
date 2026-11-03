@@ -7,6 +7,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { resolveBreakdownColor } from '#lib/utils/constants.js';
+	import { directionOf, formatMetricNumber } from '#lib/utils/metrics.js';
 	import MarkdownRenderer from '../MarkdownRenderer.svelte';
 	import BreakdownSmallMultiples from './BreakdownSmallMultiples.svelte';
 
@@ -50,7 +51,8 @@
 		unitName === 'percentage' ? '%' : HIDDEN_UNITS.includes(unitName) ? '' : unitName
 	);
 	const targetValue = $derived(widget.metric_instance?.target_value);
-	const higherIsBetter = $derived(metricDefinition?.higher_is_better ?? true);
+	// Three-way: a metric without a direction gets no good or bad colour.
+	const direction = $derived(directionOf(metricDefinition));
 
 	// Helper to determine builtin metric type
 	function getBuiltinMetricType(metricKey: string): string {
@@ -94,9 +96,10 @@
 
 	// Format value with unit
 	function formatValueWithUnit(value: number | string): string {
-		if (unitName === 'percentage') return `${value}%`;
-		if (unitSymbol) return `${value} ${unitSymbol}`;
-		return String(value);
+		const shown = isBuiltinMetric ? String(value) : formatMetricNumber(value, metricDefinition);
+		if (unitName === 'percentage') return `${shown}%`;
+		if (unitSymbol) return `${shown} ${unitSymbol}`;
+		return shown;
 	}
 
 	// Prepare chart data from samples (custom metrics)
@@ -730,7 +733,7 @@
 		if (isQualitative && choiceNames[value - 1]) {
 			return choiceNames[value - 1];
 		}
-		return String(value);
+		return isBuiltinMetric ? String(value) : formatMetricNumber(value, metricDefinition);
 	}
 
 	// Format display value with unit
@@ -774,12 +777,19 @@
 					? (((rawLatestValue - prevValue) / prevValue) * 100).toFixed(1)
 					: null}
 				{@const isPositiveChange = Number(change) >= 0}
-				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}
+				{@const isGood =
+					direction === 'none'
+						? null
+						: direction === 'higher'
+							? isPositiveChange
+							: !isPositiveChange}
 				{#if change !== null}
 					<div
-						class="text-base font-medium px-2 py-0.5 rounded {isGood
-							? 'text-green-700 bg-green-100'
-							: 'text-red-700 bg-red-100'}"
+						class="text-base font-medium px-2 py-0.5 rounded {isGood === null
+							? 'text-surface-700 bg-surface-200'
+							: isGood
+								? 'text-green-700 bg-green-100'
+								: 'text-red-700 bg-red-100'}"
 					>
 						{isPositiveChange ? '↑' : '↓'}
 						{Math.abs(Number(change))}%

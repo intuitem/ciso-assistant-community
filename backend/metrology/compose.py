@@ -268,6 +268,12 @@ def _existing_definition(user, folder, specs, expression, shape):
     return None
 
 
+def _direction(value):
+    """The stored direction for a form value: None stays None (no
+    direction), anything else is the boolean it reads as."""
+    return None if value is None else value is not False
+
+
 def _definition_name(name, folder):
     """The metric's name, made unique among the domain's definitions."""
     taken = MetricDefinition.objects.filter(folder=folder)
@@ -383,7 +389,8 @@ def compose(user, data, instance=None):
         "category": category,
         "levels": levels,
         "unit": unit,
-        "higher_is_better": data.get("higher_is_better", True) is not False,
+        # Three-way: True, False, or None for a metric without a direction.
+        "higher_is_better": _direction(data.get("higher_is_better", True)),
     }
     picks = {key: {"pick": str(picked.id)} for key, picked in pairs}
     try:
