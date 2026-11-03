@@ -687,8 +687,9 @@ def _translate_questions(owner) -> dict | None:
             choice_data["select_implementation_groups"] = (
                 choice.select_implementation_groups
             )
-        if choice.annotation:
-            choice_data["annotation"] = choice.annotation
+        annotation = tr.get("annotation", choice.annotation)
+        if annotation:
+            choice_data["annotation"] = annotation
         return choice_data
 
     result = {}
@@ -701,8 +702,12 @@ def _translate_questions(owner) -> dict | None:
         }
         if not question.required:
             q_data["required"] = False
-        if question.annotation:
-            q_data["annotation"] = question.annotation
+        annotation = q_tr.get("annotation")
+        # sync copies the text into an empty annotation; that copy is no help text
+        if not annotation and question.annotation != question.text:
+            annotation = question.annotation
+        if annotation:
+            q_data["annotation"] = annotation
         if question.config is not None:
             q_data["config"] = question.config
         choices = [_translate_choice(c) for c in question.choices.all()]
@@ -3056,6 +3061,8 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         ordering = ["object_classification", "rank"]
         verbose_name = _("Classification level")
         verbose_name_plural = _("Classification levels")
+
+    folder_from = "object_classification"
 
     def save(self, *args, **kwargs):
         if self.object_classification_id:
@@ -6636,6 +6643,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
 
+    folder_from = "evidence"
+
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
@@ -6913,6 +6922,8 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.entry}"
+
+    folder_from = "incident"
 
     def save(self, *args, **kwargs):
         if self.timestamp > now():
@@ -9050,6 +9061,8 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
             updated_at=timezone.now()
         )
         return result
+
+    folder_from = "risk_assessment"
 
     def save(self, *args, **kwargs):
         self.folder = self.risk_assessment.folder
@@ -12518,6 +12531,8 @@ class QuickFormApplication(AbstractBaseModel, FolderMixin):
         verbose_name = _("Quick form application")
         verbose_name_plural = _("Quick form applications")
         ordering = ["-created_at"]
+
+    folder_from = "response"
 
     def save(self, *args, **kwargs):
         # As visible as the response that made it.

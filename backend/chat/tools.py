@@ -990,12 +990,7 @@ def _build_create_proposal(arguments: dict, scope, parsed_context=None) -> dict 
         if model_key == "ebios_rm_study" and "risk_matrix" not in entry:
             try:
                 RiskMatrix = apps.get_model("core", "RiskMatrix")
-                matrix = RiskMatrix.objects.filter(
-                    is_enabled=True,
-                    folder_id__in=scope.folder_ids,
-                ).first()
-                if not matrix:
-                    matrix = RiskMatrix.objects.filter(is_enabled=True).first()
+                matrix = scope.queryset(RiskMatrix).filter(is_enabled=True).first()
                 if matrix:
                     entry["risk_matrix"] = str(matrix.id)
             except LookupError as e:

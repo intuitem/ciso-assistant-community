@@ -411,6 +411,8 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"DORA IR ({self.get_incident_submission_display()}) — {self.incident}"
 
+    folder_from = "incident"
+
     def save(self, *args, **kwargs):
         if self.incident_id:
             self.folder = self.incident.folder
