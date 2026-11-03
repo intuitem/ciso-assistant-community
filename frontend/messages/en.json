@@ -7600,7 +7600,7 @@
 	"resultNumber": "Number",
 	"resultLevel": "Level",
 	"levels": "Levels",
-	"levelsHelpText": "Filled from the texts your formula returns. Order them from worst to best: with \"higher is better\" ticked, the last level is the best.",
+	"levelsHelpText": "Filled from the texts your formula returns. Their order sets the trend: with \"Higher is better\" enabled, list them from worst to best; with it disabled, from best to worst.",
 	"levelsCopiedHelpText": "The levels of {name}. Your formula returns their names or references.",
 	"useLevelsOf": "Use the levels of…",
 	"notALevel": "'{text}' is not one of the levels",
