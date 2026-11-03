@@ -81,6 +81,9 @@ test('user can add a custom metric sample to a metric instance', async ({
 				hasText: vars.metricInstanceName + ' one step'
 			})
 		).toBeVisible();
+		// Back to the list: the next step opens a metric from there.
+		await metricInstancesPage.goto();
+		await metricInstancesPage.hasUrl();
 	});
 
 	await test.step('add a custom metric sample', async () => {
