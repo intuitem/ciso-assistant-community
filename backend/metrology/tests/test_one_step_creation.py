@@ -153,6 +153,13 @@ class TestOneStepCreation:
         assert instance.collection_frequency == "quarterly"
         assert instance.target_value == 90
 
+    def test_a_picked_definition_with_a_null_inline_one_is_fine(self):
+        spain = make_domain("Spain")
+        data = one_step(spain, metric_definition=str(make_definition().id))
+        data["definition"] = None
+        response = call(MetricInstanceViewSet, "post", "create", data, admin())
+        assert response.status_code == 201, response.data
+
     def test_editing_ignores_an_inline_definition(self):
         spain = make_domain("Spain")
         instance = make_instance(spain, make_definition())

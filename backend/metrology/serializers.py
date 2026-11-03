@@ -171,7 +171,8 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
     # A metric made in one step: the definition's fields, written with the
     # metric instead of a `metric_definition` picked beforehand. The
     # definition is created in the metric's domain, named after the metric.
-    definition = serializers.JSONField(write_only=True, required=False)
+    # Null when a definition is picked instead: the form always sends both.
+    definition = serializers.JSONField(write_only=True, required=False, allow_null=True)
 
     organisation_objectives = serializers.PrimaryKeyRelatedField(
         queryset=OrganisationObjective.objects.all(),
