@@ -6,7 +6,7 @@ description: "Record a metric's value from its page: the period it answers for, 
 
 A metric's page carries a **Record a value** strip. Type the value, press **Enter** or click **Save**, and the metric's current value and timeline update in place. No window opens.
 
-<figure><img src="../../.gitbook/assets/metrics-record-value.png" alt="The Record a value strip: a value field holding 1310, a For period field set to November 2026 with a date picker, an Observation field, the Save button, and the note that a value already recorded for this period is replaced"><figcaption><p>The value, the period it answers for, an optional observation, and Save</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/metrics-record-value.png" alt="The page of the metric Number of assets in ACME Spain: its details on the left, and on the right the Record a value strip with 1310 typed, For period November 2026, an Observation field and Save, above the Current Value 1300 and the Timeline chart"><figcaption><p>The strip sits at the top of the metric's page, above its current value and timeline</p></figcaption></figure>
 
 ## The period
 
