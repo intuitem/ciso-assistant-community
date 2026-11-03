@@ -231,6 +231,8 @@ class Purpose(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.legal_basis
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -287,6 +289,8 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else str(self.category)
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -352,6 +356,8 @@ class DataSubject(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.category
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -411,6 +417,8 @@ class DataRecipient(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.category
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -451,6 +459,8 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.relationship_type
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -483,6 +493,8 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.country
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -677,6 +689,8 @@ class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
         verbose_name = _("DPIA requirement change")
         verbose_name_plural = _("DPIA requirement changes")
         ordering = ["-created_at"]
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
