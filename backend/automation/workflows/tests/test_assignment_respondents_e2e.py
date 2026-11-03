@@ -63,8 +63,10 @@ def install(domain):
     return workflow
 
 
-def make_audit(domain, urn=TARGETED):
-    framework = Framework.objects.create(name=urn, urn=urn, folder=domain)
+def make_audit(domain, urn=TARGETED, framework_folder=None):
+    framework = Framework.objects.create(
+        name=urn, urn=urn, folder=framework_folder or domain
+    )
     perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
     return ComplianceAssessment.objects.create(
         name="Audit", framework=framework, perimeter=perimeter, folder=domain
@@ -182,6 +184,7 @@ class TestAssignmentRespondents:
         dispatch_internal_event_task.call_local(last_update(assignment).pk, 0)
 
         instance = WorkflowInstance.objects.get(workflow=workflow)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
         assert instance.variables["framework_urn"] in (None, "")
         assert respondents(domain) == set()
         assert respondents(sibling) == set()
@@ -233,3 +236,20 @@ class TestAssignmentRespondents:
 
         instance = WorkflowInstance.objects.get(workflow=workflow)
         assert instance.status == WorkflowInstance.Status.FAILED
+
+    def test_a_framework_out_of_reach_is_not_read(self, run_now):
+        domain = make_domain("Domain")
+        sibling = make_domain("Sibling")
+        workflow = install(domain)
+        user = User.objects.create_user(email="direct@example.com")
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=make_audit(domain, framework_folder=sibling),
+            folder=domain,
+        )
+        assignment.actor.add(Actor.objects.get(user=user))
+
+        dispatch_internal_event_task.call_local(last_update(assignment).pk, 0)
+
+        instance = WorkflowInstance.objects.get(workflow=workflow)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        assert respondents(domain) == set()

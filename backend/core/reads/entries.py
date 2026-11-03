@@ -13,6 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import (
     BooleanField,
     Count,
@@ -252,16 +253,29 @@ def _requirements_breakdown(assessment):
     return {"total": total, **by_result}
 
 
+def _scoped_related(obj, name):
+    """A required relation the scoped prefetch cut reads as None, not DoesNotExist."""
+    try:
+        return getattr(obj, name)
+    except ObjectDoesNotExist:
+        return None
+
+
 def _assignment_audit(assignment):
-    audit = assignment.compliance_assessment
+    audit = _scoped_related(assignment, "compliance_assessment")
     if audit is None:
         return None
     return {"str": str(audit), "id": str(audit.id), "name": audit.name}
 
 
+def _assignment_audit_folder(assignment):
+    audit = _scoped_related(assignment, "compliance_assessment")
+    return str(audit.folder_id) if audit else None
+
+
 def _assignment_framework(assignment):
-    audit = assignment.compliance_assessment
-    framework = audit.framework if audit else None
+    audit = _scoped_related(assignment, "compliance_assessment")
+    framework = _scoped_related(audit, "framework") if audit else None
     if framework is None:
         return None
     return {
@@ -589,14 +603,10 @@ READABLE_MODELS: dict[str, ReadEntry] = {
         # The audit and its framework are scoped too: None when out of reach.
         computed={
             # Not str(): it walks the actors, which the scope may have cut.
-            "name": lambda a: str(a.compliance_assessment or ""),
+            "name": lambda a: str(_scoped_related(a, "compliance_assessment") or ""),
             "compliance_assessment": _assignment_audit,
             "framework": _assignment_framework,
-            "audit_folder": lambda a: (
-                str(a.compliance_assessment.folder_id)
-                if a.compliance_assessment
-                else None
-            ),
+            "audit_folder": _assignment_audit_folder,
             "actors": lambda a: [str(actor.id) for actor in a.actor.all()],
         },
         optional_computed={"users": _assignment_users},
