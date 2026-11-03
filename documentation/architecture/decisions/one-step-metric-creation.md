@@ -10,8 +10,6 @@ A metric is two objects: a definition (name, kind, unit, direction, default targ
 
 Two definition settings do not fit what people measure. `higher_is_better` is a boolean, so a count of assets reads as good when it grows. Values are shown at full precision, so authors wrap every formula in `round()` to get one decimal on a percentage.
 
-How a definition is spread across a group's domains and monitored there is decided in [deploy-definitions-to-domains](deploy-definitions-to-domains.md).
-
 ## Decision
 
 A metric is created in one form: name, domain, kind, unit, decimals, frequency, direction, target. The form creates a definition in the metric's domain, named after the metric and suffixed when the domain already has one, as compose does. While the name is typed, the form offers a definition the user can read with a similar name and the same kind; the hint never blocks. A definition gains a merge action: its instances move to the chosen definition and it is deleted; kind and unit must match.
@@ -27,7 +25,6 @@ A definition carries a number of decimals, defaulted by unit: one for a percenta
 - A merge keeps the chosen definition's direction, decimals and default target. An instance with a target of its own keeps it.
 - Readers of `higher_is_better` handle null. Existing definitions keep their direction; a new one without a stated direction has none, library definitions included.
 - Schema: the direction boolean becomes nullable and the definition gains decimals. One migration, no data step.
-- The merge ships with the creation release, not later.
 
 ## Security considerations
 
