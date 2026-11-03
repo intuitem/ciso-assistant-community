@@ -5,7 +5,8 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.apps import startup
-from core.models import AppliedControl, Asset, ReferenceControl
+from core.models import AppliedControl, Asset, Policy, ReferenceControl
+from core.views import FolderViewSet
 from custom_fields.models import CustomFieldDefinition
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
@@ -330,16 +331,17 @@ def test_entity_assessment_batch_delete_removes_enclave_audit(
     assert not ComplianceAssessment.objects.filter(pk=audit_id).exists()
 
 
-def _folder_group(payload: dict) -> dict | None:
+def _group(payload: dict, model: str) -> dict | None:
     return next(
-        (g for g in payload["carried"]["grouped_objects"] if g["model"] == "Folder"),
+        (g for g in payload["carried"]["grouped_objects"] if g["model"] == model),
         None,
     )
 
 
-def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
+def test_carried_folders_are_grouped_by_type(
     admin_client: APIClient, domain_tree: dict[str, Folder]
 ) -> None:
+    """An enclave moves with its domain, so it is listed, apart from the domains."""
     Folder.objects.create(
         name="SOME-ENCLAVE",
         parent_folder=domain_tree["target"],
@@ -351,9 +353,98 @@ def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
     )
 
     assert res.status_code == 200, res.content
-    group = _folder_group(res.json())
-    assert group["verbose_name"] == "Domain"
-    assert {o["name"] for o in group["objects"]} == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
+    domains = _group(res.json(), "Folder.DO")
+    assert domains["verbose_name"] == "Domain"
+    assert {o["name"] for o in domains["objects"]} == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
+    enclaves = _group(res.json(), "Folder.EN")
+    assert [o["name"] for o in enclaves["objects"]] == ["SOME-ENCLAVE"]
+
+
+def test_move_preview_only_takes_domains_as_subjects(
+    admin_client: APIClient, domain_tree: dict[str, Folder]
+) -> None:
+    enclave = Folder.objects.create(
+        name="SELECTED-ENCLAVE",
+        parent_folder=domain_tree["target"],
+        content_type=Folder.ContentType.ENCLAVE,
+    )
+
+    alone = admin_client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(enclave.id)]}, format="json"
+    )
+    mixed = admin_client.post(
+        MOVE_PREVIEW_URL,
+        {"ids": [str(enclave.id), str(domain_tree["sub"].id)]},
+        format="json",
+    )
+
+    assert alone.status_code == 403
+    assert mixed.status_code == 200, mixed.content
+    assert [s["name"] for s in mixed.json()["subjects"]] == ["SUB-DOMAIN"]
+
+
+def test_move_preview_caps_the_names_but_not_the_count(
+    admin_client: APIClient, domain_tree: dict[str, Folder], monkeypatch
+) -> None:
+    monkeypatch.setattr(FolderViewSet, "MOVE_PREVIEW_NAMES_PER_GROUP", 2)
+
+    res = admin_client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    assets = _group(res.json(), "Asset")
+    assert assets["count"] == 3
+    assert len(assets["objects"]) == 2
+
+
+def test_move_preview_lists_a_policy_once(
+    admin_client: APIClient, target_folder: Folder
+) -> None:
+    """A policy is an applied control seen through a proxy: one row, one entry."""
+    Policy.objects.create(name="LOCAL-POLICY", folder=target_folder)
+
+    res = admin_client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(target_folder.id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    names = [
+        o["name"]
+        for group in res.json()["carried"]["grouped_objects"]
+        for o in group["objects"]
+    ]
+    assert names.count("LOCAL-POLICY") == 1
+
+
+def test_move_preview_masks_principals_the_caller_cannot_view(
+    app_ready: Folder, domain_tree: dict[str, Folder]
+) -> None:
+    """Viewing a role assignment does not reveal a user or group the caller could
+    not read on its own."""
+    victim = User.objects.create_user("hidden-principal@cascade.test")
+    RoleAssignment.objects.create(
+        user=victim, role=Role.objects.get(name="BI-RL-ANA"), folder=domain_tree["sub"]
+    )
+    mover = Role.objects.create(name="RA-MOVER", folder=app_ready)
+    mover.permissions.set(
+        Permission.objects.filter(
+            codename__in=["view_folder", "change_folder", "view_roleassignment"]
+        )
+    )
+    client = _scoped_client(
+        "ra-mover@cascade.test", "RA-MOVER", domain_tree["target"], app_ready
+    )
+
+    res = client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    assignments = _group(res.json(), "RoleAssignment")
+    assert assignments["count"] == 2
+    assert "hidden-principal@cascade.test" not in res.content.decode()
+    assert "grp-ra-mover@cascade.test" not in res.content.decode()
 
 
 def test_move_preview_needs_the_change_permission_not_the_delete_one(

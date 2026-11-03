@@ -135,7 +135,15 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from iam.models import (
+    Folder,
+    IdPGroup,
+    Permission,
+    Role,
+    RoleAssignment,
+    User,
+    UserGroup,
+)
 from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
@@ -9552,20 +9560,25 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
-    # One per requirement and implied by the audit they belong to: naming them would
-    # bury the rest of the move preview.
-    MOVE_PREVIEW_EXEMPT_MODELS = frozenset({"core.RequirementAssessment"})
+    # Names returned per group; the count still covers every object in it.
+    MOVE_PREVIEW_NAMES_PER_GROUP = 50
+    MOVE_PREVIEW_FOLDER_LABELS = {
+        Folder.ContentType.DOMAIN: _("Domain"),
+        Folder.ContentType.ENCLAVE: _("Enclave"),
+        Folder.ContentType.PERSONAL: _("Personal folder"),
+    }
 
     @action(detail=False, methods=["post"], url_path="move-preview")
     def move_preview(self, request: Request) -> Response:
         """What moving the listed domains together carries along.
 
-        Covers the listed domains the caller may change. `subjects` says for each one
-        whether it sits below another listed domain: moved to a common target, it
-        leaves that subtree. `carried` groups the sub-domains and everything filed
-        under the moved subtrees; what the caller may not view is counted in
-        `hidden_count`, never named. 400 if `ids` is empty or longer than
-        `BATCH_SIZE_LIMIT`, 403 if none is changeable.
+        Covers the listed domains the caller may change; other folders are left out.
+        `subjects` says for each one whether it sits below another listed domain:
+        moved to a common target, it leaves that subtree. `carried` groups the
+        folders and everything filed under the moved subtrees, each group with its
+        `count` and at most `MOVE_PREVIEW_NAMES_PER_GROUP` names; what the caller may
+        not view is counted in `hidden_count`, never named. 400 if `ids` is empty or
+        longer than `BATCH_SIZE_LIMIT`, 403 if none is changeable.
         """
         ids = request.data.get("ids")
         if not isinstance(ids, list) or not ids:
@@ -9582,7 +9595,11 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         subjects = sorted(
             (
                 folder
-                for folder in self.get_queryset().filter(id__in=ids, builtin=False)
+                for folder in self.get_queryset().filter(
+                    id__in=ids,
+                    builtin=False,
+                    content_type=Folder.ContentType.DOMAIN,
+                )
                 if RoleAssignment.is_access_allowed(
                     user=request.user, perm=perm, folder=folder
                 )
@@ -9616,47 +9633,89 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 if codename in granted.get(str(folder_id), ())
             }
 
+        viewable_ids_by_model = {}
+
+        def can_view(model, pk) -> bool:
+            if model not in viewable_ids_by_model:
+                viewable_ids_by_model[model] = {
+                    str(object_id)
+                    for object_id in RoleAssignment.get_viewable_object_ids(
+                        request.user, model
+                    )
+                }
+            return str(pk) in viewable_ids_by_model[model]
+
+        def display_name(obj) -> str:
+            if not isinstance(obj, RoleAssignment):
+                return self._cascade_display_name(obj)
+            # The assignment is viewable, its role and principal not necessarily:
+            # name only what the caller could read on its own.
+            role = (
+                obj.role.name
+                if obj.role_id and can_view(Role, obj.role_id)
+                else str(_("Role assignment"))
+            )
+            if obj.user_id and can_view(User, obj.user_id):
+                return f"{role} → {obj.user.email}"
+            if obj.user_group_id and can_view(UserGroup, obj.user_group_id):
+                return f"{role} → {obj.user_group.name}"
+            return role
+
         groups = []
         hidden_count = 0
 
-        def add_group(model, verbose_name, queryset, viewable) -> None:
+        def add_group(key, verbose_name, queryset, viewable) -> None:
             nonlocal hidden_count
             if viewable != subtree_ids:
                 hidden_count += queryset.exclude(folder_id__in=viewable).count()
             if not viewable:
                 return
+            named = queryset.filter(folder_id__in=viewable)
+            count = named.count()
+            if not count:
+                return
             objects = [
-                {"id": str(obj.pk), "name": self._cascade_display_name(obj)}
-                for obj in queryset.filter(folder_id__in=viewable)
+                {"id": str(obj.pk), "name": display_name(obj)}
+                for obj in named[: self.MOVE_PREVIEW_NAMES_PER_GROUP]
             ]
-            if objects:
-                objects.sort(key=lambda o: (o["name"] or "").lower())
-                groups.append(
-                    {
-                        "model": model.__name__,
-                        "verbose_name": str(verbose_name),
-                        "objects": objects,
-                    }
-                )
+            objects.sort(key=lambda o: (o["name"] or "").lower())
+            groups.append(
+                {
+                    "model": key,
+                    "verbose_name": str(verbose_name),
+                    "count": count,
+                    "objects": objects,
+                }
+            )
 
-        # A folder's own folder is itself, so view_folder is checked on the sub-domain.
-        add_group(
-            Folder,
-            _("Domain"),
-            Folder.objects.filter(
-                id__in=subtree_ids - subject_ids,
-                content_type=Folder.ContentType.DOMAIN,
-            ).annotate(folder_id=F("id")),
-            viewable_folder_ids(Folder),
+        # Every folder below a moved domain moves with it, enclaves included. A
+        # folder's own folder is itself, so view_folder is checked on that folder.
+        viewable_folders = viewable_folder_ids(Folder)
+        carried_folders = (
+            Folder.objects.filter(id__in=subtree_ids - subject_ids)
+            .annotate(folder_id=F("id"))
+            .order_by("name")
         )
-        for model in self._folder_content_models(
-            exempt=self.MOVE_PREVIEW_EXEMPT_MODELS
-        ):
-            queryset = model._base_manager.filter(folder_id__in=subtree_ids)
+        for content_type, label in self.MOVE_PREVIEW_FOLDER_LABELS.items():
+            add_group(
+                f"Folder.{content_type}",
+                label,
+                carried_folders.filter(content_type=content_type),
+                viewable_folders,
+            )
+        for model in self._folder_content_models(exempt=frozenset()):
+            # By name where there is one, so the capped names are the first ones.
+            has_name = any(field.name == "name" for field in model._meta.fields)
+            queryset = model._base_manager.filter(folder_id__in=subtree_ids).order_by(
+                "name" if has_name else "pk"
+            )
             if model is RoleAssignment:
                 queryset = queryset.select_related("role", "user", "user_group")
             add_group(
-                model, model._meta.verbose_name, queryset, viewable_folder_ids(model)
+                model.__name__,
+                model._meta.verbose_name,
+                queryset,
+                viewable_folder_ids(model),
             )
 
         groups.sort(key=lambda g: g["verbose_name"].lower())
@@ -9671,7 +9730,7 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                     for folder in subjects
                 ],
                 "carried": {
-                    "count": sum(len(g["objects"]) for g in groups),
+                    "count": sum(g["count"] for g in groups),
                     "hidden_count": hidden_count,
                     "grouped_objects": groups,
                 },
@@ -9871,7 +9930,8 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
         Exhaustive rather than curated: deletion cascades through every FK. By default
         the IAM objects every domain auto-provisions are exempt, or nothing would be
-        deletable. Models whose table this edition never created are dropped up front:
+        deletable. Proxies are left out: their concrete model already covers their
+        rows. Models whose table this edition never created are dropped up front:
         probing one raises, and on PostgreSQL that aborts the surrounding transaction,
         so the error cannot simply be caught and skipped.
         """
@@ -9883,6 +9943,7 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
             model
             for model in apps.get_models()
             if model is not Folder
+            and not model._meta.proxy
             and model._meta.label not in exempt
             and model._meta.db_table in tables
             and any(

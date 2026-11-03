@@ -1,9 +1,16 @@
 <script module lang="ts">
 	export type CascadeObject = { id: string; name: string };
-	export type CascadeGroup = { model: string; verbose_name?: string; objects: CascadeObject[] };
+	export type CascadeGroup = {
+		model: string;
+		verbose_name?: string;
+		/** Objects in the group when `objects` holds only some of them. */
+		count?: number;
+		objects: CascadeObject[];
+	};
 </script>
 
 <script lang="ts">
+	import { m } from '#paraglide/messages.js';
 	import { SvelteSet } from 'svelte/reactivity';
 
 	interface Props {
@@ -22,6 +29,7 @@
 </script>
 
 {#each groups as group (group.model)}
+	{@const total = group.count ?? group.objects.length}
 	<section class="border-t border-surface-200-800">
 		<button
 			type="button"
@@ -32,7 +40,7 @@
 		>
 			<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
 			<span class="text-xs text-surface-600-400">
-				{group.objects.length}
+				{total}
 			</span>
 		</button>
 
@@ -43,6 +51,11 @@
 						<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
 					</li>
 				{/each}
+				{#if total > group.objects.length}
+					<li class="py-1 text-xs text-surface-600-400">
+						{m.andNMoreObjects({ count: total - group.objects.length })}
+					</li>
+				{/if}
 			</ul>
 		{/if}
 	</section>

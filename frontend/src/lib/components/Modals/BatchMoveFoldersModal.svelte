@@ -32,7 +32,7 @@
 	const { form: pickerForm } = createPickerForm('parent_folder');
 	const pickerValues = pickerForm.form;
 
-	let preview: MovePreview | null = $state(null);
+	let preview = $state<MovePreview | null>(null);
 	let loading = $state(true);
 	let fetchError = $state(false);
 

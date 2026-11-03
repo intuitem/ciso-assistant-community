@@ -124,12 +124,6 @@
 		orgTree && allowedIds ? restrict(orgTree, new Set(allowedIds.map(String))) : orgTree
 	);
 
-	// Include the GL root as a flat first entry
-	const topNodes = $derived(
-		shownTree ? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])] : []
-	);
-	const hasNodes = $derived(topNodes.length > 0);
-
 	//  optionsSelf / excludedIds exclusion
 	const excludedSelf = $derived(
 		optionsSelf
@@ -143,6 +137,15 @@
 	const excluded: ReadonlySet<string> = $derived(
 		new Set([...excludedSelf, ...excludedIds.map(String)])
 	);
+
+	// Include the GL root as a flat first entry; its children are listed beside it, so
+	// excluding the root must drop them too.
+	const topNodes = $derived(
+		shownTree && !excluded.has(String(shownTree.uuid))
+			? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])]
+			: []
+	);
+	const hasNodes = $derived(topNodes.length > 0);
 
 	/** Recursively prune the excluded nodes (and their subtrees) from a node list. */
 	function pruneExcluded(nodes: TreeNode[]): TreeNode[] {
