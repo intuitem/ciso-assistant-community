@@ -54,6 +54,7 @@
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
+	let frameworkHasRequiredEvidence = $state(false);
 
 	let frameworkScoring = $state<FrameworkScale | null>(null);
 
@@ -289,7 +290,10 @@
 			pickedScale = null;
 			baselineScale = null;
 		}
-		if (!id) frameworkScoring = null;
+		if (!id) {
+			frameworkScoring = null;
+			frameworkHasRequiredEvidence = false;
+		}
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
@@ -304,6 +308,7 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
+					frameworkHasRequiredEvidence = r['has_required_evidence'] ?? false;
 					defaultScoring = r['default_scoring'] ?? null;
 
 					frameworkScoring = {
@@ -525,6 +530,7 @@
 			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
 			disabled={object?.is_locked}
 			{frameworkDefaults}
+			evidenceRequired={frameworkHasRequiredEvidence}
 		/>
 
 		{#if scaleChoice}

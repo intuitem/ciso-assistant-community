@@ -16,9 +16,17 @@
 		// keys in `value`, so pills on a fresh create form display what the
 		// API will actually save.
 		frameworkDefaults?: VisibilityMap | null;
+		// The framework has requirements that cannot be submitted without evidence.
+		evidenceRequired?: boolean;
 	}
 
-	let { value, onChange, disabled = false, frameworkDefaults = null }: Props = $props();
+	let {
+		value,
+		onChange,
+		disabled = false,
+		frameworkDefaults = null,
+		evidenceRequired = false
+	}: Props = $props();
 
 	const FIELD_LABELS: Record<string, () => string> = {
 		result: m.result,
@@ -188,6 +196,14 @@
 					{/each}
 				</div>
 			</div>
+			{#if field === 'evidences' && evidenceRequired && readPair(field).respondent !== 'edit'}
+				<p
+					class="flex items-start gap-1.5 text-xs text-warning-700-300 pb-1"
+					data-testid="visibility-evidences-required-warning"
+				>
+					<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>{m.evidenceRequiredHiddenWarning()}
+				</p>
+			{/if}
 		{/each}
 	</div>
 </div>

@@ -58,6 +58,7 @@ The content sheet contains one row per section or requirement. Rows follow the o
 | `description` <mark style="color:$info;">T</mark> | Requirement text or explanation | Text |
 | `annotation` <mark style="color:$info;">T</mark> | Additional guidance | Text |
 | `typical_evidence` <mark style="color:$info;">T</mark> | Examples of evidence to look for | Text |
+| `evidence_required` | Whether the requirement cannot be submitted without an evidence | Enter `x` to require one, leave empty otherwise |
 | `importance` | Priority of the requirement | `mandatory`, `recommended`, or `nice_to_have` |
 | `weight` | Relative weight of the requirement | Positive integer |
 | `min_score` | Lowest score for a specific requirement, overriding the framework value | Integer, `0` or more, lower than the row's `max_score`. Fill both columns or neither. |
