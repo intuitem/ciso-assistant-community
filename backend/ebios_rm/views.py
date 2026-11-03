@@ -605,7 +605,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 }
             ]
             df_study = pd.DataFrame(study_data)
-            df_study.map(esc).to_excel(writer, sheet_name=SHEET_NAMES["study"], index=False)
+            df_study.map(esc).to_excel(
+                writer, sheet_name=SHEET_NAMES["study"], index=False
+            )
 
             # 1.2 Assets sheet
             assets_data = []
@@ -715,7 +717,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if roto_data:
                 df_roto = pd.DataFrame(roto_data)
-                df_roto.map(esc).to_excel(writer, sheet_name=SHEET_NAMES["ro_to"], index=False)
+                df_roto.map(esc).to_excel(
+                    writer, sheet_name=SHEET_NAMES["ro_to"], index=False
+                )
 
             # 3.1 Stakeholders sheet
             sh_data = []
