@@ -264,7 +264,10 @@ def _assignment_users(assignment):
         for user in people:
             if user is not None and user.is_active:
                 users[user.id] = user
-    return [{"id": str(user.id), "email": user.email} for user in users.values()]
+    return [
+        {"id": str(user.id), "email": user.email, "is_third_party": user.is_third_party}
+        for user in users.values()
+    ]
 
 
 READABLE_MODELS: dict[str, ReadEntry] = {
@@ -563,7 +566,8 @@ READABLE_MODELS: dict[str, ReadEntry] = {
         model=RequirementAssignment,
         fields=["status", "compliance_assessment", "folder"],
         computed={
-            "name": str,
+            # Not str(): it walks the actors, which the scope may have cut.
+            "name": lambda a: str(a.compliance_assessment),
             "compliance_assessment": lambda a: {
                 "str": str(a.compliance_assessment),
                 "id": str(a.compliance_assessment_id),

@@ -86,7 +86,7 @@ A webhook run's payload is the JSON body the caller posted. An internal event ru
 | `object_id` | The object's id |
 | `object_repr` | The object's display name |
 | `changes` | For each changed field, a pair `[old, new]` |
-| `new_values` | For each changed field, the new value |
+| `new_values` | For each changed field, the new value. For a link (an assignment's actors, an audit's authors), `add` or `delete` |
 | `folder_id` | The object's domain |
 | `actor_email` | Who made the change, when known |
 | `timestamp` | When |

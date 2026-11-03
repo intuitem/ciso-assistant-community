@@ -92,7 +92,7 @@ See [Schedule](triggers.md#schedule).
 - Any audited object: controls, findings, vulnerabilities, audits, requirement assessments, requirement assignments, risk acceptances, validation flows, entities, users, tokens, and more.
 - Fires only for objects in the workflow's domain subtree, whatever the filters say. A folder filter outside the subtree is refused at publish.
 - Objects without a domain (users, tokens) live in the root: only a root workflow sees them.
-- Links set after creation (assignment actors, audit authors) arrive as `updated`. `requirementassignment.updated` covers a new assignment's actors.
+- Links set after creation (assignment actors, audit authors) arrive as `updated`, their new value is `add` or `delete`. Actors added, creation included: `actor`, **Only when changed**, `eq` `add`.
 - Filters: a run starts when **any** group matches, a group matches when **all** its conditions do. Quick chips: `status`, `folder`, `filtering_labels`.
 - **Only when changed**: off = state after the event ("status is done"), on = transition ("status just became done"). Use it to fire once.
 - One user action on one object = one run per trigger (**Coalesced**). A bulk edit still gives one run per object.
@@ -193,7 +193,7 @@ See [Steps](steps.md).
 - Rows carry `id`, `name`, `created_at`, `updated_at` plus model fields. Filter on stored values (`active`), read back labels (`Active`).
 - `…_count` fields (`evidences_count`, `applied_controls_count`) filter and aggregate like numbers: "controls with no evidence" = `evidences_count` equals `0`.
 - Requirement assessments: only assessable ones. Risk scenario level filters ignore unrated scenarios.
-- Requirement assignments: `framework` (`urn`, `ref_id`, `name`) and `audit_folder` of the audit. **Extra data to include** `users` (`id`, `email`) behind the actors: the user, a team's leader, deputies and members, an entity's representatives with an account. Users the run cannot see are left out. Grant in `audit_folder`, not the assignment's `folder`.
+- Requirement assignments: `framework` (`urn`, `ref_id`, `name`) and `audit_folder` of the audit. **Extra data to include** `users` (`id`, `email`, `is_third_party`) behind the actors: the user, a team's leader, deputies and members, an entity's representatives with an account. Out of reach, silently: users, teams and entities the run cannot view, and representatives without `view_representative` on the entity's domain. Grant in `audit_folder`, not the assignment's `folder`.
 - `document_revision.content` is truncated under `{{nodes…}}`: map it to a variable to pass the whole text.
 - **Extra data to include**: `quality_check` on audits and requirements (`errors`, `warnings`, `info`, `count`, `flagged`, `messages`, `text`). Branch on `flagged`, not `count`. Expensive: use it on a first-match read or a short page.
 
@@ -345,7 +345,7 @@ See [Action reference](actions.md).
 | `model`, `operation` | `appliedcontrol`, `created` / `updated` / `deleted` |
 | `object_id`, `object_repr` | Id, display name |
 | `changes.<field>` | `[old, new]` |
-| `new_values.<field>` | New value |
+| `new_values.<field>` | New value. `add` or `delete` for a link (actors, authors) |
 | `folder_id`, `actor_email`, `timestamp` | Domain, author when known, when |
 
 See [Payloads](expressions.md#payloads).

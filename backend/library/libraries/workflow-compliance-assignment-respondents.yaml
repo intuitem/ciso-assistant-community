@@ -2,12 +2,13 @@ urn: urn:intuitem:risk:library:workflow-compliance-assignment-respondents
 locale: en
 ref_id: workflow-compliance-assignment-respondents
 name: Assignment actors become respondents
-description: 'When a requirement assignment is created or its actors change on an audit of a chosen
-  framework, add the people behind its actors to the Respondent group of the audit''s domain.
+description: 'When actors are added to a requirement assignment on an audit of a chosen framework, add
+  the people behind them to the Respondent group of the audit''s domain.
 
   Set framework_urns to the URNs of the frameworks concerned, comma separated. Left empty, the workflow
   does nothing. Actors resolve to the user, the team''s leader, deputies and members, or the entity''s
-  representatives that have an account. Nobody is ever removed from the group.'
+  representatives that have an account. Third-party accounts are skipped: they answer through their
+  entity''s workspace. Nobody is ever removed from the group.'
 copyright: © intuitem
 version: 1
 publication_date: 2026-10-14
@@ -20,7 +21,7 @@ objects:
     ref_id: assignment-respondents
     name: Assignment actors become respondents
     description: Adds the actors of a requirement assignment to the Respondent group of the audit's domain,
-      for audits of the frameworks listed in framework_urns.
+      for audits of the frameworks listed in framework_urns. Third-party accounts are skipped.
     graph:
       variables:
       - key: framework_urns
@@ -41,14 +42,24 @@ objects:
       - key: users
         type: json
         default_value: []
+      - key: third_party
+        type: boolean
+        default_value: false
       nodes:
-      # Actors are set right after creation, so their change is the event to follow.
+      # A new assignment's actors arrive as an update too, right after its creation.
       - ref: on_actors
         type: trigger
-        label: Assignment actors set
+        label: Actors added to an assignment
         trigger_config:
           type: internal_event
           event_key: requirementassignment.updated
+          filters:
+            operator: and
+            conditions:
+            - field: actor
+              changed: true
+              op: eq
+              value: add
         input_mapping:
           assignment_id: object_id
       - ref: read_assignment
@@ -87,12 +98,33 @@ objects:
               value: '{{framework_urns}}'
         - name: skipped
           is_default: true
+      # Stops on the first failure: a missing group or scope fails every user alike.
       - ref: per_user
         type: loop
         label: One user at a time
         loop_config:
           collection: '{{users}}'
-          on_item_error: continue
+          on_item_error: stop
+      - ref: read_user
+        type: action
+        label: Is it a third party?
+        action_config:
+          type: set_variables
+          variables:
+            third_party: '{{item.is_third_party}}'
+      - ref: check_third_party
+        type: condition
+        label: Internal account?
+        branches:
+        - name: internal
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: third_party
+              op: eq
+              value: false
+        - name: third_party
+          is_default: true
       - ref: add_respondent
         type: action
         label: Add to Respondent group
@@ -116,8 +148,16 @@ objects:
         target: done
         source_branch: skipped
       - source: per_user
-        target: add_respondent
+        target: read_user
         source_port: each
+      - source: read_user
+        target: check_third_party
+      - source: check_third_party
+        target: add_respondent
+        source_branch: internal
+      - source: check_third_party
+        target: per_user
+        source_branch: third_party
       - source: add_respondent
         target: per_user
       - source: per_user
