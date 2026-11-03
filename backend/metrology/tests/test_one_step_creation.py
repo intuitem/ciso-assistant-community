@@ -155,10 +155,15 @@ class TestOneStepCreation:
 
     def test_a_picked_definition_with_a_null_inline_one_is_fine(self):
         spain = make_domain("Spain")
-        data = one_step(spain, metric_definition=str(make_definition().id))
+        picked = make_definition()
+        data = one_step(spain, metric_definition=str(picked.id))
         data["definition"] = None
+        before = MetricDefinition.objects.count()
         response = call(MetricInstanceViewSet, "post", "create", data, admin())
         assert response.status_code == 201, response.data
+        instance = MetricInstance.objects.get(id=response.data["id"])
+        assert instance.metric_definition == picked
+        assert MetricDefinition.objects.count() == before
 
     def test_editing_ignores_an_inline_definition(self):
         spain = make_domain("Spain")
