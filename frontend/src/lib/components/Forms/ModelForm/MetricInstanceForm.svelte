@@ -413,9 +413,13 @@
 			onChange={(value) => (direction = value as Direction)}
 			ariaLabel={m.direction()}
 		/>
-		{#if direction === 'none'}
-			<p class="text-xs text-surface-500 mt-1">{m.noDirectionHelpText()}</p>
-		{/if}
+		<p class="text-xs text-surface-500 mt-1">
+			{direction === 'none'
+				? m.noDirectionHelpText()
+				: direction === 'lower'
+					? m.lowerIsBetterHelpText()
+					: m.higherIsBetterHelpText()}
+		</p>
 	</div>
 {:else}
 	{#key definitionVersion}

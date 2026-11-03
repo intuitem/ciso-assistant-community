@@ -185,7 +185,11 @@
 		ariaLabel={m.direction()}
 	/>
 	<p class="text-xs text-surface-500 mt-1">
-		{direction === 'none' ? m.noDirectionHelpText() : m.higherIsBetterHelpText()}
+		{direction === 'none'
+			? m.noDirectionHelpText()
+			: direction === 'lower'
+				? m.lowerIsBetterHelpText()
+				: m.higherIsBetterHelpText()}
 	</p>
 </div>
 <AutocompleteSelect
