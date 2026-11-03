@@ -365,6 +365,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 113. OWASP Top 10 for Agentic Applications 2026 🐝🤖
 114. China: Personal Information Protection Law (PIPL) and CAC Personal Information Protection Compliance Audit Measures 🇨🇳
 115. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
+116. Australian Information Security Manual (ASD ISM) (September 2026) 🇦🇺
 
 ### Community contributions
 
@@ -410,7 +411,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 ### Threat and TTP catalogs
 
 1. Mitre ATT&CK v19.1 (Enterprise) and v19.2 (ICS, Mobile) - Threats and Mitigations catalogs 🌐
-2. OWASP Top 10 Web (2021) - Threat catalog 🐝🌐
+2. OWASP Top 10 Web (2021 & 2025) - Threat catalog 🐝🌐
 3. OWASP Multi-Agentic System (MAS) Threat Modelling Guide - Threat catalog 🐝🤖
 4. Hungarian NIS2 threat catalogue (7/2024. (VI. 24.) MK rendelet, annex 3) 🇭🇺
 5. Mitre ATLAS v2026.07 - Threats and Mitigations catalog for AI systems 🤖🌐
