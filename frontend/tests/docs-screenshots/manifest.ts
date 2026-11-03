@@ -239,8 +239,8 @@ export const shots: Shot[] = [
 		url: '/metric-instances/597d588f-e161-46e5-9f66-53f7b632bfc2',
 		usedBy: ['features/metrics/recording-values.md', 'concepts/metrics.md'],
 		act: async (page) => {
-			// The whole page, so the strip is seen where it lives.
-			await page.setViewportSize({ width: 1440, height: 1000 });
+			// The whole page at a 16-inch MacBook's default size, so the strip is seen where it lives.
+			await page.setViewportSize({ width: 1728, height: 1117 });
 			await page.getByTestId('record-value-input').fill('1310');
 		}
 	},
