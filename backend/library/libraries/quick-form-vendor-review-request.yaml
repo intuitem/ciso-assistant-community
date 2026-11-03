@@ -325,12 +325,10 @@ objects:
         name: Antrag auf Anbieterprüfung
         description: |-
           Liefert Angaben für eine Drittparteiprüfung. Kritikalität, Abhängigkeit und Vertrauen bleiben im Ermessen der bewertenden Person – hier werden nur die zur Abgrenzung und Priorisierung benötigten Angaben gesammelt.
-
-          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
 translations:
   de:
     name: Antrag auf Anbieterprüfung
     description: |-
       Beantragen Sie eine Prüfung einer Drittpartei, bevor Sie deren Leistungen nutzen. Die Antworten legen den Prüfumfang fest; sie stellen noch keine Prüfung dar: Wer ist der Anbieter, wie wird die Leistung erbracht, welche Daten würde er halten oder worauf zugreifen und wie stark wäre das Unternehmen von ihm abhängig?
 
-      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

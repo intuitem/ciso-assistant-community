@@ -461,11 +461,12 @@ objects:
 
           Chaque réponse notée va de 1 (faible) à 4 (critique). L'impact métier et l'exposition des données sont chacun la moyenne de leurs trois réponses, et le risque intrinsèque est le plus élevé des deux : une solution qui fait tourner un processus critique compte même si elle ne détient aucune donnée, et inversement.
 
-          Certaines réponses relèvent le niveau à elles seules : une fonction critique réglementée, une solution unique derrière un processus critique, des données sensibles, ou un accès à privilèges à vos systèmes.
+          Certaines réponses ou combinaisons de réponses relèvent directement le niveau : une fonction critique réglementée ; une solution dont la défaillance arrête un processus critique ou exposé aux clients, et qui est soit sans alternative, soit longue à remplacer (plus de six mois) ; des données personnelles sensibles, des données de paiement ou de santé, des identifiants ou des secrets ; ou un accès à privilèges à vos systèmes.
         annotation: 'Une réponse acceptée attribue le niveau de la solution sur l''échelle par défaut
           : Critique à partir d''un risque intrinsèque de 3,3, Important à partir de 2,6, Standard à partir
           de 2,0, Faible impact en dessous. Une fonction critique réglementée ou un point de défaillance
-          unique rend la solution au moins Critique ; des données sensibles ou un accès à privilèges,
+          unique rend la solution au moins Critique ; des données personnelles sensibles, des données de paiement
+          ou de santé, des identifiants ou des secrets, ou un accès à privilèges,
           au moins Important. Le niveau retenu est le plus élevé de ces résultats. Chaque dimension fait
           la moyenne de trois réponses et évolue donc par tiers : 3,3 est atteint avec 4-4-2 ou 3-3-4,
           2,6 avec 3-3-2. Les niveaux sont désignés par leur clé : une échelle renommée ou réordonnée
@@ -478,8 +479,6 @@ objects:
           Jede bewertete Antwort erhält 1 (niedrig) bis 4 (kritisch) Punkte. Geschäftliche Auswirkungen und Datenexposition ergeben sich jeweils aus dem Mittelwert ihrer drei Antworten. Das inhärente Risiko ist der höhere der beiden Werte: Eine Lösung, die einen kritischen Prozess betreibt, ist auch ohne Datenhaltung bedeutsam – und umgekehrt.
 
           Einige Antworten oder Antwortkombinationen erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion; eine Lösung, deren Ausfall einen kritischen Prozess oder einen Prozess mit direktem Kundenkontakt zum Stillstand bringt und für die entweder keine alternative Bezugsquelle besteht oder ein Wechsel mehr als sechs Monate dauert; besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten oder Geheimnisse; oder privilegierter Zugriff auf Ihre Systeme.
-
-          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
         annotation: 'Eine angenommene Antwort setzt die Stufe der Lösung auf der Standardskala:
           Kritisch ab einem inhärenten Risiko von 3,3, Wichtig ab 2,6, Standard ab 2,0, darunter
           Geringe Auswirkungen. Eine regulierte kritische Funktion oder ein Single Point of Failure
@@ -502,4 +501,4 @@ translations:
     description: |-
       Ein kurzes Einstiegsformular zur Einstufung einer Lösung, also der Leistung eines Anbieters, nach ihrem inhärenten Risiko: drei Fragen zu geschäftlichen und betrieblichen Auswirkungen sowie drei zu Daten, Datenschutz und Sicherheit. Starten Sie es bei einer Lösung über „Stufe bewerten“; eine angenommene Antwort überträgt die Stufe auf die Lösung.
 
-      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

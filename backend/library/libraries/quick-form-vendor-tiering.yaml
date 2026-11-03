@@ -621,11 +621,12 @@ objects:
 
           Chaque réponse notée va de 1 (faible) à 4 (critique). L'impact métier et l'exposition des données sont chacun la moyenne de leurs trois réponses, et le risque intrinsèque est le plus élevé des deux : un fournisseur qui fait tourner un processus critique compte même s'il ne détient aucune donnée, et inversement.
 
-          Certaines réponses relèvent le niveau à elles seules : une fonction critique réglementée, un fournisseur unique derrière un processus critique, des données sensibles, ou un accès à privilèges à vos systèmes.
+          Certaines réponses ou combinaisons de réponses relèvent directement le niveau : une fonction critique réglementée ; un fournisseur dont la défaillance arrête un processus critique ou exposé aux clients, et qui est soit le seul fournisseur possible, soit long à remplacer (plus de six mois) ; des données personnelles sensibles, des données de paiement ou de santé, des identifiants ou des secrets ; ou un accès à privilèges à vos systèmes.
         annotation: 'Une réponse acceptée attribue le niveau du fournisseur sur l''échelle par défaut
           : Critique à partir d''un risque intrinsèque de 3,3, Important à partir de 2,6, Standard à partir
           de 2,0, Faible impact en dessous. Une fonction critique réglementée ou un point de défaillance
-          unique rend le fournisseur au moins Critique ; des données sensibles ou un accès à privilèges,
+          unique rend le fournisseur au moins Critique ; des données personnelles sensibles, des données de paiement
+          ou de santé, des identifiants ou des secrets, ou un accès à privilèges,
           au moins Important. Le niveau retenu est le plus élevé de ces résultats. Chaque dimension fait
           la moyenne de trois réponses et évolue donc par tiers : 3,3 est atteint avec 4-4-2 ou 3-3-4,
           2,6 avec 3-3-2. Les niveaux sont désignés par leur clé : une échelle renommée ou réordonnée
@@ -637,11 +638,12 @@ objects:
 
           Ogni risposta con punteggio va da 1 (basso) a 4 (critico). L’impatto aziendale e l’esposizione dei dati sono calcolati ciascuno come media delle rispettive tre risposte; il rischio intrinseco corrisponde al valore più alto tra i due: un fornitore che gestisce un processo critico è rilevante anche se non detiene dati, e viceversa.
 
-          Alcune risposte innalzano autonomamente il livello: una funzione critica soggetta a normativa, un fornitore unico per un processo critico, dati personali appartenenti a categorie particolari oppure accessi privilegiati ai sistemi.
+          Alcune risposte, o combinazioni di risposte, innalzano direttamente il livello: una funzione critica soggetta a normativa; un fornitore la cui indisponibilità blocca un processo critico o rivolto ai clienti e che è l'unico fornitore disponibile oppure richiede più di sei mesi per essere sostituito; dati personali appartenenti a categorie particolari, dati di pagamento o sanitari, credenziali o segreti; oppure accessi privilegiati ai sistemi.
         annotation: 'Una risposta approvata imposta il livello del fornitore sulla scala predefinita: Critico per un
           rischio intrinseco da 3,3, Importante da 2,6, Standard da 2,0, Impatto basso al di sotto. Una
           funzione critica soggetta a normativa o un punto singolo di guasto rendono il fornitore almeno
-          Critico; i dati appartenenti a categorie particolari o gli accessi privilegiati lo rendono almeno
+          Critico; i dati appartenenti a categorie particolari, i dati di pagamento o sanitari, le credenziali o i
+          segreti e gli accessi privilegiati lo rendono almeno
           Importante. Viene attribuito il livello più elevato tra questi. Ogni dimensione è la media di tre
           risposte e varia quindi per incrementi di un terzo: 3,3 si raggiunge con 4-4-2 o 3-3-4, 2,6 con
           3-3-2. I livelli sono identificati tramite chiave: la scala continua a funzionare anche se
@@ -654,8 +656,6 @@ objects:
           Jede bewertete Antwort erhält 1 (niedrig) bis 4 (kritisch) Punkte. Geschäftliche Auswirkungen und Datenexposition ergeben sich jeweils aus dem Mittelwert ihrer drei Antworten. Das inhärente Risiko ist der höhere der beiden Werte: Ein Anbieter, der einen kritischen Prozess betreibt, ist auch ohne Datenhaltung bedeutsam – und umgekehrt.
 
           Einige Antworten oder Antwortkombinationen erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion; ein Anbieter, dessen Ausfall einen kritischen Prozess oder einen Prozess mit direktem Kundenkontakt zum Stillstand bringt und für den entweder keine alternative Bezugsquelle besteht oder ein Wechsel mehr als sechs Monate dauert; besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten oder Geheimnisse; oder privilegierter Zugriff auf Ihre Systeme.
-
-          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
         annotation: 'Eine angenommene Antwort setzt die Stufe des Anbieters auf der Standardskala:
           Kritisch ab einem inhärenten Risiko von 3,3, Wichtig ab 2,6, Standard ab 2,0, darunter
           Geringe Auswirkungen. Eine regulierte kritische Funktion oder ein Single Point of Failure
@@ -683,4 +683,4 @@ translations:
     description: |-
       Ein kurzes Einstiegsformular zur Einstufung eines Anbieters nach seinem inhärenten Risiko: drei Fragen zu geschäftlichen und betrieblichen Auswirkungen sowie drei zu Daten, Datenschutz und Sicherheit. Starten Sie es bei einem Anbieter über „Stufe bewerten“; eine angenommene Antwort überträgt die Stufe auf den Anbieter.
 
-      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

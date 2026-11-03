@@ -514,8 +514,6 @@ objects:
           Stuft einen Anbieter anhand der Stakeholder-Kriterien der EBIOS-Risk-Manager-Methode ein (ANSSI, Workshop 3): Exposition (Abhängigkeit, Durchdringung) und Cyber-Zuverlässigkeit (Cyberreife, Vertrauen), jeweils von 1 bis 4 bewertet.
 
           Das Bedrohungsniveau berechnet sich als Abhängigkeit × Durchdringung ÷ (Reife × Vertrauen) und reicht von 0,06 bis 16. Anhand dieses Werts werden Stakeholder in der EBIOS-RM-Ökosystemkarte eingeordnet.
-
-          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
         annotation: 'Eine angenommene Antwort setzt die Stufe des Anbieters auf der Standardskala
           anhand des Bedrohungsniveaus und der Standardzonen der EBIOS-RM-Ökosystemkarte: Kritisch
           ab 2,5 (Gefahrenzone), Wichtig ab 0,9 (Kontrollzone), Standard ab 0,2 (Beobachtungszone),
@@ -541,4 +539,4 @@ translations:
     description: |-
       Ein Einstiegsformular zur Einstufung eines Anbieters anhand der vier Kriterien für Stakeholder aus EBIOS Risk Manager. Starten Sie es bei einem Anbieter über „Stufe bewerten“; eine angenommene Antwort überträgt die Stufe auf den Anbieter. Es ist eine Alternative zum Formular „Anbietereinstufung“: Verwenden Sie pro Organisation eine Einstufungsmethode.
 
-      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

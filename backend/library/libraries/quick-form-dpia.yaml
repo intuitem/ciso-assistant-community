@@ -1506,8 +1506,6 @@ objects:
         name: DSFA
         description: |-
           Datenschutz-Folgenabschätzung einer Verarbeitung.
-
-          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
 translations:
   fr:
     name: Analyse d'impact relative à la protection des données (AIPD)
@@ -1530,4 +1528,4 @@ translations:
     description: |-
       Eine DSFA nach der Struktur der PIA-Methode der CNIL: Kontext, Grundprinzipien, Risiken für betroffene Personen und Freigabe. Mit der Annahme einer Antwort wird diese als DSFA der Verarbeitung hinterlegt; die darin ausgewählten Maßnahmen werden der Verarbeitung hinzugefügt.
 
-      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Formulartexte von intuitem mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung. Bestehende Formularlogik und Bewertungsregeln wurden unverändert übernommen.
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.
