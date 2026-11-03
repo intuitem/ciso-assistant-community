@@ -4,14 +4,16 @@
 	// current one; a second value for the period replaces the first.
 	import { m } from '#paraglide/messages.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
-	import { hasPeriods, periodLabel, periodStart } from '#lib/utils/metrics.js';
+	import { formatMetricNumber, hasPeriods, periodLabel, periodStart } from '#lib/utils/metrics.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		metricInstance: any;
+		/** The metric's values, newest first: what the chosen period already holds. */
+		samples?: any[];
 		onSaved?: () => void | Promise<void>;
 	}
-	let { metricInstance, onSaved }: Props = $props();
+	let { metricInstance, samples = [], onSaved }: Props = $props();
 
 	const toastStore = getToastStore();
 	const definition = $derived(metricInstance?.metric_definition);
@@ -41,6 +43,27 @@
 		return Number.isNaN(noon.getTime()) ? null : periodStart(noon, frequency);
 	});
 	const label = $derived(period ? periodLabel(period, frequency) : '');
+
+	// What the chosen period holds today, so replacing it is a conscious act
+	// and a missing period is visibly missing.
+	const existing = $derived.by(() => {
+		if (!period) return null;
+		const key = period.toISOString();
+		return (
+			samples.find((s) => s?.period_start && new Date(s.period_start).toISOString() === key) ?? null
+		);
+	});
+	const existingShown = $derived.by(() => {
+		if (!existing) return '';
+		const value = typeof existing.value === 'string' ? JSON.parse(existing.value) : existing.value;
+		if (isQualitative) {
+			const index = Number(value?.choice_index);
+			return levels[index - 1]?.name ?? String(value?.choice_index ?? '');
+		}
+		const shown = formatMetricNumber(value?.result, definition);
+		return unitSymbol ? `${shown} ${unitSymbol}` : shown;
+	});
+	const existingDate = $derived(existing ? new Date(existing.timestamp).toLocaleDateString() : '');
 
 	async function save() {
 		// One request at a time: a second Enter must not race the first.
@@ -162,8 +185,14 @@
 		<i class="fa-solid {saving ? 'fa-spinner fa-spin' : 'fa-check'} mr-2" aria-hidden="true"
 		></i>{m.save()}
 	</button>
-	{#if byPeriod}
-		<p class="w-full text-xs text-surface-500 m-0">{m.replacesPeriodValue()}</p>
+	{#if byPeriod && period}
+		<p class="w-full text-xs text-surface-500 m-0" data-testid="record-value-existing">
+			{#if existing}
+				{m.periodHasValue({ period: label, value: existingShown, date: existingDate })}
+			{:else}
+				{m.periodHasNoValue({ period: label })}
+			{/if}
+		</p>
 	{/if}
 	{#if error}
 		<p class="w-full text-xs text-error-500 m-0" role="alert">{error}</p>

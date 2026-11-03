@@ -5191,6 +5191,8 @@
 	"recordAValue": "Saisir une valeur",
 	"forPeriod": "Pour la période",
 	"replacesPeriodValue": "Une valeur déjà saisie pour cette période est remplacée.",
+	"periodHasValue": "{period} contient {value}, saisi le {date}. Enregistrer le remplace.",
+	"periodHasNoValue": "Pas encore de valeur pour {period}.",
 	"valueSaved": "Valeur enregistrée",
 	"valueNotSaved": "La valeur n'a pas pu être enregistrée",
 	"mergeDefinition": "Fusionner dans une autre définition",

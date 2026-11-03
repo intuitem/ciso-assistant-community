@@ -235,6 +235,7 @@
 			{#if !metricInstance?.is_derived}
 				<RecordValueStrip
 					{metricInstance}
+					{samples}
 					onSaved={async () => {
 						refreshSampleTables();
 						await invalidate('metric-instance:samples');
