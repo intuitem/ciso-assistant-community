@@ -63,6 +63,7 @@ from core.quick_form_scoring import (
     normalize_page_aggregation,
     score_bounds,
 )
+from core.staircase import expand_scope
 from global_settings.models import GlobalSettings
 from integrations.sync_mixin import IntegrationSyncableMixin
 
@@ -686,8 +687,9 @@ def _translate_questions(owner) -> dict | None:
             choice_data["select_implementation_groups"] = (
                 choice.select_implementation_groups
             )
-        if choice.annotation:
-            choice_data["annotation"] = choice.annotation
+        annotation = tr.get("annotation", choice.annotation)
+        if annotation:
+            choice_data["annotation"] = annotation
         return choice_data
 
     result = {}
@@ -700,8 +702,12 @@ def _translate_questions(owner) -> dict | None:
         }
         if not question.required:
             q_data["required"] = False
-        if question.annotation:
-            q_data["annotation"] = question.annotation
+        annotation = q_tr.get("annotation")
+        # sync copies the text into an empty annotation; that copy is no help text
+        if not annotation and question.annotation != question.text:
+            annotation = question.annotation
+        if annotation:
+            q_data["annotation"] = annotation
         if question.config is not None:
             q_data["config"] = question.config
         choices = [_translate_choice(c) for c in question.choices.all()]
@@ -3055,6 +3061,8 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         ordering = ["object_classification", "rank"]
         verbose_name = _("Classification level")
         verbose_name_plural = _("Classification levels")
+
+    folder_from = "object_classification"
 
     def save(self, *args, **kwargs):
         if self.object_classification_id:
@@ -6635,6 +6643,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
 
+    folder_from = "evidence"
+
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
@@ -6912,6 +6922,8 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.entry}"
+
+    folder_from = "incident"
 
     def save(self, *args, **kwargs):
         if self.timestamp > now():
@@ -9050,6 +9062,8 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         )
         return result
 
+    folder_from = "risk_assessment"
+
     def save(self, *args, **kwargs):
         self.folder = self.risk_assessment.folder
 
@@ -9527,6 +9541,12 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
         creating = self._state.adding
+        if creating and self.selected_implementation_groups:
+            # A target level brings the levels below it, whatever creates the
+            # audit (campaigns, third parties, automation, imports).
+            self.selected_implementation_groups = expand_scope(
+                self.framework.outcomes_definition, self.selected_implementation_groups
+            )
         loaded = getattr(self, "_loaded_cel_values", {})
         update_fields = kwargs.get("update_fields")
         saved = self._CEL_RELEVANT_FIELDS & set(
@@ -12511,6 +12531,8 @@ class QuickFormApplication(AbstractBaseModel, FolderMixin):
         verbose_name = _("Quick form application")
         verbose_name_plural = _("Quick form applications")
         ordering = ["-created_at"]
+
+    folder_from = "response"
 
     def save(self, *args, **kwargs):
         # As visible as the response that made it.
