@@ -7016,12 +7016,16 @@ class IncidentWriteSerializer(BaseModelSerializer):
             )
 
         # NIS2 deadlines are clocked from awareness (reported_at)
+        aware = (
+            reported_at
+            if self.instance is not None or "reported_at" in attrs
+            else timezone.now()
+        )
         if (
             attrs.get(
                 "nis2_significant", getattr(self.instance, "nis2_significant", None)
             )
-            and not reported_at
-            and (self.instance is not None or "reported_at" in attrs)
+            and not aware
         ):
             raise serializers.ValidationError(
                 {"reported_at": "Reported date is required for a significant incident."}
@@ -7039,7 +7043,7 @@ class IncidentWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     {field: "Sent date cannot be in the future."}
                 )
-            if reported_at and sent < reported_at:
+            if aware and sent < aware:
                 raise serializers.ValidationError(
                     {field: "Sent date cannot be before reported date."}
                 )

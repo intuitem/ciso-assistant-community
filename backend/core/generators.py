@@ -755,7 +755,7 @@ def breach_notification_context(
             "processings": [p.name for p in processings],
             # name is optional: str() falls back to the legal basis
             "purposes": sorted(
-                {str(pu) for p in processings for pu in p.purposes.all()}
+                {str(pu) for p in processings for pu in seen(p.purposes.all())}
             ),
             "personal_data": [
                 {
