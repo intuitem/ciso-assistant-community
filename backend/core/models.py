@@ -63,6 +63,7 @@ from core.quick_form_scoring import (
     normalize_page_aggregation,
     score_bounds,
 )
+from core.staircase import expand_scope
 from global_settings.models import GlobalSettings
 from integrations.sync_mixin import IntegrationSyncableMixin
 
@@ -222,7 +223,7 @@ class RequirementAssessmentQualityContext:
     controls: dict
     # ra_id -> {evidence_id: (status, expiry_date)}, both attachment paths merged
     evidences: dict
-    # evidence_id -> (something is attached, newest revision's updated_at)
+    # evidence_id -> (newest revision has a file or link, latest updated_at)
     evidence_revisions: dict
 
 
@@ -308,17 +309,15 @@ def _build_requirement_assessment_quality_context(
     evidence_ids = {eid for per_ra in evidences.values() for eid in per_ra}
     if evidence_ids:
         EvidenceRevision = apps.get_model("core", "EvidenceRevision")
-        for (
-            evidence_id,
-            attachment,
-            link,
-            updated_at,
-        ) in EvidenceRevision.objects.filter(evidence_id__in=evidence_ids).values_list(
-            "evidence_id", "attachment", "link", "updated_at"
+        # Ascending versions: the newest revision decides what is attached.
+        for evidence_id, attachment, link, updated_at in (
+            EvidenceRevision.objects.filter(evidence_id__in=evidence_ids)
+            .order_by("version")
+            .values_list("evidence_id", "attachment", "link", "updated_at")
         ):
-            attached, latest = evidence_revisions.get(evidence_id, (False, None))
+            _attached, latest = evidence_revisions.get(evidence_id, (False, None))
             evidence_revisions[evidence_id] = (
-                attached or bool(attachment) or bool(link),
+                bool(attachment) or bool(link),
                 updated_at if latest is None else max(latest, updated_at),
             )
 
@@ -688,8 +687,9 @@ def _translate_questions(owner) -> dict | None:
             choice_data["select_implementation_groups"] = (
                 choice.select_implementation_groups
             )
-        if choice.annotation:
-            choice_data["annotation"] = choice.annotation
+        annotation = tr.get("annotation", choice.annotation)
+        if annotation:
+            choice_data["annotation"] = annotation
         return choice_data
 
     result = {}
@@ -702,8 +702,12 @@ def _translate_questions(owner) -> dict | None:
         }
         if not question.required:
             q_data["required"] = False
-        if question.annotation:
-            q_data["annotation"] = question.annotation
+        annotation = q_tr.get("annotation")
+        # sync copies the text into an empty annotation; that copy is no help text
+        if not annotation and question.annotation != question.text:
+            annotation = question.annotation
+        if annotation:
+            q_data["annotation"] = annotation
         if question.config is not None:
             q_data["config"] = question.config
         choices = [_translate_choice(c) for c in question.choices.all()]
@@ -1940,6 +1944,7 @@ class LibraryUpdater:
                     "weight": 1,
                     "importance": RequirementNode.Importance.UNDEFINED,
                     "display_mode": RequirementNode.DisplayMode.DEFAULT,
+                    "evidence_required": False,
                 }
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
@@ -2083,6 +2088,10 @@ class LibraryUpdater:
                     for field, default in requirement_node_defaults.items():
                         if requirement_node_dict.get(field) is None:
                             requirement_node_dict[field] = default
+                    # Same strict parse as the importer.
+                    requirement_node_dict["evidence_required"] = (
+                        requirement_node_dict["evidence_required"] is True
+                    )
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
@@ -3052,6 +3061,8 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         ordering = ["object_classification", "rank"]
         verbose_name = _("Classification level")
         verbose_name_plural = _("Classification levels")
+
+    folder_from = "object_classification"
 
     def save(self, *args, **kwargs):
         if self.object_classification_id:
@@ -4203,6 +4214,14 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
+    )
+    evidence_required = models.BooleanField(
+        default=False,
+        verbose_name=_("Evidence required"),
+        help_text=_(
+            "When set, the requirement cannot be submitted without at least "
+            "one evidence attached."
+        ),
     )
     weight = models.IntegerField(default=1, verbose_name=_("Weight"))
     importance = models.CharField(
@@ -6602,12 +6621,29 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["evidence", "version"]
 
+    # A revision without a file or a link carries no evidence.
+    HAS_CONTENT = (models.Q(attachment__isnull=False) & ~models.Q(attachment="")) | (
+        models.Q(link__isnull=False) & ~models.Q(link="")
+    )
+
+    @classmethod
+    def current_with_content(cls):
+        """Newest revision of each evidence, kept only if it has a file or link."""
+        newest = (
+            cls.objects.filter(evidence=OuterRef("evidence"))
+            .order_by("-version")
+            .values("pk")[:1]
+        )
+        return cls.objects.filter(pk=Subquery(newest)).filter(cls.HAS_CONTENT)
+
     class Meta:
         verbose_name = _("Evidence Revision")
         verbose_name_plural = _("Evidence Revisions")
 
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
+
+    folder_from = "evidence"
 
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
@@ -6886,6 +6922,8 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.entry}"
+
+    folder_from = "incident"
 
     def save(self, *args, **kwargs):
         if self.timestamp > now():
@@ -9024,6 +9062,8 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         )
         return result
 
+    folder_from = "risk_assessment"
+
     def save(self, *args, **kwargs):
         self.folder = self.risk_assessment.folder
 
@@ -9501,6 +9541,12 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
         creating = self._state.adding
+        if creating and self.selected_implementation_groups:
+            # A target level brings the levels below it, whatever creates the
+            # audit (campaigns, third parties, automation, imports).
+            self.selected_implementation_groups = expand_scope(
+                self.framework.outcomes_definition, self.selected_implementation_groups
+            )
         loaded = getattr(self, "_loaded_cel_values", {})
         update_fields = kwargs.get("update_fields")
         saved = self._CEL_RELEVANT_FIELDS & set(
@@ -10263,15 +10309,19 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
         include_non_assessable: bool,
         lightweight: bool = False,
         skip_ig_filter: bool = False,
+        assignment: "RequirementAssignment | None" = None,
     ):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
         If lightweight is True, only prefetch answers/questions (for tree view), skip controls/evidences.
+        If assignment is given, only its requirement assessments are returned.
         """
         base_queryset = RequirementAssessment.objects.filter(
             compliance_assessment=self
         ).select_related("requirement", "requirement__framework")
+        if assignment is not None:
+            base_queryset = base_queryset.filter(assignments=assignment)
 
         if not lightweight:
             base_queryset = base_queryset.select_related(
@@ -10712,14 +10762,10 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             )
             | models.Q(requirement_assessments__compliance_assessment=self)
         )
-        # Evidences holding at least one revision with a file or a link, resolved
-        # in a single query instead of two per evidence.
+        # Evidences whose newest revision has a file or a link, in one query.
         evidence_ids_with_content = set(
-            EvidenceRevision.objects.filter(evidence__in=evidences)
-            .filter(
-                (models.Q(attachment__isnull=False) & ~models.Q(attachment=""))
-                | (models.Q(link__isnull=False) & ~models.Q(link=""))
-            )
+            EvidenceRevision.current_with_content()
+            .filter(evidence__in=evidences)
             .values_list("evidence_id", flat=True)
         )
 
@@ -11776,6 +11822,20 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         actors = ", ".join(str(a) for a in self.actor.all())
         return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
 
+    def get_visible_requirement_assessments(self, hidden_urns=None, lightweight=False):
+        """Assigned requirement assessments in the audit scope and not hidden."""
+        if hidden_urns is None:
+            from core.cel_service import build_cel_context
+
+            _ctx, hidden_urns = build_cel_context(self.compliance_assessment)
+        return [
+            ra
+            for ra in self.compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True, lightweight=lightweight, assignment=self
+            )
+            if ra.requirement.urn not in hidden_urns
+        ]
+
 
 class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
     assignment = models.ForeignKey(
@@ -12471,6 +12531,8 @@ class QuickFormApplication(AbstractBaseModel, FolderMixin):
         verbose_name = _("Quick form application")
         verbose_name_plural = _("Quick form applications")
         ordering = ["-created_at"]
+
+    folder_from = "response"
 
     def save(self, *args, **kwargs):
         # As visible as the response that made it.

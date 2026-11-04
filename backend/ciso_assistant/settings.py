@@ -493,7 +493,6 @@ INSTALLED_APPS = [
     "django.forms",
     "django_structlog",
     "auditlog",
-    "tailwind",
     "iam",
     "sec_intel",
     "threat_modeling",
@@ -602,7 +601,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "knox.auth.TokenAuthentication",
+        "iam.authentication.KnoxTokenAuthentication",
         "iam.authentication.OIDCServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [

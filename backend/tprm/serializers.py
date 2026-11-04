@@ -18,11 +18,14 @@ from core.models import (
     Terminology,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
-from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
+from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+)
 from custom_fields.serializers import CustomFieldsSerializerMixin
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from pmbok.models import GenericCollection
 from tprm.models import (
     Contract,
     Entity,
@@ -547,19 +550,16 @@ class EntityAssessmentReadSerializer(CustomFieldsSerializerMixin, BaseModelSeria
 
 
 class EntityAssessmentWriteSerializer(
-    CustomFieldsSerializerMixin, AssignmentNotificationMixin, BaseModelSerializer
+    CollectionMembershipMixin,
+    CustomFieldsSerializerMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
 ):
     assignment_notifications = {
         "authors": "object_assignment",
         "reviewers": "object_review_assignment",
     }
 
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
     create_audit = serializers.BooleanField(default=False)
     framework = serializers.PrimaryKeyRelatedField(
         queryset=Framework.objects.all(), required=False
@@ -573,6 +573,11 @@ class EntityAssessmentWriteSerializer(
     # Set on the audit the assessment creates, so the analyst configures respondent
     # visibility here instead of opening the audit afterwards.
     field_visibility = serializers.JSONField(required=False)
+
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
 
     def validate(self, attrs):
         # Before super(): custom fields are scoped against attrs["folder"].

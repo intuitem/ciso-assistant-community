@@ -309,6 +309,7 @@ export const RiskScenarioSchema = z.object({
 
 export const AppliedControlSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	commitment_state: z.string().optional(),
 	commitment_notes: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
@@ -373,9 +374,7 @@ export const AppliedControlDuplicateSchema = z.object({
 	duplicate_evidences: z.boolean().optional()
 });
 
-export const PolicySchema = AppliedControlSchema.omit({ category: true }).extend({
-	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional()
-});
+export const PolicySchema = AppliedControlSchema.omit({ category: true });
 
 export const RiskAcceptanceSchema = z.object({
 	...NameDescriptionMixin,
@@ -743,6 +742,7 @@ export const GeneralSettingsSchema = z.object({
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
 	default_date_format: z.string().default('auto').optional(),
+	report_timezone: z.string().default('UTC').optional(),
 	default_packager: z
 		.string()
 		// eslint-disable-next-line no-useless-escape
@@ -1147,6 +1147,7 @@ export const vulnerabilitySchema = z.object({
 export const BusinessImpactAnalysisSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -1989,6 +1990,9 @@ export const GenericCollectionSchema = z.object({
 	documents: z.array(z.string().uuid().optional()).optional(),
 	security_exceptions: z.array(z.string().uuid().optional()).optional(),
 	policies: z.array(z.string().uuid().optional()).optional(),
+	applied_controls: z.array(z.string().uuid().optional()).optional(),
+	document_containers: z.array(z.string().uuid().optional()).optional(),
+	business_impact_analyses: z.array(z.string().uuid().optional()).optional(),
 	dependencies: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
@@ -2182,6 +2186,7 @@ export const teamSchema = z.object({
 });
 
 export const DocumentContainerSchema = z.object({
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().max(100).optional().default(''),
 	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
