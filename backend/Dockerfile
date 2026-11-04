@@ -15,8 +15,14 @@ COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
 
 WORKDIR /code
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
+# DHI renamed its builds (+dhiN -> +deb13uN+dhiM) and dropped the old ones, but the base still
+# ships its gcc runtime under the old name, which sorts higher: prefer the renamed builds (a
+# downgrade, hence --allow-downgrades) so libatomic1, needed by glib, can match. A no-op once
+# the base ships them; drop it then.
+RUN printf 'Package: gcc-14-base libgcc-s1 libstdc++6 libatomic1\nPin: version /\\+deb13u[0-9]+\\+dhi[0-9]+$/\nPin-Priority: 1001\n' \
+  > /etc/apt/preferences.d/dhi-renamed-builds \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends --allow-downgrades \
   # perl-base: clears the perl finding from docker scout (#4820)
   perl-base \
   # not pango-1.0: resolves to libpango1.0-dev, pulls in mesa + LLVM
@@ -25,8 +31,6 @@ RUN apt-get update \
   libharfbuzz0b \
   libfontconfig1 \
   libfreetype6 \
-  # pinned: DHI's unfixed 1.1.0-2+dhi2 outranks its fixed +deb13u1+dhi0 (CVE-2026-111497), drop once DHI ships a higher fixed build
-  libbrotli1=1.1.0-2+deb13u1+dhi0 \
   libstdc++6 \
   zlib1g \
   libffi8 \

@@ -79,6 +79,14 @@ describe('catalog', () => {
 		expect(readableValues(rules, 1)).toEqual(['a']);
 		expect(readableValues(rules, 2)).toEqual(['a', 'b']);
 	});
+
+	test('a staircase level is readable from every rule, even above it', () => {
+		const rules = [
+			{ ref_id: 'a', kind: 'number' as const, annotation: '', color: null, expression: '' },
+			{ ref_id: 'ml', kind: 'staircase' as const, annotation: '', color: null, expression: '' }
+		];
+		expect(readableValues(rules, 0)).toEqual(['ml']);
+	});
 });
 
 describe('suggestions', () => {

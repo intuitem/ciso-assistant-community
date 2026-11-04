@@ -84,7 +84,7 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 				timeout: 10_000
 			});
 		}
-		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('visibility-score-auditor-edit').click();
 		// New audits take the organisation scale (0-5); this test scores on 0-100.
 		await page.getByTestId('score-scale-0-100').click();
 		await page.getByTestId('save-button').click();
@@ -139,7 +139,7 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		});
 		// Enable scoring on the new CA via the visibility editor in the modal.
 		// (The More dropdown is auto-expanded by form.fill() above.)
-		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('visibility-score-auditor-edit').click();
 		await applyMappingForm.saveButton.click();
 		await expect(applyMappingForm.formTitle).not.toBeVisible();
 		await complianceAssessmentsPage.isToastVisible(
@@ -216,7 +216,7 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 				timeout: 10_000
 			});
 		}
-		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('visibility-score-auditor-edit').click();
 		// New audits take the organisation scale (0-5); this test scores on 0-100.
 		await page.getByTestId('score-scale-0-100').click();
 		await page.getByTestId('save-button').click();

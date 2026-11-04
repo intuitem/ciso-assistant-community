@@ -488,6 +488,8 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("Feared events")
         ordering = ["created_at"]
 
+    folder_from = "ebios_rm_study"
+
     def save(self, *args, **kwargs):
         # Ensure the folder is set to the study's folder
         self.folder = self.ebios_rm_study.folder
@@ -634,6 +636,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("RO/TO couples")
         ordering = ["created_at"]
 
+    folder_from = "ebios_rm_study"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         self.pertinence = rating_kit.pertinence(
@@ -775,6 +779,8 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.entity.name} ({self.category.get_name_translated if self.category else 'N/A'})"
 
+    folder_from = "ebios_rm_study"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
@@ -871,6 +877,8 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
     def get_scope(self):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
+    folder_from = "ebios_rm_study"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
@@ -944,6 +952,8 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
 
     def get_scope(self):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
+
+    folder_from = "ebios_rm_study"
 
     def save(self, *args, **kwargs):
         self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
@@ -1118,6 +1128,8 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = "Operating Modes"
         ordering = ["created_at"]
 
+    folder_from = "operational_scenario"
+
     def save(self, *args, **kwargs):
         self.folder = self.operational_scenario.folder
         if self.pk and (quotation := self.quotation()) is not None:
@@ -1234,6 +1246,8 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         verbose_name = _("Operational scenario")
         verbose_name_plural = _("Operational scenarios")
         ordering = ["created_at"]
+
+    folder_from = "ebios_rm_study"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
@@ -1501,6 +1515,8 @@ class KillChain(AbstractBaseModel, FolderMixin):
         verbose_name = "Kill Chain"
         verbose_name_plural = "Kill Chains"
         ordering = ["created_at"]
+
+    folder_from = "operating_mode"
 
     def save(self, *args, **kwargs):
         self.folder = self.operating_mode.folder

@@ -314,6 +314,16 @@
 					<i class="fa-solid fa-users mr-2"></i>
 					{m.forceDateFormatForAllUsers()}
 				</button>
+				<hr class="my-2" />
+				<Select
+					{form}
+					field="report_timezone"
+					options={model.selectOptions?.['report_timezone'] ?? []}
+					label={m.reportTimezone()}
+					helpText={m.reportTimezoneHelpText()}
+					translateOptions={false}
+					disableDoubleDash
+				/>
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>

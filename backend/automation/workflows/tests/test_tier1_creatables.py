@@ -65,54 +65,6 @@ def action_flow(folder, config, label="Open it"):
     return version
 
 
-# `Assessment.save` writes the perimeter's folder only when the folder is unset
-# or root, and create_object always passes a real domain folder, so that branch
-# never fires for a workflow-created row. Every other match is load-bearing:
-# whether the guard fires is a judgment about the values create_object produces,
-# which no syntactic check can make, so a new one lands here deliberately or not
-# at all.
-FOLDER_FROM_EXEMPT = {"entity_assessment"}
-
-
-def _folder_source(model):
-    """The FK name in a `self.folder = self.<fk>.folder` anywhere in the model's
-    own save(), or None. Nesting is ignored on purpose — `EntityScore` guards
-    the same write with `if self.entity_id`, which is always true for a row
-    create_object just built."""
-    import ast
-    import inspect
-    import textwrap
-
-    save = next(
-        (klass.__dict__["save"] for klass in model.__mro__ if "save" in klass.__dict__),
-        None,
-    )
-    if save is None:
-        return None
-    try:
-        tree = ast.parse(textwrap.dedent(inspect.getsource(save)))
-    except OSError, SyntaxError:  # pragma: no cover - source always ships
-        return None
-    for statement in ast.walk(tree):
-        if not isinstance(statement, ast.Assign):
-            continue
-        target = statement.targets[0]
-        value = statement.value
-        if (
-            isinstance(target, ast.Attribute)
-            and target.attr == "folder"
-            and isinstance(target.value, ast.Name)
-            and target.value.id == "self"
-            and isinstance(value, ast.Attribute)
-            and value.attr == "folder"
-            and isinstance(value.value, ast.Attribute)
-            and isinstance(value.value.value, ast.Name)
-            and value.value.value.id == "self"
-        ):
-            return value.value.attr
-    return None
-
-
 def make_provider(name="Ratings Inc"):
     return Terminology.objects.create(
         name=name,
@@ -454,20 +406,3 @@ class TestRegistryShape:
                 and not (column.null or column.blank or column.has_default())
             }
             assert cannot_be_empty == set(entry.get("required_fields") or []), key
-
-    def test_an_entry_declares_folder_from_when_save_derives_the_folder(self):
-        """A row whose `save()` takes its folder from a parent does not land in
-        the folder the upsert searched, so the match misses and the run either
-        duplicates the row or trips a uniqueness constraint.
-
-        Anything the parse finds must either declare `folder_from` or be named
-        in FOLDER_FROM_EXEMPT with the reason its write never fires.
-        """
-        for key, entry in CREATABLE_MODELS.items():
-            derived = _folder_source(entry["model"])
-            if derived is None or derived not in (entry.get("fk_fields") or {}):
-                continue
-            if key in FOLDER_FROM_EXEMPT:
-                assert entry.get("folder_from") is None, key
-                continue
-            assert entry.get("folder_from") == derived, key

@@ -4600,8 +4600,6 @@
 	"builderUnsavedChangesNavigation": "Turite neišsaugotų pakeitimų, kurie bus prarasti. Vis tiek išeiti?",
 	"fieldVisibility": "Laukų matomumas",
 	"fieldVisibilityHelpText": "Valdykite, kuriuos laukus kiekvienas vaidmuo gali matyti ir redaguoti.",
-	"visibilityAuditorRespondent": "Auditorius + Respondentas",
-	"visibilityAuditorOnly": "Tik auditorius",
 	"visibilityHidden": "Paslėpta",
 	"answers": "Atsakymai",
 	"respondentAlignment": "Respondento suderinimas",
@@ -4816,5 +4814,7 @@
 	"dpiaRequirementChanges": "DPIA reikalavimo istorija",
 	"previously": "Anksčiau",
 	"vulnerabilityOpenWithRemediationDate": "Atviras pažeidžiamumas turi ištaisymo datą",
-	"vulnerabilityResolvedWithoutRemediationDate": "Išspręstas pažeidžiamumas neturi ištaisymo datos"
+	"vulnerabilityResolvedWithoutRemediationDate": "Išspręstas pažeidžiamumas neturi ištaisymo datos",
+	"reportTimezone": "Ataskaitų laiko juosta",
+	"reportTimezoneHelpText": "Regionas, naudojamas ataskaitose ir eksportuose nurodytiems laikams. Kiekvienas laikas rodo savo poslinkį nuo UTC. Ekrane rodomiems laikams tai neturi įtakos."
 }
