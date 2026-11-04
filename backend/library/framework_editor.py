@@ -266,6 +266,24 @@ def _dedup_leaf(leaf: str, taken: set) -> str:
     return candidate
 
 
+def _highest_index(urns, prefix: str) -> int:
+    """Highest numeric leaf among ``{prefix}{N}`` URNs (0 when none).
+
+    New question and choice URNs take the highest number already used + 1,
+    never the lowest free one, so a deleted id is not revived for new content
+    (except when it was the highest). The watermark is read from the URNs
+    present before this save; a collision ``-N`` suffix is ignored.
+    """
+    highest = 0
+    for urn in urns:
+        if not urn.startswith(prefix):
+            continue
+        match = re.match(r"(\d+)", urn[len(prefix) :])
+        if match:
+            highest = max(highest, int(match.group(1)))
+    return highest
+
+
 def _clean(mapping: dict) -> dict:
     """Drop None values so the document (and its YAML export) stays lean."""
     return {key: value for key, value in mapping.items() if value is not None}
@@ -378,7 +396,12 @@ def editor_doc_to_framework_object(
         if q_urn and q_urn in existing_question_urns and q_urn not in claimed:
             claimed.add(q_urn)
         else:
-            leaf = urn_safe_leaf(question.get("ref_id") or "") or str(len(claimed) + 1)
+            leaf = urn_safe_leaf(question.get("ref_id") or "") or str(
+                _highest_index(
+                    existing_question_urns | claimed, f"{node_urn}:question:"
+                )
+                + 1
+            )
             candidate = f"{node_urn}:question:{leaf}"
             suffix = 2
             while candidate in existing_question_urns or candidate in claimed:
@@ -402,7 +425,7 @@ def editor_doc_to_framework_object(
 
         q_choices = []
         claimed_choices: set = set()
-        next_index = 1
+        next_index = _highest_index(existing_choice_urns, f"{q_urn}:choice:") + 1
         seen_choice_ids = set()
         for choice in raw_choices:
             choice_key = id(choice)

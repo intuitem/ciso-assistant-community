@@ -1209,6 +1209,89 @@ def test_new_choice_urns_avoid_collisions_and_stay_sequential():
     assert len({choice["urn"] for choice in choices}) == 3
 
 
+def test_new_choice_never_reuses_a_deleted_choice_urn():
+    from library import framework_editor as fw_editor
+
+    # Earlier edit deleted ...choice:1 (not the highest): the saved question
+    # now holds only choice:2 and choice:3, so the number 1 is free in the
+    # document. A new choice must still take the highest + 1 (choice:4), or a
+    # republish would reattach answers of the deleted choice:1 to it.
+    original = copy.deepcopy(
+        builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    )
+    q_urn = "urn:acme:risk:req_node:source-lib:a.1:question:1"
+    question = next(
+        node["questions"][q_urn]
+        for node in original["requirement_nodes"]
+        if q_urn in (node.get("questions") or {})
+    )
+    question["choices"] = [
+        {"urn": f"{q_urn}:choice:2", "value": "No"},
+        {"urn": f"{q_urn}:choice:3", "value": "Maybe"},
+    ]
+
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    doc["choices"].append(
+        {
+            "id": "tmp-c-new",
+            "urn": None,
+            "value": "Unknown",
+            "order": 9,
+            "question_id": q_urn,
+        }
+    )
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = next(
+        n
+        for n in rebuilt["requirement_nodes"]
+        if n["urn"] == "urn:acme:risk:req_node:source-lib:a.1"
+    )
+    by_value = {c["value"]: c["urn"] for c in node["questions"][q_urn]["choices"]}
+    assert by_value["No"] == f"{q_urn}:choice:2"
+    assert by_value["Maybe"] == f"{q_urn}:choice:3"
+    assert by_value["Unknown"] == f"{q_urn}:choice:4"
+
+
+def test_new_ref_idless_question_never_reuses_a_deleted_number():
+    from library import framework_editor as fw_editor
+
+    # Same guarantee for a question reaching the backend without ref_id:
+    # ...question:1 was deleted earlier, leaving only question:2, so a new
+    # ref_id-less question must take question:3, not revive question:1.
+    original = copy.deepcopy(
+        builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    )
+    node_urn = "urn:acme:risk:req_node:source-lib:a.1"
+    node = next(n for n in original["requirement_nodes"] if n["urn"] == node_urn)
+    node["questions"] = {
+        f"{node_urn}:question:2": {
+            "type": "unique_choice",
+            "text": "Kept question?",
+            "choices": [{"urn": f"{node_urn}:question:2:choice:1", "value": "Yes"}],
+        }
+    }
+
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    doc["questions"].append(
+        {
+            "id": "tmp-q-new",
+            "urn": None,
+            "ref_id": None,
+            "text": "New question?",
+            "type": "unique_choice",
+            "order": 9,
+            "requirement_node_id": node_urn,
+        }
+    )
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    questions = next(
+        n["questions"] for n in rebuilt["requirement_nodes"] if n["urn"] == node_urn
+    )
+    assert questions[f"{node_urn}:question:2"]["text"] == "Kept question?"
+    assert questions[f"{node_urn}:question:3"]["text"] == "New question?"
+    assert f"{node_urn}:question:1" not in questions
+
+
 def test_editor_doc_backfills_missing_framework_ref_id():
     from library import framework_editor as fw_editor
 
