@@ -669,6 +669,146 @@ def annotate_tree_with_coverage(tree: dict[str, dict], compliance_assessment) ->
     return tree
 
 
+_SOA_LABELS = {
+    "en": {
+        "ref_id": "Ref",
+        "name": "Control",
+        "applicable": "Applicable",
+        "justification": "Justification",
+        "result": "Compliance result",
+        "controls": "Applied controls (status)",
+        "risks": "Linked risk scenarios",
+        True: "Yes",
+        False: "No",
+        "compliant": "Compliant",
+        "partially_compliant": "Partially compliant",
+        "non_compliant": "Non-compliant",
+        "not_applicable": "Not applicable",
+        "not_assessed": "Not assessed",
+        # applied control statuses
+        "to_do": "To do",
+        "in_progress": "In progress",
+        "on_hold": "On hold",
+        "active": "Active",
+        "degraded": "Degraded",
+        "deprecated": "Deprecated",
+        "--": "Undefined",
+    },
+    "fr": {
+        "ref_id": "Réf.",
+        "name": "Mesure",
+        "applicable": "Applicable",
+        "justification": "Justification",
+        "result": "Résultat de conformité",
+        "controls": "Mesures appliquées (statut)",
+        "risks": "Scénarios de risque liés",
+        True: "Oui",
+        False: "Non",
+        "compliant": "Conforme",
+        "partially_compliant": "Partiellement conforme",
+        "non_compliant": "Non conforme",
+        "not_applicable": "Non applicable",
+        "not_assessed": "Non évalué",
+        # applied control statuses
+        "to_do": "À faire",
+        "in_progress": "En cours",
+        "on_hold": "En attente",
+        "active": "Actif",
+        "degraded": "Dégradé",
+        "deprecated": "Obsolète",
+        "--": "Non défini",
+    },
+    "nl": {
+        "ref_id": "Ref.",
+        "name": "Maatregel",
+        "applicable": "Toepasselijk",
+        "justification": "Rechtvaardiging",
+        "result": "Conformiteitsresultaat",
+        "controls": "Toegepaste maatregelen (status)",
+        "risks": "Gekoppelde risicoscenario's",
+        True: "Ja",
+        False: "Nee",
+        "compliant": "Conform",
+        "partially_compliant": "Gedeeltelijk conform",
+        "non_compliant": "Niet conform",
+        "not_applicable": "Niet van toepassing",
+        "not_assessed": "Niet beoordeeld",
+        # applied control statuses
+        "to_do": "Te doen",
+        "in_progress": "In uitvoering",
+        "on_hold": "In de wacht",
+        "active": "Actief",
+        "degraded": "Verminderd",
+        "deprecated": "Verouderd",
+        "--": "Niet bepaald",
+    },
+    "de": {
+        "ref_id": "Ref.",
+        "name": "Maßnahme",
+        "applicable": "Anwendbar",
+        "justification": "Begründung",
+        "result": "Konformitätsergebnis",
+        "controls": "Umgesetzte Maßnahmen (Status)",
+        "risks": "Verknüpfte Risikoszenarien",
+        True: "Ja",
+        False: "Nein",
+        "compliant": "Konform",
+        "partially_compliant": "Teilweise konform",
+        "non_compliant": "Nicht konform",
+        "not_applicable": "Nicht anwendbar",
+        "not_assessed": "Nicht bewertet",
+        # applied control statuses
+        "to_do": "Zu erledigen",
+        "in_progress": "In Bearbeitung",
+        "on_hold": "Pausiert",
+        "active": "Aktiv",
+        "degraded": "Beeinträchtigt",
+        "deprecated": "Veraltet",
+        "--": "Nicht definiert",
+    },
+}
+
+
+def soa_rows(tree: dict, lang: str = "en") -> list[dict]:
+    """Flatten an `enrich_tree_for_soa` tree into one row per assessable requirement,
+    in tree order, with headers in `lang` (falls back to English)."""
+    labels = _SOA_LABELS.get((lang or "en").split("-")[0], _SOA_LABELS["en"])
+    rows = []
+
+    def walk(node):
+        if node.get("assessable"):
+            rows.append(
+                {
+                    labels["ref_id"]: node.get("ref_id") or "",
+                    labels["name"]: node.get("name") or node.get("description") or "",
+                    # Same rule as the SoA page (SoaTreeSection.svelte)
+                    labels["applicable"]: labels.get(
+                        False
+                        if node.get("result") == "not_applicable"
+                        else node.get("selected"),
+                        "",
+                    ),
+                    labels["justification"]: node.get("observation") or "",
+                    labels["result"]: labels.get(
+                        node.get("result"), node.get("result") or ""
+                    ),
+                    labels["controls"]: "\n".join(
+                        f"{c['ref_id'] + ' ' if c['ref_id'] else ''}{c['name']} ({labels.get(c['status'], c['status'])})"
+                        for c in node.get("applied_controls") or []
+                    ),
+                    labels["risks"]: "\n".join(
+                        rs["name"] for rs in node.get("risk_scenarios") or []
+                    ),
+                }
+            )
+        for child in node.get("children", {}).values():
+            walk(child)
+
+    for node in tree.values():
+        walk(node)
+    return rows
+
+
 def enrich_tree_for_soa(
     tree: dict,
     ra_lookup: dict,

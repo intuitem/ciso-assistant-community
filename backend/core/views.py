@@ -74,6 +74,7 @@ from .generators import (
     action_plan_context,
     findings_assessment_context,
     incident_context,
+    nis2_notification_context,
     risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
@@ -8737,6 +8738,8 @@ class ValidationFlowFilterSet(GenericFilterSet):
             "evidences",
             "security_exceptions",
             "policies",
+            "requirement_assessments",
+            "risk_scenarios",
             "validation_deadline",
         ]
 
@@ -8814,6 +8817,16 @@ class ValidationFlowViewSet(BaseModelViewSet):
                 "contracts",
                 queryset=contract_model.objects.select_related("folder"),
             ),
+            Prefetch(
+                "requirement_assessments",
+                queryset=RequirementAssessment.objects.select_related(
+                    "folder", "requirement"
+                ),
+            ),
+            Prefetch(
+                "risk_scenarios",
+                queryset=RiskScenario.objects.select_related("folder"),
+            ),
         )
 
         m2m_through_fields = {
@@ -8830,6 +8843,8 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "has_processings": ValidationFlow.processings.through,
             "has_accreditations": ValidationFlow.accreditations.through,
             "has_contracts": ValidationFlow.contracts.through,
+            "has_requirement_assessments": ValidationFlow.requirement_assessments.through,
+            "has_risk_scenarios": ValidationFlow.risk_scenarios.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(validationflow_id=OuterRef("pk")))
@@ -8861,6 +8876,8 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "processings": "Processings",
             "accreditations": "Accreditations",
             "contracts": "Contracts",
+            "requirement_assessments": "Requirement Assessments",
+            "risk_scenarios": "Risk Scenarios",
         }
         return Response(model_types)
 
@@ -14938,6 +14955,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             additional_controls = sorted(controls_map.values(), key=_sort_key)
 
+        if request.query_params.get("export") == "xlsx":
+            lang = request.user.preferences.get("lang") or "en"
+            rows = soa_rows(tree, lang)
+            return create_xlsx_response(
+                rows,
+                f"soa_{slugify(compliance_assessment.name) or 'audit'}.xlsx",
+                wrap_columns=list(rows[0])[1:] if rows else [],
+            )
+
         return Response(
             {
                 "tree": tree,
@@ -16454,6 +16480,24 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 continue
             filtered_ras.append(ra)
 
+        selected = set(compliance_assessment.selected_implementation_groups or [])
+        rows = {}
+
+        def requirement_row(ra):
+            # nested groups (B within I within E) share requirements: build each once
+            if ra.id not in rows:
+                rows[ra.id] = {
+                    "id": str(ra.id),
+                    "name": ra.requirement.display_short,
+                    "description": get_referential_translation(
+                        ra.requirement, "description"
+                    )
+                    or "",
+                    "result": ra.result,
+                    **compliance_assessment.get_scores_for([ra]),
+                }
+            return rows[ra.id]
+
         groups = []
         for group_def in ig_definition:
             group_ref_id = group_def.get("ref_id")
@@ -16477,6 +16521,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         "documentation_score": None,
                         "maturity_score": None,
                         "scored_count": 0,
+                        "min_maturity_score": None,
+                        "target_score": None,
+                        "selected": group_ref_id in selected,
+                        "requirements": [],
                     }
                 )
                 continue
@@ -16489,6 +16537,19 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     assessed += 1
             total = len(matching_ras)
             scores = compliance_assessment.get_scores_for(matching_ras)
+            requirements = [
+                requirement_row(ra)
+                for ra in sorted(
+                    matching_ras, key=lambda ra: ra.requirement.order_id or 0
+                )
+            ]
+            maturities = [
+                r["maturity_score"]
+                for r in requirements
+                if r["maturity_score"] is not None
+            ]
+            if selected and group_ref_id not in selected:
+                requirements = []  # the page lists the audit's groups only
 
             groups.append(
                 {
@@ -16503,6 +16564,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "documentation_score": scores["documentation_score"],
                     "maturity_score": scores["maturity_score"],
                     "scored_count": scores["scored_count"],
+                    "min_maturity_score": min(maturities, default=None),
+                    "target_score": group_def.get("target_score")
+                    if group_def.get("target_score") is not None
+                    else compliance_assessment.target_score,
+                    "selected": group_ref_id in selected,
+                    "requirements": requirements,
                 }
             )
 
@@ -18372,6 +18439,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
         "reported_at": ["exact"],
+        "nis2_significant": ["exact"],
     }
 
     def get_queryset(self):
@@ -18512,6 +18580,14 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
     def detection(self, request):
         return Response(dict(Incident.Detection.choices))
 
+    @action(detail=False, name="Get malicious intent choices")
+    def nis2_malicious_intent(self, request):
+        return Response(dict(Incident.Answer.choices))
+
+    @action(detail=False, name="Get cross-border impact choices")
+    def nis2_cross_border_impact(self, request):
+        return Response(dict(Incident.Answer.choices))
+
     def perform_update(self, serializer):
         previous_instance = self.get_object()
         previous_status = previous_instance.status
@@ -18578,6 +18654,45 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         safe_name = slugify(incident.name) or "incident"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_report.pdf"'
+        )
+        return response
+
+    @action(detail=True, methods=["get"], name="NIS2 notification worksheet")
+    def nis2_notification(self, request, pk):
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Incident, UUID(pk)
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        incident = (
+            Incident.objects.select_related("folder")
+            .prefetch_related(
+                actor_prefetch("owners"),
+                "entities",
+                "assets",
+                "threats",
+                "qualifications",
+                "applied_controls",
+            )
+            .get(id=pk)
+        )
+        breaches = [
+            b
+            for b in incident.data_breaches.all()
+            if RoleAssignment.is_object_readable(request.user, DataBreach, b.id)
+        ]
+        lang = request.user.preferences.get("lang") or "en"
+        payload = nis2_notification_context(
+            incident, breaches, lang, tz=get_report_timezone()
+        )
+        response = HttpResponse(
+            render_pdf("nis2_notification.typ", payload),
+            content_type="application/pdf",
+        )
+        safe_name = slugify(incident.name) or "incident"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_nis2_notification.pdf"'
         )
         return response
 

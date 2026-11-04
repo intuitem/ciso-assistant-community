@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from datetime import date, timedelta
 from huey import crontab
@@ -22,7 +23,9 @@ from core.models import (
 from iam.models import ServiceAccount, User
 from core import mailer
 from django.conf import settings
+from django.utils.timezone import now
 from django.db import models, transaction
+from django.db.models import Exists, OuterRef
 import logging
 from global_settings.models import GlobalSettings
 
@@ -173,6 +176,296 @@ def check_compliance_assessments_due_soon():
             "days_remaining": days,
         },
         send=send_compliance_assessment_due_soon_notification,
+    )
+
+
+# Hours before a regulatory deadline on which email escalates; -1 is "just missed".
+# shortcut: an hourly run that is skipped misses that bucket's email (the inbox row
+# stays); move to stored "last notified" state if delivery must be guaranteed.
+REGULATORY_NOTICE_HOURS = (168, 24, 6, 1, -1)
+# nis2_deadlines() stage -> label key shared by the email table and the message catalogs
+_STAGE_LABEL_KEYS = {
+    "early_warning": "earlyWarning",
+    "incident_notification": "incidentNotification",
+    "final_report": "finalReport",
+}
+
+
+def _regulatory_deadlines():
+    """(recipients, target, deadline_key, due) for every open NIS2 stage and every
+    personal data breach not yet notified to the authority."""
+    from privacy.models import DataBreach
+
+    current = now()
+    incidents = (
+        Incident.objects.filter(nis2_significant=True)
+        .exclude(status__in=["closed", "dismissed"])
+        .prefetch_related("owners")
+    )
+    for incident in incidents:
+        pending = [s for s in incident.nis2_deadlines() if s["done_at"] is None]
+        if pending:
+            # One inbox row per incident: the next stage still ahead, so a missed
+            # (or unrecorded) early warning does not hide the 72h notification
+            upcoming = [s for s in pending if s["due"] > current]
+            stage = upcoming[0] if upcoming else pending[-1]
+            yield (
+                _actor_emails(incident.owners.all()),
+                incident,
+                _STAGE_LABEL_KEYS[stage["stage"]],
+                stage["due"],
+            )
+
+    breaches = (
+        DataBreach.objects.filter(authority_notified_on__isnull=True)
+        .exclude(risk_level="privacy_no_risk")
+        .exclude(status__in=DataBreach.NOTIFIED_OR_CLOSED_STATUSES)
+        .prefetch_related("assigned_to")
+    )
+    for breach in breaches:
+        yield (
+            _actor_emails(breach.assigned_to.all()),
+            breach,
+            "gdprBreachNotification",
+            breach.authority_notification_due,
+        )
+
+
+@db_periodic_task(crontab(minute="5"))
+def check_regulatory_deadlines():
+    """NIS2 notification stages (24h / 72h / 1 month) and the GDPR 72h breach
+    notification. Hourly: these deadlines are counted in hours, not days."""
+    current = now()
+    items, escalating = [], defaultdict(list)
+    for emails, target, deadline_key, due in _regulatory_deadlines():
+        if not emails or due is None:
+            continue
+        hours = math.floor((due - current).total_seconds() / 3600)
+        context = {
+            "object_name": str(target),
+            "deadline_key": deadline_key,
+            "due": due.strftime("%Y-%m-%d %H:%M UTC"),
+        }
+        items.append((emails, target, context, hours in REGULATORY_NOTICE_HOURS))
+        if hours in REGULATORY_NOTICE_HOURS:
+            for email in emails:
+                escalating[email].append(context)
+
+    rows = notify_many(
+        "regulatory_deadline", [(e, t, c) for e, t, c, esc in items if not esc]
+    ) + notify_many(
+        "regulatory_deadline",
+        [(e, t, c) for e, t, c, esc in items if esc],
+        renotify=True,
+    )
+    clear_stale("regulatory_deadline", _written(rows))
+    for email, deadlines in escalating.items():
+        send_regulatory_deadline_notification(email, deadlines)
+
+
+@task()
+def send_regulatory_deadline_notification(email, deadlines):
+    from .email_utils import get_locale_for_email, localize_regulatory_label
+
+    locale = get_locale_for_email(email)
+    lines = [
+        f"- {localize_regulatory_label(d['deadline_key'], locale)}: {d['object_name']} ({d['due']})"
+        for d in deadlines
+    ]
+    _send_digest(
+        "regulatory_deadline",
+        email,
+        {"deadline_count": len(deadlines), "deadline_list": "\n".join(lines)},
+    )
+
+
+def _send_digest(template_name, email, context):
+    if not check_email_configuration(email):
+        return
+    from .email_utils import render_email_template
+
+    rendered = render_email_template(template_name, context, recipient_email=email)
+    if rendered:
+        send_notification_email(
+            rendered["subject"], rendered["body"], email, rendered.get("html_body")
+        )
+    elif rendered is not None:
+        logger.error("Failed to render email template", template=template_name)
+
+
+def _named_list(objects) -> str:
+    return "\n".join(f"- {obj}" for obj in objects)
+
+
+@db_periodic_task(crontab(hour="6", minute="12"))
+def check_right_requests_due_soon():
+    """Data subject requests (GDPR art. 12(3): one month) approaching their due date."""
+    from privacy.models import RightRequest
+
+    today = date.today()
+    _sweep_deadline(
+        "right_request_due_soon",
+        RightRequest.objects.filter(
+            due_date__isnull=False,
+            due_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+        )
+        .exclude(status="done")
+        .prefetch_related("owner"),
+        due_date=lambda request: request.due_date,
+        recipients=lambda request: _actor_emails(request.owner.all()),
+        context=lambda request, days: {
+            "request_name": str(request),
+            "days_remaining": days,
+            # Title shows the date: a day count reads wrong once the request is overdue
+            "due": request.due_date.isoformat(),
+        },
+        send=lambda email, requests, days: send_right_request_due_soon_notification(
+            email, [str(r) for r in requests], days
+        ),
+    )
+
+
+@task()
+def send_right_request_due_soon_notification(email, names, days):
+    _send_digest(
+        "right_request_due_soon",
+        email,
+        {
+            "request_count": len(names),
+            "request_list": _named_list(names),
+            "days_remaining": days,
+        },
+    )
+
+
+@db_periodic_task(crontab(hour="6", minute="14"))
+def check_contracts_expiring_soon():
+    """Active supplier contracts reaching their end date."""
+    from tprm.models import Contract
+
+    today = date.today()
+    _sweep_deadline(
+        "contract_expiring_soon",
+        Contract.objects.filter(
+            status=Contract.Status.ACTIVE,
+            end_date__gte=today,
+            end_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+        ).prefetch_related("owner"),
+        due_date=lambda contract: contract.end_date,
+        recipients=lambda contract: _actor_emails(contract.owner.all()),
+        context=lambda contract, days: {
+            "contract_name": str(contract),
+            "days_remaining": days,
+        },
+        send=lambda email, contracts, days: send_contract_expiring_soon_notification(
+            email, [str(c) for c in contracts], days
+        ),
+    )
+
+
+@task()
+def send_contract_expiring_soon_notification(email, names, days):
+    _send_digest(
+        "contract_expiring_soon",
+        email,
+        {
+            "contract_count": len(names),
+            "contract_list": _named_list(names),
+            "days_remaining": days,
+        },
+    )
+
+
+def _with_gap_flags(processings):
+    """Annotate what processing_obligation_gaps needs, so a sweep runs one query."""
+    from privacy.models import DataTransfer, PersonalData, Purpose
+
+    return processings.annotate(
+        _has_purpose=Exists(Purpose.objects.filter(processing=OuterRef("pk"))),
+        _retention_missing=Exists(
+            PersonalData.objects.filter(processing=OuterRef("pk"), retention="")
+        ),
+        _mechanism_missing=Exists(
+            DataTransfer.objects.filter(
+                processing=OuterRef("pk"), transfer_mechanism=""
+            )
+        ),
+    )
+
+
+def processing_obligation_gaps(processing) -> list[str]:
+    """GDPR record-keeping shortcomings of one processing, as message keys."""
+
+    def flag(name, query):
+        # annotated by _with_gap_flags in sweeps; queried for a single processing
+        return getattr(processing, name) if hasattr(processing, name) else query()
+
+    gaps = []
+    if not flag("_has_purpose", processing.purposes.exists):
+        gaps.append("gapNoPurpose")
+    if processing.dpia_applies and processing.dpia_required and not processing.dpia_id:
+        gaps.append("gapDpiaMissing")
+    if flag(
+        "_retention_missing",
+        lambda: processing.personal_data.filter(retention="").exists(),
+    ):
+        gaps.append("gapRetentionMissing")
+    if flag(
+        "_mechanism_missing",
+        lambda: processing.data_transfers.filter(transfer_mechanism="").exists(),
+    ):
+        gaps.append("gapTransferMechanismMissing")
+    return gaps
+
+
+@db_periodic_task(crontab(hour="6", minute="16"))
+def check_processing_obligations():
+    """Shortcomings in the record of processing activities (art. 30). The inbox tracks
+    them daily; email is a Monday digest, since a gap is not news every morning."""
+    from privacy.models import Processing
+
+    items, per_recipient = [], defaultdict(list)
+    for processing in _with_gap_flags(
+        Processing.objects.exclude(status="privacy_deprecated")
+    ).prefetch_related("assigned_to"):
+        gaps = processing_obligation_gaps(processing)
+        emails = _actor_emails(processing.assigned_to.all())
+        if not gaps or not emails:
+            continue
+        items.append(
+            (
+                emails,
+                processing,
+                {"processing_name": str(processing), "gap_count": len(gaps)},
+            )
+        )
+        for email in emails:
+            per_recipient[email].append((processing, gaps))
+
+    rows = notify_many("processing_obligation_gap", items)
+    clear_stale("processing_obligation_gap", _written(rows))
+    if date.today().weekday() != 0:
+        return
+    for email, entries in per_recipient.items():
+        send_processing_obligation_gaps_notification(
+            email, [(str(p), gaps) for p, gaps in entries]
+        )
+
+
+@task()
+def send_processing_obligation_gaps_notification(email, entries):
+    from .email_utils import get_locale_for_email, localize_regulatory_label
+
+    locale = get_locale_for_email(email)
+    lines = [
+        f"- {name}: "
+        + ", ".join(localize_regulatory_label(gap, locale) for gap in gaps)
+        for name, gaps in entries
+    ]
+    _send_digest(
+        "processing_obligation_gaps",
+        email,
+        {"processing_count": len(entries), "gap_list": "\n".join(lines)},
     )
 
 

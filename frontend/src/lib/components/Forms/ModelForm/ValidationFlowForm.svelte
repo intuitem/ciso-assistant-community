@@ -213,6 +213,27 @@
 			multiple
 			disabled={initialData.contracts}
 		/>
+		<!-- Too many to browse: only shown, and only fetched, for the object it was requested from -->
+		{#if initialData.requirement_assessments}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint={`requirement-assessments?id=${initialData.requirement_assessments.join(',')}`}
+				field="requirement_assessments"
+				label={m.requirementAssessments()}
+				multiple
+				disabled
+			/>
+		{/if}
+		{#if initialData.risk_scenarios}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint={`risk-scenarios?id=${initialData.risk_scenarios.join(',')}`}
+				field="risk_scenarios"
+				label={m.riskScenarios()}
+				multiple
+				disabled
+			/>
+		{/if}
 	</Dropdown>
 {/if}
 <FolderTreeSelect

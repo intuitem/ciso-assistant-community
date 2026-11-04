@@ -66,7 +66,7 @@ def test_condition_mode_matches_the_deadlines_category():
         k for k, v in NOTIFICATION_REGISTRY.items() if v["category"] == "deadlines"
     }
     assert conditions == deadlines
-    assert len(conditions) == 10
+    assert len(conditions) == 14
 
 
 def _catalog(locale: str):

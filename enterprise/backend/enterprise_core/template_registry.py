@@ -324,6 +324,36 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "regulatory_deadline": {
+        "description": "Sent when a NIS2 notification stage or a GDPR breach notification is due or overdue",
+        "category": "notification",
+        "variables": ["deadline_count", "deadline_list", "ciso_assistant_url"],
+    },
+    "right_request_due_soon": {
+        "description": "Sent when data subject requests are due soon",
+        "category": "notification",
+        "variables": [
+            "request_count",
+            "request_list",
+            "days_remaining",
+            "ciso_assistant_url",
+        ],
+    },
+    "contract_expiring_soon": {
+        "description": "Sent when contracts are about to expire",
+        "category": "notification",
+        "variables": [
+            "contract_count",
+            "contract_list",
+            "days_remaining",
+            "ciso_assistant_url",
+        ],
+    },
+    "processing_obligation_gaps": {
+        "description": "Weekly digest of gaps in the record of processing activities",
+        "category": "notification",
+        "variables": ["processing_count", "gap_list", "ciso_assistant_url"],
+    },
     "compliance_assessment_due_soon": {
         "description": "Sent when compliance assessments are due soon",
         "category": "notification",

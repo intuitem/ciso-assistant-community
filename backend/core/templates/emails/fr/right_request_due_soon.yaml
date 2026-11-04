@@ -1,0 +1,11 @@
+subject: "CISO Assistant : ${request_count} demande(s) de personnes concernées à échoir dans ${days_remaining} jour(s)"
+body: |
+  Bonjour,
+
+  Les demandes de personnes concernées suivantes arrivent à échéance dans ${days_remaining} jour(s) :
+
+  ${request_list}
+
+  L'article 12(3) du RGPD impose une réponse dans un délai d'un mois à compter de la réception. [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

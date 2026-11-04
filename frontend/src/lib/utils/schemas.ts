@@ -406,7 +406,9 @@ export const ValidationFlowSchema = z.object({
 	policies: z.array(z.string()).optional(),
 	processings: z.array(z.string()).optional(),
 	accreditations: z.array(z.string()).optional(),
-	contracts: z.array(z.string()).optional()
+	contracts: z.array(z.string()).optional(),
+	requirement_assessments: z.array(z.string()).optional(),
+	risk_scenarios: z.array(z.string()).optional()
 });
 
 export const ReferenceControlSchema = z.object({
@@ -1695,7 +1697,15 @@ export const IncidentSchema = z.object({
 		})
 		.optional(),
 	resolution: z.string().optional().default(''),
-	is_bcp_activated: z.boolean().optional().nullable()
+	is_bcp_activated: z.boolean().optional().nullable(),
+	root_cause: z.string().optional().nullable(),
+	nis2_significant: z.boolean().optional().nullable(),
+	nis2_malicious_intent: z.string().optional().nullable(),
+	nis2_cross_border_impact: z.string().optional().nullable(),
+	nis2_early_warning_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_notification_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_final_report_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_reference: z.string().optional().default('')
 });
 
 export const DoraIncidentReportSchema = z.object({

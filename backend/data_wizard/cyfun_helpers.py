@@ -1,10 +1,22 @@
+import functools
 import io
 
 import openpyxl
 
-from core.cyfun import LEVELS, normalize_ref_id
+import warnings
+from pathlib import Path
+
+from core.cyfun import (
+    CYFUN_2023_URN,
+    CYFUN_2025_URN,
+    LEVELS,
+    TEMPLATE_2023,
+    normalize_ref_id,
+    ref_id_2023,
+)
 
 CYFUN_LIBRARY_URN = "urn:intuitem:risk:library:ccb-cyfun2025"
+CYFUN_2023_LIBRARY_URN = "urn:intuitem:risk:library:ccb-cff-2023-03-01"
 
 FUNCTION_SHEETS = ("GOVERN", "IDENTIFY", "PROTECT", "DETECT", "RESPOND", "RECOVER")
 LEVEL_TO_GROUP = {"basic": "B", "important": "I", "essential": "E"}
@@ -63,7 +75,7 @@ def process_cyfun_file(file_content: bytes) -> dict:
     workbook = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
     sheet_names = set(workbook.sheetnames)
     if any(name.endswith("Details") for name in sheet_names):
-        raise ValueError("CyFun2023WorkbookNotSupported")
+        return _process_cyfun_2023(workbook)
     if not all(name in sheet_names for name in FUNCTION_SHEETS):
         raise ValueError("UnrecognizedCyfunWorkbook")
 
@@ -115,4 +127,76 @@ def process_cyfun_file(file_content: bytes) -> dict:
         raise ValueError("EmptyCyfunWorkbook")
     if level not in LEVELS:
         level = next((lvl for lvl in reversed(LEVELS) if lvl in levels_seen), None)
-    return {"assurance_level": level, "records": records}
+    return {
+        "assurance_level": level,
+        "records": records,
+        "framework_urn": CYFUN_2025_URN,
+        "library_urn": CYFUN_LIBRARY_URN,
+    }
+
+
+# CyFun 2023 "<LEVEL> Details" sheets: requirement E, scores G/H, comments M.
+_COLUMNS_2023 = {"requirement": 5, "doc_score": 7, "impl_score": 8, "comments": 13}
+
+
+def _details_2023(workbook, level) -> dict:
+    """{ref_id: (doc, impl, comment)} of a level's sheet, in library ref_ids."""
+    name = f"{level.upper()} Details"
+    if name not in workbook.sheetnames:
+        return {}
+    cells = {}
+    for row in workbook[name].iter_rows(min_row=DATA_START_ROW, values_only=True):
+        ref_id = ref_id_2023(_cell(row, _COLUMNS_2023["requirement"]), level)
+        if ref_id:
+            cells[ref_id] = tuple(
+                _cell(row, _COLUMNS_2023[key])
+                for key in ("doc_score", "impl_score", "comments")
+            )
+    return cells
+
+
+@functools.cache
+def _blank_details_2023() -> dict:
+    """{level: details} of the bundled blank tool, parsed once per process."""
+    blank_path = (
+        Path(__file__).resolve().parents[1] / "core/templates/core" / TEMPLATE_2023
+    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Data Validation extension")
+        blank = openpyxl.load_workbook(blank_path, data_only=True)
+    return {level: _details_2023(blank, level) for level in LEVELS}
+
+
+def _process_cyfun_2023(workbook) -> dict:
+    """The 2023 tool holds all three levels and ships with every score at 1, so
+    the level assessed is the highest one whose sheet differs from the blank
+    tool (core/templates/core)."""
+    blank = _blank_details_2023()
+    for level in reversed(LEVELS):
+        filled = _details_2023(workbook, level)
+        if filled and filled != blank[level]:
+            break
+    else:
+        raise ValueError("EmptyCyfunWorkbook")
+
+    records = []
+    for ref_id, (doc, impl, comment) in filled.items():
+        record = {"ref_id": ref_id, "assessable": True}
+        doc_score, doc_na = _parse_score(doc)
+        impl_score, impl_na = _parse_score(impl)
+        if doc_na or impl_na:
+            record["compliance_result"] = "not_applicable"
+        else:
+            if doc_score is not None:
+                record["documentation_score"] = doc_score
+            if impl_score is not None:
+                record["implementation_score"] = impl_score
+        if comment and str(comment).strip():
+            record["observations"] = str(comment).strip()
+        records.append(record)
+    return {
+        "assurance_level": level,
+        "records": records,
+        "framework_urn": CYFUN_2023_URN,
+        "library_urn": CYFUN_2023_LIBRARY_URN,
+    }

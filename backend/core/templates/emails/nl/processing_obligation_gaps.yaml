@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${processing_count} verwerking(en) met tekortkomingen in het AVG-register"
+body: |
+  Hallo,
+
+  De volgende verwerkingen waaraan u bent toegewezen vertonen tekortkomingen in het register van verwerkingsactiviteiten:
+
+  ${gap_list}
+
+  [Open CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.
