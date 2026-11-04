@@ -296,12 +296,27 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
         self.folder = self.processing.folder
         if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
+        previous_processing_id = (
+            None
+            if self._state.adding
+            else PersonalData.objects.filter(pk=self.pk)
+            .values_list("processing_id", flat=True)
+            .first()
+        )
         super().save(*args, **kwargs)
 
-        # Update the processing's sensitive data flag if needed
-        if self.is_sensitive and not self.processing.has_sensitive_personal_data:
-            self.processing.has_sensitive_personal_data = True
-            self.processing.save(update_fields=["has_sensitive_personal_data"])
+        # Moving the item to another processing changes both flags
+        self.processing.update_sensitive_data_flag()
+        if previous_processing_id not in (None, self.processing_id):
+            Processing.objects.get(
+                pk=previous_processing_id
+            ).update_sensitive_data_flag()
+
+    def delete(self, *args, **kwargs):
+        processing = self.processing
+        result = super().delete(*args, **kwargs)
+        processing.update_sensitive_data_flag()
+        return result
 
     @classmethod
     def get_categories_count(cls, filters: dict = {}):
