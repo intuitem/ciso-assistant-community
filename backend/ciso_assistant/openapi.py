@@ -42,6 +42,7 @@ class AutoSchema(BaseAutoSchema):
 
 
 class PersonalAccessTokenScheme(KnoxTokenScheme):
+    target_class = "iam.authentication.KnoxTokenAuthentication"
     priority = 1
     name = "PersonalAccessToken"
 

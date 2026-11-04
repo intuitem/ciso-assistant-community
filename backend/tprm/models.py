@@ -891,6 +891,8 @@ class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             return None
         return round((self.score / self.scale_max) * 100, 1)
 
+    folder_from = "entity"
+
     def save(self, *args, **kwargs):
         # As visible as the entity it is about.
         if self.entity_id:
