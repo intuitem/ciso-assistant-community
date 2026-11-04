@@ -6,7 +6,7 @@ description: 'A DPIA following the structure of the CNIL PIA method: context, co
   data subjects and validation. Accepting a response records it as the processing''s DPIA and adds the
   measures it picks to the processing.'
 copyright: © intuitem
-version: 9
+version: 10
 publication_date: '2026-10-29'
 provider: intuitem
 packager: intuitem
@@ -33,6 +33,8 @@ objects:
           label: Gravità
         nb:
           label: Alvorlighet
+        de:
+          label: Schweregrad
       levels:
       - ref_id: negligible
         label: Negligible
@@ -51,6 +53,10 @@ objects:
             label: Ubetydelig
             description: De registrerte påvirkes ikke, eller får mindre ulemper som de kommer over uten
               problemer.
+          de:
+            label: Vernachlässigbar
+            description: Betroffene Personen sind nicht beeinträchtigt oder haben geringfügige Unannehmlichkeiten,
+              die sie problemlos überwinden können.
       - ref_id: limited
         label: Limited
         description: Data subjects face significant inconveniences they overcome despite some difficulty.
@@ -66,6 +72,10 @@ objects:
           nb:
             label: Begrenset
             description: De registrerte får merkbare ulemper som de kommer over, men med noen vanskeligheter.
+          de:
+            label: Begrenzt
+            description: Betroffene Personen haben erhebliche Unannehmlichkeiten, die sie trotz gewisser
+              Schwierigkeiten überwinden können.
       - ref_id: significant
         label: Significant
         description: Data subjects face significant consequences they overcome only with serious difficulty.
@@ -81,6 +91,10 @@ objects:
           nb:
             label: Betydelig
             description: De registrerte får alvorlige konsekvenser som de bare kommer over med store vanskeligheter.
+          de:
+            label: Erheblich
+            description: Betroffene Personen erleiden erhebliche Folgen, die sie nur unter großen Schwierigkeiten
+              überwinden können.
       - ref_id: maximum
         label: Maximum
         description: Data subjects face significant, possibly irreversible consequences they may not overcome.
@@ -97,6 +111,10 @@ objects:
             label: Maksimal
             description: De registrerte får alvorlige, muligens uopprettelige konsekvenser som de kanskje
               ikke kommer over.
+          de:
+            label: Maximal
+            description: Betroffene Personen erleiden erhebliche, möglicherweise unumkehrbare Folgen,
+              die sie unter Umständen nicht überwinden können.
     - ref_id: likelihood
       label: Likelihood
       translations:
@@ -106,6 +124,8 @@ objects:
           label: Probabilità
         nb:
           label: Sannsynlighet
+        de:
+          label: Eintrittswahrscheinlichkeit
       levels:
       - ref_id: negligible
         label: Negligible
@@ -122,6 +142,10 @@ objects:
           nb:
             label: Ubetydelig
             description: Den uønskede hendelsen virker ikke mulig ut fra egenskapene til støtteverdiene.
+          de:
+            label: Vernachlässigbar
+            description: Das befürchtete Ereignis erscheint angesichts der Eigenschaften der unterstützenden
+              Assets nicht möglich.
       - ref_id: limited
         label: Limited
         description: The feared event seems difficult to bring about given the properties of the supporting
@@ -138,6 +162,10 @@ objects:
           nb:
             label: Begrenset
             description: Den uønskede hendelsen virker vanskelig å utløse ut fra egenskapene til støtteverdiene.
+          de:
+            label: Begrenzt
+            description: Das befürchtete Ereignis erscheint angesichts der Eigenschaften der unterstützenden
+              Assets schwer herbeizuführen.
       - ref_id: significant
         label: Significant
         description: The feared event seems possible given the properties of the supporting assets.
@@ -152,6 +180,10 @@ objects:
           nb:
             label: Betydelig
             description: Den uønskede hendelsen virker mulig ut fra egenskapene til støtteverdiene.
+          de:
+            label: Erheblich
+            description: Das befürchtete Ereignis erscheint angesichts der Eigenschaften der unterstützenden
+              Assets möglich.
       - ref_id: maximum
         label: Maximum
         description: The feared event seems easy to bring about given the properties of the supporting
@@ -168,6 +200,10 @@ objects:
           nb:
             label: Maksimal
             description: Den uønskede hendelsen virker lett å utløse ut fra egenskapene til støtteverdiene.
+          de:
+            label: Maximal
+            description: Das befürchtete Ereignis erscheint angesichts der Eigenschaften der unterstützenden
+              Assets leicht herbeizuführen.
     outcomes_definition:
     - ref_id: privacy_risk
       kind: rating
@@ -179,6 +215,8 @@ objects:
           label: Rischio per i diritti e le libertà degli interessati
         nb:
           label: Personvernrisiko
+        de:
+          label: Datenschutzrisiko
       dimensions:
       - severity
       - likelihood
@@ -196,6 +234,9 @@ objects:
           nb:
             label: Akseptabel
             description: Risikoen kan aksepteres med tiltakene som er på plass.
+          de:
+            label: Akzeptabel
+            description: Das Risiko kann mit den bestehenden Maßnahmen akzeptiert werden.
         color: '#BBF7D0'
       - ref_id: to_reduce
         label: To reduce
@@ -211,6 +252,10 @@ objects:
           nb:
             label: Må reduseres
             description: Risikoen må reduseres med ytterligere tiltak før behandlingen settes i gang.
+          de:
+            label: Zu verringern
+            description: Zusätzliche Maßnahmen sollten das Risiko verringern, bevor die Verarbeitung
+              durchgeführt wird.
         color: '#FEF08A'
       - ref_id: unacceptable
         label: Unacceptable
@@ -227,6 +272,10 @@ objects:
             label: Uakseptabel
             description: Risikoen er ikke akseptabel. Reduser den, eller forhåndsdrøft behandlingen med
               tilsynsmyndigheten.
+          de:
+            label: Nicht akzeptabel
+            description: Das Risiko ist nicht akzeptabel. Verringern Sie es oder konsultieren Sie die
+              Aufsichtsbehörde.
         color: '#FCA5A5'
       grid:
       - - acceptable
@@ -264,6 +313,10 @@ objects:
           label: 'Restrisiko uakseptabel: forhåndsdrøft med tilsynsmyndigheten'
           description: En risiko er fortsatt uakseptabel når de planlagte tiltakene er på plass. GDPR
             art. 36 krever forhåndsdrøfting med tilsynsmyndigheten.
+        de:
+          label: 'Restrisiko nicht akzeptabel: Aufsichtsbehörde konsultieren'
+          description: Ein Risiko bleibt auch nach Umsetzung der geplanten Maßnahmen nicht akzeptabel.
+            Artikel 36 DSGVO verlangt eine vorherige Konsultation der Aufsichtsbehörde.
     pages:
     - urn: urn:intuitem:risk:qf_page:dpia:overview
       ref_id: overview
@@ -286,6 +339,8 @@ objects:
               text: Trattamento
             nb:
               text: Behandling
+            de:
+              text: Verarbeitung
         urn:intuitem:risk:qf_page:dpia:overview:question:benefits:
           type: text
           text: What benefits are expected from the processing, and in what context is it used?
@@ -296,6 +351,9 @@ objects:
               text: Quali benefici si prevedono dal trattamento e in quale contesto viene svolto?
             nb:
               text: Hvilke fordeler forventes av behandlingen, og i hvilken sammenheng brukes den?
+            de:
+              text: Welcher Nutzen wird von der Verarbeitung erwartet und in welchem Kontext wird sie
+                eingesetzt?
         urn:intuitem:risk:qf_page:dpia:overview:question:standards:
           type: text
           text: Which standards apply to the processing? (approved codes of conduct, certifications…)
@@ -307,6 +365,9 @@ objects:
               text: Quali standard si applicano al trattamento? (codici di condotta approvati, certificazioni…)
             nb:
               text: Hvilke normer gjelder for behandlingen? (godkjente atferdsnormer, sertifiseringer
+                …)
+            de:
+              text: Welche Standards gelten für die Verarbeitung? (genehmigte Verhaltensregeln, Zertifizierungen
                 …)
       translations:
         fr:
@@ -334,6 +395,12 @@ objects:
 
             Ta vare på det utfylte svaret som dokumentasjon av vurderingen, jf. GDPR art. 35 nr. 7 og
             ansvarsprinsippet i art. 5 nr. 2.'
+        de:
+          name: 'Kontext: Überblick'
+          description: |-
+            Benennen Sie die untersuchte Verarbeitung. Zwecke, Daten, beteiligte Stellen und Maßnahmen werden aus ihrem Datensatz übernommen und auf den folgenden Seiten zur Beurteilung angezeigt.
+
+            Bewahren Sie die ausgefüllte Antwort als Dokumentation der Folgenabschätzung auf: Artikel 35 DSGVO verlangt dies.
     - urn: urn:intuitem:risk:qf_page:dpia:data
       ref_id: data
       name: 'Context: data, processes and supports'
@@ -354,6 +421,8 @@ objects:
               text: Chi può accedere ai dati, oltre ai destinatari già elencati?
             nb:
               text: Hvem har tilgang til opplysningene, utover mottakerne som er oppført?
+            de:
+              text: Wer kann neben den aufgeführten Empfängern auf die Daten zugreifen?
         urn:intuitem:risk:qf_page:dpia:data:question:lifecycle:
           type: text
           text: How does the data lifecycle unfold, from collection to deletion?
@@ -364,6 +433,8 @@ objects:
               text: Come si articola il ciclo di vita dei dati, dalla raccolta alla cancellazione?
             nb:
               text: Hvordan er livsløpet til opplysningene, fra innsamling til sletting?
+            de:
+              text: Wie verläuft der Lebenszyklus der Daten von der Erhebung bis zur Löschung?
         urn:intuitem:risk:qf_page:dpia:data:question:supports:
           type: text
           text: What else does the data rely on, beyond the assets listed? (people, paper…)
@@ -378,6 +449,8 @@ objects:
             nb:
               text: Hva annet er opplysningene avhengige av, utover verdiene som er oppført? (personer,
                 papir …)
+            de:
+              text: Wovon hängen die Daten neben den aufgeführten Assets noch ab? (Personen, Papier …)
       translations:
         fr:
           name: 'Contexte : données, processus et supports'
@@ -394,6 +467,11 @@ objects:
           description: 'Opplysningene som behandles, om hvem og for hvem. Hentet fra behandlingens oppføring.
             Endre behandlingen for å rette den: når skjemaet sendes inn, lagres en kopi av det som ble
             vurdert.'
+        de:
+          name: 'Kontext: Daten, Prozesse und Ressourcen'
+          description: 'Welche Daten über wen und für wen verarbeitet werden. Die Angaben werden aus
+            dem Datensatz der Verarbeitung angezeigt. Ändern Sie die Verarbeitung, um Angaben zu korrigieren:
+            Beim Absenden dieses Formulars wird eine Kopie der bewerteten Angaben gespeichert.'
     - urn: urn:intuitem:risk:qf_page:dpia:proportionality
       ref_id: proportionality
       name: 'Core principles: proportionality and necessity'
@@ -417,6 +495,9 @@ objects:
             nb:
               text: Er formålene spesifikke, uttrykkelig angitte og berettigede, og har hvert av dem riktig
                 behandlingsgrunnlag?
+            de:
+              text: Sind diese Zwecke festgelegt, eindeutig und legitim, und beruht jeder Zweck auf der
+                passenden Rechtsgrundlage?
         urn:intuitem:risk:qf_page:dpia:proportionality:question:minimisation:
           type: text
           text: Is the data adequate, relevant and limited to what is necessary for the purposes?
@@ -429,6 +510,8 @@ objects:
                 perseguite?
             nb:
               text: Er opplysningene adekvate, relevante og begrenset til det som er nødvendig for formålene?
+            de:
+              text: Sind die Daten dem Zweck angemessen und erheblich sowie auf das notwendige Maß beschränkt?
         urn:intuitem:risk:qf_page:dpia:proportionality:question:accuracy:
           type: text
           text: Is the data accurate and kept up to date?
@@ -439,6 +522,8 @@ objects:
               text: I dati sono esatti e mantenuti aggiornati?
             nb:
               text: Er opplysningene korrekte og oppdaterte?
+            de:
+              text: Sind die Daten sachlich richtig und werden sie aktuell gehalten?
         urn:intuitem:risk:qf_page:dpia:proportionality:question:retention:
           type: text
           text: Why are the retention periods recorded for each kind of data necessary?
@@ -450,6 +535,8 @@ objects:
               text: Perché i periodi di conservazione previsti per ciascuna categoria di dati sono necessari?
             nb:
               text: Hvorfor er lagringstidene som er registrert for hver type opplysninger, nødvendige?
+            de:
+              text: Warum sind die für jede Datenart festgehaltenen Aufbewahrungsfristen erforderlich?
       translations:
         fr:
           name: 'Principes fondamentaux : proportionnalité et nécessité'
@@ -466,6 +553,12 @@ objects:
           description: 'Vis at behandlingen oppfyller de grunnleggende prinsippene for personvern. Hentet
             fra behandlingens oppføring. Endre behandlingen for å rette den: når skjemaet sendes inn,
             lagres en kopi av det som ble vurdert.'
+        de:
+          name: 'Grundprinzipien: Verhältnismäßigkeit und Notwendigkeit'
+          description: 'Zeigen Sie, dass die Verarbeitung die Datenschutzgrundsätze einhält. Die Angaben
+            werden aus dem Datensatz der Verarbeitung angezeigt. Ändern Sie die Verarbeitung, um Angaben
+            zu korrigieren: Beim Absenden dieses Formulars wird eine Kopie der bewerteten Angaben
+            gespeichert.'
     - urn: urn:intuitem:risk:qf_page:dpia:rights
       ref_id: rights
       name: 'Core principles: measures protecting data subjects'' rights'
@@ -485,6 +578,8 @@ objects:
               text: Come sono informati gli interessati in merito al trattamento?
             nb:
               text: Hvordan informeres de registrerte om behandlingen?
+            de:
+              text: Wie werden betroffene Personen über die Verarbeitung informiert?
         urn:intuitem:risk:qf_page:dpia:rights:question:consent:
           type: text
           text: If applicable, how is the data subjects' consent obtained?
@@ -497,6 +592,8 @@ objects:
               text: Ove applicabile, come viene raccolto il consenso degli interessati?
             nb:
               text: 'Hvis det er aktuelt: Hvordan innhentes samtykke fra de registrerte?'
+            de:
+              text: Wie wird gegebenenfalls die Einwilligung der betroffenen Personen eingeholt?
         urn:intuitem:risk:qf_page:dpia:rights:question:access_portability:
           type: text
           text: How can data subjects exercise their rights of access and to data portability?
@@ -509,6 +606,9 @@ objects:
                 dei dati?
             nb:
               text: Hvordan kan de registrerte utøve retten til innsyn og dataportabilitet?
+            de:
+              text: Wie können betroffene Personen ihr Auskunftsrecht und ihr Recht auf Datenübertragbarkeit
+                ausüben?
         urn:intuitem:risk:qf_page:dpia:rights:question:rectification_erasure:
           type: text
           text: How can data subjects exercise their rights to rectification and erasure?
@@ -521,6 +621,8 @@ objects:
                 dei dati?
             nb:
               text: Hvordan kan de registrerte utøve retten til retting og sletting?
+            de:
+              text: Wie können betroffene Personen ihre Rechte auf Berichtigung und Löschung ausüben?
         urn:intuitem:risk:qf_page:dpia:rights:question:restriction_objection:
           type: text
           text: How can data subjects exercise their rights to restriction and to object?
@@ -534,6 +636,9 @@ objects:
             nb:
               text: Hvordan kan de registrerte utøve retten til begrensning av behandling og retten til
                 å protestere?
+            de:
+              text: Wie können betroffene Personen ihr Recht auf Einschränkung der Verarbeitung und ihr
+                Widerspruchsrecht ausüben?
         urn:intuitem:risk:qf_page:dpia:rights:question:processors:
           type: text
           text: Is a contract setting out their obligations in place with each of these parties?
@@ -545,6 +650,8 @@ objects:
               text: È presente un contratto che definisce gli obblighi di ciascuno dei soggetti indicati?
             nb:
               text: Er det inngått en avtale med hver av disse partene som fastsetter pliktene deres?
+            de:
+              text: Besteht mit jeder dieser Stellen ein Vertrag, der ihre Verpflichtungen festlegt?
         urn:intuitem:risk:qf_page:dpia:rights:question:transfers:
           type: text
           text: Do the safeguards listed protect the data transferred outside the EU adequately?
@@ -559,6 +666,8 @@ objects:
             nb:
               text: Gir garantiene som er oppført, tilstrekkelig vern for opplysninger som overføres ut
                 av EU/EØS?
+            de:
+              text: Schützen die aufgeführten Garantien die außerhalb der EU übermittelten Daten angemessen?
       translations:
         fr:
           name: 'Principes fondamentaux : mesures protégeant les droits des personnes'
@@ -575,6 +684,12 @@ objects:
           description: 'Vis hvordan de registrerte kan utøve rettighetene sine. Hentet fra behandlingens
             oppføring. Endre behandlingen for å rette den: når skjemaet sendes inn, lagres en kopi av
             det som ble vurdert.'
+        de:
+          name: 'Grundprinzipien: Schutz der Betroffenenrechte'
+          description: 'Zeigen Sie, wie betroffene Personen ihre Rechte ausüben können. Die Angaben
+            werden aus dem Datensatz der Verarbeitung angezeigt. Ändern Sie die Verarbeitung, um Angaben
+            zu korrigieren: Beim Absenden dieses Formulars wird eine Kopie der bewerteten Angaben
+            gespeichert.'
     - urn: urn:intuitem:risk:qf_page:dpia:measures
       ref_id: measures
       name: 'Risks: existing or planned measures'
@@ -599,6 +714,8 @@ objects:
               text: Quali ulteriori misure devono essere associate al trattamento?
             nb:
               text: Hvilke tiltak bør legges til behandlingen?
+            de:
+              text: Welche Maßnahmen sollen der Verarbeitung hinzugefügt werden?
         urn:intuitem:risk:qf_page:dpia:measures:question:notes:
           type: text
           text: Anything to add about these measures?
@@ -610,6 +727,8 @@ objects:
               text: Ci sono ulteriori osservazioni sulle misure indicate?
             nb:
               text: Noe å tilføye om disse tiltakene?
+            de:
+              text: Gibt es weitere Angaben zu diesen Maßnahmen?
       translations:
         fr:
           name: 'Risques : mesures existantes ou prévues'
@@ -627,6 +746,12 @@ objects:
           description: Tiltakene behandlingen allerede har, eksisterende eller planlagte. Hvert av dem
             er et tiltak i CISO Assistant, så eier, frist og status følges opp som for andre tiltak. Tiltak
             som velges i dette skjemaet, legges til behandlingen når DPIA-en er godtatt.
+        de:
+          name: 'Risiken: bestehende oder geplante Maßnahmen'
+          description: Die bereits der Verarbeitung zugeordneten Maßnahmen, ob umgesetzt oder geplant.
+            Jede ist eine angewendete Maßnahme; Zuständigkeit, Fälligkeit und Status werden wie bei
+            anderen Maßnahmen nachverfolgt. In diesem Formular ausgewählte Maßnahmen werden der Verarbeitung
+            hinzugefügt, sobald die DSFA angenommen wurde.
     - urn: urn:intuitem:risk:qf_page:dpia:illegitimate_access
       ref_id: illegitimate_access
       name: 'Risks: illegitimate access to data'
@@ -645,6 +770,8 @@ objects:
               text: Quali sarebbero le principali conseguenze per gli interessati se l’evento si verificasse?
             nb:
               text: Hva ville de viktigste konsekvensene for de registrerte være hvis dette skjedde?
+            de:
+              text: Welche wesentlichen Auswirkungen hätte dieses Ereignis auf die betroffenen Personen?
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:threats:
           type: text
           text: What are the main threats that could make it happen?
@@ -655,6 +782,8 @@ objects:
               text: Quali sono le principali minacce che potrebbero causare l’evento?
             nb:
               text: Hvilke trusler kan føre til at det skjer?
+            de:
+              text: Welche wesentlichen Bedrohungen könnten dieses Ereignis auslösen?
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:sources:
           type: text
           text: Which risk sources could be behind it (internal or external people, non-human sources)?
@@ -668,6 +797,9 @@ objects:
             nb:
               text: Hvilke risikokilder kan stå bak (interne eller eksterne personer, ikke-menneskelige
                 kilder)?
+            de:
+              text: Welche Risikoquellen könnten dahinterstehen (interne oder externe Personen, nichtmenschliche
+                Quellen)?
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:measures:
           type: object_reference
           text: Which measures treat this risk?
@@ -683,6 +815,8 @@ objects:
               text: Quali misure trattano questo rischio?
             nb:
               text: Hvilke tiltak håndterer denne risikoen?
+            de:
+              text: Welche Maßnahmen behandeln dieses Risiko?
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:severity:
           type: unique_choice
           text: How severe is the risk, given the potential impacts and the measures in place?
@@ -698,6 +832,9 @@ objects:
                 e le misure in essere?
             nb:
               text: Hvor alvorlig er risikoen, gitt de mulige konsekvensene og tiltakene som er på plass?
+            de:
+              text: Wie hoch ist der Schweregrad des Risikos angesichts der möglichen Auswirkungen und
+                der bestehenden Maßnahmen?
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:severity_justification:
           type: text
           text: Justify the severity
@@ -708,6 +845,8 @@ objects:
               text: Motivare la valutazione della gravità
             nb:
               text: Begrunn alvorligheten
+            de:
+              text: Schweregrad begründen
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:likelihood:
           type: unique_choice
           text: How likely is the risk, given the threats, the risk sources and the measures in place?
@@ -723,6 +862,9 @@ objects:
                 le misure in essere?
             nb:
               text: Hvor sannsynlig er risikoen, gitt truslene, risikokildene og tiltakene som er på plass?
+            de:
+              text: Wie hoch ist die Eintrittswahrscheinlichkeit angesichts der Bedrohungen, Risikoquellen
+                und bestehenden Maßnahmen?
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:likelihood_justification:
           type: text
           text: Justify the likelihood
@@ -733,6 +875,8 @@ objects:
               text: Motivare la valutazione della probabilità
             nb:
               text: Begrunn sannsynligheten
+            de:
+              text: Eintrittswahrscheinlichkeit begründen
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:residual_severity:
           type: unique_choice
           text: Severity once the planned measures are implemented
@@ -748,6 +892,8 @@ objects:
               text: Gravità dopo l’attuazione delle misure pianificate
             nb:
               text: Alvorlighet når de planlagte tiltakene er gjennomført
+            de:
+              text: Schweregrad nach Umsetzung der geplanten Maßnahmen
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:residual_likelihood:
           type: unique_choice
           text: Likelihood once the planned measures are implemented
@@ -763,6 +909,8 @@ objects:
               text: Probabilità dopo l’attuazione delle misure pianificate
             nb:
               text: Sannsynlighet når de planlagte tiltakene er gjennomført
+            de:
+              text: Eintrittswahrscheinlichkeit nach Umsetzung der geplanten Maßnahmen
       translations:
         fr:
           name: 'Risques : accès illégitime à des données'
@@ -779,6 +927,12 @@ objects:
           description: Analyser årsakene til og konsekvensene av uberettiget tilgang til opplysninger,
             og anslå deretter alvorlighet og sannsynlighet ut fra tiltakene som er på plass. Anslå dem
             så på nytt slik de vil være når de planlagte tiltakene er gjennomført.
+        de:
+          name: 'Risiken: unbefugter Datenzugriff'
+          description: Analysieren Sie die Ursachen und Folgen eines unbefugten Datenzugriffs und
+            schätzen Sie anschließend Schweregrad und Eintrittswahrscheinlichkeit unter Berücksichtigung
+            der bestehenden Maßnahmen ein. Wiederholen Sie die Einschätzung für den Zustand nach Umsetzung
+            der geplanten Maßnahmen.
     - urn: urn:intuitem:risk:qf_page:dpia:unwanted_modification
       ref_id: unwanted_modification
       name: 'Risks: unwanted modification of data'
@@ -797,6 +951,8 @@ objects:
               text: Quali sarebbero le principali conseguenze per gli interessati se l’evento si verificasse?
             nb:
               text: Hva ville de viktigste konsekvensene for de registrerte være hvis dette skjedde?
+            de:
+              text: Welche wesentlichen Auswirkungen hätte dieses Ereignis auf die betroffenen Personen?
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:threats:
           type: text
           text: What are the main threats that could make it happen?
@@ -807,6 +963,8 @@ objects:
               text: Quali sono le principali minacce che potrebbero causare l’evento?
             nb:
               text: Hvilke trusler kan føre til at det skjer?
+            de:
+              text: Welche wesentlichen Bedrohungen könnten dieses Ereignis auslösen?
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:sources:
           type: text
           text: Which risk sources could be behind it (internal or external people, non-human sources)?
@@ -820,6 +978,9 @@ objects:
             nb:
               text: Hvilke risikokilder kan stå bak (interne eller eksterne personer, ikke-menneskelige
                 kilder)?
+            de:
+              text: Welche Risikoquellen könnten dahinterstehen (interne oder externe Personen, nichtmenschliche
+                Quellen)?
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:measures:
           type: object_reference
           text: Which measures treat this risk?
@@ -835,6 +996,8 @@ objects:
               text: Quali misure trattano questo rischio?
             nb:
               text: Hvilke tiltak håndterer denne risikoen?
+            de:
+              text: Welche Maßnahmen behandeln dieses Risiko?
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:severity:
           type: unique_choice
           text: How severe is the risk, given the potential impacts and the measures in place?
@@ -850,6 +1013,9 @@ objects:
                 e le misure in essere?
             nb:
               text: Hvor alvorlig er risikoen, gitt de mulige konsekvensene og tiltakene som er på plass?
+            de:
+              text: Wie hoch ist der Schweregrad des Risikos angesichts der möglichen Auswirkungen und
+                der bestehenden Maßnahmen?
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:severity_justification:
           type: text
           text: Justify the severity
@@ -860,6 +1026,8 @@ objects:
               text: Motivare la valutazione della gravità
             nb:
               text: Begrunn alvorligheten
+            de:
+              text: Schweregrad begründen
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:likelihood:
           type: unique_choice
           text: How likely is the risk, given the threats, the risk sources and the measures in place?
@@ -875,6 +1043,9 @@ objects:
                 le misure in essere?
             nb:
               text: Hvor sannsynlig er risikoen, gitt truslene, risikokildene og tiltakene som er på plass?
+            de:
+              text: Wie hoch ist die Eintrittswahrscheinlichkeit angesichts der Bedrohungen, Risikoquellen
+                und bestehenden Maßnahmen?
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:likelihood_justification:
           type: text
           text: Justify the likelihood
@@ -885,6 +1056,8 @@ objects:
               text: Motivare la valutazione della probabilità
             nb:
               text: Begrunn sannsynligheten
+            de:
+              text: Eintrittswahrscheinlichkeit begründen
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:residual_severity:
           type: unique_choice
           text: Severity once the planned measures are implemented
@@ -900,6 +1073,8 @@ objects:
               text: Gravità dopo l’attuazione delle misure pianificate
             nb:
               text: Alvorlighet når de planlagte tiltakene er gjennomført
+            de:
+              text: Schweregrad nach Umsetzung der geplanten Maßnahmen
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:residual_likelihood:
           type: unique_choice
           text: Likelihood once the planned measures are implemented
@@ -915,6 +1090,8 @@ objects:
               text: Probabilità dopo l’attuazione delle misure pianificate
             nb:
               text: Sannsynlighet når de planlagte tiltakene er gjennomført
+            de:
+              text: Eintrittswahrscheinlichkeit nach Umsetzung der geplanten Maßnahmen
       translations:
         fr:
           name: 'Risques : modification non désirée de données'
@@ -931,6 +1108,12 @@ objects:
           description: Analyser årsakene til og konsekvensene av uønsket endring av opplysninger, og anslå
             deretter alvorlighet og sannsynlighet ut fra tiltakene som er på plass. Anslå dem så på nytt
             slik de vil være når de planlagte tiltakene er gjennomført.
+        de:
+          name: 'Risiken: unerwünschte Datenänderung'
+          description: Analysieren Sie die Ursachen und Folgen einer unerwünschten Datenänderung und
+            schätzen Sie anschließend Schweregrad und Eintrittswahrscheinlichkeit unter Berücksichtigung
+            der bestehenden Maßnahmen ein. Wiederholen Sie die Einschätzung für den Zustand nach Umsetzung
+            der geplanten Maßnahmen.
     - urn: urn:intuitem:risk:qf_page:dpia:disappearance
       ref_id: disappearance
       name: 'Risks: disappearance of data'
@@ -949,6 +1132,8 @@ objects:
               text: Quali sarebbero le principali conseguenze per gli interessati se l’evento si verificasse?
             nb:
               text: Hva ville de viktigste konsekvensene for de registrerte være hvis dette skjedde?
+            de:
+              text: Welche wesentlichen Auswirkungen hätte dieses Ereignis auf die betroffenen Personen?
         urn:intuitem:risk:qf_page:dpia:disappearance:question:threats:
           type: text
           text: What are the main threats that could make it happen?
@@ -959,6 +1144,8 @@ objects:
               text: Quali sono le principali minacce che potrebbero causare l’evento?
             nb:
               text: Hvilke trusler kan føre til at det skjer?
+            de:
+              text: Welche wesentlichen Bedrohungen könnten dieses Ereignis auslösen?
         urn:intuitem:risk:qf_page:dpia:disappearance:question:sources:
           type: text
           text: Which risk sources could be behind it (internal or external people, non-human sources)?
@@ -972,6 +1159,9 @@ objects:
             nb:
               text: Hvilke risikokilder kan stå bak (interne eller eksterne personer, ikke-menneskelige
                 kilder)?
+            de:
+              text: Welche Risikoquellen könnten dahinterstehen (interne oder externe Personen, nichtmenschliche
+                Quellen)?
         urn:intuitem:risk:qf_page:dpia:disappearance:question:measures:
           type: object_reference
           text: Which measures treat this risk?
@@ -987,6 +1177,8 @@ objects:
               text: Quali misure trattano questo rischio?
             nb:
               text: Hvilke tiltak håndterer denne risikoen?
+            de:
+              text: Welche Maßnahmen behandeln dieses Risiko?
         urn:intuitem:risk:qf_page:dpia:disappearance:question:severity:
           type: unique_choice
           text: How severe is the risk, given the potential impacts and the measures in place?
@@ -1002,6 +1194,9 @@ objects:
                 e le misure in essere?
             nb:
               text: Hvor alvorlig er risikoen, gitt de mulige konsekvensene og tiltakene som er på plass?
+            de:
+              text: Wie hoch ist der Schweregrad des Risikos angesichts der möglichen Auswirkungen und
+                der bestehenden Maßnahmen?
         urn:intuitem:risk:qf_page:dpia:disappearance:question:severity_justification:
           type: text
           text: Justify the severity
@@ -1012,6 +1207,8 @@ objects:
               text: Motivare la valutazione della gravità
             nb:
               text: Begrunn alvorligheten
+            de:
+              text: Schweregrad begründen
         urn:intuitem:risk:qf_page:dpia:disappearance:question:likelihood:
           type: unique_choice
           text: How likely is the risk, given the threats, the risk sources and the measures in place?
@@ -1027,6 +1224,9 @@ objects:
                 le misure in essere?
             nb:
               text: Hvor sannsynlig er risikoen, gitt truslene, risikokildene og tiltakene som er på plass?
+            de:
+              text: Wie hoch ist die Eintrittswahrscheinlichkeit angesichts der Bedrohungen, Risikoquellen
+                und bestehenden Maßnahmen?
         urn:intuitem:risk:qf_page:dpia:disappearance:question:likelihood_justification:
           type: text
           text: Justify the likelihood
@@ -1037,6 +1237,8 @@ objects:
               text: Motivare la valutazione della probabilità
             nb:
               text: Begrunn sannsynligheten
+            de:
+              text: Eintrittswahrscheinlichkeit begründen
         urn:intuitem:risk:qf_page:dpia:disappearance:question:residual_severity:
           type: unique_choice
           text: Severity once the planned measures are implemented
@@ -1052,6 +1254,8 @@ objects:
               text: Gravità dopo l’attuazione delle misure pianificate
             nb:
               text: Alvorlighet når de planlagte tiltakene er gjennomført
+            de:
+              text: Schweregrad nach Umsetzung der geplanten Maßnahmen
         urn:intuitem:risk:qf_page:dpia:disappearance:question:residual_likelihood:
           type: unique_choice
           text: Likelihood once the planned measures are implemented
@@ -1067,6 +1271,8 @@ objects:
               text: Probabilità dopo l’attuazione delle misure pianificate
             nb:
               text: Sannsynlighet når de planlagte tiltakene er gjennomført
+            de:
+              text: Eintrittswahrscheinlichkeit nach Umsetzung der geplanten Maßnahmen
       translations:
         fr:
           name: 'Risques : disparition de données'
@@ -1083,6 +1289,12 @@ objects:
           description: Analyser årsakene til og konsekvensene av tap av opplysninger, og anslå deretter
             alvorlighet og sannsynlighet ut fra tiltakene som er på plass. Anslå dem så på nytt slik de
             vil være når de planlagte tiltakene er gjennomført.
+        de:
+          name: 'Risiken: Datenverlust'
+          description: Analysieren Sie die Ursachen und Folgen eines Datenverlusts und schätzen Sie
+            anschließend Schweregrad und Eintrittswahrscheinlichkeit unter Berücksichtigung der bestehenden
+            Maßnahmen ein. Wiederholen Sie die Einschätzung für den Zustand nach Umsetzung der geplanten
+            Maßnahmen.
     - urn: urn:intuitem:risk:qf_page:dpia:by_design
       ref_id: by_design
       name: 'Risks: by-design risks'
@@ -1100,6 +1312,8 @@ objects:
               text: Quali rischi per gli interessati derivano dalla progettazione stessa del trattamento?
             nb:
               text: Hvilken risiko skaper behandlingen gjennom selve utformingen?
+            de:
+              text: Welche Risiken entstehen durch die Gestaltung der Verarbeitung selbst?
         urn:intuitem:risk:qf_page:dpia:by_design:question:measures:
           type: object_reference
           text: Which measures treat them?
@@ -1115,6 +1329,8 @@ objects:
               text: Quali misure sono previste per trattare tali rischi?
             nb:
               text: Hvilke tiltak håndterer den?
+            de:
+              text: Welche Maßnahmen behandeln diese Risiken?
       translations:
         fr:
           name: 'Risques : risques inhérents au traitement'
@@ -1130,6 +1346,11 @@ objects:
           name: 'Risiko: utformingsrisiko'
           description: Risiko som behandlingen skaper for de registrerte selv når alt fungerer som tiltenkt
             (profilering, overdreven overvåking, urettferdige automatiserte avgjørelser …), utover sikkerhetshendelser.
+        de:
+          name: Risiken durch die Gestaltung der Verarbeitung
+          description: Risiken, die die Verarbeitung auch bei bestimmungsgemäßem Ablauf für betroffene
+            Personen erzeugt (Profiling, übermäßige Überwachung, unfaire automatisierte Entscheidungen
+            …), über Sicherheitsvorfälle hinaus.
     - urn: urn:intuitem:risk:qf_page:dpia:validation
       ref_id: validation
       name: Validation
@@ -1145,6 +1366,8 @@ objects:
               text: Qual è il parere del Responsabile della protezione dei dati (RPD/DPO)?
             nb:
               text: Hva er personvernombudets uttalelse?
+            de:
+              text: Wie lautet die Stellungnahme der oder des Datenschutzbeauftragten?
         urn:intuitem:risk:qf_page:dpia:validation:question:dpo_advice_applied:
           type: text
           text: How was the DPO's advice applied, or why not?
@@ -1157,6 +1380,8 @@ objects:
                 non sono state seguite?
             nb:
               text: Hvordan ble personvernombudets råd fulgt, eller hvorfor ble det ikke fulgt?
+            de:
+              text: Wie wurde der Rat der oder des Datenschutzbeauftragten berücksichtigt oder warum nicht?
         urn:intuitem:risk:qf_page:dpia:validation:question:data_subject_views:
           type: text
           text: What are the views of the data subjects or their representatives?
@@ -1168,6 +1393,8 @@ objects:
               text: Qual è il parere degli interessati o dei loro rappresentanti?
             nb:
               text: Hva mener de registrerte eller deres representanter?
+            de:
+              text: Wie lauten die Stellungnahmen der betroffenen Personen oder ihrer Vertretungen?
         urn:intuitem:risk:qf_page:dpia:validation:question:views_not_sought_reason:
           type: text
           text: If their views were not sought, why not?
@@ -1179,6 +1406,8 @@ objects:
               text: Se il loro parere non è stato richiesto, per quale motivo?
             nb:
               text: 'Hvis synspunktene deres ikke ble innhentet: Hvorfor ikke?'
+            de:
+              text: Warum wurden gegebenenfalls keine Stellungnahmen eingeholt?
         urn:intuitem:risk:qf_page:dpia:validation:question:decision:
           type: unique_choice
           text: Decision
@@ -1192,6 +1421,8 @@ objects:
                 value: Procedere con il trattamento
               nb:
                 value: Gå videre
+              de:
+                value: Durchführen
           - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:proceed_conditionally
             value: Proceed with conditions
             translations:
@@ -1201,6 +1432,8 @@ objects:
                 value: Procedere a determinate condizioni
               nb:
                 value: Gå videre med vilkår
+              de:
+                value: Unter Auflagen durchführen
           - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:consult_sa
             value: Consult the supervisory authority
             translations:
@@ -1210,6 +1443,8 @@ objects:
                 value: Consultare l’autorità di controllo
               nb:
                 value: Forhåndsdrøft med tilsynsmyndigheten
+              de:
+                value: Aufsichtsbehörde konsultieren
           - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:abandon
             value: Abandon
             translations:
@@ -1219,6 +1454,8 @@ objects:
                 value: Abbandonare il trattamento
               nb:
                 value: Ikke gå videre
+              de:
+                value: Nicht durchführen
           translations:
             fr:
               text: Décision
@@ -1226,6 +1463,8 @@ objects:
               text: Decisione
             nb:
               text: Beslutning
+            de:
+              text: Entscheidung
         urn:intuitem:risk:qf_page:dpia:validation:question:conditions:
           type: text
           text: Conditions and action plan
@@ -1237,6 +1476,8 @@ objects:
               text: Condizioni e piano d’azione
             nb:
               text: Vilkår og handlingsplan
+            de:
+              text: Auflagen und Maßnahmenplan
       translations:
         fr:
           name: Validation
@@ -1247,6 +1488,10 @@ objects:
         nb:
           name: Godkjenning
           description: Registrer uttalelsene som er innhentet, og beslutningen om behandlingen.
+        de:
+          name: Freigabe
+          description: Dokumentieren Sie die eingeholten Stellungnahmen und die Entscheidung über
+            die Verarbeitung.
     translations:
       fr:
         name: AIPD
@@ -1257,6 +1502,10 @@ objects:
       nb:
         name: DPIA
         description: Vurdering av personvernkonsekvensene av en behandling.
+      de:
+        name: DSFA
+        description: |-
+          Datenschutz-Folgenabschätzung einer Verarbeitung.
 translations:
   fr:
     name: Analyse d'impact relative à la protection des données (AIPD)
@@ -1274,3 +1523,9 @@ translations:
     description: 'En DPIA etter strukturen i CNILs PIA-metode: kontekst, grunnleggende prinsipper, risiko
       for de registrerte og godkjenning. Når et svar godtas, registreres det som behandlingens DPIA, og
       tiltakene som er valgt, legges til behandlingen.'
+  de:
+    name: Datenschutz-Folgenabschätzung (DSFA)
+    description: |-
+      Eine DSFA nach der Struktur der PIA-Methode der CNIL: Kontext, Grundprinzipien, Risiken für betroffene Personen und Freigabe. Mit der Annahme einer Antwort wird diese als DSFA der Verarbeitung hinterlegt; die darin ausgewählten Maßnahmen werden der Verarbeitung hinzugefügt.
+
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

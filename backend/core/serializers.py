@@ -218,12 +218,27 @@ class BaseModelSerializer(serializers.ModelSerializer):
             self._check_object_perm(instance, "change")
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
-        try:
-            object_updated = super().update(instance, validated_data)
-            return object_updated
-        except Exception as e:
-            logger.error(e)
-            raise serializers.ValidationError(e.args[0])
+        folder_before = Folder.get_folder(instance)
+        derived = self._derived_folder(validated_data)
+        if derived is not None and derived != folder_before:
+            self._check_object_perm(instance, "add", folder=derived)
+        with transaction.atomic():
+            try:
+                object_updated = super().update(instance, validated_data)
+            except Exception as e:
+                logger.error(e)
+                raise serializers.ValidationError(e.args[0])
+            self._check_saved_folder(object_updated, folder_before)
+        return object_updated
+
+    def _derived_folder(self, validated_data: dict) -> Folder | None:
+        parent = validated_data.get(getattr(self.Meta.model, "folder_from", None))
+        return Folder.get_folder(parent) if parent is not None else None
+
+    def _check_saved_folder(self, obj, checked_folder) -> None:
+        saved_folder = Folder.get_folder(obj)
+        if saved_folder is not None and saved_folder != checked_folder:
+            self._check_object_perm(obj, "add", folder=saved_folder)
 
     def _check_m2m_visibility(self, validated_data: dict) -> None:
         """Verify that all M2M linked objects are visible to the requesting user."""
@@ -333,11 +348,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
-        folder = Folder.get_folder(validated_data)
-        folder = folder if folder else Folder.get_root_folder()
+        folder = (
+            self._derived_folder(validated_data)
+            or Folder.get_folder(validated_data)
+            or Folder.get_root_folder()
+        )
         self._check_object_perm(validated_data, "add", folder=folder)
         try:
-            object_created = super().create(validated_data)
+            with transaction.atomic():
+                object_created = super().create(validated_data)
+                self._check_saved_folder(object_created, folder)
             return object_created
         except ValidationError as e:
             logger.error(e)
@@ -856,6 +876,8 @@ class RiskAssessmentWriteSerializer(
         return super().validate(attrs)
 
     def update(self, instance, validated_data):
+        # Track old folder before update
+        old_folder_id = instance.folder_id
         # Check if status is changing to deprecated
         old_status = instance.status
         new_status = validated_data.get("status", old_status)
@@ -870,13 +892,15 @@ class RiskAssessmentWriteSerializer(
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
 
-        # Check if folder is being changed (either directly or via perimeter)
-        new_folder = validated_data.get("folder")
-        if new_folder and new_folder != instance.folder:
-            # Cascade folder change to all child RiskScenarios
-            instance.risk_scenarios.update(folder=new_folder)
+        # Cascade only after the folder move has passed the permission checks
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
 
-        return super().update(instance, validated_data)
+            # Cascade folder change (direct or via perimeter) to risk scenarios
+            if old_folder_id != updated_instance.folder_id:
+                updated_instance.risk_scenarios.update(folder=updated_instance.folder)
+
+        return updated_instance
 
     class Meta:
         model = RiskAssessment

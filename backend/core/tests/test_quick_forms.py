@@ -1760,3 +1760,25 @@ def test_the_fill_preview_offers_scale_levels_and_ratings(app_config):
     ]
     (rating,) = body["ratings"]
     assert [p["level"] for p in rating["points"]] == ["unacceptable"]
+
+
+@pytest.mark.django_db
+def test_question_help_text_is_translated(app_config):
+    from django.utils import translation
+
+    from core.models import _translate_questions
+
+    _load(LIBRARY_V1)
+    Question.objects.filter(urn=Q_SENSITIVE).update(
+        annotation="Health, biometrics, beliefs",
+        translations={"de": {"text": "Sensible Daten?", "annotation": "Gesundheit"}},
+    )
+    page = QuickFormPage.objects.get(urn=PAGE1)
+    with translation.override("de"):
+        de = _translate_questions(page)
+    assert de[Q_SENSITIVE]["annotation"] == "Gesundheit"
+    with translation.override("en"):
+        en = _translate_questions(page)
+    assert en[Q_SENSITIVE]["annotation"] == "Health, biometrics, beliefs"
+    # sync copies the text into an empty annotation; it must not come back as help
+    assert "annotation" not in en[Q_HEADCOUNT]
