@@ -41,7 +41,7 @@ stdio setup, see the [MCP setup guide](mcp.md).
 
 <figure><img src="../.gitbook/assets/mcp-oauth-login.png" alt=""><figcaption><p>Step 4: the usual CISO Assistant login page. A user who is already signed in skips it</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/mcp-oauth-consent.png" alt=""><figcaption><p>Step 5: the consent page for Claude Code. The yellow box warns that the user is adding a new app nobody checked, and shows where it sends the user back</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/mcp-oauth-consent.png" alt=""><figcaption><p>Step 5: the consent page for Claude Code. The yellow box warns that the user is adding a new app nobody checked, and shows where it sends the user back. The user picks a profile; Read only is preselected</p></figcaption></figure>
 
 The MCP server runs as its own service, `backend-mcp`, next to the backend. It
 shares the backend's database and checks each token there. Tool calls run inside
@@ -309,6 +309,8 @@ to a PAT: it gets the user's full permissions.
 The user's account is not allowed to connect AI apps, or the feature is off for
 the whole instance. The page says which. See
 [Turn MCP on and choose who may connect](#turn-mcp-on-and-choose-who-may-connect).
+
+<figure><img src="../.gitbook/assets/mcp-oauth-refused.png" alt=""><figcaption><p>The refusal page when AI app connections are off for the instance. <strong>Back to the app</strong> tells the app the user refused</p></figcaption></figure>
 
 #### `/mcp` answers `403` "MCP is disabled by your administrator."
 

@@ -8,16 +8,15 @@ services:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     restart: always
     environment:
-      - ALLOWED_HOSTS=backend,localhost,${PUBLIC_HOST:-localhost}
-      - CISO_ASSISTANT_URL=${PUBLIC_URL:-https://localhost:8443}
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
-      - GUNICORN_WORKERS=1
-      - OAUTH_DCR_ENABLED=true
+      - OAUTH_DCR_ENABLED=false
 
     read_only: true
     cap_drop:
@@ -41,8 +40,8 @@ services:
       - backend
     restart: always
     environment:
-      - ALLOWED_HOSTS=backend,localhost,${PUBLIC_HOST:-localhost}
-      - CISO_ASSISTANT_URL=${PUBLIC_URL:-https://localhost:8443}
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=False
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
@@ -70,7 +69,7 @@ services:
     container_name: frontend
     environment:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
-      - PUBLIC_BACKEND_API_EXPOSED_URL=${PUBLIC_URL:-https://localhost:8443}/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
     read_only: true
@@ -118,13 +117,13 @@ services:
         condition: service_started
     restart: unless-stopped
     environment:
-      # must match the backend: same database, same public URL
-      - ALLOWED_HOSTS=backend,localhost,${PUBLIC_HOST:-localhost}
-      - CISO_ASSISTANT_URL=${PUBLIC_URL:-https://localhost:8443}
-      # serves the RFC 8414 copy of the OAuth metadata: OAuth settings must match too
-      - OAUTH_DCR_ENABLED=true
-      - CA_MCP_READ_ONLY=false
-      - CA_MCP_ALLOWED_HOSTS=localhost:8443,${PUBLIC_HOST:-localhost:8443}
+      # must match the backend: same database, same public URL, and the same
+      # OAUTH_* settings (it serves a copy of the OAuth metadata)
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - OAUTH_DCR_ENABLED=false
+      - CA_MCP_READ_ONLY=true
+      - CA_MCP_ALLOWED_HOSTS=localhost:8443
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -148,43 +147,16 @@ services:
     restart: unless-stopped
     ports:
       - 127.0.0.1:8443:8443
-      # plain HTTP entry for a tunnel that terminates TLS itself (dev only)
-      - 127.0.0.1:8480:8480
     volumes:
       - ./db/caddy:/data/caddy
     command: |
-      sh -c 'cat > Caddyfile <<EOF
-      $$CISO_ASSISTANT_URL {
-        reverse_proxy /api/* backend:8000
-        reverse_proxy /mcp* backend-mcp:8001
-        reverse_proxy /.well-known/oauth-protected-resource* backend-mcp:8001
-        reverse_proxy /.well-known/oauth-authorization-server* backend-mcp:8001
-        reverse_proxy /* frontend:3000
-      }
-      # the tunnel is HTTPS on the public side: say so, or Django and SvelteKit
-      # build http:// URLs and refuse the secure cookies
-      http://:8480 {
-        reverse_proxy /api/* backend:8000 {
-          header_up X-Forwarded-Proto https
-        }
-        reverse_proxy /mcp* backend-mcp:8001 {
-          header_up X-Forwarded-Proto https
-        }
-        reverse_proxy /.well-known/oauth-protected-resource* backend-mcp:8001 {
-          header_up X-Forwarded-Proto https
-        }
-        reverse_proxy /.well-known/oauth-authorization-server* backend-mcp:8001 {
-          header_up X-Forwarded-Proto https
-        }
-        reverse_proxy /* frontend:3000 {
-          header_up X-Forwarded-Proto https
-          # SvelteKit preload hints exceed the 4 KB header buffer of the
-          # tunnel nginx (502); they are only a performance hint
-          header_down -Link
-        }
-      }
-      EOF
-      caddy run'
+      sh -c 'echo $$CISO_ASSISTANT_URL "{
+      reverse_proxy /api/* backend:8000
+      reverse_proxy /mcp* backend-mcp:8001
+      reverse_proxy /.well-known/oauth-protected-resource* backend-mcp:8001
+      reverse_proxy /.well-known/oauth-authorization-server* backend-mcp:8001
+      reverse_proxy /* frontend:3000
+      }" > Caddyfile && caddy run'
 
 volumes:
   qdrant_data:
