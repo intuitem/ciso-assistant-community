@@ -4602,7 +4602,8 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			label: 'changeLifecycleStage',
 			icon: 'fa-solid fa-arrows-rotate',
 			field: 'lifecycle_stage',
-			optionsEndpoint: 'terminologies?field_path=asset.lifecycle_stage&is_visible=true'
+			optionsEndpoint: 'terminologies?field_path=asset.lifecycle_stage&is_visible=true',
+			enableDoubleDash: true
 		},
 		{
 			type: 'change_m2m',

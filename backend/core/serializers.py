@@ -1075,7 +1075,7 @@ class AssetWriteSerializer(
     )
     lifecycle_stage = serializers.PrimaryKeyRelatedField(
         queryset=Terminology.objects.filter(
-            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE, is_visible=True
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE
         ),
         required=False,
         allow_null=True,
@@ -1169,6 +1169,13 @@ class AssetWriteSerializer(
             }
             extend_schema_field(schema)(fields[name])
         return fields
+
+    def validate_lifecycle_stage(self, stage):
+        # A hidden stage stays valid on assets that already carry it.
+        current = getattr(self.instance, "lifecycle_stage_id", None)
+        if stage and not stage.is_visible and stage.id != current:
+            raise serializers.ValidationError("This lifecycle stage is hidden.")
+        return stage
 
     def validate(self, data):
         self._check_linked_assets_changeable(data)

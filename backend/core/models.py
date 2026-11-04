@@ -5309,10 +5309,7 @@ class Asset(
         null=True,
         blank=True,
         related_name="assets_lifecycle_stage",
-        limit_choices_to={
-            "field_path": Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
-            "is_visible": True,
-        },
+        limit_choices_to={"field_path": Terminology.FieldPath.ASSET_LIFECYCLE_STAGE},
         verbose_name=_("Lifecycle stage"),
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))

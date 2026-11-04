@@ -357,6 +357,7 @@ export const FILTER_KEYS = new Set([
 	'lc_status',
 	'legal_basis',
 	'library',
+	'lifecycle_stage',
 	'likelihood',
 	'linked_models',
 	'locale',

@@ -1223,6 +1223,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'asset_class', urlModel: 'asset-class' },
+			{ field: 'lifecycle_stage', urlModel: 'terminologies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },

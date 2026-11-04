@@ -15,10 +15,7 @@ class Migration(migrations.Migration):
             name="lifecycle_stage",
             field=models.ForeignKey(
                 blank=True,
-                limit_choices_to={
-                    "field_path": "asset.lifecycle_stage",
-                    "is_visible": True,
-                },
+                limit_choices_to={"field_path": "asset.lifecycle_stage"},
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="assets_lifecycle_stage",
