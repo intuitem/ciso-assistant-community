@@ -176,7 +176,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             (AttackPath, {"ebios_rm_study": source}),
             (OperationalScenario, {"ebios_rm_study": source}),
             (OperatingMode, {"operational_scenario__ebios_rm_study": source}),
-            (KillChain, {"operating_mode__operational_scenario__ebios_rm_study": source}),
+            (
+                KillChain,
+                {"operating_mode__operational_scenario__ebios_rm_study": source},
+            ),
         ]
         models_to_check = [EbiosRMStudy] + [
             model for model, flt in owned if model.objects.filter(**flt).exists()
