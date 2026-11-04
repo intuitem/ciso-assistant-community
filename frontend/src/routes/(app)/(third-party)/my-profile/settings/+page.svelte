@@ -15,6 +15,7 @@
 		type DateFormatPreference
 	} from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { getLocale } from '$paraglide/runtime';
 	import { setTheme, type ThemeMode } from '$lib/utils/theme';
 	import { defaults } from 'sveltekit-superforms';
@@ -578,7 +579,7 @@
 												<tr class="text-left border-b border-surface-200-800">
 													<th class="py-2 pr-4">{m.connectedAppName()}</th>
 													<th class="py-2 pr-4">{m.connectedAppRedirectsTo()}</th>
-													<th class="py-2 pr-4">{m.connectionProfile()}</th>
+													<th class="py-2 pr-4">{m.connectedAppAllowedActions()}</th>
 													<th class="py-2 pr-4">{m.connectedAppLastUsed()}</th>
 													<th class="py-2"></th>
 												</tr>
@@ -588,11 +589,6 @@
 													<tr class="border-b border-surface-100-900 align-top">
 														<td class="py-2 pr-4">
 															<p class="font-medium">{app.name}</p>
-															{#if app.self_registered}
-																<span class="badge preset-tonal-warning text-xs">
-																	{m.connectedAppSelfRegistered()}
-																</span>
-															{/if}
 														</td>
 														<td class="py-2 pr-4">
 															{#each app.redirect_hosts as host}
@@ -600,7 +596,15 @@
 															{/each}
 														</td>
 														<td class="py-2 pr-4">
-															{app.profile?.name ?? '--'}
+															{#if app.profile}
+																<ul class="list-disc list-inside">
+																	{#each app.profile.actions as action}
+																		<li>{safeTranslate(action)}</li>
+																	{/each}
+																</ul>
+															{:else}
+																<span class="text-surface-600-400">--</span>
+															{/if}
 														</td>
 														<td class="py-2 pr-4">
 															{#if app.last_used_at}

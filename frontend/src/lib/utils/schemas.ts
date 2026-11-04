@@ -2214,13 +2214,6 @@ export const IdPGroupSchema = z.object({
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
-export const ConnectionProfileSchema = z.object({
-	name: z.string().min(1).max(100),
-	description: z.string().optional().nullable(),
-	level: z.enum(['read', 'create', 'update', 'approve']).default('read'),
-	is_default: z.boolean().default(false)
-});
-
 export const ServiceAccountSchema = z.object({
 	name: z.string().min(1).max(100),
 	description: z.string().optional().nullable(),
@@ -2262,7 +2255,6 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	users: UserCreateSchema,
 	'idp-groups': IdPGroupSchema,
 	'service-accounts': ServiceAccountSchema,
-	'connection-profiles': ConnectionProfileSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,

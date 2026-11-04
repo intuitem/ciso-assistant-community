@@ -66,7 +66,7 @@ def _oauth_token(client, knox_token, resource=None, scope="mcp:read") -> str:
         data={"dcr": True},
     )
     oauth_client.set_redirect_uris([REDIRECT_URI])
-    oauth_client.set_scopes(["openid", "mcp:read", "mcp:write"])
+    oauth_client.set_scopes(["openid", "mcp:read"])
     oauth_client.save()
 
     verifier = secrets.token_urlsafe(48)
@@ -134,7 +134,7 @@ class TestVerifier:
         access = verify(pat)
         assert access.client_id == PAT_CLIENT_ID
         assert access.subject == str(user.pk)
-        assert set(access.scopes) == {"mcp:read", "mcp:write"}
+        assert access.scopes == ["mcp:read"]
 
     def test_garbage_is_refused(self):
         assert verify("not-a-token") is None

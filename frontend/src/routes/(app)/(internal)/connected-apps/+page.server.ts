@@ -13,7 +13,6 @@ const PAGE_SIZE = 20;
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const search = url.searchParams.get('search') ?? '';
-	const selfRegisteredOnly = url.searchParams.get('self_registered') === 'true';
 	const parsed = parseInt(url.searchParams.get('page') ?? '1');
 	const pageNumber = Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 	const params = new URLSearchParams({
@@ -21,7 +20,6 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		offset: String((pageNumber - 1) * PAGE_SIZE)
 	});
 	if (search) params.set('search', search);
-	if (selfRegisteredOnly) params.set('self_registered', 'true');
 
 	const res = await fetch(`${ENDPOINT}/all/?${params}`);
 	if (!res.ok) {
@@ -32,7 +30,6 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		title: m.connectedApps(),
 		connections: results,
 		search,
-		selfRegisteredOnly,
 		pageNumber,
 		pageCount: Math.max(1, Math.ceil(count / PAGE_SIZE))
 	};

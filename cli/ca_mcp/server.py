@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 import anyio.to_thread
 from mcp.server.mcpserver import MCPServer
 
-from . import config, levels
+from . import actions, config
 from .auth import capture_headers
 from .utils.response_formatter import _cap
 
@@ -225,8 +225,8 @@ READ_TOOLS = [
     get_operating_mode_quotation,
 ]
 
-# Each write tool's level is declared here, not guessed from its name: a tool
-# missing from both lists fails tests/mcp/test_levels.py.
+# Each write tool's action is declared here, not guessed from its name: a tool
+# missing from both lists fails tests/mcp/test_actions.py.
 CREATE_TOOLS = [
     import_stored_library,
     create_folder,
@@ -303,16 +303,12 @@ UPDATE_TOOLS = [
     update_kill_chain_step,
 ]
 
-# Approving or moving objects through a workflow. No tool needs it yet.
-APPROVE_TOOLS = []
+WRITE_TOOLS = CREATE_TOOLS + UPDATE_TOOLS
 
-WRITE_TOOLS = CREATE_TOOLS + UPDATE_TOOLS + APPROVE_TOOLS
-
-TOOL_LEVELS = {
-    **{tool.__name__: levels.READ for tool in READ_TOOLS},
-    **{tool.__name__: levels.CREATE for tool in CREATE_TOOLS},
-    **{tool.__name__: levels.UPDATE for tool in UPDATE_TOOLS},
-    **{tool.__name__: levels.APPROVE for tool in APPROVE_TOOLS},
+TOOL_ACTIONS = {
+    **{tool.__name__: actions.READ for tool in READ_TOOLS},
+    **{tool.__name__: actions.CREATE for tool in CREATE_TOOLS},
+    **{tool.__name__: actions.UPDATE for tool in UPDATE_TOOLS},
 }
 
 
@@ -322,7 +318,6 @@ LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"
 _registered = False
 
 READ_SCOPE = "mcp:read"
-WRITE_SCOPE = levels.WRITE_SCOPE
 
 
 def _annotations(fn, is_read):
@@ -386,13 +381,13 @@ def _register_on(server, read_only, guard_write=None, hooks=None):
             continue
         runner = _offload(tool)
         if guard_write:
-            runner = guard_write(runner, TOOL_LEVELS[tool.__name__])
+            runner = guard_write(runner, TOOL_ACTIONS[tool.__name__])
         add(tool, runner, is_read=False)
 
 
 def _with_hooks(runner, name, hooks):
     """Let the host refuse a call before it runs (limits) and record it after
-    (logging). Outermost, so refusals by the level guard are recorded too. The
+    (logging). Outermost, so refusals by the action guard are recorded too. The
     hooks may block (database, cache): they run in a thread."""
     from mcp.server.auth.middleware.auth_context import get_access_token
 
@@ -487,7 +482,6 @@ def _transport_security():
 
 
 def build_http_app():
-    """Streamable HTTP ASGI app, configured from the environment."""
     register_tools(read_only=config.READ_ONLY)
     security = _transport_security()
 
@@ -509,40 +503,40 @@ def build_http_app():
     )
 
 
-def _require_level(runner, needed):
+def _require_action(runner, needed):
     from mcp.server.auth.middleware.auth_context import get_access_token
 
     @functools.wraps(runner)
     async def guarded(*args, **kwargs):
         access = get_access_token()
-        if not levels.allows(levels.granted_level(access), needed):
-            return levels.refusal(access, needed)
+        if not actions.allows(access, needed):
+            return actions.refusal(access, needed)
         return await runner(*args, **kwargs)
 
     return guarded
 
 
-class LevelFilteredServer(MCPServer):
-    """Lists only the tools the connection's level allows, so the agent does not
+class ActionFilteredServer(MCPServer):
+    """Lists only the tools the connection's actions allow, so the agent does not
     try the others. The guard on each tool is the boundary; this is for the agent."""
 
     async def list_tools(self):
         from mcp.server.auth.middleware.auth_context import get_access_token
 
-        level = levels.granted_level(get_access_token())
+        granted = actions.granted_actions(get_access_token())
         return [
             tool
             for tool in await super().list_tools()
-            if levels.allows(level, TOOL_LEVELS.get(tool.name, levels.READ))
+            if TOOL_ACTIONS.get(tool.name, actions.READ) in granted
         ]
 
 
 async def get_my_access() -> str:
-    """What this connection may do in CISO Assistant (read, create, change,
-    approve), and which profile it uses. Call it before planning changes."""
+    """What this connection may do in CISO Assistant (read, create, change and
+    delete), and which profile it uses. Call it before planning changes."""
     from mcp.server.auth.middleware.auth_context import get_access_token
 
-    return levels.summary(get_access_token())
+    return actions.summary(get_access_token())
 
 
 def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
@@ -554,7 +548,7 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
     from starlette.responses import JSONResponse
 
     read_only = config.READ_ONLY
-    server = LevelFilteredServer(
+    server = ActionFilteredServer(
         "ciso-assistant",
         instructions="Call get_my_access to see what this connection may do.",
         token_verifier=token_verifier,
@@ -565,7 +559,7 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
             validate_token_resource=True,
         ),
     )
-    _register_on(server, read_only, guard_write=_require_level, hooks=hooks)
+    _register_on(server, read_only, guard_write=_require_action, hooks=hooks)
     server.tool(annotations=_annotations(get_my_access, is_read=True))(get_my_access)
     _log_startup(
         f"MCP Streamable HTTP (OAuth) on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
@@ -584,7 +578,7 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
     metadata = {
         "resource": resource_url,
         "authorization_servers": [issuer_url],
-        "scopes_supported": [READ_SCOPE] if read_only else [READ_SCOPE, WRITE_SCOPE],
+        "scopes_supported": [READ_SCOPE],
         "bearer_methods_supported": ["header"],
     }
 

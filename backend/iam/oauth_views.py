@@ -27,32 +27,29 @@ from iam.mcp_access import is_mcp_request, refusal_reason
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
 from iam.oidc_adapter import MCP_SCOPES
 
-LEVEL_SUMMARY = {
-    ConnectionProfile.Level.READ: _(
-        "This app will be able to read your CISO Assistant data."
-    ),
-    ConnectionProfile.Level.CREATE: _(
+PROFILE_SUMMARY = {
+    (False, False): _("This app will be able to read your CISO Assistant data."),
+    (True, False): _(
         "This app will be able to read and create data in CISO Assistant."
     ),
-    ConnectionProfile.Level.UPDATE: _(
+    (False, True): _(
+        "This app will be able to read, change and delete data in CISO Assistant."
+    ),
+    (True, True): _(
         "This app will be able to read, create, change and delete data in "
         "CISO Assistant."
-    ),
-    ConnectionProfile.Level.APPROVE: _(
-        "This app will be able to read, create, change and delete data in "
-        "CISO Assistant, and approve or move items through a workflow."
     ),
 }
 
 
+def profile_summary(profile) -> str:
+    return PROFILE_SUMMARY[(profile.can_create, profile.can_update)]
+
+
 def profile_scopes(profile, requested, allowed) -> list[str]:
-    """The scopes follow the profile so other tools see a sensible value; the
-    profile, not the scope, is what backend-mcp enforces."""
-    scopes = {s for s in requested if s not in MCP_SCOPES} | {"mcp:read"}
-    if profile.rank >= list(ConnectionProfile.Level.values).index(
-        ConnectionProfile.Level.CREATE
-    ):
-        scopes.add("mcp:write")
+    """MCP access is one scope; the profile, not the scope, is what backend-mcp
+    enforces."""
+    scopes = {s for s in requested if s not in MCP_SCOPES} | set(MCP_SCOPES)
     return sorted(scopes & set(allowed))
 
 
@@ -175,7 +172,7 @@ class CISOAuthorizationView(AuthorizationView):
             context["profiles"] = [
                 {
                     "profile": profile,
-                    "summary": LEVEL_SUMMARY[profile.level],
+                    "summary": profile_summary(profile),
                     "checked": str(profile.pk) == str(selected),
                 }
                 for profile in sorted(

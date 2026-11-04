@@ -1,13 +1,11 @@
 import base64
 import hashlib
-import importlib
 import secrets
 from datetime import timedelta
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from allauth.idp.oidc.models import Client, Token
-from django.apps import apps
 from django.core.cache import cache
 from django.utils import timezone
 from knox.models import AuthToken
@@ -20,7 +18,6 @@ from mcp_server.oauth import verify
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
 
 AUTHORIZE_URL = "/api/identity/o/authorize"
-PROFILES_URL = "/api/iam/connection-profiles/"
 REDIRECT_URI = "http://localhost:9999/callback"
 
 
@@ -31,9 +28,13 @@ def _clean():
     ConnectionProfile.objects.all().delete()
 
 
-def _profile(name="Read only", level="read", is_default=False):
+def _profile(name="Read only", create=False, update=False, is_default=False):
     return ConnectionProfile.objects.create(
-        name=name, level=level, is_default=is_default
+        name=name,
+        can_create=create,
+        can_update=update,
+        is_default=is_default,
+        builtin=True,
     )
 
 
@@ -55,7 +56,7 @@ def _client(skip_consent=False):
         data={"dcr": True},
     )
     client.set_redirect_uris([REDIRECT_URI])
-    client.set_scopes(["openid", "mcp:read", "mcp:write"])
+    client.set_scopes(["openid", "mcp:read"])
     client.save()
     return client
 
@@ -128,21 +129,31 @@ def admin_api():
 
 class TestConsent:
     def test_lists_profiles_lowest_first_with_the_default_checked(self, client):
-        _profile("Full", "update")
-        default = _profile("Read only", "read", is_default=True)
+        _profile("Full", create=True, update=True)
+        _profile("Update", update=True)
+        _profile("Create", create=True)
+        default = _profile("Read only", is_default=True)
 
         page = _authorize(client, _client(), _user())
 
         assert page.status_code == 200
         items = page.context["profiles"]
-        assert [item["profile"].name for item in items] == ["Read only", "Full"]
-        assert [item["checked"] for item in items] == [True, False]
+        assert [item["profile"].name for item in items] == [
+            "Read only",
+            "Create",
+            "Update",
+            "Full",
+        ]
+        assert [item["checked"] for item in items] == [True, False, False, False]
+        assert items[2]["summary"] == (
+            "This app will be able to read, change and delete data in CISO Assistant."
+        )
         assert "scopes" not in page.context["form"].fields
         assert str(default.pk) in page.content.decode()
 
     def test_the_chosen_profile_becomes_the_grant(self, client):
-        _profile("Read only", "read", is_default=True)
-        full = _profile("Full", "update")
+        _profile("Read only", is_default=True)
+        full = _profile("Full", create=True, update=True)
         user, app = _user(), _client()
 
         response = _consent(client, _authorize(client, app, user), full.pk)
@@ -151,8 +162,8 @@ class TestConsent:
         assert AppGrant.objects.get(user=user, client=app).profile == full
 
     def test_consenting_again_replaces_the_grant(self, client):
-        read = _profile("Read only", "read", is_default=True)
-        full = _profile("Full", "update")
+        read = _profile("Read only", is_default=True)
+        full = _profile("Full", create=True, update=True)
         user, app = _user(), _client()
         _consent(client, _authorize(client, app, user), full.pk)
 
@@ -174,8 +185,8 @@ class TestConsent:
         assert not AppGrant.objects.exists()
 
     def test_skip_consent_uses_the_default(self, client):
-        _profile("Full", "update")
-        default = _profile("Read only", "read", is_default=True)
+        _profile("Full", create=True, update=True)
+        default = _profile("Read only", is_default=True)
         user, app = _user(), _client(skip_consent=True)
 
         response = _authorize(client, app, user)
@@ -201,95 +212,27 @@ class TestBackendMcp:
         _profile(is_default=True)
         assert verify(_token(_client(), _user())) is None
 
-    def test_the_level_comes_from_the_profile(self):
-        profile = _profile("Vendor helper", "create")
+    def test_the_actions_come_from_the_profile(self):
+        profile = _profile("Read and update", update=True)
         access = verify(_token(_client(), _user(), profile))
         assert access.claims == {
-            "level": "create",
-            "profile": "Vendor helper",
+            "actions": ["read", "update"],
+            "profile": "Read and update",
             "app": "Claude Code",
         }
-
-    def test_a_profile_change_applies_on_the_next_call(self):
-        profile = _profile("Vendor helper", "create")
-        raw = _token(_client(), _user(), profile)
-
-        profile.level = "read"
-        profile.save()
-
-        assert verify(raw).claims["level"] == "read"
 
     def test_a_personal_access_token_keeps_full_rights(self):
         user = _user()
         raw = AuthToken.objects.create(user=user)[1]
-        assert verify(raw).claims["level"] == "approve"
+        assert verify(raw).claims["actions"] == ["read", "create", "update"]
 
 
-class TestDefault:
-    def test_only_one_profile_is_the_default(self):
-        first = _profile("A", is_default=True)
-        second = _profile("B", is_default=True)
-        first.refresh_from_db()
-        assert not first.is_default
-        assert ConnectionProfile.default() == second
-
-    def test_without_a_marked_default_the_lowest_level_counts(self):
-        _profile("Full", "update")
-        read = _profile("Read", "read")
-        assert ConnectionProfile.default() == read
-
-
-class TestAdminApi:
-    def test_lists_profiles_with_their_connection_count(self, admin_api):
-        profile = _profile()
-        _token(_client(), _user(), profile)
-
-        rows = admin_api.get(PROFILES_URL).json()["results"]
-
-        assert [(r["name"], r["connections"]) for r in rows] == [("Read only", 1)]
-
-    def test_deleting_a_profile_revokes_only_its_connections(self, admin_api):
-        doomed, kept = _profile("Doomed"), _profile("Kept")
-        alice, bruno = _user("alice@example.com"), _user("bruno@example.com")
-        app_x, app_y = _client(), _client()
-        cut = _token(app_x, alice, doomed)
-        _token(app_y, bruno, doomed)
-        # alice on app_y uses another profile: it must survive
-        survivor = _token(app_y, alice, kept)
-
-        response = admin_api.delete(f"{PROFILES_URL}{doomed.pk}/")
-
-        assert response.json() == {"revoked": 2}
-        assert verify(cut) is None
-        assert verify(survivor) is not None
-
-    def test_is_for_admins_only(self):
-        api = APIClient()
-        api.credentials(
-            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=_user())[1]}"
-        )
-        assert api.get(PROFILES_URL).status_code == 403
-
+class TestConnectionsList:
     def test_connections_show_their_profile(self, admin_api):
-        profile = _profile("Vendor helper", "create")
+        profile = _profile("Read and create", create=True)
         _token(_client(), _user(), profile)
 
         row = admin_api.get("/api/iam/connected-apps/all/").json()["results"][0]
 
-        assert row["profile"]["name"] == "Vendor helper"
-
-
-def test_migration_seeds_profiles_and_grants_existing_connections():
-    migration = importlib.import_module("iam.migrations.0035_connection_profiles")
-    reader, writer = _user("reader@example.com"), _user("writer@example.com")
-    app = _client()
-    _token(app, reader, scopes=("mcp:read",))
-    _token(app, writer, scopes=("mcp:read", "mcp:write"))
-
-    migration.seed_profiles_and_grants(apps, None)
-    migration.seed_profiles_and_grants(apps, None)
-
-    assert ConnectionProfile.objects.count() == 2
-    assert ConnectionProfile.default().name == "Read only"
-    assert AppGrant.objects.get(user=reader).profile.level == "read"
-    assert AppGrant.objects.get(user=writer).profile.level == "update"
+        assert row["profile"]["name"] == "Read and create"
+        assert row["profile"]["actions"] == ["read", "create"]

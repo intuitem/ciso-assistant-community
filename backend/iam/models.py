@@ -2497,19 +2497,16 @@ class ConnectedAppUse(models.Model):
 
 
 class ConnectionProfile(models.Model):
-    """What an AI app may do once connected, set by an administrator. It only
-    narrows: the app never gets more than the user who connects it."""
-
-    class Level(models.TextChoices):
-        READ = "read", _("Read")
-        CREATE = "create", _("Create")
-        UPDATE = "update", _("Update")
-        APPROVE = "approve", _("Approve")
+    """What an AI app may do once connected: read always, plus create and update
+    (which includes delete). It only narrows: the app never gets more than the
+    user who connects it."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, default="")
-    level = models.CharField(max_length=20, choices=Level.choices, default=Level.READ)
+    can_create = models.BooleanField(default=False)
+    can_update = models.BooleanField(default=False)
+    builtin = models.BooleanField(default=False)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -2521,25 +2518,20 @@ class ConnectionProfile(models.Model):
         return self.name
 
     @property
-    def rank(self) -> int:
-        return list(self.Level.values).index(self.level)
+    def actions(self) -> list[str]:
+        return (
+            ["read"]
+            + (["create"] if self.can_create else [])
+            + (["update"] if self.can_update else [])
+        )
 
-    def save(self, *args, **kwargs):
-        with transaction.atomic():
-            if self.is_default:
-                ConnectionProfile.objects.exclude(pk=self.pk).filter(
-                    is_default=True
-                ).update(is_default=False)
-            super().save(*args, **kwargs)
+    @property
+    def rank(self) -> tuple[int, bool]:
+        return (self.can_create + self.can_update, self.can_update)
 
     @classmethod
     def default(cls) -> "ConnectionProfile | None":
-        """The marked default, else the lowest level."""
-        profiles = list(cls.objects.all())
-        marked = [p for p in profiles if p.is_default]
-        if marked:
-            return marked[0]
-        return min(profiles, key=lambda p: p.rank, default=None)
+        return cls.objects.filter(is_default=True).first()
 
 
 class AppGrant(models.Model):

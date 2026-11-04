@@ -69,7 +69,6 @@ export const URL_MODEL = [
 	'user-groups',
 	'idp-groups',
 	'service-accounts',
-	'connection-profiles',
 	'roles',
 	'role-assignments',
 	'compliance-assessments',

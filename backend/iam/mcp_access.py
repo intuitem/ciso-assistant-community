@@ -63,12 +63,3 @@ def revoke_app_tokens(user_ids, client_ids=None) -> int:
         deleted_tokens=deleted,
     )
     return deleted
-
-
-def revoke_grants(grants) -> int:
-    """Revoke each (user, client) of the grants, and nothing across them: user A
-    on app X and user B on app Y must not revoke A on Y."""
-    return sum(
-        revoke_app_tokens([user_id], [client_id])
-        for user_id, client_id in set(grants.values_list("user_id", "client_id"))
-    )

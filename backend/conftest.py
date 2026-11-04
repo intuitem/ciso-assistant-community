@@ -13,7 +13,6 @@ def _cold_feature_flags_cache():
 
 @pytest.fixture
 def mcp_on(db):
-    """Turn the MCP kill switch on (it is off by default)."""
     from global_settings.models import GlobalSettings
     from global_settings.utils import clear_feature_flags_cache
 
@@ -32,6 +31,7 @@ def app_profile(db):
     from iam.models import ConnectionProfile
 
     profile, _ = ConnectionProfile.objects.get_or_create(
-        name="Read and change", defaults={"level": "update", "is_default": True}
+        name="Read, create and update",
+        defaults={"can_create": True, "can_update": True, "is_default": True},
     )
     return profile

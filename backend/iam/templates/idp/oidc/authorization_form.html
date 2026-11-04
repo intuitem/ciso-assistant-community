@@ -32,8 +32,8 @@
     <p class="who">{% blocktranslate with email=request.user.email %}Signed in as {{ email }}{% endblocktranslate %}</p>
     {% if client.data.dcr %}
       <div class="warning">
-        <strong>{% translate "This app registered itself." %}</strong>
-        {% translate "Your administrator has not checked it. Only continue if you started this connection and you trust where it sends you back:" %}
+        <strong>{% translate "You are adding a new app." %}</strong>
+        {% translate "Your administrator has not checked it. Only approve if you started this connection and you trust where it sends you back:" %}
         <ul>{% for uri in client.get_redirect_uris %}<li><code>{{ uri }}</code></li>{% endfor %}</ul>
       </div>
     {% endif %}

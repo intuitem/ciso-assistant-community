@@ -912,6 +912,13 @@ OAUTH_DCR_ALLOWED_REDIRECT_HOSTS = [
     if host.strip()
 ]
 
+# allauth issues a new refresh token at each refresh, so this is an idle limit:
+# an app unused for this many days must sign in again. 0 = never expires.
+OAUTH_REFRESH_TOKEN_IDLE_DAYS = int(
+    os.environ.get("OAUTH_REFRESH_TOKEN_IDLE_DAYS", "30")
+)
+IDP_OIDC_REFRESH_TOKEN_EXPIRES_IN = OAUTH_REFRESH_TOKEN_IDLE_DAYS * 24 * 3600 or None
+
 # Per-connection budget on the MCP server (backend-mcp), on top of the per-call
 # caps in ca_mcp: an agent could otherwise page through everything. 0 = no limit.
 MCP_MAX_CALLS_PER_MINUTE = int(os.environ.get("MCP_MAX_CALLS_PER_MINUTE", "60"))

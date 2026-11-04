@@ -1,5 +1,4 @@
 <script lang="ts">
-	import ConnectedAppsTabs from '$lib/components/ConnectedApps/ConnectedAppsTabs.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -79,7 +78,6 @@
 	}
 </script>
 
-<ConnectedAppsTabs />
 <div class="card bg-white shadow-sm p-4 space-y-4">
 	<p class="text-sm text-surface-700-300">{m.connectedAppsAdminDescription()}</p>
 
@@ -91,16 +89,6 @@
 			placeholder={m.connectedAppsSearch()}
 			class="input max-w-md"
 		/>
-		<label class="flex items-center gap-2 text-sm">
-			<input
-				type="checkbox"
-				name="self_registered"
-				value="true"
-				class="checkbox"
-				checked={data.selfRegisteredOnly}
-			/>
-			{m.connectedAppsSelfRegisteredOnly()}
-		</label>
 		<button type="submit" class="btn preset-filled-primary-500">
 			<i class="fa-solid fa-filter mr-2"></i>{m.filters()}
 		</button>
@@ -115,7 +103,7 @@
 					<th class="py-2 pr-4">{m.user()}</th>
 					<th class="py-2 pr-4">{m.connectedAppName()}</th>
 					<th class="py-2 pr-4">{m.connectedAppRedirectsTo()}</th>
-					<th class="py-2 pr-4">{m.connectionProfile()}</th>
+					<th class="py-2 pr-4">{m.connectedAppAllowedActions()}</th>
 					<th class="py-2 pr-4">{m.connectedAppAuthorized()}</th>
 					<th class="py-2 pr-4">{m.connectedAppLastUsed()}</th>
 					<th class="py-2"></th>
@@ -127,15 +115,6 @@
 						<td class="py-2 pr-4">{row.user.email}</td>
 						<td class="py-2 pr-4">
 							<p class="font-medium">{row.name}</p>
-							{#if row.self_registered}
-								<span class="badge preset-tonal-warning text-xs">
-									{m.connectedAppSelfRegistered()}
-								</span>
-							{:else}
-								<span class="badge preset-tonal-primary text-xs">
-									{m.connectedAppAddedByAdmin()}
-								</span>
-							{/if}
 						</td>
 						<td class="py-2 pr-4">
 							{#each row.redirect_hosts as host}
@@ -144,8 +123,11 @@
 						</td>
 						<td class="py-2 pr-4">
 							{#if row.profile}
-								<p>{row.profile.name}</p>
-								<span class="text-xs text-surface-600-400">{safeTranslate(row.profile.level)}</span>
+								<ul class="list-disc list-inside">
+									{#each row.profile.actions as action}
+										<li>{safeTranslate(action)}</li>
+									{/each}
+								</ul>
 							{:else}
 								<span class="text-surface-600-400">--</span>
 							{/if}

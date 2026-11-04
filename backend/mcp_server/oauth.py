@@ -6,7 +6,7 @@ from mcp.server.auth.provider import AccessToken
 from rest_framework.exceptions import AuthenticationFailed
 
 from iam.mcp_access import mcp_enabled
-from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
+from iam.models import AppGrant, ConnectedAppUse
 from iam.oidc_adapter import MCP_SCOPES, mcp_resource
 
 PAT_CLIENT_ID = "personal-access-token"
@@ -41,9 +41,8 @@ def _from_oauth(raw: str, token: Token) -> AccessToken | None:
         expires_at=int(token.expires_at.timestamp()) if token.expires_at else None,
         resource=mcp_resource(),
         subject=str(user.pk),
-        # read at every call, so an admin's change to the profile applies at once
         claims={
-            "level": grant.profile.level,
+            "actions": grant.profile.actions,
             "profile": grant.profile.name,
             "app": token.client.name,
         },
@@ -67,7 +66,7 @@ def _from_personal_access_token(raw: str) -> AccessToken | None:
         subject=str(user.pk),
         # a PAT has no client, so no profile: the user's full rights, as before
         claims={
-            "level": ConnectionProfile.Level.APPROVE.value,
+            "actions": ["read", "create", "update"],
             "app": "Personal access token",
         },
     )

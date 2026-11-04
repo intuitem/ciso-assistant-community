@@ -3,15 +3,15 @@ from urllib.parse import urlsplit
 import structlog
 from allauth.idp.oidc.models import Client, Token
 from django.db import transaction
-from django.db.models import Count, Q
-from rest_framework import filters, serializers, status, views, viewsets
+from django.db.models import Q
+from rest_framework import status, views
 from rest_framework.response import Response
 
 from core.pagination import CustomLimitOffsetPagination
 from core.permissions import IsGlobalAdmin
 from iam.authentication import is_self_registered
-from iam.mcp_access import revoke_app_tokens, revoke_grants
-from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
+from iam.mcp_access import revoke_app_tokens
+from iam.models import AppGrant, ConnectedAppUse
 
 logger = structlog.get_logger(__name__)
 
@@ -67,7 +67,7 @@ def _connections(tokens, with_user=False) -> list[dict]:
             "authorized_at": use.authorized_at if use else None,
             "last_used_at": use.last_used_at if use else None,
             "profile": (
-                {"id": profile.id, "name": profile.name, "level": profile.level}
+                {"id": profile.id, "name": profile.name, "actions": profile.actions}
                 if profile
                 else None
             ),
@@ -114,8 +114,6 @@ class ConnectedAppDetailView(views.APIView):
 
 
 class AllConnectedAppsView(views.APIView):
-    """Every user's connections, for administrators."""
-
     permission_classes = [IsGlobalAdmin]
 
     def get(self, request, *args, **kwargs):
@@ -213,49 +211,3 @@ class ConnectedAppGroupView(views.APIView):
             {"registrations": len(client_ids), "users": len(user_ids)},
             status=status.HTTP_200_OK,
         )
-
-
-class ConnectionProfileSerializer(serializers.ModelSerializer):
-    connections = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = ConnectionProfile
-        fields = [
-            "id",
-            "name",
-            "description",
-            "level",
-            "is_default",
-            "connections",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "created_at", "updated_at"]
-
-
-class ConnectionProfileViewSet(viewsets.ModelViewSet):
-    """Profiles an administrator sets up; changes apply to existing connections
-    at once, and deleting one revokes the connections that use it."""
-
-    permission_classes = [IsGlobalAdmin]
-    serializer_class = ConnectionProfileSerializer
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ["name", "description"]
-    ordering_fields = ["name", "level", "is_default", "connections"]
-
-    def get_queryset(self):
-        return ConnectionProfile.objects.annotate(connections=Count("grants"))
-
-    def destroy(self, request, *args, **kwargs):
-        profile = self.get_object()
-        with transaction.atomic():
-            revoked = len(set(profile.grants.values_list("user_id", "client_id")))
-            revoke_grants(profile.grants.all())
-            profile.delete()
-        logger.info(
-            "connection profile deleted",
-            admin=request.user.id,
-            profile=profile.name,
-            revoked=revoked,
-        )
-        return Response({"revoked": revoked}, status=status.HTTP_200_OK)

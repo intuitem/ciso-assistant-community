@@ -1251,16 +1251,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: []
 	},
-	'connection-profiles': {
-		endpointUrl: 'iam/connection-profiles',
-		name: 'connectionprofile',
-		localName: 'connectionProfile',
-		localNamePlural: 'connectionProfiles',
-		verboseName: 'Connection profile',
-		verboseNamePlural: 'Connection profiles',
-		foreignKeyFields: [],
-		filters: []
-	},
 	'service-accounts': {
 		endpointUrl: 'iam/service-accounts',
 		name: 'serviceaccount',

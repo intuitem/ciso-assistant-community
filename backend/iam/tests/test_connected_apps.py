@@ -49,7 +49,8 @@ def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",), **k
     token.save()
     if user is not None:
         profile, _ = ConnectionProfile.objects.get_or_create(
-            name="Read and change", defaults={"level": "update"}
+            name="Read, create and update",
+            defaults={"can_create": True, "can_update": True},
         )
         AppGrant.objects.get_or_create(
             user=user, client=client, defaults={"profile": profile}
@@ -73,7 +74,7 @@ def api(client, me):
 def test_lists_apps_with_live_tokens(api, me):
     copilot = _client()
     _token(copilot, me, scopes=("openid", "mcp:read"))
-    _token(copilot, me, type=Token.Type.REFRESH_TOKEN, scopes=("mcp:write",))
+    _token(copilot, me, type=Token.Type.REFRESH_TOKEN, scopes=("email",))
 
     apps = api.get(LIST_URL).json()
 
@@ -81,7 +82,7 @@ def test_lists_apps_with_live_tokens(api, me):
     assert apps[0]["client_id"] == copilot.id
     assert apps[0]["self_registered"] is True
     assert apps[0]["redirect_hosts"] == ["global.consent.azure-apim.net"]
-    assert apps[0]["scopes"] == ["mcp:read", "mcp:write", "openid"]
+    assert apps[0]["scopes"] == ["email", "mcp:read", "openid"]
 
 
 def test_last_used_is_set_by_an_mcp_call(api, me):

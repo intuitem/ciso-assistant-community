@@ -17,8 +17,8 @@ or paste a Personal Access Token (PAT).
 - **Each user approves the app themselves**, on a consent page in CISO Assistant.
 - **The app gets that user's permissions.** It sees the same domains and objects
   as the user in the UI, no more.
-- **The app can get less than the user.** The administrator sets up profiles
-  (for example "Read only"), and the user picks one when they approve.
+- **The app can get less than the user.** When they approve, the user picks a
+  profile, for example "Read only".
 - **The user can revoke the app at any time** from their profile settings.
 
 This page covers the OAuth setup. For the MCP server itself, the tools and the
@@ -41,7 +41,7 @@ stdio setup, see the [MCP setup guide](mcp.md).
 
 <figure><img src="../.gitbook/assets/mcp-oauth-login.png" alt=""><figcaption><p>Step 4: the usual CISO Assistant login page. A user who is already signed in skips it</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/mcp-oauth-consent.png" alt=""><figcaption><p>Step 5: the consent page for Claude Code. The yellow box warns that the app registered itself and shows where it sends the user back</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/mcp-oauth-consent.png" alt=""><figcaption><p>Step 5: the consent page for Claude Code. The yellow box warns that the user is adding a new app nobody checked, and shows where it sends the user back</p></figcaption></figure>
 
 The MCP server runs as its own service, `backend-mcp`, next to the backend. It
 shares the backend's database and checks each token there. Tool calls run inside
@@ -49,33 +49,28 @@ CISO Assistant as the signed-in user, with the same permission checks as the UI.
 
 ### Profiles
 
-A profile says what an app may do once connected. Administrators manage them in
-**Organization** > **Connected apps** > **Profiles**. Each profile has a
-**level**:
+A profile says what an app may do once connected. An app can always read. On
+top of that, it may create data, update data (which includes deleting), both,
+or neither. There is one built-in profile for each choice:
 
-| Level   | What the app can do                                                  |
-| ------- | -------------------------------------------------------------------- |
-| Read    | Use the read tools: list, get, count                                 |
-| Create  | Also create data. It can't change or delete existing data            |
-| Update  | Also change and delete data                                          |
-| Approve | Also approve or move items through a workflow. No tool needs it yet  |
+| Profile                 | Read | Create | Update and delete |
+| ----------------------- | ---- | ------ | ----------------- |
+| Read only (the default) | yes  | no     | no                |
+| Read and create         | yes  | yes    | no                |
+| Read and update         | yes  | no     | yes               |
+| Read, create and update | yes  | yes    | yes               |
 
-Two profiles exist from the start: **Read only** (the default) and **Read and
-change** (Update level). Add, edit or delete profiles to match your needs.
-
-- On the consent page, the user picks one of the profiles. The default is
-  preselected. When there is only one profile, there is nothing to pick.
+- On the consent page, the user picks one of the profiles. **Read only** is
+  preselected.
 - A profile only removes access. A user who can't edit a folder in the UI can't
   edit it through MCP either, whatever the profile.
-- Changing a profile's level applies at once to the apps that use it.
-- Deleting a profile revokes every connection that uses it. Their users must
-  connect again and pick another profile.
-- Apps that skip the consent page get the default profile.
+- Apps that skip the consent page get **Read only**.
 - The app only sees the tools its profile allows. It can call `get_my_access`
   to learn what it may do.
+- To give an app more, the user connects it again and picks another profile.
 
-Every profile is offered to every app. Tying a profile to specific apps is not
-available yet.
+The profiles are built in and can't be changed for now. Every profile is
+offered to every app.
 
 If the server runs read-only (`CA_MCP_READ_ONLY=true`), the write tools are
 hidden whatever the profile.
@@ -144,7 +139,8 @@ to accept any host. Redirects must use HTTPS, except for loopback addresses.
 #### Allow the write tools
 
 `backend-mcp` is read-only by default: the write tools are hidden whatever the
-profile. To make them available to profiles above **Read**:
+profile. To make them available to the profiles that allow creating or
+updating:
 
 ```env
 CA_MCP_READ_ONLY=false
@@ -167,14 +163,6 @@ administrator decides so.
 Unticking a user, or deactivating them, disconnects all their apps at once.
 Turning the feature flag off blocks every connection but keeps them: they work
 again when you turn it back on.
-{% endstep %}
-
-{% step %}
-
-#### Review the profiles
-
-Go to **Organization** > **Connected apps** > **Profiles**. Keep the two
-profiles that exist from the start, or change them. See [Profiles](#profiles).
 {% endstep %}
 
 {% step %}
@@ -248,12 +236,12 @@ every app that can access your account:
 
 | Column     | Meaning                                                              |
 | ---------- | -------------------------------------------------------------------- |
-| App        | The name the app gave. **Registered itself** means nobody checked it |
+| App        | The name the app gave                                                |
 | Returns to | Where the app sends you back after sign-in. This identifies the app  |
-| Profile    | The profile you picked when you approved the app                     |
+| Allowed actions | What the app may do, from the profile you picked when you approved it |
 | Last used  | The last call the app made. Updated at most once a minute            |
 
-<figure><img src="../.gitbook/assets/mcp-oauth-connected-apps.png" alt=""><figcaption><p>Connected apps in the security settings: Claude Code with read and write access, and apps that are authorized but not used yet</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/mcp-oauth-connected-apps.png" alt=""><figcaption><p>Connected apps in the security settings: Claude Code and apps that are authorized but not used yet</p></figcaption></figure>
 
 If your administrator has not allowed your account to connect apps, this
 section says so instead of showing the table.
@@ -273,9 +261,8 @@ authentication**), then connect again and pick another profile.
 ### Manage connections (administrators)
 
 Go to **Organization** > **Connected apps**. The page lists the connections of
-every user: user, app, where it sends users back, profile, the date it was
-authorized and when it was last used. Search by user or app, or show only the
-apps that registered themselves.
+every user: user, app, where it sends users back, allowed actions, the date it was
+authorized and when it was last used. Search by user or app.
 
 - The **trash icon** revokes one user's connection to one app.
 - The **revoke for everyone** icon cuts an app for all its users, for example
@@ -294,7 +281,7 @@ forwarded to a SIEM carry it too: as `actor.app_name` and `actor.app_uid` in
 OCSF, and as `via_app` in the raw format.
 
 **Every tool call is logged**, reads included, in the `backend-mcp` logs. Each
-`mcp tool call` line has the user, the app, the profile and level, the tool, the
+`mcp tool call` line has the user, the app, the profile and its actions, the tool, the
 outcome (`ok`, `refused`, `limited` or `error`), the duration and the size of
 the answer. Collect these logs like the other service logs to see what an app
 read, not only what it changed.
@@ -319,8 +306,8 @@ to a PAT: it gets the user's full permissions.
 
 #### "You cannot connect this app" during sign-in
 
-The user's account is not allowed to connect AI apps, the feature is off for
-the whole instance, or there is no profile left. The page says which. See
+The user's account is not allowed to connect AI apps, or the feature is off for
+the whole instance. The page says which. See
 [Turn MCP on and choose who may connect](#turn-mcp-on-and-choose-who-may-connect).
 
 #### `/mcp` answers `403` "MCP is disabled by your administrator."
@@ -350,8 +337,8 @@ The agent can wait and continue. If normal use hits it, raise
 
 #### A tool says the connection's profile does not allow it
 
-The user picked a profile with a lower level. They can reconnect and pick
-another profile, or an administrator can raise the level of that profile. If the
+The user picked a profile that doesn't allow that action. They can reconnect
+the app and pick another profile. If the
 write tools are missing entirely, check that `CA_MCP_READ_ONLY=false`.
 
 #### `/api` answers "This client can only access the MCP endpoint."
@@ -377,7 +364,8 @@ or remove the `Link` header at your proxy. It's only a speed hint.
 | `CISO_ASSISTANT_URL`               | backend, backend-mcp | -                            | Public URL of the instance. Must be the same on both services                   |
 | `OAUTH_DCR_ENABLED`                | backend, backend-mcp | `false`                      | Let MCP clients register themselves                                             |
 | `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` | backend              | -                            | Comma-separated hosts a self-registered client may redirect to. Empty means any |
-| `CA_MCP_READ_ONLY`                 | backend-mcp          | `true`                       | Hide the write tools and offer only `mcp:read`                                  |
+| `OAUTH_REFRESH_TOKEN_IDLE_DAYS`    | backend              | `30`                         | Days without use after which an app must be approved again. `0` means never     |
+| `CA_MCP_READ_ONLY`                 | backend-mcp          | `true`                       | Hide the write tools                                                            |
 | `CA_MCP_ALLOWED_HOSTS`             | backend-mcp          | host of `CISO_ASSISTANT_URL` | Accepted `Host` headers, port included                                          |
 | `MCP_MAX_CALLS_PER_MINUTE`         | backend-mcp          | `60`                         | Tool calls allowed per connection per minute. `0` means no limit                |
 | `MCP_MAX_RESPONSE_CHARS_PER_HOUR`  | backend-mcp          | `2000000`                    | Characters returned per connection per hour. `0` means no limit                 |

@@ -46,7 +46,7 @@ def _make_client(self_registered: bool, skip_consent: bool = True) -> Client:
         data={"dcr": True} if self_registered else None,
     )
     client.set_redirect_uris([REDIRECT_URI])
-    client.set_scopes(["openid", "mcp:read", "mcp:write"])
+    client.set_scopes(["openid", "mcp:read"])
     client.save()
     return client
 
@@ -139,7 +139,7 @@ def test_redirect_host_allowlist_is_enforced():
 def test_registration_forces_mcp_scopes():
     client = _unsaved_client("https://app.example.com/cb")
     _register(client)
-    assert client.get_scopes() == ["openid", "mcp:read", "mcp:write"]
+    assert client.get_scopes() == ["openid", "mcp:read"]
 
 
 def test_unknown_resource_does_not_issue_a_code(client, knox_token):
@@ -174,5 +174,5 @@ def test_consent_page_warns_about_self_registered_clients(client, knox_token):
     client.cookies["token"] = knox_token
     response = client.get(AUTHORIZE_URL, _authorize_params(oauth_client, "x" * 43))
     assert response.status_code == 200
-    assert b"This app registered itself" in response.content
+    assert b"You are adding a new app." in response.content
     assert REDIRECT_URI.encode() in response.content

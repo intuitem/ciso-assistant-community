@@ -58,7 +58,7 @@ def _client(
         data={"dcr": True} if self_registered else None,
     )
     client.set_redirect_uris([redirect])
-    client.set_scopes(["openid", "mcp:read", "mcp:write"])
+    client.set_scopes(["openid", "mcp:read"])
     client.save()
     return client
 
@@ -76,7 +76,8 @@ def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",)):
     token.save()
     if user is not None:
         profile, _ = ConnectionProfile.objects.get_or_create(
-            name="Read and change", defaults={"level": "update"}
+            name="Read, create and update",
+            defaults={"can_create": True, "can_update": True},
         )
         AppGrant.objects.get_or_create(
             user=user, client=client, defaults={"profile": profile}

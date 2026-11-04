@@ -86,7 +86,7 @@ class ToolCallHooks:
             client_id=access.client_id if access else None,
             app=claims.get("app"),
             profile=claims.get("profile"),
-            level=claims.get("level"),
+            actions=claims.get("actions"),
             duration_ms=round(seconds * 1000),
             result_chars=size,
         )

@@ -5,37 +5,27 @@ import django.utils.timezone
 import uuid
 from django.conf import settings
 from django.db import migrations, models
-from django.db.models import Q
-from django.utils import timezone
 
 
-def seed_profiles_and_grants(apps, schema_editor):
-    """Two profiles that match today's consent choice (read, or read and write),
-    and a grant for every existing connection at the level its tokens have."""
+BUILTIN_PROFILES = [
+    ("Read only", False, False, True),
+    ("Read and create", True, False, False),
+    ("Read and update", False, True, False),
+    ("Read, create and update", True, True, False),
+]
+
+
+def seed_builtin_profiles(apps, schema_editor):
     ConnectionProfile = apps.get_model("iam", "ConnectionProfile")
-    AppGrant = apps.get_model("iam", "AppGrant")
-    Token = apps.get_model("allauth_idp_oidc", "Token")
-
-    read, _ = ConnectionProfile.objects.get_or_create(
-        name="Read only", defaults={"level": "read", "is_default": True}
-    )
-    change, _ = ConnectionProfile.objects.get_or_create(
-        name="Read and change", defaults={"level": "update"}
-    )
-    writes = {}
-    for user_id, client_id, scopes in Token.objects.filter(
-        Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now()),
-        type__in=["at", "rt"],
-        user__isnull=False,
-        client__isnull=False,
-    ).values_list("user_id", "client_id", "scopes"):
-        key = (user_id, client_id)
-        writes[key] = writes.get(key, False) or "mcp:write" in scopes.split()
-    for (user_id, client_id), write in writes.items():
-        AppGrant.objects.get_or_create(
-            user_id=user_id,
-            client_id=client_id,
-            defaults={"profile": change if write else read},
+    for name, can_create, can_update, is_default in BUILTIN_PROFILES:
+        ConnectionProfile.objects.get_or_create(
+            name=name,
+            defaults={
+                "can_create": can_create,
+                "can_update": can_update,
+                "is_default": is_default,
+                "builtin": True,
+            },
         )
 
 
@@ -60,19 +50,9 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=100, unique=True)),
                 ("description", models.TextField(blank=True, default="")),
-                (
-                    "level",
-                    models.CharField(
-                        choices=[
-                            ("read", "Read"),
-                            ("create", "Create"),
-                            ("update", "Update"),
-                            ("approve", "Approve"),
-                        ],
-                        default="read",
-                        max_length=20,
-                    ),
-                ),
+                ("can_create", models.BooleanField(default=False)),
+                ("can_update", models.BooleanField(default=False)),
+                ("builtin", models.BooleanField(default=False)),
                 ("is_default", models.BooleanField(default=False)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -127,5 +107,5 @@ class Migration(migrations.Migration):
                 ],
             },
         ),
-        migrations.RunPython(seed_profiles_and_grants, migrations.RunPython.noop),
+        migrations.RunPython(seed_builtin_profiles, migrations.RunPython.noop),
     ]

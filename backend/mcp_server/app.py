@@ -16,7 +16,7 @@ def _import_ca_mcp():
 
 
 def build_app():
-    """The backend-mcp ASGI app. Django must already be set up."""
+    """Django must already be set up."""
     from iam.oidc_adapter import CISOOIDCAdapter, mcp_resource
 
     public = urlsplit(settings.CISO_ASSISTANT_URL)

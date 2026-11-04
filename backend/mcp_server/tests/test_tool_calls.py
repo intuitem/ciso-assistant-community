@@ -24,7 +24,7 @@ def _access(subject="u1", client_id="abc"):
         client_id=client_id,
         scopes=["mcp:read"],
         subject=subject,
-        claims={"level": "read", "profile": "Read only", "app": "Claude Code"},
+        claims={"actions": ["read"], "profile": "Read only", "app": "Claude Code"},
     )
 
 

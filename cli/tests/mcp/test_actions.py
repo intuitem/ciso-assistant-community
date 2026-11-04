@@ -1,5 +1,5 @@
-"""Connection levels: every tool has one, the guard refuses tools above it, and
-the tool list hides them."""
+"""Connection actions: every tool has one, the guard refuses tools whose action
+is not granted, and the tool list hides them."""
 
 import asyncio
 import sys
@@ -12,11 +12,11 @@ from mcp.server.auth.provider import AccessToken
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
 
-from ca_mcp import levels, server  # noqa: E402
+from ca_mcp import actions, server  # noqa: E402
 
 
-def _access(level=None, profile=None, scopes=("mcp:read",)):
-    claims = {k: v for k, v in {"level": level, "profile": profile}.items() if v}
+def _access(granted=None, profile=None, scopes=("mcp:read",)):
+    claims = {k: v for k, v in {"actions": granted, "profile": profile}.items() if v}
     return AccessToken(
         token="t", client_id="c", scopes=list(scopes), claims=claims or None
     )
@@ -34,58 +34,68 @@ def connected():
         auth_context_var.reset(token)
 
 
-def test_every_tool_has_exactly_one_level():
+def test_every_tool_has_exactly_one_action():
     tools = server.READ_TOOLS + server.WRITE_TOOLS
     names = [tool.__name__ for tool in tools]
     assert len(names) == len(set(names))
-    assert set(names) == set(server.TOOL_LEVELS)
+    assert set(names) == set(server.TOOL_ACTIONS)
 
 
-def test_writes_are_never_read_level():
+def test_writes_are_never_read():
     for tool in server.WRITE_TOOLS:
-        assert server.TOOL_LEVELS[tool.__name__] != levels.READ, tool.__name__
+        assert server.TOOL_ACTIONS[tool.__name__] != actions.READ, tool.__name__
 
 
-def test_a_token_without_level_falls_back_to_its_scopes():
-    assert levels.granted_level(_access()) == levels.READ
-    assert (
-        levels.granted_level(_access(scopes=("mcp:read", "mcp:write"))) == levels.UPDATE
-    )
-    assert levels.granted_level(None) == levels.READ
+def test_read_is_always_granted():
+    assert actions.granted_actions(_access(granted=["update"])) == {"read", "update"}
+    assert actions.granted_actions(_access(granted=["approve"])) == {"read"}
 
 
-def test_the_guard_refuses_above_the_level(connected):
+def test_a_token_without_actions_may_only_read():
+    assert actions.granted_actions(_access()) == {"read"}
+    assert actions.granted_actions(None) == {"read"}
+
+
+def test_the_guard_refuses_an_action_not_granted(connected):
     async def tool():
         return "ran"
 
-    guarded = server._require_level(tool, levels.UPDATE)
+    guarded = server._require_action(tool, actions.CREATE)
 
-    connected(_access(level=levels.CREATE, profile="Vendor helper"))
+    connected(_access(granted=["read", "update"], profile="Read and update"))
     refused = asyncio.run(guarded())
-    assert 'uses the "Vendor helper" profile' in refused
-    assert "changing or deleting data" in refused
+    assert 'uses the "Read and update" profile' in refused
+    assert "creating data" in refused
 
-    connected(_access(level=levels.UPDATE))
+    connected(_access(granted=["read", "create"]))
     assert asyncio.run(guarded()) == "ran"
 
 
-def test_the_tool_list_hides_tools_above_the_level(connected):
-    app = server.LevelFilteredServer("test")
+def test_the_tool_list_hides_tools_not_granted(connected):
+    app = server.ActionFilteredServer("test")
     app.tool()(server.get_my_access)
     for tool in (server.CREATE_TOOLS[0], server.UPDATE_TOOLS[0]):
         app.tool()(tool)
 
-    connected(_access(level=levels.CREATE))
+    connected(_access(granted=["read", "update"]))
     names = {tool.name for tool in asyncio.run(app.list_tools())}
 
-    assert names == {"get_my_access", server.CREATE_TOOLS[0].__name__}
+    assert names == {"get_my_access", server.UPDATE_TOOLS[0].__name__}
 
 
 def test_get_my_access_says_what_is_missing(connected):
-    connected(_access(level=levels.READ, profile="Read only"))
+    connected(_access(granted=["read"], profile="Read only"))
     text = asyncio.run(server.get_my_access())
-    assert text.startswith('Profile "Read only" (read).')
-    assert "does not allow creating data" in text
+    assert text == (
+        'Profile "Read only". This connection can read data in CISO Assistant. '
+        "It does not allow creating data or changing or deleting data."
+    )
+
+    connected(_access(granted=["read", "create", "update"]))
+    text = asyncio.run(server.get_my_access())
+    assert text == (
+        "This connection can read, create, change and delete data in CISO Assistant."
+    )
 
 
 class _Hooks:
@@ -105,7 +115,7 @@ def test_hooks_record_every_call(connected):
         return "rows"
 
     hooks = _Hooks()
-    connected(_access(level=levels.READ))
+    connected(_access())
     assert asyncio.run(server._with_hooks(tool, "get_folders", hooks)()) == "rows"
     assert hooks.calls == [("get_folders", "rows", None)]
 
@@ -117,7 +127,7 @@ def test_a_hook_refusal_stops_the_call(connected):
         ran.append(True)
 
     hooks = _Hooks(refusal="Error: too many calls")
-    connected(_access(level=levels.READ))
+    connected(_access())
     result = asyncio.run(server._with_hooks(tool, "get_folders", hooks)())
     assert result == "Error: too many calls"
     assert not ran
@@ -129,7 +139,7 @@ def test_a_failing_tool_is_recorded_then_raises(connected):
         raise RuntimeError("boom")
 
     hooks = _Hooks()
-    connected(_access(level=levels.READ))
+    connected(_access())
     with pytest.raises(RuntimeError):
         asyncio.run(server._with_hooks(tool, "get_folders", hooks)())
     assert hooks.calls == [("get_folders", None, "RuntimeError")]

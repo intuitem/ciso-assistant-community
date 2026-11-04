@@ -6,7 +6,6 @@ from .connected_apps import (
     ConnectedAppDetailView,
     ConnectedAppGroupView,
     ConnectedAppsView,
-    ConnectionProfileViewSet,
     UserConnectedAppView,
 )
 from .views import (
@@ -71,23 +70,6 @@ urlpatterns = [
         "connected-apps/<str:pk>/",
         ConnectedAppDetailView.as_view(),
         name="connected-app-detail",
-    ),
-    path(
-        "connection-profiles/",
-        ConnectionProfileViewSet.as_view({"get": "list", "post": "create"}),
-        name="connection-profiles",
-    ),
-    path(
-        "connection-profiles/<uuid:pk>/",
-        ConnectionProfileViewSet.as_view(
-            {
-                "get": "retrieve",
-                "put": "update",
-                "patch": "partial_update",
-                "delete": "destroy",
-            }
-        ),
-        name="connection-profile-detail",
     ),
     path(
         "service-accounts/",
