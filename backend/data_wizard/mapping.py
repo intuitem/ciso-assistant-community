@@ -112,6 +112,7 @@ EXTRA_COLUMNS: dict[ModelType, dict[str, list[str]]] = {
     ModelType.APPLIED_CONTROL: {"Sheet1": ["owner"]},
     ModelType.POLICY: {"Sheet1": ["owner"]},
     ModelType.METRIC_INSTANCE: {"Metric instances": ["owner"]},
+    ModelType.VULNERABILITY: {"RA CISO": ["owner"]},
     # Read by the mapped import only: becomes a completed past occurrence.
     ModelType.TASK_TEMPLATE: {"Summary": ["last_done"]},
 }

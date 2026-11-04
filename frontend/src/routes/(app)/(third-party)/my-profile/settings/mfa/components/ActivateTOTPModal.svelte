@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import OTPInput from '#lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { activateTOTPSchema } from '$lib/utils/schemas';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { activateTOTPSchema } from '#lib/utils/schemas.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import { superForm } from 'sveltekit-superforms';
 	import { goto } from '$app/navigation';
 

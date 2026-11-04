@@ -6,6 +6,8 @@ description: "What starts a run: Manual, Webhook, Schedule and On event triggers
 
 A trigger is the step a run starts at. A workflow needs at least one. It can have several, of any kind, each leading into the graph wherever you wire it. Two triggers can lead into the same step, and a run always starts at exactly one of them.
 
+Quick reference: [cheat sheet](cheat-sheet.md#triggers).
+
 <figure><img src="../../.gitbook/assets/workflows-triggers-four-kinds.png" alt="The four trigger kinds"><figcaption><p>The four trigger kinds</p></figcaption></figure>
 
 ## Common settings

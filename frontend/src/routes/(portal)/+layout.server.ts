@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
 export const load = loadFlash(async ({ locals, url, fetch }) => {
 	const user = await locals.getUser();

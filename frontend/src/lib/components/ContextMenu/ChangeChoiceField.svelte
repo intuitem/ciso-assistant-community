@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
-	import { getModelInfo } from '$lib/utils/crud';
+	import { page } from '$app/state';
+	import { getModelInfo } from '#lib/utils/crud.js';
 
 	interface Props {
 		row: any;

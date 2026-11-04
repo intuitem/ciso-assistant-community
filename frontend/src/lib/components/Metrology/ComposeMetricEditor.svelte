@@ -47,17 +47,17 @@
 <script lang="ts">
 	import { onMount, tick, untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
-	import { m } from '$paraglide/messages';
-	import CelInput from '$lib/components/Cel/CelInput.svelte';
+	import { m } from '#paraglide/messages.js';
+	import CelInput from '#lib/components/Cel/CelInput.svelte';
 	import FormulaSparkline from './FormulaSparkline.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import OrderedEntryList from '$lib/components/OrderedEntryList.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import OrderedEntryList from '#lib/components/OrderedEntryList.svelte';
 	import { defaults, superForm, type SuperForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import { page } from '$app/state';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		samplesOnPeriods,
 		datasetNameProblem,
@@ -76,7 +76,7 @@
 		unknownLevels,
 		type Level,
 		type QuickFormula
-	} from '$lib/utils/derived-metrics';
+	} from '#lib/utils/derived-metrics.js';
 
 	interface Props {
 		layout?: 'modal' | 'drawer';

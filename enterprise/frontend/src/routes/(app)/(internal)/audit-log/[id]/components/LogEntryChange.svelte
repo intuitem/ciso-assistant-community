@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 

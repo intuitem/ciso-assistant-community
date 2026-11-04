@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Article from '$lib/components/DataViz/Article.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { experimentalExtras } from '$lib/utils/experimental-extras';
+	import Article from '#lib/components/DataViz/Article.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { experimentalExtras } from '#lib/utils/experimental-extras.js';
 
 	$pageTitle = 'Experimental';
 </script>

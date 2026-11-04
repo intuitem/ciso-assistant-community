@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Card from '$lib/components/DataViz/Card.svelte';
-	import { m } from '$paraglide/messages';
+	import Card from '#lib/components/DataViz/Card.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
-	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import StackedBarsNormalized from '#lib/components/Chart/StackedBarsNormalized.svelte';
+	import HalfDonutChart from '#lib/components/Chart/HalfDonutChart.svelte';
+	import NightingaleChart from '#lib/components/Chart/NightingaleChart.svelte';
+	import RadarChart from '#lib/components/Chart/RadarChart.svelte';
 	interface Props {
 		data: PageData;
 	}

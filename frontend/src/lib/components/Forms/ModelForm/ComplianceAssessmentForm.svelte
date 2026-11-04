@@ -1,24 +1,24 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
 	import Checkbox from '../Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
-	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import ScoreScalePicker from '$lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
+	import FrameworkResultSnippet from '#lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import ScoreScalePicker from '#lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
 	import {
 		scaleLevels,
 		scaleOptions,
 		type FrameworkScale,
 		type ScaleOption,
 		type ScoreScaleValue
-	} from '$lib/utils/score-scales';
+	} from '#lib/utils/score-scales.js';
 	import { untrack } from 'svelte';
 
 	interface Props {
@@ -54,6 +54,7 @@
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
+	let frameworkHasRequiredEvidence = $state(false);
 
 	let frameworkScoring = $state<FrameworkScale | null>(null);
 
@@ -283,13 +284,31 @@
 		);
 	}
 
+	// Staircase rules' levels, lowest first: a target level brings those below it,
+	// as the backend does (core/staircase.py expand_scope).
+	let staircaseLevels = $state<string[][]>([]);
+	function withLowerLevels(selected: string[]): string[] {
+		if (!staircaseLevels.length) return selected ?? [];
+		const next = [...(selected ?? [])];
+		for (const levels of staircaseLevels) {
+			const top = Math.max(-1, ...next.map((g) => levels.indexOf(g)));
+			if (top < 1) continue;
+			for (const level of levels.slice(0, top)) if (!next.includes(level)) next.push(level);
+		}
+		const order = implementationGroupsChoices.map((c) => c.value);
+		return next.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+	}
+
 	async function handleFrameworkChange(id: string) {
 		const request = ++frameworkRequest;
 		if (!object?.id) {
 			pickedScale = null;
 			baselineScale = null;
 		}
-		if (!id) frameworkScoring = null;
+		if (!id) {
+			frameworkScoring = null;
+			frameworkHasRequiredEvidence = false;
+		}
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
@@ -297,6 +316,12 @@
 					if (request !== frameworkRequest) return;
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
+					staircaseLevels = (r['outcomes_definition'] || [])
+						.filter(
+							(rule: Record<string, any>) =>
+								rule?.kind === 'staircase' && Array.isArray(rule.staircase_levels)
+						)
+						.map((rule: Record<string, any>) => rule.staircase_levels.map(String));
 					implementationGroupsChoices = implementation_groups.map((group) => ({
 						label: group.name,
 						value: group.ref_id
@@ -304,6 +329,7 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
+					frameworkHasRequiredEvidence = r['has_required_evidence'] ?? false;
 					defaultScoring = r['default_scoring'] ?? null;
 
 					frameworkScoring = {
@@ -314,9 +340,11 @@
 					};
 					if (!object.id) loadBaselineScale(id, request);
 
-					defaultImplementationGroups = implementation_groups
-						.filter((group) => group.default_selected)
-						.map((group) => group.ref_id);
+					defaultImplementationGroups = withLowerLevels(
+						implementation_groups
+							.filter((group) => group.default_selected)
+							.map((group) => group.ref_id)
+					);
 
 					if (!object.id) {
 						proposedTarget = defaultTarget(defaultImplementationGroups);
@@ -406,7 +434,16 @@
 		cacheLock={cacheLocks['selected_implementation_groups']}
 		bind:cachedValue={formDataCache['selected_implementation_groups']}
 		label={m.selectedImplementationGroups()}
-		helpText={is_dynamic ? m.selectedImplementationGroupsDynamicHelpText() : undefined}
+		helpText={is_dynamic
+			? m.selectedImplementationGroupsDynamicHelpText()
+			: staircaseLevels.length
+				? m.staircaseLowerLevelsHelpText()
+				: undefined}
+		onChange={(value) => {
+			const next = withLowerLevels(value);
+			if (next.join() !== (value ?? []).join())
+				form.form.update((d) => ({ ...d, selected_implementation_groups: next }));
+		}}
 	/>
 {/if}
 <TextField
@@ -525,6 +562,7 @@
 			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
 			disabled={object?.is_locked}
 			{frameworkDefaults}
+			evidenceRequired={frameworkHasRequiredEvidence}
 		/>
 
 		{#if scaleChoice}

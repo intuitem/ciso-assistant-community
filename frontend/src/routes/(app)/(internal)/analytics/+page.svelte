@@ -1,32 +1,32 @@
 <script lang="ts">
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import RadarChart from '#lib/components/Chart/RadarChart.svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
-	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
-	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
-	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import IncidentMonthlyChart from '$lib/components/Chart/IncidentMonthlyChart.svelte';
-	import ExceptionSankeyChart from '$lib/components/Chart/ExceptionSankeyChart.svelte';
-	import FindingsSankeyChart from '$lib/components/Chart/FindingsSankeyChart.svelte';
-	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
-	import CalendarHeatmap from '$lib/components/Chart/CalendarHeatmap.svelte';
-	import Card from '$lib/components/DataViz/Card.svelte';
-	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
-	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
-	import DashboardGrid from '$lib/components/Dashboard/DashboardGrid.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '#lib/components/Chart/TreemapChart.svelte';
+	import GroupedBarChart from '#lib/components/Chart/GroupedBarChart.svelte';
+	import HalfDonutChart from '#lib/components/Chart/HalfDonutChart.svelte';
+	import NightingaleChart from '#lib/components/Chart/NightingaleChart.svelte';
+	import StackedBarsNormalized from '#lib/components/Chart/StackedBarsNormalized.svelte';
+	import IncidentMonthlyChart from '#lib/components/Chart/IncidentMonthlyChart.svelte';
+	import ExceptionSankeyChart from '#lib/components/Chart/ExceptionSankeyChart.svelte';
+	import FindingsSankeyChart from '#lib/components/Chart/FindingsSankeyChart.svelte';
+	import SunburstChart from '#lib/components/Chart/SunburstChart.svelte';
+	import CalendarHeatmap from '#lib/components/Chart/CalendarHeatmap.svelte';
+	import Card from '#lib/components/DataViz/Card.svelte';
+	import CardGroup from '#lib/components/DataViz/CardGroup.svelte';
+	import SimpleCard from '#lib/components/DataViz/SimpleCard.svelte';
+	import DashboardGrid from '#lib/components/Dashboard/DashboardGrid.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import type { PageData } from './$types';
 	import CounterCard from './CounterCard.svelte';
 
@@ -146,7 +146,7 @@
 
 	function handleTabChange(tabValue: string): void {
 		// A fresh URL: goto() on the mutated live object skips the load.
-		const next = new URL(page.url);
+		const next = new URL(page.url.href);
 		next.searchParams.set('tab', tabValue);
 		goto(next);
 	}
@@ -176,19 +176,19 @@
 				return;
 			}
 			// Clear URL override so the new global default is the source of truth
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.set('tab', 'custom');
 			url.searchParams.delete('dashboard');
-			goto(url, { invalidateAll: true });
+			goto(url, { refreshAll: true });
 		} else {
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.set('tab', 'custom');
 			if (dashboardId) {
 				url.searchParams.set('dashboard', dashboardId);
 			} else {
 				url.searchParams.delete('dashboard');
 			}
-			goto(url, { invalidateAll: true });
+			goto(url, { refreshAll: true });
 		}
 	}
 </script>
@@ -832,7 +832,7 @@
 									{m.vulnerabilityDistribution()}
 								</h3>
 								<div class="h-96">
-									{#await import('$lib/components/Chart/VulnerabilitySankeyChart.svelte')}
+									{#await import('#lib/components/Chart/VulnerabilitySankeyChart.svelte')}
 										<LoadingSpinner />
 									{:then { default: VulnerabilitySankeyChart }}
 										<VulnerabilitySankeyChart {sankeyData} />

@@ -1,6 +1,6 @@
-import { browser } from '$app/environment';
-import type { ModalStore, ModalSettings } from '$lib/components/Modals/stores';
-import ExternalLinkConfirmModal from '$lib/components/Modals/ExternalLinkConfirmModal.svelte';
+import { browser } from '$app/env';
+import type { ModalStore, ModalSettings } from '#lib/components/Modals/stores.js';
+import ExternalLinkConfirmModal from '#lib/components/Modals/ExternalLinkConfirmModal.svelte';
 
 let globalModalStore: ModalStore | null = null;
 let showWarningExternalLinks: boolean = true; // Default to true for safety

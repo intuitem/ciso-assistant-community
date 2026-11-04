@@ -1,23 +1,23 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import { m } from '$paraglide/messages';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { modelSchema } from '$lib/utils/schemas';
-	import { getModelInfo } from '$lib/utils/crud';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import { getModelInfo } from '#lib/utils/crud.js';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -69,7 +69,7 @@
 			console.error('Failed to update status');
 			return;
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	async function submitObservationChange(observation: string): void {
@@ -84,7 +84,7 @@
 			console.error('Failed to update observation');
 			return;
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	async function submitDueDateChange(due_date: string): Promise<void> {
@@ -98,7 +98,7 @@
 		if (!response.ok) {
 			console.error('Failed to update due date');
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	async function removeEvidence(id: string, move: boolean): void {
@@ -113,7 +113,7 @@
 			console.error('Failed to move legacy evidence');
 			return;
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	const categories = [

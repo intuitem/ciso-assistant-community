@@ -1,11 +1,11 @@
 <script lang="ts">
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		row: { meta?: { id: string; tier?: { id: string } | null } } | undefined;

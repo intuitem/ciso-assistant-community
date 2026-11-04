@@ -1,34 +1,35 @@
 <script lang="ts">
-	import { roundScore } from '$lib/utils/helpers';
+	import { roundScore } from '#lib/utils/helpers.js';
 	import { page } from '$app/state';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import SegmentedControl from '$lib/components/Forms/SegmentedControl.svelte';
-	import ScoreControl from '$lib/components/Forms/ScoreControl.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
-	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import SegmentedControl from '#lib/components/Forms/SegmentedControl.svelte';
+	import ScoreControl from '#lib/components/Forms/ScoreControl.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '#lib/components/FrameworkBuilder/SplashCard.svelte';
+	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		setContextRecursiveTreeView,
 		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
-	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+	} from '#lib/components/TreeView/RecursiveTreeView.svelte';
+	import ExcludeNotApplicableRequirements from '#lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
 	import {
 		complianceResultColorMap,
 		complianceStatusColorMap,
 		extendedResultColorMap
-	} from '$lib/utils/constants';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	} from '#lib/utils/constants.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import {
 		getFieldVisibility,
+		isFieldEditable,
 		hasComputedResult,
 		hasComputedScore,
 		shouldShowAutoQuestion,
@@ -38,16 +39,17 @@
 		alignmentColorMap,
 		resultBadgeStyle,
 		AUTO_ALIGNMENT_QUESTION_URN
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
 	import { onMount, tick } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { deserialize } from '$app/forms';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
 		data: PageData;
@@ -126,10 +128,30 @@
 	const showResult = $derived(fieldVis.showResult);
 	const showExtendedResult = $derived(fieldVis.showExtendedResult);
 	const showScore = $derived(fieldVis.showScore);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	// A field can be visible but read-only for the viewer's role.
+	const canEditAppliedControls = $derived(
+		isFieldEditable(complianceAssessment, 'applied_controls', viewerRole)
+	);
+	const canEditEvidences = $derived(isFieldEditable(complianceAssessment, 'evidences', viewerRole));
+	const canEditObservation = $derived(
+		isFieldEditable(complianceAssessment, 'observation', viewerRole)
+	);
+	const canEditResult = $derived(isFieldEditable(complianceAssessment, 'result', viewerRole));
+	const canEditStatus = $derived(isFieldEditable(complianceAssessment, 'status', viewerRole));
+	const canEditExtendedResult = $derived(
+		isFieldEditable(complianceAssessment, 'extended_result', viewerRole)
+	);
+	const canEditScore = $derived(isFieldEditable(complianceAssessment, 'score', viewerRole));
+	const canEditDocumentationScore = $derived(
+		isFieldEditable(complianceAssessment, 'documentation_score', viewerRole)
+	);
+	const canEditAnswers = $derived(isFieldEditable(complianceAssessment, 'answers', viewerRole));
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -226,12 +248,12 @@
 
 		// Reload to drop the optimistic value the backend rejected
 		if (!ok) {
-			if (invalidateAllBool) await invalidateAll();
+			if (invalidateAllBool) await refreshAll();
 			return false;
 		}
 
 		if (refresh && invalidateAllBool) {
-			await invalidateAll();
+			await refreshAll();
 		}
 
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
@@ -320,7 +342,7 @@
 					documentation_score: documentationScore
 				});
 				if (!ok) {
-					if (invalidateAllBool) await invalidateAll();
+					if (invalidateAllBool) await refreshAll();
 					return;
 				}
 				await refreshScores();
@@ -649,24 +671,28 @@
 <!-- Related-object panel (controls / evidences): create/select + item list -->
 {#snippet detailPanel(cfg: Record<string, any>)}
 	<div class="card border border-surface-200-800 rounded-lg p-3 space-y-2">
-		{#if !shallow && !isReadOnly}
+		{#if !shallow && !isReadOnly && (cfg.canCreate !== false || cfg.canSelect !== false)}
 			<div class="flex flex-row gap-2 items-center">
-				<button
-					class="btn btn-sm preset-filled-primary-500"
-					onclick={cfg.onCreate}
-					type="button"
-					data-testid={cfg.createTestId}
-				>
-					<i class="fa-solid fa-plus mr-2"></i>{cfg.createLabel}
-				</button>
-				<button
-					class="btn btn-sm preset-filled-secondary-500"
-					onclick={cfg.onSelect}
-					type="button"
-					data-testid={cfg.selectTestId}
-				>
-					<i class="fa-solid fa-hand-pointer mr-2"></i>{cfg.selectLabel}
-				</button>
+				{#if cfg.canCreate !== false}
+					<button
+						class="btn btn-sm preset-filled-primary-500"
+						onclick={cfg.onCreate}
+						type="button"
+						data-testid={cfg.createTestId}
+					>
+						<i class="fa-solid fa-plus mr-2"></i>{cfg.createLabel}
+					</button>
+				{/if}
+				{#if cfg.canSelect !== false}
+					<button
+						class="btn btn-sm preset-filled-secondary-500"
+						onclick={cfg.onSelect}
+						type="button"
+						data-testid={cfg.selectTestId}
+					>
+						<i class="fa-solid fa-hand-pointer mr-2"></i>{cfg.selectLabel}
+					</button>
+				{/if}
 			</div>
 		{/if}
 		{#if cfg.items?.length}
@@ -721,7 +747,7 @@
 								min={raMin}
 								max={raMax}
 								scoresDefinition={raScoresDef}
-								disabled={isReadOnly}
+								disabled={isReadOnly || !canEditScore}
 								onChange={(v) => {
 									ra.score = v;
 									if (!ra.is_scored) {
@@ -734,7 +760,7 @@
 						</div>
 					{/snippet}
 					{#snippet documentation()}
-						{#if complianceAssessment.show_documentation_score}
+						{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-surface-500 italic"
 									>{m.documentationScore()}</span
@@ -745,7 +771,7 @@
 									max={raMax}
 									scoresDefinition={raScoresDef}
 									isDoc
-									disabled={isReadOnly}
+									disabled={isReadOnly || !canEditDocumentationScore}
 									onChange={(v) => {
 										ra.documentation_score = v;
 										if (!ra.is_scored) {
@@ -761,7 +787,7 @@
 				</ScorePair>
 			</div>
 		{/if}
-	{:else if showScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
+	{:else if showScore && showDocumentationScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		<div class="flex items-center gap-4 flex-wrap">
@@ -949,7 +975,7 @@
 										</span>
 									{/snippet}
 									{#snippet documentation()}
-										{#if complianceAssessment.show_documentation_score}
+										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 											<span
 												class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
 											>
@@ -1209,7 +1235,7 @@
 											{/if}
 
 											<!-- Row B: result / status / score -->
-											{#if !questionnaireMode && (showResult || (showExtendedResult && complianceAssessment.extended_result_enabled) || (!shallow && complianceAssessment.scoring_enabled))}
+											{#if !questionnaireMode && (showResult || (showStatus && complianceAssessment.progress_status_enabled) || (showExtendedResult && complianceAssessment.extended_result_enabled) || (!shallow && complianceAssessment.scoring_enabled))}
 												<div class="flex flex-wrap items-start gap-x-6 gap-y-3">
 													{#if !questionnaireMode && showResult}
 														<div class="flex flex-col gap-1">
@@ -1228,7 +1254,7 @@
 																	options={result_options}
 																	value={requirementAssessment.result}
 																	colorMap={complianceResultColorMap}
-																	disabled={isReadOnly}
+																	disabled={isReadOnly || !canEditResult}
 																	size="sm"
 																	ariaLabel={m.result()}
 																	onChange={async (newValue) => {
@@ -1245,29 +1271,27 @@
 																/>
 															{/if}
 														</div>
-														{#if complianceAssessment.progress_status_enabled}
-															<div class="flex flex-col gap-1">
-																<span class="text-xs font-semibold text-surface-500 italic"
-																	>{m.status()}</span
-																>
-																<SegmentedControl
-																	options={status_options}
-																	value={requirementAssessment.status}
-																	colorMap={complianceStatusColorMap}
-																	disabled={isReadOnly}
-																	size="sm"
-																	ariaLabel={m.status()}
-																	onChange={(newValue) => {
-																		const newStatus =
-																			requirementAssessment.status === newValue
-																				? 'to_do'
-																				: newValue;
-																		requirementAssessment.status = newStatus;
-																		update(requirementAssessment, 'status');
-																	}}
-																/>
-															</div>
-														{/if}
+													{/if}
+													{#if !questionnaireMode && showStatus && complianceAssessment.progress_status_enabled}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic"
+																>{m.status()}</span
+															>
+															<SegmentedControl
+																options={status_options}
+																value={requirementAssessment.status}
+																colorMap={complianceStatusColorMap}
+																disabled={isReadOnly || !canEditStatus}
+																size="sm"
+																ariaLabel={m.status()}
+																onChange={(newValue) => {
+																	const newStatus =
+																		requirementAssessment.status === newValue ? 'to_do' : newValue;
+																	requirementAssessment.status = newStatus;
+																	update(requirementAssessment, 'status');
+																}}
+															/>
+														</div>
 													{/if}
 													{#if showExtendedResult && complianceAssessment.extended_result_enabled}
 														<div class="flex flex-col gap-1">
@@ -1278,7 +1302,7 @@
 																options={extended_result_options}
 																value={requirementAssessment.extended_result}
 																colorMap={extendedResultColorMap}
-																disabled={isReadOnly}
+																disabled={isReadOnly || !canEditExtendedResult}
 																size="sm"
 																ariaLabel={m.extendedResult()}
 																onChange={(newValue) => {
@@ -1344,69 +1368,9 @@
 															</div>
 														{/if}
 														{#if requirementAssessment.mapping_inference?.result}
-															<div class="my-2">
-																<p class="font-medium">
-																	<i class="fa-solid fa-link"></i>
-																	{m.mappingInference()}
-																</p>
-																<span class="text-xs text-surface-500"
-																	><i class="fa-solid fa-circle-info"></i>
-																	{m.mappingInferenceHelpText()}</span
-																>
-																<ul class="list-disc ml-4">
-																	<li>
-																		<p>
-																			<a
-																				class="anchor"
-																				href="/requirement-assessments/{requirementAssessment
-																					.mapping_inference.source_requirement_assessment.id}"
-																			>
-																				{requirementAssessment.mapping_inference
-																					.source_requirement_assessment.str}
-																			</a>
-																		</p>
-																		<p class="whitespace-pre-line py-1">
-																			<span class="italic">{m.coverageColon()}</span>
-																			<span class="badge h-fit">
-																				{safeTranslate(
-																					requirementAssessment.mapping_inference
-																						.source_requirement_assessment.coverage
-																				)}
-																			</span>
-																		</p>
-																		{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
-																			<p class="whitespace-pre-line py-1">
-																				<span class="italic">{m.scoreSemiColon()}</span>
-																				<span class="badge h-fit">
-																					{safeTranslate(
-																						requirementAssessment.mapping_inference
-																							.source_requirement_assessment.score
-																					)}
-																				</span>
-																			</p>
-																		{/if}
-																		<p class="whitespace-pre-line py-1">
-																			<span class="italic">{m.suggestionColon()}</span>
-																			<span
-																				class="badge h-fit"
-																				style={resultBadgeStyle(
-																					requirementAssessment.mapping_inference.result
-																				)}
-																			>
-																				{safeTranslate(
-																					requirementAssessment.mapping_inference.result
-																				)}
-																			</span>
-																		</p>
-																		{#if requirementAssessment.mapping_inference.annotation}
-																			<p class="whitespace-pre-line py-1">
-																				<span class="italic">{m.annotationColon()}</span>
-																				{requirementAssessment.mapping_inference.annotation}
-																			</p>
-																		{/if}
-																	</li>
-																</ul>
-															</div>
+															<MappingInferenceView
+																mappingInference={requirementAssessment.mapping_inference}
+															/>
 														{/if}
 													{/if}
 												</div>
@@ -1419,7 +1383,7 @@
 														questions={requirementAssessment.requirement.questions}
 														initialValue={requirementAssessment.answers}
 														field="answers"
-														disabled={isReadOnly || !questionnaireMode}
+														disabled={isReadOnly || !questionnaireMode || !canEditAnswers}
 														shallow={shallow || !questionnaireMode}
 														onChange={async (urn, newAnswer) => {
 															requirementAssessment.answers[urn] = newAnswer;
@@ -1427,7 +1391,7 @@
 																answers: { [urn]: newAnswer }
 															});
 															if (invalidateAllBool) {
-																await invalidateAll();
+																await refreshAll();
 															}
 														}}
 													/>
@@ -1582,6 +1546,8 @@
 																emptyLabel: m.noAppliedControlYet(),
 																createLabel: m.addAppliedControl(),
 																selectLabel: m.selectAppliedControls(),
+																canCreate: canEditAppliedControls,
+																canSelect: canEditAppliedControls,
 																onCreate: () => modalMeasureCreateForm(requirementAssessment),
 																onSelect: () =>
 																	modalUpdateForm(requirementAssessment, 'selectAppliedControls')
@@ -1598,6 +1564,8 @@
 																createTestId: 'create-evidence-button',
 																selectTestId: 'select-evidence-button',
 																linkTestId: 'evidence-link',
+																canCreate: canEditEvidences,
+																canSelect: canEditEvidences,
 																onCreate: () => modalEvidenceCreateForm(requirementAssessment),
 																onSelect: () =>
 																	modalUpdateForm(requirementAssessment, 'selectEvidences')
@@ -1612,7 +1580,7 @@
 																<div class="card border border-surface-200-800 rounded-lg p-3">
 																	<TableMarkdownField
 																		value={requirementAssessment.observation}
-																		disabled={isReadOnly}
+																		disabled={isReadOnly || !canEditObservation}
 																		onSave={async (newValue) => {
 																			requirementAssessment.observation = newValue;
 																			await update(requirementAssessment, 'observation');

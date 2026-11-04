@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { locales } from '$paraglide/runtime';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+	import { m } from '#paraglide/messages.js';
+	import { locales } from '#paraglide/runtime.js';
+	import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
 
 	interface Subfield {
 		key: string;

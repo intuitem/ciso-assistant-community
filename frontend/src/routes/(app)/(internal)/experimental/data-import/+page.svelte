@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { translateChoiceLabel } from '$lib/utils/i18n';
-	import { canPerformAction, canPerformActionOnObject } from '$lib/utils/access-control';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { translateChoiceLabel } from '#lib/utils/i18n.js';
+	import { canPerformAction, canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import { page } from '$app/state';
-	import * as m from '$paraglide/messages';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import * as m from '#paraglide/messages.js';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';

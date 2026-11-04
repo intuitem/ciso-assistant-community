@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {

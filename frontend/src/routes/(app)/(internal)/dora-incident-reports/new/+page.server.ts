@@ -1,10 +1,10 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { getModelInfo } from '$lib/utils/crud';
-import { modelSchema } from '$lib/utils/schemas';
-import { defaultWriteFormAction } from '$lib/utils/actions';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
 import { redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

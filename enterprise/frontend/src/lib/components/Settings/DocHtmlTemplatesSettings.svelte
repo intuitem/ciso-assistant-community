@@ -1,12 +1,12 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
-	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants';
-	import { fetchAllPages } from '$lib/utils/pagination';
+	import * as m from '#paraglide/messages.js';
+	import { LOCALE_DISPLAY_MAP } from '#lib/utils/constants.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 

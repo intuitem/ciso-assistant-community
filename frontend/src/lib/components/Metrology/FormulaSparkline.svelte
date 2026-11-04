@@ -2,8 +2,8 @@
 	// A formula's recent results as a small chart, and the metric as it is now
 	// beside them when there is one: a dashed line on the same scale, so an
 	// edit reads as the change it makes.
-	import { m } from '$paraglide/messages';
-	import { sparkline, sparkRange, type SparkPoint } from '$lib/utils/derived-metrics';
+	import { m } from '#paraglide/messages.js';
+	import { sparkline, sparkRange, type SparkPoint } from '#lib/utils/derived-metrics.js';
 
 	type Period = { start: string; value: unknown; skipped?: boolean };
 	interface Props {

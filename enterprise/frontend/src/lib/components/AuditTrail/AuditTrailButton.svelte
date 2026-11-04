@@ -21,18 +21,18 @@
 </script>
 
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import type { urlModel } from '$lib/utils/types';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+	import type { urlModel } from '#lib/utils/types.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import AuditTrailModal from '$lib/components/AuditTrail/AuditTrailModal.svelte';
-	import { isAccessAllowed } from '$lib/utils/access-control';
+	} from '#lib/components/Modals/stores.js';
+	import AuditTrailModal from '#lib/components/AuditTrail/AuditTrailModal.svelte';
+	import { isAccessAllowed } from '#lib/utils/access-control.js';
 	import { onMount } from 'svelte';
 
 	interface Props {

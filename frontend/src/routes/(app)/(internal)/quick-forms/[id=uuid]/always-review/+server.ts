@@ -1,5 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { json } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 // Whether accepting this form always takes a review (the backend checks the right).
@@ -10,5 +9,5 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ always_review })
 	});
-	return json(await res.json().catch(() => ({})), { status: res.status });
+	return Response.json(await res.json().catch(() => ({})), { status: res.status });
 };

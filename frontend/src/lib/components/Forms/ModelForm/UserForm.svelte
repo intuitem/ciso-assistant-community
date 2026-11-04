@@ -1,13 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import { languageOptions } from '$lib/utils/locales';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import { languageOptions } from '#lib/utils/locales.js';
 	import { page } from '$app/state';
 	interface Props {
 		form: SuperValidated<any>;

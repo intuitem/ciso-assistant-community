@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { m } from '$paraglide/messages';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { savedToastEnhance } from '$lib/utils/portalActions';
+	import { m } from '#paraglide/messages.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { savedToastEnhance } from '#lib/utils/portalActions.js';
 
 	let {
 		superform,

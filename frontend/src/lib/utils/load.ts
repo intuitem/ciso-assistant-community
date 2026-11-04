@@ -1,6 +1,6 @@
-import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
-import { formatSelectFieldData } from '$lib/utils/select-field';
-import { discardBody } from '$lib/utils/responses';
+import { BASE_API_URL, UUID_REGEX } from '#lib/utils/constants.js';
+import { formatSelectFieldData } from '#lib/utils/select-field.js';
+import { discardBody } from '#lib/utils/responses.js';
 export { formatSelectFieldData };
 import {
 	getModelInfo,
@@ -9,12 +9,12 @@ import {
 	type ModelMapEntry,
 	type SelectField,
 	type SelectFieldData
-} from '$lib/utils/crud';
-import { type TableSource } from '$lib/components/ModelTable/types';
+} from '#lib/utils/crud.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 
-import { modelSchema, type FormDataShape } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import { modelSchema, type FormDataShape } from '#lib/utils/schemas.js';
+import { listViewFields } from '#lib/utils/table.js';
+import type { urlModel } from '#lib/utils/types.js';
 import type { SuperValidated } from 'sveltekit-superforms';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -22,7 +22,7 @@ import { z } from 'zod';
 import { canPerformAction } from './access-control';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 interface LoadValidationFlowFormDataParams {
 	event: { fetch: typeof fetch };

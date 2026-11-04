@@ -1,9 +1,9 @@
 <script lang="ts">
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import { getScoreHexColor } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
-	import type { ComplianceOverview } from '$lib/utils/types';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import RingProgress from '#lib/components/DataViz/RingProgress.svelte';
+	import { getScoreHexColor } from '#lib/utils/helpers.js';
+	import { m } from '#paraglide/messages.js';
+	import type { ComplianceOverview } from '#lib/utils/types.js';
 
 	interface Props {
 		overview: ComplianceOverview | null | undefined;

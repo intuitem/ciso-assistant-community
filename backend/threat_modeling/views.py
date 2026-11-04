@@ -2,6 +2,7 @@ import uuid
 from collections import defaultdict
 from math import isfinite
 
+import django_filters as df
 import structlog
 from django.contrib.auth.models import Permission
 from django.db import transaction
@@ -13,7 +14,7 @@ from rest_framework.response import Response
 from core.models import AppliedControl, Asset, Vulnerability
 from core.permissions import FeatureFlagRequired
 from iam.models import RoleAssignment
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from sec_intel.models import Technique
 from sec_intel.views import build_catalog_matrix
 from .models import ThreatModel, ThreatModelNode, ThreatModelEdge
@@ -77,6 +78,27 @@ def validate_placements(threat_model, placements) -> list[str]:
     return errors
 
 
+class ThreatModelFilterSet(GenericFilterSet):
+    # A threat model uses an asset, control or vulnerability through its nodes.
+    assets = df.ModelMultipleChoiceFilter(
+        field_name="nodes__assets", queryset=Asset.objects.all(), distinct=True
+    )
+    applied_controls = df.ModelMultipleChoiceFilter(
+        field_name="nodes__applied_controls",
+        queryset=AppliedControl.objects.all(),
+        distinct=True,
+    )
+    vulnerabilities = df.ModelMultipleChoiceFilter(
+        field_name="nodes__vulnerabilities",
+        queryset=Vulnerability.objects.all(),
+        distinct=True,
+    )
+
+    class Meta:
+        model = ThreatModel
+        fields = ["folder", "catalog", "filtering_labels"]
+
+
 class ThreatModelViewSet(BaseModelViewSet):
     """
     API endpoint that allows threat models to be viewed or edited.
@@ -94,7 +116,7 @@ class ThreatModelViewSet(BaseModelViewSet):
     }
 
     model = ThreatModel
-    filterset_fields = ["folder", "catalog", "filtering_labels"]
+    filterset_class = ThreatModelFilterSet
     search_fields = ["ref_id", "name", "description"]
 
     @action(detail=True, name="Get the catalog matrix with the selection applied")

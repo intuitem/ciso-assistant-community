@@ -1,12 +1,12 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {

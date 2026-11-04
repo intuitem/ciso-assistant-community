@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import HiddenInput from '#lib/components/Forms/HiddenInput.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import { page } from '$app/state';
-	import { filterResultChoices } from '$lib/utils/helpers';
+	import { filterResultChoices } from '#lib/utils/helpers.js';
 
 	interface Props {
 		form: SuperValidated<any>;

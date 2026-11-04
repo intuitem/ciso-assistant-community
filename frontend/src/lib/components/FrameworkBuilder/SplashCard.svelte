@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		name?: string | null;

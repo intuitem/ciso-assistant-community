@@ -62,7 +62,7 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      d.date, align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone], align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -107,6 +107,7 @@
           row-gutter: 3pt,
           column-gutter: 12pt,
           [Généré le], [#d.generated_at],
+          [Fuseau horaire], [#d.timezone - chaque heure indique son décalage UTC],
           [Identifiant du document], [#raw(d.id)],
         )
       ]
@@ -150,7 +151,7 @@
 = Chronologie
 
 #text(fill: muted)[
-  #d.counts.total entrées par ordre chronologique, heures en UTC.
+  #d.counts.total entrées par ordre chronologique.
   #d.counts.detection détection, #d.counts.mitigation atténuation.
 ]
 #v(0.8em)

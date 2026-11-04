@@ -16,6 +16,7 @@ from core.models import (
     Severity,
     TaskNode,
     TaskTemplate,
+    Vulnerability,
 )
 from iam.models import RoleAssignment
 
@@ -264,6 +265,33 @@ def _rules(today: date) -> list[Rule]:
             ),
             ("status", "due_date"),
             F("task_template__name"),
+        ),
+        # The remediation date is the user's to keep consistent with the status.
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "vulnerabilityOpenWithRemediationDate",
+            _("Open vulnerability has a remediation date"),
+            Vulnerability,
+            "vulnerability",
+            "vulnerabilities",
+            lambda qs: qs.filter(remediated_at__isnull=False).exclude(
+                status__in=Vulnerability.RESOLVED_STATUSES
+            ),
+            ("status", "remediated_at"),
+        ),
+        Rule(
+            OPERATIONS,
+            "info",
+            "vulnerabilityResolvedWithoutRemediationDate",
+            _("Resolved vulnerability has no remediation date"),
+            Vulnerability,
+            "vulnerability",
+            "vulnerabilities",
+            lambda qs: qs.filter(
+                status__in=Vulnerability.RESOLVED_STATUSES, remediated_at__isnull=True
+            ),
+            ("status", "remediated_at"),
         ),
     ]
 

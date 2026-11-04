@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 </script>
 
 <div class="flex flex-col items-center justify-center py-24 text-center">

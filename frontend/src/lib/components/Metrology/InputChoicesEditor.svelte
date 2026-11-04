@@ -3,7 +3,7 @@
 	// finds in the instance's domain, and, when it finds several instances,
 	// which one a "one value" input reads or which ones a combined input
 	// leaves out. Deprecated instances are never offered: they are never read.
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import {
 		COMBINES,
 		effectiveCombine,
@@ -14,7 +14,7 @@
 		setIncluded,
 		type Combine,
 		type InputChoices
-	} from '$lib/utils/derived-metrics';
+	} from '#lib/utils/derived-metrics.js';
 
 	interface Candidate {
 		id: string;

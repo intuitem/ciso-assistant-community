@@ -2,22 +2,22 @@
 	import { run } from 'svelte/legacy';
 	import { onMount } from 'svelte';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { loginSchema } from '$lib/utils/schemas';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import { loginSchema } from '#lib/utils/schemas.js';
 
 	import { page } from '$app/state';
-	import { redirectToProvider } from '$lib/allauth.js';
-	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { redirectToProvider } from '#lib/allauth.js';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: any;

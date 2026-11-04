@@ -60,7 +60,8 @@ class CustomFieldFilterBackend(BaseFilterBackend):
                 custom_field_values__definition__key=field_key,
                 **{f"custom_field_values__{column}__{lookup}": target},
             )
-        return queryset
+        # Multi-choice values are one row each, so the join can repeat a host.
+        return queryset.distinct()
 
     @staticmethod
     def _coerce(definition: CustomFieldDefinition, lookup: str, raw_values: list):

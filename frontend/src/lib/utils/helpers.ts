@@ -1,5 +1,5 @@
-import { complianceResultColorMap } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { complianceResultColorMap } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
@@ -668,6 +668,7 @@ export type VisibilityField = (typeof VISIBILITY_FIELDS)[number];
 
 export type RoleAccess = 'edit' | 'read' | 'hidden';
 export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
+export type VisibilityMap = Record<string, VisibilityPair>;
 
 const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 
 	$pageTitle = 'Multi-file evidence (prototype)';
 

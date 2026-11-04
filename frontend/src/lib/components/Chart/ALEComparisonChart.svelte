@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 
 	interface ScenarioData {
 		name: string;
@@ -62,12 +63,12 @@
 							type: 'shadow'
 						},
 						formatter: function (params: any) {
-							let result = `<div><strong>${params[0].axisValue}</strong></div>`;
+							let result = `<div><strong>${escapeHtml(params[0].axisValue)}</strong></div>`;
 							params.forEach((param: any) => {
 								const value = Math.abs(param.value);
 								const sign = param.value >= 0 ? '' : '-';
 								result += `<div style="color: ${param.color};">
-									${param.marker} ${param.seriesName}: ${sign}${formatCurrency(value)}
+									${param.marker} ${escapeHtml(param.seriesName)}: ${sign}${formatCurrency(value)}
 								</div>`;
 							});
 							return result;

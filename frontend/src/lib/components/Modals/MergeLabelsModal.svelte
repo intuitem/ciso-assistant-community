@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 
 	interface Props {

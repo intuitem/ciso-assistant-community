@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { CALENDAR_CATEGORIES, type CalendarEvent, type CalendarCategory } from './types';
 
 	interface Props {

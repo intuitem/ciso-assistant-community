@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export interface FeatureFlagField {
 	field: string;
@@ -263,6 +263,12 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'vulnerabilities',
 					label: m.vulnerabilities(),
 					description: m.vulnerabilitiesDescription()
+				},
+				{
+					field: 'vulnerability_sla',
+					label: m.vulnerabilitySlaPolicy(),
+					description: m.vulnerabilitySlaDescription(),
+					requires: ['vulnerabilities']
 				},
 				{
 					field: 'ebiosrm',

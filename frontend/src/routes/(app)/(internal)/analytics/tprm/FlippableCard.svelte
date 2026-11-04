@@ -1,8 +1,8 @@
 <script lang="ts">
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
-	import ComplianceSummary from '$lib/components/DataViz/ComplianceSummary.svelte';
-	import type { ComplianceOverview as ComplianceOverviewData } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
+	import ComplianceSummary from '#lib/components/DataViz/ComplianceSummary.svelte';
+	import type { ComplianceOverview as ComplianceOverviewData } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	// State to track if the card is flipped
 	let isFlipped = $state(false);
 

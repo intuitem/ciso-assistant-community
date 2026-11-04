@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getRequirementTitle } from '$lib/utils/helpers';
-	import { getOptions } from '$lib/utils/crud';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { getRequirementTitle } from '#lib/utils/helpers.js';
+	import { getOptions } from '#lib/utils/crud.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		ref_id: string;

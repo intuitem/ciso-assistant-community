@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { documentTypeLabel, documentTypeIcon } from '$lib/utils/documentTypes';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
+	import { documentTypeLabel, documentTypeIcon } from '#lib/utils/documentTypes.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

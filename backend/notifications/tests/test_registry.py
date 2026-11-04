@@ -16,7 +16,7 @@ from core import tasks
 from core.email_utils import TEMPLATE_BASE_PATH
 from notifications.registry import NOTIFICATION_REGISTRY
 
-LOCALES = ("en", "fr")
+LOCALES = ("en", "fr", "de", "nl")
 CATEGORIES = {"assignments", "approvals", "deadlines", "updates", "account"}
 MODES = {"condition", "event"}
 CHANNELS = {"in_app", "email"}
@@ -113,8 +113,12 @@ def test_title_messages_only_use_declared_context(locale):
         if not message:
             continue
         used = set(re.findall(r"\{([a-z_]+)\}", message))
-        assert used <= set(meta["context"]), (
-            f"{locale}/{key} uses undeclared {sorted(used - set(meta['context']))}"
+        # `x_key` in the context is resolved to `{x}` by the frontend (NotificationTitle).
+        declared = set(meta["context"]) | {
+            c.removesuffix("_key") for c in meta["context"] if c.endswith("_key")
+        }
+        assert used <= declared, (
+            f"{locale}/{key} uses undeclared {sorted(used - declared)}"
         )
 
 

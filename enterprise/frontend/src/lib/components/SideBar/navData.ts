@@ -182,6 +182,12 @@ export const navData = {
 			name: 'catalog',
 			items: [
 				{
+					name: 'libraries',
+					fa_icon: 'fa-solid fa-folder-plus',
+					href: '/libraries',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
+				},
+				{
 					name: 'frameworks',
 					fa_icon: 'fa-solid fa-book',
 					href: '/frameworks'
@@ -310,12 +316,6 @@ export const navData = {
 		{
 			name: 'governance',
 			items: [
-				{
-					name: 'libraries',
-					fa_icon: 'fa-solid fa-folder-plus',
-					href: '/libraries',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
-				},
 				{
 					name: 'policies',
 					fa_icon: 'fa-solid fa-file-alt',

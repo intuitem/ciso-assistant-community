@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 // A computed metric as the compose modal edits it (GET), and the edit (PUT).

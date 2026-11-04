@@ -1,14 +1,14 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import SubcontractingChainEditor from './SubcontractingChainEditor.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -27,7 +27,7 @@
 		object = {}
 	}: Props = $props();
 
-	let doraEnabled = $derived(!!$page.data?.featureflags?.dora);
+	let doraEnabled = $derived(!!page.data?.featureflags?.dora);
 
 	const formData = form.form;
 
@@ -255,7 +255,5 @@
 	open={false}
 	style="hover:text-primary-700"
 	icon="fa-solid fa-sitemap"
-	header={m.subcontractingChain()}
+	header={m.subcontractingChain()}><SubcontractingChainEditor {form} {directProviderId} /></Dropdown
 >
-	<SubcontractingChainEditor {form} {directProviderId} />
-</Dropdown>

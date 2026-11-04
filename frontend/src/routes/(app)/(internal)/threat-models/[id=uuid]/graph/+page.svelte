@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SvelteFlowProvider } from '@xyflow/svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import ThreatModelGraph from './ThreatModelGraph.svelte';
 	import ViewSwitch from '../ViewSwitch.svelte';
 	import type { PageData } from './$types';

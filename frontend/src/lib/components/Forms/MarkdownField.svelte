@@ -2,10 +2,10 @@
 	import { run } from 'svelte/legacy';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	import type { CacheLock } from '$lib/utils/types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import type { CacheLock } from '#lib/utils/types.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		class?: string;

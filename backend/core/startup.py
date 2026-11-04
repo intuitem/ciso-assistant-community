@@ -229,6 +229,7 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_entitytierchange",
     "view_solutiontierchange",
     "view_documenttemplate",
+    "view_published_documentcontainer",
     "view_customfielddefinition",
     "view_requirementmapping",
     "view_requirementmappingset",
@@ -1523,6 +1524,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     # document management
     "add_documentcontainer",
     "view_documentcontainer",
+    "view_published_documentcontainer",
     "change_documentcontainer",
     "delete_documentcontainer",
     "add_documenttemplate",
@@ -2175,6 +2177,7 @@ def seed_feature_flag_defaults():
     """
     from global_settings.models import GlobalSettings
     from global_settings.utils import (
+        apply_flag_requirements,
         clear_feature_flags_cache,
         get_feature_flag_defaults,
     )
@@ -2191,7 +2194,14 @@ def seed_feature_flag_defaults():
         }
         if not missing:
             return
-        row.value = {**stored, **missing}
+        value = {**stored, **missing}
+        # Seeding must not switch a module back on: a new flag that needs one
+        # that is off starts off, as if that one had just been turned off.
+        # Seeded on, the next save of the flags would turn it on again.
+        apply_flag_requirements(
+            value, turned_off={name for name, enabled in value.items() if not enabled}
+        )
+        row.value = value
         row.save(update_fields=["value"])
         clear_feature_flags_cache()
         logger.info("Seeded feature flag defaults", flags=sorted(missing))

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		/** Warning text shown next to confirm/cancel when active */

@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Aan u toegewezen: ${object_type} '${object_name}'"
+body: |
+  Hallo,
+
+  U bent toegewezen aan het volgende item:
+
+  - Type: ${object_type}
+  - Naam: ${object_name}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om het te bekijken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

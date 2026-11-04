@@ -1,12 +1,16 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { discardBody } from '$lib/utils/responses';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { discardBody } from '#lib/utils/responses.js';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
-import { getModelInfo, urlParamModelSelectFields, urlParamModelVerboseName } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
+import {
+	getModelInfo,
+	urlParamModelSelectFields,
+	urlParamModelVerboseName
+} from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import type { ModelInfo } from '#lib/utils/types.js';
 import { type Actions } from '@sveltejs/kit';
 import { fail, message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';

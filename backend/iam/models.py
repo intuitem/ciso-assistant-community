@@ -77,6 +77,42 @@ IGNORED_PERMISSION_MODELS = (
     "idpgroup",
     "scimtoken",
     "serviceaccount",
+    # Internal: access is gated through the parent object, never by these permissions
+    "answerattachment",
+    "demomanifest",
+    "flowevent",
+    "producedobjectlink",
+    "quickformapplication",
+    "quickformoutcome",
+    "requirementassignmentevent",
+    "requirementnodeattachment",
+    # Stale content types of removed models
+    "cacheversion",
+    "processingnature",
+    # Never checked; mail settings are gated by *_mailerconfiguration
+    "mailer",
+    "mailerhealth",
+)
+
+# System-written, served read-only: only view (and custom rights) are ever checked
+READ_ONLY_PERMISSION_MODELS = (
+    "actor",
+    "assetcapability",
+    "commitment",
+    "dpiarequirementchange",
+    "entitytierchange",
+    "quickformpage",
+    "responsibilityassignment",
+    "responsibilityrole",
+    "solutiontierchange",
+)
+
+IGNORED_PERMISSIONS = Q(content_type__model__in=IGNORED_PERMISSION_MODELS) | Q(
+    codename__in=[
+        f"{action}_{model}"
+        for model in READ_ONLY_PERMISSION_MODELS
+        for action in ("add", "change", "delete")
+    ]
 )
 
 type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
@@ -117,6 +153,18 @@ def _trimmed_ref_id(expression=None) -> Func:
         expression if expression is not None else F("ref_id"),
         Value(_REF_ID_WHITESPACE),
         function="TRIM",
+        output_field=models.CharField(),
+    )
+
+
+def _trimmed_ref_id_literal(expression=None) -> Func:
+    # _trimmed_ref_id() with the characters written into the SQL, not bound:
+    # SQLite only matches an indexed expression whose constants are literals.
+    # Queries only: the constraint keeps _trimmed_ref_id(), so its migration stays.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        function="TRIM",
+        template=f"%(function)s(%(expressions)s, '{_REF_ID_WHITESPACE}')",
         output_field=models.CharField(),
     )
 
@@ -271,13 +319,22 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
-        """Whether another folder holds *ref_id*, compared as the unique index does."""
-        normalized = Lower(_trimmed_ref_id(Value(ref_id)))
+        """Whether another folder holds *ref_id*."""
         return (
-            Folder.objects.alias(normalized_ref_id=Lower(_trimmed_ref_id()))
-            .filter(normalized_ref_id=normalized)
+            Folder.filter_by_ref_id(Folder.objects.all(), ref_id)
             .exclude(pk=exclude_pk)
             .exists()
+        )
+
+    @staticmethod
+    def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
+        """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
+        return queryset.alias(
+            normalized_ref_id=Lower(_trimmed_ref_id_literal())
+        ).filter(
+            # The index's own condition, so the partial index can serve the lookup.
+            ~Q(Exact(_trimmed_ref_id_literal(), Value(""))),
+            normalized_ref_id=Lower(_trimmed_ref_id_literal(Value(ref_id))),
         )
 
     def _ref_id_taken_message(self) -> str:
@@ -606,6 +663,7 @@ class Folder(NameDescriptionMixin):
         # NOTE: There are probably better ways to represent these, but it works.
         # NOTE: This list is not complete.
         paths = [
+            ["matrix", "folder"],
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
@@ -618,6 +676,7 @@ class Folder(NameDescriptionMixin):
             ["journey", "folder"],
             ["questionnaire_run", "folder"],
             ["agent_run", "folder"],
+            ["collection", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -1911,7 +1970,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             Permission.objects.filter(
                 content_type__app_label__in=ALLOWED_PERMISSION_APPS
             )
-            .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+            .exclude(IGNORED_PERMISSIONS)
             .values_list("id", flat=True)
         )
 

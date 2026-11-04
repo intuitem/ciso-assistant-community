@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { formatGap, type DependencyGraph } from './dependency-graph';
 
 	interface Props {

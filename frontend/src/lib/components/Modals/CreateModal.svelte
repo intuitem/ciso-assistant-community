@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Stores
-	import * as m from '$paraglide/messages';
-	import type { ModelInfo } from '$lib/utils/types';
+	import * as m from '#paraglide/messages.js';
+	import type { ModelInfo } from '#lib/utils/types.js';
 	const modalStore: ModalStore = getModalStore();
 
 	let closeModal = true;
@@ -11,11 +11,11 @@
 		'card bg-surface-100-900 border border-surface-500 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { ensureSelectOptions } from '$lib/utils/select-options';
+	import { ensureSelectOptions } from '#lib/utils/select-options.js';
 	import { onMount, tick } from 'svelte';
 	interface Props {
 		/** Exposes parent props to this component. */

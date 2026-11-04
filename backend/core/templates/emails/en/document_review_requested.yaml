@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Document '${document_name}' awaits your review"
+body: |
+  Hello,
+
+  ${actor_name} submitted a revision of the following document for your review:
+
+  - Document: ${document_name}
+  - Version: ${version_number}
+  - Change summary: ${change_summary}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to approve it or request changes: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

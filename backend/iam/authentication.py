@@ -1,12 +1,21 @@
 from allauth.idp.oidc.contrib.rest_framework.authentication import (
     TokenAuthentication as OIDCTokenAuthentication,
 )
+from knox.auth import TokenAuthentication
 from rest_framework import exceptions
 
 
 def is_self_registered(client) -> bool:
     data = getattr(client, "data", None) or {}
     return bool(data.get("dcr") or data.get("cimd"))
+
+
+class KnoxTokenAuthentication(TokenAuthentication):
+    def authenticate_credentials(self, token):
+        user, auth_token = super().authenticate_credentials(token)
+        if auth_token.scim_token.exists():
+            raise exceptions.AuthenticationFailed("Invalid token.")
+        return user, auth_token
 
 
 class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):

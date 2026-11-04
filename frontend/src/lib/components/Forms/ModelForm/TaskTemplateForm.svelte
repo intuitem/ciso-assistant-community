@@ -4,13 +4,13 @@
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import NumberField from '../NumberField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;

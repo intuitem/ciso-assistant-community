@@ -4,9 +4,9 @@
 	import NumberField from '../NumberField.svelte';
 	import TextArea from '../TextArea.svelte';
 	import TextField from '../TextField.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 
 	let {
 		form,

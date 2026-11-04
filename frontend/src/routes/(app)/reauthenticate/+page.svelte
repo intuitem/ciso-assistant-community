@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import { m } from '#paraglide/messages.js';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import OTPInput from '#lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { reauthenticateSchema } from '$lib/utils/schemas';
+	import type { SuperForm as SuperFormApi } from 'sveltekit-superforms';
+	import { reauthenticateSchema } from '#lib/utils/schemas.js';
 	import { startAuthentication } from '@simplewebauthn/browser';
 	import { tick } from 'svelte';
 
@@ -36,13 +37,22 @@
 		totp: m.loginUsingTOTP,
 		recovery_codes: m.loginUsingRecoveryCode
 	};
+
+	// A half-typed code left in the store would fail validation and silently
+	// block the next submit, since the other modes don't display code errors.
+	function switchMode(next: Mode, form: SuperFormApi<Record<string, unknown>>) {
+		mode = next;
+		webAuthnError = null;
+		form.form.update((data) => ({ ...data, mode: next, code: undefined }), { taint: false });
+		form.errors.update((errors) => ({ ...errors, code: undefined }));
+	}
 </script>
 
-<div class="flex items-center justify-center min-h-screen bg-surface-100 p-4">
-	<div class="card bg-surface-50 p-8 shadow-xl space-y-6 max-w-md w-full">
+<div class="flex items-center justify-center min-h-screen bg-surface-100-900 p-4">
+	<div class="card bg-surface-50-950 p-8 shadow-xl space-y-6 max-w-md w-full">
 		<header class="text-center space-y-4">
 			<i class="fa-solid fa-lock text-4xl text-primary-500"></i>
-			<p class="text-surface-600">{m.reauthenticateForSensitiveAction()}</p>
+			<p class="text-surface-600-400">{m.reauthenticateForSensitiveAction()}</p>
 		</header>
 		<SuperForm
 			data={data.form}
@@ -79,20 +89,20 @@
 						type="submit">{m.confirm()}</button
 					>
 				{/if}
+				{#if data.mfaTypes.length > 1}
+					<div class="flex flex-wrap gap-2 justify-center">
+						{#each data.mfaTypes.filter((type) => type !== mode) as type}
+							<button
+								type="button"
+								class="btn hover:underline text-sm"
+								onclick={() => switchMode(type as Mode, form)}
+							>
+								{switchLabels[type]()}
+							</button>
+						{/each}
+					</div>
+				{/if}
 			{/snippet}
 		</SuperForm>
-		{#if data.mfaTypes.length > 1}
-			<div class="flex flex-wrap gap-2 justify-center">
-				{#each data.mfaTypes.filter((type) => type !== mode) as type}
-					<button
-						type="button"
-						class="btn hover:underline text-sm"
-						onclick={() => (mode = type as Mode)}
-					>
-						{switchLabels[type]()}
-					</button>
-				{/each}
-			</div>
-		{/if}
 	</div>
 </div>

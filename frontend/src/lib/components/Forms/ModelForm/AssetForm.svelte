@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '#lib/utils/constants.js';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
@@ -17,7 +17,7 @@
 	import Duration from '../Duration.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Select from '../Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;

@@ -10,14 +10,14 @@
 </script>
 
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
-	import CelInput from '$lib/components/Cel/CelInput.svelte';
-	import type { Scope as CelScope } from '$lib/components/Cel/compute-assist';
-	import { dig, renderTemplate } from '$lib/components/Cel/expressions';
+	import CelInput from '#lib/components/Cel/CelInput.svelte';
+	import type { Scope as CelScope } from '#lib/components/Cel/compute-assist.js';
+	import { dig, renderTemplate } from '#lib/components/Cel/expressions.js';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import {
 		newCondition,
@@ -25,7 +25,7 @@
 		groupsToTree,
 		FILTER_OPS,
 		type Condition
-	} from '$lib/utils/filter-dnf';
+	} from '#lib/utils/filter-dnf.js';
 	import { VARIABLE_TYPES } from './builder-constants';
 	import {
 		READ_ROW_DEFAULTS,
