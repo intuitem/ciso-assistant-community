@@ -188,6 +188,18 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             return Response(
                 {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
             )
+        if any(
+            source.get("email_verified") in (False, "false")
+            for source in (extra, extra.get("userinfo", {}), extra.get("id_token", {}))
+            if isinstance(source, dict)
+        ):
+            logger.error(
+                "pre_social_login: IdP reports email as unverified",
+                provider=sociallogin.account.provider,
+            )
+            return Response(
+                {"message": "Email not verified."}, status=HTTP_401_UNAUTHORIZED
+            )
         logger.debug(
             "pre_social_login: resolved email from IdP",
             idp_email=email_address,

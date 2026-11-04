@@ -38,6 +38,9 @@ from .write_tools import (
     _collect_asset_objective_changes,
     _build_asset_objectives,
     _ignored_fields_warning,
+    _invalid_severity_error,
+    _severity_label,
+    _severity_value,
     MANUAL_TIMELINE_ENTRY_TYPES,
     INVALID_TIMELINE_ENTRY_TYPE_ERROR,
 )
@@ -1653,6 +1656,71 @@ async def update_vulnerability(
             return f"Error updating vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_vulnerability: {str(e)}"
+
+
+async def update_finding(
+    finding_id: str,
+    name: str = None,
+    severity: str = None,
+    description: str = None,
+    status: str = None,
+    eta: str = None,
+    evidences: list = None,
+    ref_id: str = None,
+) -> str:
+    """Partially update a finding (only provided fields are updated)
+
+    No duplicate check on the name: like the app, two findings may share the
+    same name in one binder. A finding of a locked binder is refused by the
+    backend, whose error is returned as is.
+
+    Args:
+        finding_id: Finding UUID or exact name (an ambiguous name is refused)
+        name: New name
+        severity: undefined | info | low | medium | high | critical (case-insensitive)
+        description: New description
+        status: -- | identified | confirmed | dismissed | assigned | in_progress | mitigated | resolved | closed | deprecated
+        eta: Expected resolution date (YYYY-MM-DD)
+        evidences: List of evidence IDs/names (replaces existing)
+        ref_id: Reference ID
+    """
+    if severity is not None and _severity_value(severity) is None:
+        return _invalid_severity_error(severity)
+    try:
+        from ..resolvers import resolve_evidence_id, resolve_finding_id
+
+        payload = {}
+        if name is not None:
+            payload["name"] = name
+        if severity is not None:
+            payload["severity"] = _severity_value(severity)
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            payload["status"] = status
+        if eta is not None:
+            payload["eta"] = eta
+        if evidences is not None:
+            payload["evidences"] = [resolve_evidence_id(x) for x in evidences]
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        resolved_id = resolve_finding_id(finding_id)
+        res = make_patch_request(f"/findings/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            finding = res.json()
+            return (
+                f"Updated finding: {finding.get('name')} (ID: {finding.get('id')}, "
+                f"severity: {_severity_label(finding.get('severity'))})"
+            )
+        else:
+            return f"Error updating finding: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_finding: {str(e)}"
 
 
 async def delete_vulnerability(vulnerability_id: str) -> str:

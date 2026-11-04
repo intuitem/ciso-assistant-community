@@ -307,7 +307,7 @@ def test_scoping_helper_matches_the_interactive_endpoint(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
 def test_every_locale_template_renders(audit, lang):
     pdf, _ = _render(audit, "auditor", profile="attestation", lang=lang)
     assert pdf[:5] == b"%PDF-"
@@ -342,7 +342,55 @@ def test_unknown_locale_falls_back_whole():
         assert localized_template(stem, "de") == f"{stem}_en.typ"
         assert localized_template(stem, "fr") == f"{stem}_fr.typ"
         assert localized_template(stem, "fr-CA") == f"{stem}_fr.typ"
+        assert localized_template(stem, "tr") == f"{stem}_tr.typ"
+        assert localized_template(stem, "tr-TR") == f"{stem}_tr.typ"
         assert localized_template(stem, None) == f"{stem}_en.typ"
+
+
+@pytest.mark.django_db
+def test_turkish_template_does_not_drift_from_english(audit):
+    """Same page count as the English twin, and none of its English chrome."""
+    en_pdf, _ = _render(audit, "auditor", profile="attestation", lang="en")
+    tr_pdf, _ = _render(audit, "auditor", profile="attestation", lang="tr")
+
+    en_doc = pymupdf.open(stream=en_pdf, filetype="pdf")
+    tr_doc = pymupdf.open(stream=tr_pdf, filetype="pdf")
+    assert en_doc.page_count == tr_doc.page_count
+
+    tr_text = "".join(page.get_text() for page in tr_doc)
+    for english_only in ("Detailed results", "Assessed entity", "Signatures"):
+        assert english_only not in tr_text, (
+            "the Turkish template still has English chrome"
+        )
+
+
+@pytest.mark.django_db
+def test_turkish_requirement_status_values_are_localised(audit):
+    """Progress comes from `i18n_dict`, not from the template: without a `tr`
+    block it would fall back to English inside a Turkish document. The context is
+    built with `tr` here, as the views do from the user's language preference."""
+    for ra in RequirementAssessment.objects.filter(compliance_assessment=audit):
+        ra.status = "in_progress"
+        ra.result = "compliant"
+        ra.save()
+
+    context = gen_audit_context(audit.id, _tree(audit), "tr")
+    payload, images = audit_context_for_typst(context, audit, "auditor", "tr", "full")
+    statuses = {
+        ra["status"] for ra in payload["requirement_assessments"] if "status" in ra
+    }
+    assert statuses == {"Devam ediyor"}
+
+    pdf = render_pdf(localized_template("audit_report", "tr"), payload, images=images)
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert "Devam ediyor" in text
+    assert "In progress" not in text, "status fell back to English"
+
+
+def test_turkish_commitment_states_cover_every_state():
+    from core.generators import _STATE_LABELS
+
+    assert set(_STATE_LABELS["tr"]) == set(_STATE_LABELS["en"])
 
 
 @pytest.mark.django_db

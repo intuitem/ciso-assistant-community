@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 
@@ -215,9 +216,9 @@
 				formatter: function (params: any) {
 					const data = params[0];
 					return `
-						<div style="font-weight: bold">${data.data.name}</div>
-						<div>ALE: ${formatCurrency(data.data.value)}</div>
-						<div style="color: #666; font-size: 12px">${data.data.status}</div>
+						<div style="font-weight: bold">${escapeHtml(data.data.name)}</div>
+						<div>ALE: ${escapeHtml(formatCurrency(data.data.value))}</div>
+						<div style="color: #666; font-size: 12px">${escapeHtml(data.data.status)}</div>
 					`;
 				}
 			},
