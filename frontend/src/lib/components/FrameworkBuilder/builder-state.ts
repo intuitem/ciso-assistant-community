@@ -176,6 +176,10 @@ export interface Framework {
 	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
 	on_accept?: Record<string, unknown>[];
 	field_visibility: VisibilityMap;
+	/** Audit defaults proposed for new audits of the framework. */
+	score_calculation_method?: string;
+	anchor_na_to_target?: boolean;
+	target_score?: number | null;
 	/** Quick forms: ordered levels questions share (`config.scale`). */
 	scales_definition?: Scale[];
 	locale?: string;
@@ -869,6 +873,9 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			on_accept: fw.on_accept ?? [],
 			scales_definition: (fw.scales_definition ?? []) as unknown as Record<string, unknown>[],
 			field_visibility: fw.field_visibility,
+			score_calculation_method: fw.score_calculation_method,
+			anchor_na_to_target: fw.anchor_na_to_target,
+			target_score: fw.target_score,
 			urn_namespace: fw.urn_namespace,
 			ref_id: fw.ref_id
 		},
@@ -907,6 +914,9 @@ export function hydrateDraft(
 		on_accept: (meta.on_accept ?? []) as Record<string, unknown>[],
 		scales_definition: (meta.scales_definition ?? []) as unknown as Scale[],
 		field_visibility: meta.field_visibility ?? {},
+		score_calculation_method: meta.score_calculation_method,
+		anchor_na_to_target: meta.anchor_na_to_target,
+		target_score: meta.target_score,
 		urn_namespace: meta.urn_namespace ?? 'custom',
 		ref_id: meta.ref_id ?? null
 	};
@@ -2276,6 +2286,22 @@ export function createBuilderState(
 		flushDraft,
 		destroy
 	};
+}
+
+/** Same rule as Framework.scoring_defaults_problem: the i18n key of what audits
+ *  would refuse, if any. */
+export function scoringDefaultsProblem(fw: Framework): string | null {
+	const target = fw.target_score ?? null;
+	const groupTargets = (fw.implementation_groups_definition ?? [])
+		.map((group) => (group as Record<string, unknown>).target_score as number | null | undefined)
+		.filter((value): value is number => value != null);
+	if (target === null && (fw.anchor_na_to_target || groupTargets.length)) {
+		return 'targetScoreRequired';
+	}
+	const targets = target === null ? groupTargets : [target, ...groupTargets];
+	return targets.some((value) => value < fw.min_score || value > fw.max_score)
+		? 'targetScoreOutOfRange'
+		: null;
 }
 
 export function setBuilderContext(store: BuilderStore) {

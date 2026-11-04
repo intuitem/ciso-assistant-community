@@ -951,7 +951,7 @@ def validate_draft_document(draft, *, user=None) -> dict:
     dependencies and reference resolution) are scoped to what that user may
     read; hidden libraries behave as missing and their references come back
     unresolved. None means system context (unscoped)."""
-    from core.models import StoredLibrary
+    from core.models import Framework, StoredLibrary
     from library.utils import LibraryImporter
 
     errors = []
@@ -977,6 +977,17 @@ def validate_draft_document(draft, *, user=None) -> dict:
         # Splash screens are never assessable; the loader forces the flag off,
         # so tell the author instead of silently diverging from the draft.
         for framework in normalized.get("frameworks") or []:
+            # The loader only refuses these at import: report them before publish.
+            if problem := Framework.scoring_defaults_problem(
+                min_score=framework.get("min_score", 0),
+                max_score=framework.get("max_score", 100),
+                anchor_na_to_target=bool(framework.get("anchor_na_to_target")),
+                target_score=framework.get("target_score"),
+                implementation_groups_definition=framework.get(
+                    "implementation_groups_definition"
+                ),
+            ):
+                errors.append(problem[0])
             for node in framework.get("requirement_nodes") or []:
                 if node.get("display_mode") == "splash" and node.get("assessable"):
                     warnings.append(

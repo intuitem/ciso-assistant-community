@@ -999,6 +999,90 @@ def test_framework_editor_doc_round_trip_preserves_everything():
     assert question["choices"][0]["value"] == "Yes"
 
 
+def test_framework_editor_doc_round_trips_cyfun_scoring_defaults():
+    from library import framework_editor as fw_editor
+
+    path = Path(__file__).resolve().parents[1] / "libraries" / "cyfun2025.yaml"
+    with open(path, encoding="utf-8") as stream:
+        original = yaml.safe_load(stream)["objects"]["framework"]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    assert rebuilt["score_calculation_method"] == "average_of_averages"
+    assert rebuilt["anchor_na_to_target"] is True
+    assert rebuilt["target_score"] == 3.0
+    assert rebuilt["score_scale_locked"] is True
+
+
+def test_framework_editor_doc_edits_and_clears_scoring_defaults():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    assert doc["framework_meta"]["score_calculation_method"] == "average"
+
+    doc["framework_meta"].update(
+        score_calculation_method="sum", anchor_na_to_target=True, target_score=2.5
+    )
+    edited = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    assert edited["score_calculation_method"] == "sum"
+    assert edited["anchor_na_to_target"] is True
+    assert edited["target_score"] == 2.5
+
+    doc["framework_meta"].update(anchor_na_to_target=False, target_score=None)
+    cleared = fw_editor.editor_doc_to_framework_object(doc, existing=edited)
+    assert "anchor_na_to_target" not in cleared
+    assert "target_score" not in cleared
+
+
+def test_framework_editor_doc_without_scoring_keys_keeps_the_documents():
+    """An older client's payload does not reset the framework's defaults."""
+    from library import framework_editor as fw_editor
+
+    original = {
+        **builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0],
+        "score_calculation_method": "sum",
+        "target_score": 2.5,
+    }
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    for key in fw_editor.EDITOR_SCORING_KEYS:
+        del doc["framework_meta"][key]
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    assert rebuilt["score_calculation_method"] == "sum"
+    assert rebuilt["target_score"] == 2.5
+
+
+@pytest.mark.parametrize(
+    "meta",
+    [
+        {"score_calculation_method": "median"},
+        {"target_score": "high"},
+        {"target_score": True},
+    ],
+)
+def test_framework_editor_doc_refuses_bad_scoring_defaults(meta):
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    doc["framework_meta"].update(meta)
+    with pytest.raises(builder.BuilderError):
+        fw_editor.editor_doc_to_framework_object(doc, existing=original)
+
+
+@pytest.mark.django_db
+def test_validate_reports_scoring_defaults_problem(admin_client):
+    draft = _create_draft(admin_client)
+    framework = {
+        **builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0],
+        "anchor_na_to_target": True,
+    }
+    LibraryDraft.objects.filter(pk=draft["id"]).update(
+        content={"frameworks": [framework]}
+    )
+    result = builder.validate_draft_document(LibraryDraft.objects.get(pk=draft["id"]))
+    assert "targetScoreRequired" in result["errors"]
+
+
 def test_framework_editor_doc_mints_urns_for_new_items():
     from library import framework_editor as fw_editor
 
