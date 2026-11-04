@@ -1706,7 +1706,7 @@ export const IncidentSchema = z.object({
 	nis2_early_warning_at: z.string().datetime({ local: true }).optional().nullable(),
 	nis2_notification_at: z.string().datetime({ local: true }).optional().nullable(),
 	nis2_final_report_at: z.string().datetime({ local: true }).optional().nullable(),
-	nis2_reference: z.string().optional().default('')
+	nis2_reference: z.string().max(255).optional().default('')
 });
 
 export const DoraIncidentReportSchema = z.object({

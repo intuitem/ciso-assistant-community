@@ -781,7 +781,7 @@ def soa_rows(tree: dict, lang: str = "en") -> list[dict]:
     rows = []
 
     def walk(node):
-        if node.get("assessable"):
+        if node.get("assessable") and node.get("ra_id"):
             row = {
                 labels["ref_id"]: node.get("ref_id") or "",
                 labels["name"]: node.get("name") or node.get("description") or "",

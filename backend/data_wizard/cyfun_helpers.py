@@ -74,9 +74,12 @@ def _cell_text(row, col):
 def process_cyfun_file(file_content: bytes) -> dict:
     workbook = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
     sheet_names = set(workbook.sheetnames)
-    if any(f"{level.upper()} Details" in sheet_names for level in LEVELS):
+    is_2025 = all(name in sheet_names for name in FUNCTION_SHEETS)
+    if not is_2025 and any(
+        f"{level.upper()} Details" in sheet_names for level in LEVELS
+    ):
         return _process_cyfun_2023(workbook)
-    if not all(name in sheet_names for name in FUNCTION_SHEETS):
+    if not is_2025:
         raise ValueError("UnrecognizedCyfunWorkbook")
 
     level = None

@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { refreshAll } from '$app/navigation';
 	import { m } from '#paraglide/messages.js';
+	import { hasPermissionAnywhere } from '#lib/utils/access-control.js';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import ValidationFlowsSection from './ValidationFlowsSection.svelte';
@@ -40,13 +41,15 @@
 
 {#if page.data?.featureflags?.validation_flows && form}
 	<div class="flex flex-col gap-2">
-		<button
-			class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
-			onclick={requestValidation}
-			data-testid="request-validation-button"
-		>
-			<i class="fa-solid fa-check-circle mr-2"></i>{m.requestValidation()}
-		</button>
+		{#if hasPermissionAnywhere(page.data?.user, 'add_validationflow')}
+			<button
+				class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+				onclick={requestValidation}
+				data-testid="request-validation-button"
+			>
+				<i class="fa-solid fa-check-circle mr-2"></i>{m.requestValidation()}
+			</button>
+		{/if}
 		{#if flows?.length}
 			{#key flows}
 				<ValidationFlowsSection validationFlows={flows} />

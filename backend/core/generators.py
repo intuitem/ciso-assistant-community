@@ -688,7 +688,7 @@ def nis2_notification_context(
         # the CCB form asks for the chronology of all actions taken
         "timeline": [
             {"timestamp": stamp(e.timestamp), "entry": e.entry or ""}
-            for e in incident.timeline_entries.order_by("timestamp")
+            for e in seen(incident.timeline_entries.order_by("timestamp"))
         ],
         "actions": [{"name": c.name, "status_key": c.status or ""} for c in controls],
         "stages": [
@@ -724,9 +724,10 @@ def breach_notification_context(
         breach.incident if breach.incident and readable(breach.incident) else None
     )
     processings = seen(breach.affected_processings.all())
-    late = (
-        breach.authority_notification_due is not None
-        and (breach.authority_notified_on or now()) > breach.authority_notification_due
+    late = breach.authority_notification_overdue or (
+        breach.authority_notified_on is not None
+        and breach.authority_notification_due is not None
+        and breach.authority_notified_on > breach.authority_notification_due
     )
     personal_data = seen(breach.affected_personal_data.select_related("category"))
     return {
@@ -777,12 +778,15 @@ def breach_notification_context(
                 {
                     str(c.entity or c)
                     for p in processings
-                    for c in p.contractors_involved.filter(
-                        relationship_type__in=(
-                            "privacy_data_processor",
-                            "privacy_sub_processor",
-                        )
-                    ).select_related("entity")
+                    for c in seen(
+                        p.contractors_involved.filter(
+                            relationship_type__in=(
+                                "privacy_data_processor",
+                                "privacy_sub_processor",
+                            )
+                        ).select_related("entity")
+                    )
+                    if c.entity is None or readable(c.entity)
                 }
             ),
         },

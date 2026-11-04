@@ -16496,6 +16496,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             for key, field in row_fields.items()
             if not is_field_visible_to(compliance_assessment, field, viewer_role)
         ]
+        if "documentation_score" in hidden and "maturity_score" not in hidden:
+            hidden.append("maturity_score")
         framework_range = (framework.min_score, framework.max_score)
         audit_range = (compliance_assessment.min_score, compliance_assessment.max_score)
 
@@ -16525,6 +16527,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     **compliance_assessment.get_scores_for([ra]),
                 }
                 rows[ra.id].update(dict.fromkeys(hidden))
+                del rows[ra.id]["scored_count"], rows[ra.id]["total_weight"]
             return rows[ra.id]
 
         groups = []

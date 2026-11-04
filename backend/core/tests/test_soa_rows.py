@@ -12,6 +12,7 @@ def test_soa_rows_flattens_assessable_nodes_in_order_and_localizes():
                     "ref_id": "A.5.1",
                     "name": "Policies for information security",
                     "assessable": True,
+                    "ra_id": "ra-1",
                     "selected": True,
                     "observation": "Required by the ISMS scope",
                     "result": "partially_compliant",
@@ -25,6 +26,7 @@ def test_soa_rows_flattens_assessable_nodes_in_order_and_localizes():
                     "ref_id": "A.5.2",
                     "name": "Roles",
                     "assessable": True,
+                    "ra_id": "ra-2",
                     "selected": True,  # N/A result wins, as on the SoA page
                     "observation": "",
                     "result": "not_applicable",

@@ -7021,6 +7021,7 @@ class IncidentWriteSerializer(BaseModelSerializer):
                 "nis2_significant", getattr(self.instance, "nis2_significant", None)
             )
             and not reported_at
+            and (self.instance is not None or "reported_at" in attrs)
         ):
             raise serializers.ValidationError(
                 {"reported_at": "Reported date is required for a significant incident."}
