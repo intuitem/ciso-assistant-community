@@ -14,6 +14,16 @@
 		titleKey: string;
 		options: ExportOption[];
 	}
+
+	/** A filtered view offers to export only what it shows. */
+	export interface ExportSelection {
+		count: number;
+		total: number;
+		/** One "Filter: values" line per active filter. */
+		summary: string[];
+		/** The same groups, their links carrying the selection. */
+		groups: ExportGroup[];
+	}
 </script>
 
 <script lang="ts">
@@ -25,9 +35,13 @@
 		parent: any;
 		title?: string;
 		groups?: ExportGroup[];
+		selection?: ExportSelection;
 	}
 
-	let { parent, title = '', groups = [] }: Props = $props();
+	let { parent, title = '', groups = [], selection = undefined }: Props = $props();
+
+	let applySelection = $state(true);
+	const shownGroups = $derived(selection && applySelection ? selection.groups : groups);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -70,8 +84,36 @@
 			</h2>
 		</header>
 
+		{#if selection}
+			<label
+				class="flex gap-3 items-start p-3 rounded-container border cursor-pointer {applySelection
+					? 'border-primary-300 bg-primary-50/60 dark:bg-primary-950/30'
+					: 'border-surface-300'}"
+				data-testid="export-apply-selection"
+			>
+				<input type="checkbox" class="checkbox mt-0.5" bind:checked={applySelection} />
+				<span class="flex flex-col gap-1.5 min-w-0">
+					<span>
+						<strong>{m.applySelection()}</strong>
+						<span class="text-surface-600-400">
+							· {m.scenarioSelectionCount({ count: selection.count, total: selection.total })}
+						</span>
+					</span>
+					<span class="flex flex-wrap gap-1.5">
+						{#each selection.summary as line}
+							<span
+								class="text-xs rounded-full border border-primary-200 bg-surface-50-950 px-2.5 py-0.5"
+								>{line}</span
+							>
+						{/each}
+					</span>
+					<span class="text-xs text-surface-600-400">{m.applySelectionHelp()}</span>
+				</span>
+			</label>
+		{/if}
+
 		<div class="space-y-5">
-			{#each groups as group}
+			{#each shownGroups as group}
 				{#if group.options.length > 0}
 					<section>
 						{#if group.titleKey}

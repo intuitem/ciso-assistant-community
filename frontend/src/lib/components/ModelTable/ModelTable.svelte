@@ -37,7 +37,7 @@
 	}
 	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
 	import { toCamelCase } from '#lib/utils/locales.js';
-	import { onMount, tick, untrack } from 'svelte';
+	import { onMount, tick, untrack, type Component } from 'svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { applyUnreadCount } from '#lib/utils/stores.js';
 
@@ -136,6 +136,12 @@
 		deleteForm?: SuperValidated<FormDataShape>;
 		URLModel?: urlModel;
 		baseEndpoint?: string;
+		/** Query appended to every request without becoming part of `baseEndpoint`,
+		 *  so the table's own filter state and sort stay keyed to the same table
+		 *  while the extra params change. A change refetches. */
+		extraParams?: string;
+		/** Cell components for this table only, over the model's defaults. */
+		fieldComponents?: Record<string, Component<any>>;
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
@@ -202,6 +208,8 @@
 		deleteForm = undefined,
 		URLModel = undefined,
 		baseEndpoint = `/${URLModel}`,
+		extraParams = '',
+		fieldComponents = {},
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
@@ -492,7 +500,7 @@
 			currentLoad = loadTableData({
 				state,
 				URLModel,
-				endpoint: baseEndpoint,
+				endpoint: withExtraParams(baseEndpoint, extraParams),
 				fields:
 					showColumnSelector && allColumnKeys.length > 0
 						? { head: allColumnKeys, body: allColumnKeys }
@@ -521,6 +529,23 @@
 			return currentLoad;
 		});
 	}
+
+	function withExtraParams(endpoint: string, params: string) {
+		if (!params) return endpoint;
+		return `${endpoint}${endpoint.includes('?') ? '&' : '?'}${params}`;
+	}
+
+	let previousExtraParams = extraParams;
+	$effect(() => {
+		if (extraParams === previousExtraParams) return;
+		previousExtraParams = extraParams;
+		// New params mean a new row set: start from its first page.
+		if (hasRemoteSource)
+			untrack(() => {
+				handler.setPage(1);
+				handler.invalidate();
+			});
+	});
 
 	function applySavedSort() {
 		const saved = $tableSortStates[filterStoreKey];
@@ -750,7 +775,7 @@
 		}
 	});
 
-	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
+	let fieldComponentMap = $derived({ ...getFieldComponentMap(URLModel), ...fieldComponents });
 	let canCreateObject = $derived(
 		model
 			? page.params.id
