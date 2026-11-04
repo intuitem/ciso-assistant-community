@@ -5,7 +5,7 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.apps import startup
-from core.models import AppliedControl, Asset, Policy, ReferenceControl
+from core.models import AppliedControl, Asset, Comment, Policy, ReferenceControl
 from core.views import FolderViewSet
 from custom_fields.models import CustomFieldDefinition
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
@@ -491,6 +491,38 @@ def test_move_preview_names_only_the_models_the_caller_may_view(
     # Three assets, plus the mover's own role assignment and group in Target.
     assert payload["carried"]["hidden_count"] == 5
     assert "blind-mover@cascade.test" not in res.content.decode()
+
+
+def test_move_preview_does_not_name_people_through_str(
+    app_ready: Folder, domain_tree: dict[str, Folder]
+) -> None:
+    """A comment's `__str__` names its author: the preview must not, for a caller who
+    may read the comment but not the user."""
+    author = User.objects.create_user("secret.author@cascade.test")
+    author.first_name, author.last_name = "Secret", "Author"
+    author.save()
+    control = AppliedControl.objects.create(name="AC", folder=domain_tree["sub"])
+    Comment.objects.create(
+        body="hello", author=author, applied_control=control, folder=domain_tree["sub"]
+    )
+    mover = Role.objects.create(name="COMMENT-MOVER", folder=app_ready)
+    mover.permissions.set(
+        Permission.objects.filter(
+            codename__in=["view_folder", "change_folder", "view_comment"]
+        )
+    )
+    client = _scoped_client(
+        "comment-mover@cascade.test", "COMMENT-MOVER", domain_tree["target"], app_ready
+    )
+
+    res = client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    assert _group(res.json(), "Comment")["count"] == 1
+    assert "Secret Author" not in res.content.decode()
+    assert "secret.author" not in res.content.decode()
 
 
 def test_move_preview_leaves_out_what_stays_in_other_domains(

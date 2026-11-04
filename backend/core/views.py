@@ -88,7 +88,7 @@ from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
 
 from django.utils import timezone, translation
-from django.utils.text import slugify
+from django.utils.text import capfirst, slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -2126,18 +2126,6 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         return Response({"succeeded": succeeded, "failed": failed})
 
-    @staticmethod
-    def _cascade_display_name(obj: models.Model) -> str:
-        """How a cascade or move preview names an object."""
-        if isinstance(obj, RoleAssignment):
-            role_name = getattr(getattr(obj, "role", None), "name", "") or ""
-            if getattr(obj, "user", None):
-                return f"{role_name} → {getattr(obj.user, 'email', '')}"
-            if getattr(obj, "user_group", None):
-                return f"{role_name} → {getattr(obj.user_group, 'name', '')}"
-            return role_name
-        return getattr(obj, "name", None) or getattr(obj, "email", None) or str(obj)
-
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
         """
@@ -2239,7 +2227,20 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             if (key, pk) in bucket["_seen"]:
                 return
 
-            display = self._cascade_display_name(obj)
+            if key == "RoleAssignment":
+                role_name = getattr(getattr(obj, "role", None), "name", "") or ""
+                if getattr(obj, "user", None):
+                    display = f"{role_name} → {getattr(obj.user, 'email', '')}"
+                elif getattr(obj, "user_group", None):
+                    display = f"{role_name} → {getattr(obj.user_group, 'name', '')}"
+                else:
+                    display = role_name
+            else:
+                display = (
+                    getattr(obj, "name", None)
+                    or getattr(obj, "email", None)
+                    or str(obj)
+                )
 
             group = bucket["by_model"].setdefault(
                 key,
@@ -9562,6 +9563,10 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
     # Names returned per group; the count still covers every object in it.
     MOVE_PREVIEW_NAMES_PER_GROUP = 50
+    # The object's own fields that may name it in the move preview. `__str__` is not
+    # used: on some models it embeds a related person (a comment's author, an
+    # answer's owner) the caller may not be allowed to see.
+    MOVE_PREVIEW_NAME_FIELDS = ("name", "email", "label", "title", "ref_id", "filename")
     MOVE_PREVIEW_FOLDER_LABELS = {
         Folder.ContentType.DOMAIN: _("Domain"),
         Folder.ContentType.ENCLAVE: _("Enclave"),
@@ -9647,7 +9652,11 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
         def display_name(obj) -> str:
             if not isinstance(obj, RoleAssignment):
-                return self._cascade_display_name(obj)
+                fields = {field.name for field in obj._meta.concrete_fields}
+                for field in self.MOVE_PREVIEW_NAME_FIELDS:
+                    if field in fields and (value := getattr(obj, field)):
+                        return str(value)
+                return f"{capfirst(obj._meta.verbose_name)} {str(obj.pk)[:8]}"
             # The assignment is viewable, its role and principal not necessarily:
             # name only what the caller could read on its own.
             role = (
