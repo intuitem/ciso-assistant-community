@@ -73,6 +73,44 @@ class TestOIDCPreSSOMainBehavior:
         assert sociallogin.user == user
         sociallogin.connect.assert_called_once_with(request, user)
 
+    @pytest.mark.parametrize(
+        "extra_data",
+        [
+            {"email": "alice@example.com", "email_verified": False},
+            {"userinfo": {"email": "alice@example.com", "email_verified": "false"}},
+            {"id_token": {"email": "alice@example.com", "email_verified": False}},
+        ],
+    )
+    def test_unverified_email_is_not_linked(self, extra_data):
+        User.objects.create_user(email="alice@example.com", password="pw")
+        sociallogin = FakeSocialLogin(extra_data=extra_data)
+
+        response = SocialAccountAdapter().pre_social_login(
+            RequestFactory().get("/"), sociallogin
+        )
+
+        assert response.status_code == 401
+        sociallogin.connect.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "extra_data",
+        [
+            {"userinfo": {"email": "alice@example.com"}},
+            {"id_token": {"email": "alice@example.com"}},
+            {"email": "alice@example.com", "email_verified": True},
+            {"userinfo": {"email": "alice@example.com", "email_verified": "true"}},
+        ],
+    )
+    def test_missing_or_true_email_verified_is_linked(self, extra_data):
+        user = User.objects.create_user(email="alice@example.com", password="pw")
+        sociallogin = FakeSocialLogin(extra_data=extra_data)
+        request = RequestFactory().get("/")
+
+        response = SocialAccountAdapter().pre_social_login(request, sociallogin)
+
+        assert response is None
+        sociallogin.connect.assert_called_once_with(request, user)
+
     def test_unknown_email_without_sso_settings_returns_401(self):
         sociallogin = FakeSocialLogin(extra_data={"email": "ghost@example.com"})
         request = RequestFactory().get("/")

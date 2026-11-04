@@ -22,7 +22,11 @@ from statistics import mean
 import math
 
 from .models import *
-from .utils import build_answers_dict, camel_case
+from .utils import (
+    build_answers_dict,
+    camel_case,
+    restrict_to_respondent_assignments,
+)
 
 DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
@@ -1111,6 +1115,10 @@ def combined_assessments_per_status(
             user, model, scoped_folder
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
+        if model is ComplianceAssessment:
+            viewable_assessments = restrict_to_respondent_assignments(
+                user, viewable_assessments, "requirement_assignments__actor__in"
+            )
 
         # Count by status in a single query
         status_counts = dict(
@@ -1423,14 +1431,24 @@ def build_audits_tree_metrics(user):
     return tree
 
 
+def _respondent_scoped_audit_ids(user, scoped_folder):
+    return restrict_to_respondent_assignments(
+        user,
+        ComplianceAssessment.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                user, ComplianceAssessment, scoped_folder
+            )
+        ),
+        "requirement_assignments__actor__in",
+    ).values_list("id", flat=True)
+
+
 def build_audits_stats(user, folder_id=None, object_ids=None):
     if object_ids is None:
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        object_ids = RoleAssignment.get_viewable_object_ids(
-            user, ComplianceAssessment, scoped_folder
-        )
+        object_ids = _respondent_scoped_audit_ids(user, scoped_folder)
     top_audits = list(
         ComplianceAssessment.objects.filter(id__in=object_ids)
         .order_by("-updated_at")
@@ -1510,12 +1528,20 @@ def get_metrics(user: User, folder_id):
 
     viewable_controls = viewable_items(AppliedControl, folder_id)
     viewable_risk_assessments = viewable_items(RiskAssessment, folder_id)
-    viewable_compliance_assessments = viewable_items(ComplianceAssessment, folder_id)
+    viewable_compliance_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(ComplianceAssessment, folder_id),
+        "requirement_assignments__actor__in",
+    )
     viewable_risk_scenarios = viewable_items(RiskScenario, folder_id)
     viewable_threats = viewable_items(Threat, folder_id)
     viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
     viewable_evidences = viewable_items(Evidence, folder_id)
-    viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
+    viewable_requirement_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(RequirementAssessment, folder_id),
+        "assignments__actor__in",
+    )
     controls_count = viewable_controls.count()
     missed_eta_count = (
         viewable_controls.filter(
@@ -1610,9 +1636,7 @@ def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    object_ids = RoleAssignment.get_viewable_object_ids(
-        user, ComplianceAssessment, scoped_folder
-    )
+    object_ids = _respondent_scoped_audit_ids(user, scoped_folder)
     progresses = list(_compute_progress_by_assessment(object_ids).values())
     progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
@@ -1659,8 +1683,10 @@ def get_compliance_analytics(user: User, folder_id=None):
         object_ids = RoleAssignment.get_viewable_object_ids(user, model, scoped_folder)
         return model.objects.filter(id__in=object_ids)
 
-    viewable_assessments = viewable_items(
-        ComplianceAssessment, folder_id
+    viewable_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(ComplianceAssessment, folder_id),
+        "requirement_assignments__actor__in",
     ).select_related("framework", "folder", "perimeter")
 
     progress_by_id = _compute_progress_by_assessment(
@@ -1800,14 +1826,7 @@ def risk_status(user: User, risk_assessment_list):
         "transfer": list(),
         "cancelled": list(),
     }
-    mtg_status_out = {
-        "--": list(),
-        "to_do": list(),
-        "in_progress": list(),
-        "on_hold": list(),
-        "active": list(),
-        "deprecated": list(),
-    }
+    mtg_status_out = {status: list() for status in AppliedControl.Status.values}
 
     max_tmp = list()
     abbreviations = [x[0] for x in get_rating_options_abbr(user)]

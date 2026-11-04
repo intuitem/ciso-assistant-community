@@ -267,7 +267,6 @@ from core.quick_form_targets import get_target
 
 logger = structlog.get_logger(__name__)
 
-SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
@@ -10720,8 +10719,6 @@ def get_analytics_export_xlsx(request):
 # TODO: Add all the proper docstrings for the following list of functions
 
 
-@cache_page(60 * SHORT_CACHE_TTL)
-@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_agg_data(request):

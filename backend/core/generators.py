@@ -1282,7 +1282,11 @@ class DocxReportSandbox(ImmutableSandboxedEnvironment):
 
 def render_docx_report(doc: DocxTemplate, context: dict) -> None:
     """Render `doc` in place with `context`, charts included."""
-    doc.render(inline_charts_for_docx(context, doc), jinja_env=DocxReportSandbox())
+    doc.render(
+        inline_charts_for_docx(context, doc),
+        jinja_env=DocxReportSandbox(),
+        autoescape=True,
+    )
 
 
 DOCX_RENDER_TIMEOUT = 60
