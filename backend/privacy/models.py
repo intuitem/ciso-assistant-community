@@ -151,7 +151,6 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     dpia_required_set_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("DPIA requirement set at")
     )
-    has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
@@ -177,14 +176,6 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     @property
     def dpia_applies(self) -> bool:
         return self.role in self.DPIA_ROLES
-
-    def update_sensitive_data_flag(self):
-        """Update the has_sensitive_personal_data flag based on associated personal data"""
-        has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
-
-        if has_sensitive != self.has_sensitive_personal_data:
-            self.has_sensitive_personal_data = has_sensitive
-            self.save(update_fields=["has_sensitive_personal_data"])
 
     def metrics(self):
         return {}
@@ -296,27 +287,7 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
         self.folder = self.processing.folder
         if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
-        previous_processing_id = (
-            None
-            if self._state.adding
-            else PersonalData.objects.filter(pk=self.pk)
-            .values_list("processing_id", flat=True)
-            .first()
-        )
         super().save(*args, **kwargs)
-
-        # Moving the item to another processing changes both flags
-        self.processing.update_sensitive_data_flag()
-        if previous_processing_id not in (None, self.processing_id):
-            Processing.objects.get(
-                pk=previous_processing_id
-            ).update_sensitive_data_flag()
-
-    def delete(self, *args, **kwargs):
-        processing = self.processing
-        result = super().delete(*args, **kwargs)
-        processing.update_sensitive_data_flag()
-        return result
 
     @classmethod
     def get_categories_count(cls, filters: dict = {}):
