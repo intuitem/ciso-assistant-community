@@ -232,6 +232,19 @@ from .serializers import *
 from .models import Severity
 from . import dora, framework_exports
 from core.asset_graph import walk_asset_graph
+from core.scenario_selection import (
+    LINK_ADDITIONAL,
+    LINK_ALL,
+    LINK_EXISTING,
+    LINK_TYPE_PARAM,
+    action_plan_controls,
+    append_selection_sheet,
+    link_q,
+    resolve_link_type,
+    resolve_selection,
+    selection_facets,
+    selection_report_context,
+)
 
 DEPENDENCY_GRAPH_LIMIT = 300
 DEPENDENCY_GRAPH_MAX_LIMIT = 2000
@@ -4844,18 +4857,27 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         risk_assessment = RiskAssessment.objects.get(id=pk)
-        risk_scenarios = risk_assessment.risk_scenarios.all()
-        queryset = AppliedControl.objects.filter(
-            risk_scenarios__in=risk_scenarios
-        ).distinct()
+        selection = resolve_selection(request, risk_assessment)
+        link_type = resolve_link_type(request)
+        queryset = action_plan_controls(request.user, selection.scenarios, link_type)
 
+        context = {"pk": pk, "link_type": link_type}
+        if selection.active:
+            context["selected_scenario_ids"] = set(
+                selection.scenarios.values_list("id", flat=True)
+            )
         serializer = RiskAssessmentActionPlanSerializer(
-            queryset, many=True, context={"pk": pk}
+            queryset, many=True, context=context
         )
 
         wb = Workbook()
         ws = wb.active
         ws.title = "Action Plan"
+        report_selection = selection_report_context(
+            selection, risk_assessment.risk_scenarios.count()
+        )
+        if report_selection:
+            append_selection_sheet(wb, report_selection)
 
         headers = [
             "Name",
@@ -4935,6 +4957,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
+            selection = resolve_selection(request, risk_assessment)
 
             response = HttpResponse(content_type="text/csv; charset=utf-8")
             response.write("\ufeff")
@@ -4970,7 +4993,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 )
             writer.writerow(columns)
 
-            for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
+            for scenario in selection.scenarios.order_by("ref_id"):
                 additional_controls = ",".join(
                     [m.name for m in scenario.applied_controls.all()]
                 )
@@ -5032,6 +5055,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         risk_assessment = self.get_object()
+        selection = resolve_selection(request, risk_assessment)
         entries = []
 
         columns = [
@@ -5060,7 +5084,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             columns.insert(columns.index("existing_applied_controls"), "inherent_proba")
             columns.insert(columns.index("existing_applied_controls"), "inherent_level")
 
-        scenarios = risk_assessment.risk_scenarios.prefetch_related(
+        scenarios = selection.scenarios.prefetch_related(
             "applied_controls",
             "existing_applied_controls",
             "threats",
@@ -5145,6 +5169,12 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 else:
                     worksheet.column_dimensions[column_letter].width = 20
 
+            report_selection = selection_report_context(
+                selection, risk_assessment.risk_scenarios.count()
+            )
+            if report_selection:
+                append_selection_sheet(writer.book, report_selection)
+
         buffer.seek(0)
         response = HttpResponse(
             buffer.read(),
@@ -5163,16 +5193,13 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
-            scenarios = (
-                RiskScenario.objects.filter(risk_assessment=risk_assessment)
-                .prefetch_related(
-                    "threats",
-                    "assets",
-                    "applied_controls",
-                    "existing_applied_controls",
-                )
-                .order_by("ref_id")
-            )
+            selection = resolve_selection(request, risk_assessment)
+            scenarios = selection.scenarios.prefetch_related(
+                "threats",
+                "assets",
+                "applied_controls",
+                "existing_applied_controls",
+            ).order_by("ref_id")
             for scenario in scenarios:
                 scenario.strength_of_knowledge = RiskScenario.DEFAULT_SOK_OPTIONS[
                     scenario.strength_of_knowledge
@@ -5192,6 +5219,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 build_scenario_clusters(
                     risk_assessment,
                     include_inherent=feature_flags.get("inherent_risk", False),
+                    scenarios=selection.scenarios,
                 ),
                 swap_axes=settings_value.get("risk_matrix_swap_axes", False),
                 flip_vertical=settings_value.get("risk_matrix_flip_vertical", False),
@@ -5201,6 +5229,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "use_risk_category_label", False
                 ),
                 tz=get_report_timezone(),
+            )
+            payload["selection"] = selection_report_context(
+                selection, risk_assessment.risk_scenarios.count()
             )
             response = HttpResponse(
                 render_pdf(localized_template("risk_report", lang), payload),
@@ -5221,22 +5252,27 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             risk_assessment: RiskAssessment = self.get_object()
-            scenarios = risk_assessment.risk_scenarios.all()
+            selection = resolve_selection(request, risk_assessment)
+            link_type = resolve_link_type(request)
+            scenarios = selection.scenarios
             applied_controls = list(
-                AppliedControl.objects.filter(risk_scenarios__in=scenarios)
-                .distinct()
-                .prefetch_related("risk_scenarios", actor_prefetch("owner"))
+                action_plan_controls(request.user, scenarios, link_type)
+                .prefetch_related(
+                    "risk_scenarios", "risk_scenarios_e", actor_prefetch("owner")
+                )
                 .order_by("eta")
             )
             scenario_ids = {scenario.id for scenario in scenarios}
-            linked = {
-                control.id: [
-                    str(scenario)
-                    for scenario in control.risk_scenarios.all()
-                    if scenario.id in scenario_ids
-                ]
-                for control in applied_controls
-            }
+            linked = {}
+            for control in applied_controls:
+                related = []
+                if link_type != LINK_EXISTING:
+                    related += control.risk_scenarios.all()
+                if link_type != LINK_ADDITIONAL:
+                    related += control.risk_scenarios_e.all()
+                linked[control.id] = sorted(
+                    {str(s) for s in related if s.id in scenario_ids}
+                )
             lang = request.user.preferences.get("lang") or "en"
             payload = action_plan_context(
                 risk_assessment,
@@ -5244,6 +5280,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 lang,
                 linked,
                 tz=get_report_timezone(),
+            )
+            payload["selection"] = selection_report_context(
+                selection, risk_assessment.risk_scenarios.count()
             )
             response = HttpResponse(
                 render_pdf(localized_template("action_plan", lang), payload),
@@ -5256,6 +5295,37 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
+
+    @action(detail=True, methods=["get"], url_path="scenario-selection")
+    def scenario_selection(self, request, pk):
+        """Resolve the `scenario__*` params into the selected scenarios.
+
+        Returns the selected ids and counts, the values dropped because their
+        object no longer exists, and, per filter the selection bar offers, how
+        many scenarios each value would keep given the other active filters.
+        """
+        risk_assessment = self.get_object()
+        selection = resolve_selection(request, risk_assessment)
+        return Response(
+            {
+                "count": selection.scenarios.count(),
+                "total": risk_assessment.risk_scenarios.count(),
+                "ids": [
+                    str(pk) for pk in selection.scenarios.values_list("id", flat=True)
+                ],
+                "filters": selection.filters,
+                "ignored": selection.ignored,
+                "risk_tolerance": risk_assessment.risk_tolerance,
+                # Level names, translated, indexed by level value.
+                "levels": [
+                    str(level.get("name", ""))
+                    for level in risk_assessment.risk_matrix.parse_json_translated().get(
+                        "risk", []
+                    )
+                ],
+                "facets": selection_facets(selection, request),
+            }
+        )
 
     @action(
         detail=True,
@@ -5911,6 +5981,22 @@ class AppliedControlFilterSet(GenericFilterSet):
             )
             if len(risk_assessments) == 0:
                 return queryset
+            if len(risk_assessments) == 1 and self.request is not None:
+                # Flash mode opened from a risk assessment's action plan carries
+                # its scenario selection and link type.
+                # Without a link type this filter keeps its historical meaning:
+                # additional measures only.
+                selection = resolve_selection(self.request, risk_assessments[0])
+                has_link_type = LINK_TYPE_PARAM in self.request.GET
+                if selection.active or has_link_type:
+                    link_type = (
+                        resolve_link_type(self.request)
+                        if has_link_type
+                        else LINK_ADDITIONAL
+                    )
+                    return queryset.filter(
+                        link_q(selection.scenarios, link_type)
+                    ).distinct()
             risk_scenarios = chain.from_iterable(
                 [ra.risk_scenarios.all() for ra in risk_assessments]
             )
@@ -7892,17 +7978,22 @@ class RiskAssessmentActionPlanList(ActionPlanList):
             raise PermissionDenied()
 
         assessment = RiskAssessment.objects.get(id=risk_id)
-        risk_scenarios = assessment.risk_scenarios.all()
-
-        qs = AppliedControl.objects.filter(
-            Q(risk_scenarios__in=risk_scenarios)
-            | Q(risk_scenarios_e__in=risk_scenarios)
-        ).distinct()
-
-        viewable_controls = RoleAssignment.get_viewable_object_ids(
-            self.request.user, AppliedControl
+        self.selection = resolve_selection(self.request, assessment)
+        self.link_type = resolve_link_type(self.request)
+        return action_plan_controls(
+            self.request.user, self.selection.scenarios, self.link_type
         )
-        return qs.filter(id__in=viewable_controls)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        # Set by get_queryset; absent when the schema generator builds a serializer.
+        selection = getattr(self, "selection", None)
+        context["link_type"] = getattr(self, "link_type", None) or LINK_ALL
+        if selection is not None and selection.active:
+            context["selected_scenario_ids"] = set(
+                selection.scenarios.values_list("id", flat=True)
+            )
+        return context
 
 
 class ComplianceAssessmentActionPlanBudgetOverview(
