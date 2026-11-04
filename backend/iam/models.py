@@ -2560,6 +2560,14 @@ class ConnectionProfile(models.Model):
     (which includes delete). It only narrows: the app never gets more than the
     user who connects it."""
 
+    # (name, can_create, can_update, is_default): one per combination
+    BUILTIN = (
+        ("Read only", False, False, True),
+        ("Read and create", True, False, False),
+        ("Read and update", False, True, False),
+        ("Read, create and update", True, True, False),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, default="")
@@ -2591,6 +2599,19 @@ class ConnectionProfile(models.Model):
     @classmethod
     def default(cls) -> "ConnectionProfile | None":
         return cls.objects.filter(is_default=True).first()
+
+    @classmethod
+    def sync_builtin(cls) -> None:
+        for name, can_create, can_update, is_default in cls.BUILTIN:
+            cls.objects.update_or_create(
+                name=name,
+                defaults={
+                    "can_create": can_create,
+                    "can_update": can_update,
+                    "is_default": is_default,
+                    "builtin": True,
+                },
+            )
 
 
 class AppGrant(models.Model):

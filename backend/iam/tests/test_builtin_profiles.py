@@ -4,7 +4,7 @@ from iam.models import ConnectionProfile
 
 
 @pytest.mark.django_db
-def test_the_migrations_seed_the_four_builtin_profiles():
+def test_startup_creates_the_four_builtin_profiles():
     profiles = sorted(ConnectionProfile.objects.all(), key=lambda p: p.rank)
     assert [(p.name, p.actions, p.builtin) for p in profiles] == [
         ("Read only", ["read"], True),

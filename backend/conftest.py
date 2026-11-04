@@ -27,7 +27,7 @@ def mcp_on(db):
 @pytest.fixture
 def app_profile(db):
     """A profile for the connections a test makes: a transactional test flushes
-    the ones the migration seeds."""
+    the built-in ones startup creates."""
     from iam.models import ConnectionProfile
 
     profile, _ = ConnectionProfile.objects.get_or_create(

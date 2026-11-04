@@ -2360,7 +2360,7 @@ def startup(sender=None, **kwargs):
         ObjectClassification,
         Terminology,
     )
-    from iam.models import Folder, Role, User
+    from iam.models import ConnectionProfile, Folder, Role, User
     from tprm.models import Entity
     from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
@@ -2394,6 +2394,8 @@ def startup(sender=None, **kwargs):
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+
+    ConnectionProfile.sync_builtin()
 
     # When nothing installed makes the default role configurable, it is
     # hard-coded: the root folder carries the baseline reader role and nothing
