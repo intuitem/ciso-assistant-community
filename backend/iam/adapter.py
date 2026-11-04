@@ -18,6 +18,8 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
+from core.custom_middleware import resolve_client_ip
+
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -41,7 +43,25 @@ class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return False
 
+    def get_client_ip(self, request):
+        client_ip = resolve_client_ip(request)
+        if client_ip is not None:
+            return client_ip
+        else:
+            return super().get_client_ip(request)
+
     def authenticate(self, request, **credentials):
+        # We need to call this for allauth rate-limiting to still be applied (even though we implement our own `authenticate` method).
+        self.pre_authenticate(request, **credentials)
+        user = self._authenticate_local(credentials)
+        if user:
+            # Rollback the failed login counter increment (as we don't want a successfull login to be considered(counted) as "failed").
+            self._rollback_login_failed_rl_usage()
+        else:
+            self.authentication_failed(request, **credentials)
+        return user
+
+    def _authenticate_local(self, credentials):
         try:
             serializer = AuthTokenSerializer(
                 data={

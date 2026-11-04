@@ -14,6 +14,10 @@ services:
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
+    depends_on:
+      - memcached
     read_only: true
     cap_drop:
       - ALL
@@ -39,6 +43,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      memcached:
+        condition: service_started
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -50,6 +56,8 @@ services:
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
     read_only: true
     cap_drop:
       - ALL
@@ -74,6 +82,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
     read_only: true
@@ -87,6 +97,18 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+
+  memcached:
+    container_name: memcached
+    image: ${MEMCACHED_IMAGE:-memcached:1.6-alpine}
+    restart: unless-stopped
+    command: ["memcached", "-m", "16"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
 
   qdrant:
     container_name: qdrant

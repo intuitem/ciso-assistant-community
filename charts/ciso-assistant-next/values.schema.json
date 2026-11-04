@@ -306,6 +306,10 @@
                     "properties": {
                         "bodySizeLimit": {
                             "type": "string"
+                        },
+                        "xffDepth": {
+                            "type": "integer",
+                            "minimum": 1
                         }
                     },
                     "additionalProperties": false
@@ -502,6 +506,45 @@
                         }
                     },
                     "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "memcached": {
+            "type": "object",
+            "properties": {
+                "containerSecurityContext": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "memoryLimit": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "resources": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             },
             "additionalProperties": false

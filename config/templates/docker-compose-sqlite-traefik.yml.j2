@@ -4,6 +4,9 @@ services:
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
     restart: always
+    depends_on:
+      memcached:
+        condition: service_started
     environment:
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
@@ -13,6 +16,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
       - EMAIL_PORT={{ email.port }}
@@ -51,6 +56,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      memcached:
+        condition: service_started
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -61,6 +68,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
       - EMAIL_PORT={{ email.port }}
@@ -84,6 +93,18 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
+  memcached:
+    container_name: memcached
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+    command: ["memcached", "-m", "16"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+
   frontend:
     container_name: frontend
     environment:
@@ -91,6 +112,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config

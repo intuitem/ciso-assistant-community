@@ -7,6 +7,7 @@ services:
     restart: always
     depends_on:
       - postgres
+      - memcached
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
@@ -15,6 +16,8 @@ services:
       - POSTGRES_USER=ciso_assistant
       - POSTGRES_PASSWORD=ciso_assistant
       - DB_HOST=postgres
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
     volumes:
       - ./db:/code/db
 
@@ -25,6 +28,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - backend
+      - memcached
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -34,6 +38,8 @@ services:
       - POSTGRES_USER=ciso_assistant
       - POSTGRES_PASSWORD=ciso_assistant
       - DB_HOST=postgres
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
     volumes:
       - ./db:/code/db
     entrypoint:
@@ -42,12 +48,26 @@ services:
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
 
+  memcached:
+    container_name: memcached
+    image: ${MEMCACHED_IMAGE:-memcached:1.6-alpine}
+    restart: unless-stopped
+    command: ["memcached", "-m", "16"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+
   frontend:
     container_name: frontend
     environment:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
 
     build:
       context: ./frontend

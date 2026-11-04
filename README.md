@@ -892,6 +892,7 @@ The following recommendations apply for production:
 - Use non-root deployment, as explained below.
 - Use a valid certificate for the reverse proxy
 - If the reverse proxy is not running on the same host as the backend and frontend, use a VPN like wireguard between the nodes.
+- Ensure the reverse proxy sets the `X-Forwarded-For` header (it is trusted by the login rate limiting).
 - Use an encrypted volume for the database, and manage the encryption key cautiously.
 - Manage secrets in environment variables instead of putting them directly in the docker-compose.yml file.
 

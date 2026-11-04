@@ -170,6 +170,7 @@ spec:
           - name: QDRANT_URL
             value: {{ include "ciso-assistant.qdrantUrl" . }}
           {{- end }}
+          {{- include "ciso-assistant.memcachedEnv" . | nindent 10 }}
           {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         ports:
           - name: http
@@ -332,6 +333,7 @@ spec:
           - name: QDRANT_URL
             value: {{ include "ciso-assistant.qdrantUrl" . }}
           {{- end }}
+          {{- include "ciso-assistant.memcachedEnv" . | nindent 10 }}
           {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         volumeMounts:
           - name: tmp-data
@@ -359,6 +361,21 @@ spec:
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
+      {{- if .Values.memcached.enabled }}
+      # Shared cache for the backend and Huey containers of this pod.
+      - name: memcached
+        image: {{ .Values.memcached.image.registry }}/{{ .Values.memcached.image.repository }}:{{ .Values.memcached.image.tag }}
+        imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.memcached.image.imagePullPolicy }}
+        args: ["memcached", "-l", "127.0.0.1", "-p", "11211", "-m", {{ .Values.memcached.memoryLimit | quote }}]
+        {{- if .Values.memcached.resources }}
+        resources:
+          {{- toYaml .Values.memcached.resources | nindent 10 }}
+        {{- end }}
+        {{- with .Values.memcached.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.backend.nodeSelector | default .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
