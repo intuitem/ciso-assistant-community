@@ -35,6 +35,11 @@ from core.views import (
     RoleFilter,
     SmartOrderingFilter,
 )
+from core.serializers import (
+    USER_ACCOUNT_FIELDS,
+    can_see_user_account,
+    user_account_folder_ids,
+)
 from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_respondent_scoped_folder_ids
 from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
@@ -1295,6 +1300,10 @@ class ObjectAuditTrailView(APIView):
     permission_classes = [IsAuthenticated]
 
     MAX_ENTRIES = 200
+    # Logged on a user but only for who may see the account (see
+    # USER_ACCOUNT_FIELDS): its account fields, and login activity that no
+    # serializer shows at all.
+    USER_ACCOUNT_LOG_FIELDS = (*USER_ACCOUNT_FIELDS, "last_login", "first_login")
 
     def get(self, request, format=None):
         from uuid import UUID
@@ -1342,22 +1351,43 @@ class ObjectAuditTrailView(APIView):
             for f in model_class._meta.get_fields()
             if getattr(f, "many_to_one", False) and f.related_model
         }
+        hidden = ()
+        if model_class is User and not self._sees_user_account(request, obj):
+            hidden = self.USER_ACCOUNT_LOG_FIELDS
         label_cache = {}
-        results = [
-            {
-                "id": entry.id,
-                "cid": entry.cid or None,
-                "action": entry.get_action_display(),
-                "actor": (entry.additional_data or {}).get("user_email")
-                or (entry.actor.email if entry.actor else None),
-                "timestamp": entry.timestamp,
-                "changes": self._mask(
-                    model_name, self._humanize(entry.changes, fk_models, label_cache)
-                ),
-            }
-            for entry in entries
-        ]
+        results = []
+        for entry in entries:
+            changes = self._mask(
+                model_name,
+                self._humanize(entry.changes, fk_models, label_cache),
+                hidden,
+            )
+            # An update touching only hidden fields would still tell when they changed.
+            if hidden and entry.action == LogEntry.Action.UPDATE and not changes:
+                continue
+            results.append(
+                {
+                    "id": entry.id,
+                    "cid": entry.cid or None,
+                    "action": entry.get_action_display(),
+                    "actor": (entry.additional_data or {}).get("user_email")
+                    or (entry.actor.email if entry.actor else None),
+                    "timestamp": entry.timestamp,
+                    "changes": changes,
+                }
+            )
         return Response(results)
+
+    @staticmethod
+    def _sees_user_account(request, user) -> bool:
+        if user is not None:
+            return can_see_user_account(request, user)
+        # A deleted user has no row left to place, and users live in Global.
+        return (
+            user_account_folder_ids(request)
+            .filter(id=Folder.get_root_folder_id())
+            .exists()
+        )
 
     @staticmethod
     def _humanize(changes, fk_models, label_cache):
@@ -1389,11 +1419,16 @@ class ObjectAuditTrailView(APIView):
         return label_cache[key]
 
     @staticmethod
-    def _mask(model_name, changes):
+    def _mask(model_name, changes, hidden=()):
+        if not isinstance(changes, dict):
+            return changes
+        changes = {
+            field: value for field, value in changes.items() if field not in hidden
+        }
         # Backstop for rows logged before "password" was excluded at registration
         # (iam/models.py); current writes never include it.
-        if model_name == "user" and isinstance(changes, dict) and "password" in changes:
-            return {**changes, "password": ["***", "***"]}
+        if model_name == "user" and "password" in changes:
+            changes["password"] = ["***", "***"]
         return changes
 
 

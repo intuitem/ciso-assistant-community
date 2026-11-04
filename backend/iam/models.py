@@ -1889,14 +1889,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def get_allowed_folder_ids(
         user: AbstractBaseUser | AnonymousUser,
-        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+        permission: tuple[PermissionPrefix, type[models.Model]]
+        | Permission
+        | list[Permission],
         *,
         base_folder: Optional[Folder] = None,
     ) -> QuerySet[uuid.UUID]:
         """
         Return the `QuerySet` of allowed folder IDs for a specific permission.
 
-        The `permission` is either a (`perm_prefix`, `model`) pair (e.g. `("view", AppliedControl)`) or a django `Permission`.
+        The `permission` is either a (`perm_prefix`, `model`) pair (e.g. `("view", AppliedControl)`), a django `Permission`, or a list of them of one model and action, any of which grants.
 
         Example:
         ```

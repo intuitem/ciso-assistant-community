@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 from core.serializers import UserReadSerializer, UserWriteSerializer
 from core.startup import ensure_user_creator_group
 from core.models import Actor
+from core.views import UserFilter
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
@@ -2018,12 +2019,22 @@ class TestUserAccountFieldsVisibility:
     @pytest.mark.parametrize(
         "serializer_class", [UserReadSerializer, UserWriteSerializer]
     )
-    def test_internal_use_needs_opt_in(self, env, serializer_class):
+    def test_hidden_without_request(self, env, serializer_class):
         assert not self.ACCOUNT_FIELDS & set(serializer_class(env.target).data)
-        data = serializer_class(
-            env.target, context={"include_account_fields": True}
-        ).data
-        assert self.ACCOUNT_FIELDS <= set(data)
+
+    def test_account_filter_without_request_matches_nothing(self, env):
+        filterset = UserFilter(
+            data={"keep_local_login": True}, queryset=User.objects.all()
+        )
+        assert not filterset.qs.exists()
+
+    def test_picker_skips_account_lookup(self, env):
+        # Pickers query on every keystroke and don't order on account fields.
+        with patch("core.views.user_account_folder_ids", side_effect=AssertionError):
+            found = self._rows(
+                env.admin_client.get(f"{reverse('users-autocomplete')}?search=aaron")
+            )
+        assert env.target.email in {row["email"] for row in found}
 
     def test_admin_order_keeps_account_fields(self, env):
         def emails(query=""):

@@ -8641,6 +8641,8 @@ class UserFilter(GenericFilterSet):
             for name, f in self.filters.items()
             if f.field_name in USER_ACCOUNT_FIELDS
         ):
+            if self.request is None:
+                return queryset.none()
             queryset = queryset.filter(
                 Q(folder_id__in=user_account_folder_ids(self.request))
                 | Q(pk=self.request.user.pk)
@@ -9030,8 +9032,9 @@ class UserViewSet(BaseModelViewSet):
 
     def filter_queryset(self, queryset):
         # Checked against the rows about to be listed. Single-object actions don't
-        # sort, so they skip the query and get the directory ordering.
-        if not self.detail:
+        # sort and pickers don't need superusers first, so both skip the query and
+        # get the directory ordering.
+        if not self.detail and self.action != "autocomplete":
             self._all_accounts_visible = (
                 not queryset.exclude(
                     folder_id__in=user_account_folder_ids(self.request)

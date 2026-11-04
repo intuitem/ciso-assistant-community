@@ -2560,36 +2560,43 @@ USER_ACCOUNT_FIELDS = (
 )
 
 
-def user_account_folder_ids(request) -> set:
-    """Folders where the requester may see users' account fields, looked up once
-    per request. `view_user` is passed as a permission, not as a `("view", User)`
-    pair, so that its restricted counterpart doesn't count."""
+def user_account_folder_ids(request) -> models.QuerySet:
+    """Folders where the requester may see users' account fields, as a subquery
+    looked up once per request. `view_user` is passed as a permission, not as a
+    `("view", User)` pair, so that its restricted counterpart doesn't count."""
     folder_ids = getattr(request, "_user_account_folder_ids", None)
     if folder_ids is None:
-        folder_ids = set(
-            RoleAssignment.get_allowed_folder_ids(
-                request.user, Permission.objects.get(codename="view_user")
-            )
-        ) | set(RoleAssignment.get_allowed_folder_ids(request.user, ("change", User)))
+        folder_ids = RoleAssignment.get_allowed_folder_ids(
+            request.user,
+            list(
+                Permission.objects.filter(
+                    codename__in=("view_user", "change_user"),
+                    content_type__app_label=User._meta.app_label,
+                    content_type__model=User._meta.model_name,
+                )
+            ),
+        )
         request._user_account_folder_ids = folder_ids
     return folder_ids
 
 
 def can_see_user_account(request, user: User) -> bool:
-    return user.pk == request.user.pk or user.folder_id in user_account_folder_ids(
-        request
-    )
+    if user.pk == request.user.pk:
+        return True
+    # Asked once per serialized row, so tested in memory.
+    folder_ids = getattr(request, "_user_account_folder_id_set", None)
+    if folder_ids is None:
+        folder_ids = set(user_account_folder_ids(request))
+        request._user_account_folder_id_set = folder_ids
+    return user.folder_id in folder_ids
 
 
 class UserAccountFieldsMixin:
     account_fields = USER_ACCOUNT_FIELDS
 
     def hide_account_fields(self, instance, data: dict) -> dict:
-        """Drop the account fields unless the requester may see them. Internal
-        callers without a request opt in with `include_account_fields` in the
-        context."""
-        if self.context.get("include_account_fields"):
-            return data
+        """Drop the account fields unless the requester may see them. Without a
+        request, nobody may."""
         request = self.context.get("request")
         if request is None or not can_see_user_account(request, instance):
             for field in self.account_fields:
@@ -2652,8 +2659,9 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 
 
 class UserWriteSerializer(UserAccountFieldsMixin, BaseModelSerializer):
-    # Read back by the edit form (`object` action), where `user_groups` is the raw
-    # membership, unmasked by group visibility.
+    # The edit form's state. `user_groups` is not the directory field here: the
+    # `object` action reads it through the viewset's visibility-filtered prefetch,
+    # but a write drops that prefetch and returns the raw membership.
     account_fields = (*USER_ACCOUNT_FIELDS, "is_local", "user_groups")
 
     is_local = serializers.BooleanField(required=False)
