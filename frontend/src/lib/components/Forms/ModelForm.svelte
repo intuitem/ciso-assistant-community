@@ -319,6 +319,12 @@
 				}
 				createModalCache.deleteCache(model.urlModel);
 			}
+		},
+		onError: ({ result }) => {
+			// a transport-level failure never fires onUpdated; clear the busy state so
+			// the form doesn't stay stuck on "loading" until the modal is closed
+			isLoading = false;
+			console.error(result.error);
 		}
 	});
 
@@ -1214,8 +1220,10 @@
 							}
 							// only enter the busy state once the form is valid; otherwise the browser
 							// blocks the submit (e.g. empty required name), superForm never runs and
-							// isLoading would stay stuck on "loading" until the modal is closed
-							if (!modelSchema(URLModel).safeParse($formData).success) return;
+							// isLoading would stay stuck on "loading" until the modal is closed.
+							// Validate against `schema` (the duplicate schema), not the full study
+							// schema modelSchema(URLModel) returns, which requires risk_matrix.
+							if (!schema.safeParse($formData).success) return;
 							isLoading = true;
 							return;
 						}
@@ -1226,8 +1234,8 @@
 							return;
 						}
 
-						const schema = modelSchema(URLModel);
-						const result = schema.safeParse($formData);
+						const importSchema = modelSchema(URLModel);
+						const result = importSchema.safeParse($formData);
 						if (!result.success) return;
 
 						isLoading = true;

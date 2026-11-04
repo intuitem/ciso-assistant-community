@@ -71,7 +71,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const ebiosRmStudyDuplicateForm = await superValidate(
 		{
-			name: `${data.name} (copy)`,
+			// keep the prefilled name within the 200-char limit once " (copy)" is added
+			name: `${(data.name ?? '').slice(0, 193)} (copy)`,
 			description: data.description ?? '',
 			version: data.version ?? '',
 			ref_id: data.ref_id ?? '',

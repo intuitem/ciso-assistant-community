@@ -164,21 +164,30 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # the user picks the destination domain; default to the source's folder
         target_folder = data.get("folder") or source.folder
-        # the clone and every owned object are created in the target folder,
-        # so the add permission is checked there (not on the source)
-        check_folder_add_permission(
-            request.user,
-            target_folder,
-            EbiosRMStudy,
-            FearedEvent,
-            RoTo,
-            Stakeholder,
-            StrategicScenario,
-            AttackPath,
-            OperationalScenario,
-            OperatingMode,
-            KillChain,
-        )
+        # Objects are created in the target folder, so add permission is checked
+        # there. Only require the permission for the owned types the source
+        # actually has records of (an empty study must stay duplicable), like
+        # RiskAssessment duplication does.
+        owned = [
+            (FearedEvent, {"ebios_rm_study": source}),
+            (RoTo, {"ebios_rm_study": source}),
+            (Stakeholder, {"ebios_rm_study": source}),
+            (StrategicScenario, {"ebios_rm_study": source}),
+            (AttackPath, {"ebios_rm_study": source}),
+            (OperationalScenario, {"ebios_rm_study": source}),
+            (OperatingMode, {"operational_scenario__ebios_rm_study": source}),
+            (KillChain, {"operating_mode__operational_scenario__ebios_rm_study": source}),
+        ]
+        models_to_check = [EbiosRMStudy] + [
+            model for model, flt in owned if model.objects.filter(**flt).exists()
+        ]
+        # a cross-domain clone may deep-copy these shared objects into the target
+        # folder (via duplicate_related_objects), so their add permission is needed
+        if target_folder != source.folder:
+            from core.models import AppliedControl, Threat
+
+            models_to_check += [Asset, Threat, AppliedControl]
+        check_folder_add_permission(request.user, target_folder, *models_to_check)
 
         clone = duplicate_ebios_rm_study(
             source,

@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext as _
+from rest_framework.exceptions import ValidationError
 import math
 import random
 from global_settings.models import GlobalSettings
@@ -1210,10 +1211,19 @@ def duplicate_ebios_rm_study(
 
     operational_scenarios = {}
     for scenario in OperationalScenario.objects.filter(ebios_rm_study=source):
+        attack_path = attack_paths.get(scenario.attack_path_id)
+        if attack_path is None:
+            # attack_path is a unique OneToOne already bound to the source scenario,
+            # so a foreign one cannot be reused. A scenario pointing at another
+            # study's attack path is malformed data we refuse with a clear error.
+            raise ValidationError(
+                f"Operational scenario '{scenario.name}' references an attack path "
+                "outside this study; the study cannot be duplicated."
+            )
         new_scenario = OperationalScenario.objects.create(
             **_copy_scalar_fields(scenario),
             ebios_rm_study=clone,
-            attack_path=attack_paths[scenario.attack_path_id],
+            attack_path=attack_path,
         )
         carry_shared(scenario, new_scenario, "threats")
         new_scenario.techniques.set(scenario.techniques.all())
@@ -1239,9 +1249,11 @@ def duplicate_ebios_rm_study(
         )
         carry_shared(step, new_step, "assets")
         steps[step.id] = new_step
-    # antecedents point at other steps, so wire them once every step exists
+    # antecedents point at other steps, so wire them once every step exists.
+    # A concurrent write could add an antecedent after source_steps was read;
+    # skip any step that is not in the copied set rather than raising KeyError.
     for step in source_steps:
-        antecedents = [steps[a.id] for a in step.antecedents.all()]
+        antecedents = [steps[a.id] for a in step.antecedents.all() if a.id in steps]
         if antecedents:
             steps[step.id].antecedents.set(antecedents)
 
