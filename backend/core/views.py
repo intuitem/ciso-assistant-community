@@ -1203,6 +1203,19 @@ def check_folder_add_permission(user, folder, *models):
             )
 
 
+def check_folder_view_permission(user, folder, *models):
+    """Raise PermissionDenied unless *user* may view each of *models* in *folder*."""
+    for model in models:
+        if not RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=f"view_{model._meta.model_name}"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to view objects in this folder"}
+            )
+
+
 def get_optimized_object_data(queryset):
     """
     Calculate folder full paths for objects in the queryset in 1 DB request.

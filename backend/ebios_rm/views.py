@@ -13,6 +13,7 @@ from core.views import (
     SmartOrderingFilter,
     actor_prefetch,
     check_folder_add_permission,
+    check_folder_view_permission,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -182,9 +183,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 {"operating_mode__operational_scenario__ebios_rm_study": source},
             ),
         ]
-        models_to_check = [EbiosRMStudy] + [
+        present = [
             model for model, flt in owned if model.objects.filter(**flt).exists()
         ]
+        # clone copies source children -> require view on each in the source folder
+        check_folder_view_permission(request.user, source.folder, *present)
+        models_to_check = [EbiosRMStudy] + present
         # a cross-domain clone may deep-copy these shared objects into the target
         # folder (via duplicate_related_objects), so their add permission is needed
         if target_folder != source.folder:

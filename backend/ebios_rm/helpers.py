@@ -382,6 +382,8 @@ def ebios_rm_visual_analysis(study):
             ],
         }
         for fe in ro_to.feared_events.all():
+            if f"{fe.id}-FE" not in nodes_idx:
+                continue  # feared event from another study has no node
             links.append(
                 {
                     "source": nodes_idx[f"{ro_to.id}-RO"],
