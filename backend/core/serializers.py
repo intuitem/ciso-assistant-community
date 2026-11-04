@@ -7471,6 +7471,24 @@ class TerminologyWriteSerializer(BaseModelSerializer):
     BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
 
+    def validate_field_path(self, value):
+        # Objects keep pointing at the term; under another path they fail limit_choices_to on save.
+        term = self.instance
+        if (
+            term
+            and value != term.field_path
+            and any(
+                rel.related_model._base_manager.filter(
+                    **{rel.field.name: term}
+                ).exists()
+                for rel in term._meta.related_objects
+            )
+        ):
+            raise serializers.ValidationError(
+                "This term is in use and cannot move to another field."
+            )
+        return value
+
     class Meta:
         model = Terminology
         exclude = ["folder"]

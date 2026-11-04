@@ -59,3 +59,25 @@ def test_hidden_stage_survives_on_assets_that_already_carry_it():
     )
     assert not moved.is_valid()
     assert "lifecycle_stage" in moved.errors
+
+
+@pytest.mark.django_db
+def test_custom_stage_in_use_cannot_move_to_another_field_path():
+    from core.models import Asset
+    from core.serializers import TerminologyWriteSerializer
+    from iam.models import Folder
+
+    stage = Terminology.objects.create(
+        name="frozen", field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE
+    )
+    moving = {"field_path": Terminology.FieldPath.PROJECT_STATUS}
+
+    unused = TerminologyWriteSerializer(stage, data=moving, partial=True)
+    assert unused.is_valid(), unused.errors
+
+    Asset.objects.create(
+        name="mainframe", folder=Folder.get_root_folder(), lifecycle_stage=stage
+    )
+    used = TerminologyWriteSerializer(stage, data=moving, partial=True)
+    assert not used.is_valid()
+    assert "field_path" in used.errors
