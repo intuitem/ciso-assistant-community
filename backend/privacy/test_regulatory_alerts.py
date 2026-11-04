@@ -27,6 +27,12 @@ from tprm.models import Contract
 pytestmark = pytest.mark.django_db
 
 
+@pytest.fixture(autouse=True)
+def nis2_flag():
+    with patch("core.tasks.ff_is_enabled", return_value=True) as flag:
+        yield flag
+
+
 @pytest.fixture
 def folder():
     return Folder.objects.create(
@@ -67,6 +73,19 @@ def test_nis2_stage_alerts_owner_and_escalates_on_the_hour(folder, owner):
     (row,) = _rows("regulatory_deadline")
     assert row.context["deadline_key"] == "incidentNotification"
     send.assert_not_called()  # 54h left: no escalation bucket
+
+
+def test_nis2_alerts_need_the_nis2_flag(folder, owner, nis2_flag):
+    nis2_flag.return_value = False
+    incident = Incident.objects.create(
+        name="Botnet",
+        folder=folder,
+        nis2_significant=True,
+        reported_at=timezone.now() - timedelta(hours=2),
+    )
+    incident.owners.set([owner.actor])
+    check_regulatory_deadlines.call_local()
+    assert _rows("regulatory_deadline").count() == 0
 
 
 def test_missed_early_warning_does_not_hide_the_72h_notification(folder, owner):

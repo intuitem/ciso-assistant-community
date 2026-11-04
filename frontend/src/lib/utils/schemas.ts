@@ -846,6 +846,7 @@ export const FeatureFlagsSchema = z.object({
 	commitment_management: z.boolean().optional(),
 	findings_from_requirements: z.boolean().optional(),
 	dora: z.boolean().optional(),
+	nis2: z.boolean().optional(),
 	external_ratings: z.boolean().optional(),
 	jit_provisioning: z.boolean().optional()
 });

@@ -299,7 +299,7 @@ NOTIFICATION_REGISTRY = {
         "category": "deadlines",
         "mode": "condition",
         "channels": ["in_app", "email"],
-        "email_template": "processing_obligation_gaps",
+        "email_template": "processing_obligation_gap",
         "context": ["processing_name", "gap_count"],
     },
     "vulnerability_assignment": {

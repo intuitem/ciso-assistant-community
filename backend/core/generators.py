@@ -640,14 +640,23 @@ def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezon
     }
 
 
-def nis2_notification_context(incident, breaches, lang="en", tz: tzinfo = timezone.utc):
+def _all_readable(obj) -> bool:
+    return True
+
+
+def nis2_notification_context(
+    incident, breaches, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
+):
     """Payload for the NIS2 notification worksheet, laid out like the CCB form.
 
     Empty strings are the fields the user still has to supply on the authority's
-    form: the template flags them instead of hiding them.
+    form: the template flags them instead of hiding them. `readable(obj)` keeps
+    linked objects the requester cannot view out of the PDF.
     """
     stamp = lambda v: format_report_timestamp(v, tz, empty="")  # noqa: E731
-    controls = incident.applied_controls.all()
+    seen = lambda objs: [o for o in objs if readable(o)]
+    controls = seen(incident.applied_controls.all())
+    next_stage = incident.nis2_next_stage()
     return {
         "lang": lang,
         "id": str(incident.id),
@@ -662,10 +671,10 @@ def nis2_notification_context(incident, breaches, lang="en", tz: tzinfo = timezo
             "status_key": incident.status or "",
             "malicious_intent": incident.nis2_malicious_intent or "",
             "cross_border_impact": incident.nis2_cross_border_impact or "",
-            "incident_types": [q.name for q in incident.qualifications.all()]
-            + [t.name for t in incident.threats.all()],
-            "assets": [a.name for a in incident.assets.all()],
-            "entities": [e.name for e in incident.entities.all()],
+            "incident_types": [q.name for q in seen(incident.qualifications.all())]
+            + [t.name for t in seen(incident.threats.all())],
+            "assets": [a.name for a in seen(incident.assets.all())],
+            "entities": [e.name for e in seen(incident.entities.all())],
             "root_cause": incident.root_cause or "",
             "resolution": incident.resolution or "",
             "is_bcp_activated": incident.is_bcp_activated,
@@ -691,6 +700,7 @@ def nis2_notification_context(incident, breaches, lang="en", tz: tzinfo = timezo
             }
             for s in incident.nis2_deadlines()
         ],
+        "next_stage": next_stage["stage"] if next_stage else "",
         "breaches": [
             {
                 "name": b.name,
@@ -703,15 +713,22 @@ def nis2_notification_context(incident, breaches, lang="en", tz: tzinfo = timezo
     }
 
 
-def breach_notification_context(breach, lang="en", tz: tzinfo = timezone.utc):
-    """Payload for the GDPR art. 33 worksheet, laid out like the APD/GBA form (part 1)."""
+def breach_notification_context(
+    breach, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
+):
+    """Payload for the GDPR art. 33 worksheet, laid out like the APD/GBA form (part 1).
+    `readable(obj)` keeps linked objects the requester cannot view out of the PDF."""
     stamp = lambda v: format_report_timestamp(v, tz, empty="")  # noqa: E731
-    incident = breach.incident
+    seen = lambda objs: [o for o in objs if readable(o)]
+    incident = (
+        breach.incident if breach.incident and readable(breach.incident) else None
+    )
+    processings = seen(breach.affected_processings.all())
     late = (
         breach.authority_notification_due is not None
         and (breach.authority_notified_on or now()) > breach.authority_notification_due
     )
-    personal_data = breach.affected_personal_data.select_related("category")
+    personal_data = seen(breach.affected_personal_data.select_related("category"))
     return {
         "lang": lang,
         "id": str(breach.id),
@@ -731,20 +748,17 @@ def breach_notification_context(breach, lang="en", tz: tzinfo = timezone.utc):
             "notified_on": stamp(breach.authority_notified_on),
             "notification_ref": breach.authority_notification_ref or "",
             "late": late,
-            "authorities": [a.name for a in breach.authorities.all()],
+            "authorities": [a.name for a in seen(breach.authorities.all())],
             "subjects_count": breach.affected_subjects_count,
             "subjects_notified_on": stamp(breach.subjects_notified_on),
-            "processings": [p.name for p in breach.affected_processings.all()],
+            "processings": [p.name for p in processings],
+            # name is optional: str() falls back to the legal basis
             "purposes": sorted(
-                {
-                    pu.name
-                    for p in breach.affected_processings.all()
-                    for pu in p.purposes.all()
-                }
+                {str(pu) for p in processings for pu in p.purposes.all()}
             ),
             "personal_data": [
                 {
-                    "name": pd.name,
+                    "name": str(pd),
                     "category": str(pd.category) if pd.category else "",
                     "sensitive": pd.is_sensitive,
                 }
@@ -754,16 +768,15 @@ def breach_notification_context(breach, lang="en", tz: tzinfo = timezone.utc):
             "consequences": breach.potential_consequences or "",
             "measures": [
                 {"name": c.name, "status_key": c.status or ""}
-                for c in breach.remediation_measures.all()
+                for c in seen(breach.remediation_measures.all())
             ],
             "observation": breach.observation or "",
             "incident": incident.name if incident else "",
-            "resolved": breach.status == "privacy_closed"
-            or (incident is not None and incident.status in ("resolved", "closed")),
+            "resolved": breach.status == "privacy_closed",
             "processors": sorted(
                 {
                     str(c.entity or c)
-                    for p in breach.affected_processings.all()
+                    for p in processings
                     for c in p.contractors_involved.filter(
                         relationship_type__in=(
                             "privacy_data_processor",

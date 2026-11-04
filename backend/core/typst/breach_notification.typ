@@ -201,7 +201,7 @@
 #fields(
   (L.f411 + "*", todo),
   (L.f412, todo),
-  (L.f421 + "*", if b.authorities.len() > 0 { b.authorities.join(", ") } else { todo }),
+  (L.f421 + "*", if b.authorities.len() > 0 [#todo #hint(b.authorities.join(", "))] else { todo }),
 )
 
 = #L.s5

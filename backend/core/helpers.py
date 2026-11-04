@@ -22,7 +22,7 @@ from statistics import mean
 import math
 
 from .models import *
-from .utils import build_answers_dict, camel_case
+from .utils import build_answers_dict, camel_case, escape_excel_formula
 
 DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
@@ -777,30 +777,30 @@ def soa_rows(tree: dict, lang: str = "en") -> list[dict]:
 
     def walk(node):
         if node.get("assessable"):
-            rows.append(
-                {
-                    labels["ref_id"]: node.get("ref_id") or "",
-                    labels["name"]: node.get("name") or node.get("description") or "",
-                    # Same rule as the SoA page (SoaTreeSection.svelte)
-                    labels["applicable"]: labels.get(
-                        False
-                        if node.get("result") == "not_applicable"
-                        else node.get("selected"),
-                        "",
-                    ),
-                    labels["justification"]: node.get("observation") or "",
-                    labels["result"]: labels.get(
-                        node.get("result"), node.get("result") or ""
-                    ),
-                    labels["controls"]: "\n".join(
-                        f"{c['ref_id'] + ' ' if c['ref_id'] else ''}{c['name']} ({labels.get(c['status'], c['status'])})"
-                        for c in node.get("applied_controls") or []
-                    ),
-                    labels["risks"]: "\n".join(
-                        rs["name"] for rs in node.get("risk_scenarios") or []
-                    ),
-                }
-            )
+            row = {
+                labels["ref_id"]: node.get("ref_id") or "",
+                labels["name"]: node.get("name") or node.get("description") or "",
+                # Same rule as the SoA page (SoaTreeSection.svelte)
+                labels["applicable"]: labels.get(
+                    False
+                    if node.get("result") == "not_applicable"
+                    else node.get("selected"),
+                    "",
+                ),
+                labels["justification"]: node.get("observation") or "",
+                labels["result"]: labels.get(
+                    node.get("result"), node.get("result") or ""
+                ),
+                labels["controls"]: "\n".join(
+                    f"{c['ref_id'] + ' ' if c['ref_id'] else ''}{c['name']} ({labels.get(c['status'], c['status'])})"
+                    for c in node.get("applied_controls") or []
+                ),
+                labels["risks"]: "\n".join(
+                    rs["name"] for rs in node.get("risk_scenarios") or []
+                ),
+            }
+            # user-editable text: a leading = + - @ must not become a formula
+            rows.append({k: escape_excel_formula(v) for k, v in row.items()})
         for child in node.get("children", {}).values():
             walk(child)
 

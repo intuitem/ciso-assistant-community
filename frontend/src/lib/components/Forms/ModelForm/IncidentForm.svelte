@@ -6,6 +6,7 @@
 	import TextField from '#lib/components/Forms/TextField.svelte';
 	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import * as m from '#paraglide/messages.js';
+	import { page } from '$app/state';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
@@ -212,72 +213,74 @@
 	<MarkdownField {form} field="resolution" label={m.resolution()} />
 	<MarkdownField {form} field="root_cause" label={m.rootCause()} />
 </Dropdown>
-<Dropdown
-	open={!!initialData?.nis2_significant}
-	style="hover:text-primary-700"
-	icon="fa-solid fa-tower-broadcast"
-	header={m.nis2Notification()}
->
-	<Select
-		{form}
-		options={[
-			{ label: m.yes(), value: true },
-			{ label: m.no(), value: false }
-		]}
-		field="nis2_significant"
-		label={m.nis2Significant()}
-		helpText={m.nis2SignificantHelpText()}
-		cacheLock={cacheLocks['nis2_significant']}
-		bind:cachedValue={formDataCache['nis2_significant']}
-	/>
-	<Select
-		{form}
-		field="nis2_malicious_intent"
-		label={m.nis2MaliciousIntent()}
-		options={model.selectOptions['nis2_malicious_intent']}
-		cacheLock={cacheLocks['nis2_malicious_intent']}
-		bind:cachedValue={formDataCache['nis2_malicious_intent']}
-	/>
-	<Select
-		{form}
-		field="nis2_cross_border_impact"
-		label={m.nis2CrossBorderImpact()}
-		options={model.selectOptions['nis2_cross_border_impact']}
-		cacheLock={cacheLocks['nis2_cross_border_impact']}
-		bind:cachedValue={formDataCache['nis2_cross_border_impact']}
-	/>
-	<TextField
-		type="datetime-local"
-		step="1"
-		{form}
-		field="nis2_early_warning_at"
-		label={m.nis2EarlyWarningAt()}
-		cacheLock={cacheLocks['nis2_early_warning_at']}
-		bind:cachedValue={formDataCache['nis2_early_warning_at']}
-	/>
-	<TextField
-		type="datetime-local"
-		step="1"
-		{form}
-		field="nis2_notification_at"
-		label={m.nis2NotificationAt()}
-		cacheLock={cacheLocks['nis2_notification_at']}
-		bind:cachedValue={formDataCache['nis2_notification_at']}
-	/>
-	<TextField
-		type="datetime-local"
-		step="1"
-		{form}
-		field="nis2_final_report_at"
-		label={m.nis2FinalReportAt()}
-		cacheLock={cacheLocks['nis2_final_report_at']}
-		bind:cachedValue={formDataCache['nis2_final_report_at']}
-	/>
-	<TextField
-		{form}
-		field="nis2_reference"
-		label={m.nis2Reference()}
-		cacheLock={cacheLocks['nis2_reference']}
-		bind:cachedValue={formDataCache['nis2_reference']}
-	/>
-</Dropdown>
+{#if page.data?.featureflags?.nis2}
+	<Dropdown
+		open={!!initialData?.nis2_significant}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-tower-broadcast"
+		header={m.nis2Notification()}
+	>
+		<Select
+			{form}
+			options={[
+				{ label: m.yes(), value: true },
+				{ label: m.no(), value: false }
+			]}
+			field="nis2_significant"
+			label={m.nis2Significant()}
+			helpText={m.nis2SignificantHelpText()}
+			cacheLock={cacheLocks['nis2_significant']}
+			bind:cachedValue={formDataCache['nis2_significant']}
+		/>
+		<Select
+			{form}
+			field="nis2_malicious_intent"
+			label={m.nis2MaliciousIntent()}
+			options={model.selectOptions['nis2_malicious_intent']}
+			cacheLock={cacheLocks['nis2_malicious_intent']}
+			bind:cachedValue={formDataCache['nis2_malicious_intent']}
+		/>
+		<Select
+			{form}
+			field="nis2_cross_border_impact"
+			label={m.nis2CrossBorderImpact()}
+			options={model.selectOptions['nis2_cross_border_impact']}
+			cacheLock={cacheLocks['nis2_cross_border_impact']}
+			bind:cachedValue={formDataCache['nis2_cross_border_impact']}
+		/>
+		<TextField
+			type="datetime-local"
+			step="1"
+			{form}
+			field="nis2_early_warning_at"
+			label={m.nis2EarlyWarningAt()}
+			cacheLock={cacheLocks['nis2_early_warning_at']}
+			bind:cachedValue={formDataCache['nis2_early_warning_at']}
+		/>
+		<TextField
+			type="datetime-local"
+			step="1"
+			{form}
+			field="nis2_notification_at"
+			label={m.nis2NotificationAt()}
+			cacheLock={cacheLocks['nis2_notification_at']}
+			bind:cachedValue={formDataCache['nis2_notification_at']}
+		/>
+		<TextField
+			type="datetime-local"
+			step="1"
+			{form}
+			field="nis2_final_report_at"
+			label={m.nis2FinalReportAt()}
+			cacheLock={cacheLocks['nis2_final_report_at']}
+			bind:cachedValue={formDataCache['nis2_final_report_at']}
+		/>
+		<TextField
+			{form}
+			field="nis2_reference"
+			label={m.nis2Reference()}
+			cacheLock={cacheLocks['nis2_reference']}
+			bind:cachedValue={formDataCache['nis2_reference']}
+		/>
+	</Dropdown>
+{/if}

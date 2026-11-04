@@ -202,6 +202,7 @@
 	});
 
 	const doraEnabled = $derived(!!page.data?.featureflags?.dora);
+	const nis2Enabled = $derived(!!page.data?.featureflags?.nis2);
 
 	function buildExportGroups(): ExportGroup[] {
 		const id = data.data.id;
@@ -223,13 +224,17 @@
 						href: `/incidents/${id}/export/pdf`,
 						testId: 'export-option-pdf'
 					},
-					{
-						titleKey: 'nis2NotificationWorksheet',
-						descriptionKey: 'nis2NotificationWorksheetDesc',
-						format: 'PDF',
-						href: `/incidents/${id}/export/nis2`,
-						testId: 'export-option-nis2'
-					}
+					...(nis2Enabled
+						? [
+								{
+									titleKey: 'nis2NotificationWorksheet',
+									descriptionKey: 'nis2NotificationWorksheetDesc',
+									format: 'PDF',
+									href: `/incidents/${id}/export/nis2`,
+									testId: 'export-option-nis2'
+								}
+							]
+						: [])
 				]
 			},
 			...(doraEnabled
@@ -370,9 +375,16 @@
 		}
 	];
 
-	const nis2Deadlines: any[] = $derived(data.data.nis2_deadlines ?? []);
+	const nis2Deadlines: any[] = $derived(nis2Enabled ? (data.data.nis2_deadlines ?? []) : []);
 	const dataBreaches: any[] = $derived((data as any).dataBreaches ?? []);
 	const showFollowUp = $derived(nis2Deadlines.length > 0 || dataBreaches.length > 0);
+
+	// DataBreach.NOTIFIED_OR_CLOSED_STATUSES: the status chip already says it, no deadline left
+	const BREACH_SETTLED = [
+		'privacy_authority_notified',
+		'privacy_subjects_notified',
+		'privacy_closed'
+	];
 
 	function deadlineState(due: string | null, doneAt: string | null, overdue: boolean) {
 		if (doneAt) return { cls: 'preset-tonal-success', label: m.sentOn() };
@@ -546,8 +558,10 @@
 									<span class="rounded px-2 py-0.5 text-xs preset-tonal-secondary"
 										>{safeTranslate(breach.status)}</span
 									>
-									<span class="rounded px-2 py-0.5 text-xs {st.cls}">{st.label}</span>
-									{#if breach.authority_notified_on || breach.authority_notification_due}
+									{#if breach.authority_notified_on || !BREACH_SETTLED.includes(breach.status)}
+										<span class="rounded px-2 py-0.5 text-xs {st.cls}">{st.label}</span>
+									{/if}
+									{#if breach.authority_notified_on || (breach.authority_notification_due && !BREACH_SETTLED.includes(breach.status))}
 										<span class="text-surface-600-400">
 											{formatDateOrDateTime(
 												breach.authority_notified_on ?? breach.authority_notification_due,

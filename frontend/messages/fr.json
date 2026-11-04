@@ -7811,6 +7811,7 @@
 	"staircaseLowerLevelsHelpText": "Les niveaux inférieurs à la cible sont ajoutés : ils servent à déterminer le niveau atteint.",
 	"rootCause": "Cause racine",
 	"nis2Notification": "Notification NIS2",
+	"nis2FlagDescription": "Affiche sur les incidents les champs, délais, rappels et la fiche de notification NIS2",
 	"nis2Significant": "Incident significatif (NIS2)",
 	"nis2SignificantHelpText": "Un incident significatif doit être notifié au CSIRT national (CCB en Belgique) : alerte précoce sous 24 h, notification sous 72 h, rapport final sous un mois.",
 	"nis2MaliciousIntent": "Acte malveillant suspecté",

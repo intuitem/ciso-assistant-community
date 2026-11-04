@@ -7823,6 +7823,7 @@
 	"templateProcessingObligationGapsDescription": "Wöchentliche Übersicht der Lücken im Verzeichnis der Verarbeitungstätigkeiten",
 	"rootCause": "Grundursache",
 	"nis2Notification": "NIS2-Meldung",
+	"nis2FlagDescription": "NIS2-Meldefelder, -Fristen, -Erinnerungen und -Arbeitsblatt bei Vorfällen anzeigen",
 	"nis2Significant": "Erheblicher Sicherheitsvorfall (NIS2)",
 	"nis2SignificantHelpText": "Erhebliche Sicherheitsvorfälle sind dem nationalen CSIRT zu melden (CCB in Belgien): Frühwarnung innerhalb von 24 Std., Meldung innerhalb von 72 Std., Abschlussbericht innerhalb eines Monats.",
 	"nis2MaliciousIntent": "Verdacht auf böswillige Absicht",

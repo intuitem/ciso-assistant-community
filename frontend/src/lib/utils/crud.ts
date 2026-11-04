@@ -156,6 +156,7 @@ interface Field {
 	field: string;
 	type?: 'date' | 'datetime';
 	tooltip?: string;
+	visibleWhen?: string;
 }
 
 export interface SelectField {
@@ -3223,7 +3224,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'incidents',
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
-		markdownFields: ['resolution'],
+		flaggedFields: {
+			nis2_significant: 'nis2',
+			nis2_malicious_intent: 'nis2',
+			nis2_cross_border_impact: 'nis2',
+			nis2_early_warning_at: 'nis2',
+			nis2_notification_at: 'nis2',
+			nis2_final_report_at: 'nis2',
+			nis2_reference: 'nis2'
+		},
+		markdownFields: ['resolution', 'root_cause'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -3306,12 +3316,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'root_cause' },
 			{ field: 'is_bcp_activated' },
 			{ field: 'nis2_significant' },
-			{ field: 'nis2_malicious_intent' },
-			{ field: 'nis2_cross_border_impact' },
-			{ field: 'nis2_early_warning_at', type: 'datetime' },
-			{ field: 'nis2_notification_at', type: 'datetime' },
-			{ field: 'nis2_final_report_at', type: 'datetime' },
-			{ field: 'nis2_reference' },
+			{ field: 'nis2_malicious_intent', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_cross_border_impact', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_early_warning_at', type: 'datetime', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_notification_at', type: 'datetime', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_final_report_at', type: 'datetime', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_reference', visibleWhen: 'nis2_significant' },
 			{ field: 'applied_controls' },
 			{ field: 'task_templates' },
 			{ field: 'risk_scenarios' },

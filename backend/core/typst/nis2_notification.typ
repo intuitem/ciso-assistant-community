@@ -19,6 +19,7 @@
     incident_notification: "Incident notification (72h)",
     final_report: "Final report (1 month)",
     not-significant: "The incident is not flagged as significant under NIS2: no notification deadlines apply.",
+    significance-pending: "NIS2 significance not assessed yet: set it on the incident to compute the notification deadlines.",
     s-entity: "Entity notifying the incident",
     Submitter: "Concerning...",
     s-nis: "NIS specific characteristics",
@@ -77,6 +78,7 @@
     incident_notification: "Notification d'incident (72 h)",
     final_report: "Rapport final (1 mois)",
     not-significant: "L'incident n'est pas qualifié de significatif au sens de NIS2 : aucun délai de notification ne s'applique.",
+    significance-pending: "Caractère significatif au sens de NIS2 pas encore évalué : renseignez-le sur l'incident pour calculer les délais de notification.",
     s-entity: "Entité notifiant l'incident",
     Submitter: "Concernant…",
     s-nis: "Caractéristiques spécifiques NIS",
@@ -135,6 +137,7 @@
     incident_notification: "Incidentmelding (72 u)",
     final_report: "Eindverslag (1 maand)",
     not-significant: "Het incident is niet als significant aangemerkt in de zin van NIS2: er gelden geen meldingstermijnen.",
+    significance-pending: "Significantie in de zin van NIS2 nog niet beoordeeld: vul ze in op het incident om de meldingstermijnen te berekenen.",
     s-entity: "Entiteit die het incident meldt",
     Submitter: "Betreffende…",
     s-nis: "Specifieke NIS-kenmerken",
@@ -194,7 +197,7 @@
 #let answer(v) = if empty(v) { todo } else { L.at(v, default: v) }
 #let flag(b) = if b == none { todo } else if b { L.yes } else { L.no }
 // CCB free-text fields hold 500 characters
-#let text500(v) = if empty(v) { todo } else if v.len() > 500 {
+#let text500(v) = if empty(v) { todo } else if v.clusters().len() > 500 {
   [#v #h(4pt) #chip(rgb("#fee2e2"), rgb("#991b1b"), L.over)]
 } else { v }
 
@@ -230,9 +233,8 @@
 #block(fill: rgb("#f1f5f9"), inset: 8pt, radius: 3pt, width: 100%)[#text(8.5pt, fill: muted)[#L.disclaimer]]
 
 = #L.s-timeline
-#let pending = d.stages.filter(s => s.done_at == "")
 #if d.stages.len() == 0 [
-  #text(fill: muted)[#L.not-significant]
+  #text(fill: muted)[#if inc.significant == none { L.significance-pending } else { L.not-significant }]
 ] else [
   #table(
     columns: (1fr, auto, auto, auto),
@@ -255,7 +257,7 @@
 #fields(
   ("NIS_Type", true, todo),
   ("Sector", true, todo),
-  ("NIS_Notification", true, if pending.len() > 0 { L.at(pending.first().stage) } else { todo }),
+  ("NIS_Notification", true, if d.next_stage != "" { L.at(d.next_stage) } else { todo }),
 )
 
 = #L.s-details

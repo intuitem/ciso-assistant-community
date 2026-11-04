@@ -28,6 +28,7 @@ from django.db import models, transaction
 from django.db.models import Exists, OuterRef
 import logging
 from global_settings.models import GlobalSettings
+from global_settings.utils import ff_is_enabled
 
 import logging.config
 import structlog
@@ -196,19 +197,16 @@ def _regulatory_deadlines():
     personal data breach not yet notified to the authority."""
     from privacy.models import DataBreach
 
-    current = now()
     incidents = (
         Incident.objects.filter(nis2_significant=True)
         .exclude(status__in=["closed", "dismissed"])
         .prefetch_related("owners")
+        if ff_is_enabled("nis2")
+        else Incident.objects.none()
     )
     for incident in incidents:
-        pending = [s for s in incident.nis2_deadlines() if s["done_at"] is None]
-        if pending:
-            # One inbox row per incident: the next stage still ahead, so a missed
-            # (or unrecorded) early warning does not hide the 72h notification
-            upcoming = [s for s in pending if s["due"] > current]
-            stage = upcoming[0] if upcoming else pending[-1]
+        # One inbox row per incident, on the stage the worksheet also points to
+        if stage := incident.nis2_next_stage():
             yield (
                 _actor_emails(incident.owners.all()),
                 incident,
@@ -463,7 +461,7 @@ def send_processing_obligation_gaps_notification(email, entries):
         for name, gaps in entries
     ]
     _send_digest(
-        "processing_obligation_gaps",
+        "processing_obligation_gap",
         email,
         {"processing_count": len(entries), "gap_list": "\n".join(lines)},
     )

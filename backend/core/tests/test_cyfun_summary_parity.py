@@ -4,6 +4,7 @@ when both hold the same answers: the tool's own formulas are recomputed."""
 import random
 import re
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from django.urls import reverse
@@ -219,6 +220,29 @@ def test_group_breakdown_lists_key_measures_against_their_target(
     key_measures = groups["BK"]
     assert key_measures["selected"] is True
     assert key_measures["target_score"] == 2.5
+    assert {r["id"] for r in key_measures["requirements"]} == {
+        str(ra.id)
+        for ra in basic_audit.requirement_assessments.filter(
+            requirement__assessable=True
+        )
+        if "BK" in (ra.requirement.implementation_groups or [])
+    }
     assert len(key_measures["requirements"]) == 13
     assert groups["I"]["selected"] is False
     assert groups["I"]["requirements"] == []  # outside the audit: not listed
+
+
+@pytest.mark.django_db
+def test_group_breakdown_hides_fields_the_viewer_cannot_see(basic_audit, admin_client):
+    url = reverse(
+        "compliance-assessments-implementation-groups-breakdown",
+        kwargs={"pk": str(basic_audit.pk)},
+    )
+    with patch(
+        "core.views.is_field_visible_to", side_effect=lambda ca, f, role: f != "score"
+    ):
+        groups = admin_client.get(url).json()["groups"]
+    rows = next(g for g in groups if g["ref_id"] == "BK")["requirements"]
+    assert all(r["maturity_score"] is None for r in rows)
+    assert all(r["implementation_score"] is None for r in rows)
+    assert any(r["result"] for r in rows)

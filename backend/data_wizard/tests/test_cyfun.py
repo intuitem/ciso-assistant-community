@@ -501,3 +501,17 @@ def test_import_of_a_2023_self_assessment(knox_admin_client, domain_folder):
         compliance_assessment=ca, requirement__ref_id="BASIC_ID.AM-1.1"
     )
     assert (ra.documentation_score, ra.score) == (3, 4)
+    na = RequirementAssessment.objects.get(
+        compliance_assessment=ca, requirement__ref_id="IMPORTANT_ID.AM-1.2"
+    )
+    assert na.result == "not_applicable"
+
+
+def test_only_level_details_sheets_route_to_the_2023_parser():
+    """A 2025 workbook with an unrelated '... Details' sheet is not a 2023 tool."""
+    wb = openpyxl.Workbook()
+    wb.active.title = "Audit Details"
+    buf = io.BytesIO()
+    wb.save(buf)
+    with pytest.raises(ValueError, match="UnrecognizedCyfunWorkbook"):
+        process_cyfun_file(buf.getvalue())

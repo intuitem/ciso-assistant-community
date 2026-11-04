@@ -1056,6 +1056,9 @@
 											<tr class="border-t border-surface-100-900 text-xs">
 												<td class="py-1.5 pr-4 pl-6">
 													<a class="anchor" href="/requirement-assessments/{req.id}">{req.name}</a>
+													{#if req.result}
+														<span class="ml-1 text-surface-500">· {safeTranslate(req.result)}</span>
+													{/if}
 													{#if req.description}
 														<span
 															class="block max-w-xl truncate text-surface-500"
@@ -1064,9 +1067,7 @@
 													{/if}
 												</td>
 												<td></td>
-												<td class="py-1.5 pr-4 text-right text-surface-500"
-													>{safeTranslate(req.result)}</td
-												>
+												<td></td>
 												{#if data.compliance_assessment.show_documentation_score}
 													<td class="py-1.5 pr-4 text-right">
 														{#if req.maturity_score !== null}

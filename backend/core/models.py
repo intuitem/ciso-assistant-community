@@ -6917,6 +6917,19 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
             for stage, due, done in stages
         ]
 
+    def nis2_next_stage(self) -> dict | None:
+        """The stage to act on: an overdue 72h notification first (a missed early
+        warning must not hide it, nor the upcoming final report), else the next
+        stage ahead, else the last one still open."""
+        pending = [s for s in self.nis2_deadlines() if s["done_at"] is None]
+        for s in pending:
+            if s["stage"] == "incident_notification" and s["overdue"]:
+                return s
+        upcoming = [s for s in pending if not s["overdue"]]
+        if upcoming:
+            return upcoming[0]
+        return pending[-1] if pending else None
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         # Update folder metrics

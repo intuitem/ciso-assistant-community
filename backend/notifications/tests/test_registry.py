@@ -37,6 +37,8 @@ def test_email_template_is_present_exactly_when_email_is_a_channel(key, meta):
     not silently coexist with an email channel."""
     if "email" in meta["channels"]:
         assert meta["email_template"], f"{key} has an email channel but no template"
+        # the settings switch disables email by type key, delivery checks the template
+        assert meta["email_template"] == key, f"{key} -> {meta['email_template']}"
         for locale in LOCALES:
             path = Path(TEMPLATE_BASE_PATH) / locale / f"{meta['email_template']}.yaml"
             assert path.exists(), f"{key} -> missing {path}"

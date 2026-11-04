@@ -8,10 +8,10 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
 from core.generators import breach_notification_context, nis2_notification_context
-from core.models import Incident
+from core.models import Asset, Incident
 from core.typst_render import render_pdf
 from iam.models import Folder
-from privacy.models import DataBreach
+from privacy.models import DataBreach, Processing, Purpose
 from privacy.test_data_breach import admin_client, domain  # noqa: F401
 
 
@@ -175,3 +175,70 @@ def test_notification_worksheet_endpoints(admin_client, domain):  # noqa: F811
     res = admin_client.get(f"/api/privacy/data-breaches/{breach.id}/notification/")
     assert res.status_code == 200
     assert res["Content-Type"] == "application/pdf"
+
+
+@pytest.mark.django_db
+def test_overdue_72h_notification_stays_the_next_stage(folder):
+    """Once 72h pass unrecorded, the upcoming final report must not take over."""
+    incident = Incident.objects.create(
+        name="Wiper",
+        folder=folder,
+        nis2_significant=True,
+        reported_at=timezone.now() - timedelta(hours=80),
+        nis2_early_warning_at=timezone.now() - timedelta(hours=70),
+    )
+    assert incident.nis2_next_stage()["stage"] == "incident_notification"
+    incident.nis2_notification_at = timezone.now()
+    assert incident.nis2_next_stage()["stage"] == "final_report"
+
+
+@pytest.mark.django_db
+def test_nis2_dates_are_validated(admin_client, domain):  # noqa: F811
+    # reported_at defaults to creation: only an explicit clear leaves it empty
+    incident = Incident.objects.create(name="DDoS", folder=domain, reported_at=None)
+    url = f"/api/incidents/{incident.id}/"
+    res = admin_client.patch(url, {"nis2_significant": True}, format="json")
+    assert res.status_code == 400 and "reported_at" in res.json()
+
+    reported = timezone.now() - timedelta(hours=10)
+    incident.reported_at = reported
+    incident.save()
+    for sent in (timezone.now() + timedelta(hours=1), reported - timedelta(hours=1)):
+        res = admin_client.patch(
+            url, {"nis2_notification_at": sent.isoformat()}, format="json"
+        )
+        assert res.status_code == 400 and "nis2_notification_at" in res.json()
+    res = admin_client.patch(
+        url,
+        {"nis2_significant": True, "nis2_notification_at": timezone.now().isoformat()},
+        format="json",
+    )
+    assert res.status_code == 200
+
+
+@pytest.mark.django_db
+def test_worksheets_keep_what_the_requester_cannot_see_out(folder):
+    incident = Incident.objects.create(
+        name="Ransomware", folder=folder, status="closed"
+    )
+    secret = Asset.objects.create(name="Secret vault", folder=folder)
+    incident.assets.set([secret])
+    processing = Processing.objects.create(name="Payroll", folder=folder)
+    Purpose.objects.create(name="Pay salaries", processing=processing)
+    Purpose.objects.create(processing=processing, legal_basis="privacy_contract")
+    breach = DataBreach.objects.create(
+        name="Leak", folder=folder, incident=incident, discovered_on=timezone.now()
+    )
+    breach.affected_processings.set([processing])
+
+    ctx = breach_notification_context(breach)["breach"]
+    # an unnamed purpose shows its legal basis instead of breaking the sort
+    assert ctx["purposes"] == ["Pay salaries", "privacy_contract"]
+    assert ctx["resolved"] is False  # the breach is open, whatever its incident
+
+    hidden = {secret.id, processing.id, incident.id}
+    readable = lambda obj: obj.id not in hidden  # noqa: E731
+    ctx = breach_notification_context(breach, readable=readable)["breach"]
+    assert (ctx["processings"], ctx["purposes"], ctx["incident"]) == ([], [], "")
+    nis2 = nis2_notification_context(incident, [], readable=readable)
+    assert nis2["incident"]["assets"] == []

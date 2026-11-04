@@ -6294,6 +6294,7 @@
 	"reportTimezoneHelpText": "Regio die wordt gebruikt voor de tijden in rapporten en exports. Elke tijd toont zijn afwijking ten opzichte van UTC. Tijden op het scherm worden niet beïnvloed.",
 	"rootCause": "Grondoorzaak",
 	"nis2Notification": "NIS2-melding",
+	"nis2FlagDescription": "Toon de NIS2-meldingsvelden, -termijnen, -herinneringen en het werkblad bij incidenten",
 	"nis2Significant": "Significant incident (NIS2)",
 	"nis2SignificantHelpText": "Een significant incident moet worden gemeld aan het nationale CSIRT (CCB in België): vroegtijdige waarschuwing binnen 24 uur, melding binnen 72 uur, eindverslag binnen een maand.",
 	"nis2MaliciousIntent": "Vermoeden van kwaadwillige opzet",

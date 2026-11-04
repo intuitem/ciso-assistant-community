@@ -195,6 +195,7 @@ from core.models import (
     AssetClass,
     Terminology,
     Team,
+    rescale_score,
 )
 from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
@@ -16464,7 +16465,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
+        is_respondent = bool(
+            respondent_folders and compliance_assessment.folder_id in respondent_folders
+        )
+        if is_respondent:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -16482,6 +16486,33 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         selected = set(compliance_assessment.selected_implementation_groups or [])
         rows = {}
+        viewer_role = "respondent" if is_respondent else "auditor"
+        # row key -> field governed by the audit's field visibility map
+        row_fields = {
+            "result": "result",
+            "implementation_score": "score",
+            "maturity_score": "score",
+            "documentation_score": "documentation_score",
+        }
+        hidden = [
+            key
+            for key, field in row_fields.items()
+            if not is_field_visible_to(compliance_assessment, field, viewer_role)
+        ]
+        framework_range = (framework.min_score, framework.max_score)
+        audit_range = (compliance_assessment.min_score, compliance_assessment.max_score)
+
+        def group_target(group_def):
+            # group targets are on the framework scale, the audit's own on its scale
+            target = group_def.get("target_score")
+            if target is None:
+                return compliance_assessment.target_score
+            if (
+                None in (*framework_range, *audit_range)
+                or audit_range == framework_range
+            ):
+                return target
+            return rescale_score(target, framework_range, audit_range, integer=False)
 
         def requirement_row(ra):
             # nested groups (B within I within E) share requirements: build each once
@@ -16496,6 +16527,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "result": ra.result,
                     **compliance_assessment.get_scores_for([ra]),
                 }
+                rows[ra.id].update(dict.fromkeys(hidden))
             return rows[ra.id]
 
         groups = []
@@ -16565,9 +16597,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "maturity_score": scores["maturity_score"],
                     "scored_count": scores["scored_count"],
                     "min_maturity_score": min(maturities, default=None),
-                    "target_score": group_def.get("target_score")
-                    if group_def.get("target_score") is not None
-                    else compliance_assessment.target_score,
+                    "target_score": group_target(group_def),
                     "selected": group_ref_id in selected,
                     "requirements": requirements,
                 }
@@ -18684,7 +18714,13 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         ]
         lang = request.user.preferences.get("lang") or "en"
         payload = nis2_notification_context(
-            incident, breaches, lang, tz=get_report_timezone()
+            incident,
+            breaches,
+            lang,
+            tz=get_report_timezone(),
+            readable=lambda obj: RoleAssignment.is_object_readable(
+                request.user, type(obj), obj.id
+            ),
         )
         response = HttpResponse(
             render_pdf("nis2_notification.typ", payload),

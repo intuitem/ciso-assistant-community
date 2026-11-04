@@ -349,7 +349,7 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
-    "processing_obligation_gaps": {
+    "processing_obligation_gap": {
         "description": "Weekly digest of gaps in the record of processing activities",
         "category": "notification",
         "variables": ["processing_count", "gap_list", "ciso_assistant_url"],

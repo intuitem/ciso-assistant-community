@@ -1,4 +1,4 @@
-"""Validation flows on a single risk scenario (and, the same way, a requirement)."""
+"""Validation flows on a single risk scenario (requirement assessments share the same M2M wiring)."""
 
 import pytest
 

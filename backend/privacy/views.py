@@ -1201,7 +1201,14 @@ class DataBreachViewSet(BaseModelViewSet):
         # get_object enforces view permission (404 otherwise)
         breach = self.get_object()
         lang = request.user.preferences.get("lang") or "en"
-        payload = breach_notification_context(breach, lang, tz=get_report_timezone())
+        payload = breach_notification_context(
+            breach,
+            lang,
+            tz=get_report_timezone(),
+            readable=lambda obj: RoleAssignment.is_object_readable(
+                request.user, type(obj), obj.id
+            ),
+        )
         response = HttpResponse(
             render_pdf("breach_notification.typ", payload),
             content_type="application/pdf",

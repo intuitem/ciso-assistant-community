@@ -159,6 +159,7 @@
 	let visibleDetailViewFields = $derived(
 		data.model?.detailViewFields?.filter((fieldConfig) => {
 			const flag = data.model?.flaggedFields?.[fieldConfig.field];
+			if (fieldConfig.visibleWhen && !data.data?.[fieldConfig.visibleWhen]) return false;
 			return isFieldFlagEnabled(flag, page.data?.featureflags ?? {});
 		})
 	);
@@ -1010,7 +1011,7 @@
 			{#if data.urlModel === 'data-breaches'}
 				<a
 					class="btn preset-filled-primary-500 h-fit"
-					href={`/data-breaches/${data.data?.id}/notification`}
+					href={`/data-breaches/notification/${data.data?.id}`}
 					data-testid="breach-notification-button"
 					download
 				>
