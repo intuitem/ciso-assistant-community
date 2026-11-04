@@ -2,9 +2,9 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { m } from '$paraglide/messages';
-	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import type { RiskMatrixJsonDefinition } from '#lib/utils/types.js';
 	import { enhance } from '$app/forms';
 
 	let { data, form } = $props();

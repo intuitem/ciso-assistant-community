@@ -13,6 +13,7 @@
 		type RequirementNode,
 		type Question,
 		remapGrid,
+		levelsInGroupOrder,
 		type OutcomeRule,
 		type Scale
 	} from './builder-state';
@@ -24,9 +25,9 @@
 		createHandleGatedDragHandlers,
 		REFERENCEABLE_MODELS
 	} from './builder-utils.svelte';
-	import { locales as supportedLocales } from '$paraglide/runtime';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { locales as supportedLocales } from '#paraglide/runtime.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -44,7 +45,7 @@
 	import { buildCelCatalog, setCelCatalogContext } from './cel-complete';
 	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import { initReferentialCatalog } from './referential-catalog';
 
 	interface Props {
@@ -281,6 +282,12 @@
 		return walk($rootNodesStore);
 	});
 
+	const hasRequiredEvidence = $derived.by(() => {
+		const walk = (nodes: BuilderNode[]): boolean =>
+			nodes.some((bn) => (bn.node.assessable && bn.node.evidence_required) || walk(bn.children));
+		return walk($rootNodesStore);
+	});
+
 	const ruleGroups = $derived(
 		($frameworkStore.implementation_groups_definition ?? [])
 			.map((g) => g as Record<string, unknown>)
@@ -388,6 +395,7 @@
 	// the library-draft document is the persisted state (publishing is a
 	// separate, library-level concern).
 	beforeNavigate((navigation) => {
+		if (navigation.shallow && navigation.type === 'goto') return;
 		if (navigation.to?.route?.id === navigation.from?.route?.id) return;
 		let hasUnsaved = false;
 		unsavedStore.subscribe((v) => (hasUnsaved = v))();
@@ -410,8 +418,10 @@
 		)) {
 			return () => {};
 		}
+
 		const caret =
 			el instanceof HTMLSelectElement ? null : ([el.selectionStart, el.selectionEnd] as const);
+
 		el.blur();
 		return () => {
 			el.focus();
@@ -663,11 +673,11 @@
 									? 'fa-chevron-down'
 									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
-							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
-								>{mode === 'quick_form'
-									? m.builderFormSettings()
-									: m.builderFrameworkSettings()}</span
-							>
+
+							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider">
+								{mode === 'quick_form' ? m.builderFormSettings() : m.builderFrameworkSettings()}
+							</span>
+
 							{#if !showSettings}
 								<span class="text-xs text-surface-500">{settingsSummary}</span>
 							{/if}
@@ -1085,6 +1095,7 @@
 									pages={rulePages}
 									catalog={celCatalog}
 									groups={ruleGroups}
+									nodes={$rootNodesStore}
 									scales={$frameworkStore.scales_definition ?? []}
 									measured={measuredScales}
 									onaddscales={(added) =>
@@ -1101,7 +1112,7 @@
 										value={($frameworkStore.on_accept ?? []) as any[]}
 										rules={$frameworkStore.outcomes_definition ?? []}
 										{subjectModel}
-										onaddvendorsubject={() => addSubjectQuestion('entity')}
+										onaddsubject={addSubjectQuestion}
 										scored={formGivesPoints}
 										onupdate={(on_accept) => builder.updateFramework({ on_accept })}
 									/>
@@ -1126,7 +1137,16 @@
 											};
 										})}
 										onupdate={(groups) =>
-											builder.updateFramework({ implementation_groups_definition: groups })}
+											builder.updateFramework({
+												implementation_groups_definition: groups,
+												outcomes_definition: levelsInGroupOrder(
+													$frameworkStore.outcomes_definition ?? [],
+													($frameworkStore.implementation_groups_definition ?? []).map((g) =>
+														String((g as Record<string, unknown>).ref_id ?? '')
+													),
+													groups.map((g) => g.ref_id)
+												)
+											})}
 										activeLanguage={$activeLanguageStore}
 									/>
 								</div>
@@ -1136,6 +1156,7 @@
 									<VisibilityEditor
 										value={$frameworkStore.field_visibility}
 										onChange={(next) => builder.updateFramework({ field_visibility: next })}
+										evidenceRequired={hasRequiredEvidence}
 									/>
 								</div>
 							{/if}

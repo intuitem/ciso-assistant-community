@@ -2,13 +2,13 @@
 	import Select from '../Select.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import * as m from '$paraglide/messages.js';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import * as m from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -165,6 +165,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],

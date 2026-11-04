@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { tableSourceMapper } from '$lib/utils/table';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
+	import { tableSourceMapper } from '#lib/utils/table.js';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import RecursiveTreeView from '#lib/components/TreeView/RecursiveTreeView.svelte';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
-	import InstantiateWorkflows from '$lib/components/Libraries/InstantiateWorkflows.svelte';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import InstantiateWorkflows from '#lib/components/Libraries/InstantiateWorkflows.svelte';
 
 	let { data } = $props();
 	let expandedNodes: string[] = $state([]);

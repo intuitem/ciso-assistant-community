@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { breadcrumbs, syncBreadcrumbsToCurrentUrl } from '$lib/utils/breadcrumbs';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { pageTitle } from '$lib/utils/stores';
+	import { breadcrumbs, syncBreadcrumbsToCurrentUrl } from '#lib/utils/breadcrumbs.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { pageTitle } from '#lib/utils/stores.js';
 
 	function getPageTitle(): string {
 		// Check each source in priority order
@@ -46,7 +46,11 @@
 		}
 	}
 
-	afterNavigate((nav) => sync(getPageTitle(), nav.type === 'enter'));
+	afterNavigate((nav) => {
+		if (nav.shallow && nav.type === 'goto') return;
+
+		return sync(getPageTitle(), nav.type === 'enter');
+	});
 
 	$effect(() => {
 		$pageTitle = getPageTitle();

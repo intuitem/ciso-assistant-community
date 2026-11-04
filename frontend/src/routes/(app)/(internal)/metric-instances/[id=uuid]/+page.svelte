@@ -1,18 +1,18 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
-	import { m } from '$paraglide/messages';
-	import { invalidate, invalidateAll } from '$app/navigation';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import MetricSampleChart from '#lib/components/Chart/MetricSampleChart.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { invalidate, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
-	import FormulaDrawer from '$lib/components/Metrology/FormulaDrawer.svelte';
-	import type { Composition } from '$lib/components/Metrology/ComposeMetricEditor.svelte';
-	import type { DefinitionComposition } from '$lib/components/Metrology/DefinitionFormulaPanel.svelte';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import ComposeMetricModal from '#lib/components/Modals/ComposeMetricModal.svelte';
+	import FormulaDrawer from '#lib/components/Metrology/FormulaDrawer.svelte';
+	import type { Composition } from '#lib/components/Metrology/ComposeMetricEditor.svelte';
+	import type { DefinitionComposition } from '#lib/components/Metrology/DefinitionFormulaPanel.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { get } from 'svelte/store';
-	import { tableRefreshers } from '$lib/utils/stores';
+	import { tableRefreshers } from '#lib/utils/stores.js';
 
 	interface Props {
 		data: PageData;
@@ -73,7 +73,7 @@
 			await new Promise((resolve) => setTimeout(resolve, REFRESH_LOOK_MS));
 			// Left the page, or clicked again: this run has nothing more to do.
 			if (run !== refreshRun) return;
-			await invalidateAll();
+			await refreshAll();
 			if (stamp(data.data?.last_computed_at) !== stamp(before)) {
 				refreshSampleTables();
 				refreshState = 'done';
@@ -130,7 +130,7 @@
 		if (looks.count >= 10) return;
 		const timer = setTimeout(() => {
 			looks.count += 1;
-			invalidateAll();
+			refreshAll();
 		}, 2000);
 		return () => clearTimeout(timer);
 	});

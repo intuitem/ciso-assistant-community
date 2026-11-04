@@ -1,23 +1,23 @@
 <script lang="ts">
-	import MostLikelyOperatingMode from '$lib/components/EbiosRM/MostLikelyOperatingMode.svelte';
+	import MostLikelyOperatingMode from '#lib/components/EbiosRM/MostLikelyOperatingMode.svelte';
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import { pageTitle } from '$lib/utils/stores';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import { isDark } from '$lib/utils/helpers';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { countMasked } from '$lib/utils/related-visibility';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { canPerformAction } from '#lib/utils/access-control.js';
+	import { isDark } from '#lib/utils/helpers.js';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { countMasked } from '#lib/utils/related-visibility.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	const modalStore: ModalStore = getModalStore();
@@ -51,7 +51,7 @@
 	let riskLevelPopupOpen = $state(false);
 
 	const user = page.data.user;
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	const model = URL_MODEL_MAP['operational-scenarios'];
 	const canEditObject = (operational_scenarios): boolean =>
 		canPerformAction({

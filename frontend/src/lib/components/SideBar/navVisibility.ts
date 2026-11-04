@@ -1,6 +1,6 @@
-import { hasPermissionAnywhere } from '$lib/utils/access-control';
-import { URL_MODEL_MAP } from '$lib/utils/crud';
-import type { User } from '$lib/utils/types';
+import { hasPermissionAnywhere } from '#lib/utils/access-control.js';
+import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+import type { User } from '#lib/utils/types.js';
 
 export interface NavItem {
 	name?: string;

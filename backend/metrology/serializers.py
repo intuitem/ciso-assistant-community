@@ -7,7 +7,11 @@ import structlog
 from rest_framework import serializers
 
 from core.models import AppliedControl, OrganisationObjective
-from core.serializers import BaseModelSerializer, ReferentialSerializer
+from core.serializers import (
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+    ReferentialSerializer,
+)
 from core.serializer_fields import FieldsRelatedField, PathField
 from metrology.models import (
     MetricDefinition,
@@ -152,7 +156,9 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
 
 
 # MetricInstance serializers
-class MetricInstanceWriteSerializer(BaseModelSerializer):
+class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     organisation_objectives = serializers.PrimaryKeyRelatedField(
         queryset=OrganisationObjective.objects.all(),
         many=True,

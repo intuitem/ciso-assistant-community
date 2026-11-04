@@ -1,11 +1,11 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import ThresholdsEditor from './ThresholdsEditor.svelte';
 	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;

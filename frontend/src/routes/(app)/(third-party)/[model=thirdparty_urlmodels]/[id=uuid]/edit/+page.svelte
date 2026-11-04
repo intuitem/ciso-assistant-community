@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {

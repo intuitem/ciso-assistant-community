@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Article from '$lib/components/DataViz/Article.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { experimentalExtras } from '$lib/utils/experimental-extras';
+	import Article from '#lib/components/DataViz/Article.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { experimentalExtras } from '#lib/utils/experimental-extras.js';
 
 	$pageTitle = 'Experimental';
 </script>
@@ -25,6 +25,12 @@
 		desc="Upload multiple files or a whole directory as evidences, with conflict-resolution strategies (skip, add revision, replace, rename) and SHA-256 duplicate detection."
 		link="/experimental/evidence-bulk-upload"
 		tags={['evidences', 'bulk', 'upload']}
+	/>
+	<Article
+		title="Data import"
+		desc="Drop any spreadsheet: header rows, target objects, column and value mappings are suggested per tab, then reviewed. Dry run before import."
+		link="/experimental/data-import"
+		tags={['import', 'xlsx', 'mapping', 'prototype']}
 	/>
 	<Article
 		title="Questionnaire Autopilot"

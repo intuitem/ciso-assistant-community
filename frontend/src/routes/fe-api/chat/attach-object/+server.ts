@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

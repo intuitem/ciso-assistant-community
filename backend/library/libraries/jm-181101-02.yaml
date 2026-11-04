@@ -1,0 +1,3157 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:soluciones-ge:risk:library:jm-181101-02
+locale: es
+ref_id: JM-181101-02
+name: "JM 181101-02 \u2013 Reglamento de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+  n"
+description: "Reglamento de Seguridad Cibernética y de la Información, aprobado por la Junta Monetaria de la República Dominicana mediante su Segunda Resolución del 1 de noviembre de 2018 (JM 181101-02). Aplica a las entidades de intermediación financiera, a los administradores y participantes del Sistema de Pagos y Liquidación de Valores (SIPARD) y a las entidades de apoyo y servicios conexos. Texto literal estructurado por artículo, párrafo, numeral y literal. Fuente oficial: https://sb.gob.do/media/dtydqoiv/20181101_segunda-resolucion_reglamento_seguridad_cibernetica_de_la_informacion.pdf"
+copyright: "Texto oficial de la Junta Monetaria de la República Dominicana (Segunda Resolución del 1 de noviembre de 2018). Transcripción estructurada por Soluciones GE, SRL."
+version: 3
+publication_date: 2026-10-03
+provider: "Junta Monetaria de la Rep\xFAblica Dominicana"
+packager: soluciones-ge
+objects:
+  framework:
+    urn: urn:soluciones-ge:risk:framework:jm-181101-02
+    ref_id: JM-181101-02
+    name: "JM 181101-02 \u2013 Reglamento de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+      n"
+    description: "Texto del JM 181101-02 \u2013 Reglamento de Seguridad Cibern\xE9\
+      tica y de la Informaci\xF3n."
+    requirement_nodes:
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: "Art. 1 \u2013 Objeto"
+      description: "Este Reglamento tiene por objeto establecer los principios y lineamientos\
+        \ generales que servir\xE1n de base a las entidades de intermediaci\xF3n financiera,\
+        \ los administradores y participantes del Sistema de Pagos y Liquidaci\xF3\
+        n de Valores de la Rep\xFAblica Dominicana (SIPARD), a los participantes de\
+        \ los sistemas de pago y liquidaci\xF3n de valores que lo componen; y, a las\
+        \ entidades de apoyo y servicios conexos interconectadas con las entidades\
+        \ de intermediaci\xF3n financiera y con el SIPARD, para procurar la integridad,\
+        \ disponibilidad y confidencialidad de la informaci\xF3n, y el funcionamiento\
+        \ \xF3ptimo de los sistemas de informaci\xF3n y de la infraestructura tecnol\xF3\
+        gica. Asimismo, la adopci\xF3n e implementaci\xF3n de pr\xE1cticas para la\
+        \ gesti\xF3n de riesgos de la Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n, acorde a su naturaleza, tama\xF1o, complejidad, perfil de riesgo e importancia\
+        \ sist\xE9mica, conforme a la Ley No.183-02, Monetaria y Financiera de fecha\
+        \ 21 de noviembre del 2002 y sus modificaciones, y a los est\xE1ndares internacionales\
+        \ en la materia."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Art. 2 \u2013 Alcance"
+      description: "El alcance de este Reglamento comprende los principios y lineamientos\
+        \ generales que deber\xE1n adoptarse para la integridad, disponibilidad y\
+        \ confidencialidad de la informaci\xF3n, el funcionamiento \xF3ptimo de los\
+        \ sistemas de informaci\xF3n y de la infraestructura tecnol\xF3gica, as\xED\
+        \ como la adopci\xF3n e implementaci\xF3n de pr\xE1cticas para la gesti\xF3\
+        n de riesgos de la Seguridad Cibern\xE9tica y de la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Art. 3 \u2013 \xC1mbito de Aplicaci\xF3n"
+      description: "Las disposiciones establecidas en este Reglamento son de aplicaci\xF3\
+        n para las entidades que se identifican a continuaci\xF3n:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.a
+      name: lit. a)
+      description: "Bancos M\xFAltiples;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.b
+      name: lit. b)
+      description: "Bancos de Ahorro y Cr\xE9dito;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.c
+      name: lit. c)
+      description: "Corporaciones de Cr\xE9dito;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.d
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.d
+      name: lit. d)
+      description: "Asociaciones de Ahorros y Pr\xE9stamos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.e
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.e
+      name: lit. e)
+      description: "Entidades P\xFAblicas de Intermediaci\xF3n Financiera;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.f
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.f
+      name: lit. f)
+      description: "Administradores de Sistemas de Pago y Liquidaci\xF3n de Valores;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.g
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.g
+      name: lit. g)
+      description: Participantes del SIPARD autorizados por la Junta Monetaria; y,
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.h
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.h
+      name: lit. h)
+      description: Cualquier otro tipo de entidad del SIPARD, que la Junta Monetaria
+        autorice en el futuro.
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.p
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
+      ref_id: 3.P
+      name: "P\xE1rr."
+      description: "La aplicaci\xF3n de este Reglamento se extender\xE1 a las entidades\
+        \ de apoyo y servicios conexos vinculadas, mediante el mantenimiento de una\
+        \ conexi\xF3n electr\xF3nica o el intercambio de informaci\xF3n esencial,\
+        \ a trav\xE9s de cualquier medio digital, en la medida en que dicha vinculaci\xF3\
+        n pueda comprometer los objetivos del SIPARD."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:4
+      assessable: true
+      depth: 1
+      ref_id: '4'
+      name: "Art. 4 \u2013 Principios Rectores"
+      description: "Este Reglamento tendr\xE1 como principios rectores b\xE1sicos,\
+        \ los siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:4.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:4
+      ref_id: 4.a
+      name: lit. a)
+      description: "Principio de Cooperaci\xF3n. Cooperar de forma abierta, eficaz\
+        \ y transparente para el intercambio de la informaci\xF3n que sea pertinente;\
+        \ y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:4.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:4
+      ref_id: 4.b
+      name: lit. b)
+      description: "Principio de Territorialidad. Gestionar los riesgos de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n en los casos en que la amenaza tenga\
+        \ incidencia en la Rep\xFAblica Dominicana."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "Art. 5 \u2013 Definiciones"
+      description: "Para efectos de este Reglamento, los t\xE9rminos y conceptos que\
+        \ se detallan a continuaci\xF3n, tendr\xE1n los significados siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.a
+      name: lit. a)
+      description: "Acceso: Capacidad y medios para comunicarse o interactuar con\
+        \ un sistema, utilizar recursos del mismo para manejar y adquirir conocimiento\
+        \ de la informaci\xF3n contenida en el sistema o controlar componentes y funciones\
+        \ del mismo;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.b
+      name: lit. b)
+      description: "Activo de Informaci\xF3n: Bien tangible o intangible, que almacena,\
+        \ procesa y/o transmite informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.c
+      name: lit. c)
+      description: "Administrador de un Sistema de Pagos o de Liquidaci\xF3n de Valores:\
+        \ El Banco Central de la Rep\xFAblica Dominicana u otra entidad debidamente\
+        \ autorizada por la Junta Monetaria que opere un sistema de pagos; o una entidad\
+        \ autorizada a ofrecer servicios de registro, transferencia, compensaci\xF3\
+        n y liquidaci\xF3n de valores en lo relativo al traspaso de los valores negociables;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.d
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.d
+      name: lit. d)
+      description: "Alta Gerencia: La integran los principales ejecutivos u \xF3rganos\
+        \ de gesti\xF3n, responsables de planificar, dirigir y controlar las estrategias\
+        \ y operaciones generales de las entidades, que han sido previamente aprobadas\
+        \ por el Consejo;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.e
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.e
+      name: lit. e)
+      description: "Amenaza: Circunstancia desfavorable que puede ocurrir y que, de\
+        \ suceder, tendr\xEDa consecuencias negativas sobre la Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n. Una amenaza puede tener causas naturales, ser\
+        \ accidental o intencionada. Si esta circunstancia desfavorable acontece a\
+        \ la vez que existe una vulnerabilidad o debilidad de los sistemas o aprovechando\
+        \ su existencia, puede derivar en un incidente de seguridad;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.f
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.f
+      name: lit. f)
+      description: "Apetito de Riesgo: Es el l\xEDmite agregado en funci\xF3n de los\
+        \ tipos de riesgos que el Consejo y la Alta Gerencia est\xE1n dispuestos a\
+        \ asumir y gestionar para cumplir sus objetivos de negocios;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.g
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.g
+      name: lit. g)
+      description: "Arquitectura Empresarial: Conjunto de sistemas de informaci\xF3\
+        n de una empresa, su configuraci\xF3n, integraci\xF3n, as\xED como su interacci\xF3\
+        n con el entorno interno y externo, y la forma de operar para respaldar la\
+        \ misi\xF3n y contribuir a la posici\xF3n de seguridad general de la misma;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.h
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.h
+      name: lit. h)
+      description: "Arquitectura de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n: Parte integral de la Arquitectura Empresarial, que describe la estructura\
+        \ y el comportamiento de los esquemas de Seguridad Cibern\xE9tica y de la\
+        \ Informaci\xF3n de una entidad, sus departamentos, colaboradores y los sistemas\
+        \ de informaci\xF3n e Infraestructura Tecnol\xF3gica que los apoyan, mostrando\
+        \ su alineaci\xF3n a las pol\xEDticas definidas por la misma y sus planes\
+        \ estrat\xE9gicos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.i
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.i
+      name: lit. i)
+      description: "Ataque: Intento de obtener acceso no autorizado a los sistemas,\
+        \ sus recursos, servicios o informaci\xF3n, o de comprometer la integridad\
+        \ de los mismos. Comprende cualquier tipo de actividad maliciosa que pretenda\
+        \ recopilar, degradar o destruir los recursos de los sistemas de informaci\xF3\
+        n, la informaci\xF3n contenida en \xE9stos, interrumpir o provocar negaci\xF3\
+        n de sus servicios, o el da\xF1o a la Infraestructura Tecnol\xF3gica que los\
+        \ soporta;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.j
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.j
+      name: lit. j)
+      description: "Ataque Cibernético: Ataque a la Infraestructura Tecnológica a través del ciberespacio;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.k
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.k
+      name: lit. k)
+      description: "Autenticaci\xF3n: Acto de validar la identidad de un usuario para\
+        \ otorgarle acceso a recursos tecnol\xF3gicos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.l
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.l
+      name: lit. l)
+      description: "Ciberespacio: Dominio global dentro del entorno de informaci\xF3\
+        n que consiste en una red interdependiente de Infraestructuras Tecnol\xF3\
+        gicas, el Internet, redes de telecomunicaciones, procesadores y controladores\
+        \ integrados, sin menoscabo de otros componentes que puedan surgir en el futuro;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.m
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.m
+      name: lit. m)
+      description: "Cifrado: Proceso mediante el cual la informaci\xF3n o archivos\
+        \ son alterados en forma matem\xE1tica, mediante un control de acceso con\
+        \ el objetivo de evitar que una persona no autorizada, al verlos o copiarlos\
+        \ pueda interpretarlos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.n
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.n
+      name: lit. n)
+      description: "Colaboradores: Personal interno que presta sus servicios de manera\
+        \ permanente o temporal a una entidad, a cambio de una contraprestaci\xF3\
+        n econ\xF3mica y que est\xE1 asociado a la misma por un contrato de trabajo;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.o
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.o
+      name: lit. o)
+      description: "Confidencialidad: Es la preservaci\xF3n de la informaci\xF3n,\
+        \ a fin de que la misma no sea divulgada en todo o en parte a personas f\xED\
+        sicas o jur\xEDdicas, o procesos, a menos que \xE9stos hayan sido autorizados\
+        \ para acceder a dicha informaci\xF3n. Incluye los medios para proteger la\
+        \ privacidad personal y la Informaci\xF3n Esencial;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.p
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.p
+      name: lit. p)
+      description: "Consejo: \xD3rgano m\xE1ximo de direcci\xF3n que tiene todas las\
+        \ facultades de administraci\xF3n y representaci\xF3n de la entidad, responsable\
+        \ de velar por el buen desempe\xF1o de la Alta Gerencia en la gesti\xF3n,\
+        \ no pudiendo delegar su responsabilidad. Se refiere al consejo de directores,\
+        \ consejo de administraci\xF3n o junta de directores, seg\xFAn corresponda;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.q
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.q
+      name: lit. q)
+      description: "Control de Acceso: Proceso de concesi\xF3n o denegaci\xF3n de\
+        \ solicitudes espec\xEDficas, para obtener y utilizar informaci\xF3n y servicios\
+        \ de procesamiento de informaci\xF3n relacionados, o entrar en instalaciones\
+        \ f\xEDsicas espec\xEDficas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.r
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.r
+      name: lit. r)
+      description: "Copias de Resguardo: Proceso de copiar informaci\xF3n para facilitar\
+        \ la recuperaci\xF3n de las mismas, en caso de que sea necesario."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.s
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.s
+      name: lit. s)
+      description: "Data: Subconjunto de informaci\xF3n en formato electr\xF3nico\
+        \ que permite ser recuperado o transmitido;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.t
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.t
+      name: lit. t)
+      description: "Datos de Car\xE1cter Personal: Cualquier informaci\xF3n num\xE9\
+        rica, alfab\xE9tica, gr\xE1fica, fotogr\xE1fica, ac\xFAstica o de cualquier\
+        \ otro tipo, concerniente a personas f\xEDsicas identificadas o identificables;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.u
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.u
+      name: lit. u)
+      description: "Disponibilidad: La propiedad de la informaci\xF3n, de ser accesible\
+        \ y utilizable a pedido de un usuario, entidad o proceso autorizado;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.v
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.v
+      name: lit. v)
+      description: "Dispositivo M\xF3vil: Dispositivo inform\xE1tico port\xE1til que:\
+        \ (i) es de tama\xF1o peque\xF1o, de modo que puede ser transportado f\xE1\
+        cilmente por un solo individuo; (ii) est\xE1 dise\xF1ado para funcionar sin\
+        \ una conexi\xF3n f\xEDsica (por ejemplo, transmitir o recibir informaci\xF3\
+        n de forma inal\xE1mbrica); (iii) posee almacenamiento de datos local, no\
+        \ extra\xEDble; y, (iv) opera durante largos per\xEDodos con una fuente de\
+        \ alimentaci\xF3n aut\xF3noma. Los dispositivos m\xF3viles tambi\xE9n pueden\
+        \ incluir capacidades de comunicaci\xF3n de voz, sensores electr\xF3nicos\
+        \ que les permiten capturar y procesar informaci\xF3n (por ejemplo, im\xE1\
+        genes, videos, datos biom\xE9tricos, ubicaci\xF3n, entre otros) y/o caracter\xED\
+        sticas integradas para sincronizar datos locales con ubicaciones remotas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.w
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.w
+      name: lit. w)
+      description: "Documento Digital: Informaci\xF3n codificada en forma digital\
+        \ sobre un soporte l\xF3gico o f\xEDsico, que se constituye en representaci\xF3\
+        n de actos, hechos o datos jur\xEDdicamente relevantes y a la cual se accede\
+        \ utilizando m\xE9todos electr\xF3nicos, \xF3pticos o similares;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.x
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.x
+      name: lit. x)
+      description: "Empresa de Adquirencia o Adquirente: Entidad que, a trav\xE9s\
+        \ de dispositivos electr\xF3nicos, sirve de enlace entre una entidad emisora\
+        \ de tarjetas bancarias y el establecimiento donde se realiza una operaci\xF3\
+        n de pago a trav\xE9s de dichas tarjetas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.y
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.y
+      name: lit. y)
+      description: "Entidad de Apoyo y Servicios Conexos: En adici\xF3n a las entidades\
+        \ previstas en el Art\xEDculo 41 de la Ley Monetaria y Financiera, son las\
+        \ empresas de adquirencia, sociedades impresoras de cheques, proveedores de\
+        \ esc\xE1ner, software y cualquier otra empresa proveedora de servicios y\
+        \ equipos a participantes y administradores de un sistema de pago, interconectadas\
+        \ con las entidades de intermediaci\xF3n financiera y con el SIPARD;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.z
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.z
+      name: lit. z)
+      description: "Entidad de Intermediaci\xF3n Financiera: Persona jur\xEDdica autorizada\
+        \ por la Junta Monetaria al amparo de la Ley Monetaria y Financiera, a realizar\
+        \ de forma habitual captaci\xF3n de fondos del p\xFAblico con el objeto de\
+        \ cederlos a terceros, cualquiera que sea el tipo o la denominaci\xF3n del\
+        \ instrumento de captaci\xF3n o cesi\xF3n utilizado, as\xED como otras operaciones\
+        \ y servicios previstos en la referida Ley;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.aa
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.aa
+      name: lit. aa)
+      description: "Entidad Interconectada: Persona jur\xEDdica que, habilitada mediante\
+        \ una relaci\xF3n contractual, mantiene una conexi\xF3n electr\xF3nica y/o\
+        \ intercambio de informaci\xF3n con una entidad de intermediaci\xF3n financiera;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.bb
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.bb
+      name: lit. bb)
+      description: "Entidad Receptora de Informaci\xF3n: Persona jur\xEDdica que captura\
+        \ datos de car\xE1cter personal a t\xEDtulo propio o bajo la modalidad de\
+        \ servicio contratado por otra persona, para el uso, procesamiento, almacenamiento\
+        \ o transmisi\xF3n de los mismos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.cc
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.cc
+      name: lit. cc)
+      description: "Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica (CSIRT\
+        \ por sus siglas en ingl\xE9s): Grupo de personas, habitualmente integrado\
+        \ por analistas de seguridad cibern\xE9tica, organizado para desarrollar,\
+        \ recomendar y coordinar acciones inmediatas de mitigaci\xF3n para la contenci\xF3\
+        n, erradicaci\xF3n y recuperaci\xF3n como resultado de incidentes de seguridad\
+        \ cibern\xE9tica, apoyado en Infraestructuras Tecnol\xF3gicas dise\xF1adas\
+        \ para tales fines;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.dd
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.dd
+      name: lit. dd)
+      description: "Factores de Riesgo: Fuentes generadoras de posibles eventos de\
+        \ p\xE9rdida por Ataques Cibern\xE9ticos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ee
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ee
+      name: lit. ee)
+      description: "Firma Digital: Valor num\xE9rico que se adhiere a un mensaje de\
+        \ datos y que, utilizando un procedimiento matem\xE1tico conocido, vinculado\
+        \ a la clave del iniciador y al texto del mensaje, permite determinar que\
+        \ este valor se ha obtenido exclusivamente con la clave del iniciador y el\
+        \ texto del mensaje, y que el mensaje inicial no ha sido modificado despu\xE9\
+        s de efectuada la transmisi\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ff
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ff
+      name: lit. ff)
+      description: "Firmware: Conjunto de datos e instrucciones para el funcionamiento\
+        \ de un dispositivo de computaci\xF3n, almacenado como software de solo lectura\
+        \ en dicho dispositivo, debiendo permanecer inalterado durante su ejecuci\xF3\
+        n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.gg
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.gg
+      name: lit. gg)
+      description: "Gesti\xF3n de Riesgos: Conjunto de pol\xEDticas y procedimientos\
+        \ mediante el cual se identifican, miden, eval\xFAan, monitorean y controlan\
+        \ los riesgos inherentes al negocio, con el objeto de conocer su grado de\
+        \ exposici\xF3n en el desarrollo de sus operaciones y definir los mecanismos\
+        \ de cobertura para proteger los recursos propios y de terceros que se encuentran\
+        \ bajo su control y administraci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.hh
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.hh
+      name: lit. hh)
+      description: "Incidente: Evento que pone en peligro la confidencialidad, integridad\
+        \ o disponibilidad de la Infraestructura Tecnol\xF3gica o la informaci\xF3\
+        n procesada, almacenada o transmitida por dicho sistema, o que constituye\
+        \ una violaci\xF3n o amenaza inminente de violaci\xF3n de pol\xEDticas, o\
+        \ procedimientos de seguridad o pol\xEDticas de uso aceptable;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ii
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ii
+      name: lit. ii)
+      description: "Incidente Significativo: Incidente o conjunto de incidentes relacionados\
+        \ que podr\xEDan resultar en la degradaci\xF3n o p\xE9rdida de funciones cr\xED\
+        ticas de servicios financieros, resultando en un riesgo sist\xE9mico para\
+        \ el sector financiero o en p\xE9rdida de la confianza p\xFAblica."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.jj
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.jj
+      name: lit. jj)
+      description: "Informaci\xF3n Esencial: Conjunto de datos que facilita el desarrollo\
+        \ de las actividades fundamentales de la entidad, que sustenta la operatividad\
+        \ de la Infraestructura Tecnol\xF3gica;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.kk
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.kk
+      name: lit. kk)
+      description: "Informaci\xF3n Esencial de Tipo Maestro: Conjunto de datos b\xE1\
+        sicos, cuyos registros sufren poca o ninguna variaci\xF3n en el tiempo;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ll
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ll
+      name: lit. ll)
+      description: "Informaci\xF3n Esencial de Tipo Transaccional: Conjunto de datos,\
+        \ cuyos registros contienen informaci\xF3n sobre las transacciones realizadas\
+        \ en un sistema de informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.mm
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.mm
+      name: lit. mm)
+      description: "Infraestructura Tecnol\xF3gica: Equipos y sistemas con que cuenta\
+        \ la entidad para procesar la informaci\xF3n, as\xED como las adecuaciones\
+        \ del espacio f\xEDsico que los aloja;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.nn
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.nn
+      name: lit. nn)
+      description: "Integridad: Propiedad que poseen los datos, que asegura que los\
+        \ mismos no han sido alterados de manera no autorizada o destruidos de manera\
+        \ inadecuada, durante su creaci\xF3n, transmisi\xF3n o almacenamiento;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.oo
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.oo
+      name: lit. oo)
+      description: "Lineamiento Funcional de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n: Control t\xE9cnico o estrat\xE9gico aplicable para el tratamiento de los\
+        \ riesgos inherentes a la Seguridad Cibern\xE9tica y de la Informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.pp
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.pp
+      name: lit. pp)
+      description: "Mecanismos de Control de Acceso: Salvaguardas o medidas de seguridad\
+        \ f\xEDsicas o l\xF3gicas dise\xF1adas para detectar, restringir y permitir\
+        \ el acceso a un sistema de informaci\xF3n o a un entorno local f\xEDsico.\
+        \ Se refiere de manera individual o combinada, a caracter\xEDsticas de hardware\
+        \ y software, controles, procedimientos operativos y procedimientos de gesti\xF3\
+        n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.qq
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.qq
+      name: lit. qq)
+      description: "Mensaje de Datos: Informaci\xF3n generada, enviada, recibida,\
+        \ almacenada o comunicada por medios electr\xF3nicos, \xF3pticos o similares;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.rr
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.rr
+      name: lit. rr)
+      description: "Mensajer\xEDa Instant\xE1nea: Servicio de mensajer\xEDa que ofrece\
+        \ transmisi\xF3n de texto, im\xE1genes, audio y video en tiempo real a trav\xE9\
+        s de redes de comunicaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ss
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ss
+      name: lit. ss)
+      description: "Monitoreo Continuo: Proceso implementado para mantener en estado\
+        \ de vigilancia el funcionamiento de los controles de seguridad de los sistemas\
+        \ de la informaci\xF3n y la Infraestructura Tecnol\xF3gica de los que depende\
+        \ la operaci\xF3n de la entidad;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.tt
+      name: lit. tt)
+      description: "Nivel de acceso a la Informaci\xF3n: Es el que se puede tener\
+        \ seg\xFAn su contenido, la cual se clasifica en los niveles siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.i
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
+      ref_id: 5.tt.i
+      name: lit. tt), i.
+      description: "P\xFAblico: Informaci\xF3n que en virtud de la ley es catalogada\
+        \ como no confidencial y, en consecuencia, puede divulgarse sin ninguna responsabilidad\
+        \ para la entidad;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.ii
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
+      ref_id: 5.tt.ii
+      name: lit. tt), ii.
+      description: "De Uso Interno: Informaci\xF3n perteneciente a la entidad cuyo\
+        \ acceso est\xE1 disponible a los colaboradores;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.iii
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
+      ref_id: 5.tt.iii
+      name: lit. tt), iii.
+      description: "Confidencial del Cliente: Datos de car\xE1cter personal de los\
+        \ clientes cuyo acceso es restringido; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.iv
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
+      ref_id: 5.tt.iv
+      name: lit. tt), iv.
+      description: "Confidencial de la Entidad: Informaci\xF3n utilizada por la entidad\
+        \ para el funcionamiento esencial de la misma, cuyo acceso est\xE1 restringido\
+        \ seg\xFAn el grado de responsabilidad."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.uu
+      name: lit. uu)
+      description: "Nivel de Sensibilidad de la Informaci\xF3n: Grado de exposici\xF3\
+        n de una informaci\xF3n seg\xFAn su contenido, clasific\xE1ndose en los niveles\
+        \ siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu.i
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu
+      ref_id: 5.uu.i
+      name: lit. uu), i.
+      description: "No Sensible: Informaci\xF3n personal o de negocio, que al ser\
+        \ accedida no puede identificar de manera individual al due\xF1o o titular\
+        \ de la informaci\xF3n, ni puede generar da\xF1o alguno, sea por p\xE9rdida,\
+        \ robo, alteraci\xF3n, uso inadecuado o divulgaci\xF3n de la misma; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu.ii
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu
+      ref_id: 5.uu.ii
+      name: lit. uu), ii.
+      description: "Sensible: Informaci\xF3n personal o de negocio, que al ser accedida\
+        \ puede identificar de manera individual al due\xF1o o titular de la informaci\xF3\
+        n, y que la p\xE9rdida, robo, alteraci\xF3n, uso inadecuado o divulgaci\xF3\
+        n de la misma puede perjudicar al due\xF1o o titular de la informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.vv
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.vv
+      name: lit. vv)
+      description: "Participantes del SIPARD: Entidades que poseen una cuenta corriente\
+        \ en el Banco Central y se encuentren interconectadas a uno o varios sistemas\
+        \ de pagos o de liquidaci\xF3n de valores, as\xED como las personas jur\xED\
+        dicas prestadoras de servicios que, a trav\xE9s de otro participante, forman\
+        \ parte de un sistema de pagos y liquidaci\xF3n de valores;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ww
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ww
+      name: lit. ww)
+      description: "Pista de Auditor\xEDa: Registro de datos l\xF3gicos de las acciones\
+        \ o sucesos ocurridos en los sistemas aplicativos u operativos, con el prop\xF3\
+        sito de mantener informaci\xF3n hist\xF3rica para fines de control, supervisi\xF3\
+        n y auditor\xEDa;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.xx
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.xx
+      name: lit. xx)
+      description: 'Plan de Contingencia: Conjunto de procedimientos alternativos
+        a la operatividad normal de la entidad, cuya finalidad es la de permitir su
+        funcionamiento, buscando minimizar el impacto operativo y financiero que pueda
+        ocasionar cualquier evento inesperado;'
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.yy
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.yy
+      name: lit. yy)
+      description: "Plan de Continuidad de Negocio: Conjunto formado por planes de\
+        \ actuaci\xF3n, de emergencia, financiero, de comunicaci\xF3n y de contingencia,\
+        \ destinados a mitigar el impacto provocado por la concreci\xF3n de determinados\
+        \ riesgos sobre la informaci\xF3n y los procesos de negocio de una sociedad;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.zz
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.zz
+      name: lit. zz)
+      description: "Procedimiento: Lista detallada de la secuencia l\xF3gica y consistente\
+        \ de actividades y cursos de acci\xF3n, por medio de los cuales se asegura\
+        \ el cumplimiento de una funci\xF3n operativa;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.aaa
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.aaa
+      name: lit. aaa)
+      description: "Proceso Cr\xEDtico: Proceso indispensable para la continuidad\
+        \ del negocio y las operaciones de la entidad, y cuya falta de identificaci\xF3\
+        n o aplicaci\xF3n deficiente puede generar un impacto financiero negativo;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.bbb
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.bbb
+      name: lit. bbb)
+      description: "Programa de Seguridad Cibern\xE9tica y de la Informaci\xF3n: Comprende\
+        \ las pol\xEDticas, estrategias, procesos y actividades que las entidades\
+        \ deben documentar, desarrollar e implementar, a fin de cumplir las disposiciones\
+        \ y requerimientos establecidos en este Reglamento;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ccc
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ccc
+      name: lit. ccc)
+      description: "Punto de Interacci\xF3n (PDI): Punto inicial donde se leen los\
+        \ datos de una tarjeta bancaria. Consiste en sistemas y equipos electr\xF3\
+        nicos para habilitar a un tarjetahabiente para realizar una transacci\xF3\
+        n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ddd
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ddd
+      name: lit. ddd)
+      description: "Red Privada Virtual (VPN por sus siglas en ingl\xE9s): Tecnolog\xED\
+        a de red, que permite una extensi\xF3n segura de una red de \xE1rea local\
+        \ (LAN, por sus siglas en ingl\xE9s) sobre una red p\xFAblica o no controlada\
+        \ como internet, garantizando la seguridad de la misma mediante el cifrado\
+        \ de la comunicaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.eee
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.eee
+      name: lit. eee)
+      description: "Riesgo: Posibilidad de que se produzca un hecho que genere p\xE9\
+        rdidas que afecte los resultados, el patrimonio, la solvencia y liquidez de\
+        \ las entidades;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.fff
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.fff
+      name: lit. fff)
+      description: "Riesgo Operacional: Posibilidad de sufrir p\xE9rdidas debido a\
+        \ la falta de adecuaci\xF3n o a fallos de los procesos y sistemas internos,\
+        \ personas, o sistemas internos, o bien a causa de acontecimientos externos.\
+        \ Incluye el riesgo legal, pero excluye el riesgo estrat\xE9gico y reputacional;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ggg
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ggg
+      name: lit. ggg)
+      description: "Riesgo Tecnol\xF3gico: Posibilidad de sufrir un impacto adverso\
+        \ relacionado con la afectaci\xF3n de la confidencialidad, integridad o disponibilidad\
+        \ de la informaci\xF3n o de la Infraestructura Tecnol\xF3gica;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.hhh
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.hhh
+      name: lit. hhh)
+      description: "Seguridad Cibern\xE9tica: Protecci\xF3n de la informaci\xF3n en\
+        \ todos sus formatos durante el almacenamiento, trasmisi\xF3n y procesamiento\
+        \ de la misma a trav\xE9s del Ciberespacio;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.iii
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.iii
+      name: lit. iii)
+      description: "Seguridad de la Informaci\xF3n: La protecci\xF3n de los sistemas\
+        \ de informaci\xF3n y de la informaci\xF3n en todos sus formatos, durante\
+        \ su almacenamiento, procesamiento o transmisi\xF3n, contra el acceso, uso,\
+        \ divulgaci\xF3n, interrupci\xF3n, modificaci\xF3n o destrucci\xF3n no autorizados,\
+        \ a fin de proporcionar confidencialidad, integridad y disponibilidad de la\
+        \ informaci\xF3n a lo interno de la entidad;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.jjj
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.jjj
+      name: lit. jjj)
+      description: "Servicio de Computaci\xF3n en la Nube: Tipo de servicio que permite\
+        \ a las entidades acceder a recursos basados en tecnolog\xEDa a trav\xE9s\
+        \ de internet sin necesidad del conocimiento, experiencia o control sobre\
+        \ la infraestructura tecnol\xF3gica que los respalda. Este modelo de computaci\xF3\
+        n se compone de 5 (cinco) caracter\xEDsticas esenciales: autoservicio bajo\
+        \ demanda, acceso universal a redes interconectadas, agrupaci\xF3n de recursos\
+        \ independiente de la ubicaci\xF3n, flexibilidad y calidad del servicio;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.kkk
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.kkk
+      name: lit. kkk)
+      description: "Sistema de Informaci\xF3n: Conjunto de activos de informaci\xF3\
+        n utilizado para obtener, almacenar, manipular, administrar, controlar, procesar,\
+        \ transmitir y/o recibir datos, con el objetivo de satisfacer una necesidad\
+        \ de informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.lll
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.lll
+      name: lit. lll)
+      description: "Sistema de Pagos: Conjunto de instrumentos, procedimientos y sistemas\
+        \ de transferencia de fondos que aseguran la circulaci\xF3n del dinero. Posee\
+        \ un administrador y participantes;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.mmm
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.mmm
+      name: lit. mmm)
+      description: "Sistema de Pagos y Liquidaci\xF3n de Valores de la Rep\xFAblica\
+        \ Dominicana (SIPARD): Servicio p\xFAblico de titularidad exclusiva del Banco\
+        \ Central, compuesto por los diferentes sistemas de pago y liquidaci\xF3n\
+        \ de valores reconocidos, al cual se encuentran adscritas las entidades de\
+        \ intermediaci\xF3n financiera, as\xED como otras entidades debidamente autorizadas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.nnn
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.nnn
+      name: lit. nnn)
+      description: "Tarjetahabiente Titular: Persona f\xEDsica o jur\xEDdica que,\
+        \ previo contrato suscrito con la entidad emisora de tarjeta de cr\xE9dito,\
+        \ es autorizada a girar en su favor sobre una l\xEDnea de cr\xE9dito, a trav\xE9\
+        s del uso de una tarjeta de cr\xE9dito, haci\xE9ndose responsable de pagar\
+        \ o saldar todos los consumos, cargos, intereses y comisiones, realizados\
+        \ por s\xED mismo y por los Tarjetahabientes adicionales autorizados por \xE9\
+        l;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ooo
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ooo
+      name: lit. ooo)
+      description: "Tarjeta Bancaria: Tarjetas de d\xE9bito, cr\xE9dito y prepagadas,\
+        \ emitidas por las entidades de intermediaci\xF3n financiera (incluyendo cualquier\
+        \ otro tipo de tarjeta que se emita en el futuro), asociadas o no a una cuenta\
+        \ bancaria;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ppp
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.ppp
+      name: lit. ppp)
+      description: "TI (Tecnolog\xEDa de Informaci\xF3n): Conjunto de herramientas\
+        \ y m\xE9todos empleados para llevar a cabo la administraci\xF3n de la informaci\xF3\
+        n. Incluye el hardware, software (aplicaciones, sistemas operativos, sistemas\
+        \ de administraci\xF3n de bases de datos, etc.), redes, multimedia, servicios\
+        \ asociados, entre otros; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.qqq
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
+      ref_id: 5.qqq
+      name: lit. qqq)
+      description: "Vulnerabilidad: Es una debilidad en un sistema de informaci\xF3\
+        n, sus procedimientos de seguridad, su implementaci\xF3n o en sus controles\
+        \ internos, que podr\xEDan permitir la materializaci\xF3n de una amenaza."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:6
+      assessable: true
+      depth: 1
+      ref_id: '6'
+      name: "Art. 6 \u2013 Marco de Trabajo"
+      description: "Las entidades de intermediaci\xF3n financiera, administradores\
+        \ y participantes del SIPARD, entidades p\xFAblicas de intermediaci\xF3n financiera\
+        \ y, las entidades de apoyo y servicios conexos, deben establecer las acciones\
+        \ para el desarrollo, implementaci\xF3n y mantenimiento del Programa de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:6.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:6
+      ref_id: 6.P
+      name: "P\xE1rr."
+      description: "En las subsidiarias o sucursales de entidades extranjeras, el\
+        \ marco de trabajo para el Programa de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n puede ser realizado por la unidad funcional de seguridad cibern\xE9tica\
+        \ de la casa matriz o una unidad regional especializada, que tenga un mandato\
+        \ para el grupo financiero completo o para la regi\xF3n a la que pertenece\
+        \ la entidad de intermediaci\xF3n financiera que opera en el pa\xEDs."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7
+      assessable: true
+      depth: 1
+      ref_id: '7'
+      name: "Art. 7 \u2013 Estructura"
+      description: "Las entidades de intermediaci\xF3n financiera, administradores\
+        \ y participantes del SIPARD, entidades p\xFAblicas de intermediaci\xF3n financiera\
+        \ y las entidades de apoyo y servicios conexos, deben contar con una estructura\
+        \ gerencial y funciones de control de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n, acordes a su naturaleza, tama\xF1o, complejidad, perfil de riesgo e importancia\
+        \ sist\xE9mica. Dicha estructura estar\xE1 conformada por un comit\xE9 funcional\
+        \ de seguridad cibern\xE9tica y de la informaci\xF3n, una unidad funcional\
+        \ de seguridad cibern\xE9tica y de la informaci\xF3n y sus respectivas \xE1\
+        reas especializadas. El citado comit\xE9 reportar\xE1 directamente al consejo.\
+        \ La unidad funcional de seguridad cibern\xE9tica y de la informaci\xF3n dirigir\xE1\
+        \ el programa de seguridad cibern\xE9tica y de la informaci\xF3n, en el marco\
+        \ de las responsabilidades definidas en este Reglamento, podr\xE1 ser conformada\
+        \ por las \xE1reas especializadas y estar\xE1 a cargo del Oficial de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7
+      ref_id: 7.P1
+      name: "P\xE1rr. I"
+      description: "Las labores del comit\xE9 funcional de seguridad cibern\xE9tica\
+        \ y de la informaci\xF3n podr\xE1n ser asumidas por el comit\xE9 de gesti\xF3\
+        n de riesgos u otro comit\xE9 de naturaleza similar (los cuales no alterar\xE1\
+        n su composici\xF3n en estos casos), para las entidades que, por su naturaleza,\
+        \ tama\xF1o, complejidad, perfil de riesgo e importancia sist\xE9mica as\xED\
+        \ lo requieran. En estas entidades, el proceso de gesti\xF3n integral de riesgos\
+        \ debe tomar en consideraci\xF3n el Programa de Seguridad Cibern\xE9tica y\
+        \ de la Informaci\xF3n, en lo que respecta a la gesti\xF3n de riesgos de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7
+      ref_id: 7.P2
+      name: "P\xE1rr. II"
+      description: "Las labores del comit\xE9 funcional de seguridad cibern\xE9tica\
+        \ y de la informaci\xF3n, en el caso de los administradores y participantes\
+        \ de sistemas de pagos y liquidaci\xF3n de valores (SIPARD) y las entidades\
+        \ de apoyo y servicios conexos, pueden ser asumidas por otro comit\xE9 de\
+        \ naturaleza similar y estructura seg\xFAn lo dispuesto por este Reglamento."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7
+      ref_id: 7.P3
+      name: "P\xE1rr. III"
+      description: "El comit\xE9 funcional de seguridad cibern\xE9tica y de la informaci\xF3\
+        n ser\xE1 dirigido por un alto ejecutivo designado por el consejo u \xF3rgano\
+        \ societario equivalente y no podr\xE1 desempe\xF1ar funciones en las unidades\
+        \ funcionales y \xE1reas especializadas de tecnolog\xEDa de la informaci\xF3\
+        n. Este ejecutivo deber\xE1 ser distinto al Oficial de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7.p4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:7
+      ref_id: 7.P4
+      name: "P\xE1rr. IV"
+      description: "Dicha estructura deber\xE1 ser revisada por el consejo u \xF3\
+        rgano societario equivalente, a medida que cambien las estrategias y/o estructura\
+        \ de las entidades de intermediaci\xF3n financiera, administradores y participantes\
+        \ del SIPARD, entidades p\xFAblicas de intermediaci\xF3n financiera y, las\
+        \ entidades de apoyo y servicios conexos, para verificar su idoneidad e independencia\
+        \ de las \xE1reas de negocios, tecnolog\xEDas de la informaci\xF3n y operaciones."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:8
+      assessable: true
+      depth: 1
+      ref_id: '8'
+      name: "Art. 8 \u2013 Aprobaci\xF3n del Programa de Seguridad Cibern\xE9tica\
+        \ y de la Informaci\xF3n"
+      description: "Las pol\xEDticas del Programa de Seguridad Cibern\xE9tica y de\
+        \ la Informaci\xF3n de las entidades de intermediaci\xF3n financiera, administradores\
+        \ y participantes del SIPARD, entidades p\xFAblicas de intermediaci\xF3n financiera\
+        \ y, las entidades de apoyo y servicios conexos, deben ser sometidos al consejo\
+        \ u \xF3rgano societario competente, para su aprobaci\xF3n, por parte del\
+        \ comit\xE9 funcional de seguridad cibern\xE9tica a m\xE1s tardar entre el\
+        \ tercer y sexto mes posterior a la entrada en vigencia de este reglamento."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9
+      assessable: true
+      depth: 1
+      ref_id: '9'
+      name: "Art. 9 \u2013 Responsabilidades del Comit\xE9 Funcional de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n"
+      description: "El comit\xE9 funcional de seguridad cibern\xE9tica y de la informaci\xF3\
+        n asumir\xE1, de manera enunciativa, pero no limitativa, las responsabilidades\
+        \ siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9
+      ref_id: 9.a
+      name: lit. a)
+      description: "Dise\xF1ar los lineamientos funcionales de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n, y el mantenimiento del Programa de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n, en consonancia con los objetivos\
+        \ estrat\xE9gicos de la entidad, determinados por el consejo u \xF3rgano societario\
+        \ equivalente;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9
+      ref_id: 9.b
+      name: lit. b)
+      description: "Someter al consejo u \xF3rgano societario competente, para su\
+        \ aprobaci\xF3n, las pol\xEDticas del Programa de Seguridad Cibern\xE9tica\
+        \ y de la Informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9
+      ref_id: 9.c
+      name: lit. c)
+      description: "Evaluar la efectividad del Programa de Seguridad Cibern\xE9tica\
+        \ y de la Informaci\xF3n, en consonancia con los objetivos estrat\xE9gicos\
+        \ de la entidad;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9
+      ref_id: 9.d
+      name: lit. d)
+      description: "Ratificar las decisiones de tratamiento de riesgo, en coordinaci\xF3\
+        n con las \xE1reas pertinentes de negocio, previamente presentadas por el\
+        \ Oficial de Seguridad Cibern\xE9tica y de la Informaci\xF3n; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:9
+      ref_id: 9.e
+      name: lit. e)
+      description: "Comunicar al consejo u \xF3rgano societario competente, los resultados\
+        \ de sus valoraciones sobre los aspectos de Seguridad Cibern\xE9tica y de\
+        \ la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10
+      assessable: true
+      depth: 1
+      ref_id: '10'
+      name: "Art. 10 \u2013 Oficial de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n"
+      description: "El personal asignado a este rol, debe contar con la competencia\
+        \ y capacidad requerida para la implementaci\xF3n del programa de la naturaleza\
+        \ descrita en este Reglamento. La funci\xF3n del Oficial de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n, aunque de naturaleza funcional y operativa, tendr\xE1\
+        \ suficiente jerarqu\xEDa, seg\xFAn la estructura de cada entidad, para asegurar\
+        \ que cuenta con la autoridad e independencia necesarias para cumplir con\
+        \ sus responsabilidades, debiendo reportar al principal ejecutivo de la entidad\
+        \ o a quien \xE9ste delegue."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10
+      ref_id: 10.P1
+      name: "P\xE1rr. I"
+      description: "El Oficial de Seguridad Cibern\xE9tica y de la Informaci\xF3n\
+        \ ser\xE1 miembro del comit\xE9 funcional de seguridad cibern\xE9tica y de\
+        \ la informaci\xF3n, y llevar\xE1 la agenda concerniente a los aspectos de\
+        \ Seguridad Cibern\xE9tica y de la Informaci\xF3n, en calidad de secretario\
+        \ del comit\xE9."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10
+      ref_id: 10.P2
+      name: "P\xE1rr. II"
+      description: "El Oficial de Seguridad Cibern\xE9tica y de la Informaci\xF3n\
+        \ podr\xE1 pertenecer a otros comit\xE9s de la entidad, por la naturaleza\
+        \ de su rol."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10.p3
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10
+      ref_id: 10.P3
+      name: "P\xE1rr. III"
+      description: "El Oficial de Seguridad Cibern\xE9tica y de la Informaci\xF3n\
+        \ debe reportar peri\xF3dicamente al Equipo de Respuestas a Incidentes de\
+        \ Seguridad Cibern\xE9tica y de la Informaci\xF3n (CSIRT) un informe de situaci\xF3\
+        n de la infraestructura tecnol\xF3gica bajo su supervisi\xF3n y cualquier\
+        \ otra informaci\xF3n que le sea requerida por el mismo."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10.p4
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:10
+      ref_id: 10.P4
+      name: "P\xE1rr. IV"
+      description: "Las funciones del Oficial de Seguridad Cibern\xE9tica y de la\
+        \ Informaci\xF3n podr\xE1 ser desempe\xF1ada por cualquier otro ejecutivo\
+        \ no perteneciente al \xE1rea de tecnolog\xEDa de la informaci\xF3n, cuyas\
+        \ funciones sean compatibles con dicho rol y cumpla con los requisitos de\
+        \ este Reglamento y sus instructivos."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11
+      assessable: true
+      depth: 1
+      ref_id: '11'
+      name: "Art. 11 \u2013 Responsabilidades del Oficial de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n"
+      description: "El Oficial de Seguridad Cibern\xE9tica y de la Informaci\xF3n\
+        \ debe cumplir, de manera enunciativa, pero no limitativa, con las responsabilidades\
+        \ siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11
+      ref_id: 11.a
+      name: lit. a)
+      description: "Desarrollar, implementar y mantener actualizado el Programa de\
+        \ Seguridad Cibern\xE9tica y de la Informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11
+      ref_id: 11.b
+      name: lit. b)
+      description: "Implementar las pol\xEDticas, est\xE1ndares y procedimientos apropiados\
+        \ para apoyar el Programa de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11
+      ref_id: 11.c
+      name: lit. c)
+      description: "Asignar las responsabilidades de los miembros que conforman las\
+        \ \xE1reas especializadas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11
+      ref_id: 11.d
+      name: lit. d)
+      description: "Gestionar las acciones para el tratamiento del riesgo tecnol\xF3\
+        gico en coordinaci\xF3n con las \xE1reas pertinentes del negocio, previa aprobaci\xF3\
+        n del comit\xE9 funcional de seguridad cibern\xE9tica y de la informaci\xF3\
+        n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11
+      ref_id: 11.e
+      name: lit. e)
+      description: "Cumplir con los l\xEDmites de los niveles de riesgo tecnol\xF3\
+        gico relevantes establecidos por el consejo relacionados con amenazas o incidentes\
+        \ de Seguridad Cibern\xE9tica y de la Informaci\xF3n; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:11
+      ref_id: 11.f
+      name: lit. f)
+      description: "Definir y evaluar las responsabilidades de los proveedores en\
+        \ lo concerniente a la Seguridad Cibern\xE9tica y de la Informaci\xF3n de\
+        \ los servicios provistos."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:12
+      assessable: true
+      depth: 1
+      ref_id: '12'
+      name: "Art. 12 \u2013 \xC1reas Especializadas"
+      description: "Las entidades de intermediaci\xF3n financiera, administradores\
+        \ y participantes del SIPARD, entidades p\xFAblicas de intermediaci\xF3n financiera\
+        \ y, las entidades de apoyo y servicios conexos, deben contar con una o varias\
+        \ \xE1reas especializadas operativas y funcionales, responsables de la ejecuci\xF3\
+        n del Programa de Seguridad Cibern\xE9tica y de la Informaci\xF3n, las cuales\
+        \ podr\xE1n estar bajo la dependencia del Oficial de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:12.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:12
+      ref_id: 12.P1
+      name: "P\xE1rr. I"
+      description: "Las \xE1reas especializadas deber\xE1n estar conformadas por personal\
+        \ t\xE9cnico con la competencia y capacidad requerida y con funciones y responsabilidades\
+        \ definidas. Las mismas deber\xE1n contar con los recursos necesarios para\
+        \ garantizar la adecuada gesti\xF3n del Programa de Seguridad Cibern\xE9tica\
+        \ y de la Informaci\xF3n. Cada unidad estar\xE1 liderada por un profesional\
+        \ designado por el Oficial de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:12.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:12
+      ref_id: 12.P2
+      name: "P\xE1rr. II"
+      description: "En los casos en que el comit\xE9 de gesti\xF3n de riesgos asuma\
+        \ las funciones del comit\xE9 funcional de seguridad cibern\xE9tica y de la\
+        \ informaci\xF3n, en atenci\xF3n a lo dispuesto en el P\xE1rrafo I, del Art\xED\
+        culo 7, las \xE1reas especializadas que se conformen, estar\xEDan bajo la\
+        \ supervisi\xF3n del encargado de la unidad de gesti\xF3n integral de riesgos."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:13
+      assessable: true
+      depth: 1
+      ref_id: '13'
+      name: "Art. 13 \u2013 Gesti\xF3n de Riesgos Tecnol\xF3gicos"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben evaluar\
+        \ y tratar adecuadamente los riesgos tecnol\xF3gicos en sus sistemas de informaci\xF3\
+        n e infraestructura tecnol\xF3gica, desde su concepci\xF3n, desarrollo e implementaci\xF3\
+        n, incluyendo entornos y procesos internos, en funci\xF3n del an\xE1lisis\
+        \ de amenazas, vulnerabilidades, controles, impacto, y apetito de riesgo establecido\
+        \ por cada entidad de intermediaci\xF3n financiera y del alcance de dichas\
+        \ evaluaciones."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:14
+      assessable: true
+      depth: 1
+      ref_id: '14'
+      name: "Art. 14 \u2013 Gesti\xF3n de Riesgos Tecnol\xF3gicos en las Entidades\
+        \ Interconectadas"
+      description: "Las entidades de intermediaci\xF3n financiera, deben procurar,\
+        \ de manera peri\xF3dica, la gesti\xF3n de riesgos tecnol\xF3gicos a las entidades\
+        \ interconectadas con las que actualmente mantengan una relaci\xF3n contractual.\
+        \ Cuando la evaluaci\xF3n de riesgos tecnol\xF3gicos realizada a estas entidades\
+        \ no sea satisfactoria, deben proceder con la desconexi\xF3n preventiva de\
+        \ la entidad interconectada y con el tratamiento de los riesgos que puedan\
+        \ producirse, tomando en consideraci\xF3n el apetito de riesgo establecido\
+        \ por cada entidad de intermediaci\xF3n financiera. En caso de que la entidad\
+        \ interconectada no realice las acciones correspondientes a la mitigaci\xF3\
+        n de sus riesgos de manera adecuada, se proceder\xE1 a su desconexi\xF3n definitiva."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:14.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:14
+      ref_id: 14.P1
+      name: "P\xE1rr. I"
+      description: "El apetito de riesgo debe ser establecido por el Consejo u \xD3\
+        rgano de Administraci\xF3n superior correspondiente, en base a una clasificaci\xF3\
+        n previamente establecida. Las Entidades de Intermediaci\xF3n Financiera,\
+        \ no debe establecer interconexi\xF3n con entidades cuyo riesgo sea mayor\
+        \ que el definido por su Consejo."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:14.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:14
+      ref_id: 14.P2
+      name: "P\xE1rr. II"
+      description: "En el marco del establecimiento de una nueva relaci\xF3n contractual\
+        \ que procure la interconexi\xF3n o el intercambio de informaci\xF3n con las\
+        \ entidades de intermediaci\xF3n financiera, deben abstenerse de concretizar\
+        \ dicha relaci\xF3n, en caso de que la evaluaci\xF3n de riesgos tecnol\xF3\
+        gicos no sea calificada como satisfactoria, tomando en consideraci\xF3n el\
+        \ apetito de riesgo establecido por cada entidad de intermediaci\xF3n financiera."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:15
+      assessable: true
+      depth: 1
+      ref_id: '15'
+      name: "Art. 15 \u2013 Metodolog\xEDas para la Gesti\xF3n de Riesgos Tecnol\xF3\
+        gicos"
+      description: "La gesti\xF3n de riesgos tecnol\xF3gicos, deben llevarse a cabo\
+        \ a trav\xE9s de metodolog\xEDas estructuradas que contemplen la identificaci\xF3\
+        n de las amenazas y vulnerabilidades tecnol\xF3gicas, la probabilidad de ocurrencia\
+        \ y el posible impacto previsto a las operaciones del negocio para determinar\
+        \ el riesgo potencial."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:15.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:15
+      ref_id: 15.P1
+      name: "P\xE1rr. I"
+      description: "Las evaluaciones deben contemplar la divulgaci\xF3n no autorizada\
+        \ de informaci\xF3n, la corrupci\xF3n accidental o deliberada, la manipulaci\xF3\
+        n de la informaci\xF3n y la disponibilidad de los entornos en cualquier per\xED\
+        odo."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:15.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:15
+      ref_id: 15.P2
+      name: "P\xE1rr. II"
+      description: "Los riesgos tecnol\xF3gicos deben ser tratados de acuerdo con\
+        \ los requerimientos del negocio y el enfoque aprobado por el comit\xE9 funcional\
+        \ de seguridad cibern\xE9tica y de la informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:16
+      assessable: true
+      depth: 1
+      ref_id: '16'
+      name: "Art. 16 \u2013 Pol\xEDtica de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y las entidades de apoyo y, servicios conexos, deben implementar\
+        \ y mantener una pol\xEDtica general o varias pol\xEDticas segregadas que\
+        \ contemplen los aspectos, procesos y procedimientos para la gesti\xF3n de\
+        \ la Seguridad Cibern\xE9tica y de la Informaci\xF3n, debiendo dar a conocer\
+        \ dichas pol\xEDticas a sus colaboradores."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:17
+      assessable: true
+      depth: 1
+      ref_id: '17'
+      name: "Art. 17 \u2013 Contratos con Colaboradores"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben incorporar\
+        \ en los contratos con colaboradores, las responsabilidades generales y espec\xED\
+        ficas de Seguridad Cibern\xE9tica y de la Informaci\xF3n hasta la finalizaci\xF3\
+        n de los mismos. Los colaboradores deber\xE1n firmar un documento formal que\
+        \ establezca tales responsabilidades."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:17.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:17
+      ref_id: 17.P
+      name: "P\xE1rr."
+      description: "Para el caso de los contratos que hayan sido perfeccionados de\
+        \ manera verbal o escrita, con colaboradores existentes a la fecha de entrada\
+        \ en vigor de este Reglamento, deben procurar la firma de un documento en\
+        \ el cual se hagan constar los aspectos generales y espec\xEDficos de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n, acorde con las responsabilidades\
+        \ de los mismos hasta su finalizaci\xF3n. De no ser \xE9sta la pr\xE1ctica,\
+        \ los colaboradores deber\xE1n firmar un documento formal que establezca dichas\
+        \ responsabilidades con la periodicidad establecida en el Programa de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n de cada entidad."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18
+      assessable: true
+      depth: 1
+      ref_id: '18'
+      name: "Art. 18 \u2013 Cultura de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben promover\
+        \ una cultura de Seguridad Cibern\xE9tica y de la Informaci\xF3n, contemplando\
+        \ al menos los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18
+      ref_id: 18.a
+      name: lit. a)
+      description: "El establecimiento de programas continuos de sensibilizaci\xF3\
+        n sobre el rol de los colaboradores en la Seguridad Cibern\xE9tica y de la\
+        \ Informaci\xF3n, el uso correcto de los sistemas de informaci\xF3n e infraestructura\
+        \ tecnol\xF3gica, y la gesti\xF3n de sus riesgos a trav\xE9s de los programas\
+        \ de inducci\xF3n, c\xE1psulas informativas, boletines, charlas concernientes\
+        \ a la seguridad y cualquier otro mecanismo de notificaci\xF3n h\xE1bil;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18
+      ref_id: 18.b
+      name: lit. b)
+      description: "La definici\xF3n de las responsabilidades de los colaboradores\
+        \ relacionados con la Seguridad Cibern\xE9tica y de la Informaci\xF3n en todos\
+        \ los niveles de la organizaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18
+      ref_id: 18.c
+      name: lit. c)
+      description: "La instauraci\xF3n de programas continuos de capacitaci\xF3n t\xE9\
+        cnica dirigidos a los colaboradores responsables de la Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:18
+      ref_id: 18.d
+      name: lit. d)
+      description: "La provisi\xF3n de los recursos adecuados para apoyar la efectividad\
+        \ de los programas continuos de sensibilizaci\xF3n de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19
+      assessable: true
+      depth: 1
+      ref_id: '19'
+      name: "Art. 19 \u2013 Gesti\xF3n de Activos de Informaci\xF3n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben desarrollar\
+        \ un esquema de gesti\xF3n de activos de informaci\xF3n que contemple los\
+        \ aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19
+      ref_id: 19.a
+      name: lit. a)
+      description: "Clasificaci\xF3n de Activos de Informaci\xF3n: La clasificaci\xF3\
+        n de los activos de informaci\xF3n, se llevar\xE1 a cabo de acuerdo con el\
+        \ nivel de confidencialidad y sensibilidad de la informaci\xF3n que gestionan;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19
+      ref_id: 19.b
+      name: lit. b)
+      description: "Gesti\xF3n de Documentos: Los documentos deben ser manejados de\
+        \ una manera sistem\xE1tica y estructurada, debi\xE9ndose cumplir con los\
+        \ requisitos de Seguridad Cibern\xE9tica y de la Informaci\xF3n durante el\
+        \ ciclo de vida del documento;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19
+      ref_id: 19.c
+      name: lit. c)
+      description: "Informaci\xF3n Sensible en Formato F\xEDsico: La informaci\xF3\
+        n sensible en formato f\xEDsico, debe protegerse contra la corrupci\xF3n,\
+        \ la p\xE9rdida o la divulgaci\xF3n no autorizada; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:19
+      ref_id: 19.d
+      name: lit. d)
+      description: "Registro de Activos de Informaci\xF3n: Los sistemas inform\xE1\
+        ticos y equipos de la infraestructura tecnol\xF3gica, deben ser registrados\
+        \ en un repositorio, el cual deber\xE1 permanecer actualizado."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:20
+      assessable: true
+      depth: 1
+      ref_id: '20'
+      name: "Art. 20 \u2013 Aplicaciones del Negocio"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben implementar\
+        \ controles de seguridad para las aplicaciones del negocio, que contemplen\
+        \ los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:20.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:20
+      ref_id: 20.a
+      name: lit. a)
+      description: "Protecci\xF3n de las Aplicaciones: Deben utilizar funcionalidades\
+        \ de seguridad de la informaci\xF3n alineadas a la infraestructura t\xE9cnica\
+        \ de seguridad, que permitan el cumplimiento de los requerimientos de confidencialidad,\
+        \ integridad y disponibilidad de la informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:20.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:20
+      ref_id: 20.b
+      name: lit. b)
+      description: "Protecci\xF3n de las Aplicaciones Basadas en Navegaci\xF3n: Deben\
+        \ establecer controles espec\xEDficos de seguridad cibern\xE9tica sobre las\
+        \ aplicaciones y servicios transaccionales, tanto internos como externos que\
+        \ apoyen los servicios hacia internet, basados en el navegador y en los servidores\
+        \ en donde se ejecutan; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:20.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:20
+      ref_id: 20.c
+      name: lit. c)
+      description: "Validaci\xF3n de la Informaci\xF3n en las aplicaciones de negocio:\
+        \ Deben incorporar controles de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n, que protejan la confidencialidad e integridad de la informaci\xF3n, cuando\
+        \ sean ingresadas, procesadas o extra\xEDdas de la aplicaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:21
+      assessable: true
+      depth: 1
+      ref_id: '21'
+      name: "Art. 21 \u2013 Pol\xEDticas de Privacidad de la Informaci\xF3n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben especificar\
+        \ en los contratos con sus clientes, las pol\xEDticas relacionadas a la privacidad\
+        \ de la informaci\xF3n y datos de car\xE1cter personal utilizados en sus productos\
+        \ y servicios, as\xED como cualquier modificaci\xF3n a las mismas. Estas pol\xED\
+        ticas deben contener el desglose del uso que la entidad receptora de informaci\xF3\
+        n dar\xE1 a cada tipo de informaci\xF3n o dato recopilado y deber\xE1n ser\
+        \ divulgadas a trav\xE9s de medios f\xEDsicos o electr\xF3nicos."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:21.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:21
+      ref_id: 21.P
+      name: "P\xE1rr."
+      description: "En el caso de los contratos vigentes aprobados por la Superintendencia\
+        \ de Bancos, se remitir\xE1 \xFAnicamente las nuevas cl\xE1usulas incluidas\
+        \ en los mismos."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:22
+      assessable: true
+      depth: 1
+      ref_id: '22'
+      name: "Art. 22 \u2013 T\xE9rminos y Condiciones de Uso"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben mantener\
+        \ actualizados los t\xE9rminos y condiciones de uso previamente aprobados,\
+        \ cubriendo los aspectos de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n. Asimismo, gestionar\xE1n el cumplimiento de dichos t\xE9rminos y condiciones\
+        \ de uso, de conformidad con los requerimientos de Seguridad Cibern\xE9tica\
+        \ y de la Informaci\xF3n de la entidad."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:23
+      assessable: true
+      depth: 1
+      ref_id: '23'
+      name: "Art. 23 \u2013 Trazabilidad de las Conexiones de los Clientes"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben identificar\
+        \ y registrar en un inventario de conexiones, los accesos de los clientes\
+        \ a los servicios de canales electr\xF3nicos o digitales. Este acceso de los\
+        \ clientes debe ser protegido mediante mecanismos de control y supervisi\xF3\
+        n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:24
+      assessable: true
+      depth: 1
+      ref_id: '24'
+      name: "Art. 24 \u2013 Gesti\xF3n de Accesos de los Colaboradores"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben contemplar\
+        \ dentro de su Programa de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n, la gesti\xF3n de los accesos de los colaboradores a los sistemas de informaci\xF3\
+        n e infraestructuras tecnol\xF3gicas, considerando los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:24.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:24
+      ref_id: 24.a
+      name: lit. a)
+      description: "Control de Acceso: Se deben establecer l\xEDmites y controles\
+        \ para los accesos de los colaboradores a los sistemas de informaci\xF3n e\
+        \ infraestructura tecnol\xF3gica; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:24.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:24
+      ref_id: 24.b
+      name: lit. b)
+      description: "Autorizaci\xF3n a los Colaboradores: Los accesos a los colaboradores\
+        \ sobre los sistemas de informaci\xF3n e infraestructura tecnol\xF3gica, deben\
+        \ ser autorizados previo a su otorgamiento."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:25
+      assessable: true
+      depth: 1
+      ref_id: '25'
+      name: "Art. 25 \u2013 Mecanismos de Control de Acceso"
+      description: "El acceso a los sistemas de informaci\xF3n e infraestructura tecnol\xF3\
+        gica se limitar\xE1 a las personas autorizadas, utilizando mecanismos apropiados\
+        \ de control de acceso contemplados en sus pol\xEDticas internas y supervisado\
+        \ por el personal t\xE9cnico de seguridad, contemplando los principios del\
+        \ menor privilegio y separaci\xF3n de funciones."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26
+      assessable: true
+      depth: 1
+      ref_id: '26'
+      name: "Art. 26 \u2013 Gesti\xF3n de Sistemas de Informaci\xF3n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben establecer\
+        \ pol\xEDticas y procedimientos para la gesti\xF3n de los sistemas de informaci\xF3\
+        n, considerando los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26
+      ref_id: 26.a
+      name: lit. a)
+      description: "Sistemas Inform\xE1ticos e Infraestructura Tecnol\xF3gica: Deben\
+        \ ser protegidos mediante controles de seguridad integrados;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26
+      ref_id: 26.b
+      name: lit. b)
+      description: "Configuraci\xF3n de los Servidores F\xEDsicos y Virtuales: Deben\
+        \ estar configurados para evitar cambios o accesos no autorizados, previniendo\
+        \ la interrupci\xF3n de los servicios como resultado de una sobrecarga del\
+        \ sistema u otros factores;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26
+      ref_id: 26.c
+      name: lit. c)
+      description: "Sistemas de Almacenamiento de Red: Deben estar protegidos mediante\
+        \ controles de seguridad, procurando la confidencialidad, integridad y disponibilidad\
+        \ de la informaci\xF3n que contienen;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26
+      ref_id: 26.d
+      name: lit. d)
+      description: "Gesti\xF3n de Cambios: Los cambios en los sistemas de la informaci\xF3\
+        n e infraestructura tecnol\xF3gica deben ser probados, revisados y aplicados\
+        \ mediante un proceso definido de gesti\xF3n de cambios; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26
+      ref_id: 26.e
+      name: lit. e)
+      description: "Copias de Resguardo y su Retenci\xF3n: Las copias de resguardo\
+        \ se deben realizar de forma regular, de acuerdo con un ciclo definido, con\
+        \ un esquema distribuido que incluya medios de resguardo no conectados a la\
+        \ red interna, fuera de l\xEDnea y en formato digital. A saber:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.e.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.e
+      ref_id: 26.e.i
+      name: lit. e), i.
+      description: "El resguardo de la informaci\xF3n esencial deber\xE1 ser conservado\
+        \ de conformidad con el grado de utilidad de la misma para los fines de restauraci\xF3\
+        n. Dicha informaci\xF3n deber\xE1 ser cifrada. El tiempo de retenci\xF3n para\
+        \ la informaci\xF3n esencial de tipo transaccional, ser\xE1 de por lo menos\
+        \ 1 (un) a\xF1o. Para la informaci\xF3n esencial de tipo maestro, la entidad\
+        \ deber\xE1 resguardar en todo momento, la m\xE1s actualizada de las versiones\
+        \ disponibles de dicha informaci\xF3n; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.e.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:26.e
+      ref_id: 26.e.ii
+      name: lit. e), ii.
+      description: "Para las copias de resguardo de las pistas de auditor\xEDa, el\
+        \ tiempo de retenci\xF3n ser\xE1 de por lo menos 180 (ciento ochenta) d\xED\
+        as."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27
+      assessable: true
+      depth: 1
+      ref_id: '27'
+      name: "Art. 27 \u2013 Infraestructura T\xE9cnica de Seguridad"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben implementar\
+        \ plataformas y sistemas que faciliten la aplicabilidad de los controles de\
+        \ seguridad apropiados, contemplando los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27
+      ref_id: 27.a
+      name: lit. a)
+      description: "Arquitectura de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n: El comit\xE9 funcional de seguridad cibern\xE9tica y de la informaci\xF3\
+        n debe establecer la arquitectura de seguridad cibern\xE9tica y de la informaci\xF3\
+        n de la entidad, a fin de proporcionar un marco est\xE1ndar para la aplicaci\xF3\
+        n de los controles;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27
+      ref_id: 27.b
+      name: lit. b)
+      description: "Gesti\xF3n de Identidad: Establecer un proceso de gesti\xF3n de\
+        \ identidad, para proporcionar una administraci\xF3n de perfiles de usuarios\
+        \ eficaz y coherente con la identificaci\xF3n, autenticaci\xF3n y mecanismos\
+        \ de control de acceso;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27
+      ref_id: 27.c
+      name: lit. c)
+      description: "Sistemas de Informaci\xF3n de Infraestructuras Cr\xEDticas: Los\
+        \ sistemas de informaci\xF3n que apoyan las infraestructuras cr\xEDticas,\
+        \ ser\xE1n protegidos por pol\xEDticas integrales de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n, que incluyan la evaluaci\xF3n de riesgos, la\
+        \ selecci\xF3n de los controles de seguridad, la evidencia de su implementaci\xF3\
+        n y su monitoreo;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27
+      ref_id: 27.d
+      name: lit. d)
+      description: "Soluciones Criptogr\xE1ficas: Utilizar soluciones criptogr\xE1\
+        ficas para proteger y preservar la confidencialidad e integridad de la informaci\xF3\
+        n sensible en tr\xE1nsito o almacenada, as\xED como el canal de transmisi\xF3\
+        n utilizado, tomando en cuenta lo siguiente:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.d.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.d
+      ref_id: 27.d.i
+      name: lit. d), i.
+      description: "Gesti\xF3n de los Algoritmos de Cifrado: La utilizaci\xF3n de\
+        \ algoritmos de cifrado debe estar documentada y aprobada por el comit\xE9\
+        \ funcional de seguridad cibern\xE9tica y de la informaci\xF3n. Los algoritmos\
+        \ deben contar con respaldo internacional por su garant\xEDa a la confidencialidad\
+        \ e integridad de la informaci\xF3n y los inseguros u obsoletos deben ser\
+        \ suspendidos o actualizados;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.d.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.d
+      ref_id: 27.d.ii
+      name: lit. d), ii.
+      description: "Gesti\xF3n de las Llaves Criptogr\xE1ficas: Las llaves criptogr\xE1\
+        ficas deben ser manejadas de manera segura, de acuerdo con los est\xE1ndares\
+        \ y procedimientos documentados, y deben ser protegidas contra el acceso o\
+        \ destrucci\xF3n no autorizada; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.d.iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.d
+      ref_id: 27.d.iii
+      name: lit. d), iii.
+      description: "Infraestructura de Llaves P\xFAblicas (PKI, por sus siglas en\
+        \ ingl\xE9s): Cuando se utiliza una infraestructura de llave p\xFAblica, deben\
+        \ ser establecidas por una o m\xE1s entidades de certificaci\xF3n y autoridades\
+        \ de registro y las llaves deben estar protegidas con los controles de seguridad\
+        \ necesarios."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27
+      ref_id: 27.e
+      name: lit. e)
+      description: "Protecci\xF3n Contra la Fuga de Informaci\xF3n: Se establecer\xE1\
+        n mecanismos de protecci\xF3n contra la fuga de informaci\xF3n a los sistemas,\
+        \ infraestructura tecnol\xF3gica y entornos locales que procesan, almacenan\
+        \ o transmiten informaci\xF3n sensible; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:27
+      ref_id: 27.f
+      name: lit. f)
+      description: "Gesti\xF3n de los Derechos Digitales (DRM, por sus siglas en ingl\xE9\
+        s): La informaci\xF3n sensible o las aplicaciones utilizadas fuera de la infraestructura\
+        \ tecnol\xF3gica, se proteger\xE1n mediante el uso de un sistema de gesti\xF3\
+        n de derechos digitales."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      assessable: true
+      depth: 1
+      ref_id: '28'
+      name: "Art. 28 \u2013 Gesti\xF3n de la Red"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben implementar\
+        \ procesos y plataformas para la gesti\xF3n segura de los componentes en las\
+        \ redes de informaci\xF3n, tomando en consideraci\xF3n los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.a
+      name: lit. a)
+      description: "Configuraci\xF3n de Dispositivos de Red: Los dispositivos de red\
+        \ deben ser configurados para funcionar de acuerdo con su rol y se establecer\xE1\
+        n controles de seguridad que eviten cambios no autorizados o incorrectos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.b
+      name: lit. b)
+      description: "Gesti\xF3n de la Red F\xEDsica: Las redes deben ser protegidas\
+        \ por controles f\xEDsicos de seguridad, con el apoyo de documentaci\xF3n\
+        \ actualizada y el etiquetado de los componentes esenciales. Los puntos de\
+        \ acceso a la red deben estar protegidos por mecanismos de control de acceso;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.c
+      name: lit. c)
+      description: "Conexiones de Redes Externas: Las conexiones de redes externas\
+        \ a los sistemas y redes inform\xE1ticas deben ser identificadas, verificadas,\
+        \ registradas y aprobadas individualmente por el comit\xE9 funcional de seguridad\
+        \ cibern\xE9tica;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.d
+      name: lit. d)
+      description: "Tr\xE1fico de Datos a Trav\xE9s de los Firewalls (Cortafuegos):\
+        \ El tr\xE1fico de datos entre redes o subredes internas o externas interconectadas,\
+        \ ser\xE1 debidamente transmitido a trav\xE9s de firewalls, con las reglas\
+        \ de seguridad requeridas, previo a la concesi\xF3n o restricci\xF3n de acceso;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.e
+      name: lit. e)
+      description: "Mantenimiento Remoto: El mantenimiento remoto de los sistemas\
+        \ y redes cr\xEDticas debe restringirse al personal debidamente autorizado,\
+        \ confinado a sesiones individuales y sujeto a revisi\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.f
+      name: lit. f)
+      description: "Acceso a Redes Inal\xE1mbricas: El acceso desde y hacia redes\
+        \ inal\xE1mbricas, ser\xE1 limitado a los usuarios y dispositivos autenticados\
+        \ y autorizados. El canal de transmisi\xF3n debe ser cifrado para salvaguardar\
+        \ la informaci\xF3n sensible en tr\xE1nsito;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.g
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.g
+      name: lit. g)
+      description: "Redes de Voz sobre IP (VoIP, por sus siglas en ingl\xE9s): Las\
+        \ redes de VoIP deben ser protegidas por una combinaci\xF3n de controles de\
+        \ seguridad, tanto de la red como espec\xEDficos del protocolo VoIP, para\
+        \ garantizar la disponibilidad de las mismas y proteger la confidencialidad\
+        \ e integridad de la informaci\xF3n sensible en tr\xE1nsito; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28.h
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:28
+      ref_id: 28.h
+      name: lit. h)
+      description: "Telefon\xEDa y Conferencia: Las instalaciones de telefon\xEDa\
+        \ y conferencia deben protegerse con una combinaci\xF3n de controles de seguridad\
+        \ f\xEDsicos y l\xF3gicos, monitoreo continuo y acceso restringido."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:29
+      assessable: true
+      depth: 1
+      ref_id: '29'
+      name: "Art. 29 \u2013 Conexiones con los Servicios de Entes Reguladores y Supervisores"
+      description: "Las Superintendencias del sistema financiero y los \xF3rganos\
+        \ reguladores sub-sectoriales a cuyos regulados alcance este Reglamento, y\
+        \ que mantengan una conexi\xF3n con los mismos, deben realizar revisiones\
+        \ peri\xF3dicas a los modelos de conexi\xF3n previamente establecidos con\
+        \ sus servicios, con el prop\xF3sito de evaluar los controles de seguridad\
+        \ utilizados en los mismos, para determinar las mejoras necesarias que deben\
+        \ ser implementadas para garantizar la disponibilidad de los servicios."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30
+      assessable: true
+      depth: 1
+      ref_id: '30'
+      name: "Art. 30 \u2013 Gesti\xF3n de Vulnerabilidades y Amenazas Tecnol\xF3gicas"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben establecer\
+        \ un proceso de an\xE1lisis, monitoreo y evaluaci\xF3n integral de las vulnerabilidades\
+        \ y amenazas tecnol\xF3gicas a sus sistemas, infraestructuras y procesos tecnol\xF3\
+        gicos, para minimizar la ocurrencia de incidentes y eventos relacionados a\
+        \ la Seguridad Cibern\xE9tica y de la Informaci\xF3n, contemplando los aspectos\
+        \ siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30
+      ref_id: 30.a
+      name: lit. a)
+      description: "Actualizaciones de Seguridad de Sistemas: Establecer un proceso\
+        \ para el despliegue recurrente de actualizaciones de seguridad del firmware,\
+        \ de los sistemas operativos y de las aplicaciones. En los casos en que la\
+        \ actualizaci\xF3n est\xE9 a cargo de un proveedor externo y que, por cualquier\
+        \ causa y de manera definitiva, rescinda o descontin\xFAe el servicio de soporte\
+        \ de actualizaciones de seguridad de firmware, sistemas operativos o aplicaciones,\
+        \ la entidad deber\xE1 sustituirlo;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30
+      ref_id: 30.b
+      name: lit. b)
+      description: "Inteligencia contra Amenazas: Desarrollar capacidades de inteligencia\
+        \ contra amenazas mediante la implementaci\xF3n de procesos, plataformas de\
+        \ an\xE1lisis y recolecci\xF3n de datos, apoyadas por un ciclo de inteligencia;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30
+      ref_id: 30.c
+      name: lit. c)
+      description: "Protecci\xF3n Contra el Software Malicioso: Se debe implementar\
+        \ una soluci\xF3n tecnol\xF3gica eficaz para el control y protecci\xF3n de\
+        \ software malicioso en los sistemas de informaci\xF3n e Infraestructura Tecnol\xF3\
+        gica. Esta soluci\xF3n estar\xE1 configurada para recibir actualizaciones\
+        \ peri\xF3dicas emitidas por el proveedor de la misma;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30
+      ref_id: 30.d
+      name: lit. d)
+      description: "Registro de Eventos de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n: Los acontecimientos potencialmente relacionados con incidentes de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n deben ser registrados, almacenados\
+        \ de forma centralizada, protegidos contra la modificaci\xF3n no autorizada\
+        \ y analizados de manera regular. El tiempo de retenci\xF3n para estos registros\
+        \ no podr\xE1 ser menor a 3 (tres) a\xF1os;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30
+      ref_id: 30.e
+      name: lit. e)
+      description: "Monitoreo de los Sistemas y la Infraestructura Tecnol\xF3gica:\
+        \ Los sistemas y la Infraestructura Tecnol\xF3gica deben ser monitoreados\
+        \ y revisados continuamente para asegurar el rendimiento de los mismos, reducir\
+        \ la ocurrencia de sobrecargas, identificar vulnerabilidades y detectar posibles\
+        \ intrusiones maliciosas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:30
+      ref_id: 30.f
+      name: lit. f)
+      description: "Prevenci\xF3n y Detecci\xF3n de Intrusos: Implementar soluciones\
+        \ tecnol\xF3gicas o mecanismos de prevenci\xF3n y detecci\xF3n de intrusos,\
+        \ a fin de proteger los sistemas y la infraestructura tecnol\xF3gica."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:31
+      assessable: true
+      depth: 1
+      ref_id: '31'
+      name: "Art. 31 \u2013 Gesti\xF3n de Incidentes de Seguridad Cibern\xE9tica y\
+        \ de la Informaci\xF3n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben establecer\
+        \ pol\xEDticas y procedimientos para la gesti\xF3n de los incidentes de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n, con el fin de identificar, responder,\
+        \ remediar y documentar de manera efectiva los eventos o cadena de eventos\
+        \ que vulneren dicha seguridad, procurando minimizar su impacto y recuperarse\
+        \ del incidente en el menor plazo posible. A tales fines deben contemplar\
+        \ los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:31.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:31
+      ref_id: 31.a
+      name: lit. a)
+      description: "Medidas contra Ataques Cibern\xE9ticos e Incidentes de Seguridad\
+        \ de la Informaci\xF3n: Tomar medidas razonables y efectivas para procurar\
+        \ la protecci\xF3n de la informaci\xF3n, los sistemas y la infraestructura\
+        \ tecnol\xF3gica, frente a los ataques cibern\xE9ticos o incidentes relacionados\
+        \ con la seguridad de la informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:31.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:31
+      ref_id: 31.b
+      name: lit. b)
+      description: "Correctivos de Emergencia: Establecer un m\xE9todo eficaz de prueba,\
+        \ revisi\xF3n y aplicaci\xF3n de correctivos de emergencia a los sistemas\
+        \ de la informaci\xF3n e infraestructura tecnol\xF3gica, de acuerdo con los\
+        \ procedimientos previamente autorizados; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:31.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:31
+      ref_id: 31.c
+      name: lit. c)
+      description: "Investigaciones Forenses: Definir un proceso para realizar las\
+        \ investigaciones forenses relacionadas con incidentes de seguridad cibern\xE9\
+        tica y de la informaci\xF3n u otros eventos que lo requieran."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:32
+      assessable: true
+      depth: 1
+      ref_id: '32'
+      name: "Art. 32 \u2013 Entornos Locales de Operaci\xF3n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben identificar\
+        \ los entornos locales de operaci\xF3n y establecer procesos de seguridad\
+        \ cibern\xE9tica para estos ambientes, contemplando los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:32.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:32
+      ref_id: 32.a
+      name: lit. a)
+      description: "Perfil de Seguridad de Localidad F\xEDsica: Definir, documentar\
+        \ y actualizar los perfiles de seguridad de sus localidades f\xEDsicas, los\
+        \ cuales deben contener detalles importantes de seguridad acerca de los colaboradores\
+        \ internos, los procesos, la informaci\xF3n, la tecnolog\xEDa utilizada y\
+        \ la ubicaci\xF3n asociados a sus localidades f\xEDsicas. La finalidad de\
+        \ los perfiles es la de servir de apoyo en la toma de decisiones basadas en\
+        \ el riesgo y relacionadas con la Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n, que involucren dichas localidades;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:32.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:32
+      ref_id: 32.b
+      name: lit. b)
+      description: "Coordinaci\xF3n de la Seguridad Local: Tomar medidas para coordinar\
+        \ las actividades de seguridad de la informaci\xF3n en las unidades de negocio\
+        \ pertinentes; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:32.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:32
+      ref_id: 32.c
+      name: lit. c)
+      description: "Equipos Electr\xF3nicos y Digitales: Los equipos electr\xF3nicos\
+        \ y digitales que procesan, almacenan o transmiten informaci\xF3n, deben ser\
+        \ protegidos y localizados en lugares f\xEDsicamente seguros. El uso de dispositivos\
+        \ electr\xF3nicos que permitan el registro o la captaci\xF3n de contenido\
+        \ audiovisual en \xE1reas restringidas debe ser controlado, as\xED como los\
+        \ horarios de acceso a las mismas."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33
+      assessable: true
+      depth: 1
+      ref_id: '33'
+      name: "Art. 33 \u2013 Aplicaciones de Estaciones de Trabajo"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben establecer\
+        \ procesos para la gesti\xF3n adecuada de la Seguridad Cibern\xE9tica y de\
+        \ la Informaci\xF3n de las aplicaciones instaladas en las estaciones de trabajo,\
+        \ contemplando los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33
+      ref_id: 33.a
+      name: lit. a)
+      description: "Inventario de las Aplicaciones de Estaciones de Trabajo: Las aplicaciones\
+        \ de estaciones de trabajo deber\xE1n estar registradas en un inventario o\
+        \ su equivalente;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33
+      ref_id: 33.b
+      name: lit. b)
+      description: "Protecci\xF3n de los Archivos con Informaci\xF3n Confidencial:\
+        \ Los archivos creados en aplicaciones de estaciones de trabajo, cuyo contenido\
+        \ sea informaci\xF3n confidencial, deben ser protegidos mediante la validaci\xF3\
+        n de la entrada, aplicando mecanismos de control de acceso;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33
+      ref_id: 33.c
+      name: lit. c)
+      description: "Protecci\xF3n de las Bases de Datos: Las bases de datos gestionadas\
+        \ con aplicaciones de estaciones de trabajo, deben ser protegidas mediante\
+        \ la validaci\xF3n de la entrada, la aplicaci\xF3n de controles de acceso\
+        \ y la restricci\xF3n a colaboradores autorizados a las funcionalidades de\
+        \ alto privilegio; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:33
+      ref_id: 33.d
+      name: lit. d)
+      description: "Desarrollo de Aplicaciones de Estaciones de Trabajo: Debe ser\
+        \ llevado a cabo seg\xFAn la metodolog\xEDa de desarrollo seguro, adoptada\
+        \ por la entidad."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34
+      assessable: true
+      depth: 1
+      ref_id: '34'
+      name: "Art. 34 \u2013 Dispositivos de Computaci\xF3n M\xF3vil"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben establecer\
+        \ mecanismos de seguridad para proteger la informaci\xF3n intercambiada a\
+        \ trav\xE9s de los dispositivos de computaci\xF3n m\xF3vil utilizados por\
+        \ los colaboradores, tomando en consideraci\xF3n los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34
+      ref_id: 34.a
+      name: lit. a)
+      description: "Acceso desde Entornos Remotos: Los dispositivos utilizados por\
+        \ los colaboradores para acceder desde entornos remotos, deben estar sujetos\
+        \ a autorizaci\xF3n seg\xFAn los est\xE1ndares y procedimientos establecidos\
+        \ por el comit\xE9 funcional de seguridad cibern\xE9tica y de la informaci\xF3\
+        n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34
+      ref_id: 34.b
+      name: lit. b)
+      description: "Gesti\xF3n Centralizada de Dispositivos M\xF3viles: Contar con\
+        \ mecanismos para la gesti\xF3n centralizada de dispositivos m\xF3viles y\
+        \ se proveer\xE1 a los colaboradores autorizados, de informaci\xF3n relevante\
+        \ relacionada a la protecci\xF3n de los dispositivos bajo su custodia;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34
+      ref_id: 34.c
+      name: lit. c)
+      description: "Protecci\xF3n de la Informaci\xF3n en los Dispositivos M\xF3viles:\
+        \ Los dispositivos m\xF3viles deben ser protegidos contra la divulgaci\xF3\
+        n no autorizada de informaci\xF3n, p\xE9rdida o hurto, mediante controles\
+        \ de acceso y cifrado de los mismos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34
+      ref_id: 34.d
+      name: lit. d)
+      description: "Conectividad de los Dispositivos M\xF3viles: Los dispositivos\
+        \ m\xF3viles deben estar provistos de medios seguros de conexi\xF3n a otros\
+        \ dispositivos y redes;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34
+      ref_id: 34.e
+      name: lit. e)
+      description: "Dispositivos Port\xE1tiles de Almacenamiento: El uso de dispositivos\
+        \ port\xE1tiles de almacenamiento, debe ser objeto de aprobaci\xF3n con acceso\
+        \ restringido. El almacenamiento de informaci\xF3n en este tipo de dispositivos,\
+        \ debe ser de forma cifrada; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:34
+      ref_id: 34.f
+      name: lit. f)
+      description: "Dispositivos Personales: El acceso a la red a trav\xE9s de dispositivos\
+        \ de computaci\xF3n m\xF3vil propiedad de los colaboradores, debe contar con\
+        \ la debida autorizaci\xF3n y la implementaci\xF3n de controles t\xE9cnicos,\
+        \ que contemplen los requerimientos de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35
+      assessable: true
+      depth: 1
+      ref_id: '35'
+      name: "Art. 35 \u2013 Comunicaciones Electr\xF3nicas"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben asegurar\
+        \ las comunicaciones electr\xF3nicas, mediante controles y pol\xEDticas de\
+        \ Seguridad Cibern\xE9tica y de la Informaci\xF3n, tomando en consideraci\xF3\
+        n los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35
+      ref_id: 35.a
+      name: lit. a)
+      description: "Correo Electr\xF3nico: Los sistemas de correo electr\xF3nico deben\
+        \ estar protegidos por una combinaci\xF3n de procesos, concienciaci\xF3n y\
+        \ controles t\xE9cnicos de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35
+      ref_id: 35.b
+      name: lit. b)
+      description: "Mensajer\xEDa Instant\xE1nea: Los servicios de mensajer\xEDa instant\xE1\
+        nea deben ser protegidos mediante el establecimiento de un proceso de gesti\xF3\
+        n, la implementaci\xF3n de los controles y la configuraci\xF3n de los elementos\
+        \ de Seguridad Cibern\xE9tica y de la Informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35
+      ref_id: 35.c
+      name: lit. c)
+      description: "Plataformas de Colaboraci\xF3n: Las plataformas de colaboraci\xF3\
+        n deben estar protegidas por pol\xEDticas de gesti\xF3n de configuraci\xF3\
+        n, controles de despliegue de aplicaci\xF3n y la realizaci\xF3n de ajustes\
+        \ de seguridad en cada plataforma, asegurando su disponibilidad cuando se\
+        \ requieran y la protecci\xF3n de las informaciones en tr\xE1nsito; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:35
+      ref_id: 35.d
+      name: lit. d)
+      description: "Servicios de Comunicaci\xF3n de voz: Los servicios de comunicaci\xF3\
+        n de voz deben ser aprobados y protegidos por una combinaci\xF3n de controles\
+        \ tecnol\xF3gicos, los cuales deben monitorease regularmente y estar respaldados\
+        \ por restricciones en los accesos."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36
+      assessable: true
+      depth: 1
+      ref_id: '36'
+      name: "Art. 36 \u2013 Gesti\xF3n de Proveedores Externos de Productos o Servicios\
+        \ Tecnol\xF3gicos"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, que contraigan\
+        \ obligaciones contractuales con proveedores externos de productos o servicios\
+        \ tecnol\xF3gicos, deben asegurar la integraci\xF3n de los requerimientos\
+        \ de Seguridad Cibern\xE9tica y de la Informaci\xF3n, tomando en consideraci\xF3\
+        n los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36
+      ref_id: 36.a
+      name: lit. a)
+      description: "Tercerizaci\xF3n: Establecer un proceso para regir la selecci\xF3\
+        n y gesti\xF3n de los proveedores externos, apoyado en contratos que especifiquen\
+        \ los requisitos de Seguridad Cibern\xE9tica y de la Informaci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36
+      ref_id: 36.b
+      name: lit. b)
+      description: "Requisitos de Seguridad a los Proveedores Externos: El cumplimiento\
+        \ de los requisitos de Seguridad Cibern\xE9tica y de la Informaci\xF3n, debe\
+        \ considerarse y revisarse de manera peri\xF3dica durante la relaci\xF3n con\
+        \ los proveedores externos, contemplando el an\xE1lisis y la gesti\xF3n adecuada\
+        \ de los riesgos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36
+      ref_id: 36.c
+      name: lit. c)
+      description: "Adquisici\xF3n o Arrendamiento de Equipos y Sistemas Tecnol\xF3\
+        gicos: El proceso de adquisici\xF3n o arrendamiento de equipos y sistemas\
+        \ tecnol\xF3gicos, debe basarse en gu\xEDas de referencia para la selecci\xF3\
+        n y aprobaci\xF3n de proveedores de equipos, aplicaciones y servicios, y prever\
+        \ los requerimientos t\xE9cnicos de seguridad aprobados por el comit\xE9 funcional\
+        \ de seguridad cibern\xE9tica y de la informaci\xF3n, asegurando que estos\
+        \ brinden la funcionalidad requerida y no comprometan la seguridad de la informaci\xF3\
+        n sensible de la entidad durante su ciclo de vida; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:36
+      ref_id: 36.d
+      name: lit. d)
+      description: "Contrataci\xF3n de Servicios de Computaci\xF3n en la Nube: Se\
+        \ debe documentar una pol\xEDtica para el uso y contrataci\xF3n de servicios\
+        \ de computaci\xF3n en la nube, incluyendo el hospedaje de servicios web,\
+        \ que contemple el desarrollo de un an\xE1lisis de riesgos de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n de los servicios contratados, para determinar\
+        \ el uso de los mismos por parte de los colaboradores, la integridad de la\
+        \ informaci\xF3n almacenada, as\xED como los mecanismos de protecci\xF3n de\
+        \ la misma. Esta pol\xEDtica debe ser comunicada a todos los colaboradores\
+        \ que puedan hacer uso de los mismos y los requerimientos de seguridad cibern\xE9\
+        tica deben estar contenidos en dicha pol\xEDtica."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37
+      assessable: true
+      depth: 1
+      ref_id: '37'
+      name: "Art. 37 \u2013 Gesti\xF3n de Desarrollo de Sistemas"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, que mantengan\
+        \ en su estructura org\xE1nica un \xE1rea de desarrollo de sistemas, deben\
+        \ establecer un proceso de gesti\xF3n de desarrollo de sistemas, el cual contemplar\xE1\
+        \ las disposiciones siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37
+      ref_id: 37.a
+      name: lit. a)
+      description: "Metodolog\xEDa de Desarrollo de Sistemas: Las actividades de desarrollo\
+        \ de sistemas deben llevarse a cabo de acuerdo con una metodolog\xEDa de desarrollo\
+        \ documentada y apegada a las mejores pr\xE1cticas internacionales;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37
+      ref_id: 37.b
+      name: lit. b)
+      description: "Entornos de Desarrollo de Sistemas: Las actividades de desarrollo\
+        \ de sistemas se deben realizar en los entornos de desarrollo especializados,\
+        \ los cuales deben estar separados de los ambientes de producci\xF3n y preproducci\xF3\
+        n, y protegidos contra el acceso no autorizado. La data de entornos productivos\
+        \ no debe ser utilizada o almacenada en los entornos de desarrollo. Deben\
+        \ establecerse mecanismos para asegurar la privacidad y protecci\xF3n de los\
+        \ datos de car\xE1cter personal en los ambientes de preproducci\xF3n (aseguramiento\
+        \ de la calidad) y producci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37
+      ref_id: 37.c
+      name: lit. c)
+      description: "Aseguramiento de la Calidad: El desarrollo de los sistemas debe\
+        \ realizarse siguiendo normas y pruebas de calidad, que procuren que los controles\
+        \ y requisitos de Seguridad Cibern\xE9tica y de la Informaci\xF3n acordados,\
+        \ sean implementados durante el ciclo de desarrollo del mismo; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:37
+      ref_id: 37.d
+      name: lit. d)
+      description: "Interfaces Programables de Aplicaciones (API, por sus siglas en\
+        \ ingl\xE9s): Los sistemas y aplicaciones que permitan la extensibilidad de\
+        \ funciones a trav\xE9s de interfaces de aplicaciones programables, deber\xE1\
+        n contar con controles de Seguridad Cibern\xE9tica y de la Informaci\xF3n\
+        \ que regulen la interacci\xF3n con otros sistemas y aplicaciones, tanto internos\
+        \ como de terceros. Del mismo modo, las aplicaciones desarrolladas que interact\xFA\
+        en con estas interfaces de aplicaciones programables, deber\xE1n cumplir con\
+        \ los requerimientos de seguridad establecidos por la entidad."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      assessable: true
+      depth: 1
+      ref_id: '38'
+      name: "Art. 38 \u2013 Ciclo de Vida del Desarrollo de Sistemas y Aplicaciones"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos que mantengan en\
+        \ su estructura org\xE1nica un \xE1rea de desarrollo de sistemas, deben adoptar\
+        \ un ciclo de vida para el desarrollo seguro de sus sistemas y aplicaciones,\
+        \ de acuerdo a las disposiciones siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      ref_id: 38.a
+      name: lit. a)
+      description: "Especificaciones de los Requerimientos: Los requerimientos del\
+        \ negocio, incluidos los de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n, deben ser contemplados durante la fase de especificaci\xF3n de requerimientos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      ref_id: 38.b
+      name: lit. b)
+      description: "Dise\xF1o de Sistemas y aplicaciones: Los requisitos de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n para los sistemas que se encuentran\
+        \ en el ciclo de desarrollo, deben ser considerados en el dise\xF1o de dichos\
+        \ sistemas y aplicaciones, a fin de minimizar las vulnerabilidades;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      ref_id: 38.c
+      name: lit. c)
+      description: "Compilaci\xF3n de Sistemas y aplicaciones: Las actividades de\
+        \ compilaci\xF3n de los sistemas y aplicaciones, incluyendo la codificaci\xF3\
+        n y personalizaci\xF3n de paquetes, deben llevarse a cabo de conformidad con\
+        \ las mejores pr\xE1cticas de la industria, realizadas por el personal especializado\
+        \ en el desarrollo de sistemas y aplicaciones. Las actividades de compilaci\xF3\
+        n deben ser inspeccionadas para identificar modificaciones o cambios no autorizados;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      ref_id: 38.d
+      name: lit. d)
+      description: "Prueba de Sistemas y aplicaciones: Los sistemas y aplicaciones\
+        \ en desarrollo deben ser probados en una zona dedicada de pruebas que simule\
+        \ el entorno de producci\xF3n, con la debida atenci\xF3n a la data de car\xE1\
+        cter personal utilizada, antes de que el sistema o aplicaci\xF3n sea colocado\
+        \ en el ambiente de producci\xF3n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      ref_id: 38.e
+      name: lit. e)
+      description: "Pruebas de Seguridad: Los sistemas y aplicaciones en desarrollo\
+        \ deben ser sometidos a pruebas de Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n en las fases requeridas dentro del ciclo de desarrollo, utilizando herramientas\
+        \ para la detecci\xF3n de vulnerabilidades, pruebas de penetraci\xF3n y pruebas\
+        \ de control de acceso, previo a su colocaci\xF3n en los ambientes de producci\xF3\
+        n;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      ref_id: 38.f
+      name: lit. f)
+      description: "Proceso de Instalaci\xF3n: Los nuevos sistemas y aplicaciones\
+        \ se deben instalar en el entorno de producci\xF3n, de acuerdo con un proceso\
+        \ documentado que contemple los requerimientos de Seguridad Cibern\xE9tica\
+        \ y de la Informaci\xF3n; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38.g
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:38
+      ref_id: 38.g
+      name: lit. g)
+      description: "Revisiones luego de las Implementaciones: luego de la implementaci\xF3\
+        n, se deben realizar revisiones peri\xF3dicas de acuerdo con procesos documentados,\
+        \ incluyendo la cobertura de la Seguridad Cibern\xE9tica y de la Informaci\xF3\
+        n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:39
+      assessable: true
+      depth: 1
+      ref_id: '39'
+      name: "Art. 39 \u2013 Seguridad F\xEDsica y del Entorno"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben definir\
+        \ los mecanismos que provean las condiciones de seguridad f\xEDsica y del\
+        \ entorno adecuado de las instalaciones cr\xEDticas."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:39.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:39
+      ref_id: 39.P
+      name: "P\xE1rr."
+      description: "Las instalaciones cr\xEDticas, incluyendo lugares que albergan\
+        \ los sistemas inform\xE1ticos, tales como los centros de datos, redes, equipos\
+        \ de telecomunicaciones, material f\xEDsico sensible y otros activos importantes,\
+        \ deben ser protegidos contra accidentes, ataques y el acceso f\xEDsico no\
+        \ autorizado; contra los cortes o fluctuaciones de energ\xEDa, as\xED como\
+        \ estar protegidos contra incendios, inundaciones y otras amenazas naturales."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40
+      assessable: true
+      depth: 1
+      ref_id: '40'
+      name: "Art. 40 \u2013 Continuidad de las Operaciones Tecnol\xF3gicas"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben definir\
+        \ los procesos que provean las capacidades necesarias que procuren garantizar\
+        \ la continuidad de las operaciones tecnol\xF3gicas ante incidentes de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n que puedan afectar significativamente\
+        \ las operaciones normales del negocio, contemplando las disposiciones siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40
+      ref_id: 40.a
+      name: lit. a)
+      description: "Esquema de Continuidad de las Operaciones Tecnol\xF3gicas: Se\
+        \ debe establecer un esquema de continuidad que incluya el desarrollo e implementaci\xF3\
+        n de sistemas e infraestructuras tecnol\xF3gicas flexibles, creando una capacidad\
+        \ de gesti\xF3n de crisis, as\xED como la coordinaci\xF3n y el mantenimiento\
+        \ de los planes de continuidad y contingencia de las operaciones tecnol\xF3\
+        gicas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40
+      ref_id: 40.b
+      name: lit. b)
+      description: "Resiliencia: Las aplicaciones cr\xEDticas del negocio y la infraestructura\
+        \ tecnol\xF3gica subyacente, se deben apoyar en equipos y sistemas robustos\
+        \ y confiables, con el apoyo de instalaciones alternativas o redundantes;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40
+      ref_id: 40.c
+      name: lit. c)
+      description: "Gesti\xF3n de Crisis: Establecer un proceso de gesti\xF3n de crisis,\
+        \ con el soporte de una unidad de apoyo, que detalle las acciones que se deben\
+        \ tomar en caso de la ocurrencia de un incidente de Seguridad Cibern\xE9tica\
+        \ y de la Informaci\xF3n, que afecten significantemente las operaciones normales\
+        \ del negocio;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40
+      ref_id: 40.d
+      name: lit. d)
+      description: "Planes de Continuidad y de Contingencia de las Operaciones Tecnol\xF3\
+        gicas: Los planes de continuidad de las operaciones tecnol\xF3gicas deben\
+        \ ser desarrollados y documentados para apoyar los procesos cr\xEDticos del\
+        \ negocio en la entidad. Para las operaciones tecnol\xF3gicas que soportan\
+        \ los procesos no cr\xEDticos, ser\xE1 suficiente con el desarrollo de un\
+        \ plan de contingencia;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40
+      ref_id: 40.e
+      name: lit. e)
+      description: "Planes de Recuperaci\xF3n ante Desastres: Se deben establecer\
+        \ y documentar planes de recuperaci\xF3n ante desastres para las operaciones\
+        \ tecnol\xF3gicas que soportan los procesos cr\xEDticos del negocio y garantizar\
+        \ la disponibilidad de los mismos cuando sea necesario; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:40
+      ref_id: 40.f
+      name: lit. f)
+      description: "Pruebas de Estr\xE9s: Las pruebas de estr\xE9s relacionadas a\
+        \ la continuidad de las operaciones tecnol\xF3gicas deben ser ejecutadas en\
+        \ intervalos de per\xEDodos no mayores a 1 (un) a\xF1o, sin perjuicio del\
+        \ incremento de la frecuencia de las pruebas bajo circunstancias especiales\
+        \ o a requerimiento de los entes reguladores y supervisores. Debe existir\
+        \ un registro o constancia de la calidad y los resultados de las mismas."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:41
+      assessable: true
+      depth: 1
+      ref_id: '41'
+      name: "Art. 41 \u2013 Auditor\xEDas Internas"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben establecer\
+        \ procesos de auditor\xEDas internas para garantizar la supervisi\xF3n efectiva\
+        \ del Programa de Seguridad Cibern\xE9tica y de la Informaci\xF3n, contemplando\
+        \ los aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:41.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:41
+      ref_id: 41.a
+      name: lit. a)
+      description: "Gesti\xF3n de las Auditor\xEDas Internas de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n: El estado de Seguridad Cibern\xE9tica y de la\
+        \ Informaci\xF3n en los sistemas de la informaci\xF3n y la infraestructura\
+        \ tecnol\xF3gica, en adici\xF3n a los procesos de evaluaci\xF3n a que hace\
+        \ referencia el Art\xEDculo 46 de este Reglamento, debe ser objeto de auditor\xED\
+        as exhaustivas y peri\xF3dicas, llevadas a cabo por la unidad interna de auditor\xED\
+        a o a trav\xE9s de una firma de auditores externos, o bien, por un auditor\
+        \ externo que cuente con las competencias y certificaciones requeridas para\
+        \ el desarrollo de las mismas, seg\xFAn se defina en el instructivo correspondiente,\
+        \ registrados en la Superintendencia de Bancos y en cumplimiento con el proceso\
+        \ de auditor\xEDa interna de la entidad; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:41.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:41
+      ref_id: 41.b
+      name: lit. b)
+      description: "Informes de Resultados de las Auditor\xEDas Internas de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n: Los resultados de las auditor\xED\
+        as internas de Seguridad Cibern\xE9tica y de la Informaci\xF3n de los sistemas\
+        \ inform\xE1ticos y la infraestructura tecnol\xF3gica, deben contener la documentaci\xF3\
+        n y notificaci\xF3n a las partes interesadas de sus conclusiones y recomendaciones."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:42
+      assessable: true
+      depth: 1
+      ref_id: '42'
+      name: "Art. 42 \u2013 Desempe\xF1o de la Seguridad"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben establecer\
+        \ mecanismos que procuren asegurar un desempe\xF1o \xF3ptimo de la gesti\xF3\
+        n de la Seguridad Cibern\xE9tica y de la Informaci\xF3n, contemplando los\
+        \ aspectos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:42.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:42
+      ref_id: 42.a
+      name: lit. a)
+      description: "Monitoreo de la Seguridad: El Oficial de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n debe monitorear permanentemente el estado de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:42.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:42
+      ref_id: 42.b
+      name: lit. b)
+      description: "Informes sobre la Seguridad: El Oficial de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n debe elaborar informes peri\xF3dicos y seg\xFA\
+        n necesidad, relativos a los riesgos de la Seguridad Cibern\xE9tica y de la\
+        \ Informaci\xF3n y los mismos ser\xE1n presentados al comit\xE9 funcional\
+        \ de seguridad cibern\xE9tica y de la informaci\xF3n en los tiempos establecidos\
+        \ por el mismo."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:43
+      assessable: true
+      depth: 1
+      ref_id: '43'
+      name: "Art. 43 \u2013 Cumplimiento del Monitoreo de la Seguridad"
+      description: "Se debe establecer un procedimiento de gesti\xF3n de cumplimiento\
+        \ de la Seguridad Cibern\xE9tica y de la Informaci\xF3n derivados de los lineamientos\
+        \ reglamentarios, jur\xEDdicos y de obligaciones contractuales."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44
+      assessable: true
+      depth: 1
+      ref_id: '44'
+      name: "Art. 44 \u2013 Est\xE1ndares Internacionales"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, que de manera\
+        \ contractual accedan a los servicios prestados por entidades internacionales\
+        \ que habilitan la provisi\xF3n de sus productos y servicios dentro de dicho\
+        \ sistema, deben cumplir, en cada caso en que aplique, con los objetivos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44
+      ref_id: 44.a
+      name: lit. a)
+      description: "Proteger los datos del cliente y facilitar la adopci\xF3n de medidas\
+        \ de seguridad uniformes, apoyados en la Norma de Seguridad de Datos para\
+        \ la Industria de Tarjeta de Pago (PCI-DSS, por sus siglas en ingl\xE9s);"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44
+      ref_id: 44.b
+      name: lit. b)
+      description: "Asegurar la protecci\xF3n en la administraci\xF3n, procesamiento\
+        \ y transmisi\xF3n, tanto en l\xEDnea como fuera de l\xEDnea, del N\xFAmero\
+        \ de Identificaci\xF3n Personal (PIN, por sus siglas en ingl\xE9s) del cliente,\
+        \ apoyados en los requerimientos de seguridad del PIN del grupo de est\xE1\
+        ndares PCI \u2013 PTS;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44
+      ref_id: 44.c
+      name: lit. c)
+      description: "Aplicar los requerimientos de seguridad y los procedimientos de\
+        \ evaluaci\xF3n de los proveedores de sistemas de aplicaciones de pago, apoyados\
+        \ en la Norma de Seguridad para las Aplicaciones de Pago (PA-DSS, por sus\
+        \ siglas en ingl\xE9s); y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:44
+      ref_id: 44.d
+      name: lit. d)
+      description: "Reforzar los controles de seguridad de los ambientes locales e\
+        \ infraestructuras relacionadas que interact\xFAen con la red de SWIFT, apoyado\
+        \ en el Marco de Controles de Seguridad del Cliente (SWIFT \u2013 CSCF, por\
+        \ sus siglas en ingl\xE9s)."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45
+      assessable: true
+      depth: 1
+      ref_id: '45'
+      name: "Art. 45 \u2013 Est\xE1ndares Facilitadores del Cumplimiento de la Norma\
+        \ PCI-DSS"
+      description: "A fin de facilitar el cumplimiento de la Norma PCI-DSS, las entidades\
+        \ de intermediaci\xF3n financiera, los administradores y participantes del\
+        \ SIPARD, las entidades p\xFAblicas de intermediaci\xF3n financiera y las\
+        \ entidades de apoyo y servicios conexos a quienes aplique a la adopci\xF3\
+        n de la misma, debe cumplir con los objetivos siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45
+      ref_id: 45.a
+      name: lit. a)
+      description: "Fortalecer la protecci\xF3n de los datos transmitidos desde el\
+        \ Punto de Interacci\xF3n (PDI) hasta su destino final, apoyados en los requerimientos\
+        \ de soluciones para el cifrado punto a punto (P2PE) del est\xE1ndar PCI \u2013\
+        \ P2PE;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45
+      ref_id: 45.b
+      name: lit. b)
+      description: "Reforzar los controles de seguridad f\xEDsica y l\xF3gica, en\
+        \ los procesos de producci\xF3n y distribuci\xF3n de las tarjetas bancarias,\
+        \ apoyados en los requerimientos de seguridad para la producci\xF3n y aprovisionamiento\
+        \ de tarjetas bancarias; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45
+      ref_id: 45.c
+      name: lit. c)
+      description: "Robustecer los controles de seguridad para salvaguardar la integridad\
+        \ del entorno de datos del Token, tanto est\xE1ticos como din\xE1micos, apoyados\
+        \ en los est\xE1ndares de seguridad para proveedores de servicios de Token\
+        \ (PCI \u2013 TSP)."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45.p
+      assessable: true
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:45
+      ref_id: 45.P
+      name: "P\xE1rr."
+      description: "En caso de que las entidades emisoras de tarjetas bancarias hayan\
+        \ tercerizado los servicios de producci\xF3n de las mismas y los servicios\
+        \ de token est\xE1ticos y din\xE1micos, deben verificar el cumplimiento de\
+        \ los requerimientos que les apliquen a los citados terceros. Para los servicios\
+        \ de producci\xF3n de tarjetas bancarias deber\xE1 tomarse en consideraci\xF3\
+        n lo establecido en los contratos de servicio suscritos con las marcas de\
+        \ tarjetas bancarias."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:46
+      assessable: true
+      depth: 1
+      ref_id: '46'
+      name: "Art. 46 \u2013 Informes de Cumplimiento"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos que est\xE9n interconectadas\
+        \ con el SIPARD, deben cumplir con un procedimiento de autoevaluaci\xF3n a\
+        \ trav\xE9s de herramientas digitales, para la remisi\xF3n de la informaci\xF3\
+        n requerida, en los plazos y en la forma en que se determine mediante Instructivo.\
+        \ Las Superintendencias del sistema financiero, en coordinaci\xF3n con el\
+        \ Banco Central en su condici\xF3n de Administrador del SIPARD, y los \xF3\
+        rganos reguladores sub-sectoriales a cuyos regulados alcance este Reglamento,\
+        \ implementar\xE1n dichas herramientas para la autoevaluaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:47
+      assessable: true
+      depth: 1
+      ref_id: '47'
+      name: "Art. 47 \u2013 Requerimientos Adicionales de Informaci\xF3n"
+      description: "Las Superintendencias del sistema financiero y los \xF3rganos\
+        \ reguladores sub-sectoriales a cuyos regulados alcance este Reglamento, podr\xE1\
+        n requerir en cualquier momento, informaci\xF3n adicional o complementaria\
+        \ a las entidades de intermediaci\xF3n financiera y las entidades p\xFAblicas\
+        \ de intermediaci\xF3n financiera, respecto a la gesti\xF3n del Programa de\
+        \ Seguridad Cibern\xE9tica y de la Informaci\xF3n. Del mismo modo, el Banco\
+        \ Central podr\xE1 requerir, en cualquier momento, informaci\xF3n adicional\
+        \ o complementaria a los Administradores y Participantes del SIPARD y de los\
+        \ Sistemas de Pago y Liquidaci\xF3n de Valores que lo componen, a las Entidades\
+        \ de apoyo y servicios conexos, respecto a la gesti\xF3n del Programa de Seguridad\
+        \ Cibern\xE9tica y de la Informaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:48
+      assessable: true
+      depth: 1
+      ref_id: '48'
+      name: "Art. 48 \u2013 Verificaci\xF3n de los Entes Reguladores y Supervisores"
+      description: "Las superintendencias del sistema financiero y los \xF3rganos\
+        \ reguladores sub-sectoriales a cuyos regulados alcance este Reglamento, as\xED\
+        \ como el Banco Central, en su calidad de Administrador del SIPARD, podr\xE1\
+        n verificar la idoneidad del cumplimiento del Programa de Seguridad Cibern\xE9\
+        tica y de la Informaci\xF3n de sus entes regulados, as\xED como de la evaluaci\xF3\
+        n independiente de la eficacia de dicha gesti\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
+      assessable: false
+      depth: 1
+      ref_id: '49'
+      name: "Art. 49 \u2013 Del Consejo Sectorial"
+      description: "Se crea el Consejo Sectorial para la Respuesta a Incidentes de\
+        \ Seguridad Cibern\xE9tica del sector financiero y estar\xE1 integrado de\
+        \ la manera siguiente:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
+      ref_id: '49.1'
+      name: "n\xFAm. 1"
+      description: 'Miembros permanentes con Voz y Voto:'
+      annotation: "Agrupación añadida para distinguir las dos listas del artículo (miembros e invitados), que usan las mismas letras. El texto es literal."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.a
+      name: "n\xFAm. 1, lit. a)"
+      description: "El Gobernador del Banco Central, quien lo Presidir\xE1;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.b
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.b
+      name: "n\xFAm. 1, lit. b)"
+      description: El Superintendente de Bancos;
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.c
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.c
+      name: "n\xFAm. 1, lit. c)"
+      description: El Superintendente del Mercado de Valores;
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.d
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.d
+      name: "n\xFAm. 1, lit. d)"
+      description: El Contralor del Banco Central;
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.e
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.e
+      name: "n\xFAm. 1, lit. e)"
+      description: "El Subgerente de Sistemas e Innovaci\xF3n Tecnol\xF3gica del Banco\
+        \ Central;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.f
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.f
+      name: "n\xFAm. 1, lit. f)"
+      description: "El Presidente de la Asociaci\xF3n de Bancos Comerciales de la\
+        \ Rep\xFAblica Dominicana, Inc. (ABA);"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.g
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.g
+      name: "n\xFAm. 1, lit. g)"
+      description: "El Presidente de la Liga de Asociaciones de Ahorros y Pr\xE9stamos\
+        \ Dominicana (LIDAAPI);"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.h
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.h
+      name: "n\xFAm. 1, lit. h)"
+      description: "El Presidente de la Asociaci\xF3n de Bancos de Ahorro y Cr\xE9\
+        dito y Corporaciones de Cr\xE9dito, Inc. (ABANCORD); y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.i
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
+      ref_id: 49.1.i
+      name: "n\xFAm. 1, lit. i)"
+      description: "El Director del Equipo de Respuesta a Incidentes de Seguridad\
+        \ Cibern\xE9tica (CSIRT por sus siglas en ingl\xE9s) del sector financiero,\
+        \ habilitado de conformidad con este Reglamento, quien fungir\xE1 como Secretario,\
+        \ pero s\xF3lo con voz."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
+      ref_id: '49.2'
+      name: "n\xFAm. 2"
+      description: 'Invitados permanentes con Voz:'
+      annotation: Ver nota de 49.1.
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.a
+      name: "n\xFAm. 2, lit. a)"
+      description: El Director de Seguridad Operativa del Banco Central;
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.b
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.b
+      name: "n\xFAm. 2, lit. b)"
+      description: "El Director del Departamento de Sistemas y Tecnolog\xEDa del Banco\
+        \ Central;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.c
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.c
+      name: "n\xFAm. 2, lit. c)"
+      description: El Director del Departamento del Sistema de Pagos del Banco Central;
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.d
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.d
+      name: "n\xFAm. 2, lit. d)"
+      description: El Director del Departamento de Seguridad Interna del Banco Central;
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.e
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.e
+      name: "n\xFAm. 2, lit. e)"
+      description: "El Responsable de la Oficina de Gesti\xF3n de Riesgos y Continuidad\
+        \ del Banco Central;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.f
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.f
+      name: "n\xFAm. 2, lit. f)"
+      description: "El Director del Departamento de Tecnolog\xEDa y Operaciones de\
+        \ la Superintendencia de Bancos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.g
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.g
+      name: "n\xFAm. 2, lit. g)"
+      description: El Director de Riesgos y Estudios de la Superintendencia de Bancos;
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.h
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.h
+      name: "n\xFAm. 2, lit. h)"
+      description: "Un representante de alta jerarqu\xEDa de la Superintendencia del\
+        \ Mercado de Valores; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.i
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
+      ref_id: 49.2.i
+      name: "n\xFAm. 2, lit. i)"
+      description: "Un representante de alta jerarqu\xEDa de la Superintendencia de\
+        \ Pensiones."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.p1
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
+      ref_id: 49.P1
+      name: "P\xE1rr. I"
+      description: "Los miembros permanentes de este Consejo Sectorial podr\xE1n delegar\
+        \ su representaci\xF3n en un funcionario de alta jerarqu\xEDa."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.p2
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
+      ref_id: 49.P2
+      name: "P\xE1rr. II"
+      description: "Los invitados permanentes de este Consejo Sectorial no podr\xE1\
+        n delegar su representaci\xF3n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.p3
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
+      ref_id: 49.P3
+      name: "P\xE1rr. III"
+      description: "El Consejo Sectorial podr\xE1 invitar otras entidades relacionadas\
+        \ al sector financiero a reuniones puntuales por requerimiento de 3 (tres)\
+        \ o m\xE1s de sus miembros."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      assessable: false
+      depth: 1
+      ref_id: '50'
+      name: "Art. 50 \u2013 Facultades"
+      description: "El Consejo Sectorial tendr\xE1 de manera enunciativa, pero no\
+        \ limitativa, las facultades siguientes:"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.a
+      name: lit. a)
+      description: "Definir las prioridades y lineamientos para la coordinaci\xF3\
+        n del Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica (CSIRT,\
+        \ por sus siglas en ingl\xE9s;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.b
+      name: lit. b)
+      description: "Dar seguimiento a las actividades del Equipo de Respuesta a Incidentes\
+        \ de Seguridad Cibern\xE9tica (CSIRT, por sus siglas en ingl\xE9s) y al funcionamiento\
+        \ de sus programas;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.c
+      name: lit. c)
+      description: "Coordinar los esfuerzos de cooperaci\xF3n entre las entidades\
+        \ de intermediaci\xF3n financiera, los administradores y participantes del\
+        \ SIPARD, las entidades p\xFAblicas de intermediaci\xF3n financiera y, las\
+        \ entidades de apoyo y servicios conexos, para la prevenci\xF3n, detecci\xF3\
+        n, manejo y recopilaci\xF3n de informaci\xF3n sobre incidentes de seguridad\
+        \ cibern\xE9tica;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.d
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.d
+      name: lit. d)
+      description: "Realizar las recomendaciones de lugar para la consecuci\xF3n de\
+        \ los objetivos estrat\xE9gicos del Equipo de Respuesta a Incidentes de Seguridad\
+        \ Cibern\xE9tica (CSIRT, por sus siglas en ingl\xE9s);"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.e
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.e
+      name: lit. e)
+      description: "Definir el marco de cooperaci\xF3n y comunicaci\xF3n del Equipo\
+        \ de Respuesta a Incidentes de Seguridad Cibern\xE9tica (CSIRT, por sus siglas\
+        \ en ingl\xE9s) con las \xE1reas funcionales de seguridad cibern\xE9tica de\
+        \ las entidades de intermediaci\xF3n financiera, los administradores y participantes\
+        \ del SIPARD, las entidades p\xFAblicas de intermediaci\xF3n financiera y\
+        \ las entidades de apoyo y servicios conexos;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.f
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.f
+      name: lit. f)
+      description: "Definir el marco de cooperaci\xF3n y comunicaci\xF3n con otras\
+        \ comisiones de similar naturaleza y con aquellas definidas por Ley;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.g
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.g
+      name: lit. g)
+      description: "Definir los protocolos de comunicaci\xF3n hacia los dem\xE1s sectores\
+        \ econ\xF3micos y sociales de la Rep\xFAblica Dominicana; y,"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.h
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
+      ref_id: 50.h
+      name: lit. h)
+      description: Cualquier otra facultad atribuida por la Junta Monetaria.
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:51
+      assessable: false
+      depth: 1
+      ref_id: '51'
+      name: "Art. 51 \u2013 Funcionamiento"
+      description: "El Consejo Sectorial deber\xE1 reunirse de manera ordinaria previa\
+        \ convocatoria de su Presidente, quien establecer\xE1 el orden del d\xEDa\
+        \ y sesionar\xE1 v\xE1lidamente con la presencia de al menos de 4 (cuatro)\
+        \ de sus miembros permanentes y el secretario de dicho Consejo, con una frecuencia\
+        \ de por lo menos 1 (una) vez por trimestre. El Presidente, podr\xE1 convocar\
+        \ extraordinariamente a tantas sesiones de trabajo como sean necesarias."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:52
+      assessable: false
+      depth: 1
+      ref_id: '52'
+      name: "Art. 52 \u2013 Creaci\xF3n del Mecanismo"
+      description: "Se crea el Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9\
+        tica para el Sector Financiero (CSIRT, por sus siglas en ingl\xE9s), bajo\
+        \ la dependencia administrativa del Banco Central y funcional del Consejo\
+        \ Sectorial, con la finalidad de definir acciones inmediatas para la prevenci\xF3\
+        n, detecci\xF3n, contenci\xF3n, erradicaci\xF3n y recuperaci\xF3n frente a\
+        \ incidentes de seguridad cibern\xE9tica que afecten las entidades definidas\
+        \ en el objeto y \xE1mbito de este Reglamento;"
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:52.p
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:52
+      ref_id: 52.P
+      name: "P\xE1rr."
+      description: "El presupuesto requerido, as\xED como las modalidades de ejecuci\xF3\
+        n del mismo, para la puesta en funcionamiento y mantenimiento de las operaciones\
+        \ del Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica (CSIRT,\
+        \ por sus siglas en ingl\xE9s), ser\xE1 determinado por la Junta Monetaria."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:53
+      assessable: false
+      depth: 1
+      ref_id: '53'
+      name: "Art. 53 \u2013 Responsabilidades"
+      description: "El Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica\
+        \ (CSIRT, por sus siglas en ingl\xE9s) debe cumplir con los deberes y responsabilidades\
+        \ que le sean otorgadas por el Consejo Sectorial."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:54
+      assessable: false
+      depth: 1
+      ref_id: '54'
+      name: "Art. 54 \u2013 Estructura"
+      description: "El Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica\
+        \ (CSIRT, por sus siglas en ingl\xE9s) debe contar con una estructura org\xE1\
+        nica que facilite el cumplimiento de sus deberes y responsabilidades."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:55
+      assessable: false
+      depth: 1
+      ref_id: '55'
+      name: "Art. 55 \u2013 Direcci\xF3n"
+      description: "El Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica\
+        \ (CSIRT, por sus siglas en ingl\xE9s), estar\xE1 dirigido por un profesional\
+        \ designado por el Banco Central, en virtud de sus competencias administrativas\
+        \ y capacidad requerida para la direcci\xF3n de equipos de respuesta de esta\
+        \ naturaleza."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56
+      assessable: false
+      depth: 1
+      ref_id: '56'
+      name: "Art. 56 \u2013 Instalaciones"
+      description: "El Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica\
+        \ (CSIRT, por sus siglas en ingl\xE9s), operar\xE1 en un lugar aislado, asegurado\
+        \ y sus sistemas de informaci\xF3n e infraestructura tecnol\xF3gica, deben\
+        \ estar implementados tomando en consideraci\xF3n la protecci\xF3n de la informaci\xF3\
+        n sensible recibida y almacenada en sus sistemas de informaci\xF3n. Asimismo,\
+        \ deber\xE1 contar con controles de seguridad f\xEDsicos y l\xF3gicos de manera\
+        \ permanente."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56.p1
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56
+      ref_id: 56.P1
+      name: "P\xE1rr. I"
+      description: "Las instalaciones de dicho Equipo estar\xE1n en un \xE1rea restringida\
+        \ con el fin de evitar el acceso no autorizado a los recursos y a la informaci\xF3\
+        n."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56.p2
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56
+      ref_id: 56.P2
+      name: "P\xE1rr. II"
+      description: "Los servidores, los equipos de comunicaciones, los dispositivos\
+        \ de seguridad l\xF3gica y los repositorios de datos, deben permanecer en\
+        \ las instalaciones del Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9\
+        tica (CSIRT, por sus siglas en ingl\xE9s) o en un centro de datos autorizado\
+        \ por el Consejo Sectorial, donde el acceso f\xEDsico y l\xF3gico se regir\xE1\
+        \ por un estricto control de acceso, seg\xFAn lo definido en las pol\xEDticas\
+        \ de acceso a ser elaboradas para esos fines."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:57
+      assessable: false
+      depth: 1
+      ref_id: '57'
+      name: "Art. 57 \u2013 Definici\xF3n de Pol\xEDticas"
+      description: "El Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica\
+        \ (CSIRT, por sus siglas en ingl\xE9s) debe contar con pol\xEDticas que deben\
+        \ ser seguidas por su personal en la realizaci\xF3n de sus operaciones acorde\
+        \ a los lineamientos definidos por este Reglamento y por las disposiciones\
+        \ del Consejo Sectorial."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:58
+      assessable: false
+      depth: 1
+      ref_id: '58'
+      name: "Art. 58 \u2013 Establecimiento de los Servicios"
+      description: "El Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica\
+        \ (CSIRT, por sus siglas en ingl\xE9s), debe establecer servicios de seguridad\
+        \ cibern\xE9tica, a fin de dar apoyo a las entidades de intermediaci\xF3n\
+        \ financiera, los administradores y participantes del SIPARD, las entidades\
+        \ p\xFAblicas de intermediaci\xF3n financiera y, las entidades de apoyo y\
+        \ servicios conexos, en sus procesos de respuesta a incidentes de seguridad\
+        \ cibern\xE9tica."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:59
+      assessable: false
+      depth: 1
+      ref_id: '59'
+      name: "Art. 59 \u2013 Sanciones"
+      description: "Las entidades de intermediaci\xF3n financiera y las entidades\
+        \ p\xFAblicas de intermediaci\xF3n financiera que infrinjan cualesquiera de\
+        \ las disposiciones contenidas en este Reglamento y en los instructivos que\
+        \ fueren creados para su implementaci\xF3n, ser\xE1n pasibles de la aplicaci\xF3\
+        n de las sanciones establecidas en la Ley Monetaria y Financiera y en el Reglamento\
+        \ de Sanciones."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:60
+      assessable: false
+      depth: 1
+      ref_id: '60'
+      name: "Art. 60 \u2013 Medidas Precautorias"
+      description: "Cuando los administradores y participantes del SIPARD previstos\
+        \ en este Reglamento, as\xED como las entidades de apoyo y servicios conexos\
+        \ que mantengan una interconexi\xF3n o intercambio de informaci\xF3n con el\
+        \ SIPARD, y sus administradores y participantes, incumplan alguna de las disposiciones\
+        \ contenidas en este Reglamento y en los instructivos que fueren creados para\
+        \ su implementaci\xF3n, el Banco Central podr\xE1 suspender temporalmente\
+        \ su participaci\xF3n en el SIPARD, como medida precautoria y para minimizar\
+        \ el riesgo sist\xE9mico. De verificarse el incumplimiento continuo de las\
+        \ disposiciones enunciadas, podr\xE1 ser gestionado en coordinaci\xF3n con\
+        \ el organismo regulador correspondiente, la exclusi\xF3n definitiva del Sistema\
+        \ de Pagos y Liquidaci\xF3n de Valores."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:61
+      assessable: false
+      depth: 1
+      ref_id: '61'
+      name: "Art. 61 \u2013 Elaboraci\xF3n de Instructivos y Circulares"
+      description: "El Banco Central y la Superintendencia de Bancos, deber\xE1n elaborar\
+        \ los instructivos y circulares con los lineamientos que consideren necesarios\
+        \ para la aplicaci\xF3n de este Reglamento."
+    - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:62
+      assessable: true
+      depth: 1
+      ref_id: '62'
+      name: "Art. 62 \u2013 Plazo de Adecuaci\xF3n"
+      description: "Las entidades de intermediaci\xF3n financiera, los administradores\
+        \ y participantes del SIPARD, las entidades p\xFAblicas de intermediaci\xF3\
+        n financiera y, las entidades de apoyo y servicios conexos, deben ajustarse\
+        \ a las disposiciones contenidas en este Reglamento en el plazo de 1 (un)\
+        \ a\xF1o contado a partir de la fecha de entrada en vigencia de este Reglamento.'"

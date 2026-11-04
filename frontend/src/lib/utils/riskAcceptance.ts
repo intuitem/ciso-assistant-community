@@ -1,10 +1,10 @@
-import { getModelInfo } from '$lib/utils/crud';
-import { modelSchema } from '$lib/utils/schemas';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { defaults } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-import { m } from '$paraglide/messages';
-import type { ModalStore, ModalComponent, ModalSettings } from '$lib/components/Modals/stores';
+import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+import { m } from '#paraglide/messages.js';
+import type { ModalStore, ModalComponent, ModalSettings } from '#lib/components/Modals/stores.js';
 
 interface RiskAcceptancePrefill {
 	folderId?: string;

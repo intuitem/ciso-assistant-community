@@ -1,3 +1,5 @@
+import adapter from '@sveltejs/adapter-node';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
@@ -13,7 +15,10 @@ export default defineConfig({
 			strategy: ['custom-userPreference', 'cookie', 'custom-fallback', 'baseLocale']
 		}),
 		tailwindcss(),
-		sveltekit()
+		sveltekit({
+			preprocess: vitePreprocess(),
+			adapter: adapter()
+		})
 	],
 	optimizeDeps: {
 		// @svelte-put/qr exports ./svg/QR.svelte under the "svelte" condition only.

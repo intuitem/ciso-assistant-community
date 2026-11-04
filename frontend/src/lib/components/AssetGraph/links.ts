@@ -1,4 +1,4 @@
-import { fetchAllByIds } from '$lib/utils/pagination';
+import { fetchAllByIds } from '#lib/utils/pagination.js';
 
 export const idOf = (ref: any): string => (typeof ref === 'object' && ref !== null ? ref.id : ref);
 

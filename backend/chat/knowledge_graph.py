@@ -224,6 +224,8 @@ def _build_graph() -> DiGraph:
 
 def _process_library(G: DiGraph, data: dict):
     """Process a single YAML library file into graph nodes and edges."""
+    from library.builder import normalize_objects
+
     library_urn = data.get("urn", "")
     library_name = data.get("name", "")
     library_ref_id = data.get("ref_id", "")
@@ -231,11 +233,13 @@ def _process_library(G: DiGraph, data: dict):
     provider = data.get("provider", "")
     description = data.get("description", "")
 
-    objects = data.get("objects", {})
+    # Both spellings are valid ("framework" is legacy): read the plural lists.
+    objects = normalize_objects(data.get("objects", {}))
 
-    # --- Framework and its requirement nodes ---
-    framework = objects.get("framework", {})
-    if isinstance(framework, dict) and framework:
+    # --- Frameworks and their requirement nodes ---
+    for framework in objects.get("frameworks") or []:
+        if not isinstance(framework, dict) or not framework:
+            continue
         fw_urn = framework.get("urn", library_urn)
         fw_name = framework.get("name", library_name)
         fw_ref_id = framework.get("ref_id", library_ref_id)
@@ -316,11 +320,7 @@ def _process_library(G: DiGraph, data: dict):
         )
 
     # --- Cross-framework mappings ---
-    # libraries use either one requirement_mapping_set or a requirement_mapping_sets list
-    mapping_sets = [objects.get("requirement_mapping_set")] + list(
-        objects.get("requirement_mapping_sets") or []
-    )
-    for mapping_set in mapping_sets:
+    for mapping_set in objects.get("requirement_mapping_sets") or []:
         if not isinstance(mapping_set, dict) or not mapping_set:
             continue
         source_fw = mapping_set.get("source_framework_urn", "")

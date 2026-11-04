@@ -1,11 +1,11 @@
-import { loadDetail } from '$lib/utils/load';
+import { loadDetail } from '#lib/utils/load.js';
 import type { PageServerLoad } from './$types';
-import { getModelInfo } from '$lib/utils/crud';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
 import type { Actions } from '@sveltejs/kit';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import type { ModelInfo } from '#lib/utils/types.js';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 

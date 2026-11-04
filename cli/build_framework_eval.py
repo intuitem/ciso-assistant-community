@@ -26,8 +26,8 @@ def load(path):
 
 def frameworks(lib):
     objs = lib.get("objects") or {}
-    fw = objs.get("framework")
-    # a library holds one framework dict, presets/combined libs may hold a list
+    # "frameworks" (a list) is the current spelling, "framework" (a dict) the legacy one
+    fw = objs.get("frameworks") or objs.get("framework")
     return [fw] if isinstance(fw, dict) else (fw or [])
 
 

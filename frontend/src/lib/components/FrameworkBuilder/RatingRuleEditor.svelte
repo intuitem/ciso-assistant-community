@@ -10,7 +10,7 @@
 		type Scale
 	} from './builder-state';
 	import ConfirmAction from './ConfirmAction.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	// One rating outcome: the scales it measures (dimensions), its named levels, how a
 	// point is classified (a grid painted by clicking, for two dimensions; or rules,

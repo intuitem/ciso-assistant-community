@@ -1,6 +1,6 @@
 <script lang="ts">
-	import FormPreview from '$lib/components/QuickForms/FormPreview.svelte';
-	import { m } from '$paraglide/messages';
+	import FormPreview from '#lib/components/QuickForms/FormPreview.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

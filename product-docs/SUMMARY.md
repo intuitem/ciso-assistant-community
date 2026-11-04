@@ -141,6 +141,7 @@
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
 * [Date format](configuration/date-format.md)
+* [Report time zone](configuration/report-time-zone.md)
 
 ## Guides
 
@@ -215,6 +216,7 @@
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
 * [Workflow builder](features/workflows/README.md)
+  * [Cheat sheet](features/workflows/cheat-sheet.md)
   * [Triggers](features/workflows/triggers.md)
   * [Steps](features/workflows/steps.md)
   * [Expressions](features/workflows/expressions.md)
@@ -240,17 +242,35 @@
 ## AI and Integrations
 
 * [Overview](integrations/README.md)
-* [API reference](integrations/api.md)
-* [Generating a PAT](integrations/pat.md)
-* [Service accounts](integrations/service-accounts.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
+* [Microsoft Sentinel](integrations/sentinel.md)
 * [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Power BI connector](integrations/powerbi.md)
+* [n8n node](integrations/n8n.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
+
+## API documentation
+
+* [Overview](integrations/api.md)
+* [Generating a PAT](integrations/pat.md)
+* [Service accounts](integrations/service-accounts.md)
+* [API reference](api-reference/README.md)
+  * ```yaml
+    props:
+      models: false
+      downloadLink: true
+      grouping: by-tag
+    type: builtin:openapi
+    dependencies:
+      spec:
+        ref:
+          kind: openapi
+          spec: ciso-assistant
+    ```
 
 ## Contributing
 

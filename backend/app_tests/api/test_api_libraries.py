@@ -5,6 +5,7 @@ from app_tests.test_vars import TEST_FRAMEWORK_URN, TEST_RISK_MATRIX_URN
 from core.models import Framework, StoredLibrary
 from core.models import RiskMatrix
 from iam.models import Folder
+from library.builder import normalize_objects
 from rest_framework import status
 
 from test_utils import EndpointTestsQueries, EndpointTestsUtils
@@ -66,7 +67,7 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = lib_detail_response["framework"]
+        lib_detail_response = normalize_objects(lib_detail_response)["frameworks"][0]
 
         # Asserts that the library is not already loaded
         assert Framework.objects.all().count() == 0, (
@@ -142,7 +143,7 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = lib_detail_response["risk_matrix"][0]
+        lib_detail_response = normalize_objects(lib_detail_response)["risk_matrices"][0]
 
         # Asserts that the library is not already loaded
         assert RiskMatrix.objects.all().count() == 0, (

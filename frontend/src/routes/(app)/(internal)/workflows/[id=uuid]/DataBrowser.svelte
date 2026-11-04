@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { childEntries, isExpandable, previewValue } from '$lib/components/Cel/expressions';
+	import { m } from '#paraglide/messages.js';
+	import { childEntries, isExpandable, previewValue } from '#lib/components/Cel/expressions.js';
 	import SecretInlineForm from './SecretInlineForm.svelte';
 
 	interface NodeData {

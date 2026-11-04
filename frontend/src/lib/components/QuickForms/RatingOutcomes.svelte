@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	// The form's rating outcomes (`kind: rating`), as the server evaluated them: each
 	// page answering all the dimensions is a point, one per stage. Two dimensions draw

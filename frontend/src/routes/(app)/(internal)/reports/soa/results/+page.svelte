@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import SoaTreeSection from './SoaTreeSection.svelte';
 	import type { PageData } from './$types';
 

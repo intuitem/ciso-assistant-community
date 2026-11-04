@@ -1,9 +1,9 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -34,6 +34,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="users?is_third_party=false"
+	lazy
 	optionsLabelField="email"
 	field="leader"
 	cacheLock={cacheLocks['leader']}
@@ -44,6 +45,7 @@
 	{form}
 	multiple
 	optionsEndpoint="users?is_third_party=false"
+	lazy
 	optionsLabelField="email"
 	field="deputies"
 	cacheLock={cacheLocks['deputies']}
@@ -54,6 +56,7 @@
 	{form}
 	multiple
 	optionsEndpoint="users?is_third_party=false"
+	lazy
 	optionsLabelField="email"
 	field="members"
 	cacheLock={cacheLocks['members']}

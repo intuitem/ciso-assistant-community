@@ -1,7 +1,7 @@
 <script lang="ts">
-	import SegmentedControl from '$lib/components/Forms/SegmentedControl.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import SegmentedControl from '#lib/components/Forms/SegmentedControl.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { MappingRequirement, MappingRow } from './types';
 	import {
 		aggregateBySide,

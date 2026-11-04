@@ -8,7 +8,7 @@
 	} from './builder-state';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import { SECTION_ICON, SECTION_TITLE } from './section-style';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	// The form's scales: ordered levels choice questions share (`config.scale`), and
 	// ratings measure. A level's id names its choices, so it is set once, from

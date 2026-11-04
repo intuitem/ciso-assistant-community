@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { fetchAllPages } from '$lib/utils/pagination';
-	import type { CacheLock } from '$lib/utils/types';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 
 	interface Option {
 		label: string;
@@ -283,7 +283,7 @@
 </script>
 
 {#snippet renderNestedGroups(groups, depth, pathPrefix)}
-	{#each Object.entries(groups) as [groupName, group]}
+	{#each Object.entries(groups).sort( ([a], [b]) => safeTranslate(a).localeCompare(safeTranslate(b)) ) as [groupName, group]}
 		{@const currentPath = pathPrefix ? `${pathPrefix}>${groupName}` : groupName}
 		{@const hasSubGroups = Object.keys(group.subGroups).length > 0}
 		{@const hasDirectOptions = group.options.length > 0}

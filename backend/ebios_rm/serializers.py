@@ -1,9 +1,10 @@
 from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
     BaseModelSerializer,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.models import RiskMatrix
-from pmbok.models import GenericCollection
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -19,13 +20,14 @@ from .models import (
 from rest_framework import serializers
 
 
-class EbiosRMStudyWriteSerializer(BaseModelSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
+class EbiosRMStudyWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     risk_matrix = serializers.PrimaryKeyRelatedField(
         queryset=RiskMatrix.objects.all(), required=False
     )
@@ -46,6 +48,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     reference_entity = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
     reference_entity = FieldsRelatedField()

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	type Entry = { param: string; value: string };
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import TTPMatrix from '$lib/components/TTPMatrix/TTPMatrix.svelte';
-	import type { MatrixCell } from '$lib/components/TTPMatrix/TTPMatrix.svelte';
-	import { m } from '$paraglide/messages';
+	import TTPMatrix from '#lib/components/TTPMatrix/TTPMatrix.svelte';
+	import type { MatrixCell } from '#lib/components/TTPMatrix/TTPMatrix.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { untrack } from 'svelte';
 	import ViewSwitch from '../ViewSwitch.svelte';
 	import type { PageData } from './$types';

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		cell: Array<any>;

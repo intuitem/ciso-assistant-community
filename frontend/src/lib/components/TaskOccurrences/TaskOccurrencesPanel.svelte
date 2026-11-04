@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime.js';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { taskStatusColor } from '$lib/utils/taskStatus';
-	import { scheduleLabel, type TaskSchedule } from '$lib/utils/taskSchedule';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { taskStatusColor } from '#lib/utils/taskStatus.js';
+	import { scheduleLabel, type TaskSchedule } from '#lib/utils/taskSchedule.js';
 
 	interface Occurrence {
 		id: string;

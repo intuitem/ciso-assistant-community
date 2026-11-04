@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import AssetDependencyGraph from '$lib/components/Assets/AssetDependencyGraph.svelte';
-	import { m } from '$paraglide/messages';
+	import AssetDependencyGraph from '#lib/components/Assets/AssetDependencyGraph.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

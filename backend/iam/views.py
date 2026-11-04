@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
 from knox import crypto
-from knox.auth import TokenAuthentication, get_token_model, knox_settings
+from knox.auth import get_token_model, knox_settings
 from knox.models import AuthToken
 from knox.views import DateTimeField
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -29,8 +29,10 @@ from rest_framework.status import (
 from django.conf import settings
 
 from global_settings.models import GlobalSettings
+from core import mailer
 from core.models import Actor
 from core.utils import RoleCodename
+from .authentication import KnoxTokenAuthentication
 from .models import (
     Folder,
     PersonalAccessToken,
@@ -291,7 +293,7 @@ class SessionTokenView(views.APIView):
                 {"error": "No access token provided"}, status=HTTP_401_UNAUTHORIZED
             )
         # Get user from token
-        auth = TokenAuthentication()
+        auth = KnoxTokenAuthentication()
         user, _ = auth.authenticate_credentials(access_token.encode())
         if not user:
             return Response(
@@ -317,7 +319,7 @@ class PasswordResetView(views.APIView):
     def post(self, request):
         email = request.data["email"]  # type: ignore
         associated_user = User.objects.filter(email__iexact=email).first()
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+        if mailer.mailing_enabled():
             if associated_user is not None and associated_user.is_local:
                 try:
                     logger.info(
@@ -417,13 +419,27 @@ class ResetPasswordConfirmView(views.APIView):
             user is not None and user.is_local
         ):  # Only local user can reset their password.
             if self.token_generator.check_token(user, token):
-                user.set_password(new_password)
-                user.save()
+                with transaction.atomic():
+                    user.set_password(new_password)
+                    user.save()
+                    _revoke_login_tokens(user)
                 return Response(status=status.HTTP_200_OK)
         return Response(
             data={"error": "The link is invalid or has expired."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+def _revoke_login_tokens(user, keep_digest=None):
+    return (
+        AuthToken.objects.filter(user=user)
+        .exclude(
+            Q(digest=keep_digest)
+            | Q(Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))))
+            | Q(Exists(SCIMToken.objects.filter(auth_token=OuterRef("pk"))))
+        )
+        .delete()[0]
+    )
 
 
 class ChangePasswordView(views.APIView):
@@ -445,8 +461,12 @@ class ChangePasswordView(views.APIView):
             raise serializers.ValidationError(
                 "Your old password was entered incorrectly. Please enter it again."
             )
-        user.set_password(new_password)
-        user.save()
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            _revoke_login_tokens(
+                user, keep_digest=getattr(request.auth, "digest", None)
+            )
         return Response(status=status.HTTP_200_OK)
 
 
@@ -464,8 +484,10 @@ class SetPasswordView(views.APIView):
         serializer.is_valid(raise_exception=True)
         new_password = serializer.validated_data.get("new_password")
         user = serializer.validated_data.get("user")
-        user.set_password(new_password)
-        user.save()
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            _revoke_login_tokens(user)
         try:
             email_address = EmailAddress.objects.get(user=user, primary=True)
             email_address.verified = True
@@ -532,20 +554,7 @@ class RevokeOtherSessionsView(views.APIView):
             )
         access_token = auth_header.split(" ")[1]
         digest = crypto.hash_token(access_token)
-        user_id = str(request.user.id)
-
-        deleted_count, _ = (
-            AuthToken.objects.filter(user_id=user_id)
-            .exclude(
-                Q(digest=digest)
-                | Q(
-                    Exists(
-                        PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))
-                    )
-                )
-            )
-            .delete()
-        )
+        deleted_count = _revoke_login_tokens(request.user, keep_digest=digest)
 
         return Response(
             {"revoked_sessions": deleted_count},
@@ -659,7 +668,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
     def get_write_serializer_class(self):
         """Resolve the write serializer by name through MODULE_PATHS, like
         BaseModelViewSet does — the seam the enterprise build uses to layer
-        license rules (seat quota) on top without any license code here."""
+        its license rules on top without any license code here."""
         # Deferred import: core.serializers circles into iam at import time.
         from core.serializers import SerializerFactory
 

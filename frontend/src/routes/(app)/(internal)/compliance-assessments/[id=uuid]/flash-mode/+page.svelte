@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import { m } from '$paraglide/messages';
+	import { complianceResultTailwindColorMap } from '#lib/utils/constants.js';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import {
 		getFieldVisibility,
 		hasComputedResult,
 		computeRequirementScoreAndResult,
 		resultBadgeStyle,
 		requirementResultOptions
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 
 	interface Props {
 		data: PageData;

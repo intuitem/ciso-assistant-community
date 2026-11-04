@@ -338,7 +338,7 @@ def build_domain_tree(user, framework, campaign_id=None) -> dict[str, Any]:
             "name": framework.name,
             "implementation_groups": [
                 {"ref_id": g["ref_id"], "name": g.get("name") or g["ref_id"]}
-                for g in framework.implementation_groups_definition or []
+                for g in framework.get_implementation_groups_definition_translated()
                 if isinstance(g, dict) and g.get("ref_id")
             ],
         },

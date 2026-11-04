@@ -54,7 +54,7 @@ from core.models import (
     ValidationFlow,
     Vulnerability,
 )
-from core.tasks import get_missing_email_settings
+from core import mailer
 from doc_management.models import (
     DocumentContainer,
     DocumentRevision,
@@ -475,7 +475,6 @@ CREATABLE_MODELS = {
         # Never the ratings or the treatment: those are the analyst's.
         "fields": ["name", "description", "ref_id"],
         "fk_fields": {"risk_assessment": (RiskAssessment, "risk-assessments")},
-        "folder_from": "risk_assessment",
     },
     "risk_assessment": {
         "model": RiskAssessment,
@@ -520,7 +519,6 @@ CREATABLE_MODELS = {
         "model": Purpose,
         "fields": ["name", "description", "legal_basis", "article_9_condition"],
         "fk_fields": {"processing": (Processing, "processings")},
-        "folder_from": "processing",
     },
     "personal_data": {
         "model": PersonalData,
@@ -536,21 +534,18 @@ CREATABLE_MODELS = {
             # Resolves among this field's own categories, by name or id.
             "category": (Terminology, "terminologies"),
         },
-        "folder_from": "processing",
     },
     "data_subject": {
         "model": DataSubject,
         "fields": ["name", "description", "category"],
         "fk_fields": {"processing": (Processing, "processings")},
         "required_fields": ["category"],
-        "folder_from": "processing",
     },
     "data_recipient": {
         "model": DataRecipient,
         "fields": ["name", "description", "category"],
         "fk_fields": {"processing": (Processing, "processings")},
         "required_fields": ["category"],
-        "folder_from": "processing",
     },
     "data_contractor": {
         "model": DataContractor,
@@ -566,7 +561,6 @@ CREATABLE_MODELS = {
             "entity": (Entity, "entities"),
         },
         "required_fields": ["relationship_type", "country"],
-        "folder_from": "processing",
     },
     "data_transfer": {
         "model": DataTransfer,
@@ -583,7 +577,6 @@ CREATABLE_MODELS = {
             "entity": (Entity, "entities"),
         },
         "required_fields": ["country"],
-        "folder_from": "processing",
     },
     "entity_score": {
         "model": EntityScore,
@@ -594,8 +587,6 @@ CREATABLE_MODELS = {
             "provider": (Terminology, "terminologies"),
         },
         "required_fields": ["score", "as_of"],
-        # save() takes the folder from the entity; match there.
-        "folder_from": "entity",
         "match_on": ["entity", "provider", "as_of"],
     },
     "timeline_entry": {
@@ -603,7 +594,6 @@ CREATABLE_MODELS = {
         "fields": ["entry", "entry_type", "timestamp", "observation"],
         "fk_fields": {"incident": (Incident, "incidents")},
         "required_fields": ["entry"],
-        "folder_from": "incident",
         # EntryType.get_manual_entry_types: a run reports what it observed,
         # it does not narrate a lifecycle move someone else made.
         "allowed_values": {
@@ -664,7 +654,6 @@ CREATABLE_MODELS = {
         "required_fks": ["container"],
         # Not a column on this model: the first revision's markdown.
         "params": {"content": None},
-        "folder_from": "container",
         "constructor": "_construct_managed_document",
         # The constructor writes the first revision too.
         "extra_permissions": ["add_documentrevision"],
@@ -675,7 +664,6 @@ CREATABLE_MODELS = {
         # no action can produce one.
         "fields": ["content", "change_summary"],
         "fk_fields": {"document": (ManagedDocument, "managed-documents")},
-        "folder_from": "document",
         "constructor": "_construct_document_revision",
     },
     "entity_assessment": {
@@ -1181,7 +1169,7 @@ class CreateObjectAction(BaseAction):
         # save() may take the folder from a parent; an upsert matching on the
         # instance folder would then miss and hit a unique constraint.
         folder = _creation_folder(instance)
-        folder_from = entry.get("folder_from")
+        folder_from = getattr(entry["model"], "folder_from", None)
         if folder_from and kwargs.get(folder_from) is not None:
             folder = kwargs[folder_from].folder
         # authorize_action cleared the workflow's own folder; the row lands
@@ -2507,7 +2495,7 @@ class SendEmailAction(BaseAction):
 
         # No notifications_enable_mailing gate: that toggle governs the
         # digest notifications, not explicit user-authored send_email nodes.
-        missing = get_missing_email_settings()
+        missing = mailer.missing_configuration()
         if missing:
             raise FatalActionError(
                 f"send_email: email is not configured (missing {', '.join(missing)})"

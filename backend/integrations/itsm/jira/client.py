@@ -63,8 +63,12 @@ class JiraClient(BaseIntegrationClient):
             basic_auth=(self.credentials["email"], self.credentials["api_token"]),
             timeout=30,
             max_retries=3,
+            get_server_info=False,
         )
         self.jira._session.max_redirects = 0
+        server_info = self.jira.server_info()
+        self.jira._version = tuple(server_info["versionNumbers"])
+        self.jira.deploymentType = server_info.get("deploymentType")
         self.mapper = JiraFieldMapper(configuration, model_key)
         # {(project_key, issue type name): issue type id} for legacy configs.
         self._issue_type_ids: dict[tuple[str, str], str] = {}

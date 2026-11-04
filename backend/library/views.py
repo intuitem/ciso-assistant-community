@@ -329,7 +329,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         library_objects = lib.content  # We may need caching for this
-        if not (framework := library_objects.get("framework")):
+        if not (framework := StoredLibrary.framework_of(library_objects)):
             return Response(
                 data="This library doesn't contain any framework.",
                 status=HTTP_400_BAD_REQUEST,

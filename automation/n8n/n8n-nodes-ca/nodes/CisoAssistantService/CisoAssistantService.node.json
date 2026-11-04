@@ -1,17 +1,17 @@
 {
-  "node": "n8n-nodes-base.cisoAssistantService",
+  "node": "@intuitem/n8n-nodes-ciso-assistant.cisoAssistantService",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
-  "categories": ["security"],
+  "categories": ["Productivity", "Development"],
   "resources": {
     "credentialDocumentation": [
       {
-        "url": "https://docs.myservice.com/authentication"
+        "url": "https://github.com/intuitem/ciso-assistant-community/tree/main/automation/n8n/n8n-nodes-ca#credentials"
       }
     ],
     "primaryDocumentation": [
       {
-        "url": "https://docs.myservice.com/api"
+        "url": "https://github.com/intuitem/ciso-assistant-community/tree/main/automation/n8n/n8n-nodes-ca"
       }
     ]
   }

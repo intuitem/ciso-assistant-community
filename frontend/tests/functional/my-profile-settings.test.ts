@@ -1,8 +1,12 @@
 import { expect, test } from '../utils/test-utils.js';
+import { generateWorkingPat } from '../utils/pat.js';
 
 test('my profile settings page loads correctly', async ({ logedPage, page }) => {
 	await test.step('navigate to my profile settings page', async () => {
 		await page.goto('/my-profile/settings');
+		await expect(page).toHaveURL(/\/reauthenticate\?method=password&next=/);
+		await page.getByTestId('form-input-password').fill(logedPage.password);
+		await page.getByTestId('reauthenticate-button').click();
 		await expect(page).toHaveURL('/my-profile/settings');
 	});
 
@@ -26,4 +30,11 @@ test('my profile settings page loads correctly', async ({ logedPage, page }) => 
 	await test.step('personal access tokens section is visible', async () => {
 		await expect(page.locator('dt').filter({ hasText: 'Personal Access Tokens' })).toBeVisible();
 	});
+});
+
+test('local user can generate a personal access token the API accepts', async ({
+	logedPage,
+	page
+}) => {
+	await generateWorkingPat(page, logedPage.password, 'local-pat');
 });

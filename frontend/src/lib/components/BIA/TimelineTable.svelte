@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { isDark } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface TimelineEntry {
 		folder: string;

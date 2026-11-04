@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { recoveryCodes } from '../utils/stores';
 
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	import { enhance } from '$app/forms';
 	import { copy } from '@svelte-put/copy';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 
 	// Base Classes
 	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-fit shadow-xl space-y-4';
@@ -33,7 +33,13 @@
 					{/each}
 				</div>
 				<span class="flex flex-row space-x-2 justify-end">
-					<form method="POST" action="?/regenerateRecoveryCodes" use:enhance>
+					<form
+						method="POST"
+						action="?/regenerateRecoveryCodes"
+						use:enhance={() =>
+							({ update }) =>
+								update({ navigate: false })}
+					>
 						<input type="hidden" name="regenerate" value="1" />
 						<button type="submit" class="btn px-2 py-1 {parent?.buttonNeutral ?? ''}"
 							><i class="fa-solid fa-sync mr-2"></i>{m.regenerateRecoveryCodes()}</button

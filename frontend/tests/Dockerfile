@@ -2,7 +2,8 @@
 FROM mcr.microsoft.com/playwright:v1.45.1
 WORKDIR /app
 
-ENV PUBLIC_BACKEND_API_URL=foo
+ARG PUBLIC_BACKEND_API_URL=foo
+ENV PUBLIC_BACKEND_API_URL=$PUBLIC_BACKEND_API_URL
 
 COPY ../package*.json .
 # Install the exact pnpm version pinned by packageManager so a newer global

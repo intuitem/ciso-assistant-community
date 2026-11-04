@@ -1,21 +1,21 @@
 <script lang="ts">
-	import MostLikelyOperatingMode from '$lib/components/EbiosRM/MostLikelyOperatingMode.svelte';
-	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isDark } from '$lib/utils/helpers';
-	import { getLocale } from '$paraglide/runtime';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
+	import MostLikelyOperatingMode from '#lib/components/EbiosRM/MostLikelyOperatingMode.svelte';
+	import ClassificationBadge from '#lib/components/ClassificationBadge.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import RiskScenarioItem from '#lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import EcosystemCircularRadarChart from '#lib/components/Chart/EcosystemCircularRadarChart.svelte';
 	import OperatingModeGraph from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
-	import AttackPathFlowText from '$lib/components/EbiosRM/AttackPathFlowText.svelte';
+	import AttackPathFlowText from '#lib/components/EbiosRM/AttackPathFlowText.svelte';
 	import type { PageData } from './$types';
-	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import type { RiskMatrixJsonDefinition, RiskScenario } from '#lib/utils/types.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -670,7 +670,7 @@
 							<div class="mt-2 text-sm">
 								<span class="font-semibold text-surface-700-300">{m.appliedControls()}:</span>
 								<span class="ml-2 text-surface-600-400"
-									>{stakeholder.applied_controls.map((c) => c.str).join(', ')}</span
+									>{stakeholder.applied_controls.map((c) => c.name).join(', ')}</span
 								>
 							</div>
 						{/if}
@@ -1405,7 +1405,7 @@
 														href="/applied-controls/{control.id}"
 														class="text-primary-600 hover:text-primary-800-200 hover:underline"
 													>
-														{control.str}
+														{control.name}
 													</Anchor>
 												</td>
 												<td class="px-3 py-2 text-sm">

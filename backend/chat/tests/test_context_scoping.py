@@ -759,3 +759,22 @@ class TestQueryVocabulary:
         assert result["total_count"] == 0
         # countries and currencies would drown the values a small model needs
         assert "country:" not in result["note"] and "currency:" not in result["note"]
+
+    def test_related_filter_on_a_missing_field_is_reported(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {
+                "model": "asset",
+                "action": "list",
+                "related_filter": {
+                    "relation": "parent_assets",
+                    "condition": "status_is",
+                    "value": "supporting",
+                },
+            },
+            scope_for(reader),
+        )
+        assert result["total_count"] == 0
+        assert result["filters_applied"][-1].endswith("(unknown)")
+        assert "Their fields with values: " in result["note"]

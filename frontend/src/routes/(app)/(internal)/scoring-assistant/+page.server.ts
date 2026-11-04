@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import type { RiskMatrix, RiskMatrixJsonDefinition } from '$lib/utils/types';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import type { RiskMatrix, RiskMatrixJsonDefinition } from '#lib/utils/types.js';
 import type { PageServerLoad } from './$types';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const req_data = await fetchAllPages<RiskMatrix>(fetch, `${BASE_API_URL}/risk-matrices/`);

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 

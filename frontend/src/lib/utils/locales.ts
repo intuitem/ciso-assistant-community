@@ -108,6 +108,10 @@ export const LOCALE_MAP = {
 	sl: {
 		name: 'slovenian',
 		flag: '🇸🇮'
+	},
+	nb: {
+		name: 'norwegian',
+		flag: '🇳🇴'
 	}
 };
 
@@ -138,7 +142,8 @@ export const language: any = {
 	korean: m.korean(),
 	estonian: m.estonian(),
 	slovak: m.slovak(),
-	slovenian: m.slovenian()
+	slovenian: m.slovenian(),
+	norwegian: m.norwegian()
 };
 
 export const defaultLangLabels = {
@@ -168,7 +173,8 @@ export const defaultLangLabels = {
 	ko: '한국어',
 	et: 'Eesti',
 	sk: 'Slovenčina',
-	sl: 'Slovenščina'
+	sl: 'Slovenščina',
+	nb: 'Norsk bokmål'
 };
 
 /** Turn the backend's {code: name} language map into picker options, labelled

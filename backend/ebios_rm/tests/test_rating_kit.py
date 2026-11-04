@@ -268,10 +268,13 @@ class TestEbiosMatrixTemplate:
         import yaml
         from django.conf import settings
 
+        from library.builder import normalize_objects
+
         path = (
             Path(settings.BASE_DIR) / "library/libraries/risk-matrix-4x4-ebios-rm.yaml"
         )
-        matrix = yaml.safe_load(path.read_text())["objects"]["risk_matrix"][0]
+        objects = normalize_objects(yaml.safe_load(path.read_text())["objects"])
+        matrix = objects["risk_matrices"][0]
         section = matrix["ebios_rm"]
         defaults = rating_kit.default_section(len(matrix["probability"]))
 

@@ -226,19 +226,72 @@ class TestResolveUser:
         fake = _router({"/users/": users})
         with patch.object(resolvers, "fetch_all_results", fake):
             assert resolvers.resolve_user_id("enzo@acme.io") == UUID_A
-        assert fake.calls == [("/users/", {"email": "enzo@acme.io"})]
+        assert fake.calls == [("/users/", {"email__icontains": "enzo@acme.io"})]
+
+    def test_email_match_ignores_case(self):
+        users = [{"id": UUID_A, "email": "enzo@acme.io"}]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            assert resolvers.resolve_user_id("Enzo@Acme.io") == UUID_A
+
+    def test_partial_email_match_is_rejected(self):
+        users = [{"id": UUID_A, "email": "lorenzo@acme.io"}]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            with pytest.raises(ValueError, match="exact"):
+                resolvers.resolve_user_id("enzo@acme.io")
 
     def test_by_name_uses_search_param(self):
-        users = [{"id": UUID_A, "email": "enzo@acme.io"}]
+        users = [{"id": UUID_A, "email": "enzo@acme.io", "first_name": "Enzo"}]
         fake = _router({"/users/": users})
         with patch.object(resolvers, "fetch_all_results", fake):
             assert resolvers.resolve_user_id("Enzo") == UUID_A
         assert fake.calls == [("/users/", {"search": "Enzo"})]
 
+    def test_lookup_is_not_capped(self):
+        users = [{"id": UUID_A, "email": "enzo@acme.io", "first_name": "Enzo"}]
+        with patch.object(
+            resolvers, "fetch_all_results", return_value=(users, None)
+        ) as fetch:
+            resolvers.resolve_user_id("Enzo")
+        fetch.assert_called_once_with(
+            "/users/", params={"search": "Enzo"}, max_items=None
+        )
+
+    def test_single_partial_match_is_rejected(self):
+        # ?search= is fuzzy: "Ann" must not silently resolve to "Joanna Smith".
+        users = [
+            {
+                "id": UUID_A,
+                "email": "joanna@acme.io",
+                "first_name": "Joanna",
+                "last_name": "Smith",
+            }
+        ]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            with pytest.raises(ValueError, match="not found as an exact"):
+                resolvers.resolve_user_id("Ann")
+
+    def test_exact_full_name_among_several(self):
+        users = [
+            {
+                "id": UUID_A,
+                "email": "a@acme.io",
+                "first_name": "Ann",
+                "last_name": "Lee",
+            },
+            {
+                "id": UUID_B,
+                "email": "b@acme.io",
+                "first_name": "Joanna",
+                "last_name": "Ann",
+            },
+        ]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            assert resolvers.resolve_user_id("ann lee") == UUID_A
+
     def test_ambiguous(self):
         users = [
-            {"id": UUID_A, "email": "a@acme.io"},
-            {"id": UUID_B, "email": "b@acme.io"},
+            {"id": UUID_A, "email": "a@acme.io", "first_name": "Enzo"},
+            {"id": UUID_B, "email": "b@acme.io", "first_name": "Enzo"},
         ]
         with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
             with pytest.raises(ValueError, match="Ambiguous"):

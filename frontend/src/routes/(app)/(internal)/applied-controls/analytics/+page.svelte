@@ -1,8 +1,8 @@
 <script lang="ts">
-	import AppliedControlsAnalytics from '$lib/components/DataViz/AppliedControlsAnalytics.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import AppliedControlsAnalytics from '#lib/components/DataViz/AppliedControlsAnalytics.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { PageData } from './$types';
 
 	interface Props {

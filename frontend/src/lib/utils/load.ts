@@ -1,6 +1,6 @@
-import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
-import { formatSelectFieldData } from '$lib/utils/select-field';
-import { discardBody } from '$lib/utils/responses';
+import { BASE_API_URL, UUID_REGEX } from '#lib/utils/constants.js';
+import { formatSelectFieldData } from '#lib/utils/select-field.js';
+import { discardBody } from '#lib/utils/responses.js';
 export { formatSelectFieldData };
 import {
 	getModelInfo,
@@ -9,12 +9,12 @@ import {
 	type ModelMapEntry,
 	type SelectField,
 	type SelectFieldData
-} from '$lib/utils/crud';
-import { type TableSource } from '$lib/components/ModelTable/types';
+} from '#lib/utils/crud.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 
-import { modelSchema, type FormDataShape } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import { modelSchema, type FormDataShape } from '#lib/utils/schemas.js';
+import { listViewFields } from '#lib/utils/table.js';
+import type { urlModel } from '#lib/utils/types.js';
 import type { SuperValidated } from 'sveltekit-superforms';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -22,7 +22,7 @@ import { z } from 'zod';
 import { canPerformAction } from './access-control';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 interface LoadValidationFlowFormDataParams {
 	event: { fetch: typeof fetch };
@@ -126,6 +126,15 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	const relatedModels = {} as RelatedModels;
 
+	const reverseCounts: Record<string, number> | undefined = model.reverseCountsEndpoint
+		? await event
+				.fetch(
+					`${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${model.reverseCountsEndpoint}/`
+				)
+				.then(async (res) => (res.ok ? res.json() : discardBody(res).then(() => ({}))))
+				.catch(() => ({}))
+		: undefined;
+
 	if (model.reverseForeignKeyFields) {
 		const initialData = {};
 		// Hoisted: the filters below are synchronous.
@@ -155,6 +164,12 @@ export const loadDetail = async ({ event, model, id }) => {
 									? data.id
 									: (data.folder?.id ?? data.folder ?? user.root_folder_id)
 						})
+				)
+				.filter(
+					(m) =>
+						!reverseCounts ||
+						!model.hideEmptyReverseTabs ||
+						reverseCounts[getModelInfo(m.urlModel).name] > 0
 				)
 				.map(async (e) => {
 					const tableFieldsRef = listViewFields[e.urlModel];
@@ -253,7 +268,14 @@ export const loadDetail = async ({ event, model, id }) => {
 		);
 	}
 	// Fetch counts for each reverse FK tab in parallel
-	if (model.reverseForeignKeyFields) {
+	if (model.reverseForeignKeyFields && reverseCounts) {
+		for (const e of model.reverseForeignKeyFields) {
+			const count = reverseCounts[getModelInfo(e.urlModel).name];
+			if (relatedModels[e.urlModel] && typeof count === 'number') {
+				relatedModels[e.urlModel].count = count;
+			}
+		}
+	} else if (model.reverseForeignKeyFields) {
 		await Promise.all(
 			model.reverseForeignKeyFields
 				.filter((e) => relatedModels[e.urlModel])
@@ -282,6 +304,11 @@ export const loadDetail = async ({ event, model, id }) => {
 					}
 				})
 		);
+	}
+	if (model.hideEmptyReverseTabs) {
+		for (const [key, related] of Object.entries(relatedModels)) {
+			if (related.count === 0) delete relatedModels[key];
+		}
 	}
 
 	let title = data.str || data.name || data.email || data.label || data.id;

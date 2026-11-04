@@ -6,7 +6,7 @@ const state = vi.hoisted(() => ({
 	theme: 'default'
 }));
 
-vi.mock('$lib/utils/echartsTheme', () => ({ isDarkTheme: () => state.dark }));
+vi.mock('#lib/utils/echartsTheme.js', () => ({ isDarkTheme: () => state.dark }));
 
 vi.mock('mermaid', () => ({
 	default: {

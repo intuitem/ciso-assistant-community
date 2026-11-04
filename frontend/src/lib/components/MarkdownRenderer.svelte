@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import sanitizeHtml from 'sanitize-html';
-	import { sanitizeConfig } from '$lib/utils/markdown';
-	import { mountMermaidBlocks, wrapMermaidBlocks } from '$lib/utils/mermaid';
-	import * as m from '$paraglide/messages';
+	import { sanitizeConfig } from '#lib/utils/markdown.js';
+	import { mountMermaidBlocks, wrapMermaidBlocks } from '#lib/utils/mermaid.js';
+	import * as m from '#paraglide/messages.js';
 
 	interface Props {
 		content: string | null | undefined;

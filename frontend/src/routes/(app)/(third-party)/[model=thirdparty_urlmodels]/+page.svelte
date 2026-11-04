@@ -1,16 +1,16 @@
 <script lang="ts">
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { consumeCreateIntent } from '$lib/utils/create-intent';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { consumeCreateIntent } from '#lib/utils/create-intent.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData, ActionData } from './$types';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;
@@ -72,7 +72,7 @@
 								{/if}
 							{:else if URLModel === 'risk-matrices'}
 								<a
-									href="/libraries?object_type=risk_matrix"
+									href="/libraries?object_type=risk_matrices"
 									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
@@ -88,7 +88,7 @@
 								>
 							{:else if URLModel === 'requirement-mapping-sets'}
 								<a
-									href="/libraries?object_type=requirement_mapping_set"
+									href="/libraries?object_type=requirement_mapping_sets"
 									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"

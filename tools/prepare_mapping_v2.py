@@ -20,6 +20,12 @@ from typing import Dict, List
 
 
 
+def get_framework(data):
+    """The library's framework: first of "frameworks", or the legacy singular "framework"."""
+    objects = data.get("objects") or {}
+    return (objects.get("frameworks") or [None])[0] or objects.get("framework")
+
+
 def load_and_validate_yaml(path, label):
     """Load a YAML file and ensure required structure exists."""
     
@@ -40,8 +46,8 @@ def load_and_validate_yaml(path, label):
     # Basic structure check
     if "urn" not in data:
         raise KeyError(f"{label} file is missing the \"urn\" field.")
-    if "objects" not in data or "framework" not in data["objects"]:
-        raise KeyError(f"{label} file is missing the \"objects.framework\" structure.")
+    if not get_framework(data):
+        raise KeyError(f"{label} file is missing the \"objects.frameworks\" structure.")
     if "locale" not in data:
         raise KeyError(f'{label} file is missing the "locale" field.')
 
@@ -99,8 +105,8 @@ def generate_mapping_excel(source_yaml, target_yaml):
     # Extract metadata from source and target libraries and frameworks
     source_library_urn = source["urn"]
     target_library_urn = target["urn"]
-    source_framework = source["objects"]["framework"]
-    target_framework = target["objects"]["framework"]
+    source_framework = get_framework(source)
+    target_framework = get_framework(target)
 
     source_framework_urn = source_framework["urn"]
     target_framework_urn = target_framework["urn"]

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		results?: any[];
@@ -126,13 +127,13 @@
 							formatter: (params: any) => {
 								const r = params.data.row;
 								const parts = [
-									`<b>${r.requirement.ref_id}</b> ${r.requirement.name ?? ''}`,
-									`${params.marker}${resultLabels[r.result] ?? r.result} — ${r.asset.str}`,
+									`<b>${escapeHtml(r.requirement.ref_id)}</b> ${escapeHtml(r.requirement.name)}`,
+									`${params.marker}${escapeHtml(resultLabels[r.result] ?? r.result)} — ${escapeHtml(r.asset.str)}`,
 									new Date(r.timestamp).toLocaleString()
 								];
-								if (r.actual) parts.push(`actual: ${r.actual}`);
-								if (r.expected) parts.push(`expected: ${r.expected}`);
-								if (r.message) parts.push(r.message);
+								if (r.actual) parts.push(`actual: ${escapeHtml(r.actual)}`);
+								if (r.expected) parts.push(`expected: ${escapeHtml(r.expected)}`);
+								if (r.message) parts.push(escapeHtml(r.message));
 								if (onCellClick) {
 									parts.push(`<i style="opacity:0.65;font-size:11px">${m.heatmapCellHint()}</i>`);
 								}

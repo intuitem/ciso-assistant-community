@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getModalStore, type ModalStore } from './stores';
 
 	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';

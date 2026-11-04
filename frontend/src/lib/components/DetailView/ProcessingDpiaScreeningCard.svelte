@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { formatDate } from '$lib/utils/datetime';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { getLocale } from '$paraglide/runtime';
-	import { m } from '$paraglide/messages';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		processing: Record<string, any>;
@@ -37,6 +38,7 @@
 	$effect(() => {
 		// Aborted when the processing changes, so a late answer cannot land on another one.
 		const controller = new AbortController();
+		screenings = null;
 		loadFailed = false;
 		fetch(`/processings/${processing.id}/dpia-screening`, { signal: controller.signal })
 			.then((res) => {
@@ -54,24 +56,25 @@
 
 	// The DPIA forms the viewer may start on this processing, and its latest DPIA:
 	// the card's next step is to start one or to follow it.
-	let dpiaForms: Option[] | null = $state(null);
+	let dpiaForms = $state<Option[] | null>(null);
 	let dpia: Record<string, any> | null | undefined = $state(undefined);
 	$effect(() => {
 		const controller = new AbortController();
 		const { signal } = controller;
+		dpiaForms = null;
+		dpia = undefined;
+		// A failed lookup leaves the forms unknown: neither a start button nor "no form loaded".
 		fetch(`/processings/${processing.id}/dpia-screening?target=processing.dpia`, { signal })
-			.then((res) => (res.ok ? res.json() : []))
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
 			.then((rows) => (dpiaForms = Array.isArray(rows) ? rows : []))
-			.catch(() => {
-				if (!signal.aborted) dpiaForms = [];
-			});
+			.catch(() => {});
 		const query = new URLSearchParams({
 			target: 'processing.dpia',
 			subject_object_id: processing.id,
 			ordering: '-updated_at'
 		});
 		fetch(`/quick-form-responses?${query}`, { signal })
-			.then((res) => (res.ok ? res.json() : null))
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
 			// A rejected DPIA is no DPIA: the card offers to start another.
 			.then(
 				(body) =>
@@ -80,9 +83,7 @@
 							(r: Record<string, any>) => !(r.status === 'closed' && r.resolution === 'rejected')
 						) ?? null)
 			)
-			.catch(() => {
-				if (!signal.aborted) dpia = null;
-			});
+			.catch(() => {});
 		return () => controller.abort();
 	});
 
@@ -116,7 +117,92 @@
 				});
 				return;
 			}
-			await goto(body.redirect);
+			await gotoOrLoad(body.redirect);
+		} catch {
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+		} finally {
+			starting = false;
+		}
+	}
+
+	// Without the right to file a response here, an empty list does not mean no form is loaded.
+	const canStartDpia = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'quickformresponse',
+			object: processing
+		})
+	);
+
+	// shortcut: imports through the first in-house DPIA form; add a picker if several are loaded.
+	// The import creates the file's measures as applied controls in the processing's domain.
+	const importForm = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'appliedcontrol',
+			object: processing
+		})
+			? dpiaForms?.find((o) => o.kind === 'form')
+			: undefined
+	);
+
+	async function importPia(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		input.value = '';
+		if (!file || !importForm || starting) return;
+		starting = true;
+		try {
+			let pia: unknown;
+			try {
+				pia = JSON.parse(await file.text());
+			} catch {
+				toastStore.trigger({
+					message: safeTranslate('piaInvalidFile'),
+					background: 'preset-filled-error-500'
+				});
+				return;
+			}
+			const res = await fetch(`/processings/${processing.id}/import-pia`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					quick_form: importForm.id,
+					pia,
+					// Saved in the answers: in the importer's language.
+					labels: {
+						responsibilities: m.piaLabelResponsibilities(),
+						dataProcessed: m.piaLabelDataProcessed(),
+						legalBasis: m.piaLabelLegalBasis(),
+						favourable: m.piaOpinionFavourable(),
+						unfavourable: m.piaOpinionUnfavourable()
+					}
+				})
+			});
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				toastStore.trigger({
+					message: body.error ? safeTranslate(body.error) : m.anErrorOccurred(),
+					background: 'preset-filled-error-500'
+				});
+				if (body.redirect) await gotoOrLoad(body.redirect);
+				return;
+			}
+			const skipped = (body.skipped ?? []).map((code: string) => safeTranslate(code));
+			toastStore.trigger({
+				message: m.cnilPiaImported({ answers: body.answers, controls: body.controls_created }),
+				background: 'preset-filled-success-500'
+			});
+			if (skipped.length) {
+				toastStore.trigger({
+					message: m.cnilPiaNotImported({ items: skipped.join(', ') }),
+					background: 'preset-filled-warning-500',
+					autohide: false
+				});
+			}
+			await gotoOrLoad(body.redirect);
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {
@@ -165,7 +251,7 @@
 				return;
 			}
 			editing = false;
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {
@@ -310,6 +396,22 @@
 						<i class="fa-solid fa-file-shield mr-1"></i>{m.startDpia()}
 						{#if dpiaForms.length > 1}<i class="fa-solid fa-caret-down ml-1"></i>{/if}
 					</button>
+					{#if importForm}
+						<label
+							class="btn btn-sm preset-tonal-surface cursor-pointer focus-within:ring-2"
+							class:pointer-events-none={starting}
+							data-testid="import-pia-button"
+						>
+							<i class="fa-solid fa-file-import mr-1"></i>{m.importCnilPia()}
+							<input
+								type="file"
+								accept=".json,.pia,application/json"
+								class="sr-only"
+								disabled={starting}
+								onchange={importPia}
+							/>
+						</label>
+					{/if}
 				{/if}
 			</div>
 		{/if}
@@ -318,6 +420,7 @@
 	{#if !editing}
 		<p class="border-t border-surface-200-800 pt-3 text-xs text-surface-500">
 			{#if loadFailed}{m.anErrorOccurred()}{:else if screenings?.length === 0}{m.noDpiaScreeningForm()}{/if}
+			{#if !loadFailed && canStartDpia && dpia === null && processing.dpia_required && dpiaForms?.length === 0}{m.noDpiaForm()}{/if}
 			<a class="anchor" href="/dpias">{m.dpias()}</a>
 		</p>
 	{/if}

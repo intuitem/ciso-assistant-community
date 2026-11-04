@@ -1,0 +1,17 @@
+subject: "CISO Assistant: U bent toegewezen aan '${exception_name}'"
+body: |
+  Hallo,
+
+  U bent toegewezen aan de volgende uitzondering:
+
+  - Naam: ${exception_name}
+  - Beschrijving: ${exception_description}
+  - Ref ID: ${exception_ref_id}
+  - Ernst: ${exception_severity}
+  - Status: ${exception_status}
+  - Vervaldatum: ${expiration_date}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om deze uitzondering te bekijken en te beheren: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

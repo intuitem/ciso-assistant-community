@@ -18,6 +18,7 @@ from auditlog.registry import auditlog
 
 from iam.models import FolderMixin
 from core.models import (
+    FilteringLabelMixin,
     AppliedControl,
     Asset,
     Assessment,
@@ -28,7 +29,7 @@ from core.models import (
 )
 
 
-class BusinessImpactAnalysis(Assessment):
+class BusinessImpactAnalysis(Assessment, FilteringLabelMixin):
     risk_matrix = models.ForeignKey(
         RiskMatrix,
         on_delete=models.PROTECT,
@@ -409,6 +410,8 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"DORA IR ({self.get_incident_submission_display()}) — {self.incident}"
+
+    folder_from = "incident"
 
     def save(self, *args, **kwargs):
         if self.incident_id:
