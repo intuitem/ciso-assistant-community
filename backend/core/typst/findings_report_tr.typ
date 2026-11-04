@@ -73,7 +73,7 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      d.date, align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone], align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -117,6 +117,7 @@
           row-gutter: 3pt,
           column-gutter: 12pt,
           [Oluşturulma zamanı], [#d.generated_at],
+          [Saat dilimi], [#d.timezone - her saat kendi UTC farkıyla gösterilir],
           [Belge kimliği], [#raw(d.id)],
         )
       ]
