@@ -387,7 +387,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 16. ANSSI : Recommandations de sécurité relatives à IPsec pour la protection des flux réseau (v1.1) 🇫🇷
 17. ANSSI : Recommandations relatives à l'interconnexion d'un système d'information à internet (v3.0) 🇫🇷
 18. Guides des mécanismes cryptographiques 🇫🇷
-19. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
+19. Swift Customer Security Controls Framework (CSCF) v2025, v2026 & v2027 🏦🌐
 20. NIST SP 800-82 (OT) - Annex F 🏭🤖
 21. RBI Master Direction 2023 - india 🏦🇮🇳
 22. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
