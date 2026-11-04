@@ -203,6 +203,9 @@
 							>{safeTranslate(question.type)}</span
 						>
 					</p>
+					{#if question.annotation && !shallow}
+						<p class="text-xs text-surface-600-400 whitespace-pre-line">{question.annotation}</p>
+					{/if}
 
 					{#if shallow}
 						{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}

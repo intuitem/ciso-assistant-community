@@ -672,6 +672,8 @@ class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
     class Meta:
         ordering = ["order", "id"]
 
+    folder_from = "matrix"
+
     def save(self, *args, **kwargs):
         # Inherit folder from the parent matrix for IAM scoping.
         self.folder = self.matrix.folder
@@ -702,6 +704,8 @@ class ResponsibilityMatrixActor(AbstractBaseModel, FolderMixin):
                 name="unique_matrix_actor",
             )
         ]
+
+    folder_from = "matrix"
 
     def save(self, *args, **kwargs):
         self.folder = self.matrix.folder
@@ -735,6 +739,8 @@ class ResponsibilityAssignment(AbstractBaseModel, FolderMixin):
                 name="unique_responsibility_cell",
             )
         ]
+
+    folder_from = "activity"
 
     def save(self, *args, **kwargs):
         self.folder = self.activity.matrix.folder
