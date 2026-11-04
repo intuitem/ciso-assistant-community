@@ -6,6 +6,8 @@ description: "The {{ }} syntax for referencing variables, payloads, step outputs
 
 Every text field in a step can contain expressions. An expression is a path wrapped in double curly braces. When the step runs, the engine replaces each expression with the value it points to.
 
+Quick reference: [cheat sheet](cheat-sheet.md#expressions).
+
 ```
 Overdue controls: {{nodes.fetch_late.count}} on {{today}}
 ```

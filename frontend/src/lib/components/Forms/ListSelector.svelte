@@ -283,7 +283,7 @@
 </script>
 
 {#snippet renderNestedGroups(groups, depth, pathPrefix)}
-	{#each Object.entries(groups) as [groupName, group]}
+	{#each Object.entries(groups).sort( ([a], [b]) => safeTranslate(a).localeCompare(safeTranslate(b)) ) as [groupName, group]}
 		{@const currentPath = pathPrefix ? `${pathPrefix}>${groupName}` : groupName}
 		{@const hasSubGroups = Object.keys(group.subGroups).length > 0}
 		{@const hasDirectOptions = group.options.length > 0}

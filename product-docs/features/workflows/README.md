@@ -6,6 +6,8 @@ description: "The canvas where workflows are designed, published and watched: he
 
 Open any workflow from **Operations > Workflows** and you land in the builder. Everything about a workflow happens here: designing the graph, configuring steps, publishing, enabling triggers, watching runs.
 
+For every rule and limit on one page, see the [cheat sheet](cheat-sheet.md).
+
 <figure><img src="../../.gitbook/assets/workflows-builder-annotated.png" alt="The builder: 1 header, 2 palette, 3 canvas, 4 panel toggles, 5 Execute, 6 inspector, 7 bottom panel (here, Runs)"><figcaption><p>The builder: 1 header, 2 palette, 3 canvas, 4 panel toggles, 5 Execute, 6 inspector, 7 bottom panel (here, Runs)</p></figcaption></figure>
 
 ## The header

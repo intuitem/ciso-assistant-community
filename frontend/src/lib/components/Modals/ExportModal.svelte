@@ -83,6 +83,7 @@
 							{#each group.options as option}
 								<a
 									href={option.href}
+									data-sveltekit-reload={option.kind === 'navigate' ? undefined : true}
 									onclick={handleClick}
 									data-testid={option.testId}
 									aria-label={`${safeTranslate(option.titleKey)} — ${option.format}`}

@@ -247,6 +247,7 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
             for f in infolist
             if not f.is_dir() and "attachments" in Path(f.filename).parts
         ]
+        saved_names = set()
         if attachments:
             logger.info(
                 "Attachments found in uploaded file",
@@ -290,6 +291,7 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                             )
                             continue
                         new_name = default_storage.save(basename, io.BytesIO(content))
+                        saved_names.add(new_name)
                         for x in matching:
                             x["fields"]["attachment"] = new_name
                     else:
@@ -308,12 +310,21 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                             )
                             continue
                         new_name = default_storage.save(zip_name, io.BytesIO(content))
+                        saved_names.add(new_name)
                         if new_name != zip_name:
                             for x in matching:
                                 x["fields"]["attachment"] = new_name
 
                 except Exception:
                     logger.error("Error extracting attachment", exc_info=True)
+
+        for x in json_dump["objects"]:
+            if (
+                x["model"] in ("core.evidence", "core.evidencerevision")
+                and x["fields"].get("attachment")
+                and x["fields"]["attachment"] not in saved_names
+            ):
+                x["fields"]["attachment"] = ""
 
     return json_dump
 

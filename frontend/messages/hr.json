@@ -3082,6 +3082,7 @@
 	"estonian": "Estonski",
 	"slovak": "Slovački",
 	"slovenian": "Slovenski",
+	"norwegian": "Norveški",
 	"loadDemoDataDescription": "Uvezi primjer okoline za razgledavanje platforme",
 	"loadedLibrary": "Učitana knjižnica",
 	"loadingAleComparisonData": "Učitavanje podataka ALE usporedbe...",
@@ -4124,8 +4125,6 @@
 	"builderUnsavedChangesNavigation": "Imate nespremljene promjene koje će biti izgubljene. Svejedno otići?",
 	"fieldVisibility": "Vidljivost polja",
 	"fieldVisibilityHelpText": "Kontrolirajte koja polja svaka uloga može vidjeti i uređivati.",
-	"visibilityAuditorRespondent": "Revizor + ispunjavatelj",
-	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skriveno",
 	"answers": "Odgovori",
 	"respondentAlignment": "Usklađenost ispunjavatelja",
@@ -4381,5 +4380,7 @@
 	"dpiaRequirementChanges": "Povijest zahtjeva za DPIA",
 	"previously": "Prethodno",
 	"vulnerabilityOpenWithRemediationDate": "Otvorena ranjivost ima datum otklanjanja",
-	"vulnerabilityResolvedWithoutRemediationDate": "Riješena ranjivost nema datum otklanjanja"
+	"vulnerabilityResolvedWithoutRemediationDate": "Riješena ranjivost nema datum otklanjanja",
+	"reportTimezone": "Vremenska zona izvješća",
+	"reportTimezoneHelpText": "Regija koja se koristi za vremena ispisana u izvješćima i izvozima. Svako vrijeme prikazuje svoj pomak u odnosu na UTC. Vremena na zaslonu nisu obuhvaćena."
 }

@@ -1,0 +1,17 @@
+subject: "CISO Assistant: Er is een vragenlijst aan u toegewezen"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  **Uw alles-in-één GRC-beheerplatform**
+
+  Hallo,
+
+  Er is een vragenlijst aan u toegewezen. Klik hieronder om verder te gaan:
+
+  [Naar de vragenlijst](${questionnaire_url})
+
+  Werkt de link niet, kopieer dan de volgende URL en plak deze in uw browser:
+  ${questionnaire_url}
+
+  Met vriendelijke groet,
+  Het CISO Assistant-team
