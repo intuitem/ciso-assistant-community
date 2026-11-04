@@ -2733,6 +2733,7 @@ class AssetFilter(GenericFilterSet):
             "dora_criticality_assessment",
             "dora_discontinuing_impact",
             "organisation_objectives",
+            "lifecycle_stage",
         ]
 
 
@@ -2843,7 +2844,11 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
     autocomplete_fields = ["type"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        qs = super().get_queryset().select_related("asset_class", "folder")
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("asset_class", "folder", "lifecycle_stage")
+        )
         if self.action == "autocomplete":
             return qs
         # The list view only renders objectives + a handful of lightweight M2Ms,
@@ -3462,6 +3467,11 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                 "escape": True,
             },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "lifecycle_stage": {
+                "source": "lifecycle_stage",
+                "label": "lifecycle_stage",
+                "format": lambda t: t.name if t else "",
+            },
             "security_objectives": {
                 "source": "get_security_objectives_display",
                 "label": "security_objectives",
@@ -3524,7 +3534,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         },
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
-        "select_related": ["folder", "asset_class"],
+        "select_related": ["folder", "asset_class", "lifecycle_stage"],
         "prefetch_related": [
             "owner",
             "parent_assets",

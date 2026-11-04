@@ -195,6 +195,32 @@ class TestAssetConsumer:
 
         assert record_data["asset_class"] == cls.id
 
+    @pytest.mark.parametrize("value", ["phasing_out", "Phasing out"])
+    def test_lifecycle_stage_resolves_name_or_label(self, base_context, value):
+        from core.models import Terminology
+
+        Terminology.create_default_asset_lifecycle_stages()
+        stage = Terminology.objects.get(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE, name="phasing_out"
+        )
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "lifecycle_stage": value}, [1, 2, 3, 4]
+        )
+
+        assert error is None
+        assert record_data["lifecycle_stage"] == stage.id
+
+    def test_unknown_lifecycle_stage_warns_but_keeps_the_row(self, base_context):
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "lifecycle_stage": "zombie"}, [1, 2, 3, 4]
+        )
+
+        assert error is not None and error.is_warning is True
+        assert "Unknown lifecycle_stage" in error.error
+        assert "lifecycle_stage" not in record_data
+
     def test_missing_name_returns_error(self, base_context):
         consumer = AssetRecordConsumer(base_context)
         _, error = consumer.prepare_create({}, [1, 2, 3, 4])

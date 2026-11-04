@@ -7807,5 +7807,12 @@
 	"staircaseBlocking": "{count} exigence(s) bloquant le niveau suivant",
 	"staircaseOverall": "Niveau le plus bas parmi les {count} {unit}",
 	"staircaseSections": "sections",
-	"staircaseLowerLevelsHelpText": "Les niveaux inférieurs à la cible sont ajoutés : ils servent à déterminer le niveau atteint."
+	"staircaseLowerLevelsHelpText": "Les niveaux inférieurs à la cible sont ajoutés : ils servent à déterminer le niveau atteint.",
+	"implementing": "En mise en œuvre",
+	"phasingOut": "En retrait progressif",
+	"retired": "Retiré",
+	"archived": "Archivé",
+	"lifecycleStage": "Étape du cycle de vie",
+	"assetLifecycleStage": "Étape du cycle de vie de l'actif",
+	"changeLifecycleStage": "Changer l'étape du cycle de vie"
 }

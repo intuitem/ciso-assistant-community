@@ -1049,6 +1049,13 @@ class AssetWriteSerializer(
         allow_null=True,
         write_only=True,
     )
+    lifecycle_stage = serializers.PrimaryKeyRelatedField(
+        queryset=Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE, is_visible=True
+        ),
+        required=False,
+        allow_null=True,
+    )
     parent_assets = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Asset.objects.all(),
@@ -1253,6 +1260,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
     asset_class = FieldsRelatedField(["id", "name"])
+    lifecycle_stage = FieldsRelatedField(["id", "name"])
     overridden_children_capabilities = FieldsRelatedField(["id", "name"], many=True)
     solutions = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -1356,6 +1364,7 @@ class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
 
     folder = FieldsRelatedField()
     asset_class = FieldsRelatedField(["id", "name"])
+    lifecycle_stage = FieldsRelatedField(["id", "name"])
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     parent_assets = FieldsRelatedField(many=True)
@@ -1375,6 +1384,7 @@ class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
             "is_business_function",
             "folder",
             "asset_class",
+            "lifecycle_stage",
             "owner",
             "filtering_labels",
             "parent_assets",
@@ -1465,6 +1475,8 @@ class AssetImportExportSerializer(BaseModelSerializer):
     def get_asset_class(self, obj) -> str | None:
         return obj.asset_class.full_path if obj.asset_class else None
 
+    lifecycle_stage = serializers.SlugRelatedField(slug_field="name", read_only=True)
+
     class Meta:
         model = Asset
         fields = [
@@ -1476,6 +1488,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "disaster_recovery_objectives",
             "parent_assets",
             "asset_class",
+            "lifecycle_stage",
             "folder",
             "created_at",
             "updated_at",

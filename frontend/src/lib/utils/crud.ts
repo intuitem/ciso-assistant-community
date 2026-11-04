@@ -1133,6 +1133,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'type' },
 			{ field: 'asset_class' },
+			{ field: 'lifecycle_stage' },
 			{ field: 'parent_assets' },
 			{ field: 'support_assets' },
 			{ field: 'children_assets' },

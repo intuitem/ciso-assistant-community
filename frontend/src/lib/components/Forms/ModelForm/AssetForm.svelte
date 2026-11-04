@@ -114,6 +114,16 @@
 />
 <AutocompleteSelect
 	{form}
+	optionsEndpoint="terminologies?field_path=asset.lifecycle_stage&is_visible=true"
+	optionsLabelField="translated_name"
+	field="lifecycle_stage"
+	cacheLock={cacheLocks['lifecycle_stage']}
+	bind:cachedValue={formDataCache['lifecycle_stage']}
+	nullable={true}
+	label={m.lifecycleStage()}
+/>
+<AutocompleteSelect
+	{form}
 	multiple
 	optionsEndpoint="actors"
 	lazy
