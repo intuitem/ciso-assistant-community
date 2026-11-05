@@ -13,9 +13,9 @@ description: 'The purpose of the Information security manual (ISM) is to outline
   Source: https://www.cyber.gov.au/ism/2026-09'
 copyright: "\xA9 Commonwealth of Australia 2026\nWith the exception of the Coat of\
   \ Arms and where otherwise stated, all material presented in this publication is\
-  \ provided under a Creative Commons Attribution 4.0 International license\nhttps://creativecommons.org/licenses/by/4.0/."
+  \ provided under a Creative Commons Attribution 4.0 International license.\nhttps://creativecommons.org/licenses/by/4.0/"
 version: 1
-publication_date: 2026-11-03
+publication_date: 2026-11-05
 provider: Australian Signals Directorate (ASD)
 packager: intuitem
 objects:
@@ -33,33 +33,34 @@ objects:
     implementation_groups_definition:
     - ref_id: PRINCIPLE
       name: Cyber Security Principles
-      description: null
+      description: The principles apply to all classifications. To reproduce the corresponding
+        ASD scope, select both the classification and Principles.
     - ref_id: CONTROL
-      name: Cyber Security Guidelines
+      name: Cyber Security Guidelines (Controls)
       description: null
     - ref_id: NC
-      name: '[NC] Control applicable for "Non-Classified" System'
+      name: '[NC] Controls applicable for "Non-Classified" System'
       description: null
     - ref_id: OS
-      name: '[OS] Control applicable for "Official: Sensitive" System'
+      name: '[OS] Controls applicable for "Official: Sensitive" System'
       description: null
     - ref_id: P
-      name: '[P] Control applicable for "Protected" System'
+      name: '[P] Controls applicable for "Protected" System'
       description: null
     - ref_id: S
-      name: '[S] Control applicable for "Secret" System'
+      name: '[S] Controls applicable for "Secret" System'
       description: null
     - ref_id: TS
-      name: '[TS] Control applicable for "Top Secret" System'
+      name: '[TS] Controls applicable for "Top Secret" System'
       description: null
     - ref_id: ML1
-      name: '[ML1] Essential 8 Maturity Level 1'
+      name: '[ML1] Essential 8 Maturity Level 1 (Controls)'
       description: null
     - ref_id: ML2
-      name: '[ML2] Essential 8 Maturity Level 2'
+      name: '[ML2] Essential 8 Maturity Level 2 (Controls)'
       description: null
     - ref_id: ML3
-      name: '[ML3] Essential 8 Maturity Level 3'
+      name: '[ML3] Essential 8 Maturity Level 3 (Controls)'
       description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-principles

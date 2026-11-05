@@ -39,7 +39,7 @@ COPYRIGHT = (
     "© Commonwealth of Australia 2026\n"
     "With the exception of the Coat of Arms and where otherwise stated, all material "
     "presented in this publication is provided under a Creative Commons Attribution 4.0 "
-    "International license\nhttps://creativecommons.org/licenses/by/4.0/."
+    "International license.\nhttps://creativecommons.org/licenses/by/4.0/"
 )
 PRINCIPLES_DESCRIPTION = (
     "The purpose of the cyber security principles within the ISM is to provide strategic "
@@ -67,16 +67,21 @@ CONTENT_HEADERS = [
 ]
 
 IMPLEMENTATION_GROUPS = [
-    ("PRINCIPLE", "Cyber Security Principles"),
-    ("CONTROL", "Cyber Security Guidelines"),
-    ("NC", '[NC] Control applicable for "Non-Classified" System'),
-    ("OS", '[OS] Control applicable for "Official: Sensitive" System'),
-    ("P", '[P] Control applicable for "Protected" System'),
-    ("S", '[S] Control applicable for "Secret" System'),
-    ("TS", '[TS] Control applicable for "Top Secret" System'),
-    ("ML1", "[ML1] Essential 8 Maturity Level 1"),
-    ("ML2", "[ML2] Essential 8 Maturity Level 2"),
-    ("ML3", "[ML3] Essential 8 Maturity Level 3"),
+    (
+        "PRINCIPLE",
+        "Cyber Security Principles",
+        "The principles apply to all classifications. To reproduce the corresponding "
+        "ASD scope, select both the classification and Principles.",
+    ),
+    ("CONTROL", "Cyber Security Guidelines (Controls)", ""),
+    ("NC", '[NC] Controls applicable for "Non-Classified" System', ""),
+    ("OS", '[OS] Controls applicable for "Official: Sensitive" System', ""),
+    ("P", '[P] Controls applicable for "Protected" System', ""),
+    ("S", '[S] Controls applicable for "Secret" System', ""),
+    ("TS", '[TS] Controls applicable for "Top Secret" System', ""),
+    ("ML1", "[ML1] Essential 8 Maturity Level 1 (Controls)", ""),
+    ("ML2", "[ML2] Essential 8 Maturity Level 2 (Controls)", ""),
+    ("ML3", "[ML3] Essential 8 Maturity Level 3 (Controls)", ""),
 ]
 CLASSIFICATION_GROUPS = ("NC", "OS", "P", "S", "TS")
 MATURITY_GROUPS = ("ML1", "ML2", "ML3")
@@ -817,9 +822,9 @@ def build_workbook(
         groups_meta,
         [("type", "implementation_groups"), ("name", "imp_grp")],
     )
-    groups_content.append(["ref_id", "name"])
-    for ref_id, name in IMPLEMENTATION_GROUPS:
-        groups_content.append([ref_id, name])
+    groups_content.append(["ref_id", "name", "description"])
+    for ref_id, name, description in IMPLEMENTATION_GROUPS:
+        groups_content.append([ref_id, name, description])
 
     content_rows = build_content_rows(
         principles,
@@ -844,7 +849,7 @@ def build_workbook(
         },
     )
     format_metadata_sheet(groups_meta, {1: 34, 2: 40})
-    format_sheet(groups_content, {1: 16, 2: 68})
+    format_sheet(groups_content, {1: 16, 2: 68, 3: 95})
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(output_path)
