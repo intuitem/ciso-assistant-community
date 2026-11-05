@@ -11,7 +11,7 @@ description: 'LYSS (Lyaazale Switch Security) specification 0.5.0-draft (draft):
   references. A device is LYSS Level N conformant when every control of levels 1 to
   N is met or not applicable. DRAFT: controls, identifiers and mappings may still
   change before LYSS 1.0. Author: Mouad Lyaazale. Generated from spec/lyss-spec.yaml
-  by tools/build_ciso_library.py.'
+  by tools/build_ciso_library.py in the LYSS repository (https://github.com/lyss-project/lyss).'
 copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
 version: 50000
 publication_date: 2026-11-05
@@ -29,7 +29,8 @@ objects:
       test procedure and informative references. A device is LYSS Level N conformant
       when every control of levels 1 to N is met or not applicable. DRAFT: controls,
       identifiers and mappings may still change before LYSS 1.0. Author: Mouad Lyaazale.
-      Generated from spec/lyss-spec.yaml by tools/build_ciso_library.py.'
+      Generated from spec/lyss-spec.yaml by tools/build_ciso_library.py in the LYSS
+      repository (https://github.com/lyss-project/lyss).'
     implementation_groups_definition:
     - ref_id: L1
       name: Level 1 - Baseline
@@ -159,9 +160,12 @@ objects:
         with access to the terminal or session.
 
 
-        Test procedure: Fail if any console or remote CLI line has no timeout (0)
-        or a timeout above the parameter. The platform default applies when no timeout
-        is configured.
+        Test procedure: Determine the effective idle timeout of every console and
+        remote CLI line: the configured value, or the platform''s documented default
+        when none is configured. Fail if any effective timeout is disabled (0, never)
+        or above the parameter. For example, Cisco IOS and Cisco Business default
+        to 10 minutes (pass when unset); HPE AOS-S defaults to no timeout (fail when
+        unset).
 
 
         Parameters: max_idle_minutes = 10

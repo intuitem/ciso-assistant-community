@@ -11,7 +11,7 @@ description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.5.
   a non-compliant one makes it non-compliant. One direction only: an ISO control judged
   compliant proves nothing about a given switch. DRAFT: controls, identifiers and
   mappings may still change before LYSS 1.0. Generated from spec/lyss-spec.yaml by
-  tools/build_ciso_library.py.'
+  tools/build_ciso_library.py in the LYSS repository (https://github.com/lyss-project/lyss).'
 copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
 version: 50000
 publication_date: 2026-11-05
@@ -32,7 +32,8 @@ objects:
       ISO control, a non-compliant one makes it non-compliant. One direction only:
       an ISO control judged compliant proves nothing about a given switch. DRAFT:
       controls, identifiers and mappings may still change before LYSS 1.0. Generated
-      from spec/lyss-spec.yaml by tools/build_ciso_library.py.'
+      from spec/lyss-spec.yaml by tools/build_ciso_library.py in the LYSS repository
+      (https://github.com/lyss-project/lyss).'
     source_framework_urn: urn:lyss:risk:framework:lyss
     target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     requirement_mappings:
