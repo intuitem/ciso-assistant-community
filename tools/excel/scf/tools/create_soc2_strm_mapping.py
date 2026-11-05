@@ -33,8 +33,8 @@ STRM_TO_FRAMEWORK_NODE = {
 # Points of focus the framework has no node for: their rows move to the parent.
 POF_WITHOUT_NODE = r"^(?:pi1\.\d\.\d+|p[123]\.1\.\d+)$"
 
-# The framework merges this point of focus into the cc3.2.5 description.
-MERGED_POF = "cc3.2.6"
+# The framework merges these two points of focus into the cc3.2.5 description.
+MERGED_POFS = ["cc3.2.5", "cc3.2.6"]
 
 
 def align_with_framework(relationship_df: pd.DataFrame) -> pd.DataFrame:
@@ -42,14 +42,15 @@ def align_with_framework(relationship_df: pd.DataFrame) -> pd.DataFrame:
     Rewrite STRM source ids onto existing framework nodes.
 
     A rolled-up or merged row is only an intersect: one point of focus does not
-    establish a node that covers more. Rows the STRM gives for that node win.
+    establish a node that covers more. Rows the STRM gives for the criterion
+    itself win.
     """
     df = relationship_df.copy()
     rolled_up = df["source_node_id"].str.fullmatch(POF_WITHOUT_NODE)
     df.loc[rolled_up, "source_node_id"] = (
         df.loc[rolled_up, "source_node_id"].str.rsplit(".", n=1).str[0]
     )
-    partial = rolled_up | (df["source_node_id"] == MERGED_POF)
+    partial = rolled_up | df["source_node_id"].isin(MERGED_POFS)
     df.loc[partial, "relationship"] = "intersect"
     df["source_node_id"] = df["source_node_id"].map(
         lambda node: STRM_TO_FRAMEWORK_NODE.get(node, node)

@@ -80,11 +80,14 @@ def test_misspelled_urns_stay_put(nodes, suffix, ref_id):
     assert nodes[f"{NODE}{suffix}"]["ref_id"] == ref_id
 
 
-def test_merged_threats_point_is_only_a_partial_match(mapping_sets):
-    relationships = {
-        row["relationship"]
-        for row in mapping_sets[0]["requirement_mappings"]
-        if row["source_requirement_urn"] == f"{NODE}cc3.2.5"
-        and row["target_requirement_urn"] == f"{SCF}thr-01"
+def test_merged_node_only_has_partial_matches(mapping_sets):
+    """cc3.2.5 carries two points of focus, so no control can establish it alone."""
+    rows = {
+        (row["source_requirement_urn"], row["target_requirement_urn"]): row
+        for mapping_set in mapping_sets
+        for row in mapping_set["requirement_mappings"]
     }
-    assert relationships == {"intersect"}
+    for control in ("rsk-01", "rsk-06.1", "thr-01"):
+        pair = f"{NODE}cc3.2.5", f"{SCF}{control}"
+        assert rows[pair]["relationship"] == "intersect"
+        assert rows[pair[::-1]]["relationship"] == "intersect"
