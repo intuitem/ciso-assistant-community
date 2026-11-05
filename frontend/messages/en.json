@@ -7850,5 +7850,12 @@
 	"staircaseBlocking": "{count} requirement(s) blocking the next level",
 	"staircaseOverall": "Lowest level across the {count} {unit}",
 	"staircaseSections": "sections",
-	"staircaseLowerLevelsHelpText": "Levels below the target are added: they are needed to tell which level is reached."
+	"staircaseLowerLevelsHelpText": "Levels below the target are added: they are needed to tell which level is reached.",
+	"implementing": "Implementing",
+	"phasingOut": "Phasing out",
+	"retired": "Retired",
+	"archived": "Archived",
+	"lifecycleStage": "Lifecycle",
+	"assetLifecycleStage": "Asset lifecycle",
+	"changeLifecycleStage": "Change lifecycle"
 }

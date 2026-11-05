@@ -426,6 +426,7 @@ export const AssetSchema = z.object({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	asset_class: z.string().optional(),
+	lifecycle_stage: z.string().uuid().optional().nullable(),
 	parent_assets: z.string().optional().array().optional(),
 	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
