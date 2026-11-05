@@ -77,7 +77,7 @@ You can skip this step if you're in a test environment, but please keep in mind 
 {% hint style="info" %}
 If for some reason this window didn't open itself automatically, go back on **AD FS Management**, click **Relying Party Trust**, right-click **CISO Assistant**, then click **Edit Claim Issuance Policy...**
 
-![](../../../.gitbook/assets/sso/adfs_policy_rule_step_0.png)
+  ![](../../../.gitbook/assets/sso/adfs_policy_rule_step_0.png)
 
 {% endhint %}
 
@@ -150,7 +150,7 @@ If for some reason this window didn't open itself automatically, go back on **AD
 It may happen that when you click on **Login with SSO** on CISO Assistant login page after completing configuration, it throws you an error.
 To solve this problem, go to SSO settings in CISO Assistant. In the **Advanced settings** section, check the **Allow single label domains** option. It should then work correctly.
 
-    ![](../../../.gitbook/assets/sso/adfs_ciso_part_1.png)
+  ![](../../../.gitbook/assets/sso/adfs_ciso_part_1.png)
 
 
 ## I want to log in from the AD FS Login Portal
@@ -158,5 +158,5 @@ To solve this problem, go to SSO settings in CISO Assistant. In the **Advanced s
 If you want to be able to log in directly from the AD FS Login Portal, go to SSO settings in CISO Assistant.
 In the **Advanced settings** section, uncheck the **Reject IdP initiated SSO** option.
 
-    ![](../../../.gitbook/assets/sso/adfs_ciso_part_2.png)
+  ![](../../../.gitbook/assets/sso/adfs_ciso_part_2.png)
 
