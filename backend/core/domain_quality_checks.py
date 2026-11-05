@@ -2,7 +2,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
 
-from django.db.models import F, Q
+from django.db.models import CharField, Exists, F, OuterRef, Q, Value
+from django.db.models.functions import Cast, Coalesce, NullIf
 from django.utils.translation import gettext_lazy as _
 
 from core.models import (
@@ -10,14 +11,19 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     Finding,
+    Incident,
     OrganisationIssue,
     OrganisationObjective,
+    RiskAcceptance,
     RiskAssessment,
+    SecurityException,
     Severity,
     TaskNode,
     TaskTemplate,
+    ValidationFlow,
 )
 from iam.models import RoleAssignment
+from tprm.models import Contract, EntityAssessment
 
 GOVERNANCE = "governance"
 OPERATIONS = "operations"
@@ -33,11 +39,17 @@ LIVE_OBJECTIVE_STATUSES = (
     OrganisationObjective.Status.DRAFT,
     OrganisationObjective.Status.IN_PROGRESS,
 )
+CLOSED_FINDING_STATUSES = (
+    Finding.Status.MITIGATED,
+    Finding.Status.RESOLVED,
+    Finding.Status.CLOSED,
+)
 PLANNED_CONTROL_STATUSES = (
     AppliedControl.Status.TO_DO,
     AppliedControl.Status.IN_PROGRESS,
     AppliedControl.Status.ON_HOLD,
 )
+OPEN_INCIDENT_STATUSES = (Incident.Status.NEW, Incident.Status.ONGOING)
 
 
 @dataclass(frozen=True)
@@ -204,6 +216,153 @@ def _rules(today: date) -> list[Rule]:
             ("status", "due_date"),
         ),
         Rule(
+            GOVERNANCE,
+            "warnings",
+            "findingOverdue",
+            _("Open finding is past its due date"),
+            Finding,
+            "finding",
+            "findings",
+            lambda qs: qs.filter(status__in=OPEN_FINDING_STATUSES, due_date__lt=today),
+            ("status", "due_date"),
+        ),
+        Rule(
+            GOVERNANCE,
+            "warnings",
+            "findingNoOwner",
+            _("Open finding has no owner"),
+            Finding,
+            "finding",
+            "findings",
+            lambda qs: qs.filter(status__in=OPEN_FINDING_STATUSES, owner__isnull=True),
+            ("status", "due_date"),
+        ),
+        Rule(
+            GOVERNANCE,
+            "warnings",
+            "findingClosedNoEvidence",
+            _("Finding is closed with no evidence of the fix"),
+            Finding,
+            "finding",
+            "findings",
+            lambda qs: qs.filter(
+                status__in=CLOSED_FINDING_STATUSES, evidences__isnull=True
+            ),
+            ("status", "due_date"),
+        ),
+        Rule(
+            GOVERNANCE,
+            "warnings",
+            "riskAcceptanceNoJustification",
+            _("Risk acceptance is submitted or accepted with no justification"),
+            RiskAcceptance,
+            "riskacceptance",
+            "risk-acceptances",
+            lambda qs: qs.filter(
+                state__in=("submitted", "accepted"),
+            ).filter(Q(justification__isnull=True) | Q(justification="")),
+            ("state", "expiry_date"),
+        ),
+        Rule(
+            GOVERNANCE,
+            "warnings",
+            "riskAcceptanceApproverIsOwner",
+            _("Risk acceptance approver also owns one of its risk scenarios"),
+            RiskAcceptance,
+            "riskacceptance",
+            "risk-acceptances",
+            lambda qs: qs.exclude(state__in=("rejected", "revoked")).filter(
+                risk_scenarios__owner__user=F("approver")
+            ),
+            ("state", "expiry_date"),
+        ),
+        Rule(
+            GOVERNANCE,
+            "errors",
+            "validationFlowSelfApproval",
+            _("Validation flow requester is also its approver"),
+            ValidationFlow,
+            "validationflow",
+            "validation-flows",
+            lambda qs: qs.filter(approver__isnull=False, requester=F("approver")),
+            ("status",),
+            # Validation flows have no name; fall back to the id so the row stays clickable.
+            Coalesce(NullIf(F("ref_id"), Value("")), Cast("id", CharField())),
+        ),
+        Rule(
+            GOVERNANCE,
+            "errors",
+            "securityExceptionSelfApproved",
+            _("Security exception approver is also one of its owners"),
+            SecurityException,
+            "securityexception",
+            "security-exceptions",
+            lambda qs: qs.exclude(status=SecurityException.Status.DEPRECATED).filter(
+                owners__user=F("approver")
+            ),
+            ("status",),
+        ),
+        Rule(
+            GOVERNANCE,
+            "warnings",
+            "riskAssessmentAuthorIsReviewer",
+            _("Risk assessment author is also one of its reviewers"),
+            RiskAssessment,
+            "riskassessment",
+            "risk-assessments",
+            lambda qs: qs.filter(authors=F("reviewers")),
+            ("status",),
+        ),
+        Rule(
+            GOVERNANCE,
+            "warnings",
+            "complianceAssessmentAuthorIsReviewer",
+            _("Audit author is also one of its reviewers"),
+            ComplianceAssessment,
+            "complianceassessment",
+            "compliance-assessments",
+            lambda qs: qs.filter(authors=F("reviewers")),
+            ("status",),
+        ),
+        Rule(
+            GOVERNANCE,
+            "errors",
+            "contractActiveEndDatePassed",
+            _("Contract is active but its end date has passed"),
+            Contract,
+            "contract",
+            "contracts",
+            lambda qs: qs.filter(status=Contract.Status.ACTIVE, end_date__lt=today),
+            ("status", "end_date"),
+        ),
+        Rule(
+            GOVERNANCE,
+            "warnings",
+            "entityAssessmentExpired",
+            _("Entity assessment has expired and no newer one replaces it"),
+            EntityAssessment,
+            "entityassessment",
+            "entity-assessments",
+            lambda qs: (
+                qs.filter(entity__isnull=False, expiry_date__lt=today)
+                .exclude(status=EntityAssessment.Status.DEPRECATED)
+                .exclude(
+                    # A still-valid, undated or later-expiring assessment of the same
+                    # entity supersedes this one, so only the latest lapse is reported.
+                    Exists(
+                        EntityAssessment.objects.filter(entity=OuterRef("entity"))
+                        .exclude(pk=OuterRef("pk"))
+                        .exclude(status=EntityAssessment.Status.DEPRECATED)
+                        .filter(
+                            Q(expiry_date__isnull=True)
+                            | Q(expiry_date__gt=OuterRef("expiry_date"))
+                        )
+                    )
+                )
+            ),
+            ("status", "expiry_date"),
+        ),
+        Rule(
             OPERATIONS,
             "warnings",
             "appliedControlNoOwner",
@@ -264,6 +423,93 @@ def _rules(today: date) -> list[Rule]:
             ),
             ("status", "due_date"),
             F("task_template__name"),
+        ),
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "taskNodeCompletedNoEvidence",
+            _(
+                "Task occurrence is completed with none of the evidence its task expects"
+            ),
+            TaskNode,
+            "tasknode",
+            "task-nodes",
+            lambda qs: qs.filter(
+                status="completed",
+                to_delete=False,
+                task_template__evidences__isnull=False,
+                evidences__isnull=True,
+                evidence_revisions__isnull=True,
+            ),
+            ("status", "due_date"),
+            F("task_template__name"),
+        ),
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "appliedControlExpired",
+            _("Active applied control is past its expiry date"),
+            AppliedControl,
+            "appliedcontrol",
+            "applied-controls",
+            lambda qs: qs.filter(
+                status=AppliedControl.Status.ACTIVE, expiry_date__lt=today
+            ),
+            ("status", "eta", "priority"),
+        ),
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "appliedControlOwnerInactive",
+            _("Applied control is owned by a deactivated user"),
+            AppliedControl,
+            "appliedcontrol",
+            "applied-controls",
+            lambda qs: qs.filter(owner__user__is_active=False).exclude(
+                status=AppliedControl.Status.DEPRECATED
+            ),
+            ("status", "eta", "priority"),
+        ),
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "incidentNoOwner",
+            _("Open incident has no owner"),
+            Incident,
+            "incident",
+            "incidents",
+            lambda qs: qs.filter(
+                status__in=OPEN_INCIDENT_STATUSES, owners__isnull=True
+            ),
+            ("status", "reported_at"),
+        ),
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "incidentSeverityUndefined",
+            _("Open incident has no severity"),
+            Incident,
+            "incident",
+            "incidents",
+            lambda qs: qs.filter(
+                status__in=OPEN_INCIDENT_STATUSES,
+                severity=Incident.Severity.UNDEFINED,
+            ),
+            ("status", "reported_at"),
+        ),
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "incidentMajorNoRiskScenario",
+            _("Critical or major incident is not linked to any risk scenario"),
+            Incident,
+            "incident",
+            "incidents",
+            lambda qs: qs.filter(
+                severity__in=(Incident.Severity.SEV1, Incident.Severity.SEV2),
+                risk_scenarios__isnull=True,
+            ).exclude(status=Incident.Status.DISMISSED),
+            ("status", "reported_at"),
         ),
     ]
 

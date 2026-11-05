@@ -401,6 +401,14 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentCompliantNoActiveControl",
             )
+        if result == Result.NOT_APPLICABLE and controls:
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is not applicable but applied controls are linked to it"
+                ).format(name),
+                "requirementAssessmentNotApplicableWithControls",
+            )
         if claims_compliance and control_statuses & {
             ControlStatus.DEPRECATED,
             ControlStatus.DEGRADED,
@@ -8179,6 +8187,12 @@ class RiskAssessment(Assessment):
         scenarios = _serialize_for_quality_check(
             self.risk_scenarios.all().order_by("created_at")
         )
+        accepted_without_acceptance = {
+            str(pk)
+            for pk in self.risk_scenarios.filter(
+                treatment="accept", riskacceptance__isnull=True
+            ).values_list("id", flat=True)
+        }
         for ri in scenarios:
             ri_object = _issue_object(ri, "ref_id", "treatment")
             if ri["current_level"] < 0:
@@ -8262,19 +8276,31 @@ class RiskAssessment(Assessment):
                         }
                     )
 
-            if ri["treatment"] == "accepted":
-                if not ri.get("riskacceptance_set", {}).get("exists", lambda: False)():
-                    warnings_lst.append(
-                        {
-                            "msg": _(
-                                "{} risk accepted but no risk acceptance attached"
-                            ).format(ri),
-                            "msgid": "riskScenarioAcceptedNoAcceptance",
-                            "link": f"risk-scenarios/{ri['id']}",
-                            "obj_type": "riskscenario",
-                            "object": ri_object,
-                        }
-                    )
+            if ri["treatment"] == "mitigate" and not ri.get("applied_controls"):
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: treatment is mitigate but no additional control is planned"
+                        ).format(ri["name"]),
+                        "msgid": "riskScenarioMitigateNoControl",
+                        "link": f"risk-scenarios/{ri['id']}",
+                        "obj_type": "riskscenario",
+                        "object": ri_object,
+                    }
+                )
+
+            if ri["id"] in accepted_without_acceptance:
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{} risk accepted but no risk acceptance attached"
+                        ).format(ri["name"]),
+                        "msgid": "riskScenarioAcceptedNoAcceptance",
+                        "link": f"risk-scenarios/{ri['id']}",
+                        "obj_type": "riskscenario",
+                        "object": ri_object,
+                    }
+                )
 
         # --- checks on existing_applied_controls (controls marked as existing but not active)
         # Create a mapping of scenario ID to scenario object with prefetched controls

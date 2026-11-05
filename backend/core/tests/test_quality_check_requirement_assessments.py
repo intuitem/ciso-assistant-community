@@ -233,6 +233,28 @@ def test_not_applicable_without_justification(requirement_assessment):
 
 
 @pytest.mark.django_db
+def test_not_applicable_with_controls_linked(requirement_assessment):
+    compliance_assessment, ra = requirement_assessment
+    ra.result = RequirementAssessment.Result.NOT_APPLICABLE
+    ra.observation = "No card data is processed."
+    ra.save()
+
+    assert "requirementAssessmentNotApplicableWithControls" not in _msgids(
+        compliance_assessment.quality_check()
+    )
+
+    ra.applied_controls.add(
+        AppliedControl.objects.create(
+            name="Card data encryption", folder=compliance_assessment.folder
+        )
+    )
+
+    assert "requirementAssessmentNotApplicableWithControls" in _msgids(
+        compliance_assessment.quality_check(), "warnings"
+    )
+
+
+@pytest.mark.django_db
 def test_done_without_a_result(requirement_assessment):
     compliance_assessment, ra = requirement_assessment
     ra.status = RequirementAssessment.Status.DONE

@@ -62,6 +62,21 @@ export const ISSUE_COLUMNS: Record<string, Column[]> = {
 		{ key: 'expiry_date', label: () => m.expiryDate(), kind: 'date' }
 	],
 	risk_assessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
+	riskassessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
+	validationflow: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
+	securityexception: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
+	entityassessment: [
+		{ key: 'status', label: () => m.status(), kind: 'enum' },
+		{ key: 'expiry_date', label: () => m.expiryDate(), kind: 'date' }
+	],
+	contract: [
+		{ key: 'status', label: () => m.status(), kind: 'enum' },
+		{ key: 'end_date', label: () => m.endDate(), kind: 'date' }
+	],
+	incident: [
+		{ key: 'status', label: () => m.status(), kind: 'enum' },
+		{ key: 'reported_at', label: () => m.reportedAt(), kind: 'date' }
+	],
 	complianceassessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
 	organisationobjective: [
 		{ key: 'status', label: () => m.status(), kind: 'enum' },
@@ -93,7 +108,14 @@ const OBJECT_LABELS: Record<string, () => string> = {
 	organisationissue: () => m.organisationIssues(),
 	finding: () => m.findings(),
 	tasktemplate: () => m.taskTemplates(),
-	tasknode: () => m.taskNodes()
+	tasknode: () => m.taskNodes(),
+	riskassessment: () => m.riskAssessments(),
+	complianceassessment: () => m.complianceAssessments(),
+	validationflow: () => m.validationFlows(),
+	securityexception: () => m.securityExceptions(),
+	contract: () => m.contracts(),
+	entityassessment: () => m.entityAssessments(),
+	incident: () => m.incidents()
 };
 
 export const occurrenceLabel = (objType: string, count: number): string => {
