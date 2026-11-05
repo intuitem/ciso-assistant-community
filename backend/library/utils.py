@@ -915,7 +915,7 @@ class MetricDefinitionImporter:
             category=self.metric_definition_data.get("category", "quantitative"),
             unit=unit,
             choices_definition=self.metric_definition_data.get("choices_definition"),
-            higher_is_better=self.metric_definition_data.get("higher_is_better", True),
+            higher_is_better=self.metric_definition_data.get("higher_is_better"),
             default_target=self.metric_definition_data.get("default_target"),
             # A formula ships with its definition. Inputs name other
             # definitions by URN, resolved when an instance computes.
