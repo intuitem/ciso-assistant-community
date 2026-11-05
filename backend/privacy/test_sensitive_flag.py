@@ -129,3 +129,19 @@ def test_the_list_reports_the_flag(client, domain, contact_details):
         for row in response.json()["results"]
     }
     assert flags == {"Payroll": True, "Hiring": False}
+
+
+def test_the_list_sorts_on_the_flag(client, domain, contact_details):
+    Processing.objects.create(name="Hiring", folder=domain)
+    payroll = Processing.objects.create(name="Payroll", folder=domain)
+    _sensitive_item(payroll, contact_details)
+
+    for ordering, expected in (
+        ("has_sensitive_personal_data", ["Hiring", "Payroll"]),
+        ("-has_sensitive_personal_data", ["Payroll", "Hiring"]),
+    ):
+        response = client.get(
+            PROCESSINGS_URL, {"folder": str(domain.id), "ordering": ordering}
+        )
+        assert response.status_code == 200
+        assert [row["name"] for row in response.json()["results"]] == expected
