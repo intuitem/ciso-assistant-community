@@ -395,7 +395,7 @@
 					</a>
 					{#if canDuplicate}
 						<button
-							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer"
 							onclick={modalDuplicateForm}
 							data-testid="duplicate-button"
 						>
@@ -406,7 +406,7 @@
 					<!-- Export dropdown -->
 					<div class="relative">
 						<button
-							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full"
+							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full cursor-pointer"
 							onclick={() => (exportMenuOpen = !exportMenuOpen)}
 							onblur={() => setTimeout(() => (exportMenuOpen = false), 150)}
 						>
