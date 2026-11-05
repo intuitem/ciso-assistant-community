@@ -1,0 +1,2404 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:bsi-bsig-nis2-2025
+locale: de
+ref_id: BSI-BSIG-NIS2-2025
+name: BSI-Gesetz (BSIG) zur NIS2 Umsetzung 2025
+description: "Gesetz \xFCber das Bundesamt f\xFCr Sicherheit in der Informationstechnik\
+  \ und \xFCber die Sicherheit in der Informationstechnik von Einrichtungen (BSIG),\
+  \ Teile 3 bis 5 (\xA7\xA7 28 bis 55), in der konsolidierten Fassung, zuletzt ge\xE4\
+  ndert durch Art. 8 G v. 22.10.2026 (BGBl. 2026 I Nr. 318).\nQuelle: https://www.gesetze-im-internet.de/bsig_2025/\n\
+  Die Bibliothek liegt nur auf Deutsch vor: Eine amtliche englische Fassung gibt es\
+  \ nicht."
+copyright: Gemeinfrei - amtlicher Gesetzestext
+version: 1
+publication_date: 2026-10-22
+provider: Bundesministerium des Innern
+packager: intuitem
+objects:
+  frameworks:
+  - urn: urn:intuitem:risk:framework:bsi-bsig-nis2-2025
+    ref_id: BSI-BSIG-NIS2-2025
+    name: BSI-Gesetz (BSIG) - Umsetzung der NIS-2-Richtlinie (2025)
+    description: "BSIG in der Fassung des NIS-2-Umsetzungsgesetzes (BGBl. 2025 I Nr.\
+      \ 301), Teile 3 bis 5 (\xA7\xA7 28 bis 55), Stand der konsolidierten Fassung:\
+      \ letzte \xC4nderung durch Art. 8 G v. 22.10.2026 (BGBl. 2026 I Nr. 318).\n\n\
+      Bewertbar sind die Abs\xE4tze, die der gepr\xFCften Organisation eine eigenst\xE4\
+      ndige, dauerhafte Pflicht auferlegen; \xA7 30 Abs. 2 und \xA7 32 Abs. 1 sind\
+      \ nach Nummern gegliedert. Als nicht bewertbarer Kontext bleiben erhalten: Vorschriften\
+      \ zum Anwendungsbereich, Aufgaben und Befugnisse von Beh\xF6rden, Wahlm\xF6\
+      glichkeiten, Pflichten, die erst durch eine Anordnung oder ein Verlangen einer\
+      \ Beh\xF6rde entstehen, Pflichten, die eine noch zu erlassende Rechtsverordnung\
+      \ voraussetzen (\xA7 30 Abs. 6), sowie die Bedingungen freiwilliger Verfahren\
+      \ (\xA7\xA7 52 bis 55).\n\nDie Implementierungsgruppen bilden die Art der Einrichtung\
+      \ ab: Damit werden nur die jeweils einschl\xE4gigen Pflichten gepr\xFCft. Sektorspezifische\
+      \ Ausnahmen (\xA7 28 Abs. 5 bis 7, \xA7 29 Abs. 3, \xA7 37) sind im Einzelfall\
+      \ zu pr\xFCfen. Begriffsbestimmungen (\xA7 2), Aufsicht und Bu\xDFgelder sind\
+      \ nicht enthalten."
+    implementation_groups_definition:
+    - ref_id: EINR
+      name: Besonders wichtige Einrichtungen und wichtige Einrichtungen
+      description: "\xA7 28 Abs. 1 und 2"
+      default_selected: true
+    - ref_id: KRITIS
+      name: Betreiber kritischer Anlagen
+      description: "\xA7 28 Abs. 1 Nr. 1. Enth\xE4lt die Pflichten besonders wichtiger\
+        \ Einrichtungen sowie \xA7 31, \xA7 32 Abs. 3, \xA7 33 Abs. 2 und \xA7 39."
+    - ref_id: BUND
+      name: Einrichtungen der Bundesverwaltung
+      description: "\xA7 29 Abs. 1. Enth\xE4lt die nach \xA7 29 Abs. 2 anzuwendenden\
+        \ Pflichten sowie \xA7\xA7 43 bis 45 und \xA7 47."
+    - ref_id: RESSORT
+      name: "Ressorts und weitere oberste Bundesbeh\xF6rden"
+      description: "\xA7 46. Erg\xE4nzend zu BUND zu w\xE4hlen."
+    - ref_id: DNS
+      name: Top Level Domain Name Registries und Domain-Name-Registry-Dienstleister
+      description: "\xA7 33 und \xA7\xA7 49 bis 51. Erg\xE4nzend zur jeweiligen Einrichtungsgruppe\
+        \ zu w\xE4hlen."
+    - ref_id: DIG
+      name: "Einrichtungsarten nach \xA7 60 Abs. 1 Satz 1"
+      description: "\xA7 34. Erg\xE4nzend zur jeweiligen Einrichtungsgruppe zu w\xE4\
+        hlen."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3
+      assessable: false
+      depth: 1
+      ref_id: Teil-3
+      name: Teil 3 - Sicherheit in der Informationstechnik von Einrichtungen
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3
+      ref_id: Teil-3.Kapitel-1
+      name: Kapitel 1 - Anwendungsbereich
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-1
+      ref_id: '28'
+      name: "\xA7 28 - Besonders wichtige Einrichtungen und wichtige Einrichtungen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.1'
+      name: "\xA7 28 Abs. 1"
+      description: "Als besonders wichtige Einrichtung gelten\n1. Betreiber kritischer\
+        \ Anlagen,\n2. qualifizierte Vertrauensdiensteanbieter, Top Level Domain Name\
+        \ Registries oder DNS-Diensteanbieter,\n3. Anbieter \xF6ffentlich zug\xE4\
+        nglicher Telekommunikationsdienste oder Betreiber \xF6ffentlicher Telekommunikationsnetze,\
+        \ die\na) mindestens 50 Mitarbeiter besch\xE4ftigen oder\nb) einen Jahresumsatz\
+        \ und eine Jahresbilanzsumme von jeweils \xFCber 10 Millionen Euro aufweisen,\n\
+        4. sonstige nat\xFCrliche oder juristische Personen oder rechtlich unselbstst\xE4\
+        ndige Organisationseinheiten einer Gebietsk\xF6rperschaft, die anderen nat\xFC\
+        rlichen oder juristischen Personen entgeltlich Waren oder Dienstleistungen\
+        \ anbieten und die einer der in Anlage 1 bestimmten Einrichtungsarten zuzuordnen\
+        \ sind, und\na) mindestens 250 Mitarbeiter besch\xE4ftigen oder\nb) einen\
+        \ Jahresumsatz von \xFCber 50 Millionen Euro und zudem eine Jahresbilanzsumme\
+        \ von \xFCber 43 Millionen Euro aufweisen.\nDavon ausgenommen sind Einrichtungen\
+        \ der Bundesverwaltung, sofern sie nicht gleichzeitig Betreiber kritischer\
+        \ Anlagen sind."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.2'
+      name: "\xA7 28 Abs. 2"
+      description: "Als wichtige Einrichtungen gelten\n1. Vertrauensdiensteanbieter,\n\
+        2. Anbieter \xF6ffentlich zug\xE4nglicher Telekommunikationsdienste oder Betreiber\
+        \ \xF6ffentlicher Telekommunikationsnetze, die\na) weniger als 50 Mitarbeiter\
+        \ besch\xE4ftigen und\nb) einen Jahresumsatz oder eine Jahresbilanzsumme von\
+        \ jeweils 10 Millionen Euro oder weniger aufweisen,\n3. sonstige nat\xFCrliche\
+        \ oder juristische Personen oder rechtlich unselbstst\xE4ndige Organisationseinheiten\
+        \ einer Gebietsk\xF6rperschaft, die anderen nat\xFCrlichen oder juristischen\
+        \ Personen entgeltlich Waren oder Dienstleistungen anbieten und die einer\
+        \ der in den Anlagen 1 und 2 bestimmten Einrichtungsarten zuzuordnen sind\
+        \ und\na) mindestens 50 Mitarbeiter besch\xE4ftigen oder\nb) einen Jahresumsatz\
+        \ und eine Jahresbilanzsumme von jeweils \xFCber 10 Millionen Euro aufweisen.\n\
+        Davon ausgenommen sind besonders wichtige Einrichtungen und Einrichtungen\
+        \ der Bundesverwaltung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.3'
+      name: "\xA7 28 Abs. 3"
+      description: "Bei der Zuordnung zu einer der Einrichtungsarten nach den Anlagen\
+        \ 1 und 2 k\xF6nnen solche Gesch\xE4ftst\xE4tigkeiten unber\xFCcksichtigt\
+        \ bleiben, die im Hinblick auf die gesamte Gesch\xE4ftst\xE4tigkeit der Einrichtung\
+        \ vernachl\xE4ssigbar sind."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.4'
+      name: "\xA7 28 Abs. 4"
+      description: "Bei der Bestimmung von Mitarbeiteranzahl, Jahresumsatz und Jahresbilanzsumme\
+        \ nach den Abs\xE4tzen 1 und 2 ist au\xDFer f\xFCr rechtlich unselbstst\xE4\
+        ndige Organisationseinheiten einer Gebietsk\xF6rperschaft die Empfehlung der\
+        \ Kommission (2003/361/EG) mit Ausnahme von Artikel 3 Absatz 4 des Anhangs\
+        \ anzuwenden. Die Daten von Partner- oder verbundenen Unternehmen im Sinne\
+        \ der Empfehlung der Kommission (2003/361/EG) sind nicht hinzuzurechnen, wenn\
+        \ das Unternehmen unter Ber\xFCcksichtigung der rechtlichen, wirtschaftlichen\
+        \ und tats\xE4chlichen Umst\xE4nde mit Blick auf die Beschaffenheit und den\
+        \ Betrieb der informationstechnischen Systeme, Komponenten und Prozesse unabh\xE4\
+        ngig von seinen Partner- oder verbundenen Unternehmen ist."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.5'
+      name: "\xA7 28 Abs. 5"
+      description: "Die \xA7\xA7 30, 31, 32, 35, 36, 38, 39, 61 und 62 gelten nicht\
+        \ f\xFCr besonders wichtige Einrichtungen und wichtige Einrichtungen, die\n\
+        1. ein \xF6ffentliches Telekommunikationsnetz betreiben oder \xF6ffentlich\
+        \ zug\xE4ngliche Telekommunikationsdienste erbringen oder\n2. Energieversorgungsnetze,\
+        \ Energieanlagen oder digitale Energiedienste nach dem Energiewirtschaftsgesetz\
+        \ betreiben und den Regelungen der \xA7\xA7 5c bis 5e des Energiewirtschaftsgesetzes\
+        \ unterliegen.\nSatz 1 gilt nicht f\xFCr die dort aufgef\xFChrten besonders\
+        \ wichtigen und wichtigen Einrichtungen, soweit sie \xFCber die in Satz 1\
+        \ Nummer 1 und 2 genannten Anlagen hinaus weitere kritische Anlagen nach \xA7\
+        \ 2 Nummer 22 betreiben oder aufgrund weiterer T\xE4tigkeiten einer der in\
+        \ Anlage 1 oder 2 bestimmten Einrichtungsarten zuzuordnen sind. Satz 2 gilt\
+        \ f\xFCr alle informationstechnischen Systeme, die f\xFCr den Betrieb der\
+        \ weiteren kritischen Anlagen erforderlich sind. Im Fall, dass der Betrieb\
+        \ einer Energieanlage nach Satz 1 Nummer 2 einer in Satz 1 aufgef\xFChrten\
+        \ besonders wichtigen und wichtigen Einrichtung im Hinblick auf die gesamte\
+        \ Gesch\xE4ftst\xE4tigkeit dieser Einrichtung eine Nebent\xE4tigkeit darstellt,\
+        \ findet dieser Absatz keine Anwendung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.6'
+      name: "\xA7 28 Abs. 6"
+      description: "Die \xA7\xA7 30, 31, 32, 35, 36, 38 und 39 gelten nicht f\xFC\
+        r\n1. Finanzunternehmen nach Artikel 2 Absatz 2 der Verordnung (EU) 2022/2554\
+        \ und Unternehmen, f\xFCr die die Anforderungen der Verordnung (EU) 2022/2554\
+        \ aufgrund von \xA7 1a Absatz 2 und 2a des Kreditwesengesetzes oder \xA7 293\
+        \ Absatz 5 des Versicherungsaufsichtsgesetzes gelten,\n2. die Gesellschaft\
+        \ f\xFCr Telematik nach \xA7 306 Absatz 1 Satz 3 des F\xFCnften Buches Sozialgesetzbuch,\
+        \ Betreiber von Diensten der Telematikinfrastruktur im Hinblick auf die nach\
+        \ \xA7 311 Absatz 6 und \xA7 325 des F\xFCnften Buches Sozialgesetzbuch zugelassenen\
+        \ Dienste und Betreiber von Diensten, soweit sie die Telematikinfrastruktur\
+        \ f\xFCr nach \xA7 327 Absatz 2 bis 5 des F\xFCnften Buches Sozialgesetzbuch\
+        \ best\xE4tigte Anwendungen nutzen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.7'
+      name: "\xA7 28 Abs. 7"
+      description: "\xA7 32 gilt nicht f\xFCr Betreiber kritischer Anlagen, soweit\
+        \ sie eine Anlage f\xFCr Unternehmen nach Absatz 6 Nummer 1 betreiben."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28.8
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:28
+      ref_id: '28.8'
+      name: "\xA7 28 Abs. 8"
+      description: "Dieses Gesetz findet keine Anwendung auf rechtlich unselbstst\xE4\
+        ndige Organisationseinheiten von Gebietsk\xF6rperschaften und auf juristische\
+        \ Personen, an denen ausschlie\xDFlich Gebietsk\xF6rperschaften, ausgenommen\
+        \ der Bund, beteiligt sind, wenn sie\n1. zu dem Zweck errichtet wurden, im\
+        \ \xF6ffentlichen Auftrag Leistungen f\xFCr Verwaltungen zu erbringen, und\n\
+        2. durch vergleichbare landesrechtliche Vorschriften unter Bezugnahme auf\
+        \ diesen Absatz reguliert werden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:29
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-1
+      ref_id: '29'
+      name: "\xA7 29 - Einrichtungen der Bundesverwaltung"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:29.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:29
+      ref_id: '29.1'
+      name: "\xA7 29 Abs. 1"
+      description: "Einrichtungen der Bundesverwaltung im Sinne dieses Gesetzes sind,\
+        \ mit Ausnahme der Institutionen der Sozialen Sicherung und der Deutschen\
+        \ Bundesbank,\n1. Bundesbeh\xF6rden,\n2. \xF6ffentlich-rechtlich organisierte\
+        \ IT-Dienstleister der Bundesverwaltung sowie\n3. weitere K\xF6rperschaften,\
+        \ Anstalten und Stiftungen des \xF6ffentlichen Rechts sowie ihre Vereinigungen,\
+        \ ungeachtet ihrer Rechtsform, auf Bundesebene, soweit durch das Bundesamt\
+        \ im Einvernehmen mit dem jeweils zust\xE4ndigen Ressort angeordnet."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:29.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:29
+      ref_id: '29.2'
+      name: "\xA7 29 Abs. 2"
+      description: "F\xFCr Einrichtungen der Bundesverwaltung sind die Regelungen\
+        \ f\xFCr besonders wichtige Einrichtungen anzuwenden, nicht jedoch die Regelungen\
+        \ der \xA7\xA7 38, 40 Absatz 3 und der \xA7\xA7 61 und 65."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:29.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:29
+      ref_id: '29.3'
+      name: "\xA7 29 Abs. 3"
+      description: "Die Gesch\xE4ftsbereiche des Ausw\xE4rtigen Amts und des Bundesministeriums\
+        \ der Verteidigung sowie der Bundesnachrichtendienst und das Bundesamt f\xFC\
+        r Verfassungsschutz sind zus\xE4tzlich zu den Regelungen gem\xE4\xDF Absatz\
+        \ 2 von den Regelungen des \xA7 7 Absatz 5 Satz 4, der \xA7\xA7 10, 13 Absatz\
+        \ 1 Satz 1 Nummer 1 Buchstabe e sowie der \xA7\xA7 30, 33 und 35 ausgenommen.\
+        \ Das Ausw\xE4rtige Amt erl\xE4sst im Einvernehmen mit dem Bundesministerium\
+        \ f\xFCr Digitales und Staatsmodernisierung eine allgemeine Verwaltungsvorschrift,\
+        \ um die Ziele der NIS-2-Richtlinie im Gesch\xE4ftsbereich des Ausw\xE4rtigen\
+        \ Amts durch ergebnis\xE4quivalente Ma\xDFnahmen umzusetzen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3
+      ref_id: Teil-3.Kapitel-2
+      name: Kapitel 2 - Risikomanagement, Melde-, Registrierungs-, Nachweis- und Unterrichtungspflichten
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '30'
+      name: "\xA7 30 - Risikomanagementma\xDFnahmen besonders wichtiger Einrichtungen\
+        \ und wichtiger Einrichtungen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.1'
+      name: "\xA7 30 Abs. 1"
+      description: "Besonders wichtige Einrichtungen und wichtige Einrichtungen sind\
+        \ verpflichtet, geeignete, verh\xE4ltnism\xE4\xDFige und wirksame technische\
+        \ und organisatorische Ma\xDFnahmen, die in Absatz 2 konkretisiert werden,\
+        \ zu ergreifen, um St\xF6rungen der Verf\xFCgbarkeit, Integrit\xE4t und Vertraulichkeit\
+        \ der informationstechnischen Systeme, Komponenten und Prozesse, die sie f\xFC\
+        r die Erbringung ihrer Dienste nutzen, zu vermeiden und Auswirkungen von Sicherheitsvorf\xE4\
+        llen m\xF6glichst gering zu halten. Bei der Bewertung der Verh\xE4ltnism\xE4\
+        \xDFigkeit der Ma\xDFnahmen nach Satz 1 sind das Ausma\xDF der Risikoexposition,\
+        \ die Gr\xF6\xDFe der Einrichtung, die Umsetzungskosten und die Eintrittswahrscheinlichkeit\
+        \ und Schwere von Sicherheitsvorf\xE4llen sowie ihre gesellschaftlichen und\
+        \ wirtschaftlichen Auswirkungen zu ber\xFCcksichtigen. Die Einhaltung der\
+        \ Verpflichtung nach Satz 1 ist durch die Einrichtungen zu dokumentieren."
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.2'
+      name: "\xA7 30 Abs. 2"
+      description: "Ma\xDFnahmen nach Absatz 1 sollen den Stand der Technik einhalten,\
+        \ die einschl\xE4gigen europ\xE4ischen und internationalen Normen ber\xFC\
+        cksichtigen und m\xFCssen auf einem gefahren\xFCbergreifenden Ansatz beruhen.\
+        \ Die Ma\xDFnahmen m\xFCssen zumindest Folgendes umfassen:"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.1
+      name: "\xA7 30 Abs. 2 Nr. 1"
+      description: Konzepte in Bezug auf die Risikoanalyse und auf die Sicherheit
+        in der Informationstechnik,
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.2
+      name: "\xA7 30 Abs. 2 Nr. 2"
+      description: "Bew\xE4ltigung von Sicherheitsvorf\xE4llen,"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.3
+      name: "\xA7 30 Abs. 2 Nr. 3"
+      description: Aufrechterhaltung des Betriebs, wie Backup-Management und Wiederherstellung
+        nach einem Notfall, und Krisenmanagement,
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.4
+      name: "\xA7 30 Abs. 2 Nr. 4"
+      description: "Sicherheit der Lieferkette einschlie\xDFlich sicherheitsbezogener\
+        \ Aspekte der Beziehungen zu unmittelbaren Anbietern oder Diensteanbietern,"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.5
+      name: "\xA7 30 Abs. 2 Nr. 5"
+      description: "Sicherheitsma\xDFnahmen bei Erwerb, Entwicklung und Wartung von\
+        \ informationstechnischen Systemen, Komponenten und Prozessen, einschlie\xDF\
+        lich Management und Offenlegung von Schwachstellen,"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.6
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.6
+      name: "\xA7 30 Abs. 2 Nr. 6"
+      description: "Konzepte und Verfahren zur Bewertung der Wirksamkeit von Risikomanagementma\xDF\
+        nahmen im Bereich der Sicherheit in der Informationstechnik,"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.7
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.7
+      name: "\xA7 30 Abs. 2 Nr. 7"
+      description: "grundlegende Schulungen und Sensibilisierungsma\xDFnahmen im Bereich\
+        \ der Sicherheit in der Informationstechnik,"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.8
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.8
+      name: "\xA7 30 Abs. 2 Nr. 8"
+      description: "Konzepte und Prozesse f\xFCr den Einsatz von kryptographischen\
+        \ Verfahren,"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.9
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.9
+      name: "\xA7 30 Abs. 2 Nr. 9"
+      description: "Erstellung von Konzepten f\xFCr die Sicherheit des Personals,\
+        \ die Zugriffskontrolle und f\xFCr die Verwaltung von IKT-Systemen, -Produkten\
+        \ und -Prozessen,"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2.10
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.2
+      ref_id: 30.2.10
+      name: "\xA7 30 Abs. 2 Nr. 10"
+      description: "Verwendung von L\xF6sungen zur Multi-Faktor-Authentifizierung\
+        \ oder kontinuierlichen Authentifizierung, gesicherte Sprach-, Video- und\
+        \ Textkommunikation sowie gegebenenfalls gesicherte Notfallkommunikationssysteme\
+        \ innerhalb der Einrichtung."
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.3'
+      name: "\xA7 30 Abs. 3"
+      description: "Der von der Europ\xE4ischen Kommission gem\xE4\xDF Artikel 21\
+        \ Absatz 5 Unterabsatz 1 der NIS-2-Richtlinie erlassene Durchf\xFChrungsrechtsakt\
+        \ zur Festlegung der technischen und methodischen Anforderungen an die in\
+        \ Absatz 1 genannten Ma\xDFnahmen in Bezug auf DNS-Diensteanbieter, Top Level\
+        \ Domain Name Registries, Cloud-Computing-Dienstleister, Anbieter von Rechenzentrumsdiensten,\
+        \ Betreiber von Content Delivery Networks, Managed Service Provider, Managed\
+        \ Security Service Provider, Anbieter von Online-Marktpl\xE4tzen, Online-Suchmaschinen\
+        \ und Plattformen f\xFCr Dienste sozialer Netzwerke und Vertrauensdiensteanbieter\
+        \ hat f\xFCr die vorgenannten Einrichtungsarten Vorrang."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.4'
+      name: "\xA7 30 Abs. 4"
+      description: "Sofern die Europ\xE4ische Kommission einen Durchf\xFChrungsrechtsakt\
+        \ gem\xE4\xDF Artikel 21 Absatz 5 Unterabsatz 2 der NIS-2-Richtlinie erl\xE4\
+        sst, in dem die technischen und methodischen Anforderungen sowie erforderlichenfalls\
+        \ die sektoralen Anforderungen der in Absatz 2 genannten Ma\xDFnahmen festgelegt\
+        \ werden, so gehen diese Anforderungen den in Absatz 2 genannten Ma\xDFnahmen\
+        \ vor, soweit sie diesen entgegenstehen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.5'
+      name: "\xA7 30 Abs. 5"
+      description: "Sofern die Durchf\xFChrungsrechtsakte der Europ\xE4ischen Kommission\
+        \ nach Artikel 21 Absatz 5 der NIS-2-Richtlinie keine abschlie\xDFenden Bestimmungen\
+        \ \xFCber die technischen und methodischen Anforderungen sowie erforderlichenfalls\
+        \ \xFCber die sektoralen Anforderungen an die in Absatz 2 genannten Ma\xDF\
+        nahmen in Bezug auf besonders wichtige Einrichtungen und wichtige Einrichtungen\
+        \ enthalten, k\xF6nnen diese Bestimmungen vom Bundesministerium des Innern\
+        \ im Benehmen mit den jeweils betroffenen Ressorts durch Rechtsverordnung,\
+        \ die nicht der Zustimmung des Bundesrates bedarf, unter Ber\xFCcksichtigung\
+        \ der m\xF6glichen Folgen unzureichender Ma\xDFnahmen sowie der Bedeutung\
+        \ bestimmter Einrichtungen pr\xE4zisiert und erweitert werden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.6'
+      name: "\xA7 30 Abs. 6"
+      description: "Besonders wichtige Einrichtungen und wichtige Einrichtungen d\xFC\
+        rfen durch Rechtsverordnung nach \xA7 56 Absatz 3 bestimmte IKT-Produkte,\
+        \ IKT-Dienste und IKT-Prozesse nur verwenden, wenn diese \xFCber eine Cybersicherheitszertifizierung\
+        \ gem\xE4\xDF europ\xE4ischer Schemata nach Artikel 49 der Verordnung (EU)\
+        \ 2019/881 verf\xFCgen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.7'
+      name: "\xA7 30 Abs. 7"
+      description: "Unbeschadet der Verh\xFCtung, Ermittlung, Aufdeckung und Verfolgung\
+        \ von Straftaten d\xFCrfen der Austausch von Informationen nach \xA7 6 oder\
+        \ die freiwillige Meldung nach \xA7 5 nicht dazu f\xFChren, dass der meldenden\
+        \ Einrichtung zus\xE4tzliche Verpflichtungen auferlegt werden, die nicht f\xFC\
+        r sie gegolten h\xE4tten, wenn sie die Meldung nicht \xFCbermittelt h\xE4\
+        tte."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.8
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.8'
+      name: "\xA7 30 Abs. 8"
+      description: "Besonders wichtige Einrichtungen und ihre Branchenverb\xE4nde\
+        \ k\xF6nnen branchenspezifische Sicherheitsstandards zur Gew\xE4hrleistung\
+        \ der Anforderungen nach Absatz 1 vorschlagen. Diese vorgeschlagenen Sicherheitsstandards\
+        \ m\xFCssen Durchf\xFChrungsrechtsakte der Europ\xE4ischen Kommission so ber\xFC\
+        cksichtigen, dass sie nicht im Widerspruch zu den dort genannten Anforderungen\
+        \ stehen sowie darin enthaltene Vorgaben nicht unterschritten werden. Das\
+        \ Bundesamt stellt auf Antrag fest, ob die vorgeschlagenen Sicherheitsstandards\
+        \ branchenspezifisch und geeignet sind, die Anforderungen nach Absatz 1 zu\
+        \ gew\xE4hrleisten und ver\xF6ffentlicht diese auf seiner Internetseite. Die\
+        \ Feststellung erfolgt\n1. im Einvernehmen mit dem Bundesamt f\xFCr Bev\xF6\
+        lkerungsschutz und Katastrophenhilfe;\n2. im Einvernehmen mit der zust\xE4\
+        ndigen Aufsichtsbeh\xF6rde des Bundes.\nIm Sektor Gesundheitswesen ist, soweit\
+        \ keine zust\xE4ndige Aufsichtsbeh\xF6rde des Bundes besteht, abweichend von\
+        \ Satz 4 Nummer 2 das Benehmen mit dem Bundesministerium f\xFCr Gesundheit\
+        \ herzustellen. Aus Gr\xFCnden des \xF6ffentlichen Interesses werden f\xFC\
+        r die Feststellung keine Geb\xFChren oder Auslagen f\xFCr die T\xE4tigkeit\
+        \ des Bundesamtes erhoben."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30.9
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:30
+      ref_id: '30.9'
+      name: "\xA7 30 Abs. 9"
+      description: "Betreiber kritischer Anlagen k\xF6nnen branchenspezifische Sicherheitsstandards\
+        \ zur Gew\xE4hrleistung der Anforderungen in Bezug auf kritische Anlagen nach\
+        \ \xA7 30 Absatz 1 Satz 1 in Verbindung mit \xA7 31 Absatz 1 und 2 Satz 1\
+        \ vorschlagen. Absatz 8 Satz 2 bis 6 gilt entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:31
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '31'
+      name: "\xA7 31 - Besondere Anforderungen an die Risikomanagementma\xDFnahmen\
+        \ von Betreibern kritischer Anlagen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:31.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:31
+      ref_id: '31.1'
+      name: "\xA7 31 Abs. 1"
+      description: "F\xFCr Betreiber kritischer Anlagen gelten f\xFCr die informationstechnischen\
+        \ Systeme, Komponenten und Prozesse, die f\xFCr die Funktionsf\xE4higkeit\
+        \ der von ihnen betriebenen kritischen Anlagen ma\xDFgeblich sind, im Vergleich\
+        \ zu anderen informationstechnischen Systemen, Komponenten und Prozessen besonders\
+        \ wichtiger Einrichtungen auch \xFCber das Schutzniveau dieser Einrichtungen\
+        \ hinausgehende Ma\xDFnahmen nach \xA7 30 Absatz 1 Satz 1 als verh\xE4ltnism\xE4\
+        \xDFig, wenn der daf\xFCr erforderliche Aufwand nicht au\xDFer Verh\xE4ltnis\
+        \ zu den Folgen eines Ausfalls oder einer Beeintr\xE4chtigung der betroffenen\
+        \ kritischen Anlage steht."
+      implementation_groups:
+      - KRITIS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:31.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:31
+      ref_id: '31.2'
+      name: "\xA7 31 Abs. 2"
+      description: "Betreiber kritischer Anlagen sind verpflichtet, f\xFCr die informationstechnischen\
+        \ Systeme, Komponenten und Prozesse, die f\xFCr die Funktionsf\xE4higkeit\
+        \ der von ihnen betriebenen kritischen Anlagen ma\xDFgeblich sind, Systeme\
+        \ zur Angriffserkennung einzusetzen. Die eingesetzten Systeme zur Angriffserkennung\
+        \ m\xFCssen geeignete Parameter und Merkmale aus dem laufenden Betrieb kontinuierlich\
+        \ und automatisch erfassen und auswerten. Sie sollten dazu in der Lage sein,\
+        \ fortw\xE4hrend Bedrohungen zu identifizieren und zu vermeiden sowie f\xFC\
+        r eingetretene St\xF6rungen geeignete Beseitigungsma\xDFnahmen vorzusehen.\
+        \ Dabei soll der Stand der Technik eingehalten werden. Der hierf\xFCr erforderliche\
+        \ Aufwand soll nicht au\xDFer Verh\xE4ltnis zu den Folgen eines Ausfalls oder\
+        \ einer Beeintr\xE4chtigung der betroffenen kritischen Anlage stehen."
+      implementation_groups:
+      - KRITIS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '32'
+      name: "\xA7 32 - Meldepflichten"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32
+      ref_id: '32.1'
+      name: "\xA7 32 Abs. 1"
+      description: "Besonders wichtige Einrichtungen und wichtige Einrichtungen sind\
+        \ verpflichtet, folgende Informationen an eine vom Bundesamt und dem Bundesamt\
+        \ f\xFCr Bev\xF6lkerungsschutz und Katastrophenhilfe eingerichtete gemeinsame\
+        \ Meldestelle zu melden:\nDie Verpflichtung nach Satz 1 gilt fr\xFChestens\
+        \ ab Einrichtung des Meldewegs."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1
+      ref_id: 32.1.1
+      name: "\xA7 32 Abs. 1 Nr. 1"
+      description: "unverz\xFCglich, sp\xE4testens jedoch innerhalb von 24 Stunden\
+        \ nach Kenntniserlangung von einem erheblichen Sicherheitsvorfall, eine fr\xFC\
+        he Erstmeldung, in der angegeben wird, ob der Verdacht besteht, dass der erhebliche\
+        \ Sicherheitsvorfall auf rechtswidrige oder b\xF6swillige Handlungen zur\xFC\
+        ckzuf\xFChren ist oder grenz\xFCberschreitende Auswirkungen haben k\xF6nnte;"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1
+      ref_id: 32.1.2
+      name: "\xA7 32 Abs. 1 Nr. 2"
+      description: "unverz\xFCglich, sp\xE4testens jedoch innerhalb von 72 Stunden\
+        \ nach Kenntniserlangung von einem erheblichen Sicherheitsvorfall, eine Meldung\
+        \ \xFCber diesen Sicherheitsvorfall, in der die in Nummer 1 genannten Informationen\
+        \ best\xE4tigt oder aktualisiert werden und eine erste Bewertung des erheblichen\
+        \ Sicherheitsvorfalls, einschlie\xDFlich seines Schweregrads und seiner Auswirkungen,\
+        \ sowie gegebenenfalls die Kompromittierungsindikatoren angegeben werden;"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1
+      ref_id: 32.1.3
+      name: "\xA7 32 Abs. 1 Nr. 3"
+      description: "auf Ersuchen des Bundesamtes eine Zwischenmeldung \xFCber relevante\
+        \ Statusaktualisierungen;"
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1
+      ref_id: 32.1.4
+      name: "\xA7 32 Abs. 1 Nr. 4"
+      description: "sp\xE4testens einen Monat nach \xDCbermittlung der Meldung des\
+        \ Sicherheitsvorfalls gem\xE4\xDF Nummer 2, vorbehaltlich Absatz 2, eine Abschlussmeldung,\
+        \ die Folgendes enth\xE4lt:\na) eine ausf\xFChrliche Beschreibung des Sicherheitsvorfalls,\
+        \ einschlie\xDFlich seines Schweregrads und seiner Auswirkungen;\nb) Angaben\
+        \ zur Art der Bedrohung beziehungsweise ihrer zugrunde liegenden Ursache,\
+        \ die wahrscheinlich den Sicherheitsvorfall ausgel\xF6st hat;\nc) Angaben\
+        \ zu den getroffenen und laufenden Abhilfema\xDFnahmen;\nd) gegebenenfalls\
+        \ die grenz\xFCberschreitenden Auswirkungen des Sicherheitsvorfalls."
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32
+      ref_id: '32.2'
+      name: "\xA7 32 Abs. 2"
+      description: "Dauert der Sicherheitsvorfall zum in Absatz 1 Satz 1 Nummer 4\
+        \ genannten Zeitpunkt noch an, legt die betreffende Einrichtung statt einer\
+        \ Abschlussmeldung zu diesem Zeitpunkt eine Fortschrittsmeldung vor. Die Abschlussmeldung\
+        \ ist dem Bundesamt nach abschlie\xDFender Bearbeitung des Sicherheitsvorfalls\
+        \ durch die betreffende Einrichtung vorzulegen."
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32
+      ref_id: '32.3'
+      name: "\xA7 32 Abs. 3"
+      description: "Betreiber kritischer Anlagen sind zus\xE4tzlich verpflichtet,\
+        \ Angaben zur Art der betroffenen Anlage und der kritischen Dienstleistung\
+        \ sowie zu den Auswirkungen des Sicherheitsvorfalls auf diese Dienstleistung\
+        \ zu \xFCbermitteln, wenn ein erheblicher Sicherheitsvorfall Auswirkungen\
+        \ auf die von ihnen betriebene kritische Anlage hat oder haben k\xF6nnte."
+      implementation_groups:
+      - KRITIS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32
+      ref_id: '32.4'
+      name: "\xA7 32 Abs. 4"
+      description: "Das Bundesamt legt die Einzelheiten zur Ausgestaltung des Meldeverfahrens\
+        \ und zur Konkretisierung der Meldungsinhalte nach Anh\xF6rung der betroffenen\
+        \ Betreiber und der betroffenen Wirtschaftsverb\xE4nde im Einvernehmen mit\
+        \ dem Bundesamt f\xFCr Bev\xF6lkerungsschutz und Katastrophenhilfe fest, soweit\
+        \ sie m\xF6glichen Durchf\xFChrungsrechtsakten der Europ\xE4ischen Kommission\
+        \ nicht widersprechen. Die Informationen nach Satz 1 werden durch das Bundesamt\
+        \ auf dessen Internetseite ver\xF6ffentlicht."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32
+      ref_id: '32.5'
+      name: "\xA7 32 Abs. 5"
+      description: "Das Bundesamt stellt den zust\xE4ndigen Aufsichtsbeh\xF6rden des\
+        \ Bundes unverz\xFCglich die bei ihm eingegangenen Meldungen zur Verf\xFC\
+        gung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32
+      ref_id: '32.6'
+      name: "\xA7 32 Abs. 6"
+      description: "Das Bundesamt kann meldenden Einrichtungen nach Ma\xDFgabe des\
+        \ \xA7 36 Absatz 1 Angebote zu deren Unterst\xFCtzung bei der Behebung des\
+        \ Sicherheitsvorfalls machen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '33'
+      name: "\xA7 33 - Registrierungspflicht"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33
+      ref_id: '33.1'
+      name: "\xA7 33 Abs. 1"
+      description: "Besonders wichtige Einrichtungen und wichtige Einrichtungen sowie\
+        \ Domain-Name-Registry-Dienstleister sind verpflichtet, sp\xE4testens drei\
+        \ Monate, nachdem sie erstmals oder erneut als eine der vorgenannten Einrichtungen\
+        \ gelten oder Domain-Name-Registry-Dienste anbieten, dem Bundesamt \xFCber\
+        \ eine gemeinsam vom Bundesamt und dem Bundesamt f\xFCr Bev\xF6lkerungsschutz\
+        \ und Katastrophenhilfe eingerichtete Registrierungsm\xF6glichkeit folgende\
+        \ Angaben zu \xFCbermitteln:\n1. Name der Einrichtung, einschlie\xDFlich der\
+        \ Rechtsform und falls einschl\xE4gig der Handelsregisternummer,\n2. Anschrift\
+        \ und aktuelle Kontaktdaten, einschlie\xDFlich E-Mail-Adresse, \xF6ffentliche\
+        \ IP-Adressbereiche und Telefonnummern,\n3. relevanter in Anlage 1 oder 2\
+        \ genannter Sektor oder falls einschl\xE4gig Branche,\n4. Auflistung derjenigen\
+        \ Mitgliedstaaten der Europ\xE4ischen Union, in denen die Einrichtung Dienste\
+        \ der in Anlage 1 oder 2 genannten Einrichtungsarten erbringt, und\n5. die\
+        \ f\xFCr die T\xE4tigkeiten, aufgrund derer die Registrierung erfolgt, zust\xE4\
+        ndigen Aufsichtsbeh\xF6rden des Bundes und der L\xE4nder."
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33
+      ref_id: '33.2'
+      name: "\xA7 33 Abs. 2"
+      description: "Die Registrierung von kritischen Anlagen erfolgt gem\xE4\xDF \xA7\
+        \ 8 des KRITIS-Dachgesetzes."
+      annotation: "\xDCbergangsregelung (\xA7 66): Dieser Absatz ist erst anzuwenden,\
+        \ wenn eine Rechtsverordnung auf der Grundlage des \xA7 4 Absatz 3 und \xA7\
+        \ 5 Absatz 1 des KRITIS-Dachgesetzes in Kraft getreten ist. Bis dahin gilt\
+        \ weiter die bis einschlie\xDFlich 16. M\xE4rz 2026 geltende Fassung:\nBetreiber\
+        \ kritischer Anlagen \xFCbermitteln mit den Angaben nach Absatz 1 die kritische\
+        \ Dienstleistung, die bei ihnen zum Einsatz kommenden Typen von kritischen\
+        \ Komponenten, die \xF6ffentlichen IP-Adressbereiche der von ihnen betriebenen\
+        \ Anlagen sowie die f\xFCr die von ihnen betriebenen kritischen Anlagen ermittelte\
+        \ Anlagenkategorie und die ermittelten Versorgungskennzahlen gem\xE4\xDF der\
+        \ Rechtsverordnung nach \xA7 56 Absatz 4 sowie den Standort der Anlagen und\
+        \ eine Kontaktstelle. Die Betreiber stellen sicher, dass sie \xFCber ihre\
+        \ in Satz 1 genannte Kontaktstelle jederzeit erreichbar sind."
+      implementation_groups:
+      - KRITIS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33
+      ref_id: '33.3'
+      name: "\xA7 33 Abs. 3"
+      description: "Die Registrierung von besonders wichtigen Einrichtungen und wichtigen\
+        \ Einrichtungen und Domain-Name-Registry-Diensteanbietern kann das Bundesamt\
+        \ im Einvernehmen mit den jeweils zust\xE4ndigen Aufsichtsbeh\xF6rden auch\
+        \ selbst vornehmen, wenn ihre Pflicht zur Registrierung nicht erf\xFCllt wird."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33
+      ref_id: '33.4'
+      name: "\xA7 33 Abs. 4"
+      description: "Rechtfertigen Tatsachen die Annahme, dass eine Einrichtung ihre\
+        \ Pflicht zur Registrierung nach Absatz 1 oder 2 nicht erf\xFCllt, so hat\
+        \ diese Einrichtung dem Bundesamt auf Verlangen die aus Sicht des Bundesamtes\
+        \ f\xFCr die Bewertung erforderlichen Aufzeichnungen, Schriftst\xFCcke und\
+        \ sonstigen Unterlagen in geeigneter Weise vorzulegen und Auskunft zu erteilen,\
+        \ soweit nicht Geheimschutzinteressen oder \xFCberwiegende Sicherheitsinteressen\
+        \ entgegenstehen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33
+      ref_id: '33.5'
+      name: "\xA7 33 Abs. 5"
+      description: "Wenn sich nach Absatz 1 zu \xFCbermittelnde Angaben \xE4ndern,\
+        \ sind diese \xC4nderungen dem Bundesamt unverz\xFCglich, sp\xE4testens jedoch\
+        \ binnen zwei Wochen ab dem Zeitpunkt, zu dem die Einrichtung Kenntnis von\
+        \ der \xC4nderung erhalten hat, zu \xFCbermitteln."
+      annotation: "\xDCbergangsregelung (\xA7 66): Dieser Absatz ist erst anzuwenden,\
+        \ wenn eine Rechtsverordnung auf der Grundlage des \xA7 4 Absatz 3 und \xA7\
+        \ 5 Absatz 1 des KRITIS-Dachgesetzes in Kraft getreten ist. Bis dahin gilt\
+        \ weiter die bis einschlie\xDFlich 28. Juli 2026 geltende Fassung:\nBei \xC4\
+        nderungen der nach Absatz 1 oder 2 zu \xFCbermittelnden Angaben sind dem Bundesamt\
+        \ ge\xE4nderte Versorgungskennzahlen sowie \xC4nderungen der bei Betreibern\
+        \ kritischer Anlagen zum Einsatz kommenden Typen von kritischen Komponenten\
+        \ einmal j\xE4hrlich zu \xFCbermitteln und alle anderen Angaben unverz\xFC\
+        glich, sp\xE4testens jedoch zwei Wochen ab dem Zeitpunkt, zu dem die Einrichtung\
+        \ Kenntnis von der \xC4nderung erhalten hat, zu \xFCbermitteln."
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:33
+      ref_id: '33.6'
+      name: "\xA7 33 Abs. 6"
+      description: "Das Bundesamt legt die Einzelheiten zur Ausgestaltung des Registrierungsverfahrens\
+        \ im Einvernehmen mit dem Bundesamt f\xFCr Bev\xF6lkerungsschutz und Katastrophenhilfe\
+        \ fest. Die Festlegung nach Satz 1 erfolgt durch eine \xF6ffentliche Mitteilung\
+        \ auf der Internetseite des Bundesamtes."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '34'
+      name: "\xA7 34 - Besondere Registrierungspflicht f\xFCr bestimmte Einrichtungsarten"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34
+      ref_id: '34.1'
+      name: "\xA7 34 Abs. 1"
+      description: "Eine Einrichtung der in \xA7 60 Absatz 1 Satz 1 genannten Einrichtungsart\
+        \ ist verpflichtet, sp\xE4testens drei Monate, nachdem sie als eine der vorgenannten\
+        \ Einrichtungen gelten, dem Bundesamt die folgenden Angaben zu \xFCbermitteln:\n\
+        1. Name der Einrichtung;\n2. einschl\xE4giger Sektor, Branche und Einrichtungsart\
+        \ wie in Anlage 1 bestimmt;\n3. Anschrift der Hauptniederlassung in der Europ\xE4\
+        ischen Union nach \xA7 60 Absatz 2 und ihrer sonstigen Niederlassungen in\
+        \ der Europ\xE4ischen Union oder, falls sie nicht in der Europ\xE4ischen Union\
+        \ niedergelassen ist, Anschrift ihres nach \xA7 60 Absatz 3 benannten Vertreters;\n\
+        4. aktuelle Kontaktdaten, einschlie\xDFlich E-Mail-Adressen und Telefonnummern\
+        \ der Einrichtung und soweit erforderlich, ihres nach \xA7 60 Absatz 3 benannten\
+        \ Vertreters;\n5. die Mitgliedstaaten der Europ\xE4ischen Union, in denen\
+        \ die Einrichtung Dienste erbringt, und\n6. die \xF6ffentlichen IP-Adressbereiche\
+        \ der Einrichtung."
+      implementation_groups:
+      - DIG
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34
+      ref_id: '34.2'
+      name: "\xA7 34 Abs. 2"
+      description: "Im Fall einer \xC4nderung der gem\xE4\xDF Absatz 1 \xFCbermittelten\
+        \ Angaben unterrichten die Einrichtungen der in \xA7 60 Absatz 1 Satz 1 genannten\
+        \ Einrichtungsart das Bundesamt unverz\xFCglich \xFCber diese \xC4nderung,\
+        \ jedoch sp\xE4testens innerhalb von drei Monaten ab dem Tag, an dem die \xC4\
+        nderung eingetreten ist."
+      implementation_groups:
+      - DIG
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34
+      ref_id: '34.3'
+      name: "\xA7 34 Abs. 3"
+      description: "Mit Ausnahme der in Absatz 1 Nummer 6 genannten Angaben leitet\
+        \ das Bundesamt die nach diesem Paragraphen \xFCbermittelten Angaben an die\
+        \ Agentur der Europ\xE4ischen Union f\xFCr Cybersicherheit weiter."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:34
+      ref_id: '34.4'
+      name: "\xA7 34 Abs. 4"
+      description: "Das Bundesamt kann f\xFCr die \xDCbermittlung der Angaben nach\
+        \ den Abs\xE4tzen 1 und 2 einen geeigneten Meldeweg vorsehen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:35
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '35'
+      name: "\xA7 35 - Unterrichtungspflichten"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:35.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:35
+      ref_id: '35.1'
+      name: "\xA7 35 Abs. 1"
+      description: "Im Fall eines erheblichen Sicherheitsvorfalls kann das Bundesamt\
+        \ besonders wichtigen Einrichtungen und wichtigen Einrichtungen anordnen,\
+        \ die Empf\xE4nger ihrer Dienste unverz\xFCglich \xFCber diesen erheblichen\
+        \ Sicherheitsvorfall zu unterrichten, der die Erbringung des jeweiligen Dienstes\
+        \ beeintr\xE4chtigen k\xF6nnte. Das Bundesamt setzt die f\xFCr die Einrichtung\
+        \ zust\xE4ndige Aufsichtsbeh\xF6rde des Bundes \xFCber Anweisungen nach Satz\
+        \ 1 in Kenntnis. Die Unterrichtung nach Satz 1 kann auch durch eine Ver\xF6\
+        ffentlichung auf der Internetseite der Einrichtung erfolgen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:35.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:35
+      ref_id: '35.2'
+      name: "\xA7 35 Abs. 2"
+      description: "Besonders wichtige Einrichtungen und wichtige Einrichtungen aus\
+        \ den Sektoren Finanzwesen, Leistungen der Sozialversicherung sowie Grundsicherung\
+        \ f\xFCr Arbeitsuchende, digitale Infrastruktur, Verwaltung von IKT-Diensten\
+        \ und Digitale Dienste teilen den potenziell von einer erheblichen Cyberbedrohung\
+        \ betroffenen Empf\xE4ngern ihrer Dienste und dem Bundesamt unverz\xFCglich\
+        \ alle Ma\xDFnahmen oder Abhilfema\xDFnahmen mit, die diese Empf\xE4nger als\
+        \ Reaktion auf diese Bedrohung ergreifen k\xF6nnen. Die Einrichtungen informieren\
+        \ zugleich diese Empf\xE4nger auch \xFCber die erhebliche Cyberbedrohung selbst.\
+        \ Die Pflichten nach Satz 1 oder 2 gelten nur dann, wenn in Abw\xE4gung der\
+        \ Interessen der Einrichtung und des Empf\xE4ngers die Interessen des Empf\xE4\
+        ngers \xFCberwiegen."
+      implementation_groups:
+      - EINR
+      - KRITIS
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:36
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '36'
+      name: "\xA7 36 - R\xFCckmeldungen des Bundesamtes gegen\xFCber meldenden Einrichtungen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:36.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:36
+      ref_id: '36.1'
+      name: "\xA7 36 Abs. 1"
+      description: "Im Fall einer Meldung einer Einrichtung gem\xE4\xDF \xA7 32 \xFC\
+        bermittelt das Bundesamt dieser unverz\xFCglich und nach M\xF6glichkeit innerhalb\
+        \ von 24 Stunden eine Best\xE4tigung \xFCber den Eingang der Meldung und,\
+        \ auf Ersuchen der Einrichtung, Orientierungshilfen oder operative Beratung\
+        \ zu Abhilfema\xDFnahmen. Das Bundesamt kann auf Ersuchen der betreffenden\
+        \ Einrichtung zus\xE4tzliche technische Unterst\xFCtzung leisten."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:36.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:36
+      ref_id: '36.2'
+      name: "\xA7 36 Abs. 2"
+      description: "Ist eine Sensibilisierung der \xD6ffentlichkeit erforderlich,\
+        \ um einen erheblichen Sicherheitsvorfall zu verhindern oder zu bew\xE4ltigen,\
+        \ oder liegt die Offenlegung des erheblichen Sicherheitsvorfalls anderweitig\
+        \ im \xF6ffentlichen Interesse, so kann das Bundesamt nach Anh\xF6rung der\
+        \ betreffenden Einrichtung diese dazu verpflichten, die \xD6ffentlichkeit\
+        \ \xFCber den erheblichen Sicherheitsvorfall zu informieren. Das Bundesamt\
+        \ kann entsprechend der Voraussetzungen nach Satz 1 die \xD6ffentlichkeit\
+        \ auch selbst informieren. Handelt es sich bei der betreffenden Einrichtung\
+        \ um eine Einrichtung der Bundesverwaltung, gilt f\xFCr die Information der\
+        \ \xD6ffentlichkeit \xA7 4 Absatz 3 entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '37'
+      name: "\xA7 37 - Ausnahmebescheid"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37
+      ref_id: '37.1'
+      name: "\xA7 37 Abs. 1"
+      description: "Das Bundesministerium des Innern kann auf Vorschlag des Bundeskanzleramtes,\
+        \ des Bundesministeriums der Justiz und f\xFCr Verbraucherschutz, des Bundesministeriums\
+        \ f\xFCr Verteidigung, des Bundesministeriums der Finanzen, der Ministerien\
+        \ f\xFCr Inneres und der Justiz der L\xE4nder oder auf eigenes Betreiben eine\
+        \ besonders wichtige Einrichtung oder eine wichtige Einrichtung von Verpflichtungen\
+        \ nach diesem Gesetz nach Ma\xDFgabe des Absatzes 2 teilweise befreien (einfacher\
+        \ Ausnahmebescheid) oder nach Ma\xDFgabe des Absatzes 3 insgesamt befreien\
+        \ (erweiterter Ausnahmebescheid), sofern die Einrichtung Vorgaben einh\xE4\
+        lt, die den Verpflichtungen nach diesem Gesetz gleichwertig sind. Die Entscheidung\
+        \ nach Satz 1 erfolgt mit dem jeweils zust\xE4ndigen Ressort im Einvernehmen,\
+        \ im Fall der Ministerien f\xFCr Inneres und der Justiz der L\xE4nder im Benehmen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37
+      ref_id: '37.2'
+      name: "\xA7 37 Abs. 2"
+      description: "Einrichtungen, die\n1. in den Bereichen nationale Sicherheit,\
+        \ \xF6ffentliche Sicherheit, Verteidigung oder Strafverfolgung, einschlie\xDF\
+        lich der Verh\xFCtung, Ermittlung, Aufdeckung und Verfolgung von Straftaten,\
+        \ (relevante Bereiche) t\xE4tig sind oder Dienste erbringen oder\n2. ausschlie\xDF\
+        lich f\xFCr Beh\xF6rden, die Aufgaben in relevanten Bereichen erf\xFCllen,\
+        \ t\xE4tig sind oder Dienste erbringen,\nk\xF6nnen f\xFCr diese T\xE4tigkeiten\
+        \ oder Dienste von den Risikomanagementma\xDFnahmen nach \xA7 30 und den Meldepflichten\
+        \ nach \xA7 32 befreit werden. Die Sicherheit in der Informationstechnik dieser\
+        \ Einrichtungen muss in diesen F\xE4llen anderweitig gew\xE4hrleistet sein\
+        \ und beaufsichtigt werden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37
+      ref_id: '37.3'
+      name: "\xA7 37 Abs. 3"
+      description: "Einrichtungen, die ausschlie\xDFlich in relevanten Bereichen t\xE4\
+        tig sind oder Dienste erbringen, k\xF6nnen insgesamt von den in Absatz 2 genannten\
+        \ Pflichten und von den Registrierungspflichten nach den \xA7\xA7 33 und 34\
+        \ befreit werden. Absatz 2 Satz 2 gilt entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37
+      ref_id: '37.4'
+      name: "\xA7 37 Abs. 4"
+      description: "Die Abs\xE4tze 1 bis 3 gelten nicht, wenn die betreffende Einrichtung\
+        \ ein Vertrauensdiensteanbieter ist."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:37
+      ref_id: '37.5'
+      name: "\xA7 37 Abs. 5"
+      description: "Ein Ausnahmebescheid nach diesem Gesetz ist zu widerrufen, wenn\
+        \ nachtr\xE4glich Tatsachen eintreten, die zur Ablehnung einer Erteilung einer\
+        \ Ausnahme h\xE4tten f\xFChren m\xFCssen. Abweichend von Satz 1 kann im Falle\
+        \ eines vor\xFCbergehenden Wegfalls der Voraussetzungen des Absatzes 2 Satz\
+        \ 1 Nummer 1 oder 2 von einem Widerruf abgesehen werden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:38
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '38'
+      name: "\xA7 38 - Umsetzungs-, \xDCberwachungs- und Schulungspflicht f\xFCr Gesch\xE4\
+        ftsleitungen besonders wichtiger Einrichtungen und wichtiger Einrichtungen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:38.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:38
+      ref_id: '38.1'
+      name: "\xA7 38 Abs. 1"
+      description: "Gesch\xE4ftsleitungen besonders wichtiger Einrichtungen und wichtiger\
+        \ Einrichtungen sind verpflichtet, die von diesen Einrichtungen nach \xA7\
+        \ 30 zu ergreifenden Risikomanagementma\xDFnahmen umzusetzen und ihre Umsetzung\
+        \ zu \xFCberwachen."
+      implementation_groups:
+      - EINR
+      - KRITIS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:38.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:38
+      ref_id: '38.2'
+      name: "\xA7 38 Abs. 2"
+      description: "Gesch\xE4ftsleitungen, die ihre Pflichten nach Absatz 1 verletzen,\
+        \ haften ihrer Einrichtung f\xFCr einen schuldhaft verursachten Schaden nach\
+        \ den auf die Rechtsform der Einrichtung anwendbaren Regeln des Gesellschaftsrechts.\
+        \ Nach diesem Gesetz haften sie nur, wenn die f\xFCr die Einrichtung ma\xDF\
+        geblichen gesellschaftsrechtlichen Bestimmungen keine Haftungsregelung nach\
+        \ Satz 1 enthalten."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:38.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:38
+      ref_id: '38.3'
+      name: "\xA7 38 Abs. 3"
+      description: "Die Gesch\xE4ftsleitungen besonders wichtiger Einrichtungen und\
+        \ wichtiger Einrichtungen m\xFCssen regelm\xE4\xDFig an Schulungen teilnehmen,\
+        \ um ausreichende Kenntnisse und F\xE4higkeiten zur Erkennung und Bewertung\
+        \ von Risiken und von Risikomanagementpraktiken im Bereich der Sicherheit\
+        \ in der Informationstechnik zu erlangen sowie um die Auswirkungen von Risiken\
+        \ sowie Risikomanagementpraktiken auf die von der Einrichtung erbrachten Dienste\
+        \ beurteilen zu k\xF6nnen."
+      implementation_groups:
+      - EINR
+      - KRITIS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '39'
+      name: "\xA7 39 - Nachweispflichten f\xFCr Betreiber kritischer Anlagen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39
+      ref_id: '39.1'
+      name: "\xA7 39 Abs. 1"
+      description: "Betreiber kritischer Anlagen haben die Umsetzung der Ma\xDFnahmen\
+        \ in Bezug auf kritische Anlagen nach \xA7 30 Absatz 1 Satz 1 in Verbindung\
+        \ mit \xA7 31 Absatz 1 und 2 Satz 1 zu einem vom Bundesamt im Benehmen mit\
+        \ dem Bundesamt f\xFCr Bev\xF6lkerungsschutz und Katastrophenhilfe festgelegten\
+        \ Zeitpunkt, fr\xFChestens drei Jahre nachdem sie erstmals oder sp\xE4testens\
+        \ drei Jahre nachdem sie erneut als ein Betreiber einer kritischen Anlage\
+        \ gelten, und anschlie\xDFend alle drei Jahre dem Bundesamt durch Sicherheitsaudits,\
+        \ Pr\xFCfungen oder Zertifizierungen nachzuweisen. Die Betreiber \xFCbermitteln\
+        \ dem Bundesamt die Ergebnisse der durchgef\xFChrten Audits, Pr\xFCfungen\
+        \ oder Zertifizierungen einschlie\xDFlich Angaben \xFCber die dabei aufgedeckten\
+        \ Sicherheitsm\xE4ngel. Das Bundesamt kann die Vorlage der Dokumentation,\
+        \ die der \xDCberpr\xFCfung zugrunde gelegt wurde, verlangen. Es kann bei\
+        \ Sicherheitsm\xE4ngeln die Vorlage eines geeigneten M\xE4ngelbeseitigungsplanes\
+        \ und im Einvernehmen mit der zust\xE4ndigen Aufsichtsbeh\xF6rde des Bundes\
+        \ oder im Benehmen mit der sonst zust\xE4ndigen Aufsichtsbeh\xF6rde die Beseitigung\
+        \ der Sicherheitsm\xE4ngel verlangen. Das Bundesamt kann die Vorlage eines\
+        \ geeigneten Nachweises \xFCber die erfolgte M\xE4ngelbeseitigung verlangen."
+      implementation_groups:
+      - KRITIS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39
+      ref_id: '39.2'
+      name: "\xA7 39 Abs. 2"
+      description: "Das Bundesamt kann zur Ausgestaltung des Verfahrens der Pr\xFC\
+        fungen und Erbringung der Nachweise nach Absatz 1 folgende Anforderungen festlegen:\n\
+        1. Anforderungen an die Art und Weise der Durchf\xFChrung,\n2. Anforderungen\
+        \ an die Geeignetheit der zu erbringenden Nachweise sowie\n3. nach Anh\xF6\
+        rung der betroffenen Betreiber und Einrichtungen und der betroffenen Wirtschaftsverb\xE4\
+        nde fachliche und organisatorische Anforderungen an die pr\xFCfenden Stellen\
+        \ im Einvernehmen mit dem Bundesamt f\xFCr Bev\xF6lkerungsschutz und Katastrophenhilfe.\n\
+        Die Festlegung nach Satz 1 erfolgt durch eine \xF6ffentliche Mitteilung auf\
+        \ der Internetseite des Bundesamtes."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39
+      ref_id: '39.3'
+      name: "\xA7 39 Abs. 3"
+      description: "Abweichend von Absatz 1 Satz 1 legt das Bundesamt f\xFCr Betreiber\
+        \ kritischer Anlagen, die bis zum Inkrafttreten dieses Gesetzes Betreiber\
+        \ Kritischer Infrastrukturen waren nach \xA7 2 Absatz 10 des BSI-Gesetzes\
+        \ vom 14. August 2009 (BGBl. I S. 2821), das zuletzt durch Artikel 12 des\
+        \ Gesetzes vom 23. Juni 2021 (BGBl. I S. 1982) ge\xE4ndert worden ist, den\
+        \ Zeitpunkt der Nachweiserbringung auf fr\xFChestens drei Jahre nach Erbringung\
+        \ des letzten Nachweises nach \xA7 8a Absatz 3 des BSI-Gesetzes vom 14. August\
+        \ 2009 (BGBl. I S. 2821), das zuletzt durch Artikel 12 des Gesetzes vom 23.\
+        \ Juni 2021 (BGBl. I S. 1982) ge\xE4ndert worden ist, fest. Betreiber kritischer\
+        \ Anlagen, die bis zum Inkrafttreten dieses Gesetzes Betreiber Kritischer\
+        \ Infrastrukturen waren, und deren Nachweisfrist nach \xA7 8a Absatz 3 des\
+        \ BSI-Gesetzes vom 14. August 2009 (BGBl. I S. 2821), das zuletzt durch Artikel\
+        \ 12 des Gesetzes vom 23. Juni 2021 (BGBl. I S. 1982) ge\xE4ndert worden ist,\
+        \ innerhalb von zw\xF6lf Monaten nach Inkrafttreten dieses Gesetzes abgelaufen\
+        \ w\xE4re, k\xF6nnen in diesem Zeitraum einen Nachweis nach den bisher geltenden\
+        \ Vorgaben erbringen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:39
+      ref_id: '39.4'
+      name: "\xA7 39 Abs. 4"
+      description: "Die Verpflichtung nach Absatz 1 Satz 1 gilt nicht f\xFCr Betreiber\
+        \ kritischer Anlagen, die auf Grundlage von \xA7 5 Absatz 7 des KRITIS-Dachgesetzes\
+        \ als solche bestimmt wurden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '40'
+      name: "\xA7 40 - Nationale Verbindungsstelle sowie zentrale Melde- und Anlaufstelle\
+        \ f\xFCr besonders wichtige und wichtige Einrichtungen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40
+      ref_id: '40.1'
+      name: "\xA7 40 Abs. 1"
+      description: "Das Bundesamt ist die nationale Verbindungsstelle sowie die zentrale\
+        \ Melde- und Anlaufstelle f\xFCr die Aufsicht f\xFCr besonders wichtige Einrichtungen\
+        \ und wichtige Einrichtungen in der Sicherheit in der Informationstechnik."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40
+      ref_id: '40.2'
+      name: "\xA7 40 Abs. 2"
+      description: "Zur Wahrnehmung seiner Aufgabe als nationale Verbindungsstelle\
+        \ koordiniert das Bundesamt\n1. die grenz\xFCberschreitende Zusammenarbeit\
+        \ der L\xE4nderbeh\xF6rden, die die L\xE4nder als zust\xE4ndige Beh\xF6rden\
+        \ f\xFCr die Aufsicht von Einrichtungen der \xF6ffentlichen Verwaltung auf\
+        \ regionaler Ebene nach Artikel 2 Absatz 2 Buchstabe f Ziffer ii der NIS-2-Richtlinie\
+        \ bestimmt haben, sowie der Bundesnetzagentur und der Bundesanstalt f\xFC\
+        r Finanzdienstleistungsaufsicht mit den f\xFCr die \xDCberwachung der Anwendung\
+        \ der NIS-2-Richtlinie zust\xE4ndigen Beh\xF6rden anderer Mitgliedstaaten\
+        \ und gegebenenfalls mit der Europ\xE4ischen Kommission und der Agentur der\
+        \ Europ\xE4ischen Union f\xFCr Cybersicherheit sowie\n2. die sektor\xFCbergreifende\
+        \ Zusammenarbeit der in Nummer 1 genannten L\xE4nderbeh\xF6rden, des Bundesamtes\
+        \ f\xFCr Bev\xF6lkerungsschutz und Katastrophenhilfe, der Bundesnetzagentur\
+        \ und der Bundesanstalt f\xFCr Finanzdienstleistungsaufsicht."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40
+      ref_id: '40.3'
+      name: "\xA7 40 Abs. 3"
+      description: "Zur Wahrnehmung seiner Aufgabe als zentrale Meldestelle hat das\
+        \ Bundesamt\n1. die f\xFCr die Abwehr von Gefahren f\xFCr die Sicherheit in\
+        \ der Informationstechnik wesentlichen Informationen zu sammeln und auszuwerten,\
+        \ insbesondere Informationen zu Schwachstellen, zu Schadprogrammen und zu\
+        \ Angriffen,\n2. in Zusammenarbeit mit den zust\xE4ndigen Aufsichtsbeh\xF6\
+        rden und dem Bundesamt f\xFCr Bev\xF6lkerungsschutz und Katastrophenhilfe\
+        \ die Relevanz der Informationen nach Nummer 1 f\xFCr die Verf\xFCgbarkeit\
+        \ kritischer Dienstleistungen zu analysieren,\n3. das Lagebild bez\xFCglich\
+        \ der Sicherheit in der Informationstechnik von kritischen Anlagen, besonders\
+        \ wichtigen Einrichtungen und wichtigen Einrichtungen kontinuierlich zu aktualisieren\
+        \ und\n4. unverz\xFCglich die nachfolgenden Personen oder Stellen zu unterrichten:\n\
+        a) die Betreiber kritischer Anlagen \xFCber sie betreffende Informationen\
+        \ nach den Nummern 1 bis 3 nach \xA7 33 Absatz 1 Nummer 2 und\nb) die zust\xE4\
+        ndigen Beh\xF6rden eines anderen Mitgliedstaats der Europ\xE4ischen Union\
+        \ \xFCber nach Absatz 5 oder nach vergleichbaren Regelungen gemeldete erhebliche\
+        \ St\xF6rungen, die Auswirkungen in diesem Mitgliedstaat haben, unter Ber\xFC\
+        cksichtigung der Interessen nationaler Sicherheit und Verteidigung und\nc)\
+        \ das Ausw\xE4rtige Amt \xFCber nach \xA7 32 Absatz 1 gemeldete erhebliche\
+        \ Sicherheitsvorf\xE4lle mit internationalem Bezug und\nd) im Rahmen vorab\
+        \ zwischen dem Bundesamt und den Empf\xE4ngern abgestimmter Prozesse zur Weitergabe\
+        \ und Wahrung der notwendigen Vertraulichkeit die zu diesem Zweck dem Bundesamt\
+        \ von den L\xE4ndern als zentrale Kontaktstellen benannten Beh\xF6rden oder\
+        \ die zust\xE4ndigen Beh\xF6rden des Bundes \xFCber die zur Erf\xFCllung ihrer\
+        \ Aufgaben erforderlichen Informationen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40
+      ref_id: '40.4'
+      name: "\xA7 40 Abs. 4"
+      description: "Zur Wahrnehmung seiner Aufgabe als zentrale Anlaufstelle hat das\
+        \ Bundesamt\n1. Anfragen der in Absatz 2 genannten Stellen anzunehmen und\
+        \ an die zust\xE4ndigen in Absatz 2 genannten Stellen weiterzuleiten,\n2.\
+        \ Antworten auf die in Absatz 2 Satz 1 Nummer 2 genannten Anfragen zu erstellen\
+        \ und dabei die in Absatz 1 genannten Stellen zu beteiligen oder Antworten\
+        \ der in Absatz 2 Satz 1 genannten Stellen an die in Absatz 2 Satz 1 genannten\
+        \ Stellen weiterzuleiten, nach \xA7 32 eingegangene Meldungen an zentrale\
+        \ Anlaufstellen der anderen betroffenen Mitgliedstaaten der Europ\xE4ischen\
+        \ Union weiterzuleiten,\n3. wenn ein erheblicher Sicherheitsvorfall zwei oder\
+        \ mehr Mitgliedstaaten der Europ\xE4ischen Union betrifft, die anderen betroffenen\
+        \ Mitgliedstaaten und die Agentur der Europ\xE4ischen Union f\xFCr Cybersicherheit\
+        \ \xFCber den erheblichen Sicherheitsvorfall zu unterrichten, wobei die Art\
+        \ der gem\xE4\xDF \xA7 32 Absatz 2 erhaltenen Informationen mitzuteilen und\
+        \ das wirtschaftliche Interesse der Einrichtung sowie die Vertraulichkeit\
+        \ der bereitgestellten Informationen zu wahren ist."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40
+      ref_id: '40.5'
+      name: "\xA7 40 Abs. 5"
+      description: "W\xE4hrend eines erheblichen Sicherheitsvorfalls gem\xE4\xDF \xA7\
+        \ 32 Absatz 1 kann das Bundesamt im Einvernehmen mit der jeweils zust\xE4\
+        ndigen Aufsichtsbeh\xF6rde des Bundes von den betroffenen Betreibern kritischer\
+        \ Anlagen die Herausgabe der zur Bew\xE4ltigung der St\xF6rung notwendigen\
+        \ Informationen einschlie\xDFlich personenbezogener Daten verlangen. Betreiber\
+        \ kritischer Anlagen sind befugt, dem Bundesamt auf Verlangen die zur Bew\xE4\
+        ltigung der St\xF6rung notwendigen Informationen einschlie\xDFlich personenbezogener\
+        \ Daten zu \xFCbermitteln, soweit dies zur Bew\xE4ltigung eines erheblichen\
+        \ Sicherheitsvorfalls erforderlich ist."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:40
+      ref_id: '40.6'
+      name: "\xA7 40 Abs. 6"
+      description: "Soweit im Rahmen dieser Vorschrift personenbezogene Daten verarbeitet\
+        \ werden, ist eine \xFCber die vorstehenden Abs\xE4tze hinausgehende Verarbeitung\
+        \ zu anderen Zwecken unzul\xE4ssig. \xA7 8 Absatz 8 Satz 3 bis 9 ist entsprechend\
+        \ anzuwenden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '41'
+      name: "\xA7 41 - Untersagung des Einsatzes kritischer Komponenten"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41
+      ref_id: '41.1'
+      name: "\xA7 41 Abs. 1"
+      description: "Das Bundesministerium des Innern kann gegen\xFCber dem Betreiber\
+        \ kritischer Anlagen den Einsatz von kritischen Komponenten eines Herstellers\
+        \ im Benehmen mit dem Bundesministerium f\xFCr Wirtschaft und Energie im Sektor\
+        \ Energie, dem Bundesministerium f\xFCr Wirtschaft und Energie sowie dem Bundesministerium\
+        \ f\xFCr Forschung, Technologie und Raumfahrt im Sektor Weltraum, dem Bundesministerium\
+        \ f\xFCr Digitales und Staatsmodernisierung in den Sektoren Informationstechnik\
+        \ und Telekommunikation, dem Bundesministerium f\xFCr Verkehr in den Sektoren\
+        \ Transport und Verkehr, dem Bundesministerium f\xFCr Gesundheit im Sektor\
+        \ Gesundheit, dem Bundesministerium f\xFCr Ern\xE4hrung und Landwirtschaft\
+        \ im Sektor Ern\xE4hrung, dem Bundesministerium der Finanzen im Sektor Finanzwesen,\
+        \ dem Bundesministerium f\xFCr Arbeit und Soziales in den Sektoren Sozialversicherungstr\xE4\
+        ger sowie Grundsicherung f\xFCr Arbeitsuchende und dem Bundesministerium f\xFC\
+        r Umwelt, Klimaschutz, Naturschutz und nukleare Sicherheit in den Sektoren\
+        \ Wasser sowie Siedlungsabfallentsorgung sowie dem Ausw\xE4rtigen Amt untersagen\
+        \ oder Anordnungen dazu erlassen, wenn der Einsatz die \xF6ffentliche Ordnung\
+        \ oder Sicherheit der Bundesrepublik Deutschland voraussichtlich beeintr\xE4\
+        chtigt."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41
+      ref_id: '41.2'
+      name: "\xA7 41 Abs. 2"
+      description: "Hat das Bundesministerium des Innern einem Betreiber kritischer\
+        \ Anlagen den Einsatz einer kritischen Komponente untersagt oder eine Anordnung\
+        \ dazu erlassen, kann es im Benehmen mit dem in Absatz 1 genannten Bundesministerium\n\
+        1. dem Betreiber kritischer Anlagen auch den zuk\xFCnftigen Einsatz weiterer\
+        \ kritischer Komponenten desselben Herstellers und desselben Komponententyps\
+        \ untersagen oder Anordnungen dazu erlassen,\n2. allen Betreibern kritischer\
+        \ Anlagen den Einsatz derselben kritischen Komponente desselben Herstellers\
+        \ sowie von weiteren kritischen Komponenten desselben Komponententyps desselben\
+        \ Herstellers untersagen oder Anordnungen dazu erlassen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41
+      ref_id: '41.3'
+      name: "\xA7 41 Abs. 3"
+      description: "Die Entscheidung nach Satz 1 Nummer 2 ergeht als Allgemeinverf\xFC\
+        gung. Widerspruch und Klage gegen eine Untersagung oder Anordnung nach den\
+        \ Abs\xE4tzen 1 und 2 Satz 1 haben keine aufschiebende Wirkung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41
+      ref_id: '41.4'
+      name: "\xA7 41 Abs. 4"
+      description: "Bei der Pr\xFCfung einer voraussichtlichen Beeintr\xE4chtigung\
+        \ der \xF6ffentlichen Ordnung oder Sicherheit nach Absatz 1 kann insbesondere\
+        \ ber\xFCcksichtigt werden, ob\n1. der Hersteller unmittelbar oder mittelbar\
+        \ von der Regierung, einschlie\xDFlich sonstiger staatlicher Stellen oder\
+        \ Streitkr\xE4fte, eines Drittstaates kontrolliert wird oder zur Zusammenarbeit\
+        \ mit staatlichen Stellen oder Streitkr\xE4ften eines Drittstaates verpflichtet\
+        \ ist oder von dem Drittstaat hierzu verpflichtet werden kann,\n2. der Hersteller\
+        \ an Aktivit\xE4ten beteiligt war oder ist, die geeignet waren oder sind,\
+        \ nachteilige Auswirkungen auf die \xF6ffentliche Ordnung oder Sicherheit\
+        \ der Bundesrepublik Deutschland oder eines anderen Mitgliedstaates der Europ\xE4\
+        ischen Union, der Europ\xE4ischen Freihandelsassoziation oder des Nordatlantikvertrages\
+        \ oder auf deren Einrichtungen zu haben,\n3. hinreichende Anhaltspunkte daf\xFC\
+        r bestehen, dass der Hersteller aus sonstigen Gr\xFCnden nicht vertrauensw\xFC\
+        rdig ist,\n4. der Einsatz der kritischen Komponente im Einklang mit den sicherheitspolitischen\
+        \ Interessen der Bundesrepublik Deutschland, der Europ\xE4ischen Union oder\
+        \ des Nordatlantikvertrages steht."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:41
+      ref_id: '41.5'
+      name: "\xA7 41 Abs. 5"
+      description: "Der Betreiber kritischer Anlagen ist zur Mitwirkung bei der Ermittlung\
+        \ des Sachverhalts verpflichtet. Daf\xFCr hat er auf Verlangen alle f\xFC\
+        r das Verfahren erheblichen Tatsachen vollst\xE4ndig und wahrheitsgem\xE4\xDF\
+        \ mitzuteilen und die ihm bekannten Beweismittel anzugeben."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:42
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-2
+      ref_id: '42'
+      name: "\xA7 42 - Auskunftsverlangen"
+      description: "Zugang zu den Informationen und Akten in Angelegenheiten nach\
+        \ Teil 2 \xA7\xA7 4 bis 10 und Teil 3 dieses Gesetzes wird nicht gew\xE4hrt.\
+        \ Die Akteneinsichtsrechte von Verfahrensbeteiligten bleiben unber\xFChrt."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3
+      ref_id: Teil-3.Kapitel-3
+      name: Kapitel 3 - Informationssicherheit der Einrichtungen der Bundesverwaltung
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-3
+      ref_id: '43'
+      name: "\xA7 43 - Informationssicherheitsmanagement"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43
+      ref_id: '43.1'
+      name: "\xA7 43 Abs. 1"
+      description: "Die Leitung der Einrichtung der Bundesverwaltung ist daf\xFCr\
+        \ verantwortlich, unter Ber\xFCcksichtigung der Belange des IT-Betriebs die\
+        \ Voraussetzungen zur Gew\xE4hrleistung der Informationssicherheit zu schaffen.\
+        \ Die Einrichtungen der Bundesverwaltung weisen dem Bundesamt die Erf\xFC\
+        llung der Anforderungen nach Satz 1 sp\xE4testens f\xFCnf Jahre nach Inkrafttreten\
+        \ dieses Gesetzes und anschlie\xDFend regelm\xE4\xDFig nach seinen Vorgaben\
+        \ nach."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43
+      ref_id: '43.2'
+      name: "\xA7 43 Abs. 2"
+      description: "Die Leitung der Einrichtung der Bundesverwaltung muss regelm\xE4\
+        \xDFig an Schulungen teilnehmen, um ausreichende Kenntnisse und F\xE4higkeiten\
+        \ zur Erkennung und Bewertung von Risiken und von Risikomanagementpraktiken\
+        \ im Bereich der Informationssicherheit zu erlangen sowie die Auswirkungen\
+        \ von Risiken sowie Risikomanagementpraktiken auf die von der Einrichtung\
+        \ erbrachten Dienste beurteilen zu k\xF6nnen."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43
+      ref_id: '43.3'
+      name: "\xA7 43 Abs. 3"
+      description: "Soweit \xF6ffentlich-rechtlich oder privatrechtlich organisierte\
+        \ Stellen mit Leistungen f\xFCr Informationstechnik des Bundes beauftragt\
+        \ werden, ist vertraglich sicherzustellen, dass sie sich zur Einhaltung der\
+        \ Voraussetzungen zur Gew\xE4hrleistung der Informationssicherheit verpflichten.\
+        \ Dies gilt auch f\xFCr den Fall, dass Schnittstellen zur Kommunikationstechnik\
+        \ des Bundes eingerichtet werden. Die Pflichten der Leitung der Einrichtung\
+        \ der Bundesverwaltung nach Absatz 1 bleiben hiervon unber\xFChrt."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43
+      ref_id: '43.4'
+      name: "\xA7 43 Abs. 4"
+      description: "Die Registrierung von Einrichtungen der Bundesverwaltung nach\
+        \ \xA7 33 obliegt der Leitung der Einrichtung der Bundesverwaltung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43
+      ref_id: '43.5'
+      name: "\xA7 43 Abs. 5"
+      description: "Werden, \xFCber die sich aus \xA7 32 ergebenden Meldepflichten\
+        \ hinaus, Einrichtungen der Bundesverwaltung Informationen nach \xA7 4 Absatz\
+        \ 2 Nummer 1 bekannt, die f\xFCr die Erf\xFCllung von Aufgaben oder f\xFC\
+        r die Sicherheit der Kommunikationstechnik des Bundes von Bedeutung sind,\
+        \ unterrichten die Einrichtungen der Bundesverwaltung das Bundesamt hier\xFC\
+        ber unverz\xFCglich, soweit andere Vorschriften dem nicht entgegenstehen.\
+        \ Ausgenommen von den Meldepflichten f\xFCr Einrichtungen der Bundesverwaltung\
+        \ nach \xA7 32 sowie nach Satz 1 dieses Absatzes sind Informationen, die aufgrund\
+        \ von Regelungen zum Geheimschutz oder Vereinbarungen mit Dritten nicht weitergegeben\
+        \ werden d\xFCrfen oder deren Weitergabe im Widerspruch zu der verfassungsrechtlichen\
+        \ Stellung eines Abgeordneten des Bundestages oder eines Verfassungsorgans\
+        \ oder der gesetzlich geregelten Unabh\xE4ngigkeit einzelner Stellen st\xFC\
+        nde. Die Einrichtungen der Bundesverwaltung melden dem Bundesamt kalenderj\xE4\
+        hrlich jeweils bis zum 31. Januar eines Jahres die Gesamtzahl der nach Satz\
+        \ 2 nicht \xFCbermittelten Informationen. Ausgenommen von der Pflicht nach\
+        \ Satz 3 sind der Bundesnachrichtendienst und das Bundesamt f\xFCr Verfassungsschutz."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:43
+      ref_id: '43.6'
+      name: "\xA7 43 Abs. 6"
+      description: "Das Bundesministerium des Innern erl\xE4sst im Einvernehmen mit\
+        \ den Ressorts allgemeine Verwaltungsvorschriften zur Durchf\xFChrung des\
+        \ Absatzes 5."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-3
+      ref_id: '44'
+      name: "\xA7 44 - Vorgaben des Bundesamtes"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44
+      ref_id: '44.1'
+      name: "\xA7 44 Abs. 1"
+      description: "Die Einrichtungen der Bundesverwaltung m\xFCssen Mindestanforderungen\
+        \ zum Schutz der in der Bundesverwaltung verarbeiteten Informationen erf\xFC\
+        llen. Die Mindestanforderungen ergeben sich aus den BSI-Standards und dem\
+        \ Grundschutzkompendium (IT-Grundschutz) sowie aus den Mindeststandards f\xFC\
+        r die Sicherheit in der Informationstechnik des Bundes (Mindeststandards)\
+        \ in den jeweils geltenden Fassungen. Die jeweils geltenden Fassungen werden\
+        \ auf der Internetseite des Bundesamtes ver\xF6ffentlicht. Die Mindeststandards\
+        \ legt das Bundesamt im Benehmen mit den Ressorts und weiteren obersten Bundesbeh\xF6\
+        rden fest. Der IT-Grundschutz und die Mindeststandards werden durch das Bundesamt\
+        \ regelm\xE4\xDFig evaluiert und entsprechend dem Stand der Technik sowie\
+        \ unter Ber\xFCcksichtigung der Erfahrungen aus der Praxis und aus der Beratung\
+        \ und Unterst\xFCtzung nach Absatz 3 fortentwickelt; dabei wird der Umsetzungsaufwand\
+        \ soweit m\xF6glich minimiert. Das Bundesamt wird den IT-Grundschutz bis zum\
+        \ 1. Januar 2026 modernisieren und fortentwickeln. F\xFCr die Verpflichtung\
+        \ nach Satz 1 gelten die Ausnahmen nach \xA7 7 Absatz 6 und 7 entsprechend."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44
+      ref_id: '44.2'
+      name: "\xA7 44 Abs. 2"
+      description: "Durch die Umsetzung der Mindestanforderungen nach Absatz 1 Satz\
+        \ 1 ist die Erf\xFCllung der Vorgaben nach \xA7 30 gew\xE4hrleistet, soweit\
+        \ nicht die Europ\xE4ische Kommission einen Durchf\xFChrungsrechtsakt gem\xE4\
+        \xDF Artikel 21 Absatz 5 Unterabsatz 2 der NIS-2-Richtlinie erl\xE4sst, in\
+        \ dem die technischen und methodischen Anforderungen \xFCber die Mindestanforderungen\
+        \ aus Absatz 1 Satz 1 hinausgehen. Falls eine Einrichtung des Bundes gleichzeitig\
+        \ ein Betreiber kritischer Anlagen ist und die Anforderungen des IT-Grundschutzes\
+        \ und der Mindeststandards den Anforderungen nach \xA7 30 Absatz 9 und \xA7\
+        \ 31 widersprechen, genie\xDFen Letztere Vorrang."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44
+      ref_id: '44.3'
+      name: "\xA7 44 Abs. 3"
+      description: "Das Bundesamt ber\xE4t die Einrichtungen der Bundesverwaltung\
+        \ auf Ersuchen bei der Umsetzung und Einhaltung der Mindestanforderungen nach\
+        \ Absatz 1 Satz 1, stellt Hilfsmittel zur Verf\xFCgung und unterst\xFCtzt\
+        \ die Bereitstellung entsprechender L\xF6sungen durch die IT-Dienstleister\
+        \ des Bundes \xFCber den gesamten Lebenszyklus."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44
+      ref_id: '44.4'
+      name: "\xA7 44 Abs. 4"
+      description: "Das Bundesamt stellt im Rahmen seiner Aufgaben nach \xA7 3 Absatz\
+        \ 1 Satz 2 Nummer 10 technische Richtlinien und Referenzarchitekturen bereit,\
+        \ die von den Einrichtungen der Bundesverwaltung als Rahmen f\xFCr die Entwicklung\
+        \ sachgerechter Anforderungen an Auftragnehmer \u2013 im Sinne einer Eignung\
+        \ \u2013 und IT-Produkte \u2013 im Sinne einer Spezifikation \u2013 f\xFC\
+        r die Durchf\xFChrung von Vergabeverfahren ber\xFCcksichtigt werden. Die Vorschriften\
+        \ des Vergaberechts und des Geheimschutzes bleiben unber\xFChrt."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:44
+      ref_id: '44.5'
+      name: "\xA7 44 Abs. 5"
+      description: "F\xFCr die Einrichtungen der Bundesverwaltung kann das Bundesministerium\
+        \ des Innern im Einvernehmen mit den anderen Ressorts festlegen, dass sie\
+        \ verpflichtet sind, nach \xA7 19 bereitgestellte IT-Sicherheitsprodukte beim\
+        \ Bundesamt abzurufen. Eigenbeschaffungen der Einrichtungen der Bundesverwaltung\
+        \ sind in diesem Fall nur zul\xE4ssig, wenn das spezifische Anforderungsprofil\
+        \ den Einsatz abweichender Produkte erfordert. Dies gilt nicht f\xFCr die\
+        \ in \xA7 2 Nummer 21 genannten Gerichte und Verfassungsorgane sowie die Auslandsinformations-\
+        \ und -kommunikationstechnik gem\xE4\xDF \xA7 7 Absatz 6."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-3
+      ref_id: '45'
+      name: "\xA7 45 - Informationssicherheitsbeauftragte der Einrichtungen der Bundesverwaltung"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45
+      ref_id: '45.1'
+      name: "\xA7 45 Abs. 1"
+      description: "Jede Leitung einer Einrichtung der Bundesverwaltung bestellt f\xFC\
+        r ihre Einrichtung eine Informationssicherheitsbeauftragte oder einen Informationssicherheitsbeauftragten\
+        \ und bestimmt mindestens eine zur Vertretung berechtigte Person."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45
+      ref_id: '45.2'
+      name: "\xA7 45 Abs. 2"
+      description: "F\xFCr die Erf\xFCllung ihrer Aufgaben ist eine zielgerichtete\
+        \ Bef\xE4higung der Informationssicherheitsbeauftragten der Einrichtungen\
+        \ der Bundesverwaltung notwendig. Die Informationssicherheitsbeauftragen der\
+        \ Einrichtungen sowie ihre Vertreter m\xFCssen die zur Erf\xFCllung ihrer\
+        \ Aufgaben erforderliche Fachkunde erwerben. Sie sowie ihre Vertreter unterstehen\
+        \ der Fachaufsicht des oder der Informationssicherheitsbeauftragten des jeweils\
+        \ zust\xE4ndigen Ressorts."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45
+      ref_id: '45.3'
+      name: "\xA7 45 Abs. 3"
+      description: "Die Informationssicherheitsbeauftragten der Einrichtungen der\
+        \ Bundesverwaltung sind f\xFCr den Aufbau und die Aufrechterhaltung des Informationssicherheitsprozesses\
+        \ ihrer Einrichtung zust\xE4ndig. Sie erstellen ein Informationssicherheitskonzept,\
+        \ das mindestens die Vorgaben des Bundesamtes nach \xA7 44 Absatz 1 erf\xFC\
+        llt. Sie wirken auf die operative Umsetzung des Informationssicherheitskonzepts\
+        \ hin und kontrollieren die Umsetzung innerhalb der Einrichtung. Die Informationssicherheitsbeauftragten\
+        \ beraten die Leitung der Einrichtung der Bundesverwaltung in allen Fragen\
+        \ der Informationssicherheit und unterrichten die Leitung der Einrichtung\
+        \ der Bundesverwaltung sowie den jeweils zust\xE4ndigen Informationssicherheitsbeauftragten\
+        \ oder die jeweils zust\xE4ndige Informationssicherheitsbeauftragte des Ressorts\
+        \ regelm\xE4\xDFig sowie anlassbezogen \xFCber ihre T\xE4tigkeit, \xFCber\
+        \ den Stand der Informationssicherheit innerhalb der Einrichtung, \xFCber\
+        \ die Mittel- und Personalausstattung sowie \xFCber Sicherheitsvorf\xE4lle.\
+        \ Ihre Berichts- und Beratungsaufgaben erf\xFCllen sie unabh\xE4ngig und weisungsfrei."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:45
+      ref_id: '45.4'
+      name: "\xA7 45 Abs. 4"
+      description: "Die Informationssicherheitsbeauftragten der Einrichtungen sind\
+        \ bei allen Ma\xDFnahmen zu beteiligen, die die Informationssicherheit der\
+        \ Einrichtung betreffen. Sie haben ein unmittelbares Vortragsrecht bei der\
+        \ jeweiligen Leitung ihrer Einrichtung sowie bei dem oder der Informationssicherheitsbeauftragten\
+        \ des jeweils zust\xE4ndigen Ressorts. Sie d\xFCrfen von ihrer jeweiligen\
+        \ Einrichtung wegen der Erf\xFCllung ihrer Aufgaben nicht abberufen oder benachteiligt\
+        \ werden."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-3
+      ref_id: '46'
+      name: "\xA7 46 - Informationssicherheitsbeauftragte der Ressorts"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46
+      ref_id: '46.1'
+      name: "\xA7 46 Abs. 1"
+      description: "Die Leitungen der einzelnen Ressorts sowie die Leitungen weiterer\
+        \ oberster Bundesbeh\xF6rden bestellen jeweils eine Informationssicherheitsbeauftragte\
+        \ oder einen Informationssicherheitsbeauftragten des Ressorts, der oder dem\
+        \ unter Ber\xFCcksichtigung der Belange des IT-Betriebs die Steuerung und\
+        \ \xDCberwachung des Informationssicherheitsmanagements innerhalb des Ressorts\
+        \ beziehungsweise innerhalb der obersten Bundesbeh\xF6rde und ihres Gesch\xE4\
+        ftsbereichs obliegt, und bestimmen mindestens eine zur Vertretung berechtigte\
+        \ Person. Der oder die Informationssicherheitsbeauftragte des Ressorts wirkt\
+        \ auf die Umsetzung der Informationssicherheit in seinem oder ihrem Ressort\
+        \ hin."
+      implementation_groups:
+      - RESSORT
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46
+      ref_id: '46.2'
+      name: "\xA7 46 Abs. 2"
+      description: "F\xFCr die Erf\xFCllung ihrer Aufgaben ist eine zielgerichtete\
+        \ Bef\xE4higung der Informationssicherheitsbeauftragten der Ressorts notwendig.\
+        \ Der oder die Informationssicherheitsbeauftragte des Ressorts muss die zur\
+        \ Erf\xFCllung seiner oder ihrer Aufgaben erforderliche Fachkunde erwerben."
+      implementation_groups:
+      - RESSORT
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46
+      ref_id: '46.3'
+      name: "\xA7 46 Abs. 3"
+      description: "Die Informationssicherheitsbeauftragten der Ressorts koordinieren\
+        \ jeweils die Fortschreibung von Informationssicherheitsleitlinien f\xFCr\
+        \ ihr Ressort. Sie unterrichten die Ressortleitung \xFCber ihre T\xE4tigkeit\
+        \ und \xFCber den Stand der Informationssicherheit innerhalb des Ressorts,\
+        \ \xFCber die Mittel- und Personalausstattung sowie \xFCber Sicherheitsvorf\xE4\
+        lle. Ihre Berichts- und Beratungsaufgaben erf\xFCllen sie unabh\xE4ngig und\
+        \ weisungsfrei."
+      implementation_groups:
+      - RESSORT
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46
+      ref_id: '46.4'
+      name: "\xA7 46 Abs. 4"
+      description: "In begr\xFCndeten Einzelf\xE4llen kann der oder die Informationssicherheitsbeauftragte\
+        \ des Ressorts im Benehmen mit dem oder der jeweiligen IT-Beauftragten des\
+        \ Ressorts den Einsatz bestimmter IT-Produkte in Einrichtungen der Bundesverwaltung\
+        \ innerhalb des jeweiligen Ressorts ganz oder teilweise untersagen. \xDCber\
+        \ eine Untersagung ist das Bundesamt zu unterrichten."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46
+      ref_id: '46.5'
+      name: "\xA7 46 Abs. 5"
+      description: "Der oder die Informationssicherheitsbeauftragte des Ressorts kann\
+        \ im Benehmen mit dem Bundesamt Einrichtungen der Bundesverwaltung innerhalb\
+        \ des Ressorts von Verpflichtungen nach diesem Teil teilweise oder insgesamt\
+        \ durch Erteilung eines Ausnahmebescheides befreien. Voraussetzung hierf\xFC\
+        r ist, dass sachliche Gr\xFCnde f\xFCr die Erteilung eines Ausnahmebescheids\
+        \ vorliegen und durch die Befreiung keine nachteiligen Auswirkungen f\xFC\
+        r die Informationssicherheit des Bundes zu bef\xFCrchten sind. \xDCber erteilte\
+        \ Ausnahmebescheide ist das Bundesamt zu unterrichten. Satz 1 gilt nicht,\
+        \ wenn die jeweilige Einrichtung der Bundesverwaltung die Voraussetzungen\
+        \ des \xA7 28 Absatz 1 Satz 1 oder \xA7 28 Absatz 2 Satz 1 erf\xFCllt."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:46
+      ref_id: '46.6'
+      name: "\xA7 46 Abs. 6"
+      description: "Der oder die Informationssicherheitsbeauftragte des Ressorts ist\
+        \ bei allen Gesetzes-, Verordnungs- und sonstigen wichtigen Vorhaben innerhalb\
+        \ des Ressorts zu beteiligen, soweit die Vorhaben Fragen der Informationssicherheit\
+        \ ber\xFChren. Er oder sie hat ein unmittelbares Vortragsrecht bei der jeweiligen\
+        \ Leitung des Ressorts. Er oder sie darf von seiner oder ihrer jeweiligen\
+        \ Einrichtung wegen der Erf\xFCllung seiner oder ihrer Aufgaben nicht abberufen\
+        \ oder benachteiligt werden."
+      implementation_groups:
+      - RESSORT
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-3
+      ref_id: '47'
+      name: "\xA7 47 - Wesentliche Digitalisierungsvorhaben und Kommunikationsinfrastrukturen\
+        \ des Bundes"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47
+      ref_id: '47.1'
+      name: "\xA7 47 Abs. 1"
+      description: "F\xFCr die Planung und Umsetzung von wesentlichen Digitalisierungsvorhaben\
+        \ und Kommunikationsinfrastrukturen des Bundes sind eigene Informationssicherheitsbeauftragte\
+        \ nach \xA7 45 zu bestellen."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47
+      ref_id: '47.2'
+      name: "\xA7 47 Abs. 2"
+      description: "Digitalisierungsvorhaben oder Kommunikationsinfrastrukturen des\
+        \ Bundes sind insbesondere dann wesentlich, wenn dabei Kommunikationstechnik\
+        \ des Bundes ressort\xFCbergreifend betrieben wird oder der ressort\xFCbergreifenden\
+        \ Kommunikation oder dem ressort\xFCbergreifenden Datenaustausch dient."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47
+      ref_id: '47.3'
+      name: "\xA7 47 Abs. 3"
+      description: "In der Regel bestellt diejenige Einrichtung den Informationssicherheitsbeauftragten\
+        \ nach Satz 1, die f\xFCr die Steuerung des Digitalisierungsvorhabens oder\
+        \ die Kommunikationsinfrastrukturen des Bundes verantwortlich ist. Wenn bei\
+        \ ressort\xFCbergreifenden Digitalisierungsvorhaben oder Kommunikationsinfrastrukturen\
+        \ eine Bestellung durch Einrichtungen in verschiedenen beteiligten Ressorts\
+        \ und weiteren obersten Bundesbeh\xF6rden in Betracht kommt und nicht innerhalb\
+        \ einer angemessenen Frist Einvernehmen dar\xFCber hergestellt werden kann,\
+        \ durch welche Einrichtung die Bestellung erfolgt, so entscheidet das Bundesministerium\
+        \ f\xFCr Digitales und Staatsmodernisierung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47
+      ref_id: '47.4'
+      name: "\xA7 47 Abs. 4"
+      description: "Die Informationssicherheitsbeauftragten nach Satz 1 unterstehen\
+        \ entweder der Leitung der Einrichtung oder dem oder der jeweils zust\xE4\
+        ndigen Informationssicherheitsbeauftragten des Ressorts."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:47
+      ref_id: '47.5'
+      name: "\xA7 47 Abs. 5"
+      description: "Zur Gew\xE4hrleistung der Informationssicherheit bei der Planung\
+        \ und Umsetzung von wesentlichen Digitalisierungsvorhaben soll die jeweils\
+        \ verantwortliche Einrichtung das Bundesamt fr\xFChzeitig beteiligen und dem\
+        \ Bundesamt Gelegenheit zur Stellungnahme geben."
+      implementation_groups:
+      - BUND
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-3.kapitel-3
+      ref_id: '48'
+      name: "\xA7 48 - Amt des Koordinators f\xFCr Informationssicherheit"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48
+      ref_id: '48.1'
+      name: "\xA7 48 Abs. 1"
+      description: "Die Leitung des Bundesamtes f\xFCr Sicherheit in der Informationstechnik\
+        \ nimmt die Aufgaben der Koordinatorin oder des Koordinators der Bundesregierung\
+        \ f\xFCr Informationssicherheit wahr. Die Fachaufsicht \xFCber das Bundesamt\
+        \ in Bezug auf seine Rolle als Koordinatorin oder Koordinator f\xFCr Informationssicherheit\
+        \ liegt beim Bundesministerium f\xFCr Digitales und Staatsmodernisierung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48
+      ref_id: '48.2'
+      name: "\xA7 48 Abs. 2"
+      description: "Die Koordinatorin oder der Koordinator koordiniert das operative\
+        \ Informationssicherheitsmanagement des Bundes. Im Benehmen mit den obersten\
+        \ Bundesbeh\xF6rden entwickelt sie oder er Programme zur Gew\xE4hrleistung\
+        \ der Informationssicherheit des Bundes und schreibt diese fort."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48
+      ref_id: '48.3'
+      name: "\xA7 48 Abs. 3"
+      description: "Auf Basis der durch das Bundesamt erhaltenen Informationen wahrt\
+        \ die Koordinatorin oder der Koordinator den \xDCberblick \xFCber den Stand\
+        \ der Informationssicherheit in der Bundesverwaltung. Auf dieser Grundlage\
+        \ beaufsichtigt sie oder er die Umsetzung der Programme zur Gew\xE4hrleistung\
+        \ der Informationssicherheit des Bundes."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48
+      ref_id: '48.4'
+      name: "\xA7 48 Abs. 4"
+      description: "Die Koordinatorin oder der Koordinator unterst\xFCtzt die Ressorts\
+        \ bei der Umsetzung der Vorgaben nach diesem Gesetz und wirkt gemeinsam mit\
+        \ dem Bundesministerium f\xFCr Digitales und Staatsmodernisierung im Benehmen\
+        \ mit dem Bundesministerium des Innern auf ein angemessenes Verh\xE4ltnis\
+        \ zwischen dem Einsatz von Informationstechnik und Informationssicherheit\
+        \ hin."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48
+      ref_id: '48.5'
+      name: "\xA7 48 Abs. 5"
+      description: "Zur Wahrnehmung ihrer oder seiner Aufgaben hat die Koordinatorin\
+        \ oder der Koordinator ein direktes halbj\xE4hrliches Vortragsrecht vor den\
+        \ zust\xE4ndigen Aussch\xFCssen des Deutschen Bundestages zu den in den Abs\xE4\
+        tzen 1 bis 3 benannten Themen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:48
+      ref_id: '48.6'
+      name: "\xA7 48 Abs. 6"
+      description: "Die Koordinatorin oder der Koordinator wird bei allen Gesetzes-,\
+        \ Verordnungs- und sonstigen wichtigen Vorhaben beteiligt, soweit sie Fragen\
+        \ der Informationssicherheit ber\xFChren."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-4
+      assessable: false
+      depth: 1
+      ref_id: Teil-4
+      name: Teil 4 - Datenbanken der Domain-Name-Registrierungsdaten
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-4
+      ref_id: '49'
+      name: "\xA7 49 - Pflicht zum F\xFChren einer Datenbank"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49
+      ref_id: '49.1'
+      name: "\xA7 49 Abs. 1"
+      description: "Um einen Beitrag zur Sicherheit, Stabilit\xE4t und Resilienz des\
+        \ Domain Name Systems zu leisten, haben Top Level Domain Name Registries und\
+        \ Domain-Name-Registry-Dienstleister genaue und vollst\xE4ndige Domain-Namen-Registrierungsdaten\
+        \ in einer eigenen Datenbank mit der gebotenen Sorgfalt zu sammeln und zu\
+        \ pflegen."
+      implementation_groups:
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49
+      ref_id: '49.2'
+      name: "\xA7 49 Abs. 2"
+      description: "Die Datenbank hat die erforderlichen Angaben zu enthalten, anhand\
+        \ derer die Inhaber der Domain-Namen und die Kontaktstellen, die die Domain-Namen\
+        \ im Rahmen der TLD verwalten, identifiziert und kontaktiert werden k\xF6\
+        nnen. Diese Angaben m\xFCssen Folgendes umfassen:\n1. den Domain-Namen;\n\
+        2. das Datum der Registrierung;\n3. den Namen des Domain-Inhabers, seine E-Mail-Adresse\
+        \ und Telefonnummer;\n4. die Kontakt-E-Mail-Adresse und die Telefonnummer\
+        \ der Anlaufstelle, die den Domain-Namen verwaltet, falls diese sich von denen\
+        \ des Domain-Inhabers unterscheiden."
+      implementation_groups:
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49
+      ref_id: '49.3'
+      name: "\xA7 49 Abs. 3"
+      description: "Top Level Domain Name Registries und Domain-Name-Registry-Dienstleister\
+        \ haben Vorgaben und Verfahren, einschlie\xDFlich \xDCberpr\xFCfungsverfahren,\
+        \ vorzuhalten, mit denen sichergestellt wird, dass die Datenbank genaue und\
+        \ vollst\xE4ndige Angaben enth\xE4lt. Sie haben diese Vorgaben und Verfahren\
+        \ bis zum 6. M\xE4rz 2026 \xF6ffentlich zug\xE4nglich zu machen."
+      implementation_groups:
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49
+      ref_id: '49.4'
+      name: "\xA7 49 Abs. 4"
+      description: "Top Level Domain Name Registries und Domain-Name-Registry-Dienstleister\
+        \ haben unverz\xFCglich nach der Registrierung eines Domain-Namens die nicht\
+        \ personenbezogenen Domain-Namen-Registrierungsdaten \xF6ffentlich zug\xE4\
+        nglich zu machen."
+      implementation_groups:
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:49
+      ref_id: '49.5'
+      name: "\xA7 49 Abs. 5"
+      description: "Das Bundesamt kann die Erf\xFCllung der Vorgaben \xFCberpr\xFC\
+        fen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-4
+      ref_id: '50'
+      name: "\xA7 50 - Verpflichtung zur Zugangsgew\xE4hrung"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50
+      ref_id: '50.1'
+      name: "\xA7 50 Abs. 1"
+      description: "Top Level Domain Name Registries und Domain-Name-Registry-Dienstleister\
+        \ haben einem berechtigten Zugangsnachfrager auf begr\xFCndeten Antrag unter\
+        \ Darlegung eines berechtigten Interesses und soweit dies f\xFCr die Erf\xFC\
+        llung seiner Aufgaben erforderlich ist unverz\xFCglich und in jedem Fall innerhalb\
+        \ von 72 Stunden nach Eingang des Antrags Zugang zu den Domain-Namen-Registrierungsdaten\
+        \ zu gew\xE4hren. Liegen die angefragten Informationen nicht vor, so ist dies\
+        \ innerhalb von 24 Stunden nach Eingang des Antrags auf Zugang mitzuteilen."
+      implementation_groups:
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50
+      ref_id: '50.2'
+      name: "\xA7 50 Abs. 2"
+      description: "Die Top Level Domain Name Registries und Domain-Name-Registry-Dienstleister\
+        \ haben die Vorgaben und Verfahren im Hinblick auf die Offenlegung der Domain-Namen-Registrierungsdaten\
+        \ bis zum 6. M\xE4rz 2026 \xF6ffentlich zug\xE4nglich zu machen."
+      implementation_groups:
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50
+      ref_id: '50.3'
+      name: "\xA7 50 Abs. 3"
+      description: "Das Auskunftsverfahren bei Bestandsdaten gem\xE4\xDF \xA7 22 des\
+        \ Telekommunikation-Digitale-Dienste-Datenschutz-Gesetzes bleibt unber\xFC\
+        hrt."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:50
+      ref_id: '50.4'
+      name: "\xA7 50 Abs. 4"
+      description: "Das Bundesamt kann die Erf\xFCllung der Vorgaben \xFCberpr\xFC\
+        fen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:51
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-4
+      ref_id: '51'
+      name: "\xA7 51 - Kooperationspflicht"
+      description: "Top Level Domain Name Registries und Domain-Name-Registry-Dienstleister\
+        \ sind zur Kooperation verpflichtet, um die in den \xA7\xA7 49 und 50 festgelegten\
+        \ Verpflichtungen zu erf\xFCllen und insbesondere eine doppelte Erhebung von\
+        \ Domain-Namen-Registrierungsdaten vom Domaininhaber auszuschlie\xDFen."
+      implementation_groups:
+      - DNS
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-5
+      assessable: false
+      depth: 1
+      ref_id: Teil-5
+      name: "Teil 5 - Zertifizierung, Konformit\xE4tserkl\xE4rung und Kennzeichen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-5
+      ref_id: '52'
+      name: "\xA7 52 - Zertifizierung"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.1'
+      name: "\xA7 52 Abs. 1"
+      description: "Das Bundesamt ist nationale Zertifizierungsstelle der Bundesverwaltung\
+        \ f\xFCr IT-Sicherheit."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.2'
+      name: "\xA7 52 Abs. 2"
+      description: "F\xFCr bestimmte Produkte oder Leistungen kann beim Bundesamt\
+        \ eine Sicherheits- oder Personenzertifizierung oder eine Zertifizierung als\
+        \ IT-Sicherheitsdienstleister beantragt werden. Die Antr\xE4ge werden in der\
+        \ zeitlichen Reihenfolge ihres Eingangs bearbeitet; hiervon kann abgewichen\
+        \ werden, wenn das Bundesamt wegen der Anzahl und des Umfangs anh\xE4ngiger\
+        \ Pr\xFCfungsverfahren eine Pr\xFCfung in angemessener Zeit nicht durchf\xFC\
+        hren kann und an der Erteilung eines Zertifikats ein \xF6ffentliches Interesse\
+        \ besteht. Der Antragsteller hat dem Bundesamt diejenigen Unterlagen vorzulegen\
+        \ und die Ausk\xFCnfte zu erteilen, deren Kenntnis f\xFCr die Pr\xFCfung und\
+        \ Bewertung der Produkte und Leistungen oder der Eignung der Person sowie\
+        \ f\xFCr die Erteilung des Zertifikats erforderlich ist. Ein Zertifikat nach\
+        \ Satz 1 darf nur dann f\xFCr ein Produkt, eine Leistung, eine Person oder\
+        \ einen IT-Sicherheitsdienstleister verwendet werden, wenn das Bundesamt ein\
+        \ entsprechendes Zertifikat erteilt hat und dieses nicht aufgehoben wurde\
+        \ oder auf andere Weise ung\xFCltig geworden ist."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.3'
+      name: "\xA7 52 Abs. 3"
+      description: "Die Pr\xFCfung und die Bewertung k\xF6nnen durch vom Bundesamt\
+        \ nach Absatz 7 anerkannte sachverst\xE4ndige Stellen erfolgen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.4'
+      name: "\xA7 52 Abs. 4"
+      description: "Das Sicherheitszertifikat wird erteilt, wenn\n1. die informationstechnischen\
+        \ Systeme, Komponenten, Produkte oder Schutzprofile den vom Bundesamt festgelegten\
+        \ Kriterien entsprechen und\n2. das Bundesministerium des Innern die Erteilung\
+        \ des Zertifikats nicht nach Absatz 5 untersagt hat.\nVor Erteilung des Sicherheitszertifikats\
+        \ legt das Bundesamt den Vorgang dem Bundesministerium des Innern zur Pr\xFC\
+        fung nach Absatz 5 vor."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.5'
+      name: "\xA7 52 Abs. 5"
+      description: "Das Bundesministerium des Innern kann die Erteilung eines Zertifikats\
+        \ nach Absatz 4 im Einzelfall untersagen, wenn \xFCberwiegende \xF6ffentliche\
+        \ Interessen, insbesondere sicherheitspolitische Belange der Bundesrepublik\
+        \ Deutschland, der Erteilung entgegenstehen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.6'
+      name: "\xA7 52 Abs. 6"
+      description: "F\xFCr die Zertifizierung von Personen und IT-Sicherheitsdienstleistern\
+        \ gilt Absatz 4 entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.7'
+      name: "\xA7 52 Abs. 7"
+      description: "Eine Stelle wird als sachverst\xE4ndig im Sinne des Absatz 3 anerkannt,\
+        \ wenn\n1. die sachliche und personelle Ausstattung sowie die fachliche Qualifikation\
+        \ und Zuverl\xE4ssigkeit der Konformit\xE4tsbewertungsstelle den vom Bundesamt\
+        \ festgelegten Kriterien entsprechen und\n2. das Bundesministerium des Innern\
+        \ festgestellt hat, dass \xFCberwiegende \xF6ffentliche Interessen, insbesondere\
+        \ sicherheitspolitische Belange der Bundesrepublik Deutschland, der Erteilung\
+        \ nicht entgegenstehen.\nDas Bundesamt stellt durch die notwendigen Ma\xDF\
+        nahmen sicher, dass das Fortbestehen der Voraussetzungen nach Satz 1 regelm\xE4\
+        \xDFig \xFCberpr\xFCft wird."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:52
+      ref_id: '52.8'
+      name: "\xA7 52 Abs. 8"
+      description: "Sicherheitszertifikate anderer anerkannter Zertifizierungsstellen\
+        \ aus dem Bereich der Europ\xE4ischen Union werden vom Bundesamt anerkannt,\
+        \ sofern sie eine den Sicherheitszertifikaten des Bundesamtes gleichwertige\
+        \ Sicherheit ausweisen und die Gleichwertigkeit vom Bundesamt festgestellt\
+        \ worden ist."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-5
+      ref_id: '53'
+      name: "\xA7 53 - Konformit\xE4tsbewertung und Konformit\xE4tserkl\xE4rung"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53
+      ref_id: '53.1'
+      name: "\xA7 53 Abs. 1"
+      description: "Das Bundesamt kann f\xFCr die vom Bundesamt in einer Technischen\
+        \ Richtlinie festgelegten Anforderungen und Vorgaben zulassen, dass ein Hersteller\
+        \ oder Anbieter von IKT-Produkten, IKT-Diensten und IKT-Prozessen, die keine\
+        \ Verbraucherprodukte nach \xA7 55 sind, sowie eine Person oder ein IT-Sicherheitsdienstleister\
+        \ eine Selbstbewertung seiner oder ihrer Konformit\xE4t vornimmt. Der Hersteller\
+        \ oder Anbieter von IKT-Produkten, IKT-Diensten und IKT-Prozessen, die Person\
+        \ oder der IT-Sicherheitsdienstleister kann unter den Voraussetzungen von\
+        \ Satz 1 eine Konformit\xE4tserkl\xE4rung ausstellen, die best\xE4tigt, dass\
+        \ er oder sie die in der Technischen Richtlinie festgelegten Anforderungen\
+        \ erf\xFCllt. Durch die Ausstellung der Konformit\xE4tserkl\xE4rung \xFCbernimmt\
+        \ der Hersteller oder Anbieter der IKT-Produkte, IKT-Dienste und IKT-Prozesse,\
+        \ die Person oder der IT-Sicherheitsdienstleister (Aussteller) die Verantwortung\
+        \ daf\xFCr, dass das IKT-Produkt, der IKT-Dienst, der IKT-Prozess, die Person\
+        \ oder die IT-Sicherheitsdienstleistung den in der Technischen Richtlinie\
+        \ festgelegten Anforderungen entspricht. Eine Erkl\xE4rung nach Satz 3 darf\
+        \ nur dann f\xFCr ein IKT-Produkt, einen IKT-Dienst und IKT-Prozess, eine\
+        \ Person oder einen IT-Sicherheitsdienstleister verwendet werden, wenn der\
+        \ Hersteller, der Anbieter, die Person oder der IT-Sicherheitsdienstleisters\
+        \ diese ausgestellt hat und sie weder widerrufen noch nach Absatz 5 Nummer\
+        \ 3 f\xFCr ung\xFCltig erkl\xE4rt wurde."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53
+      ref_id: '53.2'
+      name: "\xA7 53 Abs. 2"
+      description: "Die Technische Richtlinie nach Absatz 1 kann insbesondere Vorgaben\
+        \ enthalten \xFCber\n1. den Inhalt und das Format der Konformit\xE4tserkl\xE4\
+        rung,\n2. Nachweise und Verfahren, die die Angaben der Konformit\xE4tserkl\xE4\
+        rung belegen,\n3. die Bedingungen f\xFCr die Aufrechterhaltung, Fortf\xFC\
+        hrung und Verl\xE4ngerung der Konformit\xE4tserkl\xE4rung,\n4. die Verwendung\
+        \ eines vom Bundesamt bereitgestellten Kennzeichens und Siegels sowie die\
+        \ Bedingungen f\xFCr deren Verwendung,\n5. die Meldung und Behandlung erkannter\
+        \ Schwachstellen des IKT-Produktes, IKT-Dienstes oder IKT-Prozesses oder der\
+        \ IT-Sicherheitsdienstleistung,\n6. die Bereitstellung von Informationen auf\
+        \ der Internetseite des Bundesamtes \xFCber die Konformit\xE4tserkl\xE4rung,\
+        \ dessen Aussteller und das IKT-Produkt, den -Dienst, den -Prozess, die Person\
+        \ oder die IT-Sicherheitsdienstleistung oder\n7. die Befristung der Geltungsdauer\
+        \ der Konformit\xE4tserkl\xE4rung."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53
+      ref_id: '53.3'
+      name: "\xA7 53 Abs. 3"
+      description: "Wird in den Vorgaben nach Absatz 2 festgelegt, dass die Angaben\
+        \ der Konformit\xE4tserkl\xE4rung nur durch eine akkreditierte Konformit\xE4\
+        tsbewertungsstelle nachgewiesen werden k\xF6nnen, so kann das Bundesamt auf\
+        \ Antrag Konformit\xE4tsbewertungsstellen, die beabsichtigen, im Anwendungsbereich\
+        \ dieses Paragraphen t\xE4tig zu werden, eine Befugnis erteilen, wenn die\
+        \ ma\xDFgeblichen Voraussetzungen der Technischen Richtlinie erf\xFCllt sind.\
+        \ Ohne eine Befugniserteilung durch das Bundesamt d\xFCrfen Konformit\xE4\
+        tsbewertungsstellen im Anwendungsbereich dieses Paragraphen nicht t\xE4tig\
+        \ werden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53
+      ref_id: '53.4'
+      name: "\xA7 53 Abs. 4"
+      description: "Der Aussteller h\xE4lt die Konformit\xE4tserkl\xE4rung, die technische\
+        \ Dokumentation und alle weiteren einschl\xE4gigen Informationen in Bezug\
+        \ auf die Konformit\xE4t der IKT-Produkte, IKT-Dienste und IKT-Prozesse, der\
+        \ Person oder der IT-Sicherheitsdienstleistung mit den festgelegten Kriterien\
+        \ w\xE4hrend eines Zeitraums, der vom Bundesamt in der Technischen Richtlinie\
+        \ nach Absatz 1 festgelegt wurde, f\xFCr das Bundesamt bereit. Eine Kopie\
+        \ der Konformit\xE4tserkl\xE4rung ist dem Bundesamt vorzulegen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53
+      ref_id: '53.5'
+      name: "\xA7 53 Abs. 5"
+      description: "Das Bundesamt kann geeignete Ma\xDFnahmen ergreifen, um sicherzustellen,\
+        \ dass die Aussteller von Konformit\xE4tserkl\xE4rungen den Anforderungen\
+        \ des Schemas und den Vorgaben dieses Paragraphen gen\xFCgen und insbesondere\n\
+        1. Aussteller von Konformit\xE4tserkl\xE4rungen auffordern, ihm s\xE4mtliche\
+        \ Ausk\xFCnfte zu erteilen, die es f\xFCr die Erf\xFCllung seiner Aufgaben\
+        \ ben\xF6tigt,\n2. Untersuchungen in Form von Testk\xE4ufen oder Audits bei\
+        \ den Ausstellern von Konformit\xE4tserkl\xE4rungen durchf\xFChren, um deren\
+        \ Einhaltung der in der Technischen Richtlinie festgelegten Anforderungen\
+        \ und Vorgaben nach Absatz 1 zu \xFCberpr\xFCfen und\n3. Konformit\xE4tserkl\xE4\
+        rungen nach Absatz 1 f\xFCr ung\xFCltig erkl\xE4ren."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:53
+      ref_id: '53.6'
+      name: "\xA7 53 Abs. 6"
+      description: "F\xFCr Ma\xDFnahmen nach Absatz 4 kann das Bundesamt Geb\xFChren\
+        \ erheben, sofern es aufgrund von Anhaltspunkten t\xE4tig geworden ist, die\
+        \ berechtigte Zweifel an der Einhaltung der Anforderungen der Technischen\
+        \ Richtlinie oder dieses Paragraphen begr\xFCndeten."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-5
+      ref_id: '54'
+      name: "\xA7 54 - Nationale Beh\xF6rde f\xFCr die Cybersicherheitszertifizierung"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      ref_id: '54.1'
+      name: "\xA7 54 Abs. 1"
+      description: "Das Bundesamt ist die nationale Beh\xF6rde f\xFCr die Cybersicherheitszertifizierung\
+        \ nach Artikel 58 Absatz 1 der Verordnung (EU) 2019/881."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      ref_id: '54.2'
+      name: "\xA7 54 Abs. 2"
+      description: "Das Bundesamt kann auf Antrag Konformit\xE4tsbewertungsstellen,\
+        \ die im Anwendungsbereich der Verordnung (EU) 2019/881 sowie des \xA7 52\
+        \ dieses Gesetzes t\xE4tig werden, eine Befugnis erteilen, als solche t\xE4\
+        tig zu werden, wenn die Voraussetzungen des ma\xDFgeblichen europ\xE4ischen\
+        \ Schemas f\xFCr die Cybersicherheitszertifizierung nach Artikel 54 der Verordnung\
+        \ (EU) 2019/881 oder des \xA7 52 dieses Gesetzes erf\xFCllt sind. Ohne eine\
+        \ Befugniserteilung durch das Bundesamt d\xFCrfen Konformit\xE4tsbewertungsstellen\
+        \ im Anwendungsbereich der Verordnung (EU) 2019/881 nicht t\xE4tig werden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      ref_id: '54.3'
+      name: "\xA7 54 Abs. 3"
+      description: "Soweit dies zur Erf\xFCllung seiner Aufgaben nach Artikel 58 Absatz\
+        \ 7 der Verordnung (EU) 2019/881 und nach \xA7 52 dieses Gesetzes erforderlich\
+        \ ist, kann das Bundesamt von Konformit\xE4tsbewertungsstellen, denen eine\
+        \ Befugnis nach Absatz 2 erteilt wurde, von Inhabern europ\xE4ischer Cybersicherheitszertifikate\
+        \ und von Ausstellern von EU-Konformit\xE4tserkl\xE4rungen im Sinne von Artikel\
+        \ 56 Absatz 8 der Verordnung (EU) 2019/881 die erforderlichen Ausk\xFCnfte\
+        \ und sonstige Unterst\xFCtzung, insbesondere die Vorlage von Unterlagen oder\
+        \ Mustern, verlangen. \xA7 3 Absatz 1 Satz 1 und 3 des Akkreditierungsstellengesetzes\
+        \ gilt entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      ref_id: '54.4'
+      name: "\xA7 54 Abs. 4"
+      description: "Das Bundesamt kann Untersuchungen in Form von Auditierungen nach\
+        \ Artikel 58 Absatz 8 Buchstabe b der Verordnung (EU) 2019/881 bei Konformit\xE4\
+        tsbewertungsstellen, denen eine Befugnis nach Absatz 2 erteilt wurde, bei\
+        \ Inhabern europ\xE4ischer Cybersicherheitszertifikate und bei Ausstellern\
+        \ von EU-Konformit\xE4tserkl\xE4rungen im Sinne von Artikel 56 Absatz 8 der\
+        \ Verordnung (EU) 2019/881 durchf\xFChren, um die Einhaltung der Bestimmungen\
+        \ des Titels III der Verordnung (EU) 2019/881 zu \xFCberpr\xFCfen. \xA7 3\
+        \ Absatz 1 Satz 1 bis 3 des Akkreditierungsstellengesetzes gilt entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      ref_id: '54.5'
+      name: "\xA7 54 Abs. 5"
+      description: "Das Bundesamt ist befugt, Betriebsst\xE4tten, Gesch\xE4fts- und\
+        \ Betriebsr\xE4ume von Konformit\xE4tsbewertungsstellen, denen eine Befugnis\
+        \ nach Absatz 2 erteilt wurde, und von Inhabern europ\xE4ischer Cybersicherheitszertifikate\
+        \ im Sinne von Artikel 56 Absatz 8 der Verordnung (EU) 2019/881 in den Zeiten,\
+        \ zu denen die R\xE4ume normalerweise f\xFCr die jeweilige gesch\xE4ftliche\
+        \ oder betriebliche Nutzung zur Verf\xFCgung stehen, zu betreten, zu besichtigen\
+        \ und dort befindliche Unterlagen und Muster zu pr\xFCfen, soweit dies zur\
+        \ Erf\xFCllung seiner Aufgaben nach Artikel 58 Absatz 7 der Verordnung (EU)\
+        \ 2019/881 sowie nach diesem Paragraphen erforderlich ist. \xA7 3 Absatz 1\
+        \ Satz 1 bis 3 des Akkreditierungsstellengesetzes gilt entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      ref_id: '54.6'
+      name: "\xA7 54 Abs. 6"
+      description: "Das Bundesamt kann von ihm ausgestellte Cybersicherheitszertifikate\
+        \ oder durch eine Konformit\xE4tsbewertungsstelle, der eine Befugnis nach\
+        \ Absatz 2 erteilt wurde, nach Artikel 56 Absatz 6 der Verordnung (EU) 2019/881\
+        \ ausgestellte Cybersicherheitszertifikate widerrufen oder EU-Konformit\xE4\
+        tserkl\xE4rungen im Sinne der Verordnung (EU) 2019/881 f\xFCr ung\xFCltig\
+        \ erkl\xE4ren,\n1. sofern diese Zertifikate oder EU-Konformit\xE4tserkl\xE4\
+        rungen die Anforderungen nach der Verordnung (EU) 2019/881 oder eines europ\xE4\
+        ischen Schemas f\xFCr die Cybersicherheitszertifizierung nach Artikel 54 der\
+        \ Verordnung (EU) 2019/881 nicht erf\xFCllen oder\n2. wenn das Bundesamt die\
+        \ Erf\xFCllung nach Nummer 1 nicht feststellen kann, weil der Inhaber des\
+        \ europ\xE4ischen Cybersicherheitszertifikats oder der Aussteller der EU-Konformit\xE4\
+        tserkl\xE4rung seinen Mitwirkungspflichten nach Absatz 3 nicht nachgekommen\
+        \ ist oder weil er das Bundesamt bei der Wahrnehmung seiner Befugnisse nach\
+        \ Absatz 4 oder im Falle eines Inhabers eines europ\xE4ischen Cybersicherheitszertifikats\
+        \ auch nach Absatz 5 behindert hat.\nWiderrufene Cybersicherheitszertifikate\
+        \ oder f\xFCr ung\xFCltig erkl\xE4rte EU-Konformit\xE4tserkl\xE4rungen nach\
+        \ Satz 1 d\xFCrfen nicht verwendet werden."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:54
+      ref_id: '54.7'
+      name: "\xA7 54 Abs. 7"
+      description: "Das Bundesamt kann von ihm erteilte Befugnisse nach Absatz 2 widerrufen,\n\
+        1. sofern die Voraussetzungen des ma\xDFgeblichen europ\xE4ischen Schemas\
+        \ f\xFCr die Cybersicherheitszertifizierung nach Artikel 54 Verordnung (EU)\
+        \ 2019/881 oder des \xA7 52 dieses Gesetzes nicht erf\xFCllt sind oder\n2.\
+        \ wenn das Bundesamt die Erf\xFCllung dieser Voraussetzungen nicht feststellen\
+        \ kann, weil die Konformit\xE4tsbewertungsstelle ihren Mitwirkungspflichten\
+        \ nach Absatz 3 nicht nachgekommen ist oder weil sie das Bundesamt bei der\
+        \ Wahrnehmung seiner Befugnisse nach den Abs\xE4tzen 4 und 5 behindert hat."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:teil-5
+      ref_id: '55'
+      name: "\xA7 55 - Freiwilliges IT-Sicherheitskennzeichen"
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.1'
+      name: "\xA7 55 Abs. 1"
+      description: "Das Bundesamt f\xFChrt zur Information von Verbrauchern \xFCber\
+        \ die IT-Sicherheit von Produkten bestimmter vom Bundesamt festgelegter Produktkategorien\
+        \ ein einheitliches IT-Sicherheitskennzeichen ein. Das IT-Sicherheitskennzeichen\
+        \ trifft keine Aussage \xFCber die den Datenschutz betreffenden Eigenschaften\
+        \ eines Produktes."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.2'
+      name: "\xA7 55 Abs. 2"
+      description: "Das IT-Sicherheitskennzeichen besteht aus\n1. einer Zusicherung\
+        \ des Herstellers oder Diensteanbieters, dass das Produkt f\xFCr eine festgelegte\
+        \ Dauer bestimmte IT-Sicherheitsanforderungen erf\xFCllt (Herstellererkl\xE4\
+        rung), und\n2. einer Information des Bundesamtes \xFCber sicherheitsrelevante\
+        \ IT-Eigenschaften des Produktes (Sicherheitsinformation)."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.3'
+      name: "\xA7 55 Abs. 3"
+      description: "Die IT-Sicherheitsanforderungen, auf die sich die Herstellererkl\xE4\
+        rung bezieht, ergeben sich aus einer Norm oder einem Standard oder aus einer\
+        \ branchenabgestimmten IT-Sicherheitsvorgabe, die die jeweilige Produktkategorie\
+        \ umfasst, sofern das Bundesamt in einem Verfahren, das durch Rechtsverordnung\
+        \ nach \xA7 56 Absatz 2 geregelt wird, festgestellt hat, dass die Norm oder\
+        \ der Standard oder die branchenabgestimmte IT-Sicherheitsvorgabe geeignet\
+        \ ist, ausreichende IT-Sicherheitsanforderungen f\xFCr die Produktkategorie\
+        \ abzubilden. Ein Anspruch auf diese Feststellung besteht nicht. Liegt keine\
+        \ Feststellung nach Satz 1 vor, ergeben sich die IT-Sicherheitsvorgaben aus\
+        \ einer vom Bundesamt ver\xF6ffentlichten Technischen Richtlinie, die die\
+        \ jeweilige Produktkategorie umfasst, sofern das Bundesamt eine solche Richtlinie\
+        \ bereits ver\xF6ffentlicht hat. Wird ein Produkt von mehr als einer oder\
+        \ einem bestehenden, als geeignet festgestellten Norm, Standard, branchenabgestimmten\
+        \ IT-Sicherheitsvorgabe oder Technischen Richtlinie umfasst, richten sich\
+        \ die Anforderungen nach der oder dem jeweils spezielleren bestehenden, als\
+        \ geeignet festgestellten Norm, Standard, branchenabgestimmten IT-Sicherheitsvorgabe\
+        \ oder Technischen Richtlinie."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.4'
+      name: "\xA7 55 Abs. 4"
+      description: "Das IT-Sicherheitskennzeichen darf nur dann f\xFCr ein Produkt\
+        \ verwendet werden, wenn das Bundesamt das IT-Sicherheitskennzeichen f\xFC\
+        r dieses Produkt freigegeben hat. Das Bundesamt pr\xFCft die Freigabe des\
+        \ IT-Sicherheitskennzeichens f\xFCr ein Produkt auf Antrag des Herstellers\
+        \ oder Diensteanbieters. Dem Antrag sind die Herstellererkl\xE4rung zu dem\
+        \ Produkt sowie alle Unterlagen beizuf\xFCgen, die die Angaben in der Herstellererkl\xE4\
+        rung belegen. Das Bundesamt best\xE4tigt den Eingang des Antrags und pr\xFC\
+        ft die Plausibilit\xE4t der Herstellererkl\xE4rung anhand der beigef\xFCgten\
+        \ Unterlagen. Die Plausibilit\xE4tspr\xFCfung kann auch durch einen vom Bundesamt\
+        \ beauftragten qualifizierten Dritten erfolgen. F\xFCr die Antragsbearbeitung\
+        \ kann das Bundesamt eine Verwaltungsgeb\xFChr erheben."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.5'
+      name: "\xA7 55 Abs. 5"
+      description: "Das Bundesamt erteilt die Freigabe des IT-Sicherheitskennzeichens\
+        \ f\xFCr das jeweilige Produkt, wenn\n1. das Produkt zu einer der Produktkategorien\
+        \ geh\xF6rt, die das Bundesamt durch im Bundesanzeiger ver\xF6ffentlichte\
+        \ Allgemeinverf\xFCgung bekannt gegeben hat,\n2. die Herstellererkl\xE4rung\
+        \ plausibel und durch die beigef\xFCgten Unterlagen ausreichend belegt ist\
+        \ und\n3. die gegebenenfalls erhobene Verwaltungsgeb\xFChr beglichen wurde.\n\
+        Die Erteilung der Freigabe erfolgt schriftlich und innerhalb einer angemessenen\
+        \ Frist, die in der Rechtsverordnung nach \xA7 56 Absatz 2 bestimmt wird.\
+        \ Den genauen Ablauf des Antragsverfahrens und die beizuf\xFCgenden Unterlagen\
+        \ regelt die Rechtsverordnung nach \xA7 56 Absatz 2."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.6'
+      name: "\xA7 55 Abs. 6"
+      description: "Hat das Bundesamt die Freigabe erteilt, ist das Etikett des IT-Sicherheitskennzeichens\
+        \ auf dem jeweiligen Produkt oder auf dessen Umverpackung anzubringen, sofern\
+        \ dies nach der Beschaffenheit des Produktes m\xF6glich ist. Das IT-Sicherheitskennzeichen\
+        \ kann auch elektronisch ver\xF6ffentlicht werden. Wenn nach der Beschaffenheit\
+        \ des Produktes das Anbringen nicht m\xF6glich ist, muss die Ver\xF6ffentlichung\
+        \ des IT-Sicherheitskennzeichens elektronisch erfolgen. Das Etikett des IT-Sicherheitskennzeichens\
+        \ verweist auf eine Internetseite des Bundesamtes, auf der die Herstellererkl\xE4\
+        rung und die Sicherheitsinformationen abrufbar sind. Das genaue Verfahren\
+        \ und die Gestaltung des Verweises sind in der Rechtsverordnung nach \xA7\
+        \ 56 Absatz 2 festzulegen."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.7'
+      name: "\xA7 55 Abs. 7"
+      description: "Nach Ablauf der festgelegten Dauer, f\xFCr die der Hersteller\
+        \ oder Diensteanbieter die Erf\xFCllung der IT-Sicherheitsanforderungen zusichert,\
+        \ oder nach R\xFCcknahmeerkl\xE4rung des Herstellers oder Diensteanbieters\
+        \ gegen\xFCber dem Bundesamt erlischt die Freigabe. Das Bundesamt nimmt einen\
+        \ Hinweis auf das Erl\xF6schen der Freigabe in die Sicherheitsinformation\
+        \ auf."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.8'
+      name: "\xA7 55 Abs. 8"
+      description: "Das Bundesamt kann pr\xFCfen, ob die Anforderungen an die Freigabe\
+        \ des IT-Sicherheitskennzeichens f\xFCr ein Produkt eingehalten werden. Werden\
+        \ bei der Pr\xFCfung Abweichungen von der abgegebenen Herstellererkl\xE4rung\
+        \ oder Schwachstellen festgestellt, kann das Bundesamt die geeigneten Ma\xDF\
+        nahmen zum Schutz des Vertrauens der Verbraucher in das IT-Sicherheitskennzeichen\
+        \ treffen, insbesondere\n1. Informationen \xFCber die Abweichungen oder Schwachstellen\
+        \ in geeigneter Weise in der Sicherheitsinformation ver\xF6ffentlichen oder\n\
+        2. die Freigabe des IT-Sicherheitskennzeichens widerrufen.\nAbsatz 7 Satz\
+        \ 2 gilt entsprechend."
+    - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55.9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:55
+      ref_id: '55.9'
+      name: "\xA7 55 Abs. 9"
+      description: "Bevor das Bundesamt eine Ma\xDFnahme nach Absatz 8 trifft, r\xE4\
+        umt es dem Hersteller oder Diensteanbieter die Gelegenheit ein, die festgestellten\
+        \ Abweichungen oder Schwachstellen innerhalb eines angemessenen Zeitraumes\
+        \ zu beseitigen, es sei denn, gewichtige Gr\xFCnde der Sicherheit der Produkte\
+        \ erfordern eine sofortige Ma\xDFnahme. Die Befugnis des Bundesamtes zur Warnung\
+        \ nach \xA7 13 bleibt davon unber\xFChrt."
