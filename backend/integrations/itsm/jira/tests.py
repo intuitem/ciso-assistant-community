@@ -922,7 +922,11 @@ def test_columns_fetched_by_issue_type_id(mock_jira, configuration):
 @patch("integrations.itsm.jira.client.JIRA")
 def test_columns_fetched_by_issue_type_id_on_data_center_9(mock_jira, configuration):
     mock_jira.return_value._is_cloud = False
-    mock_jira.return_value._version = (9, 12, 0)
+    # The client sets ``_version`` from ``server_info()`` at init.
+    mock_jira.return_value.server_info.return_value = {
+        "versionNumbers": [9, 12, 0],
+        "deploymentType": "Server",
+    }
     mock_jira.return_value.project_issue_fields.return_value = [
         SimpleNamespace(raw={"fieldId": "summary", "name": "Résumé"})
     ]
