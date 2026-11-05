@@ -1,0 +1,759 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:lyss:risk:library:lyss
+locale: en
+ref_id: LYSS
+name: "LYSS \u2014 Lyaazale Switch Security (draft 0.4.0)"
+description: 'LYSS (Lyaazale Switch Security) specification 0.4.0-draft (draft): vendor-neutral
+  security controls for managed network switches, in three cumulative conformance
+  levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is one control (LYSS-<DOMAIN>-<NNN>);
+  its annotation gives the rationale, vendor-neutral test procedure and informative
+  references. A device is LYSS Level N conformant when every control of levels 1 to
+  N is met or not applicable. DRAFT: controls, identifiers and mappings may still
+  change before LYSS 1.0. Author: Mouad Lyaazale. Generated from spec/lyss-spec.yaml
+  by tools/build_ciso_library.py.'
+copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
+version: 40000
+publication_date: 2026-11-05
+provider: Mouad Lyaazale
+packager: LYSS project
+objects:
+  frameworks:
+  - urn: urn:lyss:risk:framework:lyss
+    ref_id: LYSS
+    name: "LYSS \u2014 Lyaazale Switch Security (draft 0.4.0)"
+    description: 'LYSS (Lyaazale Switch Security) specification 0.4.0-draft (draft):
+      vendor-neutral security controls for managed network switches, in three cumulative
+      conformance levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is
+      one control (LYSS-<DOMAIN>-<NNN>); its annotation gives the rationale, vendor-neutral
+      test procedure and informative references. A device is LYSS Level N conformant
+      when every control of levels 1 to N is met or not applicable. DRAFT: controls,
+      identifiers and mappings may still change before LYSS 1.0. Author: Mouad Lyaazale.
+      Generated from spec/lyss-spec.yaml by tools/build_ciso_library.py.'
+    implementation_groups_definition:
+    - ref_id: L1
+      name: Level 1 - Baseline
+      description: Controls required for LYSS Level 1 conformance (Level 1 controls).
+    - ref_id: L2
+      name: Level 2 - Hardened
+      description: Controls required for LYSS Level 2 conformance (levels 1 to 2).
+    - ref_id: L3
+      name: Level 3 - Advanced
+      description: Controls required for LYSS Level 3 conformance (levels 1 to 3).
+    requirement_nodes:
+    - urn: urn:lyss:risk:req_node:lyss:l1
+      assessable: false
+      depth: 1
+      ref_id: L1
+      name: Level 1 - Baseline
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l1.mgmt
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l1
+      ref_id: L1.MGMT
+      name: Management plane access
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-001
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.mgmt
+      ref_id: LYSS-MGMT-001
+      name: Telnet management access is disabled
+      description: The switch does not accept management sessions over Telnet.
+      annotation: 'Rationale: Telnet sends credentials and session data in cleartext;
+        anyone on the path can capture administrator passwords.
+
+
+        Test procedure: Check that no management service listens on TCP 23 (device
+        state) and that no remote CLI line or service is configured to accept Telnet
+        (configuration). Fail if either shows Telnet accepted. Unknown if the platform
+        hides the Telnet default and no device state is available.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.8.21, A.8.24; NIST SP
+        800-53 r5 CM-7, SC-8, AC-17(2); CIS Controls v8 4.8, 12.6.'
+      typical_evidence: '- Running configuration of the switch
+
+        - Read-only device state (listening services, SSH identification and algorithms,
+        port status)
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-001'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-002
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.mgmt
+      ref_id: LYSS-MGMT-002
+      name: SSH management uses protocol version 2 only
+      description: SSH is the remote CLI protocol and SSH protocol version 1 is not
+        accepted.
+      annotation: 'Rationale: SSHv1 has known cryptographic weaknesses and must not
+        be negotiable.
+
+
+        Test procedure: Read the SSH identification string of the switch: "SSH-2.0-"
+        passes, "SSH-1.99-" or "SSH-1.5-" fails. Without device state, an explicit
+        "version 2 only" setting passes.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.21, A.8.24; NIST SP 800-53
+        r5 SC-8, SC-13, AC-17(2); CIS Controls v8 12.6.'
+      typical_evidence: '- Running configuration of the switch
+
+        - Read-only device state (listening services, SSH identification and algorithms,
+        port status)
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-002'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-003
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.mgmt
+      ref_id: LYSS-MGMT-003
+      name: Cleartext HTTP management is disabled
+      description: The web management interface, if enabled, is only reachable over
+        HTTPS.
+      annotation: 'Rationale: Plain HTTP exposes administrator credentials and session
+        cookies.
+
+
+        Test procedure: Fail if a management web service listens on TCP 80 (device
+        state) or the plain HTTP server is enabled in the configuration, including
+        when it is enabled by default and not disabled.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.21, A.8.24; NIST SP 800-53
+        r5 CM-7, SC-8, AC-17(2); CIS Controls v8 4.8, 12.6.'
+      typical_evidence: '- Running configuration of the switch
+
+        - Read-only device state (listening services, SSH identification and algorithms,
+        port status)
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-003'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-004
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.mgmt
+      ref_id: LYSS-MGMT-004
+      name: Idle management sessions time out within 10 minutes
+      description: Interactive CLI sessions (console and remote) are closed after
+        at most 10 minutes of inactivity.
+      annotation: 'Rationale: Abandoned privileged sessions can be reused by anyone
+        with access to the terminal or session.
+
+
+        Test procedure: Fail if any console or remote CLI line has no timeout (0)
+        or a timeout above the parameter. The platform default applies when no timeout
+        is configured.
+
+
+        Parameters: max_idle_minutes = 10
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.5; NIST SP 800-53 r5 AC-12,
+        SC-10; CIS Controls v8 4.3.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-004'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l1.auth
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l1
+      ref_id: L1.AUTH
+      name: Authentication and credentials
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-auth-001
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.auth
+      ref_id: LYSS-AUTH-001
+      name: No default or well-known SNMP community strings
+      description: SNMP communities "public", "private" and vendor defaults are not
+        configured.
+      annotation: 'Rationale: Default communities give anyone on the network read
+        (or write) access to the device.
+
+
+        Test procedure: Fail if an SNMP community named "public", "private" or a documented
+        vendor default is configured.
+
+
+        Informative references: ISO/IEC 27001:2022 A.5.17, A.8.21; NIST SP 800-53
+        r5 IA-5, CM-6; CIS Controls v8 4.7.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-AUTH-001'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-auth-002
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.auth
+      ref_id: LYSS-AUTH-002
+      name: Privileged-mode password is stored as a strong hash
+      description: The privileged (enable) credential is stored with a one-way hash,
+        not in cleartext or a reversible encoding.
+      annotation: 'Rationale: Reversible encodings (e.g. Cisco type 7) are decoded
+        instantly by public tools from any configuration backup.
+
+
+        Test procedure: Fail if the privileged credential is stored in cleartext or
+        a reversible form. Pass if it is hashed, or if there is no privileged credential
+        and privileged access is only granted to local accounts whose credentials
+        are hashed or through central AAA.
+
+
+        Informative references: ISO/IEC 27001:2022 A.5.17, A.8.5; NIST SP 800-53 r5
+        IA-5(1); CIS Controls v8 3.11.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-AUTH-002'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-auth-003
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.auth
+      ref_id: LYSS-AUTH-003
+      name: Local account passwords are not stored in cleartext or reversible form
+      description: Every local user account credential is stored as a one-way hash.
+      annotation: 'Rationale: Configuration backups circulate (backup servers, tickets,
+        e-mail); stored passwords must not be recoverable.
+
+
+        Test procedure: Fail if any local account credential is stored in cleartext
+        or a reversible encoding.
+
+
+        Informative references: ISO/IEC 27001:2022 A.5.17; NIST SP 800-53 r5 IA-5(1);
+        CIS Controls v8 3.11.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-AUTH-003'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-auth-004
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.auth
+      ref_id: LYSS-AUTH-004
+      name: AAA shared secrets (RADIUS/TACACS+) are not stored in cleartext
+      description: Keys shared with RADIUS or TACACS+ servers are never stored in
+        cleartext in the configuration.
+      annotation: 'Rationale: A cleartext RADIUS key in a backup lets an attacker
+        impersonate the AAA server or decrypt authentication traffic.
+
+
+        Test procedure: Fail if a RADIUS or TACACS+ shared key appears in cleartext.
+        Reversible encodings pass Level 1 only.
+
+
+        Informative references: ISO/IEC 27001:2022 A.5.17, A.8.24; NIST SP 800-53
+        r5 IA-5, SC-28; CIS Controls v8 3.11.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-AUTH-004'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l1.vuln
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l1
+      ref_id: L1.VULN
+      name: Firmware and vulnerabilities
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-vuln-001
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.vuln
+      ref_id: LYSS-VULN-001
+      name: Firmware is vendor-supported and free of known critical vulnerabilities
+      description: The vendor still publishes security fixes for the device, and the
+        running firmware has no known critical (CVSS >= 9.0) or known-exploited (CISA
+        KEV) vulnerability whose fix is not installed.
+      annotation: 'Rationale: Unsupported or vulnerable firmware is the most common
+        path to switch compromise.
+
+
+        Test procedure: Identify the model and firmware version from device state
+        and compare them with a sourced knowledge base (vendor advisories, end-of-life
+        bulletins, CISA KEV). Fail if security support has ended or an applicable
+        advisory is unfixed in the running version. Unknown if the platform is not
+        in the knowledge base: a pass is never assumed.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.8; NIST SP 800-53 r5 SI-2,
+        SA-22, RA-5; CIS Controls v8 2.2, 12.1.'
+      typical_evidence: '- Read-only device state (listening services, SSH identification
+        and algorithms, port status)
+
+        - Vendor security advisories, end-of-life bulletins and CISA KEV entries for
+        the model and firmware
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-VULN-001'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l1.bkp
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l1
+      ref_id: L1.BKP
+      name: Configuration resilience
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-bkp-001
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l1.bkp
+      ref_id: LYSS-BKP-001
+      name: Configuration is backed up automatically
+      description: A copy of the running configuration is collected automatically
+        at least every 7 days.
+      annotation: 'Rationale: Without a recent backup, recovery after failure or compromise
+        is slow and error-prone.
+
+
+        Test procedure: Pass if an automatic (scheduled) collection of the running
+        configuration is at most the parameter old, or if an administrator attested
+        an external backup system for the device within the last 90 days. Fail if
+        the last automatic backup is older, or only manual collections exist.
+
+
+        Parameters: max_age_days = 7
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.9, A.8.13; NIST SP 800-53 r5
+        CP-9, CM-2(3); CIS Controls v8 11.2.'
+      typical_evidence: '- Records of the configuration backup system, or an administrator
+        attestation of it
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-BKP-001'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l2
+      assessable: false
+      depth: 1
+      ref_id: L2
+      name: Level 2 - Hardened
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l2.mgmt
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l2
+      ref_id: L2.MGMT
+      name: Management plane access
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-010
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.mgmt
+      ref_id: LYSS-MGMT-010
+      name: Management access is restricted to authorized source networks
+      description: Management protocols only accept connections from authorized administration
+        networks.
+      annotation: 'Rationale: Limiting who can even reach the login prompt removes
+        most password-guessing and exploit attempts.
+
+
+        Test procedure: Pass if every remote management access path is bound to an
+        access list of authorized sources.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.8.22; NIST SP 800-53
+        r5 AC-17, SC-7; CIS Controls v8 12.3.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-010'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-011
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.mgmt
+      ref_id: LYSS-MGMT-011
+      name: Management interface is on a dedicated management VLAN
+      description: The switch management address is not on the default VLAN (1) shared
+        with user traffic.
+      annotation: 'Rationale: Separating management from user networks prevents users
+        from reaching the management plane.
+
+
+        Test procedure: Fail if VLAN 1 carries a management address. Pass if the management
+        address is on another VLAN.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.22; NIST SP 800-53 r5 SC-7,
+        AC-4; CIS Controls v8 12.2.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-011'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-012
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.mgmt
+      ref_id: LYSS-MGMT-012
+      name: A legal warning banner is shown before login
+      description: A banner stating authorized use only is displayed before authentication.
+      annotation: 'Rationale: The warning supports legal action against intruders
+        and informs users that activity is monitored.
+
+
+        Test procedure: Pass if a login or message-of-the-day banner is configured.
+
+
+        Informative references: ISO/IEC 27001:2022 A.5.10; NIST SP 800-53 r5 AC-8.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-012'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-013
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.mgmt
+      ref_id: LYSS-MGMT-013
+      name: SSH uses modern key exchange, ciphers and host keys
+      description: The SSH server supports a SHA-2 (or better) key exchange, a CTR/GCM/ChaCha20
+        cipher and a SHA-2 host key signature.
+      annotation: 'Rationale: SHA-1 key exchange, CBC ciphers and ssh-rsa (SHA-1)
+        signatures are deprecated; modern clients refuse them and they weaken the
+        management channel.
+
+
+        Test procedure: Connect offering the strongest algorithms first and record
+        the negotiated ones (the best the switch supports). Fail on a SHA-1 or group1
+        key exchange, a CBC/3DES/RC4 cipher, or an ssh-rsa/ssh-dss host key signature.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.24, A.8.21; NIST SP 800-53
+        r5 SC-8, SC-13; CIS Controls v8 3.10, 12.6.'
+      typical_evidence: '- Read-only device state (listening services, SSH identification
+        and algorithms, port status)
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-MGMT-013'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l2.auth
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l2
+      ref_id: L2.AUTH
+      name: Authentication and credentials
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-auth-010
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.auth
+      ref_id: LYSS-AUTH-010
+      name: Administrative logins use central AAA (RADIUS/TACACS+) with local fallback
+        only
+      description: Administrator logins are authenticated by a RADIUS or TACACS+ server
+        first; local accounts are only a fallback.
+      annotation: 'Rationale: Central AAA gives individual accounts, immediate revocation
+        and an audit trail; shared local passwords do not.
+
+
+        Test procedure: Pass if an AAA server is defined and the login method list
+        tries it before local accounts.
+
+
+        Informative references: ISO/IEC 27001:2022 A.5.16, A.8.5; NIST SP 800-53 r5
+        IA-2, AC-2; CIS Controls v8 12.5.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-AUTH-010'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-auth-011
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.auth
+      ref_id: LYSS-AUTH-011
+      name: SNMP uses v3 with authentication and privacy or is disabled
+      description: No SNMPv1/v2c community is configured; SNMP, if used, is SNMPv3
+        with authentication and encryption.
+      annotation: 'Rationale: SNMPv1/v2c communities travel in cleartext and are equivalent
+        to shared passwords.
+
+
+        Test procedure: Fail if any SNMPv1/v2c community or v1/v2 group is configured.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.21, A.8.24; NIST SP 800-53
+        r5 SC-8, SC-13, IA-5; CIS Controls v8 12.6.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-AUTH-011'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l2.log
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l2
+      ref_id: L2.LOG
+      name: Logging and time
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-log-010
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.log
+      ref_id: LYSS-LOG-010
+      name: Events are sent to a remote syslog/SIEM server
+      description: The switch forwards its logs to at least one remote syslog or SIEM
+        collector.
+      annotation: 'Rationale: Local logs are lost on reboot and can be erased by an
+        intruder; remote logs support detection and investigation.
+
+
+        Test procedure: Pass if at least one remote syslog destination is configured.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.15, A.8.16; NIST SP 800-53
+        r5 AU-4(1), AU-6; CIS Controls v8 8.2, 8.9.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-LOG-010'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-log-011
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.log
+      ref_id: LYSS-LOG-011
+      name: Clock is synchronized with NTP/SNTP
+      description: The switch clock is synchronized with at least one configured time
+        server.
+      annotation: 'Rationale: Without a reliable clock, logs cannot be correlated
+        and certificates and schedules misbehave.
+
+
+        Test procedure: Pass if at least one NTP or SNTP server is configured.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.17; NIST SP 800-53 r5 AU-8,
+        SC-45; CIS Controls v8 8.4.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-LOG-011'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l2.acc
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l2
+      ref_id: L2.ACC
+      name: Access-layer protection
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-acc-010
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.acc
+      ref_id: LYSS-ACC-010
+      name: Unused ports are administratively disabled
+      description: Ports with no link are administratively shut down.
+      annotation: 'Rationale: An enabled, unused port lets anyone plug in an unauthorized
+        device.
+
+
+        Test procedure: Fail if any port is operationally down while administratively
+        enabled (device state).
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20; NIST SP 800-53 r5 CM-7;
+        CIS Controls v8 12.3.'
+      typical_evidence: '- Running configuration of the switch
+
+        - Read-only device state (listening services, SSH identification and algorithms,
+        port status)
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-ACC-010'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-acc-011
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l2.acc
+      ref_id: LYSS-ACC-011
+      name: Edge ports are protected against rogue spanning-tree participants (BPDU
+        guard)
+      description: Every edge port (not connected to another switch) disables itself
+        when it receives a spanning-tree BPDU.
+      annotation: 'Rationale: A rogue or misconnected switch on an access port can
+        take over the spanning tree or create a loop.
+
+
+        Test procedure: Edge ports are all ports minus uplinks (trunk / aggregation
+        members in the configuration, and ports where neighbour discovery sees a bridge).
+        Fail if an edge port lacks BPDU protection, unless a global default protects
+        all edge ports.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20; NIST SP 800-53 r5 SC-5,
+        CM-6; CIS Controls v8 12.2.'
+      typical_evidence: '- Running configuration of the switch
+
+        - Read-only device state (listening services, SSH identification and algorithms,
+        port status)
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-ACC-011'
+      implementation_groups:
+      - L2
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l3
+      assessable: false
+      depth: 1
+      ref_id: L3
+      name: Level 3 - Advanced
+      implementation_groups:
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:l3.acc
+      assessable: false
+      depth: 2
+      parent_urn: urn:lyss:risk:req_node:lyss:l3
+      ref_id: L3.ACC
+      name: Access-layer protection
+      implementation_groups:
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-acc-020
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
+      ref_id: LYSS-ACC-020
+      name: DHCP snooping is enabled on user VLANs
+      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+        rationale and test procedure are not written yet.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-ACC-020'
+      implementation_groups:
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-acc-021
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
+      ref_id: LYSS-ACC-021
+      name: Dynamic ARP inspection is enabled on user VLANs
+      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+        rationale and test procedure are not written yet.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-ACC-021'
+      implementation_groups:
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-acc-022
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
+      ref_id: LYSS-ACC-022
+      name: Access ports require 802.1X or MAC authentication
+      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+        rationale and test procedure are not written yet.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.5.15; CIS Controls v8
+        13.9.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-ACC-022'
+      implementation_groups:
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-acc-023
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
+      ref_id: LYSS-ACC-023
+      name: Storm control limits broadcast/multicast on access ports
+      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+        rationale and test procedure are not written yet.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-ACC-023'
+      implementation_groups:
+      - L3
+    - urn: urn:lyss:risk:req_node:lyss:lyss-acc-024
+      assessable: true
+      depth: 3
+      parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
+      ref_id: LYSS-ACC-024
+      name: Neighbor discovery (CDP/LLDP) is disabled on untrusted access ports
+      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+        rationale and test procedure are not written yet.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20.'
+      typical_evidence: '- Running configuration of the switch
+
+        - LYSS assessment report showing the verdict and evidence for LYSS-ACC-024'
+      implementation_groups:
+      - L3
