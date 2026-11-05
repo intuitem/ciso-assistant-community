@@ -5,7 +5,9 @@ description: Configure Active Directory Federation Service (AD FS) as an Identit
 # Active Directory Federation Service (AD FS)
 
 {% hint style="danger" %}
-<mark style="color:red;">Self-signed certificates won't work with CISO Assistant (even on a locally tested instance). On the other hand, certificates issued by Active Directory Certificate Services (AD CS) will work.</mark>
+<mark style="color:red;">
+For the AD FS integration described in this guide, use certificates issued by Active Directory Certificate Services (AD CS) instead of the default AD FS self-signed certificate configuration. The default configuration failed during testing with CISO Assistant, while the AD CS issued configuration worked.
+</mark>
 {% endhint %}
 
 Open your **Server Manager**
@@ -58,19 +60,19 @@ Open your **Server Manager**
 {% hint style="warning" %}
 You can skip this step if you're in a test environment, but please keep in mind that it's strongly recommended that you configure your **Access Control Policy** correctly on a production server.
 {% endhint %}
-19. Click **Next >**
+1.  Click **Next >**
 
     ![](../../../.gitbook/assets/sso/adfs_wizard_step_7.png)
 
-20. Click **Next >**
+2.  Click **Next >**
 
     ![](../../../.gitbook/assets/sso/adfs_wizard_step_8.png)
 
-21. Click **Close**
+3.  Click **Close**
 
     ![](../../../.gitbook/assets/sso/adfs_wizard_step_9.png)
 
-22. A new window opens. Click **Add Rule**
+4.  A new window opens. Click **Add Rule**
 
     ![](../../../.gitbook/assets/sso/adfs_policy_rule_step_1.png)
 
