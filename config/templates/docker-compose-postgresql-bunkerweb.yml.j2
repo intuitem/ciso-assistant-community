@@ -74,6 +74,7 @@ services:
       start_period: 150s
     networks:
       - bw-services
+      - cache
 
   huey:
     container_name: huey
@@ -127,6 +128,7 @@ services:
         python manage.py run_huey -w 2 --scheduler-interval 60
     networks:
       - bw-services
+      - cache
 
   memcached:
     container_name: memcached
@@ -140,7 +142,7 @@ services:
       - no-new-privileges:true
     user: "1001:1001"
     networks:
-      - bw-services
+      - cache
 
   frontend:
     container_name: frontend
@@ -345,3 +347,5 @@ networks:
     name: bw-services
   bw-db:
     name: bw-db
+  cache:
+    internal: true

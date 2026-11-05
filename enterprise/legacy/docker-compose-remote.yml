@@ -14,6 +14,9 @@ services:
       - MEMCACHED_LOCATION=memcached:11211
     volumes:
       - ./db:/code/db
+    networks:
+      - default
+      - cache
 
   # huey:
   #   container_name: huey
@@ -41,6 +44,8 @@ services:
     security_opt:
       - no-new-privileges:true
     user: "1001:1001"
+    networks:
+      - cache
 
   frontend:
     container_name: frontend
@@ -77,3 +82,8 @@ services:
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'
+
+networks:
+  default:
+  cache:
+    internal: true

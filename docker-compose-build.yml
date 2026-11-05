@@ -31,6 +31,9 @@ services:
     volumes:
       - ./db:/code/db
     user: "1001:1001"
+    networks:
+      - default
+      - cache
 
   huey:
     container_name: huey
@@ -70,6 +73,9 @@ services:
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
     user: "1001:1001"
+    networks:
+      - default
+      - cache
 
   frontend:
     container_name: frontend
@@ -109,6 +115,8 @@ services:
     security_opt:
       - no-new-privileges:true
     user: "1001:1001"
+    networks:
+      - cache
 
   qdrant:
     container_name: qdrant
@@ -175,3 +183,8 @@ services:
 
 volumes:
   qdrant_data:
+
+networks:
+  default:
+  cache:
+    internal: true

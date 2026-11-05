@@ -51,6 +51,9 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"{% if can_do_tls %}
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"{% endif %}
+    networks:
+      - default
+      - cache
   huey:
     container_name: huey
     image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
@@ -97,6 +100,9 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
+    networks:
+      - default
+      - cache
   memcached:
     container_name: memcached
     image: memcached:1.6-alpine
@@ -108,6 +114,8 @@ services:
     security_opt:
       - no-new-privileges:true
     user: "1001:1001"
+    networks:
+      - cache
 
   frontend:
     container_name: frontend
@@ -176,3 +184,8 @@ services:
       - "--providers.file.directory=/etc/traefik"
       - "--providers.file.watch=true"{% else %}
       - "--experimental.localPlugins.selfsigned.moduleName=traefik.tls"{% endif %}
+
+networks:
+  default:
+  cache:
+    internal: true

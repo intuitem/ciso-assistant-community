@@ -1,4 +1,4 @@
-# Title stating the decision, not the topic
+# Add the memcached container
 
 - Status: Accepted
 - Deciders: @monsieurswag @ericintuitem

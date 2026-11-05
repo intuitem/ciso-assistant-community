@@ -77,6 +77,9 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"{% if can_do_tls %}
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"{% endif %}
+    networks:
+      - default
+      - cache
 
   huey:
     container_name: huey
@@ -128,6 +131,9 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
+    networks:
+      - default
+      - cache
 
   memcached:
     container_name: memcached
@@ -140,6 +146,8 @@ services:
     security_opt:
       - no-new-privileges:true
     user: "1001:1001"
+    networks:
+      - cache
 
   frontend:
     container_name: frontend
@@ -282,3 +290,8 @@ services:
       backend:
         condition: service_healthy
   {% endif %}
+
+networks:
+  default:
+  cache:
+    internal: true

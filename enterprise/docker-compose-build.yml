@@ -35,6 +35,9 @@ services:
     volumes:
       - ./db:/code/db
     user: "1001:1001"
+    networks:
+      - default
+      - cache
 
   huey:
     container_name: huey
@@ -75,6 +78,9 @@ services:
       - -c
       - |
         python manage.py run_huey
+    networks:
+      - default
+      - cache
 
   memcached:
     container_name: memcached
@@ -87,6 +93,8 @@ services:
     security_opt:
       - no-new-privileges:true
     user: "1001:1001"
+    networks:
+      - cache
 
   frontend:
     container_name: frontend
@@ -133,3 +141,8 @@ services:
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'
+
+networks:
+  default:
+  cache:
+    internal: true
