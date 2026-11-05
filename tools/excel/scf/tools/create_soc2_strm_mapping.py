@@ -18,6 +18,7 @@ from pathlib import Path
 # The framework URNs stay as they are: a URN dropped from a framework update
 # cascades to the requirement assessments stored on that node.
 STRM_TO_FRAMEWORK_NODE = {
+    "cc3.2.6": "cc3.2.5",
     "cc3.2.7": "cc3.2.6",
     "cc3.2.8": "cc3.2.7",
     "cc3.2.9": "cc3.2.8",
@@ -30,27 +31,31 @@ STRM_TO_FRAMEWORK_NODE = {
 }
 
 # Points of focus the framework has no node for: their rows move to the parent.
-POF_WITHOUT_NODE = r"^(?:cc3\.2\.6|pi1\.\d\.\d+|p[123]\.1\.\d+)$"
+POF_WITHOUT_NODE = r"^(?:pi1\.\d\.\d+|p[123]\.1\.\d+)$"
+
+# The framework merges this point of focus into the cc3.2.5 description.
+MERGED_POF = "cc3.2.6"
 
 
 def align_with_framework(relationship_df: pd.DataFrame) -> pd.DataFrame:
     """
     Rewrite STRM source ids onto existing framework nodes.
 
-    A rolled-up row is only an intersect: one point of focus does not establish
-    its whole criterion. Rows the STRM gives for the criterion itself win.
+    A rolled-up or merged row is only an intersect: one point of focus does not
+    establish a node that covers more. Rows the STRM gives for that node win.
     """
     df = relationship_df.copy()
     rolled_up = df["source_node_id"].str.fullmatch(POF_WITHOUT_NODE)
     df.loc[rolled_up, "source_node_id"] = (
         df.loc[rolled_up, "source_node_id"].str.rsplit(".", n=1).str[0]
     )
-    df.loc[rolled_up, "relationship"] = "intersect"
+    partial = rolled_up | (df["source_node_id"] == MERGED_POF)
+    df.loc[partial, "relationship"] = "intersect"
     df["source_node_id"] = df["source_node_id"].map(
         lambda node: STRM_TO_FRAMEWORK_NODE.get(node, node)
     )
-    # Stable sort: rows from the criterion itself come first, so they survive the dedup
-    return df.assign(rolled_up=rolled_up).sort_values("rolled_up", kind="stable")[
+    # Stable sort: rows from the node itself come first, so they survive the dedup
+    return df.assign(partial=partial).sort_values("partial", kind="stable")[
         relationship_df.columns
     ]
 

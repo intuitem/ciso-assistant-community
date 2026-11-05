@@ -1429,12 +1429,6 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03.1
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
@@ -1445,21 +1439,6 @@ objects:
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:sea-01
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-01
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-02
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-03
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-09
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-10
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.1
       target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
@@ -1498,8 +1477,32 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
       relationship: subset
     - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
       target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.1
       relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-10
+      relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.6
       target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
       relationship: intersect
@@ -5648,12 +5651,6 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03.1
-      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
-      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       relationship: intersect
@@ -5664,21 +5661,6 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:sea-01
-      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-01
-      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-02
-      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-03
-      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-09
-      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-10
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
@@ -5717,9 +5699,33 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
       relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.1
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
       relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-02
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-03
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-09
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:thr-10
+      target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.5
+      relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.6
       relationship: intersect

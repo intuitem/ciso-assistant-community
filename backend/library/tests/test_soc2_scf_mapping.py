@@ -3,7 +3,8 @@
 from pathlib import Path
 
 import pytest
-import yaml
+
+from core.utils import yaml_safe_load
 
 LIBRARIES = Path(__file__).resolve().parents[1] / "libraries"
 NODE = "urn:intuitem:risk:req_node:soc2-2017-rev-2022:"
@@ -11,7 +12,7 @@ SCF = "urn:intuitem:risk:req_node:scf-2025.2.2:"
 
 
 def load(name):
-    return yaml.load((LIBRARIES / name).read_text(), Loader=yaml.CSafeLoader)
+    return yaml_safe_load((LIBRARIES / name).read_text())
 
 
 @pytest.fixture(scope="module")
@@ -59,7 +60,9 @@ def test_points_of_focus_map_to_the_controls_of_their_own_wording(nodes, mapping
         targets.setdefault(row["source_requirement_urn"], set()).add(
             row["target_requirement_urn"]
         )
-    # The STRM numbers these one higher: it lists a point the framework lacks
+    # The STRM numbers these one higher: the framework merges its threats point
+    assert "Identifies Threats" in nodes[f"{NODE}cc3.2.5"]["description"]
+    assert f"{SCF}thr-01" in targets[f"{NODE}cc3.2.5"]
     assert "Identifies Vulnerability" in nodes[f"{NODE}cc3.2.6"]["description"]
     assert f"{SCF}vpm-01" in targets[f"{NODE}cc3.2.6"]
     assert "From Vendors" in nodes[f"{NODE}cc3.2.7"]["description"]
@@ -75,3 +78,13 @@ def test_points_of_focus_map_to_the_controls_of_their_own_wording(nodes, mapping
 def test_misspelled_urns_stay_put(nodes, suffix, ref_id):
     """A framework update deletes dropped nodes, and their assessments with them."""
     assert nodes[f"{NODE}{suffix}"]["ref_id"] == ref_id
+
+
+def test_merged_threats_point_is_only_a_partial_match(mapping_sets):
+    relationships = {
+        row["relationship"]
+        for row in mapping_sets[0]["requirement_mappings"]
+        if row["source_requirement_urn"] == f"{NODE}cc3.2.5"
+        and row["target_requirement_urn"] == f"{SCF}thr-01"
+    }
+    assert relationships == {"intersect"}
