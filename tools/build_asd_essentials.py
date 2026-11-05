@@ -77,8 +77,9 @@ OUTCOME = {
     "section_label": "domains",
     "annotation": (
         "A principle is rated in each domain by its lowest applicable action, and is not "
-        "assessed while one of them is. Each domain scores its assessed principles: fully "
-        "effective 1, partially effective 0.5, not effective 0, averaged as a percentage."
+        "assessed while one of them is. Each domain scores its applicable principles: fully "
+        "effective 1, partially effective 0.5, not effective and not assessed 0, averaged "
+        "as a percentage. A domain with nothing assessed has no score."
     ),
 }
 

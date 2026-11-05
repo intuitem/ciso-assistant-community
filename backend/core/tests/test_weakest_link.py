@@ -102,15 +102,26 @@ def test_domain_score_is_asd_percentage():
     }
 
 
-def test_unassessed_principles_are_counted_apart_and_an_unassessed_domain_has_no_score():
+def test_unassessed_principles_score_0_and_an_unassessed_domain_has_no_score():
     out = run(
         {"d1": {"p": ["a"], "q": ["b"]}, "d2": {"r": ["c"]}},
         {"a": "compliant", "b": "not_assessed", "c": "not_assessed"},
     )
     d1, d2 = out["sections"]
-    assert d1["score"] == 1.0 and d1["counts"]["not_assessed"] == 1
+    assert d1["score"] == 0.5 and d1["counts"]["not_assessed"] == 1
     assert d2["score"] is None
-    assert out["score"] == 1.0
+    assert out["score"] == 0.5
+
+
+def test_not_assessed_lowers_the_score_and_not_applicable_does_not():
+    spec = {"d": {"p": ["a"], "q": ["b"], "r": ["c"], "s": ["e"], "t": ["f"]}}
+    results = dict.fromkeys(["a", "b", "c", "e", "f"], "compliant")
+
+    def score(result):
+        return run(spec, {**results, "f": result})["sections"][0]["score"]
+
+    assert score("not_assessed") == score("non_compliant") == pytest.approx(0.8)
+    assert score("not_applicable") == 1.0
 
 
 def test_requirements_outside_the_audit_are_left_out():

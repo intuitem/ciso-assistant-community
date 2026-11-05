@@ -14,7 +14,7 @@ description: |-
 copyright: © Commonwealth of Australia 2026. Material from cyber.gov.au is provided under a Creative Commons
   Attribution 4.0 International licence and is attributed to the Australian Signals Directorate.
 version: 1
-publication_date: '2026-11-02'
+publication_date: '2026-11-05'
 provider: Australian Signals Directorate (ASD)
 packager: intuitem
 objects:
@@ -53,8 +53,9 @@ objects:
         non_compliant: Not effective
       section_label: domains
       annotation: 'A principle is rated in each domain by its lowest applicable action, and is not assessed
-        while one of them is. Each domain scores its assessed principles: fully effective 1, partially
-        effective 0.5, not effective 0, averaged as a percentage.'
+        while one of them is. Each domain scores its applicable principles: fully effective 1, partially
+        effective 0.5, not effective and not assessed 0, averaged as a percentage. A domain with nothing
+        assessed has no score.'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:asd-essentials-enterprise-it:governance-and-culture
       assessable: false

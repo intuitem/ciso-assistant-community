@@ -24,11 +24,11 @@ not applicable ones aside; a node whose requirements are all not applicable is
 `not_applicable`, and one with none in the audit is left out. `drivers` lists
 the requirements that set its rating.
 
-A section's score is the mean weight of its assessed rated nodes, None when
-none is assessed: not assessed nodes are counted apart, not as 0. The overall
-score is the same mean over every rated node of the audit, stored as a
-percentage (`computed_values[ref_id]`, readable as `values.<ref_id>`) when
-known; the sections are computed on read.
+A section's score is the mean weight of its applicable rated nodes, a not
+assessed node counting as 0, and None when none is assessed. Not assessed nodes
+keep their own count. The overall score is the same mean over the nodes of the
+sections that have a score, stored as a percentage (`computed_values[ref_id]`,
+readable as `values.<ref_id>`) when known; the sections are computed on read.
 """
 
 RESULTS = ["non_compliant", "partially_compliant", "compliant"]
@@ -89,10 +89,10 @@ def _rating(results: list) -> str:
 
 
 def _score(ratings: list, weights: dict) -> float | None:
-    assessed = [r for r in ratings if r in RESULTS]
-    if not assessed:
+    applicable = [r for r in ratings if r != "not_applicable"]
+    if not any(r in RESULTS for r in applicable):
         return None
-    return sum(weights.get(r, 0.0) for r in assessed) / len(assessed)
+    return sum(weights.get(r, 0.0) for r in applicable) / len(applicable)
 
 
 def compute_weakest_link(rule: dict, nodes: list[dict], ras: dict) -> dict:
@@ -165,7 +165,9 @@ def compute_weakest_link(rule: dict, nodes: list[dict], ras: dict) -> dict:
                 "nodes": rated_nodes,
             }
         )
-    all_ratings = [n["rating"] for s in out for n in s["nodes"]]
+    all_ratings = [
+        n["rating"] for s in out if s["score"] is not None for n in s["nodes"]
+    ]
     return {"score": _score(all_ratings, weights), "sections": out}
 
 
