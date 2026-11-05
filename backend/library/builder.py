@@ -984,11 +984,18 @@ def validate_draft_document(draft, *, user=None) -> dict:
                 )
             except ValueError:
                 errors.append("invalidScoreCalculationMethod")
+            anchor = framework.get("anchor_na_to_target")
+            if anchor is not None and not isinstance(anchor, bool):
+                errors.append("invalidScoringDefaults")
+            min_score = framework.get("min_score", 0)
+            max_score = framework.get("max_score", 100)
             try:
-                if problem := Framework.scoring_defaults_problem(
-                    min_score=framework.get("min_score", 0),
-                    max_score=framework.get("max_score", 100),
-                    anchor_na_to_target=bool(framework.get("anchor_na_to_target")),
+                if min_score < 0 or min_score >= max_score:
+                    errors.append("invalidScoreScale")
+                elif problem := Framework.scoring_defaults_problem(
+                    min_score=min_score,
+                    max_score=max_score,
+                    anchor_na_to_target=anchor is True,
                     target_score=framework.get("target_score"),
                     implementation_groups_definition=framework.get(
                         "implementation_groups_definition"

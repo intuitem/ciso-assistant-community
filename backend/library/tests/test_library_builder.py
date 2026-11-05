@@ -1088,6 +1088,10 @@ def test_framework_editor_doc_refuses_bad_scoring_defaults(meta):
         ({"anchor_na_to_target": True}, "targetScoreRequired"),
         ({"score_calculation_method": "median"}, "invalidScoreCalculationMethod"),
         ({"target_score": "high"}, "invalidScoringDefaults"),
+        ({"anchor_na_to_target": "false"}, "invalidScoringDefaults"),
+        ({"min_score": 1, "max_score": 1}, "invalidScoreScale"),
+        ({"min_score": 5, "max_score": 1}, "invalidScoreScale"),
+        ({"min_score": -1, "max_score": 5}, "invalidScoreScale"),
     ],
 )
 @pytest.mark.django_db
