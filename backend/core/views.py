@@ -17413,6 +17413,8 @@ def generate_html(
             or render_markdown_as_text(requirement_node.get_description_translated),
             "depth": depth,
             "assessment": None,
+            "controls_count": 0,
+            "evidences_count": 0,
         }
         toc.append(toc_entry)
         children_nodes = [
@@ -17428,9 +17430,10 @@ def generate_html(
             "applied_controls": [],
             "result": "",
             "status": "",
+            "heading_level": min(depth + 2, 4),
         }
 
-        node_data["bar_graph"] = True if children_nodes else False
+        node_data["bar_graph"] = bool(children_nodes) and depth < 2
 
         if requirement_node.assessable:
             assessment = assessment_by_urn.get(requirement_node.urn)
@@ -17464,6 +17467,16 @@ def generate_html(
                         )
                         selected_evidences += evidences
                     node_data["applied_controls"] = applied_controls
+
+                toc_entry["controls_count"] = len(measures)
+                toc_entry["evidences_count"] = len(
+                    set(direct_evidences).union(
+                        *(
+                            control["evidences"]
+                            for control in node_data["applied_controls"]
+                        )
+                    )
+                )
 
         for child_node in children_nodes:
             child_data, child_evidences = generate_data_rec(child_node, depth + 1)

@@ -1,5 +1,6 @@
 import os
 from django import template
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from django.conf import settings
@@ -97,25 +98,40 @@ def basename_filter(file_path):
     return os.path.basename(str(file_path))
 
 
+RESULT_BAR_ORDER = (
+    RequirementAssessment.Result.COMPLIANT,
+    RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+    RequirementAssessment.Result.NON_COMPLIANT,
+    RequirementAssessment.Result.NOT_ASSESSED,
+    RequirementAssessment.Result.NOT_APPLICABLE,
+)
+
+
 @register.simple_tag
-def bar_graph(assessments, ancestors, node=None):
-    compliance_assessments_result = []
+def bar_graph(assessments, ancestors, node=None, legend=False):
     candidates = [
         c
         for c in assessments.filter(requirement__assessable=True)
         if not node or c == node or node in ancestors.get(c, set())
     ]
     total = len(candidates)
+    segments = []
     if total > 0:
-        for st in RequirementAssessment.Result:
-            count = len([c for c in candidates if c.result == st])
-            compliance_assessments_result.append((st, round(count * 100 / total)))
+        for result in RESULT_BAR_ORDER:
+            count = len([c for c in candidates if c.result == result])
+            percentage = round(count * 100 / total)
+            if percentage > 0:
+                segments.append((result, escape(result.label), percentage))
 
     content = '<div class="result-bar">'
-    for result, percentage in reversed(compliance_assessments_result):
-        if percentage > 0:
-            content += f"""
-            <div class="result-bar__segment result--{result}" style="width:{percentage}%">
+    for result, label, percentage in segments:
+        content += f"""
+            <div class="result-bar__segment result--{result}" style="width:{percentage}%" title="{label}: {percentage}%">
             {percentage}%</div>"""
     content += "</div>"
+    if legend and segments:
+        content += '<ul class="result-legend">'
+        for result, label, percentage in segments:
+            content += f'<li><span class="result-legend__swatch result--{result}"></span>{label} ({percentage}%)</li>'
+        content += "</ul>"
     return mark_safe(content)

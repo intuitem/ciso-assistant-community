@@ -47,9 +47,12 @@
         ol li { list-style: decimal outside; }
 
         .report-header { display: flex; flex-direction: column; gap: 1rem; padding-bottom: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--surface-200); }
-        .report-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.75rem; }
+        .report-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
         .report-title h1 { margin: 0; }
-        .report-meta { display: flex; flex-wrap: wrap; gap: 2rem; }
+        .report-subtitle { margin-top: 0.25rem; color: var(--surface-500); }
+        .report-meta { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; margin: 0; }
+        .report-meta dt { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--surface-500); }
+        .report-meta dd { margin: 0; color: var(--surface-950); }
         .label { font-weight: 600; color: var(--surface-950); }
         .muted { font-size: 0.8rem; font-style: italic; color: var(--surface-500); }
 
@@ -77,17 +80,29 @@
 
         .result-bar { display: flex; width: 66%; height: 1rem; overflow: hidden; border-radius: 9999px; background-color: var(--surface-300); margin: 0.5rem 0 1rem; }
         .result-bar__segment { display: flex; flex-direction: column; justify-content: center; overflow: hidden; font-size: 0.7rem; font-weight: 600; text-align: center; }
+        .report-header .result-bar { margin-bottom: 0; }
+        .result-legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; padding: 0; }
+        .result-legend li { display: flex; align-items: center; gap: 0.4rem; list-style: none; font-size: 0.8rem; }
+        .result-legend__swatch { width: 0.75rem; height: 0.75rem; border-radius: 9999px; }
 
         .toc { margin-bottom: 2rem; }
         .toc-table, .controls-table { width: 100%; border-collapse: collapse; }
         .toc-table th, .controls-table th { padding: 0.4rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--surface-500); background-color: var(--surface-100); }
         .toc-table td, .controls-table td { padding: 0.4rem 0.75rem; vertical-align: top; border-top: 1px solid var(--surface-200); }
         .toc-table td:first-child { padding-left: calc(0.75rem + var(--depth, 0) * 1.25rem); }
-        .toc-table td:not(:first-child) { width: 1%; white-space: nowrap; }
+        .toc-table td:not(:first-child), .toc-table th:not(:first-child) { width: 1%; white-space: nowrap; }
         .toc-group td, .toc-group a { font-weight: 600; color: var(--surface-950); }
+        .toc-table th.count, .toc-table td.count { text-align: center; color: var(--surface-500); }
+        .count--missing { background-color: var(--warning-50); color: var(--warning-950); }
 
         .node { margin-bottom: 1rem; }
-        .section-title { margin: 2rem 0 0.25rem; padding-bottom: 0.25rem; border-bottom: 2px solid var(--primary-500); font-size: 1.1rem; }
+        .section-title { color: var(--surface-950); }
+        h2.section-title { margin: 2.5rem 0 0.5rem; padding-bottom: 0.25rem; border-bottom: 2px solid var(--primary-500); font-size: 1.25rem; }
+        h3.section-title { margin: 1.75rem 0 0.5rem; padding-bottom: 0.2rem; border-bottom: 1px solid var(--surface-300); font-size: 1.05rem; }
+        h4.section-title { margin: 1.25rem 0 0.25rem; font-size: 0.95rem; color: var(--surface-700); }
+
+        .back-to-toc { position: fixed; right: 1.5rem; bottom: 1.5rem; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; color: #ffffff; background-color: var(--primary-500); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }
+        .back-to-toc:hover { color: #ffffff; background-color: var(--primary-600); text-decoration: none; }
         .requirement { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem 1.25rem; margin: 0.75rem 0; border: 1px solid var(--surface-200); border-left: 4px solid var(--surface-300); border-radius: var(--radius); background-color: #ffffff; }
         .result-accent--partially_compliant { border-left-color: #fde047; }
         .result-accent--non_compliant { border-left-color: #f87171; }
@@ -119,54 +134,74 @@
             body { margin: 0; padding: 0; box-shadow: none; }
             .toc { break-after: page; }
             .requirement, .controls-table tr { break-inside: avoid; }
-            .badge, .result-bar, .result-bar__segment { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .badge, .result-bar, .result-bar__segment, .result-legend__swatch { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .back-to-toc { display: none; }
         }
     </style>
 </head>
 <body>
     <header class="report-header">
         <div class="report-title">
-            <h1>{{ compliance_assessment.name }}: {{ compliance_assessment.framework }}</h1>
+            <div>
+                <h1>{{ compliance_assessment.name }}</h1>
+                <p class="report-subtitle">{{ compliance_assessment.framework }}</p>
+            </div>
             {% with scores=compliance_assessment.get_global_score %}
             {% if scores.maturity_score > -1 %}
                 <span class="badge badge--score">{% trans "Score:" %} {{ scores.maturity_score|floatformat:"-2" }}</span>
             {% endif %}
             {% endwith %}
         </div>
-        {% bar_graph assessments ancestors %}
-        <div class="report-meta">
+        <dl class="report-meta">
             <div>
-                <p class="label">{% trans "Authors "%}</p>
-                <ul>
-                    {% for author in compliance_assessment.authors.all %}
-                        <li>{{ author }}</li>
-                    {% endfor %}
-                </ul>
+                <dt>{% trans "Domain" %}</dt>
+                <dd>{{ compliance_assessment.folder }}</dd>
             </div>
-            <div>
-                <p class="label">{%trans "Reviewers" %}</p>
-                <ul>
-                    {% for group in compliance_assessment.reviewers.all %}
-                        <li>{{ group }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% with selected_groups=compliance_assessment.get_selected_implementation_groups %}
-              {% if selected_groups %}
+            {% if compliance_assessment.perimeter %}
                 <div>
-                    <p class="label">{% trans "Selected implementation groups" %}</p>
-                    <ul>
-                        {% for group in selected_groups %}
-                            <li>{{ group }}</li>
-                        {% endfor %}
-                    </ul>
+                    <dt>{% trans "Perimeter" %}</dt>
+                    <dd>{{ compliance_assessment.perimeter }}</dd>
+                </div>
+            {% endif %}
+            {% if compliance_assessment.eta %}
+                <div>
+                    <dt>{% trans "ETA" %}</dt>
+                    <dd>{{ compliance_assessment.eta|date:"SHORT_DATE_FORMAT" }}</dd>
+                </div>
+            {% endif %}
+            {% with authors=compliance_assessment.authors.all %}
+              {% if authors %}
+                <div>
+                    <dt>{% trans "Authors" %}</dt>
+                    <dd>{{ authors|join:", " }}</dd>
                 </div>
               {% endif %}
             {% endwith %}
-        </div>
+            {% with reviewers=compliance_assessment.reviewers.all %}
+              {% if reviewers %}
+                <div>
+                    <dt>{% trans "Reviewers" %}</dt>
+                    <dd>{{ reviewers|join:", " }}</dd>
+                </div>
+              {% endif %}
+            {% endwith %}
+            {% with selected_groups=compliance_assessment.get_selected_implementation_groups %}
+              {% if selected_groups %}
+                <div>
+                    <dt>{% trans "Selected implementation groups" %}</dt>
+                    <dd>{{ selected_groups|join:", " }}</dd>
+                </div>
+              {% endif %}
+            {% endwith %}
+            <div>
+                <dt>{% trans "Generated on" %}</dt>
+                <dd>{% now "SHORT_DATETIME_FORMAT" %}</dd>
+            </div>
+        </dl>
+        {% bar_graph assessments ancestors legend=True %}
     </header>
 
-    <nav class="toc">
+    <nav class="toc" id="toc">
         <h2>{% trans "Table of contents" %}</h2>
         <table class="toc-table">
             <thead>
@@ -174,6 +209,8 @@
                     <th>{% trans "Requirement" %}</th>
                     <th>{% trans "Status" %}</th>
                     <th>{% trans "Result" %}</th>
+                    <th class="count">{% trans "Applied controls" %}</th>
+                    <th class="count">{% trans "Evidences" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -185,10 +222,20 @@
                             </td>
                             <td><span class="badge status--{{ entry.assessment.status }}">{{ entry.assessment.get_status_display }}</span></td>
                             <td><span class="badge result--{{ entry.assessment.result }}">{{ entry.assessment.get_result_display }}</span></td>
+                            <td class="count">{{ entry.controls_count|default:"–" }}</td>
+                            <td class="count">
+                                {% if entry.evidences_count %}
+                                    {{ entry.evidences_count }}
+                                {% elif entry.assessment.result == "compliant" %}
+                                    <span class="badge count--missing" title="{% trans "Compliant without evidence" %}">0</span>
+                                {% else %}
+                                    –
+                                {% endif %}
+                            </td>
                         </tr>
                     {% elif not entry.node.assessable %}
                         <tr class="toc-group">
-                            <td colspan="3" style="--depth: {{ entry.depth }}">
+                            <td colspan="5" style="--depth: {{ entry.depth }}">
                                 <a href="#req-{{ entry.node.id }}">{{ entry.label|truncatechars:120 }}</a>
                             </td>
                         </tr>
@@ -201,5 +248,6 @@
     {% for node in top_level_nodes %}
         {% include "snippets/req_node.html" with node=node %}
     {% endfor %}
+    <a class="back-to-toc" href="#toc">↑ {% trans "Table of contents" %}</a>
 </body>
 </html>

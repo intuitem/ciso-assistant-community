@@ -1220,8 +1220,6 @@ msgid "Partially compliant"
 msgstr "Partiellement conforme"
 
 #: core/models.py:5977
-#, fuzzy
-#| msgid "Non compliant"
 msgid "Non-compliant"
 msgstr "Non conforme"
 
@@ -1657,6 +1655,14 @@ msgstr "Preuves associées :"
 #: core/templates/core/audit_report.html:168
 msgid "Table of contents"
 msgstr "Sommaire"
+
+#: core/templates/core/audit_report.html
+msgid "Generated on"
+msgstr "Généré le"
+
+#: core/templates/core/audit_report.html
+msgid "Compliant without evidence"
+msgstr "Conforme sans preuve"
 
 #: core/templates/snippets/req_node.html:96
 msgid "No evidence"

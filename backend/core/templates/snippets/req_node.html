@@ -2,7 +2,7 @@
 
 <div class="node">
   {% if not node.requirement_node.assessable %}
-    <h2 class="section-title" id="req-{{ node.requirement_node.id }}">{{ node.requirement_node.display_long }}</h2>
+    <h{{ node.heading_level }} class="section-title" id="req-{{ node.requirement_node.id }}">{{ node.requirement_node.display_long }}</h{{ node.heading_level }}>
     {% if node.bar_graph %}
       {% bar_graph assessments ancestors node.requirement_node %}
     {% endif %}
