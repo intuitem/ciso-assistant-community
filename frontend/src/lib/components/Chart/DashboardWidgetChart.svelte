@@ -297,22 +297,21 @@
 			left: 50
 		};
 
+		// What a point reads as: its level's name, or the number with its unit.
+		function describeValue(value: any): string {
+			if (isQualitative && choiceNames && choiceNames[value - 1]) {
+				return `${value}. ${choiceNames[value - 1]}`;
+			}
+			return isQualitative ? String(value) : formatValueWithUnit(value);
+		}
+
 		const baseTooltip = {
 			trigger: 'axis',
 			formatter: function (params: any) {
 				const date = new Date(params[0].value[0]).toLocaleString();
-				const value = params[0].value[1];
-				let displayValue = value;
-
-				if (isQualitative && choiceNames && choiceNames[value - 1]) {
-					displayValue = `${value}. ${choiceNames[value - 1]}`;
-				} else if (!isQualitative) {
-					displayValue = formatValueWithUnit(value);
-				}
-
 				// Rendered as HTML by ECharts: level names and units are typed
 				// text (a formula's results, a definition's levels), escaped.
-				return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(displayValue)}`;
+				return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(describeValue(params[0].value[1]))}`;
 			}
 		};
 
@@ -344,6 +343,22 @@
 					}
 				: { min: 0 })
 		};
+
+		// The axis is sized to the values: a target beyond them would fall off
+		// the chart, dashed line and all. Stretched to a round number past it.
+		function roundAbove(v: number): number {
+			const step = Math.pow(10, Math.floor(Math.log10(v))) / 5;
+			return Number.isFinite(step) && step > 0 ? Math.ceil((v * 1.05) / step) * step : v;
+		}
+		const numbers = chartData.map((d) => Number(d[1])).filter(Number.isFinite);
+		const showTarget = widget.show_target && typeof targetValue === 'number';
+		const targetYAxis =
+			showTarget && !isQualitative && numbers.length > 0 && targetValue > Math.max(...numbers)
+				? {
+						...baseYAxis,
+						max: unitName === 'percentage' && targetValue <= 100 ? 100 : roundAbove(targetValue)
+					}
+				: baseYAxis;
 
 		// For breakdown metrics, render as a time series, pie or donut
 		if (isBreakdownMetric) {
@@ -477,7 +492,7 @@
 					grid: baseGrid,
 					tooltip: baseTooltip,
 					xAxis: baseXAxis,
-					yAxis: baseYAxis,
+					yAxis: targetYAxis,
 					series: [
 						{
 							type: 'line',
@@ -505,7 +520,7 @@
 					grid: baseGrid,
 					tooltip: baseTooltip,
 					xAxis: baseXAxis,
-					yAxis: baseYAxis,
+					yAxis: targetYAxis,
 					series: [
 						{
 							type: 'line',
@@ -539,16 +554,19 @@
 				return {
 					grid: baseGrid,
 					tooltip: {
-						...baseTooltip,
 						trigger: 'axis',
-						axisPointer: { type: 'shadow' }
+						axisPointer: { type: 'shadow' },
+						// A bar's point is the value alone, under its date as the category.
+						formatter: function (params: any) {
+							return `${escapeHtml(params[0].name)}<br/>${params[0].marker}${escapeHtml(describeValue(params[0].value))}`;
+						}
 					},
 					xAxis: {
 						type: 'category',
 						data: chartData.map((d) => new Date(d[0]).toLocaleDateString()),
 						axisLabel: { rotate: 45 }
 					},
-					yAxis: baseYAxis,
+					yAxis: targetYAxis,
 					series: [
 						{
 							type: 'bar',
