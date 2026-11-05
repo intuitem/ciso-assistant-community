@@ -7813,7 +7813,7 @@
 	"phasingOut": "En retrait progressif",
 	"retired": "Retiré",
 	"archived": "Archivé",
-	"lifecycleStage": "Étape du cycle de vie",
-	"assetLifecycleStage": "Étape du cycle de vie de l'actif",
-	"changeLifecycleStage": "Changer l'étape du cycle de vie"
+	"lifecycleStage": "Cycle de vie",
+	"assetLifecycleStage": "Cycle de vie de l'actif",
+	"changeLifecycleStage": "Changer le cycle de vie"
 }

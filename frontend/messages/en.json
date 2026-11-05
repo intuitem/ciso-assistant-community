@@ -7813,7 +7813,7 @@
 	"phasingOut": "Phasing out",
 	"retired": "Retired",
 	"archived": "Archived",
-	"lifecycleStage": "Lifecycle stage",
-	"assetLifecycleStage": "Asset lifecycle stage",
-	"changeLifecycleStage": "Change lifecycle stage"
+	"lifecycleStage": "Lifecycle",
+	"assetLifecycleStage": "Asset lifecycle",
+	"changeLifecycleStage": "Change lifecycle"
 }
