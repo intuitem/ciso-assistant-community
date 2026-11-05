@@ -221,20 +221,26 @@ class TestAssetConsumer:
         assert "Unknown lifecycle_stage" in error.error
         assert "lifecycle_stage" not in record_data
 
-    def test_ambiguous_lifecycle_stage_warns_and_assigns_nothing(self, base_context):
+    def test_colliding_lifecycle_stages_match_exactly_or_warn(self, base_context):
         from core.models import Terminology
 
         Terminology.create_default_asset_lifecycle_stages()
-        Terminology.objects.create(
+        custom = Terminology.objects.create(
             name="Phasing out",
             field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
             is_visible=True,
         )
         consumer = AssetRecordConsumer(base_context)
-        record_data, error = consumer.prepare_create(
-            {"name": "X", "lifecycle_stage": "phasing_out"}, [1, 2, 3, 4]
-        )
 
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "lifecycle_stage": "Phasing out"}, [1, 2, 3, 4]
+        )
+        assert error is None
+        assert record_data["lifecycle_stage"] == custom.id
+
+        record_data, error = consumer.prepare_create(
+            {"name": "Y", "lifecycle_stage": "phasing out"}, [1, 2, 3, 4]
+        )
         assert error is not None and error.is_warning is True
         assert "Ambiguous lifecycle_stage" in error.error
         assert "lifecycle_stage" not in record_data

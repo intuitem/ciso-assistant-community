@@ -1334,7 +1334,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
             field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
             is_visible=True,
         ).values_list("id", "name"):
-            index.setdefault(_normalize_key(name), []).append(pk)
+            index.setdefault(_normalize_key(name), {})[name] = pk
         return index
 
     def create_context(self):
@@ -1425,9 +1425,11 @@ class AssetRecordConsumer(RecordConsumer[list]):
 
         raw_stage = record.get("lifecycle_stage") or record.get("lifecycle")
         if raw_stage:
-            stages = self.lifecycle_stage_index.get(_normalize_key(raw_stage), [])
-            if len(stages) == 1:
-                data["lifecycle_stage"] = stages[0]
+            stages = self.lifecycle_stage_index.get(_normalize_key(raw_stage), {})
+            if raw_stage in stages:
+                data["lifecycle_stage"] = stages[raw_stage]
+            elif len(stages) == 1:
+                data["lifecycle_stage"] = next(iter(stages.values()))
             elif stages:
                 parse_warning_msgs.append(f"Ambiguous lifecycle_stage: '{raw_stage}'")
             else:
