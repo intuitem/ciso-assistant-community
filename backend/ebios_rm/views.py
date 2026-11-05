@@ -188,14 +188,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ]
         # clone copies source children -> require view on each in the source folder
         check_folder_view_permission(request.user, source.folder, *present)
-        models_to_check = [EbiosRMStudy] + present
-        # a cross-domain clone may deep-copy these shared objects into the target
-        # folder (via duplicate_related_objects), so their add permission is needed
-        if target_folder != source.folder:
-            from core.models import AppliedControl, Threat
-
-            models_to_check += [Asset, Threat, AppliedControl]
-        check_folder_add_permission(request.user, target_folder, *models_to_check)
+        check_folder_add_permission(request.user, target_folder, EbiosRMStudy, *present)
 
         clone = duplicate_ebios_rm_study(
             source,
@@ -204,6 +197,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             ref_id=data.get("ref_id", source.ref_id),
             version=data.get("version", source.version),
             folder=target_folder,
+            # a cross-domain clone copies the shared objects (assets, threats,
+            # controls, elementary actions, entities) the target cannot see into
+            # it: check the add permission for each type it actually creates
+            before_copy=lambda model: check_folder_add_permission(
+                request.user, target_folder, model
+            ),
         )
         return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 

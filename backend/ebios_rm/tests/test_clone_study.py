@@ -1,6 +1,18 @@
 import pytest
+from knox.models import AuthToken
+from rest_framework.test import APIClient
 
-from core.models import AppliedControl, Asset, RiskAssessment, Terminology, Threat
+from core.apps import startup
+from core.models import (
+    AppliedControl,
+    Asset,
+    ComplianceAssessment,
+    Framework,
+    Perimeter,
+    RiskAssessment,
+    Terminology,
+    Threat,
+)
 from ebios_rm.helpers import duplicate_ebios_rm_study
 from ebios_rm.models import (
     AttackPath,
@@ -15,7 +27,8 @@ from ebios_rm.models import (
     StrategicScenario,
     get_initial_meta,
 )
-from iam.models import Folder
+from iam.models import Folder, User, UserGroup, UserGroupCodename
+from pmbok.models import ResponsibilityMatrix
 from tprm.models import Entity
 
 
@@ -322,6 +335,189 @@ class TestCloneStudy:
         # shared objects are carried over without raising (relinked or deep-copied
         # into the target domain by duplicate_related_objects)
         assert clone.assets.exists()
+
+
+def _sibling_domains(**kwargs):
+    root = Folder.get_root_folder()
+    return [
+        Folder.objects.create(
+            name=name,
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+            **kwargs,
+        )
+        for name in ("domain A", "domain B")
+    ]
+
+
+def _study_in_domain(domain):
+    """The full study, moved into `domain` with every shared object it uses, so
+    that a sibling domain can see none of them."""
+    source = EbiosRMStudy.objects.get(name="test study")
+    refs = _build_full_study(source)
+    source.folder = domain
+    source.save()  # owned objects follow the study
+    Asset.objects.update(folder=domain)
+    Threat.objects.filter(id=refs["threat"].id).update(folder=domain)
+    AppliedControl.objects.filter(id=refs["applied_control"].id).update(folder=domain)
+    Entity.objects.filter(id=refs["entity"].id).update(folder=domain)
+    ElementaryAction.objects.update(folder=domain)
+    ElementaryAction.objects.filter(id=refs["ea_know"].id).update(threat=refs["threat"])
+    # a primary asset whose supporting asset only reaches the scenario through
+    # the parent link, as get_assets() walks it
+    FearedEvent.objects.get(ebios_rm_study=source, ref_id="FE.01").assets.add(
+        Asset.objects.get(name="Primary Asset 1")
+    )
+    source.refresh_from_db()
+    return source, refs
+
+
+def _clone_steps(study):
+    return KillChain.objects.filter(
+        operating_mode__operational_scenario__ebios_rm_study=study
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("basic_ebios_rm_study_fixture")
+class TestCloneStudyAcrossDomains:
+    def test_shared_objects_the_target_cannot_see_are_copied_into_it(self):
+        domain_a, domain_b = _sibling_domains()
+        source, refs = _study_in_domain(domain_a)
+
+        clone = duplicate_ebios_rm_study(
+            source, name="test study (copy)", folder=domain_b
+        )
+
+        assert set(clone.assets.values_list("folder", flat=True)) == {domain_b.id}
+        assert {step.elementary_action.folder_id for step in _clone_steps(clone)} == {
+            domain_b.id
+        }
+        stakeholder = Stakeholder.objects.get(ebios_rm_study=clone)
+        assert stakeholder.entity.folder == domain_b
+        assert stakeholder.applied_controls.get().folder == domain_b
+        scenario = OperationalScenario.objects.get(ebios_rm_study=clone)
+        threat_copy = scenario.threats.get()
+        assert threat_copy.folder == domain_b
+        # one copy per shared object: the copied action points at the same copy
+        recon = _clone_steps(clone).get(elementary_action__name="Recon")
+        assert recon.elementary_action.threat == threat_copy
+        assert Threat.objects.filter(name="shared threat").count() == 2
+        # the source keeps pointing at its own objects
+        assert Stakeholder.objects.get(ebios_rm_study=source).entity == refs["entity"]
+        assert (
+            _clone_steps(source).get(elementary_action__name="Recon").elementary_action
+            == (refs["ea_know"])
+        )
+
+    def test_copied_assets_keep_their_parents(self):
+        domain_a, domain_b = _sibling_domains()
+        source, _ = _study_in_domain(domain_a)
+
+        clone = duplicate_ebios_rm_study(
+            source, name="test study (copy)", folder=domain_b
+        )
+
+        support = clone.assets.get(name="Supporting Asset 1")
+        assert {(p.name, p.folder_id) for p in support.parent_assets.all()} == {
+            ("Primary Asset 1", domain_b.id),
+            ("Primary Asset 2", domain_b.id),
+        }
+        source_assets = OperationalScenario.objects.get(
+            ebios_rm_study=source
+        ).get_assets()
+        clone_assets = OperationalScenario.objects.get(
+            ebios_rm_study=clone
+        ).get_assets()
+        assert "Supporting Asset 1" in {asset.name for asset in clone_assets}
+        assert sorted(a.name for a in clone_assets) == sorted(
+            a.name for a in source_assets
+        )
+
+    def test_links_that_are_not_copied_are_dropped_when_invisible(self):
+        domain_a, domain_b = _sibling_domains()
+        source, _ = _study_in_domain(domain_a)
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw-clone", folder=Folder.get_root_folder()
+        )
+        audits = [
+            ComplianceAssessment.objects.create(
+                name=f"audit {domain.name}",
+                framework=framework,
+                folder=domain,
+                perimeter=Perimeter.objects.create(
+                    name=f"perimeter {domain.name}", folder=domain
+                ),
+            )
+            for domain in (domain_a, domain_b)
+        ]
+        source.compliance_assessments.set(audits)
+        source.responsibility_matrix = ResponsibilityMatrix.objects.create(
+            name="RACI", folder=domain_a
+        )
+        source.save()
+
+        clone = duplicate_ebios_rm_study(
+            source, name="test study (copy)", folder=domain_b
+        )
+
+        # audits and RACI are never copied: only what domain B can see is kept
+        assert list(clone.compliance_assessments.all()) == [audits[1]]
+        assert clone.responsibility_matrix is None
+        assert source.compliance_assessments.count() == 2
+
+    def test_objects_the_target_already_has_or_sees_are_reused(self):
+        domain_a, domain_b = _sibling_domains()
+        source, _ = _study_in_domain(domain_a)
+        existing = ElementaryAction.objects.create(
+            name="Recon",
+            attack_stage=ElementaryAction.AttackStage.KNOW,
+            folder=domain_b,
+        )
+
+        clone = duplicate_ebios_rm_study(
+            source, name="test study (copy)", folder=domain_b
+        )
+
+        assert (
+            _clone_steps(clone).get(elementary_action__name="Recon").elementary_action
+            == existing
+        )
+        assert ElementaryAction.objects.filter(name="Recon").count() == 2
+        # the built-in main entity is linked, never duplicated
+        assert clone.reference_entity == source.reference_entity
+        assert clone.reference_entity.builtin
+
+    def test_endpoint_checks_add_permission_for_each_copied_type(self):
+        startup(sender=None)
+        domain_a, domain_b = _sibling_domains(create_iam_groups=True)
+        for domain in (domain_a, domain_b):
+            Folder.create_default_ug_and_ra(domain)
+        source, refs = _study_in_domain(domain_a)
+        analyst = User.objects.create_user(email="analyst@clone-tests.com")
+        for domain in (domain_a, domain_b):
+            UserGroup.objects.get(
+                name=str(UserGroupCodename.ANALYST), folder=domain
+            ).user_set.add(analyst)
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=analyst)[1]}"
+        )
+        url = f"/api/ebios-rm/studies/{source.id}/duplicate/"
+        payload = {"name": "test study (copy)", "folder": str(domain_b.id)}
+
+        # analysts may not add entities, and the stakeholder's entity is only
+        # visible in domain A: copying it into domain B is refused, all rolled back
+        response = client.post(url, payload, format="json")
+        assert response.status_code == 403, response.content
+        assert not EbiosRMStudy.objects.filter(name="test study (copy)").exists()
+        assert not Asset.objects.filter(folder=domain_b).exists()
+
+        # once domain B can see the entity, no entity needs to be created
+        Entity.objects.filter(id=refs["entity"].id).update(folder=domain_b)
+        response = client.post(url, payload, format="json")
+        assert response.status_code == 200, response.content
+        assert Asset.objects.filter(folder=domain_b).exists()
 
 
 @pytest.mark.django_db

@@ -1099,16 +1099,80 @@ def _copy_scalar_fields(instance):
 
 @transaction.atomic
 def duplicate_ebios_rm_study(
-    source, *, name, description="", ref_id="", version=None, folder=None
+    source,
+    *,
+    name,
+    description="",
+    ref_id="",
+    version=None,
+    folder=None,
+    before_copy=None,
 ):
     """Deep-copy an EBIOS RM study into `folder` (the source's folder by default).
 
     Owned objects (feared events -> ro/to -> ... -> kill chains) are recreated
     and their intra-study links remapped through old_id -> new_obj maps; shared
-    objects (assets, threats, controls, elementary actions, ...) are referenced.
-    Ratings are recomputed from the copied inputs by the final save(), so the
-    clone matches the source.
+    objects (assets, threats, controls, elementary actions, entities, ...) are
+    referenced. Ratings are recomputed from the copied inputs by the final save(),
+    so the clone matches the source.
+
+    Into another domain, shared objects follow the rule risk assessment
+    duplication applies (see `resolve_related_object`): kept when the target
+    domain can see them, else copied into it (`before_copy(model)` runs first).
+    Links that are not copied (compliance assessments, responsibility matrix)
+    are dropped when the target domain cannot see them.
     """
+    from core.helpers import is_visible_from_folder, resolve_related_object
+
+    target_folder = folder or source.folder
+    cross_domain = target_folder.id != source.folder_id
+    if cross_domain:
+        target_parent_folders = list(target_folder.get_parent_folders())
+        sub_folders = list(target_folder.get_sub_folders())
+    # (model, source id) -> shared object the clone points at; `copied` holds the
+    # ones this run created in the target domain, with their source object
+    carried = {}
+    copied = {}
+
+    def carry(obj, on_copy=None):
+        """The shared object the clone points at instead of the source's `obj`."""
+        if not cross_domain or obj is None:
+            return obj
+        key = (type(obj), obj.pk)
+        if key not in carried:
+            target_obj, created = resolve_related_object(
+                obj,
+                target_folder,
+                target_parent_folders,
+                sub_folders,
+                before_copy=before_copy,
+            )
+            carried[key] = target_obj
+            if created:
+                copied[key] = (obj, target_obj)
+                if on_copy is not None:
+                    on_copy(obj, target_obj)
+        return carried[key]
+
+    def keep_if_visible(obj):
+        """`obj` when the target domain can see it, else None (link dropped)."""
+        if not cross_domain or obj is None:
+            return obj
+        if is_visible_from_folder(
+            obj, target_folder, target_parent_folders, sub_folders
+        ):
+            return obj
+        return None
+
+    def carry_shared(src_obj, dup_obj, field):
+        getattr(dup_obj, field).set(carry(obj) for obj in getattr(src_obj, field).all())
+
+    def carry_action_threat(action, action_copy):
+        # a copied elementary action must not point at a threat the target cannot see
+        if action.threat_id:
+            action_copy.threat = carry(action.threat)
+            action_copy.save(update_fields=["threat"])
+
     clone = EbiosRMStudy.objects.create(
         **{
             **_copy_scalar_fields(source),
@@ -1122,31 +1186,19 @@ def duplicate_ebios_rm_study(
             "status": EbiosRMStudy.Status.PLANNED,
             "meta": get_initial_meta(),
         },
-        folder=folder or source.folder,
+        folder=target_folder,
         risk_matrix=source.risk_matrix,
-        reference_entity=source.reference_entity,
-        responsibility_matrix=source.responsibility_matrix,
+        reference_entity=carry(source.reference_entity),
+        responsibility_matrix=keep_if_visible(source.responsibility_matrix),
         classification=source.classification,
     )
 
-    # Shared M2M objects: a same-domain clone relinks the very same objects
-    # (unchanged behavior). A cross-domain clone goes through
-    # duplicate_related_objects, which relinks an object when it is visible from
-    # the target folder and otherwise deep-copies it into the target domain, so
-    # the clone never points at objects invisible in its new domain. FK-referenced
-    # shared objects (risk_matrix, entity, ...) are relinked as-is either way.
-    cross_domain = clone.folder_id != source.folder_id
-
-    def carry_shared(src_obj, dup_obj, field):
-        if cross_domain:
-            from core.helpers import duplicate_related_objects
-
-            duplicate_related_objects(src_obj, dup_obj, clone.folder, field)
-        else:
-            getattr(dup_obj, field).set(getattr(src_obj, field).all())
-
     carry_shared(source, clone, "assets")
-    clone.compliance_assessments.set(source.compliance_assessments.all())
+    clone.compliance_assessments.set(
+        audit
+        for audit in source.compliance_assessments.all()
+        if keep_if_visible(audit) is not None
+    )
     clone.authors.set(source.authors.all())
     clone.reviewers.set(source.reviewers.all())
     clone.filtering_labels.set(source.filtering_labels.all())
@@ -1181,7 +1233,7 @@ def duplicate_ebios_rm_study(
         new_stakeholder = Stakeholder.objects.create(
             **_copy_scalar_fields(stakeholder),
             ebios_rm_study=clone,
-            entity=stakeholder.entity,
+            entity=carry(stakeholder.entity),
             category=stakeholder.category,
         )
         carry_shared(stakeholder, new_stakeholder, "applied_controls")
@@ -1247,7 +1299,9 @@ def duplicate_ebios_rm_study(
         new_step = KillChain.objects.create(
             **_copy_scalar_fields(step),
             operating_mode=operating_modes[step.operating_mode_id],
-            elementary_action=step.elementary_action,
+            elementary_action=carry(
+                step.elementary_action, on_copy=carry_action_threat
+            ),
         )
         carry_shared(step, new_step, "assets")
         steps[step.id] = new_step
@@ -1258,6 +1312,18 @@ def duplicate_ebios_rm_study(
         antecedents = [steps[a.id] for a in step.antecedents.all() if a.id in steps]
         if antecedents:
             steps[step.id].antecedents.set(antecedents)
+
+    # The field copy leaves copied assets without their parents, which
+    # get_assets() and the workshop 5 risk assessment walk: rewire them on the
+    # copies only, never on assets that were reused as they are.
+    for (model, _), (asset, asset_copy) in copied.items():
+        if model is not Asset:
+            continue
+        parents = (
+            carried.get((Asset, parent.pk)) or keep_if_visible(parent)
+            for parent in asset.parent_assets.all()
+        )
+        asset_copy.parent_assets.add(*[p for p in parents if p is not None])
 
     # recompute ratings from the copied inputs now that the graph is complete
     clone.save()
