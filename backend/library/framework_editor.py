@@ -353,11 +353,9 @@ def editor_doc_to_framework_object(
         if node_urn and node_urn in existing_nodes:
             canonical = node_urn
         else:
-            leaf = (
-                urn_safe_leaf(node.get("ref_id") or "")
-                or urn_safe_leaf(node.get("name") or "")
-                or f"node{index + 1}"
-            )
+            # A node without a ref_id gets node{N}, never its name slug: a
+            # 200-char name would blow the URN length budget (see the ADR).
+            leaf = urn_safe_leaf(node.get("ref_id") or "") or f"node{index + 1}"
             canonical = f"{base}:{_dedup_leaf(leaf, taken_leaves)}"
             if node_urn:
                 urn_map[node_urn] = canonical

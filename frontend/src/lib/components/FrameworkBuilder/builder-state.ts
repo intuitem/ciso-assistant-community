@@ -237,13 +237,9 @@ export function computeRefId(
 	parentRefId: string | null,
 	type: 'section' | 'requirement' | 'question' | 'choice'
 ): string {
-	const separator = type === 'question' ? '-q' : type === 'choice' ? '-c' : '.';
-	const prefix =
-		type === 'section'
-			? ''
-			: parentRefId
-				? `${parentRefId}${separator}`
-				: `${separator === '.' ? '' : ''}`;
+	// Only choices and requirements use the separator below; the '-q' form and
+	// the old `prefix` were dead (a question returns before the parent branch).
+	const separator = type === 'choice' ? '-c' : '.';
 
 	// Extract numeric last segments from sibling ref_ids
 	const nums: number[] = [];
@@ -251,13 +247,14 @@ export function computeRefId(
 		if (!refId) continue;
 		let lastPart: string;
 		if (type === 'question') {
-			// Only count the new default ("3"), or legacy "q3" / "<parent>-q3";
-			// a named question is skipped even when it ends in digits ("iso-27001").
-			const match = refId.match(/(?:^q?|-q)(\d+)$/);
+			// Count the new default ("3"), legacy "q3" / "<parent>-q3", and a
+			// collision-suffixed id ("3-2" counts as 3); a named question is
+			// skipped even when it ends in digits ("iso-27001").
+			const match = refId.match(/(?:^q?|-q)(\d+)(?:-\d+)?$/);
 			if (match) nums.push(parseInt(match[1], 10));
 			continue;
 		} else if (type === 'choice') {
-			const match = refId.match(/-c(\d+)$/);
+			const match = refId.match(/-c(\d+)(?:-\d+)?$/);
 			if (match) nums.push(parseInt(match[1], 10));
 			continue;
 		} else {
@@ -269,10 +266,14 @@ export function computeRefId(
 		if (!isNaN(n)) nums.push(n);
 	}
 
+	// A numbered sibling sets the next number. Otherwise sections and
+	// requirements fall back to a positional count, but questions and choices
+	// start at 1 so a set of only named questions doesn't skip the first to 2.
+	const countsFromName = type === 'section' || type === 'requirement';
 	const next =
 		nums.length > 0
 			? Math.max(...nums) + 1
-			: siblingRefIds.length > 0
+			: countsFromName && siblingRefIds.length > 0
 				? siblingRefIds.length + 1
 				: 1;
 

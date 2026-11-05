@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
-	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { apiErrorMessage } from '#lib/utils/api-error.js';
 	import { defaultMatrixObject, identitySlug } from './builder-helpers';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
@@ -66,8 +66,7 @@
 				})
 			});
 			const result = await res.json();
-			if (!res.ok)
-				throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
+			if (!res.ok) throw new Error(apiErrorMessage(result));
 			window.location.href = `/experimental/library-builder/${result.id}`;
 		} catch (e: any) {
 			setStatus(e.message, 'error');
@@ -92,10 +91,7 @@
 				body: form
 			});
 			const result = await res.json();
-			if (!res.ok)
-				throw new Error(
-					result.detail || (result.error ? safeTranslate(result.error) : JSON.stringify(result))
-				);
+			if (!res.ok) throw new Error(apiErrorMessage(result));
 			window.location.href = `/experimental/library-builder/${result.id}`;
 		} catch (e: any) {
 			setStatus(e.message, 'error');
@@ -153,8 +149,7 @@
 				window.location.href = `/experimental/library-builder/${result.draft}`;
 				return;
 			}
-			if (!res.ok)
-				throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
+			if (!res.ok) throw new Error(apiErrorMessage(result));
 			window.location.href = `/experimental/library-builder/${result.id}`;
 		} catch (e: any) {
 			setStatus(e.message, 'error');
@@ -251,8 +246,7 @@
 				body: JSON.stringify({ action: 'create', name: quickName, packager, ref_id: refId })
 			});
 			const created = await createRes.json();
-			if (!createRes.ok)
-				throw new Error(created.error ? safeTranslate(created.error) : JSON.stringify(created));
+			if (!createRes.ok) throw new Error(apiErrorMessage(created));
 			const draftBase = `/experimental/library-builder/${created.id}`;
 
 			if (kind === 'quick_form') {
@@ -262,8 +256,7 @@
 					body: JSON.stringify({ action: 'add-quick-form', name: quickName, ref_id: refId })
 				});
 				const result = await res.json();
-				if (!res.ok)
-					throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
+				if (!res.ok) throw new Error(apiErrorMessage(result));
 				window.location.href = `${draftBase}/quick-form?quick_form_urn=${encodeURIComponent(
 					result.quick_form_urn
 				)}`;
@@ -274,8 +267,7 @@
 					body: JSON.stringify({ action: 'add-framework' })
 				});
 				const result = await res.json();
-				if (!res.ok)
-					throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
+				if (!res.ok) throw new Error(apiErrorMessage(result));
 				window.location.href = `${draftBase}/framework?framework_urn=${encodeURIComponent(
 					result.framework_urn
 				)}`;
@@ -290,8 +282,7 @@
 					})
 				});
 				const result = await res.json();
-				if (!res.ok)
-					throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
+				if (!res.ok) throw new Error(apiErrorMessage(result));
 				window.location.href = `${draftBase}/matrix?matrix_urn=${encodeURIComponent(
 					result.object.urn
 				)}`;

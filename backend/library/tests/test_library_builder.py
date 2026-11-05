@@ -1118,6 +1118,35 @@ def test_framework_editor_doc_mints_urns_for_new_items():
     assert choice["urn"] == "urn:acme:risk:req_node:source-lib:b:question:1:choice:1"
 
 
+def test_new_node_without_ref_id_uses_node_n_not_the_name_slug():
+    from library import framework_editor as fw_editor
+
+    # A node minted without a ref_id must get node{N}, never its name slug:
+    # a 200-char name would overflow the child URNs (the CA-1854 case).
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    doc["nodes"].append(
+        {
+            "id": "tmp-node-noref",
+            "urn": None,
+            "ref_id": None,
+            "name": "A very long requirement name",
+            "parent_urn": "urn:acme:risk:req_node:source-lib:a",
+            "assessable": True,
+            "order_id": 9,
+        }
+    )
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    new_node = next(
+        n
+        for n in rebuilt["requirement_nodes"]
+        if n["urn"].rsplit(":", 1)[-1].startswith("node")
+    )
+    leaf = new_node["urn"].rsplit(":", 1)[-1]
+    assert leaf[4:].isdigit()
+    assert "a-very-long-requirement-name" not in new_node["urn"]
+
+
 def test_new_question_never_overwrites_an_existing_one():
     from library import framework_editor as fw_editor
 

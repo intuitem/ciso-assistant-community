@@ -5,6 +5,7 @@
 	import TranslationsEditor from '../TranslationsEditor.svelte';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { apiErrorMessage } from '#lib/utils/api-error.js';
 	import { createCopyHandler } from '#lib/components/FrameworkBuilder/builder-utils.svelte.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
@@ -145,18 +146,6 @@
 	resetForms();
 
 	let metaDirty = $derived(metaSnapshot() !== metaBaseline);
-
-	// DRF errors arrive as {detail}, {error: code}, or a field map
-	// ({packager: ["packagerTooLong"]}); surface the first one, translating codes.
-	function apiErrorMessage(err: any): string {
-		if (err?.detail) return err.detail;
-		if (err?.error) return safeTranslate(err.error);
-		for (const v of Object.values(err ?? {})) {
-			const code = Array.isArray(v) ? v[0] : v;
-			if (typeof code === 'string') return safeTranslate(code);
-		}
-		return JSON.stringify(err);
-	}
 
 	async function patch(payload: Record<string, any>): Promise<boolean> {
 		const res = await fetch(base(), {
