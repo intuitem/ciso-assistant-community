@@ -297,10 +297,13 @@ def _apply_scoring_defaults(framework: dict, meta: dict) -> None:
         isinstance(target, bool) or not isinstance(target, (int, float))
     ):
         raise BuilderError("The target score must be a number")
+    anchor = meta.get("anchor_na_to_target")
+    if anchor is not None and not isinstance(anchor, bool):
+        raise BuilderError("Anchoring N/A to the target must be true or false")
     for key in EDITOR_SCORING_KEYS:
         if key in meta:
             framework.pop(key, None)
-            if meta[key] not in (None, False):
+            if meta[key] is not None and meta[key] is not False:
                 framework[key] = meta[key]
 
 

@@ -1034,6 +1034,17 @@ def test_framework_editor_doc_edits_and_clears_scoring_defaults():
     assert "target_score" not in cleared
 
 
+def test_framework_editor_doc_keeps_a_zero_target_score():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    doc["framework_meta"].update(min_score=0, anchor_na_to_target=True, target_score=0)
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    assert rebuilt["target_score"] == 0
+    assert rebuilt["anchor_na_to_target"] is True
+
+
 def test_framework_editor_doc_without_scoring_keys_keeps_the_documents():
     """An older client's payload does not reset the framework's defaults."""
     from library import framework_editor as fw_editor
@@ -1057,6 +1068,8 @@ def test_framework_editor_doc_without_scoring_keys_keeps_the_documents():
         {"score_calculation_method": "median"},
         {"target_score": "high"},
         {"target_score": True},
+        {"anchor_na_to_target": "false"},
+        {"anchor_na_to_target": 1},
     ],
 )
 def test_framework_editor_doc_refuses_bad_scoring_defaults(meta):
@@ -1069,18 +1082,26 @@ def test_framework_editor_doc_refuses_bad_scoring_defaults(meta):
         fw_editor.editor_doc_to_framework_object(doc, existing=original)
 
 
+@pytest.mark.parametrize(
+    "fields, code",
+    [
+        ({"anchor_na_to_target": True}, "targetScoreRequired"),
+        ({"score_calculation_method": "median"}, "invalidScoreCalculationMethod"),
+        ({"target_score": "high"}, "invalidScoringDefaults"),
+    ],
+)
 @pytest.mark.django_db
-def test_validate_reports_scoring_defaults_problem(admin_client):
+def test_validate_reports_scoring_defaults_problem(admin_client, fields, code):
     draft = _create_draft(admin_client)
     framework = {
         **builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0],
-        "anchor_na_to_target": True,
+        **fields,
     }
     LibraryDraft.objects.filter(pk=draft["id"]).update(
         content={"frameworks": [framework]}
     )
     result = builder.validate_draft_document(LibraryDraft.objects.get(pk=draft["id"]))
-    assert "targetScoreRequired" in result["errors"]
+    assert code in result["errors"]
 
 
 def test_framework_editor_doc_mints_urns_for_new_items():

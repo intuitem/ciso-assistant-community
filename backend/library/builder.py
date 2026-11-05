@@ -978,16 +978,25 @@ def validate_draft_document(draft, *, user=None) -> dict:
         # so tell the author instead of silently diverging from the draft.
         for framework in normalized.get("frameworks") or []:
             # The loader only refuses these at import: report them before publish.
-            if problem := Framework.scoring_defaults_problem(
-                min_score=framework.get("min_score", 0),
-                max_score=framework.get("max_score", 100),
-                anchor_na_to_target=bool(framework.get("anchor_na_to_target")),
-                target_score=framework.get("target_score"),
-                implementation_groups_definition=framework.get(
-                    "implementation_groups_definition"
-                ),
-            ):
-                errors.append(problem[0])
+            try:
+                Framework.validate_score_calculation_method(
+                    framework.get("score_calculation_method", "average")
+                )
+            except ValueError:
+                errors.append("invalidScoreCalculationMethod")
+            try:
+                if problem := Framework.scoring_defaults_problem(
+                    min_score=framework.get("min_score", 0),
+                    max_score=framework.get("max_score", 100),
+                    anchor_na_to_target=bool(framework.get("anchor_na_to_target")),
+                    target_score=framework.get("target_score"),
+                    implementation_groups_definition=framework.get(
+                        "implementation_groups_definition"
+                    ),
+                ):
+                    errors.append(problem[0])
+            except TypeError:
+                errors.append("invalidScoringDefaults")
             for node in framework.get("requirement_nodes") or []:
                 if node.get("display_mode") == "splash" and node.get("assessable"):
                     warnings.append(
