@@ -139,16 +139,19 @@ def _access_denied_url(info, error="access_denied") -> str | None:
     return urlunsplit(parts._replace(query=urlencode(query)))
 
 
-def _silent_without_grant(request, info) -> bool:
-    # prompt=none answers without the consent form, and only that form creates
-    # the grant: a code issued here would be refused by backend-mcp anyway
-    prompts = (request.GET.get("prompt") or "").split()
-    return (
-        "none" in prompts
-        and not AppGrant.objects.filter(
-            user=request.user, client_id=info.get("client_id")
-        ).exists()
+def _silent_without_consent(request, info, mcp_request) -> bool:
+    # allauth answers prompt=none from the user's tokens for any client, so a
+    # client the user never approved could get a code without asking
+    if "none" not in (request.GET.get("prompt") or "").split():
+        return False
+    approvals = (
+        AppGrant.objects.all()
+        if mcp_request
+        else ConnectedAppUse.objects.filter(authorized_at__isnull=False)
     )
+    return not approvals.filter(
+        user=request.user, client_id=info.get("client_id")
+    ).exists()
 
 
 # Overriding dispatch drops the decorators allauth puts on it, so restate them.
@@ -223,7 +226,7 @@ class CISOAuthorizationView(AuthorizationView):
         mcp_request = is_mcp_request(scopes, info.get("resources"))
         reason = refusal_reason(request.user, mcp_request)
         if reason is None:
-            if mcp_request and _silent_without_grant(request, info):
+            if _silent_without_consent(request, info, mcp_request):
                 return HttpResponseRedirect(
                     _access_denied_url(info, error="consent_required")
                 )

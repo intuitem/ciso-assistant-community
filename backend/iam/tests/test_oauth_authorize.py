@@ -4,11 +4,14 @@ import secrets
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
-from allauth.idp.oidc.models import Client
+from datetime import timedelta
+
+from allauth.idp.oidc.models import Client, Token
+from django.utils import timezone
 from django.conf import settings
 from knox.models import AuthToken
 
-from iam.models import User
+from iam.models import ConnectedAppUse, User
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
 
@@ -84,6 +87,53 @@ def test_a_scim_token_cookie_is_not_a_session(client, oauth_client):
     client.cookies["token"] = raw
     response = client.get(AUTHORIZE_URL, _params(oauth_client))
     assert "/login?" in response["Location"]
+
+
+def _openid_token(app, user):
+    token = Token(
+        type=Token.Type.ACCESS_TOKEN,
+        client=app,
+        user=user,
+        expires_at=timezone.now() + timedelta(hours=1),
+    )
+    token.set_value(secrets.token_urlsafe(32))
+    token.set_scopes(["openid"])
+    token.save()
+
+
+def _silent(http, app, knox_token):
+    http.cookies["token"] = knox_token
+    return parse_qs(
+        urlsplit(
+            http.get(AUTHORIZE_URL, {**_params(app), "prompt": "none"})["Location"]
+        ).query
+    )
+
+
+def test_a_silent_request_from_an_unapproved_client_gets_no_code(
+    client, oauth_client, knox_token
+):
+    # the user holds a token for another app, which allauth alone would accept
+    user = AuthToken.objects.get().user
+    other = Client(name="Other", type=Client.Type.PUBLIC)
+    other.set_redirect_uris([REDIRECT_URI])
+    other.save()
+    _openid_token(other, user)
+
+    query = _silent(client, oauth_client, knox_token)
+
+    assert "code" not in query
+    assert query["error"] == ["consent_required"]
+
+
+def test_a_silent_request_from_an_approved_client_gets_a_code(
+    client, oauth_client, knox_token
+):
+    user = AuthToken.objects.get().user
+    ConnectedAppUse.record_authorization(user.pk, oauth_client.pk)
+    _openid_token(oauth_client, user)
+
+    assert "code" in _silent(client, oauth_client, knox_token)
 
 
 def test_logged_in_user_gets_code_and_iss(client, oauth_client, knox_token):
