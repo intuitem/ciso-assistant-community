@@ -159,7 +159,7 @@ objects:
     name: Denial of ML Service
     translations:
       de:
-        name: Ausfall des ML-Dienstes
+        name: Dienstverweigerung des ML-Dienstes
   - urn: urn:intuitem:risk:threat:google-saif:iic
     ref_id: IIC
     name: Insecure Integrated System

@@ -2,8 +2,7 @@ urn: urn:intuitem:risk:library:workflow-compliance-audit-progress-digest
 locale: en
 ref_id: workflow-compliance-audit-progress-digest
 name: Weekly audit progress digest
-description: Every Monday morning, list the audits still in progress with their score and requirement
-  breakdown, and email the summary.
+description: Every Monday morning, email the names and count of audits still in progress.
 copyright: © intuitem
 version: 2
 publication_date: 2026-08-28
@@ -13,7 +12,7 @@ translations:
   de:
     name: Auditfortschritt – Wochenübersicht
     description: |-
-      Listet jeden Montagmorgen die noch laufenden Audits mit ihrer Punktzahl und der Aufschlüsselung ihrer Anforderungen auf und versendet die Übersicht per E-Mail.
+      Versendet jeden Montagmorgen eine E-Mail mit den Namen und der Anzahl der noch laufenden Audits.
 
       Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
@@ -22,8 +21,7 @@ objects:
     schema_version: 1
     ref_id: audit-progress-digest
     name: Weekly audit progress digest
-    description: Every Monday morning, list the audits still in progress with their score and requirement
-      breakdown, and email the summary.
+    description: Every Monday morning, email the names and count of audits still in progress.
     graph:
       variables:
       - key: notify_emails

@@ -295,8 +295,8 @@ objects:
           uneinheitliches Vertrauen machen perimeterbasierte Sicherheitsmodelle unwirksam. Schwache Kontrollen
           für Authentisierung, Integrität, Vertraulichkeit oder Autorisierung zwischen Agenten erlauben Angreifern,
           Nachrichten abzufangen, zu manipulieren, zu fälschen oder zu blockieren. Unsichere Kommunikation
-          zwischen Agenten liegt vor, wenn der Austausch nicht angemessen authentisiert und weder auf Integrität
-          noch auf semantische Gültigkeit geprüft wird. So lassen sich Agentennachrichten und Handlungsabsichten
+          zwischen Agenten liegt vor, wenn der Austausch nicht angemessen authentisiert ist, nicht auf Integrität
+          geprüft wird oder eine Prüfung der semantischen Gültigkeit fehlt. So lassen sich Agentennachrichten und Handlungsabsichten
           abfangen, fälschen oder verändern. Die Bedrohung umfasst Transport, Routing, Diensterkennung und
           die semantische Ebene sowie verdeckte Kanäle oder Seitenkanäle, über die Agenten anhand zeitlicher
           oder verhaltensbezogener Merkmale Daten offenlegen oder ableiten. Dies unterscheidet sich von ASI03
