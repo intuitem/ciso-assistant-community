@@ -1073,6 +1073,13 @@ class AssetWriteSerializer(
         allow_null=True,
         write_only=True,
     )
+    lifecycle_stage = serializers.PrimaryKeyRelatedField(
+        queryset=Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE
+        ),
+        required=False,
+        allow_null=True,
+    )
     parent_assets = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Asset.objects.all(),
@@ -1162,6 +1169,13 @@ class AssetWriteSerializer(
             }
             extend_schema_field(schema)(fields[name])
         return fields
+
+    def validate_lifecycle_stage(self, stage):
+        # A hidden stage stays valid on assets that already carry it.
+        current = getattr(self.instance, "lifecycle_stage_id", None)
+        if stage and not stage.is_visible and stage.id != current:
+            raise serializers.ValidationError("This lifecycle stage is hidden.")
+        return stage
 
     def validate(self, data):
         self._check_linked_assets_changeable(data)
@@ -1277,6 +1291,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
     asset_class = FieldsRelatedField(["id", "name"])
+    lifecycle_stage = FieldsRelatedField(["id", "name"])
     overridden_children_capabilities = FieldsRelatedField(["id", "name"], many=True)
     solutions = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -1380,6 +1395,7 @@ class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
 
     folder = FieldsRelatedField()
     asset_class = FieldsRelatedField(["id", "name"])
+    lifecycle_stage = FieldsRelatedField(["id", "name"])
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     parent_assets = FieldsRelatedField(many=True)
@@ -1399,6 +1415,7 @@ class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
             "is_business_function",
             "folder",
             "asset_class",
+            "lifecycle_stage",
             "owner",
             "filtering_labels",
             "parent_assets",
@@ -1489,6 +1506,8 @@ class AssetImportExportSerializer(BaseModelSerializer):
     def get_asset_class(self, obj) -> str | None:
         return obj.asset_class.full_path if obj.asset_class else None
 
+    lifecycle_stage = serializers.SlugRelatedField(slug_field="name", read_only=True)
+
     class Meta:
         model = Asset
         fields = [
@@ -1500,6 +1519,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "disaster_recovery_objectives",
             "parent_assets",
             "asset_class",
+            "lifecycle_stage",
             "folder",
             "created_at",
             "updated_at",
@@ -7450,6 +7470,24 @@ class TerminologyWriteSerializer(BaseModelSerializer):
     # visibility, not rename or otherwise modify them.
     BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
+
+    def validate_field_path(self, value):
+        # Objects keep pointing at the term; under another path they fail limit_choices_to on save.
+        term = self.instance
+        if (
+            term
+            and value != term.field_path
+            and any(
+                rel.related_model._base_manager.filter(
+                    **{rel.field.name: term}
+                ).exists()
+                for rel in term._meta.related_objects
+            )
+        ):
+            raise serializers.ValidationError(
+                "This term is in use and cannot move to another field."
+            )
+        return value
 
     class Meta:
         model = Terminology
