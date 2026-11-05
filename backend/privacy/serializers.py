@@ -127,6 +127,10 @@ class ProcessingWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer
     dpia_required_note = serializers.CharField(
         write_only=True, required=False, allow_blank=True, default=""
     )
+    has_sensitive_personal_data = serializers.BooleanField(
+        read_only=True,
+        help_text="True when any of the processing's personal data is sensitive.",
+    )
 
     class Meta:
         model = Processing
@@ -211,13 +215,10 @@ class ProcessingReadSerializer(BaseModelSerializer):
     dpia = FieldsRelatedField(["id", "ref_id", "status", "submitted_at"])
     personal_data_categories = serializers.SerializerMethodField()
     data_subject_categories = serializers.SerializerMethodField()
-    has_sensitive_personal_data = serializers.SerializerMethodField(
-        help_text="True when any of the processing's personal data is sensitive."
+    has_sensitive_personal_data = serializers.BooleanField(
+        read_only=True,
+        help_text="True when any of the processing's personal data is sensitive.",
     )
-
-    def get_has_sensitive_personal_data(self, obj) -> bool:
-        # Reads the personal_data prefetch, like the categories below
-        return any(pd.is_sensitive for pd in obj.personal_data.all())
 
     def get_personal_data_categories(self, obj):
         seen = {}

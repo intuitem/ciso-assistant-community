@@ -177,6 +177,11 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     def dpia_applies(self) -> bool:
         return self.role in self.DPIA_ROLES
 
+    @property
+    def has_sensitive_personal_data(self) -> bool:
+        # Reads the personal_data prefetch when the queryset has one
+        return any(pd.is_sensitive for pd in self.personal_data.all())
+
     def metrics(self):
         return {}
 

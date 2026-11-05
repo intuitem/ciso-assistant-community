@@ -93,16 +93,28 @@ def test_moving_the_item_moves_the_flag(client, domain, contact_details):
     assert _flag(client, hiring) is True
 
 
-def test_the_flag_cannot_be_written(client, domain):
+def test_the_flag_cannot_be_written(client, domain, contact_details):
     processing = Processing.objects.create(name="Payroll", folder=domain)
+    _sensitive_item(processing, contact_details)
 
     response = client.patch(
         f"{PROCESSINGS_URL}{processing.id}/",
-        {"has_sensitive_personal_data": True},
+        {"has_sensitive_personal_data": False},
         format="json",
     )
     assert response.status_code == 200
-    assert _flag(client, processing) is False
+    assert response.json()["has_sensitive_personal_data"] is True
+    assert _flag(client, processing) is True
+
+
+def test_create_reports_the_flag(client, domain):
+    response = client.post(
+        PROCESSINGS_URL,
+        {"name": "Payroll", "folder": str(domain.id)},
+        format="json",
+    )
+    assert response.status_code == 201
+    assert response.json()["has_sensitive_personal_data"] is False
 
 
 def test_the_list_reports_the_flag(client, domain, contact_details):
