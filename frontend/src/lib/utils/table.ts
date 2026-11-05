@@ -4237,24 +4237,6 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
-	// Admin-only on the API (UserWriteSerializer): a non-admin gets per-row refusals.
-	users: [
-		{
-			type: 'change_field',
-			label: 'allowAiApps',
-			icon: 'fa-solid fa-plug',
-			field: 'can_connect_apps',
-			value: 'true'
-		},
-		{
-			type: 'change_field',
-			label: 'disallowAiApps',
-			icon: 'fa-solid fa-plug-circle-xmark',
-			field: 'can_connect_apps',
-			value: 'false',
-			confirmMessage: 'disallowAiAppsConfirm'
-		}
-	],
 	'document-containers': [
 		{
 			type: 'group',

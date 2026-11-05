@@ -196,13 +196,16 @@ class ConnectedAppGroupView(views.APIView):
         if client is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         client_ids = [c.id for c in group]
-        user_ids = list(
-            Token.objects.filter(client_id__in=client_ids, user__isnull=False)
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
         with transaction.atomic():
-            revoke_app_tokens(user_ids, client_ids)
+            users = (
+                Token.objects.filter(client_id__in=client_ids, user__isnull=False)
+                .values("user_id")
+                .distinct()
+                .count()
+            )
+            # by client, not by a list read beforehand: a token issued meanwhile
+            # must go too
+            revoke_app_tokens(None, client_ids)
             # deleting a self-registered client stops its ID being reused; an
             # admin-registered one is configuration and stays
             if is_self_registered(client):
@@ -212,9 +215,9 @@ class ConnectedAppGroupView(views.APIView):
             admin=request.user.id,
             name=client.name,
             clients=client_ids,
-            users=len(user_ids),
+            users=users,
         )
         return Response(
-            {"registrations": len(client_ids), "users": len(user_ids)},
+            {"registrations": len(client_ids), "users": users},
             status=status.HTTP_200_OK,
         )

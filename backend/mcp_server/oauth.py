@@ -1,10 +1,10 @@
 from allauth.idp.oidc.models import Token
 from asgiref.sync import sync_to_async
 from django.db import close_old_connections
-from knox.auth import TokenAuthentication
 from mcp.server.auth.provider import AccessToken
 from rest_framework.exceptions import AuthenticationFailed
 
+from iam.authentication import KnoxTokenAuthentication
 from iam.mcp_access import mcp_enabled
 from iam.models import AppGrant, ConnectedAppUse
 from iam.oidc_adapter import MCP_SCOPES, mcp_resource
@@ -52,7 +52,10 @@ def _from_oauth(raw: str, token: Token) -> AccessToken | None:
 def _from_personal_access_token(raw: str) -> AccessToken | None:
     # Keeps existing PAT setups ("API key" in Copilot Studio) working as Bearer.
     try:
-        user, auth_token = TokenAuthentication().authenticate_credentials(raw.encode())
+        # the project's class: it also refuses SCIM provisioning tokens
+        user, auth_token = KnoxTokenAuthentication().authenticate_credentials(
+            raw.encode()
+        )
     except AuthenticationFailed:
         return None
     if not user.is_active or not user.can_connect_apps:

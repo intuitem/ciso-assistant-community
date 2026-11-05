@@ -550,7 +550,8 @@
 						</div>
 					</dl>
 				{/if}
-				{#if page.data.featureflags?.mcp}
+				<!-- kept while the flag is off if apps remain, so they can still be revoked -->
+				{#if page.data.featureflags?.mcp || data.connectedApps?.length}
 					<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 							<dt class="font-medium">{m.connectedApps()}</dt>
@@ -571,6 +572,8 @@
 											<i class="fa-solid fa-circle-info mt-0.5"></i>
 											<span>{m.connectAppsNotAllowed()}</span>
 										</p>
+									{:else if data.connectedApps === null}
+										<p class="text-sm text-error-500">{m.connectedAppsLoadError()}</p>
 									{:else if data.connectedApps.length === 0}
 										<p class="text-sm text-surface-600-400">{m.noConnectedApps()}</p>
 									{:else}

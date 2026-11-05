@@ -43,13 +43,17 @@ def refusal_reason(user, mcp_request: bool) -> str | None:
 
 def revoke_app_tokens(user_ids, client_ids=None) -> int:
     """Delete every token type (a pending code could still be redeemed) and the
-    usage and grant rows. Service-account tokens carry no user and are never
-    matched."""
+    usage and grant rows. `user_ids=None` means every user. Service-account
+    tokens carry no user and are never matched."""
     from iam.models import AppGrant, ConnectedAppUse
 
-    tokens = Token.objects.filter(user_id__in=user_ids, client__isnull=False)
-    uses = ConnectedAppUse.objects.filter(user_id__in=user_ids)
-    grants = AppGrant.objects.filter(user_id__in=user_ids)
+    tokens = Token.objects.filter(user__isnull=False, client__isnull=False)
+    uses = ConnectedAppUse.objects.all()
+    grants = AppGrant.objects.all()
+    if user_ids is not None:
+        tokens = tokens.filter(user_id__in=user_ids)
+        uses = uses.filter(user_id__in=user_ids)
+        grants = grants.filter(user_id__in=user_ids)
     if client_ids is not None:
         tokens = tokens.filter(client_id__in=client_ids)
         uses = uses.filter(client_id__in=client_ids)
@@ -60,7 +64,7 @@ def revoke_app_tokens(user_ids, client_ids=None) -> int:
         grants.delete()
     logger.info(
         "app tokens revoked",
-        users=[str(u) for u in user_ids],
+        users=None if user_ids is None else [str(u) for u in user_ids],
         clients=client_ids,
         deleted_tokens=deleted,
     )

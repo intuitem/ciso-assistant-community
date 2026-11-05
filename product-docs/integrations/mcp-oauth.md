@@ -127,11 +127,12 @@ To accept only some clients, list the hosts they may send users back to after
 sign-in:
 
 ```env
-OAUTH_DCR_ALLOWED_REDIRECT_HOSTS=global.consent.azure-apim.net,localhost
+OAUTH_DCR_ALLOWED_REDIRECT_HOSTS=global.consent.azure-apim.net,localhost,127.0.0.1
 ```
 
-`global.consent.azure-apim.net` is Copilot Studio. `localhost` covers Claude
-Code and other clients that run on the user's machine. Leave the variable empty
+`global.consent.azure-apim.net` is Copilot Studio. `localhost` and `127.0.0.1`
+cover Claude Code and other clients that run on the user's machine. Hosts are
+compared exactly, so list each loopback name your clients use. Leave the variable empty
 to accept any host. Redirects must use HTTPS, except for loopback addresses.
 {% endstep %}
 
@@ -158,8 +159,8 @@ administrator decides so.
 1. Go to **Extra** > **Settings** > **Feature flags** and turn on **AI app
    connections (MCP)**.
 2. Allow the users who may connect an app: in **Organization** > **Users**,
-   edit a user and tick **Can connect AI apps (MCP)**, or select several users
-   and use **Allow AI apps**. Users who can connect show an **AI apps** badge.
+   edit a user and tick **Can connect AI apps (MCP)**. The users list has a
+   column showing who can connect.
 
 Unticking a user, or deactivating them, disconnects all their apps at once.
 Turning the feature flag off blocks every connection but keeps them: they work
@@ -297,15 +298,18 @@ A connection is one user with one app. When it goes over, the tool answers with
 an error that tells the agent to wait, and the call is logged as `limited`. Set
 a variable to `0` to turn that limit off.
 
-The counters are kept in the cache. With the default in-memory cache, each
-worker counts on its own and the counters reset on restart; use a shared cache
-for exact limits.
+The limits are soft. The data budget is checked before a call, so the call that
+crosses it still completes. The counters are kept in the cache. With the
+default in-memory cache, each worker counts on its own and the counters reset
+on restart; use a shared cache for exact limits.
 
 ### Personal Access Tokens still work
 
-`backend-mcp` also accepts a PAT, sent as `Authorization: Bearer <PAT>`. Existing
-setups that use **API key** authentication keep working. Profiles don't apply
-to a PAT: it gets the user's full permissions.
+`backend-mcp` also accepts a PAT, sent as `Authorization: Bearer <PAT>`, so
+setups that use **API key** authentication can keep working. After an upgrade,
+an administrator must first turn on the **AI app connections (MCP)** feature flag
+and tick **Can connect AI apps (MCP)** for the PAT's user: both are off by
+default. Profiles don't apply to a PAT: it gets the user's full permissions.
 
 ### Troubleshooting
 

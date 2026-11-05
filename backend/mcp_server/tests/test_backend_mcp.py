@@ -136,6 +136,13 @@ class TestVerifier:
         assert access.subject == str(user.pk)
         assert access.scopes == ["mcp:read"]
 
+    def test_a_scim_provisioning_token_is_refused(self, user):
+        from iam.models import SCIMToken
+
+        auth_token, raw = AuthToken.objects.create(user=user)
+        SCIMToken.objects.create(auth_token=auth_token)
+        assert verify(raw) is None
+
     def test_garbage_is_refused(self):
         assert verify("not-a-token") is None
 

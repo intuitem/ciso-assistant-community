@@ -123,6 +123,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - OAUTH_DCR_ENABLED=false
       - CA_MCP_READ_ONLY=true
+      # the public host, port included: change it with CISO_ASSISTANT_URL
       - CA_MCP_ALLOWED_HOSTS=localhost:8443
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache

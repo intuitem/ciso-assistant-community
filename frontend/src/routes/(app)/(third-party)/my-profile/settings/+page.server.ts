@@ -76,10 +76,11 @@ export const load: PageServerLoad = async (event) => {
 		personalAccessTokens = await personalAccessTokensResponse.json();
 	}
 
+	// null on failure, so the page can tell an error from "no apps"
 	const connectedApps = await event
 		.fetch(`${BASE_API_URL}/iam/connected-apps/`)
-		.then((res) => (res.ok ? res.json() : []))
-		.catch(() => []);
+		.then((res) => (res.ok ? res.json() : null))
+		.catch(() => null);
 
 	// Third parties get the same narrow nav whatever the flags say, so there is
 	// nothing for them to personalise — same reasoning as `patAllowed`.

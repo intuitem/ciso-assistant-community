@@ -60,7 +60,7 @@ def test_the_guard_refuses_an_action_not_granted(connected):
     async def tool():
         return "ran"
 
-    guarded = server._require_action(tool, actions.CREATE)
+    guarded = server._require_action(tool, {actions.CREATE})
 
     connected(_access(granted=["read", "update"], profile="Read and update"))
     refused = asyncio.run(guarded())
@@ -69,6 +69,29 @@ def test_the_guard_refuses_an_action_not_granted(connected):
 
     connected(_access(granted=["read", "create"]))
     assert asyncio.run(guarded()) == "ran"
+
+
+def test_the_ebios_sync_needs_create_and_update(connected):
+    async def tool():
+        return "ran"
+
+    name = server.sync_risk_assessment_from_ebios_rm.__name__
+    guarded = server._require_action(tool, server.needed_actions(name))
+
+    connected(_access(granted=["read", "update"]))
+    assert "creating data" in asyncio.run(guarded())
+
+    connected(_access(granted=["read", "create", "update"]))
+    assert asyncio.run(guarded()) == "ran"
+
+
+def test_the_oauth_server_never_offers_create_evidence(monkeypatch):
+    monkeypatch.setattr(server.config, "IS_HTTP", False)
+    app = server.ActionFilteredServer("test")
+    server._register_on(app, read_only=False, remote=True)
+    names = {tool.name for tool in app._tool_manager.list_tools()}
+    assert "create_evidence" not in names
+    assert "create_folder" in names
 
 
 def test_the_tool_list_hides_tools_not_granted(connected):

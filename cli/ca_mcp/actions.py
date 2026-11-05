@@ -27,10 +27,6 @@ def granted_actions(access) -> set[str]:
     return {READ}
 
 
-def allows(access, needed: str) -> bool:
-    return needed in granted_actions(access)
-
-
 def profile_name(access) -> str | None:
     return (access.claims or {}).get("profile") if access else None
 

@@ -317,6 +317,16 @@ TOOL_ACTIONS = {
     **{tool.__name__: actions.UPDATE for tool in UPDATE_TOOLS},
 }
 
+# Tools that do more than their action says.
+ALSO_NEEDS = {
+    # creates the risk scenarios that are missing
+    sync_risk_assessment_from_ebios_rm.__name__: {actions.CREATE},
+}
+
+
+def needed_actions(name: str) -> set[str]:
+    return {TOOL_ACTIONS.get(name, actions.READ)} | ALSO_NEEDS.get(name, set())
+
 
 LOOPBACK_HOSTS = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
 LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
@@ -372,7 +382,7 @@ def _offload(fn):
     return runner
 
 
-def _register_on(server, read_only, guard_write=None, hooks=None):
+def _register_on(server, read_only, guard_write=None, hooks=None, remote=False):
     def add(tool, runner, is_read):
         if hooks:
             runner = _with_hooks(runner, tool.__name__, hooks)
@@ -383,11 +393,12 @@ def _register_on(server, read_only, guard_write=None, hooks=None):
     if read_only:
         return
     for tool in WRITE_TOOLS:
-        if config.IS_HTTP and tool is create_evidence:
+        # reads files from the server's disk: only for a local stdio user
+        if (remote or config.IS_HTTP) and tool is create_evidence:
             continue
         runner = _offload(tool)
         if guard_write:
-            runner = guard_write(runner, TOOL_ACTIONS[tool.__name__])
+            runner = guard_write(runner, needed_actions(tool.__name__))
         add(tool, runner, is_read=False)
 
 
@@ -517,8 +528,10 @@ def _require_action(runner, needed):
     @functools.wraps(runner)
     async def guarded(*args, **kwargs):
         access = get_access_token()
-        if not actions.allows(access, needed):
-            return actions.refusal(access, needed)
+        missing = needed - actions.granted_actions(access)
+        if missing:
+            first = min(missing, key=actions.ACTIONS.index)
+            return actions.refusal(access, first)
         return await runner(*args, **kwargs)
 
     return guarded
@@ -535,7 +548,7 @@ class ActionFilteredServer(MCPServer):
         return [
             tool
             for tool in await super().list_tools()
-            if TOOL_ACTIONS.get(tool.name, actions.READ) in granted
+            if needed_actions(tool.name) <= granted
         ]
 
 
@@ -567,7 +580,9 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
             validate_token_resource=True,
         ),
     )
-    _register_on(server, read_only, guard_write=_require_action, hooks=hooks)
+    _register_on(
+        server, read_only, guard_write=_require_action, hooks=hooks, remote=True
+    )
     runner = (
         _with_hooks(get_my_access, "get_my_access", hooks) if hooks else get_my_access
     )
