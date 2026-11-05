@@ -606,17 +606,13 @@ objects:
       - KRITIS
       - BUND
     - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1.3
-      assessable: true
+      assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1
       ref_id: 32.1.3
       name: "\xA7 32 Abs. 1 Nr. 3"
       description: "auf Ersuchen des Bundesamtes eine Zwischenmeldung \xFCber relevante\
         \ Statusaktualisierungen;"
-      implementation_groups:
-      - EINR
-      - KRITIS
-      - BUND
     - urn: urn:intuitem:risk:req_node:bsi-bsig-nis2-2025:32.1.4
       assessable: true
       depth: 5

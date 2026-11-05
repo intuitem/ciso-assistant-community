@@ -84,6 +84,7 @@ ASSESSABLE = {
 }
 # Absätze split per Nummer, each Nummer being assessable: {(§, Absatz): groups}
 SPLIT_NUMBERS = {(30, 2): A, (32, 1): A}
+CONTEXT_NUMBERS = {(32, 1, 3)}  # interim report: only "auf Ersuchen des Bundesamtes"
 
 # § 66 keeps the previous wording applicable until the KRITIS-DachG regulation is in force.
 _T66 = (
@@ -232,14 +233,19 @@ def rows_for(items):
                 intro, nums = split_numbers(body)
                 add(i in cfg, depth + 1, ref, name, intro, ann, cfg.get(i))
                 for n, item in nums:
+                    groups = (
+                        None
+                        if (nr, i, n) in CONTEXT_NUMBERS
+                        else SPLIT_NUMBERS[(nr, i)]
+                    )
                     add(
-                        True,
+                        bool(groups),
                         depth + 2,
                         f"{ref}.{n}",
                         f"{name} Nr. {n}",
                         item,
                         None,
-                        SPLIT_NUMBERS[(nr, i)],
+                        groups,
                     )
             else:
                 add(i in cfg, depth + 1, ref, name, body, ann, cfg.get(i))
