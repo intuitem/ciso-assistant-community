@@ -151,6 +151,28 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
         exclude = ["translations"]
 
 
+class InlineMetricDefinitionSerializer(MetricDefinitionWriteSerializer):
+    """The definition written with a metric made in one step: its own
+    columns only. The domain and, unless given, the name come from the
+    metric; a library, formula or labels are never set from the form."""
+
+    class Meta:
+        model = MetricDefinition
+        extra_kwargs = {"name": {"required": False, "allow_blank": True}}
+        fields = [
+            "name",
+            "description",
+            "ref_id",
+            "category",
+            "unit",
+            "choices_definition",
+            "higher_is_better",
+            "decimals",
+            "default_target",
+            "default_collection_frequency",
+        ]
+
+
 class MetricDefinitionReadSerializer(ReferentialSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
@@ -172,7 +194,9 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
     # metric instead of a `metric_definition` picked beforehand. The
     # definition is created in the metric's domain, named after the metric.
     # Null when a definition is picked instead: the form always sends both.
-    definition = serializers.JSONField(write_only=True, required=False, allow_null=True)
+    definition = InlineMetricDefinitionSerializer(
+        write_only=True, required=False, allow_null=True
+    )
 
     organisation_objectives = serializers.PrimaryKeyRelatedField(
         queryset=OrganisationObjective.objects.all(),
@@ -195,34 +219,34 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
         return super().to_internal_value(data)
 
     def create(self, validated_data):
-        from django.db import transaction
+        from rest_framework.exceptions import PermissionDenied
 
-        from metrology.definitions import definition_name
+        from metrology.definitions import create_metric
 
         inline = validated_data.pop("definition", None)
-        folder = validated_data["folder"]
-        if inline is not None:
-            # Both rights before either write, and both writes in one
-            # transaction: a refused metric leaves no definition behind.
-            self._check_object_perm(validated_data, "add", folder=folder)
-            self._check_object_perm(
-                validated_data, "add", folder=folder, model=MetricDefinition
+        if inline is None:
+            return self._create_with_defaults(validated_data)
+        fields = dict(inline)
+        name = fields.pop("name", None) or validated_data["name"]
+
+        def new_instance(definition):
+            return self._create_with_defaults(
+                {**validated_data, "metric_definition": definition}
             )
-            data = {
-                **inline,
-                "folder": str(folder.id),
-                "name": definition_name(
-                    str(inline.get("name") or validated_data["name"]), folder
-                ),
-            }
-            data.pop("library", None)
-            nested = MetricDefinitionWriteSerializer(data=data, context=self.context)
-            if not nested.is_valid():
-                raise serializers.ValidationError({"definition": nested.errors})
-            with transaction.atomic():
-                validated_data["metric_definition"] = nested.save()
-                return self._create_with_defaults(validated_data)
-        return self._create_with_defaults(validated_data)
+
+        try:
+            _definition, instance = create_metric(
+                self.context["request"].user,
+                validated_data["folder"],
+                name,
+                fields,
+                new_instance,
+            )
+        except PermissionError:
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add objects in this folder"}
+            )
+        return instance
 
     def _create_with_defaults(self, validated_data):
         definition = validated_data["metric_definition"]
@@ -258,10 +282,6 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
             return attrs.get(name, getattr(self.instance, name, None))
 
         inline = attrs.get("definition")
-        if inline is not None and not isinstance(inline, dict):
-            raise serializers.ValidationError(
-                {"definition": [_("The definition must be an object")]}
-            )
         if self.instance is None and not attrs.get("metric_definition") and not inline:
             raise serializers.ValidationError(
                 {"metric_definition": [_("This field is required.")]}

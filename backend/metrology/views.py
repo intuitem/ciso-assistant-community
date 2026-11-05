@@ -508,12 +508,8 @@ class MetricInstanceViewSet(BaseModelViewSet):
         the user may create metrics in; the frequency is the least frequent
         pick's. Instances the user may not read are left out, as if they did
         not exist."""
-        from metrology.compose import (
-            common_domain,
-            creatable_in,
-            least_frequent,
-            readable_instances,
-        )
+        from metrology.compose import common_domain, least_frequent, readable_instances
+        from metrology.definitions import creatable_in
 
         ids = [_as_uuid(i) for i in request.query_params.getlist("instance")]
         found = readable_instances(request.user, [i for i in ids if i is not None])
@@ -576,9 +572,9 @@ class MetricInstanceViewSet(BaseModelViewSet):
             CompositionError,
             compose,
             is_composable,
-            permitted,
             readable_instances,
         )
+        from metrology.definitions import permitted
 
         instance = self.get_object()
         definition = instance.metric_definition

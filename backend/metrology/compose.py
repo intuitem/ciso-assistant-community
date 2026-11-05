@@ -25,17 +25,15 @@ from django.db import transaction
 from core.models import Terminology
 from iam.models import Folder, RoleAssignment
 
+from .definitions import create_metric, creatable_in, new_definition, permitted
 from .models import MetricDefinition, MetricInstance, normalize_frequency
 from .series import MAX_INPUTS, validate_inputs, validate_series_expression
 
 # From the most to the least frequent: a computed metric defaults to the
 # frequency of its least frequent input, so no period repeats a value.
 FREQUENCY_ORDER = [value for value, _label in MetricInstance.Frequency.choices]
-CREATE = ["add_metricinstance", "add_metricdefinition"]
 # A level's name and reference are what a formula returns: short texts.
 MAX_LEVEL_TEXT = 100
-# MetricDefinition.name's length.
-MAX_NAME_LENGTH = 200
 QUALITATIVE = MetricDefinition.Category.QUALITATIVE
 QUANTITATIVE = MetricDefinition.Category.QUANTITATIVE
 # A CEL string literal, single- or double-quoted, escapes allowed.
@@ -110,23 +108,6 @@ def unreadable_picks(user, choices, previous=None):
     ids = [_as_uuid(pick) for pick in new]
     readable = readable_instances(user, [i for i in ids if i is not None])
     return [pick for pick, i in zip(new, ids) if i not in readable]
-
-
-def permitted(user, codenames, folder):
-    """Whether the user holds every one of ``codenames`` in ``folder``."""
-    from django.contrib.auth.models import Permission
-
-    permissions = list(Permission.objects.filter(codename__in=codenames))
-    return len(permissions) == len(codenames) and all(
-        RoleAssignment.is_access_allowed(user=user, perm=permission, folder=folder)
-        for permission in permissions
-    )
-
-
-def creatable_in(user, folder):
-    """Whether the user may create both the definition and the instance in
-    ``folder``."""
-    return permitted(user, CREATE, folder)
 
 
 def is_composable(instance):
@@ -274,18 +255,6 @@ def _direction(value):
     return None if value is None else value is not False
 
 
-def _definition_name(name, folder):
-    """The metric's name, made unique among the domain's definitions."""
-    taken = MetricDefinition.objects.filter(folder=folder)
-    candidate, n = name, 2
-    while taken.filter(name__iexact=candidate).exists():
-        suffix = f" ({n})"
-        # Room for the suffix: a name at the limit stays valid.
-        candidate = name[: MAX_NAME_LENGTH - len(suffix)] + suffix
-        n += 1
-    return candidate
-
-
 def compose(user, data, instance=None):
     """Create a computed metric from ``data``, or edit ``instance``, one the
     modal can show (is_composable). Returns (instance, outcome): "created",
@@ -399,25 +368,39 @@ def compose(user, data, instance=None):
         "higher_is_better": _direction(data.get("higher_is_better")),
     }
     picks = {key: {"pick": str(picked.id)} for key, picked in pairs}
+
+    def new_instance(definition):
+        return MetricInstance.objects.create(
+            name=name,
+            description=data.get("description") or "",
+            folder=folder,
+            metric_definition=definition,
+            status=MetricInstance.Status.ACTIVE,
+            collection_frequency=frequency,
+            target_value=target_value,
+            # Pinned, every one: the author picked these instances, and
+            # a second instance of a metric appearing later in the
+            # domain must not change what this one reads.
+            input_choices=picks,
+        )
+
     try:
         with transaction.atomic():
             if instance is None:
-                definition, outcome = _definition_for(
-                    user, folder, name, specs, expression, shape
+                definition = _existing_definition(
+                    user, folder, specs, expression, shape
                 )
-                instance = MetricInstance.objects.create(
-                    name=name,
-                    description=data.get("description") or "",
-                    folder=folder,
-                    metric_definition=definition,
-                    status=MetricInstance.Status.ACTIVE,
-                    collection_frequency=frequency,
-                    target_value=target_value,
-                    # Pinned, every one: the author picked these instances, and
-                    # a second instance of a metric appearing later in the
-                    # domain must not change what this one reads.
-                    input_choices=picks,
-                )
+                if definition is not None:
+                    instance, outcome = new_instance(definition), "reused"
+                else:
+                    definition, instance = create_metric(
+                        user,
+                        folder,
+                        name,
+                        _definition_fields(specs, expression, shape),
+                        new_instance,
+                    )
+                    outcome = "created"
             else:
                 definition, outcome = _definition_after_edit(
                     user, instance, folder, name, specs, expression, shape
@@ -455,23 +438,17 @@ def compose(user, data, instance=None):
     return instance, outcome
 
 
-def _definition_for(user, folder, name, specs, expression, shape):
-    """An identical definition the user can read, or a new one in
-    ``folder``: (definition, "reused" | "created")."""
-    definition = _existing_definition(user, folder, specs, expression, shape)
-    if definition is not None:
-        return definition, "reused"
-    definition = MetricDefinition.objects.create(
-        name=_definition_name(name, folder),
-        folder=folder,
-        category=shape["category"],
-        choices_definition=shape["levels"] or None,
-        unit=shape["unit"],
-        higher_is_better=shape["higher_is_better"],
-        inputs=specs,
-        expression=expression,
-    )
-    return definition, "created"
+def _definition_fields(specs, expression, shape):
+    """The definition's own columns for a formula over ``specs`` into
+    ``shape``."""
+    return {
+        "category": shape["category"],
+        "choices_definition": shape["levels"] or None,
+        "unit": shape["unit"],
+        "higher_is_better": shape["higher_is_better"],
+        "inputs": specs,
+        "expression": expression,
+    }
 
 
 def _definition_after_edit(user, instance, folder, name, specs, expression, shape):
@@ -531,7 +508,11 @@ def _definition_after_edit(user, instance, folder, name, specs, expression, shap
         )
     if not permitted(user, ["add_metricdefinition"], folder):
         raise PermissionError
-    definition, _outcome = _definition_for(user, folder, name, specs, expression, shape)
+    definition = _existing_definition(user, folder, specs, expression, shape)
+    if definition is None:
+        definition = new_definition(
+            folder, name, **_definition_fields(specs, expression, shape)
+        )
     return definition, "forked"
 
 

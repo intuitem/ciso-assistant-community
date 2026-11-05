@@ -6,9 +6,12 @@ from django.db import transaction
 from django.db.models import Count
 
 from iam.models import RoleAssignment
-from metrology.compose import _definition_name, permitted
 from metrology.models import MetricDefinition, MetricInstance
 
+# What creating a metric with its definition takes, in the metric's domain.
+CREATE = ["add_metricinstance", "add_metricdefinition"]
+# MetricDefinition.name's length.
+MAX_NAME_LENGTH = 200
 # How many definitions the similar-name hint shows, and the shortest name it
 # looks for: two letters match too much.
 SIMILAR_LIMIT = 5
@@ -21,6 +24,60 @@ class MergeError(Exception):
     def __init__(self, message):
         super().__init__(message)
         self.message = message
+
+
+def permitted(user, codenames, folder):
+    """Whether the user holds every one of ``codenames`` in ``folder``."""
+    from django.contrib.auth.models import Permission
+
+    permissions = list(Permission.objects.filter(codename__in=codenames))
+    return len(permissions) == len(codenames) and all(
+        RoleAssignment.is_access_allowed(user=user, perm=permission, folder=folder)
+        for permission in permissions
+    )
+
+
+def creatable_in(user, folder):
+    """Whether the user may create both the definition and the instance in
+    ``folder``."""
+    return permitted(user, CREATE, folder)
+
+
+def definition_name(name, folder):
+    """The definition created for a metric is named after it, suffixed when
+    the domain already has one of that name."""
+    name = name.strip()
+    taken = MetricDefinition.objects.filter(folder=folder)
+    candidate, n = name, 2
+    while taken.filter(name__iexact=candidate).exists():
+        suffix = f" ({n})"
+        # Room for the suffix: a name at the limit stays valid.
+        candidate = name[: MAX_NAME_LENGTH - len(suffix)] + suffix
+        n += 1
+    return candidate
+
+
+def new_definition(folder, name, **fields):
+    """The definition a metric creates for itself: in the metric's domain,
+    named after the metric, with ``fields`` as its own columns."""
+    return MetricDefinition.objects.create(
+        folder=folder, name=definition_name(name, folder), **fields
+    )
+
+
+def create_metric(user, folder, name, definition, instance):
+    """A metric made in one step, the way both the metric form and the
+    compose modal make one: ``definition`` (the definition's own columns)
+    becomes a definition in ``folder`` named after the metric, and
+    ``instance`` (called with it) the metric measuring it. Both rights are
+    checked before either write, and both writes share a transaction: a
+    refused metric leaves no definition behind. Returns (definition,
+    instance); raises PermissionError."""
+    if not creatable_in(user, folder):
+        raise PermissionError
+    with transaction.atomic():
+        created = new_definition(folder, name, **definition)
+        return created, instance(created)
 
 
 def similar_definitions(user, name, category=None, exclude=None, mergeable=False):
@@ -156,9 +213,3 @@ def _level_names(definition):
     if not isinstance(levels, list):
         return []
     return [level.get("name") if isinstance(level, dict) else None for level in levels]
-
-
-def definition_name(name, folder):
-    """The definition created for a metric is named after it, suffixed when
-    the domain already has one of that name."""
-    return _definition_name(name.strip(), folder)
