@@ -593,6 +593,36 @@ def test_import_yaml_rejects_overlong_packager(admin_client):
 
 
 @pytest.mark.django_db
+def test_import_yaml_rejects_non_urn_safe_packager(admin_client):
+    # objects.create bypasses the packager RegexValidator, so a non-URN-safe
+    # packager from a hand-crafted file must be refused at import, not later.
+    document = {
+        "name": "Imported",
+        "packager": "My Org!",
+        "ref_id": "mylib",
+        "objects": {
+            "threats": [
+                {
+                    "urn": "urn:me:risk:threat:mylib:t1",
+                    "ref_id": "T1",
+                    "name": "My threat",
+                }
+            ]
+        },
+    }
+    upload = SimpleUploadedFile(
+        "lib.yaml", yaml.safe_dump(document).encode(), content_type="application/x-yaml"
+    )
+    response = admin_client.post(
+        reverse("library-drafts-import-yaml"), {"file": upload}, format="multipart"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
+        response.content
+    )
+    assert response.data["error"] == "packagerTooLong"
+
+
+@pytest.mark.django_db
 def test_draft_packager_predating_the_cap_keeps_saving_when_unchanged():
     # A draft created before the cap holds a >32 packager; the serializer keeps
     # accepting it while it is resubmitted unchanged (the edit form does that),
