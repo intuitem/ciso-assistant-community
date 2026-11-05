@@ -3,7 +3,7 @@
 <div class="node">
   {% if not node.requirement_node.assessable %}
     <h{{ node.heading_level }} class="section-title" id="req-{{ node.requirement_node.id }}">{{ node.title }}</h{{ node.heading_level }}>
-    {% if node.requirement_node.display_short and node.requirement_node.description %}
+    {% if node.requirement_node.display_short and node.requirement_node.get_description_translated %}
       <div class="markdown section-description">
         {{ node.requirement_node.get_description_translated|render_markdown }}
       </div>
@@ -26,7 +26,7 @@
           {% endif %}
         </div>
       </header>
-      {% if node.assessments.requirement.description %}
+      {% if node.assessments.requirement.get_description_translated %}
         <div class="markdown">
           {{ node.assessments.requirement.get_description_translated|render_markdown }}
         </div>

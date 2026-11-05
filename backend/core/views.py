@@ -15075,14 +15075,18 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         revision = evidence.last_revision
                         if not entry_name or not revision or not revision.attachment:
                             continue
-                        if not default_storage.exists(revision.attachment.name):
-                            continue
-                        with default_storage.open(
-                            revision.attachment.name
-                        ) as attachment_file:
-                            zipf.writestr(
-                                f"evidences/{entry_name}", attachment_file.read()
+                        try:
+                            with default_storage.open(
+                                revision.attachment.name
+                            ) as attachment_file:
+                                content = attachment_file.read()
+                        except Exception:
+                            logger.warning(
+                                "evidence file unreadable, omitted from archive",
+                                evidence_id=evidence.id,
                             )
+                            continue
+                        zipf.writestr(f"evidences/{entry_name}", content)
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
