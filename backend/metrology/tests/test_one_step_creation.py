@@ -460,6 +460,77 @@ class TestPeriodOnEnteredValues:
         assert response.status_code == 403
         assert instance.samples.get().raw_value() == 1
 
+    def test_recording_over_a_leftover_formula_sample(self, frozen):  # noqa: F811
+        """A definition that stops being computed leaves its instances'
+        computed samples behind as plain history: the period one of them
+        holds can be recorded over, and the value typed takes it."""
+        es = make_domain("Spain")
+        source = make_instance(es, make_definition())
+        definition = make_definition(
+            "Copy",
+            inputs=[
+                {
+                    "key": "x",
+                    "definition": str(source.metric_definition_id),
+                    "combine": "one",
+                }
+            ],
+            expression="x",
+        )
+        instance = make_instance(es, definition)
+        CustomMetricSample.objects.create(
+            metric_instance=instance,
+            folder=es,
+            timestamp=at(2026, 5, 1),
+            period_start=at(2026, 4, 1),
+            value={"result": 1},
+            source=CustomMetricSample.Source.DERIVED,
+        )
+        definition.expression = ""
+        definition.inputs = None
+        definition.save()
+        data = {
+            "metric_instance": str(instance.id),
+            "timestamp": at(2026, 5, 4).isoformat(),
+            "period_start": at(2026, 4, 1).isoformat(),
+            "value": {"result": 2},
+        }
+        response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
+        assert response.status_code == 201, response.data
+        stored = instance.samples.get()
+        assert stored.raw_value() == 2
+        assert stored.source == CustomMetricSample.Source.MANUAL
+
+    def test_the_current_value_is_the_latest_period_s_not_the_last_typed(
+        self, frozen
+    ):  # noqa: F811
+        es = make_domain("Spain")
+        instance = make_instance(es, make_definition())
+        for moment, period, value in (
+            (at(2026, 5, 3), at(2026, 5, 1), 50),
+            (at(2026, 5, 4), at(2026, 4, 1), 42),
+        ):
+            data = {
+                "metric_instance": str(instance.id),
+                "timestamp": moment.isoformat(),
+                "period_start": period.isoformat(),
+                "value": {"result": value},
+            }
+            response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
+            assert response.status_code == 201, response.data
+        instance = MetricInstance.objects.get(id=instance.id)
+        assert instance.raw_value() == 50
+        # A value typed for its moment alone ranks by that moment.
+        data = {
+            "metric_instance": str(instance.id),
+            "timestamp": at(2026, 5, 10).isoformat(),
+            "value": {"result": 60},
+        }
+        response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
+        assert response.status_code == 201, response.data
+        instance = MetricInstance.objects.get(id=instance.id)
+        assert instance.raw_value() == 60
+
     def test_a_future_period_is_refused(self, frozen):  # noqa: F811
         es = make_domain("Spain")
         instance = make_instance(es, make_definition())

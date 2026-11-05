@@ -221,15 +221,20 @@
 		};
 	});
 	// The suggestion follows the picked definition and the domain until the
-	// name is typed by hand.
+	// name is typed by hand. Clearing it counts as typing: an emptied field
+	// stays empty instead of refilling under the cursor.
 	let lastSuggestion = $state('');
+	let typed = $state(false);
 	$effect(() => {
-		if (!isCreate || mode !== 'existing' || !pickedDefinition) return;
+		const current = String($nameValue ?? '');
+		if (lastSuggestion && current !== lastSuggestion) typed = true;
+	});
+	$effect(() => {
+		if (!isCreate || mode !== 'existing' || !pickedDefinition || typed) return;
 		const suggestion = folderName
 			? `${pickedDefinition.name} · ${folderName}`
 			: pickedDefinition.name;
-		const current = String($nameValue ?? '');
-		if (!current || current === lastSuggestion) {
+		if (!String($nameValue ?? '') || $nameValue === lastSuggestion) {
 			$nameValue = suggestion;
 			lastSuggestion = suggestion;
 		}

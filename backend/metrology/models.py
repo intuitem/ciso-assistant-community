@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -321,7 +322,8 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         # last_refresh, current_value and raw_value each want the same row, so the
         # lookup is memoised per instance. When the caller prefetched `samples`,
         # first() reads the prefetch cache and costs nothing; ordering is the
-        # model's own ("-timestamp"), so first() really is the latest.
+        # model's own (latest period or moment first), so first() is the
+        # current value.
         if "_latest_sample" not in self.__dict__:
             self.__dict__["_latest_sample"] = self.samples.first()
         return self.__dict__["_latest_sample"]
@@ -504,9 +506,15 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = _("Custom metric sample")
         verbose_name_plural = _("Custom metric samples")
-        # Most recent first; two values typed in the same second (for two
-        # periods) rank by entry.
-        ordering = ["-timestamp", "-created_at"]
+        # Most recent first, by the moment a value answers for: a period's
+        # value ranks by its period and a plain one by its timestamp, as the
+        # chart places them, so a past period typed today is not the current
+        # value. Two typed in the same second rank by entry.
+        ordering = [
+            Coalesce("period_start", "timestamp").desc(),
+            "-timestamp",
+            "-created_at",
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["metric_instance", "period_start"],
@@ -559,7 +567,10 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
             # the last one written wins, whenever it was typed. Its second is
             # not unique (the per-second rule is for periodless values), so
             # two periods typed in the same second both keep their entry time.
-            return entered.update_or_create(
+            # Looked up among every sample: a formula that stopped computing
+            # leaves its samples behind as plain history, and the period one
+            # of them holds is taken over, not inserted beside it.
+            return cls.objects.update_or_create(
                 metric_instance=metric_instance,
                 period_start=period_start,
                 defaults={"timestamp": timestamp, **defaults},
