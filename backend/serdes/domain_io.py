@@ -956,6 +956,10 @@ def process_model_relationships(
             _fields["asset_class"] = import_asset_class(
                 _fields.get("asset_class"), create_missing_asset_classes
             )
+            _fields["lifecycle_stage"] = import_terminologies(
+                _fields.get("lifecycle_stage"),
+                Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
+            )
 
         case "riskassessment":
             _fields["perimeter"] = Perimeter.objects.filter(

@@ -112,6 +112,19 @@
 	label={m.assetClass()}
 	fallbackLabel={object?.asset_class?.str ?? object?.asset_class?.name ?? null}
 />
+<!-- shortcut: on edit, hidden stages are listed so the current one survives load; picking another hidden one is refused by the API. Upgrade if the select learns to keep an unlisted value. -->
+<AutocompleteSelect
+	{form}
+	optionsEndpoint={object?.lifecycle_stage
+		? 'terminologies?field_path=asset.lifecycle_stage'
+		: 'terminologies?field_path=asset.lifecycle_stage&is_visible=true'}
+	optionsLabelField="translated_name"
+	field="lifecycle_stage"
+	cacheLock={cacheLocks['lifecycle_stage']}
+	bind:cachedValue={formDataCache['lifecycle_stage']}
+	nullable={true}
+	label={m.lifecycleStage()}
+/>
 <AutocompleteSelect
 	{form}
 	multiple

@@ -426,6 +426,7 @@ export const AssetSchema = z.object({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	asset_class: z.string().optional(),
+	lifecycle_stage: z.string().uuid().optional().nullable(),
 	parent_assets: z.string().optional().array().optional(),
 	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
@@ -2111,19 +2112,34 @@ export const MetricDefinitionSchema = z.object({
 	unit: z.string().optional().nullable(),
 	choices_definition: jsonSchema.optional().nullable(),
 	provider: z.string().optional().nullable(),
-	higher_is_better: z.boolean().default(true),
+	higher_is_better: z.boolean().nullable().default(null),
+	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
 	default_target: z.number().optional().nullable(),
+	default_collection_frequency: z.string().max(20).optional().nullable(),
 	datasets: jsonSchema.optional().nullable(),
 	inputs: jsonSchema.optional().nullable(),
 	expression: z.string().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
+// A metric made in one step: the definition's fields, created with it.
+export const InlineMetricDefinitionSchema = z.object({
+	category: z.string().default('quantitative'),
+	unit: z.string().optional().nullable(),
+	choices_definition: jsonSchema.optional().nullable(),
+	higher_is_better: z.boolean().nullable().default(null),
+	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
+	default_target: z.coerce.number().optional().nullable(),
+	default_collection_frequency: z.string().max(20).optional().nullable()
+});
+
 export const MetricInstanceSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	metric_definition: z.string().uuid(),
+	metric_definition: z.string().uuid().optional().nullable(),
+	definition: InlineMetricDefinitionSchema.optional().nullable(),
+	collection_grace_days: z.coerce.number().int().min(0).max(28).optional().nullable(),
 	status: z.string().default('draft'),
 	owner: z.array(z.string().uuid().optional()).optional(),
 	target_value: z.coerce.number().optional().nullable(),
@@ -2137,6 +2153,7 @@ export const MetricInstanceSchema = z.object({
 
 export const CustomMetricSampleSchema = z.object({
 	metric_instance: z.string().uuid(),
+	period_start: z.string().optional().nullable(),
 	timestamp: z.iso.datetime(),
 	value: jsonSchema,
 	observation: z.string().optional().nullable(),

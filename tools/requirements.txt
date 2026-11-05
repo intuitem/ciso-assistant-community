@@ -2,3 +2,4 @@ openpyxl
 PyYAML
 lxml
 BeautifulSoup4
+defusedxml
