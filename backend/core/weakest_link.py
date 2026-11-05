@@ -17,8 +17,8 @@ principles rated by their lowest action, reported per domain):
         compliant: Fully effective
       section_label: domains      # optional: what the sections are called
 
-A rated node covers the audit's assessable requirements below it, or itself
-when it is assessable. It is `not_assessed` while one of them is, else the worst
+A rated node covers the audit's visible assessable requirements below it, or
+itself when it is assessable. It is `not_assessed` while one of them is, else the worst
 of their results (non compliant, then partially compliant, then compliant),
 not applicable ones aside; a node whose requirements are all not applicable is
 `not_applicable`, and one with none in the audit is left out. `drivers` lists
@@ -33,6 +33,7 @@ known; the sections are computed on read.
 
 RESULTS = ["non_compliant", "partially_compliant", "compliant"]
 DEFAULT_WEIGHTS = {"compliant": 1.0, "partially_compliant": 0.5, "non_compliant": 0.0}
+LABELLED = {*RESULTS, "not_assessed", "not_applicable"}
 
 
 def weakest_link_rules(rules) -> list[dict]:
@@ -42,7 +43,7 @@ def weakest_link_rules(rules) -> list[dict]:
         if isinstance(rule, dict)
         and rule.get("kind") == "weakest_link"
         and rule.get("ref_id")
-        and isinstance(rule.get("rated_depth"), int)
+        and not weakest_link_errors(rule)
     ]
 
 
@@ -60,16 +61,19 @@ def weakest_link_errors(rule) -> list[str]:
         isinstance(weights, dict)
         and set(weights) <= set(RESULTS)
         and all(
-            isinstance(w, (int, float)) and not isinstance(w, bool)
+            isinstance(w, (int, float)) and not isinstance(w, bool) and 0 <= w <= 1
             for w in weights.values()
         )
     ):
         errors.append(
-            "result_weights maps compliant, partially_compliant or non_compliant to a number"
+            "result_weights maps compliant, partially_compliant or non_compliant "
+            "to a number from 0 to 1"
         )
     labels = rule.get("result_labels")
     if labels is not None and not (
-        isinstance(labels, dict) and all(isinstance(v, str) for v in labels.values())
+        isinstance(labels, dict)
+        and set(labels) <= LABELLED
+        and all(isinstance(v, str) for v in labels.values())
     ):
         errors.append("result_labels maps results to names")
     return errors
@@ -165,7 +169,7 @@ def compute_weakest_link(rule: dict, nodes: list[dict], ras: dict) -> dict:
     return {"score": _score(all_ratings, weights), "sections": out}
 
 
-def evaluate_weakest_links(ca, rules) -> tuple[dict, list]:
+def evaluate_weakest_links(ca, rules, hidden_urns=None) -> tuple[dict, list]:
     """({ref_id: overall score in %}, [detail per rule]) for an audit's weakest-link rules."""
     from django.utils.translation import get_language
 
@@ -174,6 +178,10 @@ def evaluate_weakest_links(ca, rules) -> tuple[dict, list]:
     rules = weakest_link_rules(rules)
     if not rules:
         return {}, []
+    if hidden_urns is None:
+        from core.cel_service import build_cel_context
+
+        _ctx, hidden_urns = build_cel_context(ca)
     language = get_language()
     nodes = []
     for node in (
@@ -195,7 +203,8 @@ def evaluate_weakest_links(ca, rules) -> tuple[dict, list]:
     in_scope = {
         n["urn"]
         for n in nodes
-        if not selected or selected & set(n.get("implementation_groups") or [])
+        if n["urn"] not in hidden_urns
+        and (not selected or selected & set(n.get("implementation_groups") or []))
     }
     ras = {
         urn: (str(pk), result)

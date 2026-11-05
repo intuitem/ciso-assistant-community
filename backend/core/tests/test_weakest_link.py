@@ -3,7 +3,11 @@ from pathlib import Path
 import pytest
 import yaml
 
-from core.cel_service import evaluate_outcomes, validate_framework_expressions
+from core.cel_service import (
+    evaluate_outcomes,
+    validate_framework_expressions,
+    validate_quick_form_expressions,
+)
 from core.models import (
     ComplianceAssessment,
     Framework,
@@ -11,7 +15,12 @@ from core.models import (
     RequirementAssessment,
     RequirementNode,
 )
-from core.weakest_link import compute_weakest_link, evaluate_weakest_links
+from core.weakest_link import (
+    compute_weakest_link,
+    evaluate_weakest_links,
+    weakest_link_errors,
+    weakest_link_rules,
+)
 from iam.models import Folder
 
 RULE = {"ref_id": "eff", "kind": "weakest_link", "rated_depth": 2, "per": "depth_1"}
@@ -68,6 +77,12 @@ def test_not_applicable_actions_are_set_aside():
     )
     assert ratings(out["sections"][0]) == {"p": "compliant", "q": "not_applicable"}
     assert out["sections"][0]["score"] == 1.0
+    assert out["sections"][0]["counts"] == {
+        "compliant": 1,
+        "partially_compliant": 0,
+        "non_compliant": 0,
+        "not_assessed": 0,
+    }
 
 
 def test_domain_score_is_asd_percentage():
@@ -131,6 +146,11 @@ def test_whole_audit_and_custom_weights():
         {"result_weights": {"compliant": "one"}},
         {"result_weights": {"not_assessed": 0}},
         {"result_labels": ["Fully effective"]},
+        {"rated_depth": -1, "per": None},
+        {"result_weights": {"compliant": 2}},
+        {"result_weights": {"non_compliant": -1}},
+        {"result_weights": {"compliant": float("nan")}},
+        {"result_labels": {"complaint": "Fully effective"}},
     ],
 )
 def test_invalid_rules_are_rejected(patch):
@@ -140,6 +160,29 @@ def test_invalid_rules_are_rejected(patch):
         "requirement_nodes": [],
     }
     assert validate_framework_expressions(framework)
+    assert weakest_link_rules(framework["outcomes_definition"]) == []
+
+
+def test_every_result_shown_can_be_named():
+    labels = {
+        result: result.title()
+        for result in (
+            "compliant",
+            "partially_compliant",
+            "non_compliant",
+            "not_assessed",
+            "not_applicable",
+        )
+    }
+    assert weakest_link_errors({**RULE, "result_labels": labels}) == []
+
+
+def test_quick_forms_refuse_the_rule():
+    form = {"outcomes_definition": [RULE], "pages": []}
+    assert any(
+        e["ref_id"] == "eff" and "weakest-link" in e["error"].lower()
+        for e in validate_quick_form_expressions(form)
+    )
 
 
 def test_asd_essentials_library_rule():
@@ -159,8 +202,8 @@ def test_asd_essentials_library_rule():
     assert out["score"] == 1.0
 
 
-@pytest.mark.django_db
-def test_the_overall_score_is_stored_as_a_value_numbers_can_read():
+def make_audit(results, **audit_fields):
+    """results: {ref: (result, node fields)} under one domain and principle."""
     folder = Folder.get_root_folder()
     framework = Framework.objects.create(
         name="Weakest link",
@@ -171,33 +214,73 @@ def test_the_overall_score_is_stored_as_a_value_numbers_can_read():
         ],
     )
     base = "urn:intuitem:risk:req_node:wl"
-    spec = {"d": None, "d:p": "d", "d:p:a": "d:p", "d:p:b": "d:p"}
-    nodes = {
-        ref: RequirementNode.objects.create(
+
+    def node(ref, parent, **fields):
+        return RequirementNode.objects.create(
             framework=framework,
             urn=f"{base}:{ref}",
             parent_urn=f"{base}:{parent}" if parent else None,
-            assessable=ref.count(":") == 2,
+            assessable=parent == "p",
             folder=folder,
+            **fields,
         )
-        for ref, parent in spec.items()
-    }
+
+    node("d", None)
+    node("p", "d")
     audit = ComplianceAssessment.objects.create(
         name="WL",
         framework=framework,
         folder=folder,
         perimeter=Perimeter.objects.create(name="WL", folder=folder),
+        **audit_fields,
     )
-    for ref, node in nodes.items():
+    for ref, (result, fields) in results.items():
         RequirementAssessment.objects.create(
             compliance_assessment=audit,
-            requirement=node,
+            requirement=node(ref, "p", **fields),
             folder=folder,
-            result="partially_compliant" if ref.endswith(":a") else "compliant",
+            result=result,
         )
+    return audit, framework
+
+
+@pytest.mark.django_db
+def test_the_overall_score_is_stored_as_a_value_numbers_can_read():
+    audit, framework = make_audit(
+        {"a": ("partially_compliant", {}), "b": ("compliant", {})}
+    )
     values, details = evaluate_weakest_links(audit, framework.outcomes_definition)
     assert values == {"eff": 50.0}
-    assert details[0]["sections"][0]["urn"] == f"{base}:d"
+    assert details[0]["sections"][0]["urn"] == "urn:intuitem:risk:req_node:wl:d"
     evaluate_outcomes(audit)
     audit.refresh_from_db()
     assert audit.computed_values == {"eff": 50.0, "half": 25.0}
+
+
+@pytest.mark.django_db
+def test_requirements_outside_the_selected_groups_are_left_out():
+    audit, _framework = make_audit(
+        {
+            "a": ("compliant", {"implementation_groups": ["1"]}),
+            "b": ("non_compliant", {"implementation_groups": ["2"]}),
+        },
+        selected_implementation_groups=["1"],
+    )
+    evaluate_outcomes(audit)
+    audit.refresh_from_db()
+    assert audit.computed_values == {"eff": 100.0, "half": 50.0}
+
+
+@pytest.mark.django_db
+def test_hidden_requirements_are_left_out():
+    audit, framework = make_audit(
+        {
+            "a": ("compliant", {}),
+            "b": ("not_assessed", {"visibility_expression": "false"}),
+        }
+    )
+    _values, details = evaluate_weakest_links(audit, framework.outcomes_definition)
+    assert details[0]["sections"][0]["nodes"][0]["rating"] == "compliant"
+    evaluate_outcomes(audit)
+    audit.refresh_from_db()
+    assert audit.computed_values == {"eff": 100.0, "half": 50.0}

@@ -146,6 +146,24 @@
 						onblur={(e) => setResultLabel(r, e.currentTarget.value)}
 					/>
 				</label>
+				{#if activeLanguage}
+					<label class="flex flex-col gap-1">
+						<span class="text-xs text-blue-500">{activeLanguage.toUpperCase()}</span>
+						<input
+							class="input w-44 text-sm py-1 border-blue-100"
+							value={getTranslation(rule.translations, activeLanguage, `result_label_${r}`)}
+							onblur={(e) =>
+								update({
+									translations: withTranslation(
+										rule.translations,
+										activeLanguage!,
+										`result_label_${r}`,
+										e.currentTarget.value
+									)
+								})}
+						/>
+					</label>
+				{/if}
 			{/each}
 		</div>
 	</div>

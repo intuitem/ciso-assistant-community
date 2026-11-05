@@ -536,10 +536,10 @@ def evaluate_outcomes(compliance_assessment) -> None:
 
     computed = values = None
     if rules:
-        context, _hidden = build_cel_context(ca)
+        context, hidden_urns = build_cel_context(ca)
         _add_scores(context, ca, framework, rules)
         staircase_values, _details = evaluate_staircases(ca, rules)
-        staircase_values.update(evaluate_weakest_links(ca, rules)[0])
+        staircase_values.update(evaluate_weakest_links(ca, rules, hidden_urns)[0])
         computed, values = _evaluate_rules(
             celpy.Environment(),
             rules,
@@ -1346,6 +1346,14 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
             str(page.get("visibility_expression") or ""),
             visibility_probe,
         )
+    for rule in quick_form.get("outcomes_definition") or []:
+        if rule.get("kind") == "weakest_link":
+            _error(
+                "outcome",
+                str(rule.get("ref_id") or ""),
+                "",
+                "A weakest-link rule applies to frameworks, not quick forms",
+            )
     _check_rules(
         quick_form.get("outcomes_definition") or [],
         raw_probe,

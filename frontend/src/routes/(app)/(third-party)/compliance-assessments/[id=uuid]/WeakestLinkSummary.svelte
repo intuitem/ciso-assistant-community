@@ -23,12 +23,13 @@
 	};
 
 	const label = (r: string) =>
-		rule.translations?.[getLocale()]?.result_labels?.[r] ||
+		rule.translations?.[getLocale()]?.[`result_label_${r}`] ||
 		rule.result_labels?.[r] ||
 		safeTranslate(r);
 	const unit = $derived(
 		rule.translations?.[getLocale()]?.section_label || rule.section_label || m.staircaseSections()
 	);
+	const annotation = $derived(rule.translations?.[getLocale()]?.annotation || rule.annotation);
 	const percent = (score: number | null) => (score === null ? '—' : `${Math.round(score * 100)}%`);
 </script>
 
@@ -50,8 +51,8 @@
 					>{m.weakestLinkOverall({ count: result.sections.length, unit })}</span
 				>
 			{/if}
-			{#if rule.annotation}
-				<span class="text-xs text-surface-600-400">{rule.annotation}</span>
+			{#if annotation}
+				<span class="text-xs text-surface-600-400">{annotation}</span>
 			{/if}
 		</div>
 	</div>
