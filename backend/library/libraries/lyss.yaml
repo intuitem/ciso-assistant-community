@@ -3,8 +3,8 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:lyss:risk:library:lyss
 locale: en
 ref_id: LYSS
-name: "LYSS \u2014 Lyaazale Switch Security (draft 0.4.0)"
-description: 'LYSS (Lyaazale Switch Security) specification 0.4.0-draft (draft): vendor-neutral
+name: "LYSS \u2014 Lyaazale Switch Security (draft 0.5.0)"
+description: 'LYSS (Lyaazale Switch Security) specification 0.5.0-draft (draft): vendor-neutral
   security controls for managed network switches, in three cumulative conformance
   levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is one control (LYSS-<DOMAIN>-<NNN>);
   its annotation gives the rationale, vendor-neutral test procedure and informative
@@ -13,7 +13,7 @@ description: 'LYSS (Lyaazale Switch Security) specification 0.4.0-draft (draft):
   change before LYSS 1.0. Author: Mouad Lyaazale. Generated from spec/lyss-spec.yaml
   by tools/build_ciso_library.py.'
 copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
-version: 40000
+version: 50000
 publication_date: 2026-11-05
 provider: Mouad Lyaazale
 packager: LYSS project
@@ -21,8 +21,8 @@ objects:
   frameworks:
   - urn: urn:lyss:risk:framework:lyss
     ref_id: LYSS
-    name: "LYSS \u2014 Lyaazale Switch Security (draft 0.4.0)"
-    description: 'LYSS (Lyaazale Switch Security) specification 0.4.0-draft (draft):
+    name: "LYSS \u2014 Lyaazale Switch Security (draft 0.5.0)"
+    description: 'LYSS (Lyaazale Switch Security) specification 0.5.0-draft (draft):
       vendor-neutral security controls for managed network switches, in three cumulative
       conformance levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is
       one control (LYSS-<DOMAIN>-<NNN>); its annotation gives the rationale, vendor-neutral
@@ -217,16 +217,21 @@ objects:
       parent_urn: urn:lyss:risk:req_node:lyss:l1.auth
       ref_id: LYSS-AUTH-002
       name: Privileged-mode password is stored as a strong hash
-      description: The privileged (enable) credential is stored with a one-way hash,
-        not in cleartext or a reversible encoding.
+      description: The privileged (enable) credential is stored with a one-way hash
+        based on SHA-256 or a stronger algorithm (e.g. scrypt, PBKDF2-SHA-256, SHA-256/SHA-512
+        crypt). Cleartext, reversible encodings, MD5- and SHA-1-based hashes and Cisco
+        type 4 are not accepted.
       annotation: 'Rationale: Reversible encodings (e.g. Cisco type 7) are decoded
-        instantly by public tools from any configuration backup.
+        instantly by public tools from any configuration backup, and MD5- or SHA-1-based
+        hashes (e.g. Cisco type 5) are cracked quickly on commodity hardware.
 
 
-        Test procedure: Fail if the privileged credential is stored in cleartext or
-        a reversible form. Pass if it is hashed, or if there is no privileged credential
-        and privileged access is only granted to local accounts whose credentials
-        are hashed or through central AAA.
+        Test procedure: Fail if the privileged credential, or a local account with
+        full privileges, is stored in cleartext, a reversible form, or with MD5, SHA-1
+        or Cisco type 4 (e.g. Cisco "enable password", type 4 or 5, a 40-hex-digit
+        SHA-1 value, HPE "sha1"). Pass if it uses an accepted algorithm, or if there
+        is no privileged credential and privileged access is only granted through
+        central AAA. Unknown if the algorithm cannot be identified.
 
 
         Informative references: ISO/IEC 27001:2022 A.5.17, A.8.5; NIST SP 800-53 r5
@@ -275,7 +280,9 @@ objects:
 
 
         Test procedure: Fail if a RADIUS or TACACS+ shared key appears in cleartext.
-        Reversible encodings pass Level 1 only.
+        A reversible encoding is not cleartext and passes this control; storing keys
+        irreversibly or with a device-specific encryption key is planned as a separate
+        Level 2 control.
 
 
         Informative references: ISO/IEC 27001:2022 A.5.17, A.8.24; NIST SP 800-53
@@ -312,9 +319,10 @@ objects:
 
         Test procedure: Identify the model and firmware version from device state
         and compare them with a sourced knowledge base (vendor advisories, end-of-life
-        bulletins, CISA KEV). Fail if security support has ended or an applicable
-        advisory is unfixed in the running version. Unknown if the platform is not
-        in the knowledge base: a pass is never assumed.
+        bulletins, CISA KEV). Fail if security support has ended, or if an applicable
+        critical (CVSS >= 9.0) or known-exploited (CISA KEV) advisory is unfixed in
+        the running version; other advisories do not affect this control. Unknown
+        if the platform is not in the knowledge base: a pass is never assumed.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.8; NIST SP 800-53 r5 SI-2,
@@ -346,16 +354,21 @@ objects:
       parent_urn: urn:lyss:risk:req_node:lyss:l1.bkp
       ref_id: LYSS-BKP-001
       name: Configuration is backed up automatically
-      description: A copy of the running configuration is collected automatically
-        at least every 7 days.
+      description: The running configuration is collected automatically, so that a
+        copy at most 7 days old exists at any time.
       annotation: 'Rationale: Without a recent backup, recovery after failure or compromise
         is slow and error-prone.
 
 
-        Test procedure: Pass if an automatic (scheduled) collection of the running
-        configuration is at most the parameter old, or if an administrator attested
-        an external backup system for the device within the last 90 days. Fail if
-        the last automatic backup is older, or only manual collections exist.
+        Test procedure: Pass if the most recent automatic (scheduled) collection of
+        the running configuration is at most the parameter old at the time of assessment;
+        a schedule less frequent than the parameter therefore fails between runs.
+        Otherwise pass on an external backup system only with evidence of its last
+        successful backup for this device, at most the parameter old (for example
+        from the backup system''s records), or with an administrator attestation,
+        renewed at least every 90 days, that the external system backs the device
+        up at least as often as the parameter and alerts on failure. Fail if the last
+        automatic backup is older, or only manual collections exist.
 
 
         Parameters: max_age_days = 7
@@ -418,14 +431,15 @@ objects:
       parent_urn: urn:lyss:risk:req_node:lyss:l2.mgmt
       ref_id: LYSS-MGMT-011
       name: Management interface is on a dedicated management VLAN
-      description: The switch management address is not on the default VLAN (1) shared
-        with user traffic.
+      description: 'The switch management address is on a VLAN reserved for management:
+        not the default VLAN (1), and no user access port is a member of it.'
       annotation: 'Rationale: Separating management from user networks prevents users
         from reaching the management plane.
 
 
-        Test procedure: Fail if VLAN 1 carries a management address. Pass if the management
-        address is on another VLAN.
+        Test procedure: Fail if VLAN 1 carries a management address, or if an access
+        (untagged, non-uplink) port is a member of the management VLAN. Pass if the
+        management address is on another VLAN with no access port.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.22; NIST SP 800-53 r5 SC-7,
@@ -447,7 +461,10 @@ objects:
         and informs users that activity is monitored.
 
 
-        Test procedure: Pass if a login or message-of-the-day banner is configured.
+        Test procedure: Pass if a banner displayed before authentication (login or
+        message-of-the-day, not a post-login exec banner) is configured and its text
+        states the authorized-use restriction ("authorized", "authorised", "unauthorized"
+        or "unauthorised"). Fail otherwise.
 
 
         Informative references: ISO/IEC 27001:2022 A.5.10; NIST SP 800-53 r5 AC-8.'
@@ -506,8 +523,10 @@ objects:
         and an audit trail; shared local passwords do not.
 
 
-        Test procedure: Pass if an AAA server is defined and the login method list
-        tries it before local accounts.
+        Test procedure: Pass if an AAA server is defined and every login method list
+        used for remote administrative access starts with the AAA server, local accounts
+        coming only after it. Fail if any such list starts with a local account, a
+        line password or no authentication.
 
 
         Informative references: ISO/IEC 27001:2022 A.5.16, A.8.5; NIST SP 800-53 r5
@@ -530,7 +549,9 @@ objects:
         to shared passwords.
 
 
-        Test procedure: Fail if any SNMPv1/v2c community or v1/v2 group is configured.
+        Test procedure: Fail if any SNMPv1/v2c community or v1/v2 group is configured,
+        or if any SNMPv3 group or user has a security level below authentication with
+        privacy (noAuthNoPriv or authNoPriv).
 
 
         Informative references: ISO/IEC 27001:2022 A.8.21, A.8.24; NIST SP 800-53
@@ -562,7 +583,9 @@ objects:
         intruder; remote logs support detection and investigation.
 
 
-        Test procedure: Pass if at least one remote syslog destination is configured.
+        Test procedure: Fail if logging is disabled globally (e.g. "no logging on").
+        Pass if at least one remote syslog destination is configured and logging is
+        enabled.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.15, A.8.16; NIST SP 800-53
@@ -585,12 +608,18 @@ objects:
         and certificates and schedules misbehave.
 
 
-        Test procedure: Pass if at least one NTP or SNTP server is configured.
+        Test procedure: Fail if no NTP or SNTP server is configured, or if the device
+        state reports the clock as not synchronized. Pass if a time server is configured
+        and the clock is reported synchronized; without device state, a configured
+        time server passes and the report says that synchronization was not verified.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.17; NIST SP 800-53 r5 AU-8,
         SC-45; CIS Controls v8 8.4.'
       typical_evidence: '- Running configuration of the switch
+
+        - Read-only device state (listening services, SSH identification and algorithms,
+        port status)
 
         - LYSS assessment report showing the verdict and evidence for LYSS-LOG-011'
       implementation_groups:
@@ -638,16 +667,18 @@ objects:
       ref_id: LYSS-ACC-011
       name: Edge ports are protected against rogue spanning-tree participants (BPDU
         guard)
-      description: Every edge port (not connected to another switch) disables itself
-        when it receives a spanning-tree BPDU.
+      description: Every edge port disables itself when it receives a spanning-tree
+        BPDU. Links to other switches are configured as such (trunks or link aggregations);
+        every other port is an edge port.
       annotation: 'Rationale: A rogue or misconnected switch on an access port can
         take over the spanning tree or create a loop.
 
 
-        Test procedure: Edge ports are all ports minus uplinks (trunk / aggregation
-        members in the configuration, and ports where neighbour discovery sees a bridge).
-        Fail if an edge port lacks BPDU protection, unless a global default protects
-        all edge ports.
+        Test procedure: Edge ports are all ports minus uplinks, and uplinks are only
+        the ports configured as trunks or link-aggregation members (tagged on HPE
+        AOS-S). Neighbour discovery never exempts a port: a rogue device can advertise
+        bridge capability. Fail if an edge port lacks BPDU protection, unless a global
+        default protects all edge ports.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.20; NIST SP 800-53 r5 SC-5,
@@ -677,12 +708,12 @@ objects:
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-020
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-020
       name: DHCP snooping is enabled on user VLANs
-      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
         rationale and test procedure are not written yet.
 
 
@@ -693,12 +724,12 @@ objects:
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-021
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-021
       name: Dynamic ARP inspection is enabled on user VLANs
-      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
         rationale and test procedure are not written yet.
 
 
@@ -709,12 +740,12 @@ objects:
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-022
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-022
       name: Access ports require 802.1X or MAC authentication
-      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
         rationale and test procedure are not written yet.
 
 
@@ -726,12 +757,12 @@ objects:
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-023
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-023
       name: Storm control limits broadcast/multicast on access ports
-      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
         rationale and test procedure are not written yet.
 
 
@@ -742,12 +773,12 @@ objects:
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-024
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-024
       name: Neighbor discovery (CDP/LLDP) is disabled on untrusted access ports
-      annotation: 'Draft control (LYSS specification 0.4.0-draft): requirement text,
+      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
         rationale and test procedure are not written yet.
 
 
