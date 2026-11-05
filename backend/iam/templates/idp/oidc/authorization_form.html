@@ -30,7 +30,7 @@
   <main class="card">
     <h1>{% blocktranslate with name=client.name %}{{ name }} wants to access CISO Assistant{% endblocktranslate %}</h1>
     <p class="who">{% blocktranslate with email=request.user.email %}Signed in as {{ email }}{% endblocktranslate %}</p>
-    {% if client.data.dcr %}
+    {% if self_registered %}
       <div class="warning">
         <strong>{% translate "You are adding a new app." %}</strong>
         {% translate "Your administrator has not checked it. Only approve if you started this connection and you trust where it sends you back:" %}
@@ -73,7 +73,7 @@
         {{ form }}
       {% endif %}
       <div class="actions">
-        <button type="submit" name="action" value="cancel" class="secondary">{% translate "Cancel" %}</button>
+        <button type="submit" name="action" value="cancel" class="secondary" formnovalidate>{% translate "Cancel" %}</button>
         <button type="submit" name="action" value="grant" class="primary">{% translate "Authorize" %}</button>
       </div>
     </form>

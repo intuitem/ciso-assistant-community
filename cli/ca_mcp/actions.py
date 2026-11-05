@@ -50,8 +50,8 @@ def _join(words: list[str]) -> str:
     return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
 
 
-def summary(access) -> str:
-    granted = granted_actions(access)
+def summary(access, read_only: bool = False) -> str:
+    granted = {READ} if read_only else granted_actions(access)
     allowed = [verb for a in ACTIONS if a in granted for verb in _ALLOWED_VERBS[a]]
     text = f"This connection can {_join(allowed)} data in CISO Assistant."
     missing = [_REFUSED_ACTION[a] for a in ACTIONS if a != READ and a not in granted]

@@ -98,6 +98,24 @@ def test_get_my_access_says_what_is_missing(connected):
     )
 
 
+def test_get_my_access_on_a_read_only_server(connected, monkeypatch):
+    monkeypatch.setattr(server.config, "READ_ONLY", True)
+    connected(_access(granted=["read", "create", "update"]))
+    text = asyncio.run(server.get_my_access())
+    assert text.startswith("This connection can read data in CISO Assistant.")
+
+
+def test_a_cancelled_call_is_recorded(connected):
+    async def tool():
+        raise asyncio.CancelledError
+
+    hooks = _Hooks()
+    connected(_access())
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(server._with_hooks(tool, "get_folders", hooks)())
+    assert hooks.calls == [("get_folders", None, "cancelled")]
+
+
 class _Hooks:
     def __init__(self, refusal=None):
         self.refusal = refusal

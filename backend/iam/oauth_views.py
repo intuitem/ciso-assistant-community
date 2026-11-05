@@ -23,6 +23,7 @@ from knox.auth import TokenAuthentication
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from rest_framework.exceptions import AuthenticationFailed
 
+from iam.authentication import is_self_registered
 from iam.mcp_access import is_mcp_request, refusal_reason
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
 from iam.oidc_adapter import MCP_SCOPES
@@ -127,18 +128,28 @@ def _pending_request(request):
     return scopes, info
 
 
-def _access_denied_url(info) -> str | None:
+def _access_denied_url(info, error="access_denied") -> str | None:
     redirect_uri = info.get("redirect_uri")
     if not redirect_uri:
         return None
     parts = urlsplit(redirect_uri)
-    query = parse_qsl(parts.query, keep_blank_values=True) + [
-        ("error", "access_denied")
-    ]
+    query = parse_qsl(parts.query, keep_blank_values=True) + [("error", error)]
     if info.get("state"):
         query.append(("state", info["state"]))
     query.append(("iss", get_adapter().get_issuer()))
     return urlunsplit(parts._replace(query=urlencode(query)))
+
+
+def _silent_without_grant(request, info) -> bool:
+    # prompt=none answers without the consent form, and only that form creates
+    # the grant: a code issued here would be refused by backend-mcp anyway
+    prompts = (request.GET.get("prompt") or "").split()
+    return (
+        "none" in prompts
+        and not AppGrant.objects.filter(
+            user=request.user, client_id=info.get("client_id")
+        ).exists()
+    )
 
 
 # Overriding dispatch drops the decorators allauth puts on it, so restate them.
@@ -166,6 +177,7 @@ class CISOAuthorizationView(AuthorizationView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["self_registered"] = is_self_registered(context["client"])
         form = context["form"]
         if form.mcp_request:
             selected = form["profile"].value()
@@ -204,10 +216,13 @@ class CISOAuthorizationView(AuthorizationView):
         if pending is None:
             return None
         scopes, info = pending
-        reason = refusal_reason(
-            request.user, is_mcp_request(scopes, info.get("resources"))
-        )
+        mcp_request = is_mcp_request(scopes, info.get("resources"))
+        reason = refusal_reason(request.user, mcp_request)
         if reason is None:
+            if mcp_request and _silent_without_grant(request, info):
+                return HttpResponseRedirect(
+                    _access_denied_url(info, error="consent_required")
+                )
             return None
         return render(
             request,

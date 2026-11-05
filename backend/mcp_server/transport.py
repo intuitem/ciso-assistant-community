@@ -99,10 +99,13 @@ def request_as(
         # DRF's Request honours this in place of its authenticators.
         request._force_auth_user = user
     response = _get_handler().get_response(request)
-    if response.streaming:
-        content = b"".join(response.streaming_content)
-    else:
-        content = response.content
+    try:
+        if response.streaming:
+            content = b"".join(response.streaming_content)
+        else:
+            content = response.content
+    finally:
+        response.close()
     return Response(response.status_code, content)
 
 

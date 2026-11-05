@@ -4577,9 +4577,6 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 				keep_local_login: {
 					true: { text: 'Local', cssClasses: 'badge bg-violet-200' }
 				},
-				can_connect_apps: {
-					true: { text: 'AI apps', cssClasses: 'badge bg-sky-200' }
-				},
 				is_third_party: {
 					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' }
 				}

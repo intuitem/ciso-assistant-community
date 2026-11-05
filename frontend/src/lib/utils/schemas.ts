@@ -550,6 +550,7 @@ export const UserEditSchema = z.object({
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
 	language: z.string().optional().default(''),
+	can_connect_apps: z.boolean().optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.iso.date()])

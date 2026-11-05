@@ -1,3 +1,4 @@
+import uuid
 from urllib.parse import urlsplit
 
 import structlog
@@ -122,7 +123,13 @@ class AllConnectedAppsView(views.APIView):
         )
         params = request.query_params
         if params.get("user"):
-            tokens = tokens.filter(user_id=params["user"])
+            try:
+                tokens = tokens.filter(user_id=uuid.UUID(params["user"]))
+            except ValueError:
+                return Response(
+                    {"user": ["Not a valid user ID."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         if params.get("client"):
             tokens = tokens.filter(client_id=params["client"])
         if params.get("search"):

@@ -2,6 +2,7 @@
 
 import structlog
 from allauth.idp.oidc.models import Token
+from django.db import transaction
 
 from iam.oidc_adapter import MCP_SCOPES, mcp_resource
 
@@ -53,9 +54,10 @@ def revoke_app_tokens(user_ids, client_ids=None) -> int:
         tokens = tokens.filter(client_id__in=client_ids)
         uses = uses.filter(client_id__in=client_ids)
         grants = grants.filter(client_id__in=client_ids)
-    deleted, _ = tokens.delete()
-    uses.delete()
-    grants.delete()
+    with transaction.atomic():
+        deleted, _ = tokens.delete()
+        uses.delete()
+        grants.delete()
     logger.info(
         "app tokens revoked",
         users=[str(u) for u in user_ids],

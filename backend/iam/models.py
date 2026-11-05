@@ -2620,8 +2620,10 @@ class AppGrant(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="app_grants")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    # deleting a profile must go through revoking its connections, or their
+    # tokens would outlive the grant
     profile = models.ForeignKey(
-        ConnectionProfile, on_delete=models.CASCADE, related_name="grants"
+        ConnectionProfile, on_delete=models.PROTECT, related_name="grants"
     )
     granted_at = models.DateTimeField(default=timezone.now)
 
@@ -2682,7 +2684,7 @@ _APP_ACCESS_FIELDS = ("can_connect_apps", "is_active")
 def _note_lost_app_access(sender, instance, update_fields=None, **kwargs):
     # unticking the flag or deactivating is a decision about this person: their
     # connections must not come back if it is reverted, so the tokens go
-    if not instance.pk or (
+    if instance._state.adding or (
         update_fields is not None and not set(update_fields) & set(_APP_ACCESS_FIELDS)
     ):
         return

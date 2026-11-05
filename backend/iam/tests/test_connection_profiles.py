@@ -77,7 +77,7 @@ def _token(client, user, profile=None, scopes=("mcp:read",)):
     return raw
 
 
-def _authorize(http, client, user, scope="openid mcp:read"):
+def _authorize(http, client, user, scope="openid mcp:read", **extra):
     challenge = (
         base64.urlsafe_b64encode(
             hashlib.sha256(secrets.token_urlsafe(48).encode()).digest()
@@ -96,6 +96,7 @@ def _authorize(http, client, user, scope="openid mcp:read"):
             "state": "xyz",
             "code_challenge": challenge,
             "code_challenge_method": "S256",
+            **extra,
         },
     )
 
@@ -194,6 +195,14 @@ class TestConsent:
         assert _code(response)
         assert AppGrant.objects.get(user=user, client=app).profile == default
 
+    def test_a_silent_request_without_a_grant_gets_no_code(self, client):
+        _profile(is_default=True)
+        response = _authorize(client, _client(), _user(), prompt="none")
+
+        assert not _code(response)
+        assert "error=consent_required" in response["Location"]
+        assert not AppGrant.objects.exists()
+
     def test_no_profile_at_all_is_refused(self, client):
         response = _authorize(client, _client(skip_consent=True), _user())
 
@@ -236,3 +245,7 @@ class TestConnectionsList:
 
         assert row["profile"]["name"] == "Read and create"
         assert row["profile"]["actions"] == ["read", "create"]
+
+    def test_a_bad_user_filter_is_a_400(self, admin_api):
+        response = admin_api.get("/api/iam/connected-apps/all/?user=not-a-uuid")
+        assert response.status_code == 400

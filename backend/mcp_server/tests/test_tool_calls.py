@@ -58,6 +58,12 @@ class TestBudget:
         hooks.after("get_folders", access, "Error: " + "x" * 200, 0.0, "limited")
         assert hooks.before("get_folders", access) is None
 
+    @override_settings(MCP_MAX_RESPONSE_CHARS_PER_HOUR=100)
+    def test_tool_refusals_do_not_use_the_budget(self):
+        hooks, access = ToolCallHooks(), _access()
+        hooks.after("update_folder", access, "Error: " + "x" * 200, 0.0, None)
+        assert hooks.before("get_folders", access) is None
+
     @override_settings(MCP_MAX_CALLS_PER_MINUTE=0, MCP_MAX_RESPONSE_CHARS_PER_HOUR=0)
     def test_zero_turns_the_limits_off(self):
         hooks, access = ToolCallHooks(), _access()

@@ -57,7 +57,7 @@ urlpatterns = [
         name="connected-apps-all",
     ),
     path(
-        "connected-apps/all/<str:user_id>/<str:client_id>/",
+        "connected-apps/all/<uuid:user_id>/<str:client_id>/",
         UserConnectedAppView.as_view(),
         name="connected-apps-user",
     ),

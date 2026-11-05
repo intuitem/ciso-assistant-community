@@ -409,12 +409,14 @@ def _with_hooks(runner, name, hooks):
         start = time.monotonic()
         try:
             result = await runner(*args, **kwargs)
-        except Exception as e:
-            failure = type(e).__name__
+        except BaseException as e:
+            failure = type(e).__name__ if isinstance(e, Exception) else "cancelled"
             elapsed = time.monotonic() - start
-            await anyio.to_thread.run_sync(
-                lambda: hooks.after(name, access, None, elapsed, failure)
-            )
+            # a cancelled call is recorded too: shield the hook from the cancel
+            with anyio.CancelScope(shield=True):
+                await anyio.to_thread.run_sync(
+                    lambda: hooks.after(name, access, None, elapsed, failure)
+                )
             raise
         await anyio.to_thread.run_sync(
             lambda: hooks.after(name, access, result, time.monotonic() - start, None)
@@ -542,7 +544,7 @@ async def get_my_access() -> str:
     delete), and which profile it uses. Call it before planning changes."""
     from mcp.server.auth.middleware.auth_context import get_access_token
 
-    return actions.summary(get_access_token())
+    return actions.summary(get_access_token(), read_only=config.READ_ONLY)
 
 
 def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
@@ -566,7 +568,10 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
         ),
     )
     _register_on(server, read_only, guard_write=_require_action, hooks=hooks)
-    server.tool(annotations=_annotations(get_my_access, is_read=True))(get_my_access)
+    runner = (
+        _with_hooks(get_my_access, "get_my_access", hooks) if hooks else get_my_access
+    )
+    server.tool(annotations=_annotations(get_my_access, is_read=True))(runner)
     _log_startup(
         f"MCP Streamable HTTP (OAuth) on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
     )

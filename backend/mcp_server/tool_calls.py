@@ -59,14 +59,6 @@ class ToolCallHooks:
 
     def after(self, tool, access, result, seconds, error):
         size = len(result) if isinstance(result, str) else 0
-        # a refused or failed call returned no data
-        if (
-            access is not None
-            and size
-            and not error
-            and settings.MCP_MAX_RESPONSE_CHARS_PER_HOUR
-        ):
-            _count(_bucket("chars", access, HOUR), size, HOUR)
         if error == "limited":
             outcome = "limited"
         elif error:
@@ -75,6 +67,13 @@ class ToolCallHooks:
             outcome = "refused"
         else:
             outcome = "ok"
+        # a refused or failed call returned no data
+        if (
+            outcome == "ok"
+            and access is not None
+            and settings.MCP_MAX_RESPONSE_CHARS_PER_HOUR
+        ):
+            _count(_bucket("chars", access, HOUR), size, HOUR)
         claims = _claims(access) if access else {}
         log = logger.warning if outcome in ("limited", "error") else logger.info
         log(

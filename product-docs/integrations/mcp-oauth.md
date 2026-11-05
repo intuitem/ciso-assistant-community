@@ -82,10 +82,11 @@ hidden whatever the profile.
 
 #### Start the MCP service
 
-The service is off by default. Start it with the `mcp` profile:
+The service is off by default. For now it ships in `docker-compose-build.yml`
+only, built from source. Start it with the `mcp` profile:
 
 ```bash
-docker compose --profile mcp up -d
+docker compose -f docker-compose-build.yml --profile mcp up -d --build
 ```
 
 The proxy sends these paths to `backend-mcp`, so it is served on your existing
@@ -295,6 +296,10 @@ read, not only what it changed.
 A connection is one user with one app. When it goes over, the tool answers with
 an error that tells the agent to wait, and the call is logged as `limited`. Set
 a variable to `0` to turn that limit off.
+
+The counters are kept in the cache. With the default in-memory cache, each
+worker counts on its own and the counters reset on restart; use a shared cache
+for exact limits.
 
 ### Personal Access Tokens still work
 

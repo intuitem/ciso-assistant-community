@@ -41,7 +41,6 @@ class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):
                         "Connecting apps is not allowed for this user."
                     )
                 ConnectedAppUse.record(user.pk, client.pk)
-            # User-bound OIDC token (e.g. authorization_code): honor as-is.
             return (user, token)
         service_account = (
             getattr(client, "service_account", None) if client is not None else None
