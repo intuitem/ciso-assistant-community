@@ -8,10 +8,10 @@ When the law changes: refresh the XML, update STAND, review ASSESSABLE and TRANS
 
 import re
 import sys
-import xml.etree.ElementTree as ET
 from collections import Counter
 
 import openpyxl
+from defusedxml.ElementTree import parse as parse_xml
 
 STAND = "2026-10-22"  # Art. 8 G v. 22.10.2026 (BGBl. 2026 I Nr. 318), latest amendment
 SOURCE_URL = "https://www.gesetze-im-internet.de/bsig_2025/"
@@ -157,7 +157,7 @@ def flatten(node):
 def load(path):
     """Return ordered [{kind, ...}] for Teil 3-5."""
     items, in_scope = [], False
-    for n in ET.parse(path).getroot().findall("norm"):
+    for n in parse_xml(path).getroot().findall("norm"):
         md = n.find("metadaten")
         unit, enbez = md.find("gliederungseinheit"), md.findtext("enbez") or ""
         if unit is not None:
