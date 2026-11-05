@@ -109,6 +109,7 @@
   * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
+    * [Active Directory Federation Service (AD FS)](configuration/sso/identity-providers/adfs.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
     * [Google Workspace](configuration/sso/identity-providers/google-workspace.md)
     * [Keycloak](configuration/sso/identity-providers/keycloak.md)
