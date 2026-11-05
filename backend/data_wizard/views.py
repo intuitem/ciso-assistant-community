@@ -1329,13 +1329,13 @@ class AssetRecordConsumer(RecordConsumer[list]):
     @cached_property
     def lifecycle_stage_index(self) -> dict:
         # Keyed so "phasing_out" (as exported) and "Phasing out" both match.
-        return {
-            _normalize_key(name): pk
-            for pk, name in Terminology.objects.filter(
-                field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
-                is_visible=True,
-            ).values_list("id", "name")
-        }
+        index = {}
+        for pk, name in Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
+            is_visible=True,
+        ).values_list("id", "name"):
+            index.setdefault(_normalize_key(name), []).append(pk)
+        return index
 
     def create_context(self):
         return _get_security_objective_scale(), None
@@ -1425,9 +1425,11 @@ class AssetRecordConsumer(RecordConsumer[list]):
 
         raw_stage = record.get("lifecycle_stage") or record.get("lifecycle")
         if raw_stage:
-            stage = self.lifecycle_stage_index.get(_normalize_key(raw_stage))
-            if stage is not None:
-                data["lifecycle_stage"] = stage
+            stages = self.lifecycle_stage_index.get(_normalize_key(raw_stage), [])
+            if len(stages) == 1:
+                data["lifecycle_stage"] = stages[0]
+            elif stages:
+                parse_warning_msgs.append(f"Ambiguous lifecycle_stage: '{raw_stage}'")
             else:
                 parse_warning_msgs.append(f"Unknown lifecycle_stage: '{raw_stage}'")
 

@@ -209,7 +209,7 @@ export const ASSET_LIFECYCLE_STAGE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'terminologies?field_path=asset.lifecycle_stage',
-		optionsLabelField: 'name',
+		optionsLabelField: 'translated_name',
 		label: 'lifecycleStage',
 		browserCache: 'force-cache',
 		multiple: true
