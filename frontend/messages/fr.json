@@ -7824,5 +7824,12 @@
 	"builderWeakestLinkPerSectionHint": "Chaque nœud de premier niveau a sa propre synthèse et son propre score.",
 	"builderWeakestLinkResultLabels": "Noms des résultats (facultatif)",
 	"builderWeakestLinkHowTitle": "Calcul de la notation",
-	"builderWeakestLinkPerSection": "Une synthèse par section de premier niveau"
+	"builderWeakestLinkPerSection": "Une synthèse par section de premier niveau",
+	"implementing": "En mise en œuvre",
+	"phasingOut": "En retrait progressif",
+	"retired": "Retiré",
+	"archived": "Archivé",
+	"lifecycleStage": "Cycle de vie",
+	"assetLifecycleStage": "Cycle de vie de l'actif",
+	"changeLifecycleStage": "Changer le cycle de vie"
 }

@@ -408,7 +408,12 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
-	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const nonNavigableRelatedFields = new Set([
+		'qualifications',
+		'relationship',
+		'nature',
+		'lifecycle_stage'
+	]);
 	const getRelatedFieldHref = (
 		fieldName: string,
 		id: string,

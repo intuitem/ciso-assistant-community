@@ -7824,5 +7824,12 @@
 	"builderWeakestLinkPerSectionHint": "Each top-level node gets its own summary and score.",
 	"builderWeakestLinkResultLabels": "Result names (optional)",
 	"builderWeakestLinkHowTitle": "How the rating is computed",
-	"builderWeakestLinkPerSection": "One summary per top-level section"
+	"builderWeakestLinkPerSection": "One summary per top-level section",
+	"implementing": "Implementing",
+	"phasingOut": "Phasing out",
+	"retired": "Retired",
+	"archived": "Archived",
+	"lifecycleStage": "Lifecycle",
+	"assetLifecycleStage": "Asset lifecycle",
+	"changeLifecycleStage": "Change lifecycle"
 }
