@@ -1,5 +1,7 @@
 <script lang="ts">
 	import DashboardWidgetChart from '#lib/components/Chart/DashboardWidgetChart.svelte';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		widgets: any[];
@@ -57,6 +59,24 @@
 		`;
 	}
 
+	// Where a widget's number comes from: the metric for a custom widget,
+	// the object for a built-in one.
+	function widgetHref(widget: any): string | null {
+		const instanceId = widget.metric_instance?.id ?? widget.metric_instance;
+		if (instanceId && typeof instanceId === 'string') return `/metric-instances/${instanceId}`;
+		const modelName = String(widget.target_content_type_display ?? '').toLowerCase();
+		if (!modelName || !widget.target_object_id) return null;
+		const urlModel = Object.entries(URL_MODEL_MAP).find(
+			([, info]: [string, any]) => info?.name === modelName
+		)?.[0];
+		return urlModel ? `/${urlModel}/${widget.target_object_id}` : null;
+	}
+	function widgetLinkTitle(widget: any): string {
+		return widget.metric_instance
+			? m.openMetric()
+			: m.openObject({ name: widget.target_object_name ?? '' });
+	}
+
 	const maxRow = $derived(
 		Math.max(2, ...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2)))
 	);
@@ -73,9 +93,25 @@
 				style={getWidgetStyle(widget)}
 			>
 				{#if widget.display_title || widget.title}
+					{@const href = widgetHref(widget)}
 					<div class="mb-3">
 						<h4 class="font-semibold text-base">
-							{widget.display_title || widget.title}
+							{#if href}
+								<a
+									{href}
+									class="hover:text-primary-600 hover:underline inline-flex items-center gap-2"
+									title={widgetLinkTitle(widget)}
+									data-testid="widget-source-link"
+								>
+									{widget.display_title || widget.title}
+									<i
+										class="fa-solid fa-arrow-up-right-from-square text-xs text-surface-400"
+										aria-hidden="true"
+									></i>
+								</a>
+							{:else}
+								{widget.display_title || widget.title}
+							{/if}
 						</h4>
 						{#if widget.chart_type !== 'text'}
 							<p class="text-xs text-surface-500">
