@@ -197,30 +197,14 @@ SEED_HEXCOLORS = {
     },
 }
 
-NEUTRAL_HEXCOLORS = [
-    "#dbeafe",
-    "#e0e7ff",
-    "#ede9fe",
-    "#f3e8ff",
-    "#fce7f3",
-    "#ffe4e6",
-    "#ffedd5",
-    "#fef3c7",
-    "#fef9c3",
-    "#ecfccb",
-    "#dcfce7",
-    "#d1fae5",
-    "#ccfbf1",
-    "#cffafe",
-    "#e0f2fe",
-]
+NEUTRAL_HEXCOLOR = "#f3f4f6"
 
 
-def seed_hexcolor(field_path, name, position):
+def seed_hexcolor(field_path, name):
     colors = SEED_HEXCOLORS.get(field_path)
     if colors is not None:
-        return colors.get(name, "")
-    return NEUTRAL_HEXCOLORS[(position - 1) % len(NEUTRAL_HEXCOLORS)]
+        return colors.get(name, NEUTRAL_HEXCOLOR)
+    return NEUTRAL_HEXCOLOR
 
 
 def set_colors_and_order(apps, schema_editor):
@@ -235,9 +219,9 @@ def set_colors_and_order(apps, schema_editor):
             if row is None:
                 continue
             row.order = position
-            row.hexcolor = seed_hexcolor(field_path, name, position)
+            row.hexcolor = seed_hexcolor(field_path, name)
             row.save(update_fields=["order", "hexcolor"])
-        # Customer values follow the built-ins, alphabetically, uncoloured.
+        # Customer values follow the built-ins, alphabetically.
         position = len(names)
         rest = rows.exclude(pk__in=[t.pk for t in seeded.values()]).order_by("name")
         for row in rest:
@@ -260,7 +244,7 @@ class Migration(migrations.Migration):
             model_name="terminology",
             name="hexcolor",
             field=models.CharField(
-                blank=True, default="", max_length=9, verbose_name="Color"
+                blank=True, default="#f3f4f6", max_length=9, verbose_name="Color"
             ),
         ),
         migrations.AddField(

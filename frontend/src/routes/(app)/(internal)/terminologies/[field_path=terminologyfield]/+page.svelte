@@ -52,7 +52,7 @@
 
 	let busy = $state(false);
 	let newName = $state('');
-	let newColor = $state('#dbeafe');
+	let newColor = $state('#f3f4f6');
 	let dragIndex: number | null = $state(null);
 
 	// Colours come from the database and reach inline styles: only bare hex gets through.

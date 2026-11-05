@@ -3600,8 +3600,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Translations"),
         help_text=_("JSON field to store translations for different languages"),
     )
+    # Vocabularies that are only listed get one neutral tint.
+    NEUTRAL_HEXCOLOR = "#f3f4f6"
     hexcolor = models.CharField(
-        max_length=9, blank=True, default="", verbose_name=_("Color")
+        max_length=9, blank=True, default=NEUTRAL_HEXCOLOR, verbose_name=_("Color")
     )
     order = models.PositiveIntegerField(default=0, verbose_name=_("Order"))
 
@@ -3640,24 +3642,6 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "other": "#f3f4f6",
         },
     }
-    # Fallback for nominal vocabularies, cycled by seed position.
-    NEUTRAL_HEXCOLORS = [
-        "#dbeafe",
-        "#e0e7ff",
-        "#ede9fe",
-        "#f3e8ff",
-        "#fce7f3",
-        "#ffe4e6",
-        "#ffedd5",
-        "#fef3c7",
-        "#fef9c3",
-        "#ecfccb",
-        "#dcfce7",
-        "#d1fae5",
-        "#ccfbf1",
-        "#cffafe",
-        "#e0f2fe",
-    ]
     # Owned by the organisation once seeded: set on insert, never on update.
     USER_OWNED_FIELDS = {"is_visible", "hexcolor", "order"}
 
@@ -3665,11 +3649,11 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         ordering = ["field_path", "order", "name"]
 
     @classmethod
-    def default_hexcolor(cls, field_path: str, name: str, position: int) -> str:
+    def default_hexcolor(cls, field_path: str, name: str) -> str:
         colors = cls.DEFAULT_HEXCOLORS.get(field_path)
         if colors is not None:
-            return colors.get(name, "")
-        return cls.NEUTRAL_HEXCOLORS[(position - 1) % len(cls.NEUTRAL_HEXCOLORS)]
+            return colors.get(name, cls.NEUTRAL_HEXCOLOR)
+        return cls.NEUTRAL_HEXCOLOR
 
     @classmethod
     def next_order(cls, field_path: str) -> int:
@@ -3684,9 +3668,7 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         for position, item in enumerate(items, start=1):
             seeded = {
                 "order": position,
-                "hexcolor": cls.default_hexcolor(
-                    item["field_path"], item["name"], position
-                ),
+                "hexcolor": cls.default_hexcolor(item["field_path"], item["name"]),
                 **item,
             }
             cls.objects.update_or_create(
