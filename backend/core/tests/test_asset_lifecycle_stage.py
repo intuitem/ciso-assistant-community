@@ -1,7 +1,9 @@
 import pytest
+from django.http import QueryDict
 
-from core.models import Terminology
+from core.models import Asset, Terminology
 from core.serializers import AssetWriteSerializer
+from core.views import AssetFilter
 
 
 def _errors(terminology):
@@ -81,3 +83,29 @@ def test_custom_stage_in_use_cannot_move_to_another_field_path():
     used = TerminologyWriteSerializer(stage, data=moving, partial=True)
     assert not used.is_valid()
     assert "field_path" in used.errors
+
+
+@pytest.mark.django_db
+def test_filter_keeps_every_selected_stage():
+    from iam.models import Folder
+
+    Terminology.create_default_asset_lifecycle_stages()
+    terms = Terminology.objects.filter(
+        field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE
+    )
+    active = terms.get(name="active")
+    retired = terms.get(name="retired")
+    root = Folder.get_root_folder()
+    Asset.objects.create(name="a", folder=root, lifecycle_stage=active)
+    Asset.objects.create(name="r", folder=root, lifecycle_stage=retired)
+    Asset.objects.create(
+        name="p", folder=root, lifecycle_stage=terms.get(name="planned")
+    )
+
+    query = QueryDict(mutable=True)
+    query.setlist("lifecycle_stage", [str(active.id), str(retired.id)])
+
+    names = AssetFilter(query, queryset=Asset.objects.all()).qs.values_list(
+        "name", flat=True
+    )
+    assert set(names) == {"a", "r"}

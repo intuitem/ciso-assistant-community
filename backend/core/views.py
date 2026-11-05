@@ -2663,6 +2663,11 @@ class AssetFilter(GenericFilterSet):
     asset_class__isnull = df.BooleanFilter(
         field_name="asset_class", lookup_expr="isnull"
     )
+    lifecycle_stage = df.ModelMultipleChoiceFilter(
+        queryset=Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE
+        )
+    )
     # BIA report: only assets assessed in the given BIA.
     bia = df.UUIDFilter(method="filter_bia")
     # Add-only pickers: drop assets already assessed in the given BIA.
