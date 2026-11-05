@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0203_requirementnode_evidence_required"),
+        ("core", "0204_asset_lifecycle_stage"),
     ]
 
     operations = [

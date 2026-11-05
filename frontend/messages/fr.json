@@ -7844,5 +7844,12 @@
 	"templateContractExpiringSoonDescription": "Envoyé quand des contrats arrivent à échéance",
 	"templateProcessingObligationGapsName": "Manquements au registre RGPD",
 	"templateProcessingObligationGapsDescription": "Récapitulatif hebdomadaire des manquements au registre des activités de traitement",
-	"lowestScore": "Minimum"
+	"lowestScore": "Minimum",
+	"implementing": "En mise en œuvre",
+	"phasingOut": "En retrait progressif",
+	"retired": "Retiré",
+	"archived": "Archivé",
+	"lifecycleStage": "Cycle de vie",
+	"assetLifecycleStage": "Cycle de vie de l'actif",
+	"changeLifecycleStage": "Changer le cycle de vie"
 }

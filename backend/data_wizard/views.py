@@ -418,6 +418,12 @@ def _parse_recovery_objectives(raw: str) -> dict:
     return result
 
 
+def _normalize_key(value: Any) -> str:
+    from .mapping import normalize  # mapping imports this module
+
+    return normalize(value)
+
+
 def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
     """Resolve a canonical asset class path, or an unambiguous leaf name."""
     if not isinstance(value, str):
@@ -1301,6 +1307,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
             "reference_link": ["reference_link", "link"],
             "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
             "asset_class": ["asset_class", "class", "classe"],
+            "lifecycle_stage": ["lifecycle_stage", "lifecycle"],
         }
     )
     TYPE_MAP: Final[dict[str, str]] = {
@@ -1313,6 +1320,17 @@ class AssetRecordConsumer(RecordConsumer[list]):
     @cached_property
     def asset_class_index(self) -> dict:
         return AssetClass.path_index()
+
+    @cached_property
+    def lifecycle_stage_index(self) -> dict:
+        # Keyed so "phasing_out" (as exported) and "Phasing out" both match.
+        index = {}
+        for pk, name in Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
+            is_visible=True,
+        ).values_list("id", "name"):
+            index.setdefault(_normalize_key(name), {})[name] = pk
+        return index
 
     def create_context(self):
         return _get_security_objective_scale(), None
@@ -1399,6 +1417,18 @@ class AssetRecordConsumer(RecordConsumer[list]):
                 data["asset_class"] = asset_class.id
             else:
                 parse_warning_msgs.append(f"Unknown asset_class: '{raw_asset_class}'")
+
+        raw_stage = record.get("lifecycle_stage") or record.get("lifecycle")
+        if raw_stage:
+            stages = self.lifecycle_stage_index.get(_normalize_key(raw_stage), {})
+            if raw_stage in stages:
+                data["lifecycle_stage"] = stages[raw_stage]
+            elif len(stages) == 1:
+                data["lifecycle_stage"] = next(iter(stages.values()))
+            elif stages:
+                parse_warning_msgs.append(f"Ambiguous lifecycle_stage: '{raw_stage}'")
+            else:
+                parse_warning_msgs.append(f"Unknown lifecycle_stage: '{raw_stage}'")
 
         if asset_type == "PR":
             if sec_objectives:
