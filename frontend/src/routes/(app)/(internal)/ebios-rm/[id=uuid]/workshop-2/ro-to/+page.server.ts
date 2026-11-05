@@ -1,16 +1,17 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
-import type { ModelInfo, urlModel } from '$lib/utils/types';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo, urlParamModelSelectFields } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { listViewFields } from '#lib/utils/table.js';
+import type { ModelInfo, urlModel } from '#lib/utils/types.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
@@ -37,8 +38,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const selectOptions: Record<string, any> = {};
 
 	for (const selectField of selectFields) {
-		if (selectField.detail) continue;
-		const url = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${selectField.field}/`;
+		const studyScoped = selectField.detail && selectField.formNestedField === 'ebios_rm_study';
+		if (selectField.detail && !studyScoped) continue;
+		const url = studyScoped
+			? `${BASE_API_URL}/${selectField.endpointUrl}/${params.id}/${selectField.field}/`
+			: `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${selectField.field}/`;
 		const response = await fetch(url);
 		if (response.ok) {
 			const responseData = await response.json();
@@ -64,7 +68,18 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
+	// Data for the risk origins map (M2_09): every couple of the study, plus the
+	// pertinence labels of the study's matrix, lowest level first.
+	const [couples, ratingKit] = await Promise.all([
+		fetchAllPages<any>(fetch, `${BASE_API_URL}/ebios-rm/ro-to/?ebios_rm_study=${params.id}`),
+		fetch(`${BASE_API_URL}/ebios-rm/studies/${params.id}/rating-kit/`).then((res) =>
+			res.ok ? res.json() : null
+		)
+	]);
+
 	return {
+		couples,
+		pertinenceLevels: ratingKit?.ro_to?.pertinence ?? [],
 		createForm,
 		deleteForm,
 		model,

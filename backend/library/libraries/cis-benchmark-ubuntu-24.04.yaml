@@ -1,0 +1,3098 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cis-benchmark-ubuntu-24.04
+locale: en
+ref_id: cis-benchmark-ubuntu-24.04
+name: CIS Ubuntu Linux 24.04 LTS Benchmark
+description: CIS Ubuntu Linux 24.04 LTS Benchmark v2.0.0
+copyright: "\xA9 CIS Security"
+version: 1
+publication_date: 2026-05-28
+provider: CIS
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cis-benchmark-ubuntu-24.04
+    ref_id: cis-benchmark-ubuntu-24.04
+    name: CIS Ubuntu Linux 24.04 LTS Benchmark
+    description: CIS Ubuntu Linux 24.04 LTS Benchmark v2.0.0
+    implementation_groups_definition:
+    - ref_id: A
+      name: Automatic
+      description: null
+    - ref_id: M
+      name: Manual
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Initial Setup
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      ref_id: '1.1'
+      name: Filesystem
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1
+      ref_id: 1.1.1
+      name: Configure Filesystem Kernel Modules
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.1
+      name: Ensure cramfs kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.2
+      name: Ensure freevxfs kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.3
+      name: Ensure hfs kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.4
+      name: Ensure hfsplus kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.5
+      name: Ensure jffs2 kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.6
+      name: Ensure overlay kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.7
+      name: Ensure squashfs kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.8
+      name: Ensure udf kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.9
+      name: Ensure firewire-core kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.10
+      name: Ensure usb-storage kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.1
+      ref_id: 1.1.1.11
+      name: Ensure unused filesystems kernel modules are not available
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1
+      ref_id: 1.1.2
+      name: Configure Filesystem Partitions
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      ref_id: 1.1.2.1
+      name: Configure /tmp
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1
+      ref_id: 1.1.2.1.1
+      name: Ensure /tmp is tmpfs or a separate partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1
+      ref_id: 1.1.2.1.2
+      name: Ensure nodev option set on /tmp partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1
+      ref_id: 1.1.2.1.3
+      name: Ensure nosuid option set on /tmp partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.1
+      ref_id: 1.1.2.1.4
+      name: Ensure noexec option set on /tmp partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      ref_id: 1.1.2.2
+      name: Configure /dev/shm
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2
+      ref_id: 1.1.2.2.1
+      name: Ensure /dev/shm is tmpfs or a separate partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2
+      ref_id: 1.1.2.2.2
+      name: Ensure nodev option set on /dev/shm partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2
+      ref_id: 1.1.2.2.3
+      name: Ensure nosuid option set on /dev/shm partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.2
+      ref_id: 1.1.2.2.4
+      name: Ensure noexec option set on /dev/shm partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      ref_id: 1.1.2.3
+      name: Configure /home
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.3.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.3
+      ref_id: 1.1.2.3.1
+      name: Ensure separate partition exists for /home
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.3.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.3
+      ref_id: 1.1.2.3.2
+      name: Ensure nodev option set on /home partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.3.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.3
+      ref_id: 1.1.2.3.3
+      name: Ensure nosuid option set on /home partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      ref_id: 1.1.2.4
+      name: Configure /var
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.4.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.4
+      ref_id: 1.1.2.4.1
+      name: Ensure separate partition exists for /var
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.4.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.4
+      ref_id: 1.1.2.4.2
+      name: Ensure nodev option set on /var partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.4.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.4
+      ref_id: 1.1.2.4.3
+      name: Ensure nosuid option set on /var partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      ref_id: 1.1.2.5
+      name: Configure /var/tmp
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5
+      ref_id: 1.1.2.5.1
+      name: Ensure separate partition exists for /var/tmp
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5
+      ref_id: 1.1.2.5.2
+      name: Ensure nodev option set on /var/tmp partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5
+      ref_id: 1.1.2.5.3
+      name: Ensure nosuid option set on /var/tmp partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.5
+      ref_id: 1.1.2.5.4
+      name: Ensure noexec option set on /var/tmp partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      ref_id: 1.1.2.6
+      name: Configure /var/log
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6
+      ref_id: 1.1.2.6.1
+      name: Ensure separate partition exists for /var/log
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6
+      ref_id: 1.1.2.6.2
+      name: Ensure nodev option set on /var/log partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6
+      ref_id: 1.1.2.6.3
+      name: Ensure nosuid option set on /var/log partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.6
+      ref_id: 1.1.2.6.4
+      name: Ensure noexec option set on /var/log partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2
+      ref_id: 1.1.2.7
+      name: Configure /var/log/audit
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7
+      ref_id: 1.1.2.7.1
+      name: Ensure separate partition exists for /var/log/audit
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7
+      ref_id: 1.1.2.7.2
+      name: Ensure nodev option set on /var/log/audit partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7
+      ref_id: 1.1.2.7.3
+      name: Ensure nosuid option set on /var/log/audit partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.1.2.7
+      ref_id: 1.1.2.7.4
+      name: Ensure noexec option set on /var/log/audit partition
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      ref_id: '1.2'
+      name: Package Management
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2
+      ref_id: 1.2.1
+      name: Configure Package Repositories
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.1
+      name: Ensure the source.list and .source files use the Signed-By option
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.2
+      name: Ensure weak dependencies are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.3
+      name: Ensure access to gpg key files are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.4
+      name: Ensure access to /etc/apt/trusted.gpg.d  directory is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.5
+      name: Ensure access to /etc/apt/auth.conf.d directory  is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.6
+      name: Ensure access to files in the /etc/apt/auth.conf.d/ directory is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.7
+      name: Ensure access to /usr/share/keyrings directory is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.8
+      name: Ensure access to /etc/apt/sources.list.d directory is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.1
+      ref_id: 1.2.1.9
+      name: Ensure access to files in /etc/apt/sources.list.d are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2
+      ref_id: 1.2.2
+      name: Configure Package Updates
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.2.2
+      ref_id: 1.2.2.1
+      name: Ensure updates, patches, and additional security software are installed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      ref_id: '1.3'
+      name: Mandatory Access Control
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3
+      ref_id: 1.3.1
+      name: Configure AppArmor
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1
+      ref_id: 1.3.1.1
+      name: Ensure apparmor packages are installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1
+      ref_id: 1.3.1.2
+      name: Ensure AppArmor is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1
+      ref_id: 1.3.1.3
+      name: Ensure all AppArmor Profiles are enforcing
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.3.1
+      ref_id: 1.3.1.4
+      name: Ensure apparmor_restrict_unprivileged_unconfined is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      ref_id: '1.4'
+      name: Configure Bootloader
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.4
+      ref_id: 1.4.1
+      name: Ensure bootloader password is set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.4
+      ref_id: 1.4.2
+      name: Ensure access to bootloader config is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      ref_id: '1.5'
+      name: Configure Additional Process Hardening
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.1
+      name: Ensure fs.protected_hardlinks is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.2
+      name: Ensure fs.protected_symlinks is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.3
+      name: Ensure kernel.yama.ptrace_scope is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.4
+      name: Ensure fs.suid_dumpable is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.5
+      name: Ensure kernel.dmesg_restrict is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.6
+      name: Ensure prelink is not installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.7
+      name: Ensure Automatic Error Reporting is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.8
+      name: Ensure kernel.kptr_restrict is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.9
+      name: Ensure kernel.randomize_va_space is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.10
+      name: Ensure core file size is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.11
+      name: Ensure systemd-coredump ProcessSizeMax is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.5
+      ref_id: 1.5.12
+      name: Ensure systemd-coredump Storage is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      ref_id: '1.6'
+      name: Configure Command Line Warning Banners
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.1
+      name: Ensure /etc/motd is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.2
+      name: Ensure /etc/issue is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.3
+      name: Ensure /etc/issue.net is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.4
+      name: Ensure pam_motd is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.5
+      name: Ensure sshd warning Banner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.6
+      name: Ensure access to /etc/motd is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.7
+      name: Ensure access to /etc/issue is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.8
+      name: Ensure access to /etc/issue.net is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.9
+      name: Ensure access to pam_motd file is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.6
+      ref_id: 1.6.10
+      name: Ensure access to sshd warning banner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1
+      ref_id: '1.7'
+      name: Configure GNOME Display Manager
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      ref_id: 1.7.1
+      name: Ensure GDM login banner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      ref_id: 1.7.2
+      name: Ensure GDM disable-user-list is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      ref_id: 1.7.3
+      name: Ensure GDM screen lock is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      ref_id: 1.7.4
+      name: Ensure GDM automount is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      ref_id: 1.7.5
+      name: Ensure GDM autorun-never is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      ref_id: 1.7.6
+      name: Ensure XDMCP is not enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:1.7
+      ref_id: 1.7.7
+      name: Ensure Xwayland is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2
+      ref_id: '2.1'
+      name: Configure Server Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.1
+      name: Ensure autofs services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.2
+      name: Ensure mail transfer agents are configured for local-only mode
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.3
+      name: Ensure avahi daemon services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.4
+      name: Ensure only approved services are listening on a network interface
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.5
+      name: Ensure dhcp server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.6
+      name: Ensure web server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.7
+      name: Ensure dns server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.8
+      name: Ensure ftp server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.9
+      name: Ensure dnsmasq services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.10
+      name: Ensure ldap server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.11
+      name: Ensure message access server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.12
+      name: Ensure network file system services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.13
+      name: Ensure nis server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.14
+      name: Ensure print server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.15
+      name: Ensure rpcbind services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.16
+      name: Ensure rsync services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.17
+      name: Ensure samba file server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.18
+      name: Ensure snmp services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.19
+      name: Ensure telnet server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.20
+      name: Ensure tftp server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.21
+      name: Ensure web proxy server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.22
+      name: Ensure xinetd services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1.23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.1
+      ref_id: 2.1.23
+      name: Ensure X window server services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2
+      ref_id: '2.2'
+      name: Configure Client Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2
+      ref_id: 2.2.1
+      name: Ensure nis client is not installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2
+      ref_id: 2.2.2
+      name: Ensure rsh client is not installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2
+      ref_id: 2.2.3
+      name: Ensure talk client is not installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2
+      ref_id: 2.2.4
+      name: Ensure telnet client is not installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2
+      ref_id: 2.2.5
+      name: Ensure ldap client is not installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.2
+      ref_id: 2.2.6
+      name: Ensure ftp client is not installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2
+      ref_id: '2.3'
+      name: Configure Time Synchronization
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3
+      ref_id: 2.3.1
+      name: Ensure time synchronization is in use
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.1
+      ref_id: 2.3.1.1
+      name: Ensure a single time synchronization daemon is in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3
+      ref_id: 2.3.2
+      name: Configure systemd-timesyncd
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.2
+      ref_id: 2.3.2.1
+      name: Ensure systemd-timesyncd configured with authorized timeserver
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.2
+      ref_id: 2.3.2.2
+      name: Ensure systemd-timesyncd is enabled and running
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3
+      ref_id: 2.3.3
+      name: Configure chrony
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.3
+      ref_id: 2.3.3.1
+      name: Ensure chrony is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.3
+      ref_id: 2.3.3.2
+      name: Ensure chrony is running as user _chrony
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.3.3
+      ref_id: 2.3.3.3
+      name: Ensure chrony is enabled and running
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2
+      ref_id: '2.4'
+      name: Job Schedulers
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4
+      ref_id: 2.4.1
+      name: Configure cron
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.1
+      name: Ensure cron daemon is enabled and active
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.2
+      name: Ensure access to /etc/crontab is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.3
+      name: Ensure access to /etc/cron.hourly is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.4
+      name: Ensure access to /etc/cron.daily is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.5
+      name: Ensure access to /etc/cron.weekly is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.6
+      name: Ensure access to /etc/cron.monthly is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.7
+      name: Ensure access to /etc/cron.yearly is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.8
+      name: Ensure access to /etc/cron.d is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.1
+      ref_id: 2.4.1.9
+      name: Ensure access to crontab is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4
+      ref_id: 2.4.2
+      name: Configure at
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:2.4.2
+      ref_id: 2.4.2.1
+      name: Ensure access to at is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Network
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3
+      ref_id: '3.1'
+      name: Configure Network Devices
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.1
+      ref_id: 3.1.1
+      name: Ensure IPv6 status is identified
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.1
+      ref_id: 3.1.2
+      name: Ensure wireless interfaces are not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.1
+      ref_id: 3.1.3
+      name: Ensure bluetooth services are not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3
+      ref_id: '3.2'
+      name: Configure Network Kernel Modules
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2
+      ref_id: 3.2.1
+      name: Ensure atm kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2
+      ref_id: 3.2.2
+      name: Ensure can kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2
+      ref_id: 3.2.3
+      name: Ensure dccp kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2
+      ref_id: 3.2.4
+      name: Ensure rds kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2
+      ref_id: 3.2.5
+      name: Ensure sctp kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.2
+      ref_id: 3.2.6
+      name: Ensure tipc kernel module is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3
+      ref_id: '3.3'
+      name: Configure Network Kernel Parameters
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3
+      ref_id: 3.3.1
+      name: Configure IPv4 parameters
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.1
+      name: Ensure net.ipv4.ip_forward is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.2
+      name: Ensure net.ipv4.conf.all.forwarding is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.3
+      name: Ensure net.ipv4.conf.default.forwarding is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.4
+      name: Ensure net.ipv4.conf.all.send_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.5
+      name: Ensure net.ipv4.conf.default.send_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.6
+      name: Ensure net.ipv4.icmp_ignore_bogus_error_responses is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.7
+      name: Ensure net.ipv4.icmp_echo_ignore_broadcasts is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.8
+      name: Ensure net.ipv4.conf.all.accept_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.9
+      name: Ensure net.ipv4.conf.default.accept_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.10
+      name: Ensure net.ipv4.conf.all.secure_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.11
+      name: Ensure net.ipv4.conf.default.secure_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.12
+      name: Ensure net.ipv4.conf.all.rp_filter is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.13
+      name: Ensure net.ipv4.conf.default.rp_filter is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.14
+      name: Ensure net.ipv4.conf.all.accept_source_route is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.15
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.15
+      name: Ensure net.ipv4.conf.default.accept_source_route is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.16
+      name: Ensure net.ipv4.conf.all.log_martians is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.17
+      name: Ensure net.ipv4.conf.default.log_martians is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1.18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.1
+      ref_id: 3.3.1.18
+      name: Ensure net.ipv4.tcp_syncookies is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3
+      ref_id: 3.3.2
+      name: Configure IPv6 parameters
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.1
+      name: Ensure  net.ipv6.conf.all.forwarding is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.2
+      name: Ensure  net.ipv6.conf.default.forwarding is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.3
+      name: Ensure net.ipv6.conf.all.accept_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.4
+      name: Ensure net.ipv6.conf.default.accept_redirects is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.5
+      name: Ensure net.ipv6.conf.all.accept_source_route is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.6
+      name: Ensure net.ipv6.conf.default.accept_source_route is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.7
+      name: Ensure net.ipv6.conf.all.accept_ra is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:3.3.2
+      ref_id: 3.3.2.8
+      name: Ensure net.ipv6.conf.default.accept_ra is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Host Based Firewall
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4
+      ref_id: '4.1'
+      name: Configure Uncomplicated Firewall
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1
+      ref_id: 4.1.1
+      name: Ensure ufw is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1
+      ref_id: 4.1.2
+      name: Ensure ufw service is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1
+      ref_id: 4.1.3
+      name: Ensure ufw incoming default is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1
+      ref_id: 4.1.4
+      name: Ensure ufw outgoing default is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:4.1
+      ref_id: 4.1.5
+      name: Ensure ufw routed default is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Access Control
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5
+      ref_id: '5.1'
+      name: Configure SSH Server
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.1
+      name: Ensure access to /etc/ssh/sshd_config is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.2
+      name: Ensure access to SSH private host key files is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.3
+      name: Ensure access to SSH public host key files is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.4
+      name: Ensure sshd access is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.5
+      name: Ensure sshd Banner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.6
+      name: Ensure sshd Ciphers are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.7
+      name: Ensure sshd ClientAliveInterval and ClientAliveCountMax are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.8
+      name: Ensure sshd DisableForwarding is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.9
+      name: Ensure sshd GSSAPIAuthentication is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.10
+      name: Ensure sshd HostbasedAuthentication is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.11
+      name: Ensure sshd IgnoreRhosts is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.12
+      name: Ensure sshd KexAlgorithms is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.13
+      name: Ensure sshd LoginGraceTime is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.14
+      name: Ensure sshd LogLevel is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.15
+      name: Ensure sshd MACs are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.16
+      name: Ensure sshd MaxAuthTries is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.17
+      name: Ensure sshd MaxStartups is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.18
+      name: Ensure sshd MaxSessions is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.19
+      name: Ensure sshd PermitEmptyPasswords is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.20
+      name: Ensure sshd PermitRootLogin is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.21
+      name: Ensure sshd PermitUserEnvironment is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.22
+      name: Ensure sshd UsePAM is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.23
+      name: Ensure sshd post-quantum cryptography key exchange algorithms are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1.24
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.1
+      ref_id: 5.1.24
+      name: Ensure sshd ListenAddress is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5
+      ref_id: '5.2'
+      name: Configure privilege escalation
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      ref_id: 5.2.1
+      name: Ensure sudo is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      ref_id: 5.2.2
+      name: Ensure sudo commands use pty
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      ref_id: 5.2.3
+      name: Ensure sudo log file exists
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      ref_id: 5.2.4
+      name: Ensure users must provide password for escalation
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      ref_id: 5.2.5
+      name: Ensure re-authentication for privilege escalation is not disabled globally
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      ref_id: 5.2.6
+      name: Ensure sudo timestamp_timeout is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.2
+      ref_id: 5.2.7
+      name: Ensure access to the su command is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5
+      ref_id: '5.3'
+      name: Pluggable Authentication Modules
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3
+      ref_id: 5.3.1
+      name: Configure PAM software packages
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1
+      ref_id: 5.3.1.1
+      name: Ensure latest version of pam is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1
+      ref_id: 5.3.1.2
+      name: Ensure latest version of libpam-modules is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1
+      ref_id: 5.3.1.3
+      name: Ensure latest version of libpam-pwquality is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.1
+      ref_id: 5.3.1.4
+      name: Ensure latest version of cracklib-runtime is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3
+      ref_id: 5.3.2
+      name: Configure pam-auth-update profiles
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2
+      ref_id: 5.3.2.1
+      name: Ensure pam_unix module is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2
+      ref_id: 5.3.2.2
+      name: Ensure pam_faillock module is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2
+      ref_id: 5.3.2.3
+      name: Ensure pam_pwquality module is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.2
+      ref_id: 5.3.2.4
+      name: Ensure pam_pwhistory module is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3
+      ref_id: 5.3.3
+      name: Configure PAM Arguments
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3
+      ref_id: 5.3.3.1
+      name: Configure pam_faillock module
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.1
+      ref_id: 5.3.3.1.1
+      name: Ensure password failed attempts lockout is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.1
+      ref_id: 5.3.3.1.2
+      name: Ensure password unlock time is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.1.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.1
+      ref_id: 5.3.3.1.3
+      name: Ensure password failed attempts lockout includes root account
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3
+      ref_id: 5.3.3.2
+      name: Configure pam_pwquality module
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.1
+      name: Ensure password number of changed characters is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.2
+      name: Ensure password length is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.3
+      name: Ensure password complexity is configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.4
+      name: Ensure password same consecutive characters is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.5
+      name: Ensure password maximum sequential characters is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.6
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.6
+      name: Ensure password dictionary check is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.7
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.7
+      name: Ensure password quality checking is enforced
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2.8
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.2
+      ref_id: 5.3.3.2.8
+      name: Ensure password quality is enforced for the root user
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3
+      ref_id: 5.3.3.3
+      name: Configure pam_pwhistory module
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.3.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.3
+      ref_id: 5.3.3.3.1
+      name: Ensure password history remember is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.3.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.3
+      ref_id: 5.3.3.3.2
+      name: Ensure password history is enforced for the root user
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.3.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.3
+      ref_id: 5.3.3.3.3
+      name: Ensure pam_pwhistory includes use_authtok
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3
+      ref_id: 5.3.3.4
+      name: Configure pam_unix module
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4
+      ref_id: 5.3.3.4.1
+      name: Ensure pam_unix does not include nullok
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4
+      ref_id: 5.3.3.4.2
+      name: Ensure pam_unix does not include remember
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4
+      ref_id: 5.3.3.4.3
+      name: Ensure pam_unix includes a strong password hashing algorithm
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.3.3.4
+      ref_id: 5.3.3.4.4
+      name: Ensure pam_unix includes use_authtok
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5
+      ref_id: '5.4'
+      name: User Accounts and Environment
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4
+      ref_id: 5.4.1
+      name: Configure shadow password suite parameters
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1
+      ref_id: 5.4.1.1
+      name: Ensure password expiration is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1
+      ref_id: 5.4.1.2
+      name: Ensure minimum password days is configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1
+      ref_id: 5.4.1.3
+      name: Ensure password expiration warning days is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1
+      ref_id: 5.4.1.4
+      name: Ensure strong password hashing algorithm is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1
+      ref_id: 5.4.1.5
+      name: Ensure inactive password lock is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.1
+      ref_id: 5.4.1.6
+      name: Ensure all users last password change date is in the past
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4
+      ref_id: 5.4.2
+      name: Configure root and system accounts and environment
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.1
+      name: Ensure root is the only UID 0 account
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.2
+      name: Ensure root is the only GID 0 account
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.3
+      name: Ensure group root is the only GID 0 group
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.4
+      name: Ensure root account access is controlled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.5
+      name: Ensure root path integrity
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.6
+      name: Ensure root user umask is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.7
+      name: Ensure system accounts do not have a valid login shell
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.2
+      ref_id: 5.4.2.8
+      name: Ensure accounts without a valid login shell are locked
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4
+      ref_id: 5.4.3
+      name: Configure user default environment
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.3
+      ref_id: 5.4.3.1
+      name: Ensure nologin is not listed in /etc/shells
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.3
+      ref_id: 5.4.3.2
+      name: Ensure default user shell timeout is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:5.4.3
+      ref_id: 5.4.3.3
+      name: Ensure default user umask is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Logging and Auditing
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6
+      ref_id: '6.1'
+      name: System Logging
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1
+      ref_id: 6.1.1
+      name: Configure journald
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1
+      ref_id: 6.1.1.1
+      name: Configure journald
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      ref_id: 6.1.1.1.1
+      name: Ensure journald service is active
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      ref_id: 6.1.1.1.2
+      name: Ensure systemd-journal-remote service is not in use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      ref_id: 6.1.1.1.3
+      name: Ensure journald is configured to send logs to rsyslog
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      ref_id: 6.1.1.1.4
+      name: Ensure journald log file access is configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      ref_id: 6.1.1.1.5
+      name: Ensure journald log file rotation is configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1.6
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      ref_id: 6.1.1.1.6
+      name: Ensure journald Storage is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1.7
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.1.1
+      ref_id: 6.1.1.1.7
+      name: Ensure journald Compress is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1
+      ref_id: 6.1.2
+      name: Configure rsyslog
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.1
+      name: Ensure rsyslog is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.2
+      name: Ensure rsyslog service is enabled and active
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.3
+      name: Ensure rsyslog log file creation mode is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.4
+      name: Ensure rsyslog logging is configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.5
+      name: Ensure rsyslog is configured to send logs to a remote log host
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.6
+      name: Ensure rsyslog is not configured to receive logs from a remote client
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.7
+      name: Ensure logrotate is configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.8
+      name: Ensure rsyslog-gnutls is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.9
+      name: Ensure rsyslog forwarding uses gtls
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.2
+      ref_id: 6.1.2.10
+      name: Ensure rsyslog CA certificates are configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1
+      ref_id: 6.1.3
+      name: Configure Logfiles
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.1.3
+      ref_id: 6.1.3.1
+      name: Ensure access to all logfiles has been configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6
+      ref_id: '6.2'
+      name: System Auditing
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2
+      ref_id: 6.2.1
+      name: Configure auditd Service
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1
+      ref_id: 6.2.1.1
+      name: Ensure auditd packages are installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1
+      ref_id: 6.2.1.2
+      name: Ensure auditd service is enabled and active
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1
+      ref_id: 6.2.1.3
+      name: Ensure auditing for processes that start prior to auditd is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.1
+      ref_id: 6.2.1.4
+      name: Ensure audit_backlog_limit is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2
+      ref_id: 6.2.2
+      name: Configure Data Retention
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2
+      ref_id: 6.2.2.1
+      name: Ensure audit log storage size is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2
+      ref_id: 6.2.2.2
+      name: Ensure audit logs are not automatically deleted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2
+      ref_id: 6.2.2.3
+      name: Ensure system is disabled when audit logs are full
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.2
+      ref_id: 6.2.2.4
+      name: Ensure system warns when audit logs are low on space
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2
+      ref_id: 6.2.3
+      name: Configure auditd Rules
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.1
+      name: Ensure changes to system administration scope (sudoers) is collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.2
+      name: Ensure actions as another user are always logged
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.3
+      name: Ensure events that modify the sudo log file are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.4
+      name: Ensure events that modify date and time information are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.5
+      name: Ensure events that modify sethostname and setdomainname are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.6
+      name: Ensure events that modify /etc/issue and /etc/issue.net are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.7
+      name: Ensure events that modify /etc/hosts and /etc/hostname are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.8
+      name: Ensure events that modify /etc/network and /etc/networks are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.9
+      name: Ensure events that modify /etc/netplan are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.10
+      name: Ensure use of privileged commands are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.11
+      name: Ensure events that modify /etc/group information are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.12
+      name: Ensure events that modify /etc/passwd information are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.13
+      name: Ensure events that modify /etc/shadow and /etc/gshadow are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.14
+      name: Ensure events that modify /etc/security/opasswd are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.15
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.15
+      name: Ensure events that modify /etc/nsswitch.conf file are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.16
+      name: Ensure events that modify /etc/pam.conf and /etc/pam.d/ information are
+        collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.17
+      name: Ensure unsuccessful file access attempts are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.18
+      name: Ensure discretionary access control permission modification events are
+        collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.19
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.19
+      name: Ensure successful file system mounts are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.20
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.20
+      name: Ensure session initiation information is collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.21
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.21
+      name: Ensure login and logout events are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.22
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.22
+      name: Ensure file deletion events by users are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.23
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.23
+      name: Ensure events that modify the system's Mandatory Access Controls are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.24
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.24
+      name: Ensure successful and unsuccessful attempts to use the chcon command are
+        collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.25
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.25
+      name: Ensure successful and unsuccessful attempts to use the setfacl command
+        are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.26
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.26
+      name: Ensure successful and unsuccessful attempts to use the chacl command are
+        collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.27
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.27
+      name: Ensure successful and unsuccessful attempts to use the usermod command
+        are collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.28
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.28
+      name: Ensure kernel module loading unloading and modification is collected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.29
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.29
+      name: Ensure the audit configuration is immutable
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3.30
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.3
+      ref_id: 6.2.3.30
+      name: Ensure the running and on disk configuration is the same
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2
+      ref_id: 6.2.4
+      name: Configure auditd File Access
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.1
+      name: Ensure the audit log file directory mode is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.2
+      name: Ensure audit log files mode is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.3
+      name: Ensure audit log files owner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.4
+      name: Ensure audit log files group owner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.5
+      name: Ensure audit configuration files mode is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.6
+      name: Ensure audit configuration files owner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.7
+      name: Ensure audit configuration files group owner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.8
+      name: Ensure audit tools mode is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.9
+      name: Ensure audit tools owner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.2.4
+      ref_id: 6.2.4.10
+      name: Ensure audit tools group owner is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6
+      ref_id: '6.3'
+      name: Configure Integrity Checking
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.3
+      ref_id: 6.3.1
+      name: Ensure AIDE is installed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.3
+      ref_id: 6.3.2
+      name: Ensure filesystem integrity is regularly checked
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:6.3
+      ref_id: 6.3.3
+      name: Ensure cryptographic mechanisms are used to protect the integrity of audit
+        tools
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: System Maintenance
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7
+      ref_id: '7.1'
+      name: Configure system file and directory access
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.1
+      name: Ensure access to /etc/passwd is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.2
+      name: Ensure access to /etc/passwd- is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.3
+      name: Ensure access to /etc/group is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.4
+      name: Ensure access to /etc/group- is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.5
+      name: Ensure access to /etc/shadow is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.6
+      name: Ensure access to /etc/shadow- is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.7
+      name: Ensure access to /etc/gshadow is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.8
+      name: Ensure access to /etc/gshadow- is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.9
+      name: Ensure access to /etc/shells is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.10
+      name: Ensure access to /etc/security/opasswd is configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.11
+      name: Ensure world writable files and directories are secured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.12
+      name: Ensure no files or directories without an owner and a group exist
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.1
+      ref_id: 7.1.13
+      name: Ensure SUID and SGID files are reviewed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7
+      ref_id: '7.2'
+      name: Local User and Group Settings
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.1
+      name: Ensure accounts in /etc/passwd use shadowed passwords
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.2
+      name: Ensure /etc/shadow password fields are not empty
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.3
+      name: Ensure all groups in /etc/passwd exist in /etc/group
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.4
+      name: Ensure shadow group is empty
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.5
+      name: Ensure no duplicate UIDs exist
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.6
+      name: Ensure no duplicate GIDs exist
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.7
+      name: Ensure no duplicate user names exist
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.8
+      name: Ensure no duplicate group names exist
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.9
+      name: Ensure local interactive user home directories are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-ubuntu-24.04:7.2
+      ref_id: 7.2.10
+      name: Ensure local interactive user dot files access is configured
+      implementation_groups:
+      - A

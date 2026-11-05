@@ -135,6 +135,7 @@ class PublicDocument(NameDescriptionMixin, FolderMixin):
         max_length=64, unique=True, default=_public_document_token, editable=False
     )
     file = models.FileField(upload_to="public_documents/%Y/%m/")
+    filename = models.CharField(max_length=255, blank=True)
     mime_type = models.CharField(max_length=120, blank=True)
     size = models.BigIntegerField(default=0)
 

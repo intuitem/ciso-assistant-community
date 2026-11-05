@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Column {
 		key: string;

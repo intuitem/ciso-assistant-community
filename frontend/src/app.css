@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+/* Restrict the Tailwind source scan to src/ (the default auto-detection can crawl the whole project tree, which makes the app.css transform take minutes in the enterprise .build overlay). */
+@import 'tailwindcss' source('.');
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 @import '@skeletonlabs/skeleton';
@@ -46,6 +47,25 @@
 	@apply text-gray-50 bg-teal-500 hover:bg-teal-400 dark:bg-teal-600 dark:hover:bg-teal-500;
 }
 
+/* v5 styles the <code> element itself and dropped the `code` utility; we still tag
+   <a>/<span> as code, so mirror the v5 base declarations for those. */
+@utility code {
+	&:not(pre &, .ec-line &) {
+		background-color: color-mix(
+			in oklab,
+			light-dark(var(--color-brand-light), var(--color-brand-dark)) 25%,
+			transparent
+		);
+		color: var(--color-surface-950-50);
+		border-radius: var(--radius-base);
+		font-family: var(--font-mono);
+		font-size: var(--text-xs);
+		white-space: nowrap;
+		padding-inline: --spacing(1.5);
+		padding-block: --spacing(0.75);
+	}
+}
+
 @layer utilities {
 	/* (all other styles here...) */
 	html,
@@ -83,6 +103,9 @@
 
 /* svelte-multiselect dropdown: align the options panel with the app surface in both
    themes (off-white surface-100 instead of pure white in light, surface-900 in dark). */
+div.multiselect {
+	--sms-open-z-index: 20;
+}
 div.multiselect > ul.options {
 	background-color: var(--color-surface-100-900);
 	color: var(--color-surface-950-50);
@@ -91,6 +114,17 @@ div.multiselect > ul.options > li.active {
 	background-color: var(--color-surface-200-800);
 }
 div.multiselect > ul.options > li:not(.active):hover {
+	background-color: var(--color-surface-200-800);
+}
+/* Portaled to <body>, so the rules above no longer match; theme via the library's vars. */
+ul.options.portaled-options {
+	--sms-options-bg: var(--color-surface-100-900);
+	--sms-li-active-bg: var(--color-surface-200-800);
+	/* Above modals (z-999): an open dropdown is on top of whatever opened it. */
+	--sms-options-z-index: 1000;
+	color: var(--color-surface-950-50);
+}
+ul.options.portaled-options > li:not(.active):hover {
 	background-color: var(--color-surface-200-800);
 }
 /* Selected values/chips: keep text readable in dark mode. Single-select uses a

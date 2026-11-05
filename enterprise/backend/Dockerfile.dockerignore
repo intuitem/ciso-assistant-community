@@ -1,0 +1,21 @@
+# BuildKit uses this file INSTEAD of backend/.dockerignore for the enterprise
+# backend build (Dockerfile-specific ignore file). Keep the community entries
+# below in sync with backend/.dockerignore.
+*.pyc
+**/.DS_Store
+*~$*
+.git*
+.pytest*
+.idea*
+.venv
+.dockerignore
+Dockerfile
+db
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+static/
+pytest-report.html
+
+# Libraries excluded from the enterprise image (still shipped in community)
+library/libraries/cis-benchmark-*.yaml

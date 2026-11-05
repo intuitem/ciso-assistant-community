@@ -2,6 +2,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.http.response import Http404
 from django.urls import reverse
@@ -27,7 +28,7 @@ from allauth.socialaccount.internal.flows.login import (
     pre_social_login,
     record_authentication,
 )
-from allauth.socialaccount.models import PermissionDenied, SocialLogin
+from allauth.socialaccount.models import SocialLogin
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from allauth.socialaccount.providers.saml.views import (
     AuthProcess,
@@ -44,16 +45,47 @@ from allauth.utils import ValidationError
 
 # === Application-specific imports ===
 from core.permissions import IsGlobalAdmin  # ou une permission plus adaptée
+from iam.adapter import DEFAULT_ATTRIBUTE_MAPPING_GROUPS
 from iam.models import User
 from iam.sso.errors import AuthError
 from iam.sso.models import SSOSettings
 from iam.sso.redirects import get_sso_authenticate_url
-from iam.utils import generate_token
+from iam.sso.slo import stash_saml_slo_state
+from iam.utils import generate_token, sync_user_idp_groups
 from global_settings.models import GlobalSettings
+from global_settings.utils import ff_is_enabled
 
 DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL = SAMLProvider.default_attribute_mapping["email"]
 
 logger = structlog.get_logger(__name__)
+
+
+DEFAULT_RELAY_STATE = "/"
+
+
+def saml_redirect(
+    request: HttpRequest,
+    provider: SAMLProvider,
+    *,
+    process: str,
+    next_url: str | None = None,
+    **state_kwargs,
+) -> HttpResponseRedirect:
+    """Builds the AuthnRequest redirect mirroring `SAMLProvider.redirect`, but
+    with a non-empty RelayState. allauth sends `RelayState=` empty, and AD FS
+    rejects a signed request whose signed query carries an empty RelayState.
+    The post-login destination still comes from the stashed `next_url`."""
+    auth = build_auth(request, provider)
+    redirect_url = auth.login(return_to=DEFAULT_RELAY_STATE)
+    provider.stash_redirect_state(
+        request,
+        process,
+        next_url,
+        None,
+        state_id=auth.get_last_request_id(),
+        **state_kwargs,
+    )
+    return HttpResponseRedirect(redirect_url)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -162,6 +194,16 @@ class FinishACSView(SAMLViewMixin, View):
             ] or DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL
             emails = [auth.get_attribute(x) or [] for x in email_attributes]
             emails = [x for xs in emails for x in xs]  # flatten
+            idp_first_names = auth.get_attribute(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+            )
+            idp_last_names = auth.get_attribute(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+            )
+            sso_settings = provider.app
+            jit_provisioning_active = sso_settings.jit_provisioning_enabled and (
+                ff_is_enabled("jit_provisioning")
+            )
             user = User.objects.filter(email__iexact=auth.get_nameid()).first()
             if not user and emails:
                 logger.info(
@@ -172,22 +214,45 @@ class FinishACSView(SAMLViewMixin, View):
                 try:
                     user = User.objects.get(email__iexact=emails[0])
                 except User.DoesNotExist:
-                    raise User.DoesNotExist()
-            idp_first_names = auth.get_attribute(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
-            )
-            idp_last_names = auth.get_attribute(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
-            )
+                    if not jit_provisioning_active:
+                        raise User.DoesNotExist()
+                    user = User.objects.create_user(
+                        email=emails[0],
+                        password=None,
+                        first_name=idp_first_names[0] if idp_first_names else "",
+                        last_name=idp_last_names[0] if idp_last_names else "",
+                        user_groups=sso_settings.default_user_groups,
+                        is_jit_provisioned=True,
+                    )
+                    logger.info(
+                        "SAML: user auto-provisioned via JIT", user_id=str(user.id)
+                    )
+            if not user:
+                raise User.DoesNotExist()
             user.first_name = idp_first_names[0] if idp_first_names else user.first_name
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
+            if jit_provisioning_active:
+                group_claims_string = attribute_mapping.get("groups", [])
+                group_claims = [
+                    item.strip() for y in group_claims_string for item in y.split(",")
+                ] or DEFAULT_ATTRIBUTE_MAPPING_GROUPS
+                if group_claims:
+                    group_values = [auth.get_attribute(x) or [] for x in group_claims]
+                    group_names = [g for xs in group_values for g in xs]
+                    sync_user_idp_groups(user, group_names)
             token = generate_token(user)
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
             login._accept_login(request)  # complete_social_login not working
+            if login.account.pk is None:
+                # allauth only links the account when it matches an email through
+                # its own attribute mapping, which the settings form can store as
+                # one comma-joined name. The user is resolved above: link it.
+                login.connect(request, user)
             record_authentication(request, login)
+            stash_saml_slo_state(request, auth, user)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
             error = AuthError.USER_DOES_NOT_EXIST

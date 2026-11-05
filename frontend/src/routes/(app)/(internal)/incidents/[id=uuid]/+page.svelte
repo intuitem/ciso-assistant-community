@@ -1,49 +1,53 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { modelSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages.js';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { createModalCache } from '$lib/utils/stores';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import * as m from '#paraglide/messages.js';
+	import { onMount } from 'svelte';
+	import { ensureSelectOptions } from '#lib/utils/select-options.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
-	import { loadTableData } from '$lib/components/ModelTable/handler';
-	import Search from '$lib/components/ModelTable/Search.svelte';
-	import RowsPerPage from '$lib/components/ModelTable/RowsPerPage.svelte';
-	import RowCount from '$lib/components/ModelTable/RowCount.svelte';
-	import Pagination from '$lib/components/ModelTable/Pagination.svelte';
-	import { listViewFields } from '$lib/utils/table';
+	import { loadTableData } from '#lib/components/ModelTable/handler.js';
+	import Search from '#lib/components/ModelTable/Search.svelte';
+	import RowsPerPage from '#lib/components/ModelTable/RowsPerPage.svelte';
+	import RowCount from '#lib/components/ModelTable/RowCount.svelte';
+	import Pagination from '#lib/components/ModelTable/Pagination.svelte';
+	import { listViewFields } from '#lib/utils/table.js';
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
-	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getListViewFields } from '$lib/utils/table';
-	import type { ReverseForeignKeyField } from '$lib/utils/crud';
-	import { countMasked } from '$lib/utils/related-visibility';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import TableRowActions from '#lib/components/TableRowActions/TableRowActions.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import SelectExistingModal from '#lib/components/Modals/SelectExistingModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { getListViewFields } from '#lib/utils/table.js';
+	import type { ReverseForeignKeyField } from '#lib/utils/crud.js';
+	import { countMasked } from '#lib/utils/related-visibility.js';
 
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { Popover, Tabs } from '@skeletonlabs/skeleton-svelte';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		data: PageData;
@@ -57,6 +61,11 @@
 	const formAction = '?/create';
 	const timelineForm = data.relatedModels['timeline-entries'].createForm;
 	const model = data.relatedModels['timeline-entries'];
+	let entryTypeOptions = $state(model.selectOptions['entry_type'] ?? []);
+	onMount(async () => {
+		await ensureSelectOptions(model);
+		entryTypeOptions = model.selectOptions['entry_type'] ?? [];
+	});
 	const schema = modelSchema('timeline-entries');
 
 	const _form = superForm(timelineForm, {
@@ -100,6 +109,7 @@
 		}
 	);
 	const rows = handler.getRows();
+	const toastStore = getToastStore();
 	const field = data.model.reverseForeignKeyFields.find(
 		(item) => item.urlModel === 'timeline-entries'
 	);
@@ -108,7 +118,11 @@
 			state,
 			URLModel: 'timeline-entries',
 			endpoint: `/timeline-entries?incident=${data.data.id}`,
-			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field)
+			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field),
+			onError: (error) => {
+				console.error(error);
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			}
 		})
 	);
 
@@ -123,7 +137,7 @@
 	$effect(() => {
 		if (invalidateTable) {
 			handler.invalidate();
-			_goto(page.url);
+			_goto(page.url.href);
 			invalidateTable = false;
 		}
 	});
@@ -187,7 +201,64 @@
 				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
 
-	let exportPopupOpen = $state(false);
+	const doraEnabled = $derived(!!page.data?.featureflags?.dora);
+
+	function buildExportGroups(): ExportGroup[] {
+		const id = data.data.id;
+		return [
+			{
+				titleKey: 'incident',
+				options: [
+					{
+						titleKey: 'exportIncidentReport',
+						descriptionKey: 'exportIncidentReportDesc',
+						format: 'MD',
+						href: `/incidents/${id}/export/md`,
+						testId: 'export-option-md'
+					},
+					{
+						titleKey: 'exportIncidentReportPrintable',
+						descriptionKey: 'exportIncidentReportPrintableDesc',
+						format: 'PDF',
+						href: `/incidents/${id}/export/pdf`,
+						testId: 'export-option-pdf'
+					}
+				]
+			},
+			...(doraEnabled
+				? [
+						{
+							titleKey: 'doraIncidentReports',
+							options: [
+								{
+									titleKey: 'generateDoraReport',
+									descriptionKey: 'generateDoraReportDesc',
+									format: 'JSON',
+									href: `/dora-incident-reports/new?incident=${id}`,
+									kind: 'navigate',
+									testId: 'export-option-dora'
+								}
+							]
+						}
+					]
+				: [])
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups()
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
 
 	function modalDeleteDoraReport(reportId: string, reportName: string): void {
 		const modalComponent: ModalComponent = {
@@ -270,12 +341,18 @@
 			urlmodel: 'risk-scenarios',
 			icon: 'fa-solid fa-triangle-exclamation',
 			labelKey: 'riskScenarios'
+		},
+		{
+			tabValue: 'vulnerabilities',
+			urlmodel: 'vulnerabilities',
+			icon: 'fa-solid fa-bug',
+			labelKey: 'vulnerabilities'
 		}
 	];
 
 	// DORA reports fetched server-side, sorted by creation date (newest first)
 	const doraRows: any[] = $derived(
-		[...(data.doraReports ?? [])].sort(
+		[...(doraEnabled ? (data.doraReports ?? []) : [])].sort(
 			(a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
 		)
 	);
@@ -285,42 +362,14 @@
 	<DetailView {data} displayModelTable={false}>
 		{#snippet actions()}
 			<div class="flex flex-col space-y-2">
-				<Popover
-					open={exportPopupOpen}
-					onOpenChange={(e) => (exportPopupOpen = e.open)}
-					positioning={{ placement: 'bottom' }}
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 w-full"
+					data-testid="export-button"
+					onclick={modalExport}
 				>
-					<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-						<span data-testid="export-button">
-							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-						</span>
-					</Popover.Trigger>
-					<Popover.Positioner class="z-50!">
-						<Popover.Content
-							class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-						>
-							<div>
-								<p class="block px-4 py-2 text-sm text-surface-800-200">{m.incident()}</p>
-								<a
-									href="/incidents/{data.data.id}/export/md"
-									class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
-									>... {m.asMarkdown()}</a
-								>
-								<a
-									href="/incidents/{data.data.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
-									>... {m.asPDF()}</a
-								>
-							</div>
-						</Popover.Content>
-					</Popover.Positioner>
-				</Popover>
-				<a
-					href="/dora-incident-reports/new?incident={data.data.id}"
-					class="btn preset-filled-secondary-500 w-full"
-				>
-					<i class="fa-solid fa-file-shield mr-2"></i>{m.generateDoraReport()}
-				</a>
+					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+				</button>
 			</div>
 		{/snippet}
 		{#snippet widgets()}
@@ -352,7 +401,8 @@
 							<Select
 								{form}
 								disableDoubleDash={true}
-								options={model.selectOptions['entry_type']}
+								options={entryTypeOptions}
+								disabled={entryTypeOptions.length === 0}
 								field="entry_type"
 								label={m.entryType()}
 							/>
@@ -375,6 +425,7 @@
 											{form}
 											multiple
 											optionsEndpoint="evidences"
+											lazy
 											optionsDetailedUrlParameters={[
 												['scope_folder_id', page.data.data?.folder?.id]
 											]}
@@ -430,16 +481,18 @@
 				<Tabs.Trigger value="timeline">
 					<i class="fa-solid fa-timeline mr-2"></i>{m.timeline()}
 				</Tabs.Trigger>
-				<Tabs.Trigger value="dora-reports">
-					<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
-					{#if doraRows.length > 0}
-						<span
-							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
-						>
-							{doraRows.length}
-						</span>
-					{/if}
-				</Tabs.Trigger>
+				{#if doraEnabled}
+					<Tabs.Trigger value="dora-reports">
+						<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
+						{#if doraRows.length > 0}
+							<span
+								class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
+							>
+								{doraRows.length}
+							</span>
+						{/if}
+					</Tabs.Trigger>
+				{/if}
 				{#each linkedPanels as panel}
 					{@const related = data.relatedModels?.[panel.urlmodel]}
 					{#if related}
@@ -502,7 +555,7 @@
 									>
 									<a
 										href={`/${actionsURLModel}/${meta.id}`}
-										class="font-semibold capitalize"
+										class="font-semibold"
 										data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
 									>
 								</div>
@@ -612,72 +665,76 @@
 				{/if}
 			{/each}
 
-			<Tabs.Content value="dora-reports" class="pt-4">
-				{#if doraRows.length > 0}
-					<table class="w-full text-sm">
-						<thead>
-							<tr class="border-b text-left text-surface-600-400">
-								<th class="py-2 px-3">{m.incidentSubmission()}</th>
-								<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
-								<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
-								<th class="py-2 px-3"></th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each doraRows as report}
-								<tr
-									class="border-b hover:bg-surface-100-900 cursor-pointer"
-									onclick={(e) => {
-										if (!(e.target as HTMLElement).closest('button')) {
-											window.location.href = `/dora-incident-reports/${report.id}`;
-										}
-									}}
-								>
-									<td class="py-2 px-3">
-										<span
-											class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded"
-										>
-											{safeTranslate(report.incident_submission)}
-										</span>
-										{#if report.is_submitted}
-											<span
-												class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded ml-1"
-											>
-												<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
-											</span>
-										{:else}
-											<span
-												class="bg-surface-200-800 text-surface-600-400 text-xs px-2 py-1 rounded ml-1"
-											>
-												{m.draft()}
-											</span>
-										{/if}
-									</td>
-									<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td>
-									<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td>
-									<td class="py-2 px-3 text-right">
-										{#if !report.is_submitted}
-											<button
-												type="button"
-												class="text-red-500 hover:text-red-700 text-sm"
-												onclick={() =>
-													modalDeleteDoraReport(
-														report.id,
-														safeTranslate(report.incident_submission)
-													)}
-											>
-												<i class="fa-solid fa-trash"></i>
-											</button>
-										{/if}
-									</td>
+			{#if doraEnabled}
+				<Tabs.Content value="dora-reports" class="pt-4">
+					{#if doraRows.length > 0}
+						<table class="w-full text-sm">
+							<thead>
+								<tr class="border-b text-left text-surface-600-400">
+									<th class="py-2 px-3">{m.incidentSubmission()}</th>
+									<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
+									<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
+									<th class="py-2 px-3"></th>
 								</tr>
-							{/each}
-						</tbody>
-					</table>
-				{:else}
-					<p class="text-surface-600-400 text-sm italic py-4">{m.noResultFound()}</p>
-				{/if}
-			</Tabs.Content>
+							</thead>
+							<tbody>
+								{#each doraRows as report}
+									<tr
+										class="border-b hover:bg-surface-100-900 cursor-pointer"
+										onclick={(e) => {
+											if (!(e.target as HTMLElement).closest('button')) {
+												window.location.href = `/dora-incident-reports/${report.id}`;
+											}
+										}}
+									>
+										<td class="py-2 px-3">
+											<span
+												class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded"
+											>
+												{safeTranslate(report.incident_submission)}
+											</span>
+											{#if report.is_submitted}
+												<span
+													class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded ml-1"
+												>
+													<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
+												</span>
+											{:else}
+												<span
+													class="bg-surface-200-800 text-surface-600-400 text-xs px-2 py-1 rounded ml-1"
+												>
+													{m.draft()}
+												</span>
+											{/if}
+										</td>
+										<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td
+										>
+										<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td
+										>
+										<td class="py-2 px-3 text-right">
+											{#if !report.is_submitted}
+												<button
+													type="button"
+													class="text-red-500 hover:text-red-700 text-sm"
+													onclick={() =>
+														modalDeleteDoraReport(
+															report.id,
+															safeTranslate(report.incident_submission)
+														)}
+												>
+													<i class="fa-solid fa-trash"></i>
+												</button>
+											{/if}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					{:else}
+						<p class="text-surface-600-400 text-sm italic py-4">{m.noResultFound()}</p>
+					{/if}
+				</Tabs.Content>
+			{/if}
 		</Tabs>
 	</div>
 </div>

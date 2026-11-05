@@ -1,0 +1,52 @@
+urn: urn:intuitem:risk:library:workflow-operations-sandbox-explorer
+locale: en
+ref_id: workflow-operations-sandbox-explorer
+name: Read-only explorer
+description: Reads a few applied controls and writes what it found to the run log. Touches nothing — the
+  safest way to press Execute for the first time and see how runs, variables and expressions fit together.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-sandbox-explorer:workflow:sandbox-explorer
+    schema_version: 1
+    ref_id: sandbox-explorer
+    name: Read-only explorer
+    description: Reads a few applied controls and writes what it found to the run log. Touches nothing
+      — the safest way to press Execute for the first time and see how runs, variables and expressions
+      fit together.
+    graph:
+      variables: []
+      nodes:
+      - ref: manual
+        type: trigger
+        label: Run it yourself
+        trigger_config:
+          type: manual
+      - ref: fetch
+        type: action
+        label: Read applied controls
+        action_config:
+          type: read_objects
+          model: applied_control
+          mode: list
+          order_by: -created_at
+          limit: 5
+      - ref: report
+        type: action
+        label: Write to the run log
+        action_config:
+          type: log
+          message: '{{nodes.fetch.count}} applied control(s) in scope on {{today}}; first page: {{nodes.fetch.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: manual
+        target: fetch
+      - source: fetch
+        target: report
+      - source: report
+        target: done

@@ -25,8 +25,12 @@ def startup(sender, **kwargs):
     # admin's explicit False.
     if not isinstance(ff.value, dict):
         ff.value = {}
-    if "idp_groups" not in ff.value:
-        ff.value["idp_groups"] = False
+    value_changed = False
+    for enterprise_flag in ("idp_groups", "service_accounts"):
+        if enterprise_flag not in ff.value:
+            ff.value[enterprise_flag] = False
+            value_changed = True
+    if value_changed:
         ff.save(update_fields=["value"])
 
     administrator_permissions = Permission.objects.filter(

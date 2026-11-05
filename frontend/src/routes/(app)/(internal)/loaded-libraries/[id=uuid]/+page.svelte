@@ -1,18 +1,24 @@
 <script lang="ts">
-	import { tableSourceMapper } from '$lib/utils/table';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
+	import { tableSourceMapper } from '#lib/utils/table.js';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import RecursiveTreeView from '#lib/components/TreeView/RecursiveTreeView.svelte';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import InstantiateWorkflows from '#lib/components/Libraries/InstantiateWorkflows.svelte';
 
 	let { data } = $props();
 	let expandedNodes: string[] = $state([]);
+
+	// Workflow libraries: loaded workflows are divorced rows, so the
+	// library only carries a count (objects_meta) — instantiation reads the
+	// stored content server-side and can be repeated at will.
+	const workflowCount = $derived(data.library.objects_meta?.workflows ?? 0);
 
 	const showRisks = true;
 
@@ -122,6 +128,8 @@
 			{/if}
 		</div>
 	</div>
+
+	<InstantiateWorkflows loadedLibraryId={data.library.id} count={workflowCount} />
 
 	{#if riskMatrices.length > 0}
 		<Dropdown

@@ -1,16 +1,22 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import ApplyPresetModal from '$lib/components/Modals/ApplyPresetModal.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { page } from '$app/stores';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import ApplyPresetModal from '#lib/components/Modals/ApplyPresetModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { canPerformAction } from '#lib/utils/access-control.js';
+	import { page } from '$app/state';
 
 	let { data }: { data: PageData } = $props();
 
 	const canApplyPreset = $derived(
-		Object.hasOwn($page.data.user?.permissions ?? {}, 'add_loadedlibrary')
+		canPerformAction({
+			user: page.data.user,
+			action: 'add',
+			model: 'loadedlibrary',
+			domain: page.data.user?.root_folder_id
+		})
 	);
 
 	const modalStore = getModalStore();
@@ -133,9 +139,11 @@
 	function getProgressPercent(journey: any): number {
 		const steps = journey.steps || [];
 		if (steps.length === 0) return 0;
+
 		const completed = steps.filter(
 			(s: any) => s.status === 'done' || s.status === 'skipped'
 		).length;
+
 		return Math.round((completed / steps.length) * 100);
 	}
 
@@ -249,7 +257,7 @@
 											fill="none"
 											stroke-width="3"
 											class="stroke-gray-100"
-										/>
+										></circle>
 										<circle
 											cx="24"
 											cy="24"
@@ -261,7 +269,7 @@
 											class:stroke-emerald-500={progress === 100}
 											stroke-dasharray="{(progress / 100) * 125.6} 125.6"
 											style="transition: stroke-dasharray 0.5s ease-out"
-										/>
+										></circle>
 									</svg>
 									<span
 										class="absolute inset-0 flex items-center justify-center text-xs font-bold"
@@ -330,10 +338,9 @@
 							{activeFilter === 'all'
 							? 'bg-gray-800 text-white shadow-sm'
 							: 'bg-surface-50-950 text-surface-600-400 border border-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300'}"
-						onclick={() => (activeFilter = 'all')}
+						onclick={() => (activeFilter = 'all')}>{m.showAll()}</button
 					>
-						{m.showAll()}
-					</button>
+
 					{#each allRegions as region}
 						<button
 							class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer

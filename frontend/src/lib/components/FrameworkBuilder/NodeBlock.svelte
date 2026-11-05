@@ -10,9 +10,12 @@
 	import { getCardCollapsedContext } from './collapse-state';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import CelInput from './CelInput.svelte';
+	import { getCelCatalogContext } from './cel-complete';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
-	import { m } from '$paraglide/messages';
+	import ReferentialLinks from './ReferentialLinks.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		node: BuilderNode;
@@ -23,18 +26,18 @@
 	let { node, parentId = null, indexWithinParent = 0 }: Props = $props();
 
 	const builder = getBuilderContext();
+	const isQuickForm = builder.mode === 'quick_form';
 	const {
 		framework: frameworkStore,
 		errors: errorsStore,
 		activeLanguage: activeLanguageStore
 	} = builder;
 	const urnCopy = createCopyHandler();
+	const celCatalog = getCelCatalogContext();
 
 	// --- Splash-specific state (only used when display_mode === 'splash') ---
 	let splashMode: 'edit' | 'preview' = $state('edit');
-	let uploading = $state(false);
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
-	let fileInputEl: HTMLInputElement | undefined = $state();
 	let splashDescription = $state(node.node.description ?? '');
 	let splashTransDescription = $state('');
 
@@ -88,16 +91,12 @@
 		});
 	}
 
-	// Framework ID for splash-screen image upload proxy
-	const frameworkId =
-		typeof node.node.framework === 'string' ? node.node.framework : (node.node.framework?.id ?? '');
-	const proxyUrl = `/frameworks/${frameworkId}/builder`;
-
 	const allQuestions = $derived(node.questions.map((q) => q.question));
 	let nameLength = $derived((node.node.name ?? '').length);
 
 	// Status line text
 	const statusLine = $derived.by(() => {
+		if (isQuickForm) return m.builderPageStatus({ count: node.questions.length });
 		if (node.node.display_mode === 'splash') return m.builderSplashScreenStatus();
 		const childCount = node.children.length;
 		if (node.node.assessable && childCount > 0) {
@@ -111,26 +110,6 @@
 	});
 
 	// ===== Markdown editor helpers (ported from SplashScreenBlock.svelte) =====
-
-	async function uploadImage(file: File) {
-		uploading = true;
-		try {
-			const formData = new FormData();
-			formData.append('file', file);
-			const res = await fetch(`${proxyUrl}?_action=upload-image`, {
-				method: 'POST',
-				body: formData
-			});
-			if (res.ok) {
-				const data = await res.json();
-				const imageUrl = `${proxyUrl}?_action=serve-image&attachment_id=${data.id}`;
-				insertAtCursor(`![image](${imageUrl})`);
-				await saveDescription();
-			}
-		} finally {
-			uploading = false;
-		}
-	}
 
 	function insertAtCursor(text: string) {
 		if (!textareaEl) {
@@ -186,27 +165,6 @@
 		});
 	}
 
-	function handlePaste(e: ClipboardEvent) {
-		if (!e.clipboardData) return;
-		const items = e.clipboardData.items;
-		for (const item of items) {
-			if (item.type.startsWith('image/')) {
-				e.preventDefault();
-				const file = item.getAsFile();
-				if (file) uploadImage(file);
-				return;
-			}
-		}
-	}
-
-	function handleFileInput(e: Event) {
-		const input = e.target as HTMLInputElement;
-		if (input.files?.[0]) {
-			uploadImage(input.files[0]);
-			input.value = '';
-		}
-	}
-
 	/** Auto-grow a textarea to fit its content */
 	function autoGrow(el: HTMLTextAreaElement) {
 		el.style.height = 'auto';
@@ -248,6 +206,7 @@
 		!!(
 			node.node.annotation ||
 			node.node.typical_evidence ||
+			node.node.evidence_required ||
 			node.node.visibility_expression ||
 			(node.node.translations &&
 				Object.values(node.node.translations).some((t) => t.annotation || t.typical_evidence))
@@ -504,7 +463,7 @@
 								</div>
 							</div>
 						{/if}
-						{#if showAdvanced && node.node.assessable}
+						{#if showAdvanced && node.node.assessable && !isQuickForm}
 							<!-- Typical evidence side-by-side -->
 							<div>
 								<label
@@ -568,7 +527,9 @@
 									: node.node.description
 										? node.node.description.slice(0, 60) +
 											(node.node.description.length > 60 ? '...' : '')
-										: m.builderNodeNamePlaceholder()}
+										: isQuickForm
+											? m.builderPageNamePlaceholder()
+											: m.builderNodeNamePlaceholder()}
 								class="w-full text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:{isSplash
 									? 'border-purple-500'
 									: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash
@@ -608,29 +569,32 @@
 
 			<!-- Right controls: Assessable checkbox, Display mode select, Delete -->
 			<div class="flex items-center gap-2 shrink-0">
-				{#if !isSplash}
-					<label
-						class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
-						title={m.builderAssessableTooltip()}
+				{#if !isQuickForm}
+					{#if !isSplash}
+						<label
+							class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
+							title={m.builderAssessableTooltip()}
+						>
+							<input
+								type="checkbox"
+								checked={node.node.assessable}
+								onchange={(e) => saveField('assessable', e.currentTarget.checked)}
+								class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+							/>
+							{m.builderAssessable()}
+						</label>
+					{/if}
+					<select
+						value={node.node.display_mode}
+						onchange={(e) =>
+							builder.setDisplayMode(node.node.id, e.currentTarget.value as 'default' | 'splash')}
+						class="text-xs bg-transparent border-b border-surface-200-800 focus:border-blue-500 outline-none"
+						title={m.builderDisplayMode()}
 					>
-						<input
-							type="checkbox"
-							checked={node.node.assessable}
-							onchange={(e) => saveField('assessable', e.currentTarget.checked)}
-							class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
-						/>
-						{m.builderAssessable()}
-					</label>
+						<option value="default">{m.builderDefaultMode()}</option>
+						<option value="splash">{m.builderSplashMode()}</option>
+					</select>
 				{/if}
-				<select
-					value={node.node.display_mode}
-					onchange={(e) => saveField('display_mode', e.currentTarget.value)}
-					class="text-xs bg-transparent border-b border-surface-200-800 focus:border-blue-500 outline-none"
-					title={m.builderDisplayMode()}
-				>
-					<option value="default">{m.builderDefaultMode()}</option>
-					<option value="splash">{m.builderSplashMode()}</option>
-				</select>
 				<ConfirmAction
 					onconfirm={() => builder.deleteNode(node.node.id)}
 					confirmLabel={m.delete()}
@@ -755,25 +719,6 @@
 								>
 									<i class="fa-solid fa-table text-xs"></i>
 								</button>
-								<button
-									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
-									onclick={() => fileInputEl?.click()}
-									title={m.builderSplashInsertImage()}
-									disabled={uploading}
-								>
-									{#if uploading}
-										<i class="fa-solid fa-spinner fa-spin text-xs"></i>
-									{:else}
-										<i class="fa-solid fa-image text-xs"></i>
-									{/if}
-								</button>
-								<input
-									type="file"
-									accept="image/*"
-									class="hidden"
-									bind:this={fileInputEl}
-									onchange={handleFileInput}
-								/>
 							</div>
 						{/if}
 					</div>
@@ -783,7 +728,6 @@
 						<textarea
 							bind:value={splashDescription}
 							bind:this={textareaEl}
-							onpaste={handlePaste}
 							onblur={saveDescription}
 							placeholder={m.builderSplashEditPlaceholder()}
 							rows="6"
@@ -845,6 +789,25 @@
 
 					{#if showAdvanced}
 						<div class="space-y-2 pt-1">
+							{#if !isQuickForm}
+								<div class="w-32">
+									<label
+										class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
+									>
+										{m.builderWeight()}
+									</label>
+									<input
+										type="number"
+										value={node.node.weight}
+										min="1"
+										class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+										onblur={(e) => {
+											const val = Number(e.currentTarget.value) || 1;
+											saveField('weight', val);
+										}}
+									/>
+								</div>
+							{/if}
 							<div>
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
@@ -860,7 +823,7 @@
 									onblur={(e) => saveField('annotation', e.currentTarget.value || null)}
 								></textarea>
 							</div>
-							{#if node.node.assessable}
+							{#if node.node.assessable && !isQuickForm}
 								<div>
 									<label
 										class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
@@ -876,6 +839,18 @@
 										onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
 									></textarea>
 								</div>
+								<label
+									class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
+									title={m.builderEvidenceRequiredHint()}
+								>
+									<input
+										type="checkbox"
+										checked={node.node.evidence_required}
+										onchange={(e) => saveField('evidence_required', e.currentTarget.checked)}
+										class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+									/>
+									{m.builderEvidenceRequiredLabel()}
+								</label>
 							{/if}
 						</div>
 					{/if}
@@ -885,29 +860,38 @@
 			<!-- Implementation groups — editable on any node, not just assessable ones.
 			     Ancestors can carry IGs (e.g. ISO 27001's annex-a has ['SoA']) and
 			     the audit-tree filter honours them. -->
-			{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
+			{#if !isQuickForm && $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
 				<div class="px-4 py-2 border-b border-surface-100-900">
 					<span class="text-xs text-surface-600-400 mr-2"
 						>{m.builderImplementationGroupsLabel()}</span
 					>
 					{#each $frameworkStore.implementation_groups_definition as ig}
 						{@const refId = (ig as Record<string, string>).ref_id}
+						{@const igLabel = (ig as Record<string, string>).name || refId}
 						{@const selected = (node.node.implementation_groups ?? []).includes(refId)}
 						<button
 							type="button"
 							class="text-xs px-2 py-0.5 rounded-full border mr-1 transition-colors {selected
 								? 'bg-blue-100 border-blue-300 text-blue-700'
 								: 'bg-surface-50-950 border-surface-200-800 text-surface-500 hover:border-surface-300-700'}"
+							title={(ig as Record<string, string>).description || igLabel}
 							onclick={() => {
 								const current = node.node.implementation_groups ?? [];
 								const next = selected ? current.filter((g) => g !== refId) : [...current, refId];
 								builder.updateNode(node.node.id, { implementation_groups: next });
 							}}
 						>
-							{refId}
+							{igLabel}
 						</button>
 					{/each}
 				</div>
+			{/if}
+
+			<!-- Reference controls & threats: language-neutral URN links, editable
+			     like the implementation-group pills above (also in translation mode). -->
+			{#if !isQuickForm}
+				<ReferentialLinks {node} kind="reference_controls" />
+				<ReferentialLinks {node} kind="threats" />
 			{/if}
 		{/if}
 
@@ -923,15 +907,45 @@
 						title={m.builderVisibilityExpressionTooltip()}>&#9432;</span
 					>
 				</label>
-				<input
-					type="text"
+				<CelInput
 					class="w-full text-xs px-2 py-1 border border-surface-200-800 rounded font-mono bg-surface-50-950 focus:bg-surface-50-950 focus:{isSplash
 						? 'border-purple-300'
 						: 'border-blue-300'} focus:outline-none"
 					placeholder={m.builderVisibilityExpressionPlaceholder()}
 					value={node.node.visibility_expression ?? ''}
-					onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
+					catalog={celCatalog()}
+					place={{ where: 'visibility' }}
+					oncommit={(value) => saveField('visibility_expression', value || null)}
 				/>
+			</div>
+		{/if}
+
+		{#if isQuickForm}
+			<div class="px-4 py-2 flex items-center gap-2">
+				<label
+					class="text-[10px] font-semibold uppercase tracking-wider text-surface-500"
+					for="page-aggregation-{node.node.id}"
+				>
+					{m.builderPageScore()}
+					<span class="text-surface-500 ml-1 normal-case" title={m.builderPageScoreTooltip()}
+						>&#9432;</span
+					>
+				</label>
+				<select
+					id="page-aggregation-{node.node.id}"
+					class="text-xs border border-surface-200-800 rounded px-2 py-0.5 bg-surface-50-950"
+					value={node.node.aggregation ?? 'sum'}
+					onchange={(e) =>
+						saveField(
+							'aggregation',
+							e.currentTarget.value === 'sum' ? null : e.currentTarget.value
+						)}
+					data-testid="page-aggregation"
+				>
+					<option value="sum">{m.sum()}</option>
+					<option value="max">{m.maximum()}</option>
+					<option value="mean">{m.average()}</option>
+				</select>
 			</div>
 		{/if}
 
@@ -977,7 +991,7 @@
 	</div>
 
 	<!-- Add child button (outside card to avoid overflow-hidden clipping the dropdown) -->
-	{#if node.node.urn}
+	{#if node.node.urn && !isQuickForm}
 		<AddNodeMenu
 			parent={node.node.id}
 			triggerLabel={m.builderAddChild()}
@@ -988,12 +1002,27 @@
 
 	<!-- Add sibling below button -->
 	{#if parentId !== undefined}
-		<AddNodeMenu
-			parent={parentId}
-			afterIndex={indexWithinParent}
-			triggerLabel={m.builderAddSiblingBelow()}
-			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
-		/>
+		{#if isQuickForm}
+			<button
+				type="button"
+				class="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
+				onclick={() =>
+					builder.addNode({
+						parent: parentId,
+						afterIndex: indexWithinParent,
+						preset: 'requirement'
+					})}
+			>
+				<i class="fa-solid fa-plus mr-1"></i>{m.builderAddPageBelow()}
+			</button>
+		{:else}
+			<AddNodeMenu
+				parent={parentId}
+				afterIndex={indexWithinParent}
+				triggerLabel={m.builderAddSiblingBelow()}
+				triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
+			/>
+		{/if}
 	{/if}
 
 	<!-- Recursive children -->

@@ -1,10 +1,10 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import { headData } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { headData } from '#lib/utils/table.js';
+import type { urlModel } from '#lib/utils/types.js';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';

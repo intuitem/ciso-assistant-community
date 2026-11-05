@@ -32,8 +32,8 @@ copyright: "The Baseline Information Security for Government 2 (BIO2) is entirel
   \ from these standards in the BIO is subject to permission by the Netherlands Standardization\
   \ Institute. For more information about NEN and the use of their products, see:\
   \ www.nen.nl."
-version: 1
-publication_date: 2026-01-25
+version: 3
+publication_date: 2026-08-28
 provider: Rijksoverheid
 packager: intuitem
 translations:
@@ -92,7 +92,7 @@ objects:
           een uniforme aanpak en een gemeenschappelijk normenkader voor informatiebeveiliging
           binnen de overheid, waarbij risicomanagement centraal staat.'
     implementation_groups_definition:
-    - ref_id: "Basishygi\xEBne"
+    - ref_id: "basishygi\xEBne"
       name: Baseline hygiene
       description: null
       translations:
@@ -103,8 +103,8 @@ objects:
       description: null
       translations:
         nl:
-          name: "ketenhygi\xEBne"
-    - ref_id: Overheidsrisico
+          name: "Ketenhygi\xEBne"
+    - ref_id: overheidsrisico
       name: Government risk
       description: null
       translations:
@@ -135,7 +135,7 @@ objects:
         5. the frequency with which the information security policy is evaluated;\n\
         6. the promotion of security awareness."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -166,7 +166,7 @@ objects:
         in alignment with the (existing) governance and Planning & Control (P&C) cycles
         and external developments, and adjusted where necessary.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Het informatiebeveiligingsbeleid wordt minimaal jaarlijks en
@@ -183,7 +183,7 @@ objects:
         \ process owners who are responsible for organisational assets shall also\
         \ be responsible for addressing the risks applicable to those assets."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "De leiding van de organisatie heeft vastgelegd wat de verantwoordelijkheden\
@@ -201,7 +201,7 @@ objects:
         advice and report on information security to the board and/or the regulating
         body.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er is een CISO aangesteld die bevoegd is om onafhankelijk en
@@ -219,7 +219,7 @@ objects:
         knowledge and skills to assess the impact of information security risks on
         the services and/or products supplied by the organisation.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Bestuur en werknemers moeten regelmatig, scholing volgen om\
@@ -236,7 +236,7 @@ objects:
         be laid down in the contracts for external staff and volunteers, in accordance
         with the house rules or internal code of conduct.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: De gedragsregels voor het gebruik van bedrijfsmiddelen zijn
@@ -249,7 +249,7 @@ objects:
       description: All employees shall have been formally made aware of the code of
         conduct for the use of organisational assets.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: Alle medewerkers zijn aantoonbaar gewezen op de gedragsregels
@@ -264,7 +264,7 @@ objects:
 
         This overview shall be updated at least annually.'
       implementation_groups:
-      - "Ketenhygi\xEBne"
+      - "ketenhygi\xEBne"
       translations:
         nl:
           description: 'De organisatie heeft uitgewerkt welke functionarissen met
@@ -282,7 +282,7 @@ objects:
         that risks are identified and appropriately managed, and that security requirements
         are properly defined.
       implementation_groups:
-      - "Ketenhygi\xEBne"
+      - "ketenhygi\xEBne"
       translations:
         nl:
           description: "Bij nieuwe informatiesystemen en bij significante wijzigingen\
@@ -302,7 +302,7 @@ objects:
         \ control.\nThe completeness and accuracy of the inventory shall be periodically\
         \ verified at intervals commensurate with the frequency of changes."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -328,7 +328,7 @@ objects:
         A defined impact classification methodology, which forms part of the established
         risk management methodology, shall be applied for this purpose.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -350,7 +350,7 @@ objects:
         All components shall be configured to ensure optimal security without compromising
         the functionality of the service provided.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Internetfacing-informatiesystemen en e-mail-berichtenverkeer
@@ -374,7 +374,7 @@ objects:
         stringent certificate requirements may arise from a risk assessment, connection
         conditions or applicable legislation.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Maak bij openbaar webverkeer van gevoelige gegevens gebruik
@@ -392,7 +392,7 @@ objects:
         Advanced Electronic Signatures (AdES Baseline Profiles) as included in the
         open standards list of the Netherlands Standardisation Forum.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Geavanceerde en/of gekwalificeerde elektronische handtekeningen
@@ -405,7 +405,7 @@ objects:
       description: Up-to-date records shall be kept of all Internet-facing information
         systems, web applications, IP addresses and APIs.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Van alle internetfacing-informatiesystemen, webapplicaties,\
@@ -419,7 +419,7 @@ objects:
 
         This information shall be updated at least every six months.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Publiek toegankelijke websites worden bekend gemaakt via Register
@@ -436,7 +436,7 @@ objects:
 
         2. from software operating within a secure enclave.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -452,7 +452,7 @@ objects:
       description: A comprehensive formal registration and de-registration procedure
         shall be in place for the management of user identities.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er is een sluitende formele registratie- en afmeldprocedure
@@ -464,7 +464,7 @@ objects:
       description: The use of group accounts shall not be permitted unless motivated,
         recorded and coordinated with the CISO by the process owner.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Het gebruiken van groepsaccounts is niet toegestaan, tenzij
@@ -493,7 +493,7 @@ objects:
         \ at a minimum, login attempts from unusual locations and spikes in failed\
         \ login attempts."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -533,7 +533,7 @@ objects:
       description: The organisation shall provide all employees access to a password
         manager or equivalent solution.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De organisatie biedt aan alle medewerkers een wachtwoordmanager
@@ -544,7 +544,7 @@ objects:
       ref_id: 5.17.03
       description: Enforcement of password requirements shall be automated.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De eisen aan wachtwoorden moeten geautomatiseerd worden afgedwongen.
@@ -556,7 +556,7 @@ objects:
         shall be monitored. If such a change is found to be unauthorised, this qualifies
         as a security incident and shall be recorded and handled accordingly.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Het maken en aanpassen van accounts met bijzondere rechten
@@ -571,7 +571,7 @@ objects:
         A risk assessment shall be made to determine whether a higher frequency is
         required.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Alle uitgegeven toegangsrechten worden minimaal eenmaal per
@@ -587,7 +587,7 @@ objects:
 
         The information security requirements shall be based on an explicit risk assessment.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -604,7 +604,7 @@ objects:
         shall be explicitly included in (procurement) contracts that involve information
         processing.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -624,7 +624,7 @@ objects:
         are acceptable, which must be mitigated and which conditions will not or may
         never be accepted.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -649,7 +649,7 @@ objects:
 
         The supplier shall demonstrate this on an annual basis.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -676,7 +676,7 @@ objects:
         The government organisation shall control any residual risks arising from
         the foregoing by applying its adopted risk management methodology.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -696,7 +696,7 @@ objects:
         to respond appropriately, for example by reporting the incident and taking
         mitigating measures.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -715,7 +715,7 @@ objects:
         An explicit and detailed definition of the exit strategy shall be a standard
         component of the contract.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -731,7 +731,7 @@ objects:
       description: The contract shall stipulate that the supplier is responsible for
         ensuring compliance, by its subcontractors, with the specified requirements.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -745,7 +745,7 @@ objects:
         into the chain of subcontractors and any risks involved. The government organisation
         shall then assess whether those risks are acceptable.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -762,7 +762,7 @@ objects:
         \ of subcontractors, unless those requirements are not relevant in view of\
         \ the nature of the supplier\u2019s services."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -782,7 +782,7 @@ objects:
         minimum, this shall cover vulnerabilities and information security incidents
         that can affect services to the government organisation.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -800,7 +800,7 @@ objects:
         in place, for identifying any security risks, for taking or commissioning
         mitigating measures and for accepting residual risks.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -817,7 +817,7 @@ objects:
       description: An up-to-date register of suppliers and existing contracts shall
         be kept.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -839,7 +839,7 @@ objects:
         In the event of major changes with the supplier, the associated risks shall
         be assessed and suitable measures shall be taken.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -858,7 +858,7 @@ objects:
         notification desk where they can report and register information security
         incidents.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -872,7 +872,7 @@ objects:
       description: The tasks and responsibilities of the notification desk shall be
         laid down in an incident reporting procedure.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er is een meldprocedure waarin de taken en verantwoordelijkheden
@@ -884,7 +884,7 @@ objects:
       description: The process owner shall be responsible for resolving information
         security incidents.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De proceseigenaar is verantwoordelijk voor het oplossen van
@@ -897,7 +897,7 @@ objects:
         of information security incidents to the person with ultimate responsibility
         for operations.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De proceseigenaar rapporteert maandelijks de opvolging van
@@ -910,7 +910,7 @@ objects:
       description: The procedure for information security incidents shall include
         a link to crisis management.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: In de procedure voor informatiebeveiligingsincidenten is er
@@ -926,7 +926,7 @@ objects:
         \ practices of their suppliers and service providers, including their secure\
         \ development procedures."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'De beveiliging van toeleveringsketens is onderdeel van de
@@ -950,7 +950,7 @@ objects:
         \ management;\n\u2212 inform the parties involved about the incident within\
         \ the statutory time limit."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'De incidentprocedure is er op ingericht om:
@@ -973,7 +973,7 @@ objects:
         Security Act, the Public Records Act and the General Data Protection Regulation
         (GDPR).
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - overheidsrisico
       translations:
         nl:
@@ -988,7 +988,7 @@ objects:
       description: Information security incidents shall be analysed in order to establish
         the root causes and realise improvements with the aim to prevent future incidents.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Informatiebeveiligingsincidenten worden geanalyseerd om achterliggende
@@ -1002,7 +1002,7 @@ objects:
         root causes and improvements, shall be shared widely among relevant partners
         in order to prevent similar and future incidents.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De analyses van informatiebeveiligingsincidenten, inclusief
@@ -1017,7 +1017,7 @@ objects:
         years. This includes, among other things, the information required for the
         analysis (including logging), the resolution and recommendations.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De bewaartermijn van een (vermoedelijk) informatiebeveiligingsincident
@@ -1031,7 +1031,7 @@ objects:
       description: Every year, the process owner shall test continuity plans for effectiveness,
         completeness and current relevance with a view to improving them.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: "De proceseigenaar test jaarlijks continu\xEFteitsplannen op\
@@ -1045,7 +1045,7 @@ objects:
         management methodology and an explicit risk assessment. The process owner
         shall update this overview at least once every three years.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: "Binnen de inventarisatie van beheersmaatregel 5.12, identificeert\
@@ -1063,7 +1063,7 @@ objects:
         \ process owner shall have implemented these retention periods in practice\
         \ and shall periodically test their effectiveness."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -1080,7 +1080,7 @@ objects:
       description: There shall be an operational ISMS in place in accordance with
         NEN-EN-ISO/IEC ISO 27001.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er is een werkend ISMS volgens NEN-EN-ISO/IEC ISO 27001.
@@ -1091,7 +1091,7 @@ objects:
       description: An established audit plan shall be in place, in which annual decisions
         are made regarding which systems will undergo which type of security audit.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er is een vastgesteld auditplan waarin jaarlijks keuzes worden
@@ -1107,7 +1107,7 @@ objects:
         s entire information security system. The ICV or the comparable instrument\
         \ can also be part of the formal accountability procedure."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "In de P&C-cyclus en als onderdeel van de plan-do-check-act\
@@ -1125,7 +1125,7 @@ objects:
         Upon commencement of employment and in the event of a job change, a Certificate
         of Conduct (VOG) may be requested based on a risk assessment.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - overheidsrisico
       translations:
         nl:
@@ -1144,7 +1144,7 @@ objects:
         They shall have easy access to the information security regulations and instructions
         that apply to them.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Alle medewerkers (intern en extern) zijn bij hun aanstelling
@@ -1161,7 +1161,7 @@ objects:
         concerning information security and, where relevant, any special requirements
         for classified environments.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Alle medewerkers, lijnmanagers en bestuurders hebben de verantwoordelijkheid
@@ -1176,7 +1176,7 @@ objects:
         \ and services shall have successfully completed an \u2018I-awareness\u2019\
         \ training course within three months after their appointment."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Alle medewerkers en contractanten die gebruikmaken van de informatiesystemen
@@ -1192,7 +1192,7 @@ objects:
         security. Management shall actively encourage them to periodically attend
         such training.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Het management benadrukt bij aanstelling en interne overplaatsing
@@ -1207,7 +1207,7 @@ objects:
       description: All internal and external employees shall have demonstrably taken
         note of the notification procedure for information security incidents.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Alle medewerkers (intern en extern) hebben aantoonbaar kennisgenomen
@@ -1218,7 +1218,7 @@ objects:
       ref_id: 7.01.01
       description: Secure zones shall be set up based on standards.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er wordt voor het inrichten van beveiligde zones gebruik gemaakt
@@ -1230,7 +1230,7 @@ objects:
       description: Critical information or information systems shall never be accessible
         via a single secure zone.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Kritieke informatie of informatiesystemen zijn nooit via \xE9\
@@ -1243,7 +1243,7 @@ objects:
         \ in accordance with mutual agreements, to the relevant colleagues within\
         \ the government\u2019s security domain."
       implementation_groups:
-      - "Ketenhygi\xEBne"
+      - "ketenhygi\xEBne"
       translations:
         nl:
           description: "In geval van concrete beveiligingsrisico\u2019s worden waarschuwingen,\
@@ -1256,7 +1256,7 @@ objects:
       description: When a chip card token is used for access to systems, the access
         security lock shall be automatically activated upon removal of the token.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Bij het gebruik van een chipcardtoken voor toegang tot systemen
@@ -1270,7 +1270,7 @@ objects:
         business-sensitive content on removable media that are reusable and leave
         the organisation shall have been irretrievably deleted.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: Er is een verwijderinstructie waarin is opgenomen dat van verwijderbare
@@ -1287,7 +1287,7 @@ objects:
         \ Unit of the National Communications Security Agency (NBV) has issued a positive\
         \ deployment recommendation."
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: 'Voor het wissen van alle data op het medium, wordt data onherstelbaar
@@ -1307,7 +1307,7 @@ objects:
       description: The use of couriers or forwarders for the transport of classified
         information shall meet predefined reliability requirements.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: Het gebruik van koeriers of transporteurs voor transport van
@@ -1323,7 +1323,7 @@ objects:
         \ with an access security mechanism that includes, at a minimum, data encryption.\n\
         Mobile equipment shall include \u2018remote deletion\u2019 functionality."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Mobiele apparatuur is zo ingericht dat bedrijfsinformatie\
@@ -1348,7 +1348,7 @@ objects:
         \ employee uses for business purposes.\nCompliance with the provisions in\
         \ sections 1., 2. and 3. shall be checked periodically."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Bij de inzet van mobiele apparatuur zijn minimaal de volgende\
@@ -1369,7 +1369,7 @@ objects:
       description: The assigned or exercised special privileges shall be assessed
         at least on a quarterly basis in terms of their set-up, existence and operation.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De toegewezen of gebruikte speciale bevoegdheden worden in
@@ -1381,7 +1381,7 @@ objects:
       description: Measures shall be in place to safeguard the physical and/or logical
         isolation of information of specific importance.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er zijn maatregelen genomen die het fysiek en/of logisch isoleren
@@ -1393,7 +1393,7 @@ objects:
       description: Users shall only be able to view and process the information of
         specific importance they need to perform their duties.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Gebruikers kunnen alleen die informatie met specifiek belang
@@ -1407,7 +1407,7 @@ objects:
         long, the suppliers are granted access. A register shall be kept to show how
         rights have been assigned.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -1424,7 +1424,7 @@ objects:
 
         The antimalware software shall always screen all downloads.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Het downloaden van bestanden is beheerst en beperkt op basis
@@ -1438,7 +1438,7 @@ objects:
       description: Users shall have been informed about the risk of surfing behaviour
         and of clicking unknown links.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Gebruikers zijn voorgelicht over de risico\u2019s van surfgedrag\
@@ -1450,7 +1450,7 @@ objects:
       description: The antimalware software and associated recovery software shall
         be up to date and supported by periodic updates.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De gebruikte antimalware-software en bijbehorende herstelsoftware
@@ -1466,7 +1466,7 @@ objects:
         \ of storage medium, before use or storage within the organisation\u2019s\
         \ own environment."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "De malwarescan wordt uitgevoerd op:\n- alle omgevingen, bijvoorbeeld\
@@ -1484,7 +1484,7 @@ objects:
         or supplier security recommendations), appropriate mitigating measures shall
         be implemented as quickly as possible, but no later than within one week.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Als de kans op misbruik en de verwachte schade beide hoog zijn
@@ -1498,7 +1498,7 @@ objects:
       description: How mitigating measures will be implemented shall be based on an
         explicit risk assessment.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Op basis van een expliciete risicoafweging wordt bepaald op
@@ -1511,7 +1511,7 @@ objects:
         week, mitigating measures shall be taken on the basis of an explicit risk
         assessment.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: In de tussentijd of als installatie binnen een week niet mogelijk
@@ -1527,7 +1527,7 @@ objects:
         tests. Internet-facing information systems shall be tested, preferably continuously,
         for weaknesses and vulnerabilities.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Informatiesystemen worden bij voorkeur jaarlijks gecontroleerd\
@@ -1548,7 +1548,7 @@ objects:
         All Internet-facing information systems shall be tested at least once a year
         for weaknesses and vulnerabilities.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Internetfacing-informatiesystemen hebben een verplichte (bij
@@ -1571,7 +1571,7 @@ objects:
         Information arising from Coordinated Vulnerability Disclosure (CVD) reports
         shall be included in the incident report.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Een Coordinated Vulnerability Disclosure (CVD)-procedure is
@@ -1589,7 +1589,7 @@ objects:
         special focus on protecting the back-up against ransomware attacks and on
         measures taken to preserve the integrity of the back-up.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -1605,7 +1605,7 @@ objects:
         following an incident shall have been determined based on an explicit risk
         assessment.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -1620,7 +1620,7 @@ objects:
         of the back-up in such a way that an incident at one location cannot result
         in damage at another location.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -1634,7 +1634,7 @@ objects:
       description: The recovery procedure shall be tested at least annually or following
         a major change, to ensure its proper functioning in case of an emergency.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -1653,7 +1653,7 @@ objects:
         \ of the person who or the process that made the event happen.\n\u2212 Time\
         \ stamp: the date and time at which the event or operation took place."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Een logregel bevat minimaal:
@@ -1679,7 +1679,7 @@ objects:
       description: A log entry shall never contain data that could lead to a security
         breach.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Een logregel bevat nooit gegevens die tot het doorbreken van
@@ -1690,7 +1690,7 @@ objects:
       ref_id: 8.15.03
       description: There shall be a list of log files that are generated.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Er is een overzicht van logbestanden die worden gegenereerd.
@@ -1703,7 +1703,7 @@ objects:
         taking into account scenarios in which attackers remain undetected for an
         extended period.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De bewaartermijn van logbestanden en gegevens in het Security
@@ -1718,7 +1718,7 @@ objects:
         following the information security incident procedure in accordance with control
         measure 5.24.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Oneigenlijk wijzigen, verwijderen of pogingen daartoe van loggegevens
@@ -1736,7 +1736,7 @@ objects:
         The verification shall be carried out by an independent official (separate
         from operations).'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Op basis van een expliciete risicoafweging bepaalt de organisatie
@@ -1753,7 +1753,7 @@ objects:
         shall be shared with the designated Computer Emergency Response Team (CERT)
         within the applicable legal framework.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - overheidsrisico
       translations:
         nl:
@@ -1767,7 +1767,7 @@ objects:
       description: The SIEM and/or SOC monitoring processes shall include clear rules
         about when to report an incident to the managers responsible.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Het SIEM- en/of het SOC-monitoring-proces hebben eenduidige
@@ -1781,7 +1781,7 @@ objects:
         a detection and response solution that enables detection of attacks and an
         effective and timely response to any anomalous event.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: De informatieverwerkende omgeving wordt gemonitord met een
@@ -1794,7 +1794,7 @@ objects:
       description: Active network components shall include logging (and log monitoring)
         functionality in order to detect and respond to anomalous events.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Actieve netwerkcomponenten zijn voorzien van logging en monitoring
@@ -1807,7 +1807,7 @@ objects:
       description: Access to system utilities shall be restricted to authorised staff
         members, who shall only have access when strictly necessary.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: Alleen bevoegd personeel heeft op die momenten dat toegang
@@ -1820,7 +1820,7 @@ objects:
 
         The logging data shall remain available for investigation for six months.'
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: 'Het gebruik van systeemhulpmiddelen wordt gelogd.
@@ -1833,7 +1833,7 @@ objects:
       description: Controls must be in place to prevent users from installing non-authorised
         software.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: Het risico van installatie door gebruikers van niet geautoriseerde
@@ -1845,7 +1845,7 @@ objects:
       description: At a minimum, network components shall comply with the confidentiality
         level of the network of which they form part.
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: Netwerkcomponenten moeten minimaal voldoen aan het vertrouwelijkheidsniveau
@@ -1857,7 +1857,7 @@ objects:
       description: Access to management interfaces of network components shall be
         separated from the user network (as far as possible and in a risk-based manner).
       implementation_groups:
-      - Overheidsrisico
+      - overheidsrisico
       translations:
         nl:
           description: Toegang tot beheerinterfaces van netwerkcomponenten moet (zo
@@ -1871,7 +1871,7 @@ objects:
         mitigate possible attacks that could adversely affect the availability of
         information, such as DDoS (Distributed Denial of Service) attacks.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "In koppelpunten met externe of onvertrouwde zones en vanwege\
@@ -1886,7 +1886,7 @@ objects:
       description: Detection tools shall be in place to monitor/analyse data traffic
         to and from the trusted environment for the presence of any suspicious traffic.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Het dataverkeer van of naar de vertrouwde omgeving, wordt bewaakt/geanalyseerd
@@ -1899,7 +1899,7 @@ objects:
         be passed on and shared within the government, with due regard for the applicable
         legal frameworks.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Bij ontdekte nieuwe dreigingen vanuit overheidsmaatregel 8.21.02
@@ -1924,7 +1924,7 @@ objects:
         If the Resilience Unit does not have any recommended encryption tools, a different
         encryption method shall be selected and set up in consultation with the CISO.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Bij transport van gegevens over draadloze verbindingen zoals
@@ -1948,7 +1948,7 @@ objects:
       ref_id: 8.22.01
       description: Each segregated group shall have its own security level.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Alle gescheiden groepen hebben een gedefinieerd beveiligingsniveau.
@@ -1965,7 +1965,7 @@ objects:
         \u2212 In communication between organisations, the policy shall be determined\
         \ in mutual consultation."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -1987,7 +1987,7 @@ objects:
         For all cryptographic control measures it shall be established where they
         are used, who is responsible for them and how they are kept up to date.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -2003,7 +2003,7 @@ objects:
       description: Cryptographic control measures shall comply with the relevant standards
         of the Netherlands Standardisation Forum.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -2016,7 +2016,7 @@ objects:
       description: The strength of the cryptography shall be based on the current
         recommendations of the NCSC and the AIVD Resilience Unit.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -2030,7 +2030,7 @@ objects:
         from an alternative supplier if the risk assessment shows that these are necessary
         as part of business continuity readiness (control measure 5.30).
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -2047,7 +2047,7 @@ objects:
         \ systems shall be adopted, documented, maintained and applied for all activities\
         \ involved in the development of information systems."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: "Architectuurprincipes zoals \u2018security by design\u2019\
@@ -2063,7 +2063,7 @@ objects:
 
         The results of the tests shall be included in a report.'
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'Voor acceptatietesten van systemen worden gestructureerde
@@ -2078,7 +2078,7 @@ objects:
       description: Internal measures for system development shall apply in full to
         outsourced development, supplemented with the measures arising from outsourcing.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       - "ketenhygi\xEBne"
       translations:
         nl:
@@ -2093,7 +2093,7 @@ objects:
         from this rule shall be permitted only with the prior approval of the process
         owner.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: In de productieomgeving wordt niet getest. Alleen met voorafgaande
@@ -2106,7 +2106,7 @@ objects:
         be tested before being put into production. Departures from this rule shall
         be permitted only with the prior approval of the process owner.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Significante wijzigingen in de productieomgeving worden altijd
@@ -2121,7 +2121,7 @@ objects:
         \u2212 a risk assessment of the potential consequences of the changes, including\
         \ a written roll-back plan;\n\u2212 the approval procedure for changes."
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: 'In het wijzigingsbeheerproces is minimaal aandacht besteed
@@ -2140,7 +2140,7 @@ objects:
       description: Change management shall be conducted on the basis of a generally
         accepted management framework.
       implementation_groups:
-      - "Basishygi\xEBne"
+      - "basishygi\xEBne"
       translations:
         nl:
           description: Wijzigingsbeheer vindt plaats op basis van een algemeen geaccepteerd

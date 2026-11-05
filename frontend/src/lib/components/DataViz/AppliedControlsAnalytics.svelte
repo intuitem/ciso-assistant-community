@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
 	import SimpleCard from './SimpleCard.svelte';
 
 	interface Bucket {
@@ -49,6 +49,9 @@
 	}
 
 	let { analyticsData = null, analyticsEndpoint, showBudget = true }: Props = $props();
+
+	// Owners the caller may not see are merged server-side into one anonymous bucket.
+	const RESTRICTED_KEY = '_restricted';
 
 	let fetched: AnalyticsData | null = $state(null);
 	let loading = $state(!!analyticsEndpoint && !analyticsData);

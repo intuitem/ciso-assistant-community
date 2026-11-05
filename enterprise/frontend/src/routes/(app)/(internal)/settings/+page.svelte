@@ -1,21 +1,24 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import * as m from '$paraglide/messages';
+	import { navigating, page } from '$app/state';
+	import * as m from '#paraglide/messages.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import ClientSettings from './client-settings/+page.svelte';
 	import InfraConfig from './infra-config/+page.svelte';
-	import { goto, preloadData, pushState } from '$app/navigation';
-	import { browser } from '$app/environment';
-	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
-	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
-	import SCIMSettings from '$lib/components/Settings/SCIMSettings.svelte';
-	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
-	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
-	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
-	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
-	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
-	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
-	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
+	import { goto, preloadData } from '$app/navigation';
+	import { browser } from '$app/env';
+	import GeneralSettings from '#lib/components/Settings/GeneralSettings.svelte';
+	import SSOSettings from '#lib/components/Settings/SSOSettings.svelte';
+	import SCIMSettings from '#lib/components/Settings/SCIMSettings.svelte';
+	import FeatureFlagsSettings from '#lib/components/Settings/FeatureFlagsSettings.svelte';
+	import NotificationChannelsSettings from '#lib/components/Settings/NotificationChannelsSettings.svelte';
+	import WebhooksSettings from '#lib/components/Settings/WebhooksSettings.svelte';
+	import VulnerabilitySlaSettings from '#lib/components/Settings/VulnerabilitySlaSettings.svelte';
+	import SecIntelFeedsSettings from '#lib/components/Settings/SecIntelFeedsSettings.svelte';
+	import EmailTemplatesSettings from '#lib/components/Settings/EmailTemplatesSettings.svelte';
+	import WordTemplatesSettings from '#lib/components/Settings/WordTemplatesSettings.svelte';
+	import DocHtmlTemplatesSettings from '#lib/components/Settings/DocHtmlTemplatesSettings.svelte';
+	import AuditLogForwardingSettings from '#lib/components/Settings/AuditLogForwardingSettings.svelte';
+	import MailerSettings from '#lib/components/Settings/MailerSettings.svelte';
 
 	// Tabs whose content lives in a dedicated sub-route and is preloaded into
 	// page.state instead of being loaded by the main settings page.
@@ -34,6 +37,7 @@
 	// page never initialises on a hidden tab (e.g. `scim` with idp_groups off).
 	const FLAG_GATED_TABS: Record<string, string> = {
 		scim: 'idp_groups',
+		notificationChannels: 'notification_center',
 		webhooks: 'outgoing_webhooks',
 		auditLogForwarding: 'audit_log_forwarding',
 		infraConfig: 'infra_config_management'
@@ -43,8 +47,10 @@
 		'sso',
 		'scim',
 		'featureFlags',
+		'notificationChannels',
 		'vulnerabilitySla',
 		'secIntelFeeds',
+		'mailer',
 		'webhooks',
 		'auditLogForwarding',
 		'emailTemplates',
@@ -55,6 +61,9 @@
 
 	function tabAvailable(tab: string | null | undefined): tab is string {
 		if (!tab || !KNOWN_TABS.has(tab)) return false;
+		// Loaded only when the backend runs with ENABLE_CUSTOM_MAILER and the
+		// user may view it (see the community +page.server.ts).
+		if (tab === 'mailer') return Boolean(page.data?.mailerSettings);
 		const flag = FLAG_GATED_TABS[tab];
 		return flag ? Boolean(page.data?.featureflags?.[flag]) : true;
 	}
@@ -64,6 +73,10 @@
 		for (const [tab, { href }] of Object.entries(PRELOAD_TABS)) {
 			if (page.url.pathname.endsWith(href.replace('/settings', ''))) return tab;
 		}
+		// A deep link (/settings?tab=featureFlags) names its tab, so it beats the
+		// remembered one. Tabs backed by a sub-route have their own URL instead.
+		const linked = page.url.searchParams.get('tab');
+		if (tabAvailable(linked) && !PRELOAD_TABS[linked]) return linked;
 		if (browser) {
 			const saved = sessionStorage.getItem(SETTINGS_TAB_STORAGE_KEY);
 			if (tabAvailable(saved)) {
@@ -98,11 +111,16 @@
 		const preload = PRELOAD_TABS[newValue];
 		if (preload && !page.state[preload.stateKey]) {
 			const result = await preloadData(preload.href);
+			// A shallow goto would cancel a navigation the user started meanwhile
+			if (navigating.to) return;
 
 			if (result.type === 'loaded' && result.status === 200) {
-				// Use pushState to update the page store without a full navigation.
+				// Shallow goto updates page.state without a full navigation.
 				// This keeps the UI fast and responsive.
-				pushState(preload.href, { ...nextState, [preload.stateKey]: result.data });
+				goto(preload.href, {
+					shallow: true,
+					state: { ...nextState, [preload.stateKey]: result.data }
+				});
 			} else {
 				// Fallback to a full navigation if preloading fails for any reason.
 				goto(preload.href, { state: nextState });
@@ -113,7 +131,7 @@
 		if (page.url.pathname !== '/settings') {
 			goto('/settings', { state: nextState });
 		} else {
-			pushState('/settings', nextState);
+			goto('/settings', { shallow: true, state: nextState });
 		}
 	}
 </script>
@@ -128,12 +146,20 @@
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
+		{#if page.data?.featureflags?.notification_center}
+			<Tabs.Trigger value="notificationChannels"
+				><i class="fa-solid fa-bell"></i> {m.notifications()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Trigger value="vulnerabilitySla"
 			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
 		>
 		<Tabs.Trigger value="secIntelFeeds"
 			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
+		{#if data.mailerSettings}
+			<Tabs.Trigger value="mailer"><i class="fa-solid fa-envelope"></i> {m.mailer()}</Tabs.Trigger>
+		{/if}
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
@@ -145,10 +171,10 @@
 						fill="currentColor"
 					>
 						<title>webhook</title>
-						<rect width="24" height="24" fill="none" />
+						<rect width="24" height="24" fill="none"></rect>
 						<path
 							d="M10.46,19a4.59,4.59,0,0,1-6.37,1.15,4.63,4.63,0,0,1,2.49-8.38l0,1.43a3.17,3.17,0,0,0-2.36,1.36A3.13,3.13,0,0,0,5,18.91a3.11,3.11,0,0,0,4.31-.84,3.33,3.33,0,0,0,.56-1.44v-1l5.58,0,.07-.11a1.88,1.88,0,1,1,.67,2.59,1.77,1.77,0,0,1-.83-1l-4.07,0A5,5,0,0,1,10.46,19m7.28-7.14a4.55,4.55,0,1,1-1.12,9,4.63,4.63,0,0,1-3.43-2.21L14.43,18a3.22,3.22,0,0,0,2.32,1.45,3.05,3.05,0,1,0,.75-6.06,3.39,3.39,0,0,0-1.53.18l-.85.44L12.54,9.2h-.22a1.88,1.88,0,1,1,.13-3.76A1.93,1.93,0,0,1,14.3,7.39a1.88,1.88,0,0,1-.46,1.15l1.9,3.51a4.75,4.75,0,0,1,2-.19M8.25,9.14A4.54,4.54,0,1,1,16.62,5.6a4.61,4.61,0,0,1-.2,4.07L15.18,9a3.17,3.17,0,0,0,.09-2.73A3.05,3.05,0,1,0,9.65,8.6,3.21,3.21,0,0,0,11,10.11l.39.21-3.07,5a1.09,1.09,0,0,1,.1.19,1.88,1.88,0,1,1-2.56-.83,1.77,1.77,0,0,1,1.23-.17l2.31-3.77A4.41,4.41,0,0,1,8.25,9.14Z"
-						/>
+						></path>
 					</svg>
 					{m.webhooks()}</span
 				></Tabs.Trigger
@@ -176,39 +202,45 @@
 		<Tabs.Indicator />
 	</Tabs.List>
 
-	<Tabs.Content value="general">
-		<GeneralSettings {data} />
-	</Tabs.Content>
-	<Tabs.Content value="sso">
-		<SSOSettings {data} />
-	</Tabs.Content>
+	<Tabs.Content value="general"><GeneralSettings {data} /></Tabs.Content>
+	<Tabs.Content value="sso"><SSOSettings {data} /></Tabs.Content>
+
 	{#if page.data?.featureflags?.idp_groups}
-		<Tabs.Content value="scim">
-			<SCIMSettings {data} />
+		<Tabs.Content value="scim"><SCIMSettings {data} /></Tabs.Content>
+	{/if}
+
+	<Tabs.Content value="featureFlags"><FeatureFlagsSettings {data} /></Tabs.Content>
+
+	{#if page.data?.featureflags?.notification_center}
+		<Tabs.Content value="notificationChannels">
+			<NotificationChannelsSettings />
 		</Tabs.Content>
 	{/if}
-	<Tabs.Content value="featureFlags">
-		<FeatureFlagsSettings {data} />
-	</Tabs.Content>
-	<Tabs.Content value="vulnerabilitySla">
-		<VulnerabilitySlaSettings {data} />
-	</Tabs.Content>
-	<Tabs.Content value="secIntelFeeds">
-		<SecIntelFeedsSettings {data} />
-	</Tabs.Content>
-	<Tabs.Content value="webhooks">
-		<WebhooksSettings {data} allowMultiple />
-	</Tabs.Content>
-	<Tabs.Content value="auditLogForwarding">
-		<AuditLogForwardingSettings {data} />
-	</Tabs.Content>
+
+	<Tabs.Content value="vulnerabilitySla"><VulnerabilitySlaSettings {data} /></Tabs.Content>
+	<Tabs.Content value="secIntelFeeds"><SecIntelFeedsSettings {data} /></Tabs.Content>
+
+	{#if data.mailerSettings}
+		<Tabs.Content value="mailer"><MailerSettings {data} /></Tabs.Content>
+	{/if}
+
+	<Tabs.Content value="webhooks"><WebhooksSettings {data} allowMultiple /></Tabs.Content>
+	<Tabs.Content value="auditLogForwarding"><AuditLogForwardingSettings {data} /></Tabs.Content>
+
 	<Tabs.Content value="emailTemplates">
 		<div class="space-y-8">
 			<section>
 				<h3 class="h4 font-semibold mb-4">
-					<i class="fa-solid fa-file-word mr-2"></i>{m.wordTemplates()}
+					<i class="fa-solid fa-file-lines mr-2"></i>{m.reportTemplates()}
 				</h3>
 				<WordTemplatesSettings />
+			</section>
+			<hr />
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-file-pdf mr-2"></i>{m.docHtmlTemplates()}
+				</h3>
+				<DocHtmlTemplatesSettings />
 			</section>
 			<hr />
 			<section>
@@ -237,7 +269,7 @@
 											{/if}
 										</span>
 										<span class="flex flex-row space-x-2">
-											<h6 class="h6 base-font-color">{m.jira()}</h6>
+											<h6 class="h6 text-typo-base-light">{m.jira()}</h6>
 										</span>
 									</div>
 								</a>
@@ -252,7 +284,7 @@
 											{/if}
 										</span>
 										<span class="flex flex-row space-x-2">
-											<h6 class="h6 base-font-color">{m.serviceNow()}</h6>
+											<h6 class="h6 text-typo-base-light">{m.serviceNow()}</h6>
 										</span>
 									</div>
 								</a>

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
+	import type { RiskMatrixJsonDefinition } from '#lib/utils/types.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
-	import { toCamelCase } from '$lib/utils/locales';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { isDark } from '$lib/utils/helpers';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { isDark } from '#lib/utils/helpers.js';
 
 	interface Props {
 		label?: string | undefined;

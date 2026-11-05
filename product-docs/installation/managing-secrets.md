@@ -130,7 +130,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.10.0
+    image: caddy:2.11.4
     restart: unless-stopped
     ports:
       - 8443:8443

@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 async function proxyRequest(event: Parameters<RequestHandler>[0], init: RequestInit, query = '') {

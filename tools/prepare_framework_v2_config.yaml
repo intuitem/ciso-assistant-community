@@ -33,12 +33,30 @@
 #     - name (str, required)
 #     - description (str, optional) — warning shown if missing
 #
+# - answers_sheet_base_name: (str) Creates an empty answers "_meta" / "_content"
+#   sheet pair using this value as the sheet prefix and metadata name.
+#
+# - scores_sheet_base_name: (str) Creates an empty scores "_meta" / "_content"
+#   sheet pair using this value as the sheet prefix and metadata name.
+#
+# - threats_sheet_base_name: (str) Creates an empty threats "_meta" / "_content"
+#   sheet pair. Its base URN is derived from "urn_root".
+#
+# - reference_controls_sheet_base_name: (str) Creates an empty reference controls
+#   "_meta" / "_content" sheet pair. Its base URN is derived from "urn_root".
+#
+# - urn_prefix_sheet_base_name: (str) Creates a URN prefix "_meta" / "_content"
+#   sheet pair. Its content includes the threats and reference controls URNs when
+#   their corresponding sheet pairs are enabled.
+#
 # - extra_locales: (list of locale dicts)
 #   Used to add additional localized columns and data in the Excel output.
 #   To enable, uncomment the example block below.
 #
 # TO ENABLE custom Excel file name : Uncomment the first block below.
-# TO ENABLE implementation groups: Uncomment the last two blocks below.
+# TO ENABLE implementation groups: Uncomment the "implementation_groups_sheet_base_name"
+#   field and the "implementation_groups" block below.
+# TO ENABLE another optional sheet pair: Uncomment its corresponding field below.
 # TO ENABLE extra_locales: Uncomment the block below marked as extra_locales.
 # ==============================================================================
 
@@ -88,7 +106,6 @@ framework_sheet_base_name: "framework"
 #         Il s'agit d'un framework de démonstration.
 #         Il présente des exemples de règles, de contrôles et d'exigences.
 #         Il est conçu pour illustrer et tester le générateur Excel.
-#       copyright: "© 2025 Entreprise d'Exemple"
 #
 #       implementation_groups:
 #       - ref_id: "grp001"
@@ -103,3 +120,18 @@ framework_sheet_base_name: "framework"
 #
 #       - ref_id: "grp003"
 #         name: "Groupe de réponse aux incidents"
+
+# --- To enable answer sheets, uncomment the lines below ---
+# answers_sheet_base_name: "answ"
+
+# --- To enable scores sheets, uncomment the lines below ---
+# scores_sheet_base_name: "scr"
+
+# --- To enable threats sheets, uncomment the lines below ---
+# threats_sheet_base_name: "thrt"
+
+# --- To enable reference controls sheets, uncomment the lines below ---
+# reference_controls_sheet_base_name: "ref_ctrl"
+
+# --- To enable urn prefix sheets, uncomment the lines below ---
+# urn_prefix_sheet_base_name: "urn_pref"

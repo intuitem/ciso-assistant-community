@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { csrfToken } from '$lib/utils/csrf';
-import { safeTranslate } from '$lib/utils/i18n';
-import { emailSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { csrfToken } from '#lib/utils/csrf.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { emailSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { RetryAfterRateLimiter } from 'sveltekit-rate-limiter/server';
@@ -12,7 +12,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	// redirect user if already logged in
-	if (event.locals.user) {
+	if (await event.locals.getUser()) {
 		redirect(302, '/');
 	}
 

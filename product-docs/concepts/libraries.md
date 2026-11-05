@@ -25,6 +25,8 @@ A library starts life as a **stored** record — its YAML is parsed and register
 | Loaded library | `LoadedLibrary` | Activated; contents visible across the platform |
 | Mapping set | `RequirementMappingSet` | Crosswalk between two frameworks |
 
+<figure><img src="../.gitbook/assets/libraries-catalog.png" alt=""><figcaption><p>The library store, where a stored library is loaded on demand</p></figcaption></figure>
+
 ## Stored vs loaded
 
 A library can be in one of two states:
@@ -44,11 +46,11 @@ Library content is referenced by **URN** (Uniform Resource Name), an immutable i
 - **Community libraries** are contributed by the open-source community; see [Contributing a framework or library](../contributing/framework.md).
 - **Custom libraries** can be built locally and loaded without sharing them, useful for internal frameworks or control sets.
 
-See [Designing your own libraries](../configuration/libraries/custom-libraries.md) for the format.
+See [Create a Library](../configuration/libraries/create-library.md) for the Excel format and authoring workflow.
 
 ## Lifecycle
 
-Libraries are versioned. When a newer version is available, you can upgrade in place — your existing audits keep using the version they were created with until you migrate them explicitly. See [Library upgrade](../configuration/libraries/library-upgrade.md) and [Library clean-up](../configuration/libraries/library-cleanup.md).
+Libraries are versioned. When you update a library from the Catalog, its new content is applied to all linked objects in the instance, including existing audits. Inspect the updated content before applying it. See [Update a library](../configuration/libraries/update-library.md) and [Unload or delete a library](../configuration/libraries/unload-or-delete-library.md).
 
 ## Related
 

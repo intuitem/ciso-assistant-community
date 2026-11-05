@@ -1,5 +1,7 @@
 <script lang="ts">
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { untrack } from 'svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		value: string;
@@ -11,16 +13,24 @@
 	let {
 		value = $bindable(),
 		onSave,
-		placeholder = 'Double-click to add content...',
+		placeholder = m.markdownCTA(),
 		disabled = false
 	}: Props = $props();
 
 	let isEditing = $state(false);
 	let editValue = $state(value ?? '');
+	let isDirty = $derived((editValue ?? '') !== (value ?? ''));
+	let syncedValue = value ?? '';
+
+	$effect(() => {
+		const next = value ?? '';
+		if (next === syncedValue) return;
+		if ((untrack(() => editValue) ?? '') === syncedValue) editValue = next;
+		syncedValue = next;
+	});
 
 	function startEdit() {
 		if (disabled) return;
-		editValue = value;
 		isEditing = true;
 	}
 
@@ -46,27 +56,27 @@
 		<textarea
 			class="input w-full"
 			rows="5"
-			placeholder="You can use markdown formatting here..."
+			placeholder={m.markdownPlaceholder()}
 			bind:value={editValue}
 		></textarea>
 		<div class="flex justify-end items-center">
 			<div class="flex space-x-2">
-				<button type="button" class="btn btn-sm variant-filled-primary" onclick={preview}>
+				<button type="button" class="btn btn-sm preset-tonal-primary" onclick={preview}>
 					<i class="fas fa-eye mr-1"></i>
-					Preview
+					{m.preview()}
 				</button>
-				<button class="btn btn-sm variant-filled-success" onclick={saveChanges} type="button">
+				<button class="btn btn-sm preset-filled-primary-500" onclick={saveChanges} type="button">
 					<i class="fa-solid fa-check mr-1"></i>
-					Save
+					{m.save()}
 				</button>
-				<button class="btn btn-sm variant-filled-error" onclick={cancelEdit} type="button">
+				<button class="btn btn-sm preset-tonal" onclick={cancelEdit} type="button">
 					<i class="fa-solid fa-xmark mr-1"></i>
-					Cancel
+					{m.cancel()}
 				</button>
 			</div>
 		</div>
 		<p class="text-xs text-surface-400-600">
-			Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
+			{m.markdownHelpText()}
 		</p>
 	{:else}
 		<!-- Preview Mode -->
@@ -87,24 +97,33 @@
 			{#if editValue}
 				<MarkdownRenderer content={editValue} />
 			{:else}
-				<p class="text-surface-600-400 italic">{placeholder}</p>
+				<p class="text-surface-600-400 italic">{disabled ? m.noObservation() : placeholder}</p>
 			{/if}
 		</div>
 		{#if !disabled}
-			<div class="flex justify-end items-center">
+			<div class="flex justify-end items-center gap-2">
+				{#if isDirty}
+					<span class="text-xs italic text-warning-600-400">{m.unsavedChanges()}</span>
+				{/if}
 				<div class="flex space-x-2">
-					<button type="button" class="btn btn-sm variant-soft" onclick={startEdit}>
+					<button type="button" class="btn btn-sm preset-tonal" onclick={startEdit}>
 						<i class="fas fa-edit mr-1"></i>
-						Edit
+						{m.edit()}
 					</button>
-					<button class="btn btn-sm variant-filled-success" onclick={saveChanges} type="button">
-						<i class="fa-solid fa-check mr-1"></i>
-						Save
-					</button>
-					<button class="btn btn-sm variant-filled-error" onclick={cancelEdit} type="button">
-						<i class="fa-solid fa-xmark mr-1"></i>
-						Cancel
-					</button>
+					{#if isDirty}
+						<button
+							class="btn btn-sm preset-filled-primary-500"
+							onclick={saveChanges}
+							type="button"
+						>
+							<i class="fa-solid fa-check mr-1"></i>
+							{m.save()}
+						</button>
+						<button class="btn btn-sm preset-tonal" onclick={cancelEdit} type="button">
+							<i class="fa-solid fa-xmark mr-1"></i>
+							{m.cancel()}
+						</button>
+					{/if}
 				</div>
 			</div>
 		{/if}

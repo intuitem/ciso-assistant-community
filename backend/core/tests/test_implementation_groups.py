@@ -1,6 +1,7 @@
 """Tests for implementation group recalculation and Framework.is_dynamic()."""
 
 import pytest
+from django.utils import translation
 from core.models import (
     Answer,
     ComplianceAssessment,
@@ -9,9 +10,13 @@ from core.models import (
     Question,
     QuestionChoice,
     RequirementAssessment,
+    RequirementAssignment,
     RequirementNode,
 )
-from core.utils import update_selected_implementation_groups
+from core.utils import (
+    sync_requirement_assignments,
+    update_selected_implementation_groups,
+)
 from iam.models import Folder
 
 
@@ -22,7 +27,6 @@ def dynamic_framework_setup(db):
     fw = Framework.objects.create(
         name="Dynamic IG Framework",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
         implementation_groups_definition=[
@@ -37,7 +41,6 @@ def dynamic_framework_setup(db):
         ref_id="IG-REQ",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q1 = Question.objects.create(
         requirement_node=rn,
@@ -48,7 +51,6 @@ def dynamic_framework_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     c_basic = QuestionChoice.objects.create(
         question=q1,
@@ -59,7 +61,6 @@ def dynamic_framework_setup(db):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
         select_implementation_groups=["base"],
     )
     c_advanced = QuestionChoice.objects.create(
@@ -71,7 +72,6 @@ def dynamic_framework_setup(db):
         compute_result="true",
         order=1,
         folder=folder,
-        is_published=True,
         select_implementation_groups=["advanced"],
     )
 
@@ -81,7 +81,6 @@ def dynamic_framework_setup(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -116,7 +115,6 @@ class TestIsDynamic:
         fw = Framework.objects.create(
             name="Static FW",
             folder=folder,
-            is_published=True,
         )
         rn = RequirementNode.objects.create(
             framework=fw,
@@ -124,7 +122,6 @@ class TestIsDynamic:
             ref_id="ST-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q = Question.objects.create(
             requirement_node=rn,
@@ -133,7 +130,6 @@ class TestIsDynamic:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q,
@@ -142,7 +138,6 @@ class TestIsDynamic:
             value="A",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q,
@@ -151,7 +146,6 @@ class TestIsDynamic:
             value="B",
             order=1,
             folder=folder,
-            is_published=True,
         )
         assert fw.is_dynamic() is False
 
@@ -161,7 +155,6 @@ class TestIsDynamic:
         fw = Framework.objects.create(
             name="Empty IG FW",
             folder=folder,
-            is_published=True,
         )
         rn = RequirementNode.objects.create(
             framework=fw,
@@ -169,7 +162,6 @@ class TestIsDynamic:
             ref_id="EIG-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q = Question.objects.create(
             requirement_node=rn,
@@ -178,7 +170,6 @@ class TestIsDynamic:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q,
@@ -187,7 +178,6 @@ class TestIsDynamic:
             value="A",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=[],
         )
         QuestionChoice.objects.create(
@@ -197,7 +187,6 @@ class TestIsDynamic:
             value="B",
             order=1,
             folder=folder,
-            is_published=True,
         )
         assert fw.is_dynamic() is False
 
@@ -242,7 +231,6 @@ class TestUpdateSelectedImplementationGroups:
         fw = Framework.objects.create(
             name="Hidden IG FW",
             folder=folder,
-            is_published=True,
             implementation_groups_definition=[
                 {"ref_id": "base", "default_selected": True},
                 {"ref_id": "hidden_ig"},
@@ -254,7 +242,6 @@ class TestUpdateSelectedImplementationGroups:
             ref_id="HIG-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q1 = Question.objects.create(
             requirement_node=rn,
@@ -263,7 +250,6 @@ class TestUpdateSelectedImplementationGroups:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         c_no = QuestionChoice.objects.create(
             question=q1,
@@ -274,7 +260,6 @@ class TestUpdateSelectedImplementationGroups:
             compute_result="false",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -285,7 +270,6 @@ class TestUpdateSelectedImplementationGroups:
             compute_result="true",
             order=1,
             folder=folder,
-            is_published=True,
         )
         q2 = Question.objects.create(
             requirement_node=rn,
@@ -299,7 +283,6 @@ class TestUpdateSelectedImplementationGroups:
                 "condition": "any",
             },
             folder=folder,
-            is_published=True,
         )
         c_ig = QuestionChoice.objects.create(
             question=q2,
@@ -308,7 +291,6 @@ class TestUpdateSelectedImplementationGroups:
             value="Select",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=["hidden_ig"],
         )
         QuestionChoice.objects.create(
@@ -318,7 +300,6 @@ class TestUpdateSelectedImplementationGroups:
             value="Skip",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="HIG Perim", folder=folder)
@@ -327,7 +308,6 @@ class TestUpdateSelectedImplementationGroups:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
         )
         ra = RequirementAssessment.objects.create(
             compliance_assessment=ca,
@@ -365,7 +345,6 @@ class TestUpdateSelectedImplementationGroups:
         fw = Framework.objects.create(
             name="Merge IG FW",
             folder=folder,
-            is_published=True,
             implementation_groups_definition=[
                 {"ref_id": "ig_a"},
                 {"ref_id": "ig_b"},
@@ -377,7 +356,6 @@ class TestUpdateSelectedImplementationGroups:
             ref_id="MIG-REQ1",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         rn2 = RequirementNode.objects.create(
             framework=fw,
@@ -385,7 +363,6 @@ class TestUpdateSelectedImplementationGroups:
             ref_id="MIG-REQ2",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
 
         q1 = Question.objects.create(
@@ -395,7 +372,6 @@ class TestUpdateSelectedImplementationGroups:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         c1 = QuestionChoice.objects.create(
             question=q1,
@@ -404,7 +380,6 @@ class TestUpdateSelectedImplementationGroups:
             value="A",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=["ig_a"],
         )
         QuestionChoice.objects.create(
@@ -414,7 +389,6 @@ class TestUpdateSelectedImplementationGroups:
             value="B",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         q2 = Question.objects.create(
@@ -424,7 +398,6 @@ class TestUpdateSelectedImplementationGroups:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         c2 = QuestionChoice.objects.create(
             question=q2,
@@ -433,7 +406,6 @@ class TestUpdateSelectedImplementationGroups:
             value="C",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=["ig_b"],
         )
         QuestionChoice.objects.create(
@@ -443,7 +415,6 @@ class TestUpdateSelectedImplementationGroups:
             value="D",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="MIG Perim", folder=folder)
@@ -452,7 +423,6 @@ class TestUpdateSelectedImplementationGroups:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
         )
         ra1 = RequirementAssessment.objects.create(
             compliance_assessment=ca,
@@ -540,3 +510,353 @@ class TestIGFilteringSQLiteCompat:
         # save() calls upsert_daily_metrics() internally — must not crash
         d["ca"].refresh_from_db()
         assert d["ca"].selected_implementation_groups == ["base"]
+
+
+@pytest.fixture
+def assignment_setup(db):
+    """Dynamic framework with two assignments, where an answer reveals a requirement.
+
+    Node layout, by order_id: an orphan question outside any assignment, the same
+    question inside Alice's, then the requirements the answer may reveal, then a
+    requirement owned by Bob.
+    """
+    folder = Folder.get_root_folder()
+    fw = Framework.objects.create(
+        name="Assignment IG Framework",
+        folder=folder,
+        implementation_groups_definition=[
+            {"ref_id": "base", "default_selected": True},
+            {"ref_id": "advanced"},
+        ],
+    )
+
+    def node(node_id, order_id, groups):
+        return RequirementNode.objects.create(
+            framework=fw,
+            urn=f"urn:test:assign:req:{node_id}",
+            ref_id=node_id.upper(),
+            assessable=True,
+            folder=folder,
+            order_id=order_id,
+            implementation_groups=groups,
+        )
+
+    def question(node, node_id):
+        q = Question.objects.create(
+            requirement_node=node,
+            urn=f"urn:test:assign:q:{node_id}",
+            ref_id=f"Q{node_id.upper()}",
+            text="Go advanced?",
+            type=Question.Type.UNIQUE_CHOICE,
+            order=0,
+            weight=1,
+            folder=folder,
+        )
+        yes = QuestionChoice.objects.create(
+            question=q,
+            urn=f"urn:test:assign:choice:{node_id}:yes",
+            ref_id=f"C{node_id.upper()}Y",
+            value="Yes",
+            order=0,
+            folder=folder,
+            select_implementation_groups=["advanced"],
+        )
+        no = QuestionChoice.objects.create(
+            question=q,
+            urn=f"urn:test:assign:choice:{node_id}:no",
+            ref_id=f"C{node_id.upper()}N",
+            value="No",
+            order=1,
+            folder=folder,
+            select_implementation_groups=[],
+        )
+        return q, yes, no
+
+    rn_orphan = node("orphan", 0, ["base"])
+    rn_base = node("base", 1, ["base"])
+    rn_advanced = node("advanced", 2, ["advanced"])
+    rn_both = node("both", 3, ["base", "advanced"])
+    rn_other = node("other", 4, ["base"])
+
+    q_orphan, orphan_yes, _orphan_no = question(rn_orphan, "orphan")
+    q_base, base_yes, base_no = question(rn_base, "base")
+
+    perimeter = Perimeter.objects.create(name="Assign Perim", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="Assign CA",
+        framework=fw,
+        folder=folder,
+        perimeter=perimeter,
+        selected_implementation_groups=["base"],
+    )
+
+    def assessment(requirement):
+        return RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=requirement, folder=folder
+        )
+
+    ra_orphan = assessment(rn_orphan)
+    ra_base = assessment(rn_base)
+    ra_advanced = assessment(rn_advanced)
+    ra_both = assessment(rn_both)
+    ra_other = assessment(rn_other)
+
+    alice = RequirementAssignment.objects.create(
+        compliance_assessment=ca, folder=folder
+    )
+    alice.requirement_assessments.set([ra_base])
+    bob = RequirementAssignment.objects.create(compliance_assessment=ca, folder=folder)
+    bob.requirement_assessments.set([ra_other])
+
+    return {
+        "ca": ca,
+        "folder": folder,
+        "q_orphan": q_orphan,
+        "q_base": q_base,
+        "orphan_yes": orphan_yes,
+        "base_yes": base_yes,
+        "base_no": base_no,
+        "ra_orphan": ra_orphan,
+        "ra_base": ra_base,
+        "ra_advanced": ra_advanced,
+        "ra_both": ra_both,
+        "ra_other": ra_other,
+        "alice": alice,
+        "bob": bob,
+    }
+
+
+def _answer(setup, requirement_assessment, question, choice):
+    answer, _ = Answer.objects.get_or_create(
+        requirement_assessment=requirement_assessment,
+        question=question,
+        folder=setup["folder"],
+    )
+    answer.selected_choices.set([choice])
+
+
+def _answer_base(setup, choice):
+    _answer(setup, setup["ra_base"], setup["q_base"], choice)
+
+
+def _assigned_ids(assignment):
+    return set(assignment.requirement_assessments.values_list("id", flat=True))
+
+
+@pytest.mark.django_db
+class TestSyncRequirementAssignments:
+    def test_revealed_requirement_joins_the_trigger_assignment(self, assignment_setup):
+        d = assignment_setup
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id, d["ra_advanced"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_already_visible_requirement_stays_unassigned(self, assignment_setup):
+        """Visible under 'base' already, so leaving it out was the auditor's call."""
+        d = assignment_setup
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert d["ra_both"].id not in _assigned_ids(d["alice"])
+        assert d["ra_both"].id not in _assigned_ids(d["bob"])
+
+    def test_trigger_outside_any_assignment_is_skipped(self, assignment_setup):
+        """The orphan answers first; routing falls through to the assigned trigger."""
+        d = assignment_setup
+        _answer(d, d["ra_orphan"], d["q_orphan"], d["orphan_yes"])
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert d["ra_advanced"].id in _assigned_ids(d["alice"])
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_in_progress_assignment_receives(self, assignment_setup):
+        """Deliberate: the respondent reveals requirements while working, not in draft."""
+        d = assignment_setup
+        d["alice"].status = RequirementAssignment.Status.IN_PROGRESS
+        d["alice"].save()
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert d["ra_advanced"].id in _assigned_ids(d["alice"])
+
+    def test_submitted_assignment_receives_nothing(self, assignment_setup):
+        d = assignment_setup
+        d["alice"].status = RequirementAssignment.Status.SUBMITTED
+        d["alice"].save()
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_deselected_group_leaves_the_assignment(self, assignment_setup):
+        """Changing the answer back drops what it had revealed."""
+        d = assignment_setup
+        _answer_base(d, d["base_yes"])
+        update_selected_implementation_groups(d["ca"])
+        d["ca"].refresh_from_db()
+
+        _answer_base(d, d["base_no"])
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_empty_selection_keeps_every_assignment(self, assignment_setup):
+        """No selected group means the whole audit is in scope, so nothing is out of it."""
+        d = assignment_setup
+        d["ca"].selected_implementation_groups = []
+        d["ca"].save()
+
+        sync_requirement_assignments(d["ca"], {}, {"base"})
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_answer_selecting_no_group_changes_nothing(self, assignment_setup):
+        d = assignment_setup
+        _answer_base(d, d["base_no"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+
+@pytest.fixture
+def translated_groups_setup(db):
+    """Framework authored in French with English translations, as the library
+    builder produces them."""
+    folder = Folder.get_root_folder()
+    framework = Framework.objects.create(
+        name="Cadre",
+        folder=folder,
+        implementation_groups_definition=[
+            {
+                "ref_id": "G1",
+                "name": "Groupe essentiel",
+                "description": "Mesures de base",
+                "translations": {
+                    "en": {"name": "Essential group", "description": "Baseline"}
+                },
+            }
+        ],
+    )
+    requirement = RequirementNode.objects.create(
+        framework=framework,
+        urn="urn:test:ig-i18n:req:001",
+        ref_id="R1",
+        assessable=True,
+        implementation_groups=["G1"],
+        folder=folder,
+    )
+    perimeter = Perimeter.objects.create(name="IG i18n perimeter", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="IG i18n CA", framework=framework, perimeter=perimeter, folder=folder
+    )
+    ra = RequirementAssessment.objects.create(
+        compliance_assessment=ca, requirement=requirement, folder=folder
+    )
+    return ca, ra
+
+
+class TestImplementationGroupsTranslation:
+    """The audit and requirement assessment payloads nest the framework's
+    implementation groups: they must follow the request language like the
+    framework endpoint, not leak the base language."""
+
+    @pytest.mark.parametrize(
+        "lang,name,description",
+        [
+            ("en", "Essential group", "Baseline"),
+            ("fr", "Groupe essentiel", "Mesures de base"),
+        ],
+    )
+    def test_requirement_assessment_payload(
+        self, translated_groups_setup, lang, name, description
+    ):
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        _, ra = translated_groups_setup
+        with translation.override(lang):
+            data = RequirementAssessmentReadSerializer(ra).data
+        (group,) = data["compliance_assessment"]["framework"][
+            "implementation_groups_definition"
+        ]
+        assert (group["ref_id"], group["name"], group["description"]) == (
+            "G1",
+            name,
+            description,
+        )
+
+    @pytest.mark.parametrize(
+        "lang,name", [("en", "Essential group"), ("fr", "Groupe essentiel")]
+    )
+    def test_compliance_assessment_payload(self, translated_groups_setup, lang, name):
+        from core.serializers import ComplianceAssessmentReadSerializer
+
+        ca, _ = translated_groups_setup
+        with translation.override(lang):
+            data = ComplianceAssessmentReadSerializer(ca).data
+        (group,) = data["framework"]["implementation_groups_definition"]
+        assert (group["ref_id"], group["name"]) == ("G1", name)
+
+    def test_framework_without_groups_is_left_as_is(self, db):
+        from core.serializers import ComplianceAssessmentReadSerializer
+
+        folder = Folder.get_root_folder()
+        framework = Framework.objects.create(name="No IG", folder=folder)
+        perimeter = Perimeter.objects.create(name="No IG perimeter", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="No IG CA", framework=framework, perimeter=perimeter, folder=folder
+        )
+        data = ComplianceAssessmentReadSerializer(ca).data
+        assert data["framework"]["implementation_groups_definition"] is None
+
+    def test_list_payload_translates_once_per_framework(self, translated_groups_setup):
+        """Every row nests the same framework: its groups are translated once
+        for the whole list, not once per requirement assessment."""
+        from unittest import mock
+
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        ca, ra = translated_groups_setup
+        folder = Folder.get_root_folder()
+        for i in range(2, 5):
+            node = RequirementNode.objects.create(
+                framework=ca.framework,
+                urn=f"urn:test:ig-i18n:req:00{i}",
+                ref_id=f"R{i}",
+                assessable=True,
+                folder=folder,
+            )
+            RequirementAssessment.objects.create(
+                compliance_assessment=ca, requirement=node, folder=folder
+            )
+        translate = Framework.get_implementation_groups_definition_translated
+        rows = RequirementAssessment.objects.filter(compliance_assessment=ca)
+        with (
+            translation.override("en"),
+            mock.patch.object(
+                Framework,
+                "get_implementation_groups_definition_translated",
+                autospec=True,
+                side_effect=translate,
+            ) as spy,
+        ):
+            data = RequirementAssessmentReadSerializer(rows, many=True).data
+        assert spy.call_count == 1
+        assert {
+            row["compliance_assessment"]["framework"][
+                "implementation_groups_definition"
+            ][0]["name"]
+            for row in data
+        } == {"Essential group"}

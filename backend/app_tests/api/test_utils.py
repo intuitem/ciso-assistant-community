@@ -8,6 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import StoredLibrary
+from library.builder import normalize_objects
 from iam.models import Folder, User, UserGroup
 
 from test_vars import *
@@ -80,7 +81,7 @@ class EndpointTestsUtils:
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 
-        user = User.objects.create_user(TEST_USER_EMAIL, is_published=True)
+        user = User.objects.create_user(TEST_USER_EMAIL)
         user_group = UserGroup.objects.get(
             name=role,
             folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
@@ -433,9 +434,8 @@ class EndpointTestsQueries:
             if build_params and object:
                 if object.__name__ == "User":
                     # Ensure new test users are published so they're visible through IAM filtering
-                    build_params_with_published = {**build_params, "is_published": True}
                     user = object.objects.create_superuser(
-                        **build_params_with_published
+                        **build_params
                     )  # no password is required in the build_params
                     # create the new user in the same group as the test user to make it visible
                     if user_group:
@@ -506,15 +506,27 @@ class EndpointTestsQueries:
                 and user_perm_reason != "outside_scope"
                 and len(response.json()["results"]) != 0
             ):
+                payload = response.json()
+                # The created object is the newest, so under the default
+                # created_at ordering it sits on the LAST page: fetch that page
+                # before scanning when the collection spans several pages.
+                if payload.get("next"):
+                    last_page_offset = max(
+                        payload["count"] - len(payload["results"]), 0
+                    )
+                    response = authenticated_client.get(
+                        url, {"offset": last_page_offset}
+                    )
+                    payload = response.json()
                 params = {**build_params, **test_params}
-                if len(response.json()["results"]) > 0 and item_search_field:
+                if len(payload["results"]) > 0 and item_search_field:
                     response_item = [
                         res
-                        for res in response.json()["results"]
+                        for res in payload["results"]
                         if res[item_search_field] == params[item_search_field]
                     ][0]
                 else:
-                    response_item = response.json()["results"][-1]
+                    response_item = payload["results"][-1]
                 for key, value in params.items():
                     if type(value) == dict and type(response_item[key]) == str:
                         assert json.loads(response_item[key]) == value, (
@@ -1141,9 +1153,8 @@ class EndpointTestsQueries:
             if isinstance(content, str):
                 content = json.loads(content)
 
-            for object in content["framework"][object_name.lower().replace(" ", "_")][
-                :count
-            ]:
+            framework = normalize_objects(content)["frameworks"][0]
+            for object in framework[object_name.lower().replace(" ", "_")][:count]:
                 comparelist = authenticated_client.get(compare_url)
                 compare = dict()
                 assert comparelist.status_code == expected_status, (

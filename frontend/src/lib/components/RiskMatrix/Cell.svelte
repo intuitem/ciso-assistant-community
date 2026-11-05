@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isDark } from '$lib/utils/helpers';
+	import { isDark } from '#lib/utils/helpers.js';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
@@ -33,7 +33,7 @@
 		return `width: ${maxBubbleSize}rem; height: ${maxBubbleSize}rem`;
 	});
 	let classesCellText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
 	});
 </script>
 

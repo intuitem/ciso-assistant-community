@@ -1,19 +1,21 @@
 <script lang="ts">
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { modelSchema } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getModalStore, type ModalStore } from './stores';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	// A lazy picker renders no options up front, so the card needs its own width.
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-[640px] max-w-[90vw] shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
 	interface Props {
@@ -25,6 +27,7 @@
 		label?: string;
 		optionsInfoFields?: {
 			fields: { field: string; translate?: boolean }[];
+			position?: 'suffix' | 'prefix';
 			classes?: string;
 		};
 		lazy?: boolean;
@@ -41,7 +44,7 @@
 			fields: [],
 			classes: 'text-surface-500'
 		},
-		lazy = false
+		lazy = true
 	}: Props = $props();
 
 	const schema = modelSchema(urlModel);
@@ -84,7 +87,7 @@
 			});
 
 			if (res.ok) {
-				await invalidateAll();
+				await refreshAll();
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}

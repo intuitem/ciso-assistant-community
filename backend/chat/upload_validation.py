@@ -1,4 +1,5 @@
-"""Upload validation for the Questionnaire Autopilot.
+"""Upload validation for chat file uploads (Questionnaire Autopilot and
+session document uploads).
 
 Belt-and-braces checks that go beyond the generic core validators:
 
@@ -36,6 +37,17 @@ _MAX_UNCOMPRESSED_BYTES = 300 * 1024 * 1024  # 300 MB
 _MAX_DECOMPRESSION_RATIO = 200  # uncompressed / compressed
 
 
+# Extensions accepted on the generic chat upload endpoint, mapped to the
+# canonical content type the extractor registry keys on. The client-supplied
+# content type is never trusted.
+CHAT_UPLOAD_CONTENT_TYPES = {
+    ".pdf": "application/pdf",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".csv": "text/csv",
+    ".txt": "text/plain",
+}
+
+
 def validate_questionnaire_upload(file_obj) -> None:
     """Validate the uploaded file is a benign .xlsx.
 
@@ -54,15 +66,51 @@ def validate_questionnaire_upload(file_obj) -> None:
         )
 
     file_obj.seek(0)
-    head = file_obj.read(4)
-    if head[:4] != b"PK\x03\x04":
-        raise ValidationError(
-            "File does not look like a valid .xlsx (missing zip header)."
-        )
+    raw = file_obj.read()
+    file_obj.seek(0)
+    _validate_xlsx_zip(raw)
+
+
+def validate_chat_upload(file_obj) -> str:
+    """Validate a file uploaded to a chat session and return its canonical
+    content type.
+
+    Same contract as :func:`validate_questionnaire_upload` (raises
+    ``ValidationError``, resets the cursor) but accepts every type the
+    extractor registry can digest, with per-format magic-byte checks.
+    """
+    name = getattr(file_obj, "name", "") or ""
+    ext = "." + name.rsplit(".", 1)[-1].lower() if "." in name else ""
+    content_type = CHAT_UPLOAD_CONTENT_TYPES.get(ext)
+    if not content_type:
+        accepted = ", ".join(sorted(CHAT_UPLOAD_CONTENT_TYPES))
+        raise ValidationError(f"Unsupported file type. Accepted: {accepted}.")
 
     file_obj.seek(0)
     raw = file_obj.read()
     file_obj.seek(0)
+
+    if not raw:
+        raise ValidationError("File is empty.")
+
+    if ext == ".xlsx":
+        _validate_xlsx_zip(raw)
+    elif ext == ".pdf":
+        if not raw.startswith(b"%PDF-"):
+            raise ValidationError("File does not look like a valid PDF.")
+    else:  # .csv / .txt
+        if b"\x00" in raw[: 64 * 1024]:
+            raise ValidationError("File does not look like a text file.")
+
+    return content_type
+
+
+def _validate_xlsx_zip(raw: bytes) -> None:
+    """Zip-level checks shared by the questionnaire and chat upload paths."""
+    if raw[:4] != b"PK\x03\x04":
+        raise ValidationError(
+            "File does not look like a valid .xlsx (missing zip header)."
+        )
 
     try:
         zf = zipfile.ZipFile(io.BytesIO(raw))

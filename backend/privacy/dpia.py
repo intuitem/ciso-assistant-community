@@ -1,0 +1,85 @@
+"""`processing.dpia`: an accepted DPIA, a quick form response on the processing,
+becomes the processing's DPIA of record. No config: the form is the DPIA."""
+
+import uuid
+
+from core.quick_form_targets import Proposal, Target, register
+
+# Placeholder displays are message keys: the frontend translates them (safeTranslate).
+
+
+@register
+class ProcessingDpiaTarget(Target):
+    key = "processing.dpia"
+    subject_model = "privacy.Processing"
+    permission = "change_processing"
+    label = "dpia"
+
+    def applies_to(self, subject) -> bool:
+        return subject.dpia_applies
+
+    def current(self, subject):
+        dpia = subject.dpia
+        return (str(dpia.pk), dpia.ref_id or dpia.name) if dpia else (None, "")
+
+    def resolve(self, response, config, override=None) -> Proposal:
+        # A preview passes the form's results only, not the response itself.
+        pk = getattr(response, "pk", None)
+        label = getattr(response, "ref_id", "") or getattr(response, "name", "")
+        return Proposal(
+            ok=True, value=str(pk) if pk else None, display=label or "thisDpia"
+        )
+
+    def apply(self, subject, proposal, *, response, user) -> None:
+        subject.dpia = response
+        subject.save(update_fields=["dpia"])
+
+
+@register
+class ProcessingControlsTarget(Target):
+    """`processing.controls`: the measures the form picks join the processing's
+    controls. Only adds: a control the form leaves out stays on the processing."""
+
+    key = "processing.controls"
+    subject_model = "privacy.Processing"
+    permission = "change_processing"
+    label = "associatedControls"
+
+    def current(self, subject):
+        controls = list(subject.associated_controls.order_by("name"))
+        return [str(c.pk) for c in controls], ", ".join(str(c) for c in controls)
+
+    def resolve(self, response, config, override=None) -> Proposal:
+        from core.cel_service import evaluate_quick_form
+        from core.models import AppliedControl, Question
+
+        # A preview passes the form's results only: the picks are not among them.
+        if getattr(response, "pk", None) is None:
+            return Proposal(ok=True, value=None, display="theMeasuresPicked")
+        # Picks on a page the answers hid no longer count.
+        hidden = set(evaluate_quick_form(response, persist=False)["hidden_pages"])
+        ids = set()
+        for answer in response.answers.filter(
+            question__type=Question.Type.OBJECT_REFERENCE,
+            question__config__model="applied_control",
+        ).exclude(question__page__urn__in=hidden):
+            value = answer.value
+            for item in value if isinstance(value, list) else [value]:
+                try:
+                    ids.add(uuid.UUID(str(item)))
+                except ValueError:
+                    pass
+        # Only controls the processing could hold: its domain or one above it. A
+        # response filed elsewhere could offer another domain's controls.
+        folder = response.subject.folder
+        controls = AppliedControl.objects.filter(
+            pk__in=ids, folder__in=[folder, *folder.get_parent_folders()]
+        ).order_by("name")
+        return Proposal(
+            ok=True,
+            value=[str(c.pk) for c in controls],
+            display=", ".join(str(c) for c in controls) or "none",
+        )
+
+    def apply(self, subject, proposal, *, response, user) -> None:
+        subject.associated_controls.add(*proposal.value)

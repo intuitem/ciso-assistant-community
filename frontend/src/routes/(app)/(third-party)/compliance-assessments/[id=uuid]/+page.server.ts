@@ -1,15 +1,15 @@
-import { nestedWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { loadValidationFlowFormData, formatSelectFieldData } from '$lib/utils/load';
-import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
+import { nestedWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadValidationFlowFormData, formatSelectFieldData } from '#lib/utils/load.js';
+import { ComplianceAssessmentSchema } from '#lib/utils/schemas.js';
 import { error, redirect, type Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'compliance-assessments';
@@ -21,7 +21,7 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		if (res.status === 404) {
 			// Check if focus mode is active
 			const focusFolderId = cookies.get('focus_folder_id');
-			const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+			const focusModeEnabled = (await locals.getFeatureFlags())?.focus_mode ?? false;
 			const isFocusModeActive = focusFolderId && focusModeEnabled;
 
 			const message = isFocusModeActive

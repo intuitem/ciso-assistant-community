@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { UserEditSchema } from '$lib/utils/schemas';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
+	import { UserEditSchema } from '#lib/utils/schemas.js';
 	import type { PageData } from './$types';
 
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;
@@ -35,8 +35,8 @@
 {/if}
 
 {#if showDisableMFA}
-	<div class="card bg-white shadow-sm p-4 mt-2">
-		<p class="text-gray-500 text-sm">
+	<div class="card bg-surface-50-950 shadow-sm p-4 mt-2">
+		<p class="text-surface-500 text-sm">
 			{m.disableMFA1()}
 			<a
 				href="{page.url.pathname}/disable-mfa"

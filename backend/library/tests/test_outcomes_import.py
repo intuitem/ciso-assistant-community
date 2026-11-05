@@ -26,7 +26,7 @@ objects:
       - ref_id: outcome_1
         annotation: Outcome 1
         color: "#FF0000"
-        expression: "score > 80"
+        expression: "assessment.score_sum > 80"
         translations:
           fr:
             annotation: Résultat 1
@@ -118,7 +118,7 @@ class TestOutcomesImport:
                 "ref_id": "outcome_1",
                 "annotation": "Outcome 1",
                 "color": "#FF0000",
-                "expression": "score > 80",
+                "expression": "assessment.score_sum > 80",
                 "translations": {"fr": {"annotation": "Résultat 1"}},
             }
         ]

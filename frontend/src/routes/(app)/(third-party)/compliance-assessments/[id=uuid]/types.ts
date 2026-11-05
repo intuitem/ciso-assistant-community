@@ -13,4 +13,6 @@ export interface Node {
 	score?: number; // Assuming that the score field exists in nodes similar to leaves
 	is_scored?: boolean; // Assuming that the is_scored field exists in nodes similar to leaves
 	weight?: number; // Weight multiplier for score calculations
+	has_applied_controls?: boolean; // Only emitted when true
+	has_evidence?: boolean; // Direct or through applied controls; only emitted when true
 }

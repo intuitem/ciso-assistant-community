@@ -17,6 +17,8 @@ export default {
 	threatName: 'Test threat',
 	description: 'Test description',
 	biaName: 'Test BIA',
+	metricDefinitionName: 'Test metric definition',
+	metricInstanceName: 'Test metric instance',
 	file: new URL('../utils/test_image.png', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	favicon: new URL('../utils/test_favicon.ico', import.meta.url).pathname,
@@ -141,7 +143,6 @@ export default {
 				'change_operationalscenario',
 				'delete_operationalscenario',
 				'view_qualification',
-				'view_globalsettings',
 				'view_securityexception',
 				'add_securityexception',
 				'change_securityexception',
@@ -277,7 +278,6 @@ export default {
 				'view_attackpath',
 				'view_operationalscenario',
 				'view_qualification',
-				'view_globalsettings',
 				'view_securityexception',
 				'view_finding',
 				'view_findingsassessment',
@@ -421,7 +421,6 @@ export default {
 				'change_operationalscenario',
 				'delete_operationalscenario',
 				'view_qualification',
-				'view_globalsettings',
 				'view_securityexception',
 				'add_securityexception',
 				'change_securityexception',
@@ -557,7 +556,6 @@ export default {
 				'view_attackpath',
 				'view_operationalscenario',
 				'view_qualification',
-				'view_globalsettings',
 				'view_securityexception',
 				'view_finding',
 				'view_findingsassessment',
@@ -625,23 +623,24 @@ export default {
 		},
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'
 	},
+	// ATT&CK now ships as TTPs, so its legacy threats are no longer maintained
 	threat: {
-		name: 'T1011 - Exfiltration Over Other Network Medium',
+		name: 'ICT-001 - Ransomware',
 		library: {
-			name: 'Mitre ATT&CK v18.1 - Threats and mitigations',
-			ref: 'mitre-attack',
-			urn: 'urn:intuitem:risk:library:mitre-attack'
+			name: 'INTUITEM Common Catalog',
+			ref: 'intuitem-common-catalog',
+			urn: 'urn:intuitem:risk:library:intuitem-common-catalog'
 		},
-		urn: 'urn:intuitem:risk:threat:mitre-attack:T1011'
+		urn: 'urn:intuitem:risk:threat:intuitem-common-catalog:ict-001'
 	},
 	threat2: {
-		name: 'T1052 - Exfiltration Over Physical Medium',
+		name: 'ICT-002 - Phishing and Spear Phishing',
 		library: {
-			name: 'Mitre ATT&CK v18.1 - Threats and mitigations',
-			ref: 'mitre-attack',
-			urn: 'urn:intuitem:risk:library:mitre-attack'
+			name: 'INTUITEM Common Catalog',
+			ref: 'intuitem-common-catalog',
+			urn: 'urn:intuitem:risk:library:intuitem-common-catalog'
 		},
-		urn: 'urn:intuitem:risk:threat:mitre-attack:T1052'
+		urn: 'urn:intuitem:risk:threat:intuitem-common-catalog:ict-002'
 	},
 	requirement_assessment: {
 		name: 'RC.RP - Recovery Planning',

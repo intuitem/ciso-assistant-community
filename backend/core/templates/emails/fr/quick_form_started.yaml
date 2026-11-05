@@ -1,0 +1,13 @@
+subject: "CISO Assistant : Le formulaire rapide '${response_name}' attend votre contribution"
+body: |
+  Bonjour,
+
+  Vous avez été désigné comme répondant sur le formulaire rapide suivant :
+
+  - Réponse : ${response_name}
+  - Formulaire : ${quick_form_name}
+  - Date d'échéance : ${due_date}
+
+  Veuillez vous connecter à CISO Assistant pour le remplir : [Ouvrir le formulaire](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Merci.

@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Ihnen wurde '${assessment_name}' zugewiesen"
+body: |
+  Hallo,
+
+  Sie wurden dem folgenden Audit als Autor zugewiesen:
+
+  - Name: ${assessment_name}
+  - Beschreibung: ${assessment_description}
+  - Referenzwerk: ${framework_name}
+  - Status: ${assessment_status}
+  - Fällig am: ${assessment_due_date}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um dieses Audit anzuzeigen und zu bearbeiten: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

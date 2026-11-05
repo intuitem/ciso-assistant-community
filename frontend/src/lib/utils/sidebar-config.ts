@@ -1,4 +1,5 @@
 type SidebarBackendKeys = {
+	notification_center: boolean;
 	xrays: boolean;
 	incidents: boolean;
 	tasks: boolean;
@@ -11,41 +12,58 @@ type SidebarBackendKeys = {
 	vulnerabilities: boolean;
 	compliance: boolean;
 	campaigns: boolean;
+	commitment_management: boolean;
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
+	threat_modeling: boolean;
+	ttps: boolean;
 	terminologies: boolean;
 	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
+	generic_collections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibility_matrices: boolean;
+	risk_management: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validation_flows: boolean;
+	workflows: boolean;
 	metrology: boolean;
 	personal_data: boolean;
 	purposes: boolean;
 	right_requests: boolean;
 	data_breaches: boolean;
+	dpias: boolean;
 	auditee_mode: boolean;
+	quick_forms: boolean;
 	advanced_analytics: boolean;
 	journeys: boolean;
 	policy_documents: boolean;
+	document_management: boolean;
 	security_advisories: boolean;
 	cwes: boolean;
 	custom_portals: boolean;
 	idp_groups: boolean;
+	jit_provisioning: boolean;
+	service_accounts: boolean;
+	posture_assessments: boolean;
 };
 
 type SidebarFrontendKeys = {
+	notifications: boolean;
 	xRays: boolean;
 	incidents: boolean;
 	tasks: boolean;
 	tasksReview: boolean;
 	riskAcceptances: boolean;
 	securityExceptions: boolean;
+	findings: boolean;
 	followUp: boolean;
 	ebiosRM: boolean;
 	scoringAssistant: boolean;
@@ -58,36 +76,56 @@ type SidebarFrontendKeys = {
 	organisationObjectives: boolean;
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
+	threatModeling: boolean;
+	ttpCatalogs: boolean;
 	terminologies: boolean;
 	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
+	genericCollections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibilityMatrices: boolean;
+	risk: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validationFlows: boolean;
+	workflows: boolean;
 	metrology: boolean;
 	personalData: boolean;
 	purposes: boolean;
 	rightRequests: boolean;
 	dataBreaches: boolean;
+	dpias: boolean;
 	auditDashboard: boolean;
+	quickForms: boolean;
+	myRequests: boolean;
+	requestQueue: boolean;
 	presets: boolean;
 	securityAdvisories: boolean;
 	cwes: boolean;
 	managePortals: boolean;
 	idpGroups: boolean;
+	serviceAccounts: boolean;
+	postureAssessments: boolean;
+	commitments: boolean;
 };
 
 export function getSidebarVisibleItems(
-	featureFlags: Partial<SidebarBackendKeys>
+	featureFlags: Partial<SidebarBackendKeys> | undefined
 ): SidebarFrontendKeys {
 	return {
+		// Default true: unlike the others this is not a module you opt into, it is the
+		// notification channel that works out of the box (notifications_enable_mailing
+		// defaults off, so email alone leaves most installs silent).
+		notifications: featureFlags?.notification_center ?? true,
 		xRays: featureFlags?.xrays ?? false,
 		incidents: featureFlags?.incidents ?? false,
 		tasks: featureFlags?.tasks ?? false,
 		tasksReview: featureFlags?.control_plan ?? true,
 		riskAcceptances: featureFlags?.risk_acceptances ?? false,
 		securityExceptions: featureFlags?.exceptions ?? false,
+		findings: featureFlags?.follow_up ?? false,
 		followUp: featureFlags?.follow_up ?? false,
 		ebiosRM: featureFlags?.ebiosrm ?? false,
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
@@ -100,23 +138,42 @@ export function getSidebarVisibleItems(
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
+		threatModeling: featureFlags?.threat_modeling ?? false,
+		ttpCatalogs: featureFlags?.ttps ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
 		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
+		genericCollections: featureFlags?.generic_collections ?? true,
+		accreditations: featureFlags?.accreditations ?? true,
+		projects: featureFlags?.projects ?? true,
+		responsibilityMatrices: featureFlags?.responsibility_matrices ?? true,
+		risk: featureFlags?.risk_management ?? true,
 		contracts: featureFlags?.contracts ?? false,
 		reports: featureFlags?.reports ?? false,
 		validationFlows: featureFlags?.validation_flows ?? false,
+		workflows: featureFlags?.workflows ?? false,
 		metrology: featureFlags?.metrology ?? true,
 		personalData: featureFlags?.personal_data ?? true,
 		purposes: featureFlags?.purposes ?? true,
 		rightRequests: featureFlags?.right_requests ?? true,
 		dataBreaches: featureFlags?.data_breaches ?? true,
+		// DPIAs run on quick forms: without them the review queue is hidden.
+		dpias: (featureFlags?.dpias ?? false) && (featureFlags?.quick_forms ?? false),
 		auditDashboard: featureFlags?.auditee_mode ?? false,
+		quickForms: featureFlags?.quick_forms ?? false,
+		myRequests: featureFlags?.quick_forms ?? false,
+		requestQueue: featureFlags?.quick_forms ?? false,
 		presets: featureFlags?.journeys ?? true,
 		securityAdvisories: featureFlags?.security_advisories ?? true,
 		cwes: featureFlags?.cwes ?? true,
 		managePortals: featureFlags?.custom_portals ?? false,
-		idpGroups: featureFlags?.idp_groups ?? false
+		idpGroups: (featureFlags?.idp_groups || featureFlags?.jit_provisioning) ?? false,
+		serviceAccounts: featureFlags?.service_accounts ?? false,
+		postureAssessments: featureFlags?.posture_assessments ?? false,
+		commitments: featureFlags?.commitment_management ?? false,
+		documents: featureFlags?.document_management ?? true,
+		documentTemplates: featureFlags?.document_management ?? true,
+		objectClassifications: featureFlags?.document_management ?? true
 	};
 }

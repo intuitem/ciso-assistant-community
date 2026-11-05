@@ -79,6 +79,8 @@
   <!-- tools/readme/features.json; the render script injects it into the    -->
   <!-- data slot below. To change features, edit the JSON and run:          -->
   <!-- pnpm --dir frontend readme:features                                  -->
+  <!-- Entries marked "bento": false are listed in the README but skipped   -->
+  <!-- here, which keeps this image at a readable height.                   -->
   <!-- =================================================================== -->
   <div class="bento" id="bento"></div>
 
@@ -97,7 +99,10 @@
     const raw = document.getElementById("features-data").textContent.trim();
     // Accept either the full features.json object or a bare array of names.
     const parsed = JSON.parse(raw);
-    const features = Array.isArray(parsed) ? parsed : parsed.features;
+    const all = Array.isArray(parsed) ? parsed : parsed.features;
+    // `"bento": false` keeps a feature in the README's collapsible list but out
+    // of the image, so the list can stay exhaustive without the PNG growing.
+    const features = all.filter((f) => typeof f === "string" || f.bento !== false);
     const bento = document.getElementById("bento");
 
     features.forEach((f, i) => {

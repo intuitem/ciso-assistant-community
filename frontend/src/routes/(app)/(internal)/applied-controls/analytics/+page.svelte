@@ -1,8 +1,8 @@
 <script lang="ts">
-	import AppliedControlsAnalytics from '$lib/components/DataViz/AppliedControlsAnalytics.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import AppliedControlsAnalytics from '#lib/components/DataViz/AppliedControlsAnalytics.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -15,7 +15,7 @@
 <div class="p-4 space-y-4">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">
-			<Anchor href={`${data.backUrl}${data.filterSearch}`} class="btn variant-ghost-surface">
+			<Anchor href={`${data.backUrl}${data.filterSearch}`} class="btn preset-outlined-surface-500">
 				<i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>
 				{safeTranslate(data.backLabel) || data.backLabel}
 			</Anchor>

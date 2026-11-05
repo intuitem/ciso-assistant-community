@@ -413,9 +413,7 @@ def admin_client_with_audit(framework_with_alternatives):
 
     startup(sender=None)
 
-    admin = User.objects.create_superuser(
-        "admin@update-requirement-tests.com", is_published=True
-    )
+    admin = User.objects.create_superuser("admin@update-requirement-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()

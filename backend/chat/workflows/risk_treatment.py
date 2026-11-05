@@ -100,13 +100,11 @@ class RiskTreatmentWorkflow(Workflow):
         try:
             RiskScenario = apps.get_model("core", "RiskScenario")
             scenario = (
-                RiskScenario.objects.prefetch_related(
+                ctx.scope.queryset(RiskScenario)
+                .prefetch_related(
                     "threats", "assets", "applied_controls", "existing_applied_controls"
                 )
-                .filter(
-                    id=ctx.parsed_context.object_id,
-                    risk_assessment__folder_id__in=ctx.accessible_folder_ids,
-                )
+                .filter(id=ctx.parsed_context.object_id)
                 .first()
             )
             if not scenario:
@@ -154,7 +152,7 @@ class RiskTreatmentWorkflow(Workflow):
         AppliedControl = apps.get_model("core", "AppliedControl")
 
         already_attached = scenario_info.get("existing_control_ids", set())
-        qs = AppliedControl.objects.filter(folder_id__in=ctx.accessible_folder_ids)
+        qs = ctx.scope.queryset(AppliedControl)
         if already_attached:
             qs = qs.exclude(id__in=already_attached)
 

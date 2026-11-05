@@ -1,21 +1,13 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { displayScoreColor } from '$lib/utils/helpers';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { displayScoreColor } from '#lib/utils/helpers.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { localizedLevelField, type ScoreLevel } from '#lib/utils/score-scales.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-	interface ScoresDefinition {
-		score: number;
-		name: string;
-		description: string;
-		description_doc?: string;
-		translations?: Record<
-			string,
-			Partial<Record<'name' | 'description' | 'description_doc', string>>
-		>;
-	}
+	type ScoresDefinition = ScoreLevel;
 
 	interface Props {
 		label?: string | undefined;
@@ -55,15 +47,9 @@
 	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	let previous = $state($value);
 
-	$effect(() => {
-		if (previous !== $value && previous !== undefined) {
-			onChange($value);
-		}
-		previous = $value;
-	});
-
+	// onChange fires on user input only: a programmatic reset of the form value
+	// (reload, locale switch, min_score fallback) must never be persisted as a score.
 	run(() => {
 		$value = !disabled ? ($value ?? min_score) : $value;
 	});
@@ -72,9 +58,7 @@
 		definition: ScoresDefinition,
 		field: 'name' | 'description' | 'description_doc'
 	) {
-		const locale = getLocale();
-		const language = locale.split('-')[0];
-		return definition.translations?.[language]?.[field] ?? definition[field];
+		return localizedLevelField(definition, field, getLocale().split('-')[0]);
 	}
 </script>
 
@@ -112,6 +96,7 @@
 					step={score_step}
 					{disabled}
 					{...constraints}
+					oninput={() => onChange($value)}
 				/>
 			</div>
 			<div class="shrink-0 relative">

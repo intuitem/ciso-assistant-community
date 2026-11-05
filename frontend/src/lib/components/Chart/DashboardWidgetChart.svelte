@@ -1,9 +1,14 @@
 <script lang="ts">
+	import { sampleMoment } from '#lib/utils/derived-metrics.js';
+	import { escapeHtml, roundScore } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { resolveBreakdownColor } from '$lib/utils/constants';
+
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { resolveBreakdownColor } from '#lib/utils/constants.js';
 	import MarkdownRenderer from '../MarkdownRenderer.svelte';
+	import BreakdownSmallMultiples from './BreakdownSmallMultiples.svelte';
 
 	interface Props {
 		widget: any;
@@ -101,12 +106,12 @@
 				try {
 					const value = typeof sample.value === 'string' ? JSON.parse(sample.value) : sample.value;
 					if (isQualitative) {
-						return [sample.timestamp, value?.choice_index ?? null];
+						return [sampleMoment(sample), value?.choice_index ?? null];
 					} else {
-						return [sample.timestamp, value?.result ?? null];
+						return [sampleMoment(sample), value?.result ?? null];
 					}
 				} catch {
-					return [sample.timestamp, null];
+					return [sampleMoment(sample), null];
 				}
 			})
 			.filter((item) => item[1] !== null)
@@ -131,8 +136,21 @@
 			.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
 	);
 
-	// Combined chart data based on metric type
-	const chartData = $derived(isBuiltinMetric ? builtinChartData : customChartData);
+	// Combined chart data based on metric type. Audit scores are stored
+	// unrounded: thresholds and the trend read the raw values, what is shown is
+	// rounded like on the audit.
+	const rawChartData = $derived(isBuiltinMetric ? builtinChartData : customChartData);
+	const chartData = $derived(
+		isBuiltinMetric
+			? rawChartData.map(([date, value]) => [
+					date,
+					typeof value === 'number' ? roundScore(value) : value
+				])
+			: rawChartData
+	);
+	const rawLatestValue = $derived(
+		rawChartData.length > 0 ? rawChartData[rawChartData.length - 1][1] : null
+	);
 
 	// Get choice names for qualitative metrics
 	const choiceNames = $derived(
@@ -143,7 +161,7 @@
 	const latestValue = $derived(chartData.length > 0 ? chartData[chartData.length - 1][1] : null);
 
 	// Threshold-resolved color for the latest scalar value (null when no threshold matches)
-	const thresholdColor = $derived(resolveThresholdColor(latestValue));
+	const thresholdColor = $derived(resolveThresholdColor(rawLatestValue));
 
 	// For breakdown metrics, get the latest breakdown data
 	const latestBreakdown = $derived(
@@ -173,67 +191,98 @@
 			: []
 	);
 
+	// Bar and area are both composition-over-time readings, so both stack. A breakdown
+	// whose series differ wildly in magnitude wants small multiples instead: one panel
+	// per key on its own scale, which is the one form that survives a 16x spread.
+	const breakdownCategories = $derived(
+		chartData.map(([date]) => new Date(date).toLocaleDateString())
+	);
+
 	// Prepare stacked bar/area data for breakdown time series — series color via the semantic resolver
 	const breakdownTimeSeriesData = $derived(() => {
 		if (!isBreakdownMetric) return { categories: [], series: [] };
 		const keys = breakdownKeys();
-		const categories = chartData.map(([date]) => new Date(date).toLocaleDateString());
+		const isArea = widget.chart_type === 'area';
 		const series = keys.map((key, idx) => ({
 			name: formatBreakdownKey(key),
-			type: widget.chart_type === 'area' ? 'line' : 'bar',
+			type: isArea ? 'line' : 'bar',
 			stack: 'total',
-			areaStyle: widget.chart_type === 'area' ? {} : undefined,
+			smooth: isArea,
+			showSymbol: isArea && chartData.length <= 30,
+			symbolSize: 4,
+			areaStyle: isArea ? {} : undefined,
+			lineStyle: isArea ? { width: 1.5 } : undefined,
+			emphasis: { focus: 'series' },
 			itemStyle: { color: resolveBreakdownColor(key, idx) },
 			data: chartData.map(([, breakdown]) =>
 				breakdown && typeof breakdown === 'object' ? breakdown[key] || 0 : 0
 			)
 		}));
-		return { categories, series };
+		return { categories: breakdownCategories, series };
 	});
+
+	// One panel per breakdown key, ordered and coloured exactly as the stacked forms.
+	const smallMultiplePanels = $derived(
+		isBreakdownMetric
+			? breakdownKeys().map((key, idx) => ({
+					key,
+					label: formatBreakdownKey(key),
+					color: resolveBreakdownColor(key, idx),
+					values: chartData.map(([, breakdown]) =>
+						breakdown && typeof breakdown === 'object' ? breakdown[key] || 0 : 0
+					)
+				}))
+			: []
+	);
 
 	let chartInstance: any = null;
 
-	onMount(async () => {
-		// Skip ECharts for text widgets - they render markdown, not charts
-		if (widget.chart_type === 'text') {
-			return;
-		}
-		// Skip ECharts for KPI/table with scalar values, but allow for breakdown metrics
-		if ((widget.chart_type === 'kpi_card' || widget.chart_type === 'table') && !isBreakdownMetric) {
-			return; // These don't use ECharts for scalar values
-		}
-		// For breakdown table, we don't need ECharts
-		if (widget.chart_type === 'table' && isBreakdownMetric) {
-			return;
-		}
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			// Skip ECharts for text widgets - they render markdown, not charts
+			if (widget.chart_type === 'text') {
+				return;
+			}
+			// Skip ECharts for KPI/table with scalar values, but allow for breakdown metrics
+			if (
+				(widget.chart_type === 'kpi_card' || widget.chart_type === 'table') &&
+				!isBreakdownMetric
+			) {
+				return; // These don't use ECharts for scalar values
+			}
+			// For breakdown table, we don't need ECharts
+			if (widget.chart_type === 'table' && isBreakdownMetric) {
+				return;
+			}
+			// Small multiples mount their own charts, one per breakdown key
+			if (widget.chart_type === 'small_multiples') {
+				return;
+			}
 
-		const echarts = await import('echarts');
-		const container = document.getElementById(chartId);
-		if (!container) return;
+			const echarts = await import('echarts');
+			if (!active) return;
+			const container = document.getElementById(chartId);
+			if (!container) return;
 
-		chartInstance = echarts.init(
-			container,
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
+			const disposeChart = mountThemeAwareChart(echarts, container, () => getChartOption(echarts), {
+				onChart: (c: any) => (chartInstance = c)
+			});
 
-		const option = getChartOption(echarts);
-		option.backgroundColor = 'transparent';
-		chartInstance.setOption(option);
+			// the helper only watches window resize; this also catches container-only changes
+			const resizeObserver = new ResizeObserver(() => chartInstance?.resize());
+			resizeObserver.observe(container);
 
-		const resizeHandler = () => chartInstance?.resize();
-		window.addEventListener('resize', resizeHandler);
-
-		// Use ResizeObserver for container size changes
-		const resizeObserver = new ResizeObserver(() => {
-			chartInstance?.resize();
-		});
-		resizeObserver.observe(container);
-
+			dispose = () => {
+				resizeObserver.disconnect();
+				disposeChart();
+				chartInstance = null;
+			};
+		})();
 		return () => {
-			window.removeEventListener('resize', resizeHandler);
-			resizeObserver.disconnect();
-			chartInstance?.dispose();
+			active = false;
+			dispose?.();
 		};
 	});
 
@@ -258,7 +307,9 @@
 					displayValue = formatValueWithUnit(value);
 				}
 
-				return `${date}<br/>${params[0].marker}${displayValue}`;
+				// Rendered as HTML by ECharts: level names and units are typed
+				// text (a formula's results, a definition's levels), escaped.
+				return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(displayValue)}`;
 			}
 		};
 
@@ -291,17 +342,20 @@
 				: { min: 0 })
 		};
 
-		// For breakdown metrics, render as stacked bar or pie
+		// For breakdown metrics, render as a time series, pie or donut
 		if (isBreakdownMetric) {
 			const tsData = breakdownTimeSeriesData();
 
-			// For bar/area with breakdown, use stacked chart
+			// For bar/area with breakdown, plot one stacked series per key over time
 			if (widget.chart_type === 'bar' || widget.chart_type === 'area') {
+				const isArea = widget.chart_type === 'area';
 				return {
 					grid: { ...baseGrid, right: 100 },
 					tooltip: {
 						trigger: 'axis',
-						axisPointer: { type: 'shadow' }
+						axisPointer: { type: isArea ? 'line' : 'shadow' },
+						// Seven statuses at once: order by value so the biggest read first.
+						order: 'valueDesc'
 					},
 					legend: {
 						show: widget.show_legend !== false,
@@ -313,6 +367,7 @@
 					xAxis: {
 						type: 'category',
 						data: tsData.categories,
+						boundaryGap: !isArea,
 						axisLabel: { rotate: 45 }
 					},
 					yAxis: { type: 'value', min: 0 },
@@ -712,11 +767,11 @@
 					>
 				{/if}
 			</div>
-			<!-- Trend indicator -->
-			{#if chartData.length > 1}
-				{@const prevValue = chartData[chartData.length - 2]?.[1]}
+			<!-- Trend indicator: a percentage change between two levels means nothing -->
+			{#if chartData.length > 1 && !isQualitative}
+				{@const prevValue = rawChartData[rawChartData.length - 2]?.[1]}
 				{@const change = prevValue
-					? (((latestValue - prevValue) / prevValue) * 100).toFixed(1)
+					? (((rawLatestValue - prevValue) / prevValue) * 100).toFixed(1)
 					: null}
 				{@const isPositiveChange = Number(change) >= 0}
 				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}
@@ -810,6 +865,11 @@
 				{m.noDataAvailable()}
 			</div>
 		{/if}
+	</div>
+{:else if widget.chart_type === 'small_multiples'}
+	<!-- One panel per breakdown key, each on its own scale -->
+	<div class="h-full overflow-hidden">
+		<BreakdownSmallMultiples panels={smallMultiplePanels} categories={breakdownCategories} />
 	</div>
 {:else if samples.length > 0 || builtinSamples.length > 0}
 	<!-- ECharts -->

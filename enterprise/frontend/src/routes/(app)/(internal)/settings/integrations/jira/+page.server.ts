@@ -4,8 +4,8 @@ import { superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import type { Actions, PageServerLoad } from './$types';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 
 const schema = z
 	.object({
@@ -29,7 +29,8 @@ const schema = z
 			project_key: z.string().optional(),
 			issue_type: z.string().optional(),
 			field_map: z.record(z.string(), z.any()).default({}).optional(),
-			value_map: z.record(z.string(), z.any()).default({}).optional()
+			value_map: z.record(z.string(), z.any()).default({}).optional(),
+			models: z.record(z.string(), z.any()).default({}).optional()
 		})
 	})
 	.superRefine((data, ctx) => {
@@ -56,7 +57,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 		const providerData = await providerResponse.json();
 		const provider = providerData.results[0];
 		config = {
-			folder_id: locals.user.root_folder_id,
+			folder_id: (await locals.getUser())?.root_folder_id,
 			provider_id: provider.id
 		};
 	}
@@ -68,6 +69,15 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (settings && !settings.table_name && settings.project_key) {
 		settings.table_name = `${settings.project_key}:${settings.issue_type || 'Task'}`;
 	}
+
+	// Seed the nested per-model structure so the asset FieldMapper's form paths
+	// (settings.models.asset.*) exist for binding.
+	config.settings = config.settings ?? {};
+	config.settings.models = config.settings.models ?? {};
+	config.settings.models.asset = config.settings.models.asset ?? {
+		field_map: {},
+		value_map: {}
+	};
 
 	const form = await superValidate(config, zod(schema), { errors: false });
 	return {

@@ -2,7 +2,7 @@ export type ChatView = 'closed' | 'window' | 'expanded';
 
 export interface PendingAction {
 	id: string;
-	action: 'create' | 'attach';
+	action: 'create' | 'attach' | 'import';
 	modelKey?: string;
 	urlSlug?: string;
 	displayName: string;
@@ -19,6 +19,15 @@ export interface PendingAction {
 	parentId?: string;
 	parentUrlSlug?: string;
 	m2mField?: string;
+	// Import-specific fields (dry-run counts)
+	documentId?: string;
+	targetName?: string;
+	truncated?: boolean;
+	rowCount?: number;
+	createdCount?: number;
+	updatedCount?: number;
+	skippedCount?: number;
+	failedCount?: number;
 }
 
 export interface PendingChoice {
@@ -30,6 +39,18 @@ export interface PendingChoice {
 	selectedId?: string;
 }
 
+export interface ChatAttachment {
+	id: string;
+	filename: string;
+}
+
+export interface PendingAttachment {
+	id: string;
+	filename: string;
+	status: 'uploading' | 'ready' | 'error';
+	error?: string;
+}
+
 export interface ChatMessage {
 	id: string;
 	role: 'user' | 'assistant';
@@ -39,6 +60,7 @@ export interface ChatMessage {
 	contextRefs?: ContextRef[];
 	pendingAction?: PendingAction;
 	pendingChoice?: PendingChoice;
+	attachments?: ChatAttachment[];
 }
 
 export interface ContextRef {

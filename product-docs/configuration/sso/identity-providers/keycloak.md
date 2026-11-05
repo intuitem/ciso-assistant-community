@@ -50,6 +50,8 @@ Go into your **Keycloak admin console**
 
     <figure><img src="../../../.gitbook/assets/Screenshot 2024-08-20 11.15.46.png" alt=""><figcaption></figcaption></figure>
 
+    The same metadata also contains Keycloak's Single Logout Service URL, so it is picked up automatically. To also close the Keycloak session when users log out of CISO Assistant, just turn on **Enable service provider-initiated single logout** in the SSO settings.
+
 
 {% endtab %}
 
@@ -72,10 +74,13 @@ Go into your **Keycloak admin console**
    2.  For cloud deployments, you must set it to `<base_url>/api/accounts/oidc/openid_connect/login/callback/`
 
        <figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
-7.  Once your client is created, you can find its **Client secret** under the **Credentials** tab. You can copy it from there
+7. Enter your **Valid post logout redirect URIs**
+   1. Set it to `<frontend_url>/login`
+   2. For cloud deployments, set it to `<base_url>/login`
+8.  Once your client is created, you can find its **Client secret** under the **Credentials** tab. You can copy it from there
 
     <figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
-8.  Go into **Realm settings > General** to find the <mark style="color:purple;">**OpenID Endpoint Configuration**</mark><mark style="color:purple;">,</mark> which you will have to paste into CISO Assistant's **Server URL** SSO parameter
+9.  Go into **Realm settings > General** to find the <mark style="color:purple;">**OpenID Endpoint Configuration**</mark><mark style="color:purple;">,</mark> which you will have to paste into CISO Assistant's **Server URL** SSO parameter
 
     <figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 {% endtab %}

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;

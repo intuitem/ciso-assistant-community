@@ -49,6 +49,14 @@ Once you've retrieved the **IdP Entity ID,** the **Metadata URL** and the **Enti
 {% endtab %}
 {% endtabs %}
 
+### Single Logout
+
+Turn on **Enable service provider-initiated single logout** in the SSO settings to close the SAML session at the identity provider when users log out of CISO Assistant (see [Single Logout](README.md#single-logout) for the general behavior).
+
+It also needs the identity provider's Single Logout Service URL. When you configure the identity provider by **Metadata URL**, this is read automatically from the metadata — the **SLO URL** field is only used when you configure the identity provider manually.
+
+Some identity providers require signed logout requests. In that case, enable **Logout request signed** in the advanced SAML settings and configure the SP private key and certificate — and register that SP certificate with the identity provider so it can verify the signature. Microsoft Entra ID, for example, rejects unsigned SAML logout requests.
+
 {% hint style="warning" %}
 <mark style="color:orange;">Be aware that the user needs to be created on CISO Assistant to be authenticated with SSO.</mark>
 {% endhint %}

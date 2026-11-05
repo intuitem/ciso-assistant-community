@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { complianceResultColorMap, complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultColorMap,
+		complianceResultTailwindColorMap
+	} from '#lib/utils/constants.js';
 
 	interface Props {
 		option: Record<string, any>;

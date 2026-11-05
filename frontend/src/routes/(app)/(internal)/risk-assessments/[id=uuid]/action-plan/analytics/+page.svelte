@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AppliedControlsAnalytics from '$lib/components/DataViz/AppliedControlsAnalytics.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
+	import AppliedControlsAnalytics from '#lib/components/DataViz/AppliedControlsAnalytics.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -15,7 +15,7 @@
 	<div class="flex items-center gap-3">
 		<Anchor
 			href={`/risk-assessments/${data.risk_assessment.id}/action-plan`}
-			class="btn variant-ghost-surface"
+			class="btn preset-outlined-surface-500"
 		>
 			<i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>{m.actionPlan()}
 		</Anchor>

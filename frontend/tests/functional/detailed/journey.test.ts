@@ -4,32 +4,43 @@ import { test, expect } from '../../utils/test-utils.js';
 const PRESET_NAME_PREFIX = 'Test Preset E2E';
 
 test.describe('Journeys', () => {
-	test('create preset, apply it as journey, complete a step, then cleanup', async ({
+	test('author a preset library, apply it as journey, complete a step, then cleanup', async ({
 		logedPage,
 		page
 	}, testInfo) => {
 		const runId = `${testInfo.workerIndex}-${testInfo.retry}-${Date.now()}`;
 		const PRESET_NAME = `${PRESET_NAME_PREFIX} ${runId}`;
 		const FOLDER_NAME = PRESET_NAME;
+		// Library identity must be URN-safe ([a-z0-9_-]).
+		const LIBRARY_REF_ID = `e2e-journey-${runId}`;
 		test.setTimeout(180_000);
 
-		await test.step('navigate to preset editor', async () => {
-			await page.goto('/experimental/preset-editor');
+		let libraryEditorUrl = '';
+
+		await test.step('create a library draft', async () => {
+			await page.goto('/experimental/library-builder');
 			await page.waitForLoadState('networkidle');
-			await expect(page.getByRole('heading', { name: /preset editor/i })).toBeVisible({
-				timeout: 10_000
-			});
+			await page.getByRole('button', { name: /new library draft/i }).click();
+			await page.locator('input[placeholder="My security library"]').fill(PRESET_NAME);
+			await page.locator('input[placeholder="my-org"]').fill('e2e-tests');
+			await page.locator('input[placeholder="my-library"]').fill(LIBRARY_REF_ID);
+			const createBtn = page.getByRole('button', { name: /^create$/i });
+			await expect(createBtn).toBeEnabled();
+			await createBtn.click();
+			await page.waitForURL(/.*library-builder\/[a-f0-9-]+$/, { timeout: 15_000 });
+			await page.waitForLoadState('networkidle');
+			libraryEditorUrl = page.url();
 		});
 
-		await test.step('create blank preset', async () => {
-			await page.getByRole('button', { name: /create blank preset/i }).click();
+		await test.step('open the journey preset editor', async () => {
+			await page.getByRole('link', { name: /create journey/i }).click();
+			await page.waitForURL(/.*library-builder\/[a-f0-9-]+\/preset$/, { timeout: 15_000 });
 			await page.waitForLoadState('networkidle');
-			await expect(page).toHaveURL(/.*preset-editor\/.+/);
 		});
 
 		await test.step('fill preset name', async () => {
 			const nameInput = page.locator('input[placeholder="Preset name"]');
-			await expect(nameInput).toBeVisible();
+			await expect(nameInput).toBeVisible({ timeout: 10_000 });
 			await nameInput.fill(PRESET_NAME);
 			await page.waitForTimeout(300);
 		});
@@ -39,18 +50,21 @@ test.describe('Journeys', () => {
 			await page.waitForTimeout(300);
 		});
 
-		await test.step('save the draft', async () => {
-			const saveBtn = page.locator('button[title="Save draft"]');
+		await test.step('save to the library draft', async () => {
+			const saveBtn = page.locator('button[title="Save to the library draft"]');
 			await expect(saveBtn).toBeEnabled({ timeout: 5_000 });
 			await saveBtn.click();
 			await page.waitForTimeout(500);
 		});
 
-		await test.step('publish the preset', async () => {
-			const publishBtn = page.locator('button[title="Publish the draft"]');
-			await expect(publishBtn).toBeVisible();
-			await publishBtn.click();
+		await test.step('publish the library', async () => {
+			await page.goto(libraryEditorUrl);
 			await page.waitForLoadState('networkidle');
+			await page.getByRole('button', { name: /^publish$/i }).click();
+			// Publishing loads the library; the header badge flips to Published.
+			await expect(page.getByText('Published', { exact: true })).toBeVisible({
+				timeout: 30_000
+			});
 		});
 
 		await test.step('navigate to /presets and verify preset is listed', async () => {
@@ -160,31 +174,19 @@ test.describe('Journeys', () => {
 			}
 		});
 
-		await test.step('go to preset editor and delete all test presets', async () => {
-			await page.goto('/experimental/preset-editor');
+		await test.step('cleanup - delete the library draft', async () => {
+			await page.goto('/experimental/library-builder');
 			await page.waitForLoadState('networkidle');
 
-			let deleteCount = 0;
-			while (deleteCount < 10) {
-				const row = page.locator('tr').filter({ hasText: PRESET_NAME }).first();
-				const exists = await row.isVisible({ timeout: 2_000 }).catch(() => false);
-				if (!exists) break;
-
-				const deleteBtn = row.getByRole('button', { name: /delete/i });
-				await expect(deleteBtn).toBeEnabled({ timeout: 10_000 });
+			const row = page.locator('tr').filter({ hasText: PRESET_NAME }).first();
+			const exists = await row.isVisible({ timeout: 3_000 }).catch(() => false);
+			if (exists) {
 				page.once('dialog', (dialog) => dialog.accept());
-				await deleteBtn.click();
-				await page.goto('/experimental/preset-editor');
-				await page.waitForLoadState('networkidle');
-				deleteCount++;
+				await row.getByRole('button', { name: /delete draft/i }).click();
+				await expect(page.locator('tr').filter({ hasText: PRESET_NAME })).not.toBeVisible({
+					timeout: 5_000
+				});
 			}
-			console.log(`Deleted ${deleteCount} preset(s) named "${PRESET_NAME}"`);
-		});
-
-		await test.step('verify preset is removed from editor', async () => {
-			await expect(page.getByRole('link', { name: PRESET_NAME })).not.toBeVisible({
-				timeout: 5_000
-			});
 		});
 	});
 });

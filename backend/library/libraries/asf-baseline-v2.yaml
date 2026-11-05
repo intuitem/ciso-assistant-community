@@ -5,8 +5,8 @@ name: Agile Security Framework - Baseline
 description: Quick overview of essential security domains - holistic baseline for
   custom framework
 copyright: "\xA9 intuitem"
-version: 1
-publication_date: 2024-05-26
+version: 2
+publication_date: 2026-09-26
 provider: intuitem
 packager: intuitem
 objects:
@@ -126,7 +126,7 @@ objects:
       description: Risk analysis, assigned personnel, management involvement, regulatory
         framework identification, independent audit
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-01
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-01
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:02
       assessable: true
       depth: 1
@@ -135,7 +135,7 @@ objects:
       description: Hardware and software components listed, regular controls and audits,
         lifecycle management, categorization, visibility, and continuous improvement
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-10
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-10
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:03
       assessable: true
       depth: 1
@@ -145,7 +145,7 @@ objects:
         secrets management, AD hardening, IAM aligned with onboarding and offboarding
         processes
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-04
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-04
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:04
       assessable: true
       depth: 1
@@ -154,7 +154,7 @@ objects:
       description: Encryption (in transit and at rest), audit trails, privacy by design
         (data minimization at least), GDPR compliance
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-12
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-12
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:05
       assessable: true
       depth: 1
@@ -163,8 +163,8 @@ objects:
       description: Antivirus/Antimalware, EDR, MDM, Application Control, quarantaine
         management, email and browsing security
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-02
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-18
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-02
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-18
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:06
       assessable: true
       depth: 1
@@ -173,8 +173,8 @@ objects:
       description: Network segmentation, Firewall, IDS, Remote Access Control (VPN
         and/or ZTNA), WAF, NAC, and Wireless Security
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-11
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-23
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-11
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-23
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:07
       assessable: true
       depth: 1
@@ -183,8 +183,8 @@ objects:
       description: Identification on all workloads and assets, monitoring and communication,
         triage and prioritization processes, continuous patching, periodic checkpoints
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-21
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-22
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-21
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-22
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:08
       assessable: true
       depth: 1
@@ -193,8 +193,8 @@ objects:
       description: General cybersecurity awareness, specialized training, campaigns
         to check for efficiency
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-17
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-24
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-17
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-24
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:09
       assessable: true
       depth: 1
@@ -203,8 +203,8 @@ objects:
       description: Vendor management, exit strategy, privileged communication channels,
         decoupling, incident management, contract management
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-09
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-25
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-09
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-25
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:10
       assessable: true
       depth: 1
@@ -213,8 +213,8 @@ objects:
       description: Facility access control, surveillance, security personnel, visitor
         management, locks and safes, emergency response, secure disposal
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-03
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-16
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-03
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-16
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:11
       assessable: true
       depth: 1
@@ -224,7 +224,7 @@ objects:
         same principles of IAM, network, and data protection, threat detection, and
         response
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-20
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-20
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:12
       assessable: true
       depth: 1
@@ -234,9 +234,9 @@ objects:
         use standard libraries, software factory security through gates (SAST, SCA,
         secret leaks, DAST)
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-06
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-07
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-08
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-06
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-07
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-08
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:13
       assessable: true
       depth: 1
@@ -245,7 +245,7 @@ objects:
       description: Aggregation of events for inspection and correlation, logs protection,
         tooling and processes for timely incident response involving relevant stakeholders
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-13
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-13
     - urn: urn:intuitem:risk:req_node:asf-baseline-v2:14
       assessable: true
       depth: 1
@@ -255,4 +255,4 @@ objects:
         playbooks for disaster recovery documented and tested, cyber resiliency strategy
         documented and known
       reference_controls:
-      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-14
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-14

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import sanitizeHtml from 'sanitize-html';
-	import * as m from '$paraglide/messages';
+	import { sanitizeConfig } from '#lib/utils/markdown.js';
+	import { mountMermaidBlocks, wrapMermaidBlocks } from '#lib/utils/mermaid.js';
+	import * as m from '#paraglide/messages.js';
 
 	interface Props {
 		content: string | null | undefined;
@@ -9,52 +11,6 @@
 	}
 
 	let { content, class: className = '' }: Props = $props();
-
-	const sanitizeConfig: sanitizeHtml.IOptions = {
-		allowedTags: [
-			'p',
-			'blockquote',
-			'h1',
-			'h2',
-			'h3',
-			'h4',
-			'h5',
-			'h6',
-			'ul',
-			'ol',
-			'li',
-			'strong',
-			'em',
-			'a',
-			'code',
-			'pre',
-			'table',
-			'thead',
-			'tbody',
-			'tr',
-			'th',
-			'td',
-			'img',
-			'hr',
-			'br',
-			'input',
-			'abbr',
-			'sup'
-		],
-		allowedAttributes: {
-			a: ['href', 'name', 'target', 'rel'],
-			img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
-			code: ['class'],
-			input: ['type', 'checked', 'disabled'],
-			li: ['class'],
-			ul: ['class'],
-			abbr: ['title']
-		},
-		allowedSchemes: ['http', 'https'],
-		transformTags: {
-			a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer', target: '_blank' }, true)
-		}
-	};
 
 	// Matches only our internal image-serving proxy URLs:
 	// /frameworks/{uuid}/builder?_action=serve-image&...
@@ -66,7 +22,13 @@
 	function processContent(content: string | null | undefined): string {
 		if (!content || content.trim() === '') return '';
 
-		let html = marked(content) as string;
+		// Resolve canonical document links [label](document:<uuid>) to the reader.
+		const src = content.replace(
+			/\]\(document:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\)/g,
+			'](/documents/$1/read)'
+		);
+
+		let html = marked(src) as string;
 
 		// Temporarily give internal image URLs an https scheme so they survive
 		// sanitize-html's allowedSchemes check, then strip the fake origin after.
@@ -81,6 +43,8 @@
 				: `<input${attrs} aria-label="${/\bchecked\b/.test(attrs) ? m.taskItemChecked() : m.taskItemUnchecked()}" />`
 		);
 
+		html = wrapMermaidBlocks(html);
+
 		// Clean up excessive spacing
 		html = html
 			.replace(/>\s+</g, '><') // Remove whitespace between tags
@@ -94,10 +58,17 @@
 	}
 
 	let renderedContent = $derived(processContent(content));
+
+	let container: HTMLDivElement | undefined = $state();
+
+	$effect(() => {
+		if (container && renderedContent) return mountMermaidBlocks(container);
+	});
 </script>
 
 {#if renderedContent}
 	<div
+		bind:this={container}
 		class="prose prose-sm dark:prose-invert max-w-none wrap-break-word whitespace-pre-line {className}"
 	>
 		{@html renderedContent}
@@ -105,3 +76,19 @@
 {:else}
 	<span class="text-surface-600-400 italic">--</span>
 {/if}
+
+<style>
+	:global(.mermaid-diagram) {
+		display: flex;
+		justify-content: center;
+		margin: 1em 0;
+		overflow-x: auto;
+		white-space: normal;
+	}
+
+	:global(.mermaid-diagram pre) {
+		width: 100%;
+		white-space: pre;
+		font-family: var(--font-mono, monospace);
+	}
+</style>

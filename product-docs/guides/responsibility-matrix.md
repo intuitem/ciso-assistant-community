@@ -83,7 +83,7 @@ In the drawer you can:
   - **Assets** — what the activity touches.
   - **Applied controls** — controls that realise it.
   - **Tasks** — task definitions that recur from it.
-  - **Risk assessments**, **Audits**, **Follow-ups** — assessments it ties into.
+  - **Risk assessments**, **Audits**, **Findings binders** — assessments it ties into.
   - **Business Impact Analyses** — BIAs that depend on it.
 
 ## Reorder activities and actors

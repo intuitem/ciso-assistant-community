@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up Helm
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
         with:
@@ -37,6 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Check Helm Dependencies lock
         run: |
           helm repo add qdrant https://qdrant.github.io/qdrant-helm
@@ -46,6 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Check values schema json
         uses: losisin/helm-values-schema-json-action@b0dbd950f1b546a97789ae081ba1ec1b0557f927 # v1.8.0
         with:
@@ -57,6 +63,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Generate helm-docs
         uses: losisin/helm-docs-github-action@2ccf3e77eb70dc80d62f8cc26f15d0a96b75fef4 # v1.8.0
         with:

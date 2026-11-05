@@ -3,8 +3,9 @@ import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
 export const load = loadFlash(async ({ locals }) => {
-	if (locals.user.is_third_party) {
+	const user = await locals.getUser();
+	if (user?.is_third_party) {
 		redirect(302, `/auditee-dashboard`);
 	}
-	return { user: locals.user };
+	return { user };
 }) satisfies LayoutServerLoad;

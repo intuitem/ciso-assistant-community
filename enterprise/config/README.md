@@ -48,7 +48,8 @@ Once complete, a `docker-compose.yml` file is automatically generated.
 The initialization script handles everything (pull, start, and admin account creation):
 
 ```bash
-./docker-compose.sh
+./docker-compose.sh     # Linux/MacOS
+./docker-compose.ps1    # Windows
 ```
 
 > This script only works on a fresh install (no existing `db/` folder). For all subsequent operations, use the manual commands below.

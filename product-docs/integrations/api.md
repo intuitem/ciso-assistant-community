@@ -1,4 +1,4 @@
-# API reference
+# API overview
 
 CISO Assistant exposes a REST API that mirrors the platform's object model. The same API powers the web frontend, the CLI, the MCP server, and every external integration. Anything you can do in the UI, you can do over HTTP.
 
@@ -25,17 +25,18 @@ Notes:
 
 - Always include the trailing slash on endpoints (`/api/assets/`, not `/api/assets`).
 - Your endpoint URL is your instance URL with `/api/` appended (assuming default proxy settings).
-- Pro SaaS users need to open a support request to expose the API on their instance — it is disabled by default.
+- API access is IP-restricted: the calling machine must be on the [Allowed IPs whitelist](../configuration/settings/infra-config-allowed-ip.md) (**Settings → Infrastructure**). On SaaS the allowlist is self-service and API access is closed until you add your caller IPs; on-premises, enable the allowlist with `ENABLE_INFRA_CONFIG_MANAGEMENT=True` or handle IP filtering in your own infrastructure.
 
 ## Browsing the schema
 
 Two ways to read the API surface:
 
-- **Live online docs** — [ca-api-doc.pages.dev](https://ca-api-doc.pages.dev).
-- **On your instance, in debug mode** — set `DJANGO_DEBUG=True`, start the backend, then browse:
+- **[API reference](../api-reference/README.md)** — every endpoint, generated from the latest release, with the conventions for pagination, filters and sparse fields.
+- **On your instance, in debug mode** — matches the exact version you run. Set `DJANGO_DEBUG=True`, start the backend, then browse:
   - Swagger UI: `http://127.0.0.1:8000/api/schema/swagger/`
   - ReDoc: `http://127.0.0.1:8000/api/schema/redoc/`
 
 ## Related
 
+- [Allowed IP whitelist](../configuration/settings/infra-config-allowed-ip.md) — open API access to your callers
 - [Philosophy → Open by default, extensible by design](../introduction/philosophy.md)

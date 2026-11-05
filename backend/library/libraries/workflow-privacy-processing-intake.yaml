@@ -1,0 +1,103 @@
+urn: urn:intuitem:risk:library:workflow-privacy-processing-intake
+locale: en
+ref_id: workflow-privacy-processing-intake
+name: Processing intake — record a new processing and its data
+description: >-
+  A team posts a new processing to this workflow's URL and it lands in the
+  privacy register: the processing, its purpose, and one personal data entry
+  per category submitted. The record arrives as a draft — reviewing and
+  approving it stays with the DPO.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-29
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+    - urn: urn:intuitem:risk:library:workflow-privacy-processing-intake:workflow:processing-intake
+      schema_version: 1
+      ref_id: processing-intake
+      name: Processing intake — record a new processing and its data
+      description: >-
+        Expects {"name": "Payroll", "description": "...", "purpose": "Pay the
+        staff", "legal_basis": "privacy_contract", "personal_data": [{"name":
+        "Sick leave", "category": "Health data"}]}. Categories are matched by
+        name against the personal-data categories configured on this instance.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: dpo@example.com
+        nodes:
+          - ref: hook
+            type: trigger
+            label: A team submits a processing
+            trigger_config:
+              type: webhook
+          - ref: record
+            type: action
+            label: Record the processing
+            action_config:
+              type: create_object
+              model: processing
+              fields:
+                name: '{{payload.name}}'
+                description: '{{payload.description}}'
+          - ref: add_purpose
+            type: action
+            label: Record its purpose
+            action_config:
+              type: create_object
+              model: purpose
+              fields:
+                name: '{{payload.purpose}}'
+                processing: '{{nodes.record.created_object_id}}'
+                legal_basis: '{{payload.legal_basis}}'
+          - ref: per_category
+            type: loop
+            label: Each data category
+            loop_config:
+              collection: '{{payload.personal_data}}'
+              collect: '{{item.name}}'
+              on_item_error: continue
+          - ref: add_data
+            type: action
+            label: Record the data
+            action_config:
+              type: create_object
+              model: personal_data
+              fields:
+                name: '{{item.name}}'
+                processing: '{{nodes.record.created_object_id}}'
+                category: '{{item.category}}'
+          - ref: tell_dpo
+            type: action
+            label: Tell the DPO
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'New processing to review: {{payload.name}}'
+              body: >-
+                {{payload.name}} was recorded on {{today}} with
+                {{nodes.per_category.count}} personal-data item(s):
+                {{nodes.per_category.results}}. It is a draft until you approve
+                it.
+          - ref: done
+            type: end
+        edges:
+          - source: hook
+            target: record
+          - source: record
+            target: add_purpose
+          - source: add_purpose
+            target: per_category
+          - source: per_category
+            target: add_data
+            source_port: each
+          - source: add_data
+            target: per_category
+          - source: per_category
+            target: tell_dpo
+            source_port: done
+          - source: tell_dpo
+            target: done

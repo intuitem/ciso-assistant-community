@@ -32,7 +32,7 @@ A project sits in a domain and can stack as a portfolio → programme → projec
 
 Project objects don't replace [Perimeters](perimeters.md) — they sit alongside. Use a perimeter to define the _scope of assessment_; use a project to plan the _work needed to bring that scope into compliance_ or through an accreditation.
 
-A single project typically references many perimeters, audits, applied controls, and findings assessments — it's the cross-cutting view the security organisation works against day-to-day.
+A single project typically references many perimeters, audits, applied controls, and findings binders — it's the cross-cutting view the security organisation works against day-to-day.
 
 ## Budget — high-level on the project, details on the controls
 
@@ -40,7 +40,7 @@ Every project carries a **Budget** and an **Actual cost** field (with a currency
 
 This is **deliberately the high-level view only**. The project's budget number is not computed from anywhere — it's the planned envelope a sponsor signed off on, and the actual cost is whatever spend you record against it. Both are decimal money values, not roll-ups.
 
-The **detailed financial picture** — line items, build vs run split, amortisation, who's spending — lives where the work actually happens: on the [applied controls](applied-controls.md#financial-tracking) referenced by the audits, risk studies, findings assessments, and other objects sitting in the project's [generic collection](../introduction/vocabulary.md). Each applied control carries its own structured cost; the [action plan](../features/action-plans.md) of every assessment in the collection rolls those costs up into a budget overview.
+The **detailed financial picture** — line items, build vs run split, amortisation, who's spending — lives where the work actually happens: on the [applied controls](applied-controls.md#financial-tracking) referenced by the audits, risk studies, findings binders, and other objects sitting in the project's [generic collection](../introduction/vocabulary.md). Each applied control carries its own structured cost; the [action plan](../features/action-plans.md) of every assessment in the collection rolls those costs up into a budget overview.
 
 The link between the two layers is **indirect**: applied controls aren't attached to a project directly. They're attached to the work objects inside the project's collection (a control satisfies an audit's requirement, mitigates a risk scenario, remediates a finding), and through that chain they become part of the project's financial picture.
 

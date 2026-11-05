@@ -1,18 +1,24 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import ApplyPresetModal from '$lib/components/Modals/ApplyPresetModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { page } from '$app/stores';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import ApplyPresetModal from '#lib/components/Modals/ApplyPresetModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { canPerformAction } from '#lib/utils/access-control.js';
+	import { page } from '$app/state';
 
 	let { data }: { data: PageData } = $props();
 
 	const modalStore = getModalStore();
 
 	const canApplyPreset = $derived(
-		Object.hasOwn($page.data.user?.permissions ?? {}, 'add_loadedlibrary')
+		canPerformAction({
+			user: page.data.user,
+			action: 'add',
+			model: 'loadedlibrary',
+			domain: page.data.user?.root_folder_id
+		})
 	);
 
 	function startJourney() {

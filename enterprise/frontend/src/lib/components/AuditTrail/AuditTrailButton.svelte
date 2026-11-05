@@ -21,25 +21,27 @@
 </script>
 
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import type { urlModel } from '$lib/utils/types';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+	import type { urlModel } from '#lib/utils/types.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import AuditTrailModal from '$lib/components/AuditTrail/AuditTrailModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import AuditTrailModal from '#lib/components/AuditTrail/AuditTrailModal.svelte';
+	import { isAccessAllowed } from '#lib/utils/access-control.js';
 	import { onMount } from 'svelte';
 
 	interface Props {
 		model?: string;
 		objectId?: string;
+		folderId?: string;
 	}
 
-	let { model = '', objectId = '' }: Props = $props();
+	let { model = '', objectId = '', folderId = '' }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -50,11 +52,19 @@
 		auditedModels = await loadAuditedModels(fetch);
 	});
 
-	const hasPermission = $derived(!!page.data?.user?.permissions?.view_object_audittrail);
+	// Fail-closed: without a folderId the check is against no folder and the button stays
+	// hidden. The audit trail endpoint enforces the same folder-scoped check server-side.
+	const canViewAuditTrail = $derived(
+		isAccessAllowed(page.data?.user, 'view_object_audittrail', folderId)
+	);
 	const featureEnabled = $derived(page.data?.featureflags?.object_audit_trail !== false);
 
 	const enabled = $derived(
-		featureEnabled && hasPermission && !!contentType && !!objectId && auditedModels.has(contentType)
+		featureEnabled &&
+			canViewAuditTrail &&
+			!!contentType &&
+			!!objectId &&
+			auditedModels.has(contentType)
 	);
 
 	function openAuditTrail() {

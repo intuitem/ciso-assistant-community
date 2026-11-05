@@ -91,9 +91,9 @@ def get_config():
     config["license_expiration"] = questionary.text(
         "License expiration date (YYYY-MM-DD): ", default="2030-01-01" ).ask()
 
-    # Debug mode for local development
+    # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
-        "Enable debug mode?", default=True if config["db"] == "sqlite" else False
+        "Enable debug mode?", default=False
     ).ask()
 
     return config

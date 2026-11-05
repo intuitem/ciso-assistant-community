@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DataSourceLabel" xml:space="preserve">
+    <value>CISO Assistant</value>
+  </data>
+  <data name="ButtonTitle" xml:space="preserve">
+    <value>CISO Assistant</value>
+  </data>
+  <data name="ButtonHelp" xml:space="preserve">
+    <value>Connect to your CISO Assistant GRC data</value>
+  </data>
+  <data name="KeyAuthLabel" xml:space="preserve">
+    <value>Personal Access Token</value>
+  </data>
+  <data name="KeyLabel" xml:space="preserve">
+    <value>Personal Access Token (create one from your CISO Assistant profile page)</value>
+  </data>
+  <data name="BaseUrlCaption" xml:space="preserve">
+    <value>CISO Assistant URL</value>
+  </data>
+  <data name="BaseUrlDescription" xml:space="preserve">
+    <value>The address you use to open CISO Assistant in your browser, e.g. https://ciso-assistant.example.com</value>
+  </data>
+  <data name="ContentsLongDescription" xml:space="preserve">
+    <value>Returns the CISO Assistant reporting tables: facts, dimensions and bridge tables, scoped to what your account is allowed to see.</value>
+  </data>
+  <data name="ErrorInsecureUrl" xml:space="preserve">
+    <value>For security, plain http:// URLs are only allowed for local or private development hosts. Enter the https:// address of your CISO Assistant instance.</value>
+  </data>
+  <data name="ErrorAuth" xml:space="preserve">
+    <value>CISO Assistant rejected your Personal Access Token. It may be expired or revoked: create a new token from your profile page, then update the credentials in Power BI (Data source settings).</value>
+  </data>
+  <data name="ErrorNotFound" xml:space="preserve">
+    <value>The CISO Assistant API endpoint was not found. Check the CISO Assistant URL, and that the server version supports the Power BI connector.</value>
+  </data>
+  <data name="ErrorRateLimit" xml:space="preserve">
+    <value>The CISO Assistant API rate limit was reached. Wait a moment and refresh again.</value>
+  </data>
+  <data name="ErrorServer" xml:space="preserve">
+    <value>CISO Assistant returned a server error (HTTP #{0}). Try again later or contact your administrator.</value>
+  </data>
+  <data name="ErrorGeneric" xml:space="preserve">
+    <value>CISO Assistant returned an unexpected error (HTTP #{0}).</value>
+  </data>
+</root>

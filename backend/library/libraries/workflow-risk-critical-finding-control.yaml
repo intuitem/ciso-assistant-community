@@ -1,0 +1,77 @@
+urn: urn:intuitem:risk:library:workflow-risk-critical-finding-control
+locale: en
+ref_id: workflow-risk-critical-finding-control
+name: Critical finding — open and link a remediation control
+description: 'A high-severity finding opens an applied control, links it to the finding, and notifies
+  the responders. Triage stays human: the finding''s own status is left alone.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-risk-critical-finding-control:workflow:critical-finding-control
+    schema_version: 1
+    ref_id: critical-finding-control
+    name: Critical finding — open and link a remediation control
+    description: 'A high-severity finding opens an applied control, links it to the finding, and notifies
+      the responders. Triage stays human: the finding''s own status is left alone.'
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: security@example.com
+      nodes:
+      - ref: on_finding
+        type: trigger
+        label: Critical finding raised
+        trigger_config:
+          type: internal_event
+          event_key: finding.created
+          filters:
+            operator: and
+            conditions:
+            - field: severity
+              op: gte
+              value: 3
+      - ref: create_control
+        type: action
+        label: Open a remediation control
+        action_config:
+          type: create_object
+          model: applied_control
+          fields:
+            name: 'Remediation: {{payload.object_repr}}'
+            description: Opened automatically on {{today}} from a critical finding.
+      - ref: link_control
+        type: action
+        label: Link it to the finding
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{payload.object_id}}'
+          m2m:
+            applied_controls:
+              op: add
+              values: '{{nodes.create_control.created_object_id}}'
+      - ref: notify
+        type: action
+        label: Tell the responders
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Critical finding: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was raised on {{today}}. {{nodes.create_control.created_object_name}}
+            was opened and linked to it.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_finding
+        target: create_control
+      - source: create_control
+        target: link_control
+      - source: link_control
+        target: notify
+      - source: notify
+        target: done

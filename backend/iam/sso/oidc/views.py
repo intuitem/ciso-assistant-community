@@ -26,6 +26,7 @@ from urllib.parse import urlparse
 
 from iam.sso.errors import AuthError
 from iam.sso.redirects import get_sso_authenticate_url
+from iam.sso.slo import stash_oidc_slo_state
 from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
@@ -43,6 +44,19 @@ _OIDC_NONCE_SESSION_MAX = 10
 
 def _generate_oidc_token(length: int = _OIDC_TOKEN_LENGTH) -> str:
     return "".join(secrets.choice(_OIDC_TOKEN_ALPHABET) for _ in range(length))
+
+
+def _get_oidc_scopes(provider, request: HttpRequest) -> list[str]:
+    """Return allauth's scopes plus optional scopes from the SSO config."""
+    scopes = provider.get_scope_from_request(request)
+    configured_scopes = provider.app.settings.get("additional_scopes") or ""
+    additional_scopes = [
+        scope.strip() for scope in configured_scopes.split(",") if scope.strip()
+    ]
+    for additional_scope in additional_scopes:
+        if additional_scope and additional_scope not in scopes:
+            scopes.append(additional_scope)
+    return scopes
 
 
 class NonceValidatingOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
@@ -89,6 +103,7 @@ class NonceValidatingOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
                     provider=self.provider_id,
                 )
             data["id_token"] = decoded
+            stash_oidc_slo_state(request, id_token_str)
         return self.get_provider().sociallogin_from_response(request, data)
 
 
@@ -120,7 +135,7 @@ def oidc_redirect(
     code_verifier = pkce_params.pop("code_verifier", None)
     auth_params.update(pkce_params)
 
-    scope = provider.get_scope_from_request(request)
+    scope = _get_oidc_scopes(provider, request)
 
     state_id = _generate_oidc_token()
     nonce = _generate_oidc_token()

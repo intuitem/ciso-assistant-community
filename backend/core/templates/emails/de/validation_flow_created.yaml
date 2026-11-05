@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Neuer Freigabeantrag erfordert Ihre Genehmigung"
+body: |
+  Hallo,
+
+  Ihnen wurde ein neuer Freigabeantrag zur Genehmigung zugewiesen:
+
+  - Referenz: ${validation_ref_id}
+  - Antragsteller: ${requester_name}
+  - Freigabefrist: ${validation_deadline}
+  - Bereich: ${folder_name}
+
+  Bitte prüfen und bearbeiten Sie diesen Freigabeantrag: [Freigabe öffnen](${validation_url})
+
+  Vielen Dank.

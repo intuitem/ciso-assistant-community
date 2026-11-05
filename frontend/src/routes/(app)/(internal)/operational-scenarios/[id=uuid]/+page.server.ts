@@ -1,11 +1,11 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
-import { getModelInfo } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
-import { loadDetail } from '$lib/utils/load';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import { loadDetail } from '#lib/utils/load.js';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'operational-scenarios';
@@ -40,6 +40,8 @@ export const load: PageServerLoad = async (event) => {
 	} else {
 		console.error(`Failed to fetch data for likelihood: ${likelihoodChoicesResponse.statusText}`);
 	}
+
+	(detail.relatedModels['operating-modes'] as any).quotationMethod = detail.data.quotation_method;
 
 	return { ...detail, table };
 };

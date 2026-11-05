@@ -6,28 +6,28 @@
 	import '../app.css';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 
 	onMount(() => {
 		document.body.dataset.hydrated = 'true';
 	});
 
-	import Toast from '$lib/components/Toast/Toast.svelte';
-	import Dialog from '$lib/components/Modals/Modal.svelte';
-	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import ProblematicScenariosModal from '$lib/components/Modals/ProblematicScenariosModal.svelte';
-	import { initializeModalStore, type ModalComponent } from '$lib/components/Modals/stores';
+	import Toast from '#lib/components/Toast/Toast.svelte';
+	import Dialog from '#lib/components/Modals/Modal.svelte';
+	import DisplayJSONModal from '#lib/components/Modals/DisplayJSONModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import ProblematicScenariosModal from '#lib/components/Modals/ProblematicScenariosModal.svelte';
+	import { initializeModalStore, type ModalComponent } from '#lib/components/Modals/stores.js';
 	import {
 		initializeToastStore,
 		getToastStore,
 		type ToastSettings
-	} from '$lib/components/Toast/stores';
+	} from '#lib/components/Toast/stores.js';
 
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
-	import { clientSideToast } from '$lib/utils/stores';
+	import { page } from '$app/state';
+	import { clientSideToast } from '#lib/utils/stores.js';
 
 	initializeModalStore();
 	initializeToastStore();
@@ -36,10 +36,8 @@
 	const toastStore = getToastStore();
 
 	const toast = (message: string, options: Record<string, string>) => {
-		const t: ToastSettings = {
-			message: message,
-			...options
-		};
+		const t: ToastSettings = { message, ...options };
+
 		toastStore.trigger(t);
 	};
 
@@ -103,9 +101,10 @@
 	};
 
 	run(() => {
-		if (browser && $page.url.searchParams.has('refresh')) {
-			$page.url.searchParams.delete('refresh');
-			window.location.href = $page.url.href;
+		if (browser && page.url.searchParams.has('refresh')) {
+			const url = new URL(page.url.href);
+			url.searchParams.delete('refresh');
+			window.location.href = url.href;
 		}
 	});
 </script>

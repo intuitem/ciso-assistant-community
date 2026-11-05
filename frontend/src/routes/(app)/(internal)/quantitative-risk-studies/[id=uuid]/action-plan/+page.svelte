@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '#lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 
 	let { data } = $props();
 
@@ -20,7 +20,9 @@
 		annual_cost: 'cost',
 		control_impact: 'controlImpact',
 		eta: 'eta',
-		quantitative_risk_scenarios: 'scenarios'
+		quantitative_risk_scenarios: 'scenarios',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 
 	const appliedControls: TableSource = {
@@ -78,6 +80,8 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/quantitative-risk-studies/{page.params.id}/action-plan"
+			columnSelector={true}
+			columnStateKey="applied-controls:quantitative-risk-action-plan"
 			fields={[
 				'name',
 				'status',

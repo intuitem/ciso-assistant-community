@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from './$types';
-import type { GlobalSettings } from '$lib/utils/types';
+import type { GlobalSettings } from '#lib/utils/types.js';
 
 async function fetchClientSettings(
 	fetch: Parameters<LayoutServerLoad>[0]['fetch']
@@ -54,24 +54,21 @@ function sanitizeClientSettings(
 	};
 }
 
-export const load: LayoutServerLoad = async ({ fetch, locals, url }) => {
-	const isSSOAuthenticate = url.pathname.startsWith('/sso/authenticate');
-	const clientSettings =
-		locals.globalSettings ??
-		(isSSOAuthenticate
-			? {
-					name: 'clientSettings',
-					settings: {
-						name: '',
-						logo: '',
-						favicon: '',
-						show_images_unauthenticated: false
-					}
+export const load: LayoutServerLoad = async ({ fetch, locals, url, untrack }) => {
+	const isSSOAuthenticate = untrack(() => url.pathname.startsWith('/sso/authenticate'));
+	const clientSettings = isSSOAuthenticate
+		? {
+				name: 'clientSettings',
+				settings: {
+					name: '',
+					logo: '',
+					favicon: '',
+					show_images_unauthenticated: false
 				}
-			: await fetchClientSettings(fetch));
+			}
+		: await fetchClientSettings(fetch);
 	return {
 		featureFlags: locals.featureFlags,
-		generalSettings: locals.generalSettings,
-		clientSettings: sanitizeClientSettings(clientSettings, Boolean(locals.user))
+		clientSettings: sanitizeClientSettings(clientSettings, Boolean(await locals.getUser()))
 	};
 };

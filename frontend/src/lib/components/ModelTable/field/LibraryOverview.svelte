@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		cell: Array<any>;
@@ -8,11 +8,7 @@
 	}
 
 	type ReferentialObject =
-		| 'reference_controls'
-		| 'threats'
-		| 'framework'
-		| 'risk_matrix'
-		| 'requirement_mapping_set';
+		'reference_controls' | 'threats' | 'framework' | 'risk_matrix' | 'requirement_mapping_set';
 
 	let { cell, ...rest }: Props = $props();
 	let display = $derived(Object.entries(cell));

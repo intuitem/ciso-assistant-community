@@ -20,7 +20,6 @@ def scoring_setup(db):
     fw = Framework.objects.create(
         name="Scoring Test Framework",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -30,7 +29,6 @@ def scoring_setup(db):
         ref_id="SCORE-REQ",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q1 = Question.objects.create(
         requirement_node=rn,
@@ -41,7 +39,6 @@ def scoring_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     choice_good = QuestionChoice.objects.create(
         question=q1,
@@ -52,7 +49,6 @@ def scoring_setup(db):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
     )
     choice_bad = QuestionChoice.objects.create(
         question=q1,
@@ -63,7 +59,6 @@ def scoring_setup(db):
         compute_result="false",
         order=1,
         folder=folder,
-        is_published=True,
     )
 
     from core.models import Perimeter
@@ -74,7 +69,6 @@ def scoring_setup(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -142,7 +136,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Empty Q FW",
             folder=folder,
-            is_published=True,
         )
         rn = RequirementNode.objects.create(
             framework=fw,
@@ -150,7 +143,6 @@ class TestScoring:
             ref_id="EMP-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
 
         from core.models import Perimeter
@@ -161,7 +153,6 @@ class TestScoring:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
         )
         ra = RequirementAssessment.objects.create(
             compliance_assessment=ca,
@@ -205,7 +196,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Weight FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -215,7 +205,6 @@ class TestScoring:
             ref_id="W-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
 
         # Question with weight=3
@@ -227,7 +216,6 @@ class TestScoring:
             order=0,
             weight=3,
             folder=folder,
-            is_published=True,
         )
         choice_yes = QuestionChoice.objects.create(
             question=q1,
@@ -238,7 +226,6 @@ class TestScoring:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -249,7 +236,6 @@ class TestScoring:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         from core.models import Perimeter
@@ -260,7 +246,6 @@ class TestScoring:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -291,7 +276,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Depends FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -301,7 +285,6 @@ class TestScoring:
             ref_id="DEP-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
 
         # Q1: single_choice
@@ -312,7 +295,6 @@ class TestScoring:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -323,7 +305,6 @@ class TestScoring:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         choice_no = QuestionChoice.objects.create(
             question=q1,
@@ -334,7 +315,6 @@ class TestScoring:
             compute_result="true",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         # Q2: depends on Q1 answer being "DC1A"
@@ -350,7 +330,6 @@ class TestScoring:
             },
             order=1,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -361,7 +340,6 @@ class TestScoring:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -372,7 +350,6 @@ class TestScoring:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         from core.models import Perimeter
@@ -383,7 +360,6 @@ class TestScoring:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -414,7 +390,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Multi FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -424,7 +399,6 @@ class TestScoring:
             ref_id="MULTI-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q = Question.objects.create(
             requirement_node=rn,
@@ -434,7 +408,6 @@ class TestScoring:
             order=0,
             weight=1,
             folder=folder,
-            is_published=True,
         )
         c1 = QuestionChoice.objects.create(
             question=q,
@@ -445,7 +418,6 @@ class TestScoring:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         c2 = QuestionChoice.objects.create(
             question=q,
@@ -456,7 +428,6 @@ class TestScoring:
             compute_result="true",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         from core.models import Perimeter
@@ -467,7 +438,6 @@ class TestScoring:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -514,7 +484,6 @@ class TestGlobalScoreQueryPerformance:
                 ref_id=f"PERF-{i}",
                 assessable=True,
                 folder=folder,
-                is_published=True,
             )
             ra = RequirementAssessment.objects.create(
                 compliance_assessment=ca,
@@ -563,7 +532,6 @@ class TestGlobalScoreQueryPerformance:
                 ref_id=f"PERF2-{i}",
                 assessable=True,
                 folder=folder,
-                is_published=True,
             )
             RequirementAssessment.objects.create(
                 compliance_assessment=ca,

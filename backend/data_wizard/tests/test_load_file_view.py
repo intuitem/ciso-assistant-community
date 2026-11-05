@@ -16,24 +16,29 @@ Pattern mirrors tprm/test/test_views.py:
   - RBAC-layer classes: real knox token + startup(), no RBAC patch
 """
 
+import io
+
+import openpyxl
 import pytest
 
 from core.models import (
     AppliedControl,
     Asset,
+    Evidence,
     Incident,
     Perimeter,
     Policy,
     ReferenceControl,
     SecurityException,
+    TaskTemplate,
     Threat,
     Vulnerability,
 )
+from data_wizard.tests.conftest import make_excel_file
 from ebios_rm.models import ElementaryAction
 from iam.models import User
 from privacy.models import Processing
-
-from data_wizard.tests.conftest import make_excel_file
+from tprm.models import EntityAssessment
 
 URL = "/api/data-wizard/load-file/"
 
@@ -520,6 +525,348 @@ class TestProcessingEndpoint:
         assert resp.json()["results"]["created"] == 1
 
 
+@pytest.mark.django_db
+class TestProcessingMultiSheetEndpoint:
+    @pytest.fixture
+    def pd_category(self, root_folder):
+        from core.models import Terminology
+
+        return Terminology.objects.filter(
+            name="privacy_health_data",
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+        ).first() or Terminology.objects.create(
+            name="privacy_health_data",
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            is_visible=True,
+            folder=root_folder,
+        )
+
+    def _workbook(self):
+        return make_excel_file(
+            {
+                "Processing": [
+                    {
+                        "name": "HR Payroll",
+                        "ref_id": "PRC-100",
+                        "status": "privacy_draft",
+                        "information_channel": "Intranet",
+                        "usage_channel": "HR portal",
+                    }
+                ],
+                "Purposes": [
+                    {"name": "Salary payment", "legal_basis": "privacy_contract"}
+                ],
+                "Personal data": [
+                    {
+                        "name": "Health record",
+                        "category": "privacy_health_data",
+                        "deletion_policy": "privacy_anonymization",
+                        "retention": "5 years",
+                        "is_sensitive": True,
+                    }
+                ],
+                "Data subjects": [
+                    {"name": "Employees", "category": "privacy_employee"}
+                ],
+                "Data recipients": [
+                    {"name": "Payroll provider", "category": "privacy_data_processor"}
+                ],
+                "Contractors": [
+                    {
+                        "name": "ACME Payroll",
+                        "relationship_type": "privacy_data_processor",
+                        "country": "FR",
+                    }
+                ],
+                "Transfers": [
+                    {
+                        "name": "US transfer",
+                        "country": "US",
+                        "transfer_mechanism": "privacy_standard_contractual_clauses",
+                    }
+                ],
+            }
+        )
+
+    def test_multi_sheet_create(
+        self, api_client, domain_folder, all_accessible, pd_category
+    ):
+        resp = _post(
+            api_client,
+            self._workbook().read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["processing"]["created"] == 1
+        for key in (
+            "purposes",
+            "personal_data",
+            "data_subjects",
+            "data_recipients",
+            "contractors",
+            "transfers",
+        ):
+            assert results[key]["created"] == 1, key
+
+        processing = Processing.objects.get(ref_id="PRC-100", folder=domain_folder)
+        assert processing.information_channel == "Intranet"
+        assert processing.purposes.get().legal_basis == "privacy_contract"
+        personal_data = processing.personal_data.get()
+        assert personal_data.category == pd_category
+        assert personal_data.is_sensitive is True
+        assert personal_data.folder == domain_folder
+        assert processing.has_sensitive_personal_data is True
+        assert processing.data_subjects.get().category == "privacy_employee"
+        assert processing.data_recipients.get().category == "privacy_data_processor"
+        contractor = processing.contractors_involved.get()
+        assert contractor.relationship_type == "privacy_data_processor"
+        assert contractor.country == "FR"
+        transfer = processing.data_transfers.get()
+        assert transfer.country == "US"
+        assert transfer.transfer_mechanism == "privacy_standard_contractual_clauses"
+
+    def test_reimport_with_skip_deduplicates_children(
+        self, api_client, domain_folder, all_accessible, pd_category
+    ):
+        _post(
+            api_client,
+            self._workbook().read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+        )
+        resp = _post(
+            api_client,
+            self._workbook().read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="skip",
+        )
+        results = resp.json()["results"]
+        assert results["processing"]["skipped"] == 1
+        for key in (
+            "purposes",
+            "personal_data",
+            "data_subjects",
+            "data_recipients",
+            "contractors",
+            "transfers",
+        ):
+            assert results[key]["skipped"] == 1, key
+
+        processing = Processing.objects.get(ref_id="PRC-100")
+        assert processing.purposes.count() == 1
+        assert processing.personal_data.count() == 1
+        assert processing.data_subjects.count() == 1
+        assert processing.data_recipients.count() == 1
+        assert processing.contractors_involved.count() == 1
+        assert processing.data_transfers.count() == 1
+
+    def test_choice_labels_accepted(self, api_client, domain_folder, all_accessible):
+        excel = make_excel_file(
+            {
+                "Processing": [{"name": "Labelled", "ref_id": "PRC-101"}],
+                "Purposes": [
+                    {
+                        "name": "Contractual",
+                        "legal_basis": "Performance of a Contract",
+                    }
+                ],
+                "Data subjects": [{"name": "Staff", "category": "Employee"}],
+            }
+        )
+        resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
+        results = resp.json()["results"]
+        assert results["purposes"]["created"] == 1
+        assert results["data_subjects"]["created"] == 1
+        processing = Processing.objects.get(ref_id="PRC-101")
+        assert processing.purposes.get().legal_basis == "privacy_contract"
+        assert processing.data_subjects.get().category == "privacy_employee"
+
+    def test_unknown_reference_fails_row(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Processing": [{"name": "Bad refs", "ref_id": "PRC-102"}],
+                "Contractors": [
+                    {
+                        "name": "Ghost",
+                        "entity": "Nonexistent Entity",
+                        "relationship_type": "privacy_data_processor",
+                        "country": "FR",
+                    }
+                ],
+            }
+        )
+        resp = _post(
+            api_client,
+            excel.read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="skip",
+        )
+        results = resp.json()["results"]
+        assert results["processing"]["created"] == 1
+        assert results["contractors"]["failed"] == 1
+
+    def test_child_sheets_without_processing_sheet_rejected(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {"Purposes": [{"name": "Orphan", "legal_basis": "privacy_consent"}]}
+        )
+        resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
+        assert "error" in resp.json()["results"]
+
+    def test_multi_row_processing_sheet_warns(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Processing": [
+                    {"name": "First", "ref_id": "PRC-A"},
+                    {"name": "Second", "ref_id": "PRC-B"},
+                ],
+                "Purposes": [{"name": "P1", "legal_basis": "privacy_consent"}],
+            }
+        )
+        resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
+        results = resp.json()["results"]
+        assert "warning" in results
+        assert results["processing"]["created"] == 2
+        assert Processing.objects.get(ref_id="PRC-A").purposes.count() == 1
+        assert Processing.objects.get(ref_id="PRC-B").purposes.count() == 0
+
+    def test_uuid_reference_scoped_to_accessible_processings(
+        self, base_context, domain_folder
+    ):
+        from unittest.mock import patch
+
+        from data_wizard.views import PurposeRecordConsumer
+
+        processing = Processing.objects.create(name="Hidden", folder=domain_folder)
+        consumer = PurposeRecordConsumer(base_context)
+        record = {"name": "P", "processing": str(processing.id)}
+
+        with patch(
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[],
+        ):
+            resolved, error = consumer._resolve_processing(record)
+        assert resolved is None
+        assert "Unknown processing" in error.error
+
+        accessible_consumer = PurposeRecordConsumer(base_context)
+        with patch(
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[processing.id],
+        ):
+            resolved, error = accessible_consumer._resolve_processing(record)
+        assert error is None
+        assert resolved == processing
+
+    def test_export_reimport_round_trip(self, knox_admin_client, domain_folder):
+        from core.models import Terminology
+        from privacy.models import (
+            DataContractor,
+            DataRecipient,
+            DataSubject,
+            DataTransfer,
+            PersonalData,
+            Purpose,
+        )
+        from tprm.models import Entity
+
+        category = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            name="privacy_health_data",
+        ).first() or Terminology.objects.create(
+            name="privacy_health_data",
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            is_visible=True,
+        )
+        entity = Entity.objects.create(name="ACME Corp", folder=domain_folder)
+        processing = Processing.objects.create(
+            name="Round Trip", ref_id="PRC-RT", folder=domain_folder
+        )
+        Purpose.objects.create(
+            name="Billing", legal_basis="privacy_contract", processing=processing
+        )
+        PersonalData.objects.create(
+            name="Medical file",
+            category=category,
+            retention="3 years",
+            deletion_policy="privacy_anonymization",
+            processing=processing,
+        )
+        DataSubject.objects.create(
+            name="Patients", category="privacy_customer", processing=processing
+        )
+        DataRecipient.objects.create(
+            name="Lab", category="privacy_service_provider", processing=processing
+        )
+        DataContractor.objects.create(
+            name="Host",
+            entity=entity,
+            relationship_type="privacy_data_processor",
+            country="FR",
+            processing=processing,
+        )
+        DataTransfer.objects.create(
+            name="Backup",
+            entity=entity,
+            country="US",
+            transfer_mechanism="privacy_binding_corporate_rules",
+            processing=processing,
+        )
+
+        export = knox_admin_client.get(
+            f"/api/privacy/processings/{processing.id}/export-xlsx/"
+        )
+        assert export.status_code == 200
+        exported_bytes = export.getvalue()
+
+        processing.delete()
+        assert not Purpose.objects.filter(name="Billing").exists()
+
+        resp = _post(
+            knox_admin_client,
+            exported_bytes,
+            "export.xlsx",
+            "Processing",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["processing"]["created"] == 1
+        for key in (
+            "purposes",
+            "personal_data",
+            "data_subjects",
+            "data_recipients",
+            "contractors",
+            "transfers",
+        ):
+            assert results[key]["created"] == 1, key
+
+        recreated = Processing.objects.get(ref_id="PRC-RT", folder=domain_folder)
+        assert recreated.purposes.get().legal_basis == "privacy_contract"
+        assert recreated.personal_data.get().category == category
+        assert recreated.personal_data.get().retention == "3 years"
+        assert recreated.data_subjects.get().category == "privacy_customer"
+        assert recreated.data_recipients.get().category == "privacy_service_provider"
+        assert recreated.contractors_involved.get().entity == entity
+        assert recreated.data_transfers.get().transfer_mechanism == (
+            "privacy_binding_corporate_rules"
+        )
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Field-contract tests — prove each supported field round-trips correctly
 # through a real file upload, not just a unit-layer consumer call.
@@ -866,7 +1213,12 @@ class TestVulnerabilityFieldContracts:
 
 @pytest.mark.django_db
 class TestFolderEndpoint:
-    def test_create_folder_in_domain(self, api_client, domain_folder, all_accessible):
+    def test_create_folder_in_domain_is_refused(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """Nesting is a PRO feature, so the community importer rejects the row rather
+        than flattening it to the root. The enterprise edition covers the nested case.
+        """
         resp = _post(
             api_client,
             _csv("name,domain\nNew Sub-Folder,Test Domain\n"),
@@ -875,11 +1227,13 @@ class TestFolderEndpoint:
             domain_folder.id,
         )
         assert resp.status_code == 200
-        assert resp.json()["results"]["created"] == 1
+        results = resp.json()["results"]
+        assert results["created"] == 0
+        assert results["failed"] == 1
+        assert "subDomainsRequirePro" in str(results["errors"])
         from iam.models import Folder
 
-        created = Folder.objects.get(name="New Sub-Folder")
-        assert created.parent_folder == domain_folder
+        assert not Folder.objects.filter(name="New Sub-Folder").exists()
 
     def test_create_folder_without_domain_uses_root(
         self, api_client, root_folder, all_accessible
@@ -950,7 +1304,7 @@ class TestRealAuthAndRBAC:
 
     def test_admin_update_mode_sees_existing_record(self, knox_admin_client, app_ready):
         """
-        With real RBAC, the admin's get_accessible_object_ids() returns the
+        With real RBAC, the admin's get_changeable_object_ids() returns the
         existing record so UPDATE mode can find and patch it.
         """
         folder = app_ready
@@ -971,18 +1325,8 @@ class TestRealAuthAndRBAC:
     def test_restricted_user_cannot_update_hidden_record(
         self, knox_restricted_client, app_ready
     ):
-        """
-        find_existing() locates the record regardless of RBAC (it searches by
-        ref_id/name, not by viewable_ids).  The update is blocked one layer
-        deeper: BaseModelSerializer.update() calls _check_object_perm("change"),
-        which calls RoleAssignment.is_access_allowed() with the real request
-        user.  A user with no role assignments has no "change_asset" permission
-        on any folder, so PermissionDenied is raised → failed == 1, updated == 0,
-        and the record on disk is unchanged.
-
-        This test proves get_accessible_object_ids() / is_access_allowed() are
-        called with the real user and return real results — not a patched shortcut.
-        """
+        # A user with no role assignments holds add_asset on no folder, so the
+        # import is refused before any record is read or written.
         folder = app_ready
         asset = Asset.objects.create(
             name="Hidden Asset", ref_id="RBAC-001", folder=folder
@@ -995,8 +1339,594 @@ class TestRealAuthAndRBAC:
             folder.id,
             HTTP_X_ON_CONFLICT="update",
         )
-        body = resp.json()
-        assert body["results"]["updated"] == 0
-        assert body["results"]["failed"] == 1
+        assert resp.status_code == 403
         asset.refresh_from_db()
         assert asset.description is None
+
+    def test_restricted_user_cannot_create_in_any_folder(
+        self, knox_restricted_client, app_ready, domain_folder
+    ):
+        for folder_id in (app_ready.id, domain_folder.id, None):
+            resp = _post(
+                knox_restricted_client,
+                _csv("name,ref_id\nIntruder,INTRUDE-001\n"),
+                "a.csv",
+                "Asset",
+                folder_id,
+            )
+            assert resp.status_code == 403
+        assert not Asset.objects.filter(ref_id="INTRUDE-001").exists()
+
+    def test_domain_column_cannot_escape_into_a_view_only_folder(self, app_ready):
+        # The gate authorizes the X-Folder-Id folder, but a record's `domain`
+        # column is resolved separately through the accessible-folders map.
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+
+        writable = Folder.objects.create(
+            name="Writable",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        readonly = Folder.objects.create(
+            name="Readonly",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("split@datawizard.test")
+        user.folder = app_ready
+        user.save()
+        for folder, role_name in ((writable, "BI-RL-ANA"), (readonly, "BI-RL-AUD")):
+            group = UserGroup.objects.create(name=f"grp-{role_name}", folder=folder)
+            group.user_set.add(user)
+            assignment = RoleAssignment.objects.create(
+                user_group=group,
+                role=Role.objects.get(name=role_name),
+                folder=folder,
+                is_recursive=True,
+            )
+            assignment.perimeter_folders.add(folder)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nESCAPED-ASSET,Readonly\n"),
+            "a.csv",
+            "Asset",
+            writable.id,
+        )
+        assert resp.status_code == 200
+        # Must fail loudly, not be silently redirected into the request folder.
+        assert resp.json()["results"]["failed"] == 1
+        assert resp.json()["results"]["created"] == 0
+        assert not Asset.objects.filter(name="ESCAPED-ASSET").exists()
+
+    def test_domain_scoped_user_can_import_without_a_folder_header(self, app_ready):
+        # The wizard's domain selector is optional; rows carry their own domain.
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+
+        dom = Folder.objects.create(
+            name="MyDomain",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("dma@datawizard.test")
+        user.folder = app_ready
+        user.save()
+        group = UserGroup.objects.create(name="grp-dma", folder=dom)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group,
+            role=Role.objects.get(name="BI-RL-DMA"),
+            folder=dom,
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(dom)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nROW-SCOPED-ASSET,MyDomain\n"),
+            "a.csv",
+            "Asset",
+            folder_id=None,
+        )
+        assert resp.status_code == 200
+        assert Asset.objects.get(name="ROW-SCOPED-ASSET").folder_id == dom.id
+
+    def test_restricted_user_cannot_import_users(
+        self, knox_restricted_client, app_ready
+    ):
+        resp = _post(
+            knox_restricted_client,
+            _csv("email\nintruder@evil.test\n"),
+            "u.csv",
+            "User",
+            app_ready.id,
+        )
+        assert resp.status_code == 403
+        assert not User.objects.filter(email="intruder@evil.test").exists()
+
+
+# TPRM import — EntityAssessments sheet linking an existing audit
+
+
+def _make_audit(folder, name="Vendor Audit", ref_id="AUD-001"):
+    from core.models import ComplianceAssessment, Framework, RequirementNode
+
+    fw = Framework.objects.create(name=f"{name} FW", folder=folder)
+    RequirementNode.objects.create(
+        framework=fw,
+        urn=f"urn:test:{ref_id}:req:1",
+        ref_id="REQ1",
+        assessable=True,
+        folder=folder,
+    )
+    audit = ComplianceAssessment.objects.create(
+        name=name,
+        ref_id=ref_id,
+        framework=fw,
+        folder=folder,
+    )
+    audit.create_requirement_assessments()
+    return audit
+
+
+def _tprm_excel_with_audit(entity_ref_id, audit_ref_id=None, audit_name=None):
+    row = {
+        "entity_ref_id": entity_ref_id,
+        "name": "Vendor Review",
+    }
+    if audit_ref_id is not None:
+        row["audit_ref_id"] = audit_ref_id
+    if audit_name is not None:
+        row["audit_name"] = audit_name
+    return make_excel_file(
+        {
+            "Entities": [
+                {"ref_id": entity_ref_id, "name": "Vendor Corp", "description": ""}
+            ],
+            "EntityAssessments": [row],
+        }
+    )
+
+
+@pytest.mark.django_db
+class TestTprmEntityAssessmentAuditLink:
+    def test_linking_relocates_audit_and_its_requirement_assessments(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from core.models import RequirementAssessment
+
+        audit = _make_audit(domain_folder, name="Vendor Audit Move", ref_id="AUD-MOVE")
+        original_folder_id = audit.folder_id
+
+        excel = _tprm_excel_with_audit("ENT-MOVE", audit_ref_id="AUD-MOVE")
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["successful"] == 1, results[
+            "entity_assessments"
+        ]
+
+        entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
+        audit.refresh_from_db()
+
+        assert entity_assessment.compliance_assessment_id == audit.id
+        assert audit.folder_id != original_folder_id
+        assert audit.folder.parent_folder_id == entity_assessment.folder_id
+        ra = RequirementAssessment.objects.get(compliance_assessment=audit)
+        assert ra.folder_id == audit.folder_id
+
+    def test_unknown_audit_ref_id_fails_the_row_only(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = _tprm_excel_with_audit("ENT-MISS", audit_ref_id="AUD-NOPE")
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["failed"] == 1
+        assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
+
+    def test_unknown_audit_ref_id_does_not_fall_back_to_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """A typo'd audit_ref_id must fail the row, not silently link by name."""
+        _make_audit(domain_folder, name="Real Audit", ref_id="AUD-REAL")
+
+        excel = _tprm_excel_with_audit(
+            "ENT-STRICT", audit_ref_id="AUD-TYPO", audit_name="Real Audit"
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["failed"] == 1, results[
+            "entity_assessments"
+        ]
+        assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
+
+    def test_audit_resolved_by_name_when_ref_id_absent(
+        self, api_client, domain_folder, all_accessible
+    ):
+        audit = _make_audit(
+            domain_folder, name="Vendor Audit ByName", ref_id="AUD-BYNAME"
+        )
+        original_folder_id = audit.folder_id
+
+        excel = _tprm_excel_with_audit("ENT-BYNAME", audit_name="Vendor Audit ByName")
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["successful"] == 1, results[
+            "entity_assessments"
+        ]
+
+        entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
+        audit.refresh_from_db()
+        assert entity_assessment.compliance_assessment_id == audit.id
+        assert audit.folder_id != original_folder_id
+
+    def test_audit_ref_id_takes_precedence_over_audit_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """ref_id is tried first, name is only a fallback — same convention as elsewhere."""
+        target = _make_audit(domain_folder, name="Target Audit", ref_id="AUD-TARGET")
+        decoy = _make_audit(domain_folder, name="Decoy Audit", ref_id="AUD-DECOY")
+
+        excel = _tprm_excel_with_audit(
+            "ENT-PRECEDENCE", audit_ref_id="AUD-TARGET", audit_name="Decoy Audit"
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
+        assert entity_assessment.compliance_assessment_id == target.id
+        assert entity_assessment.compliance_assessment_id != decoy.id
+
+    def test_same_named_assessment_in_different_domain_does_not_collide(
+        self, api_client, domain_folder, other_folder, all_accessible
+    ):
+        """Dedup must be scoped per-domain, like Entities/Contracts already are."""
+        audit_a = _make_audit(domain_folder, name="Vendor Audit A", ref_id="AUD-X-A")
+        audit_b = _make_audit(other_folder, name="Vendor Audit B", ref_id="AUD-X-B")
+
+        excel_a = _tprm_excel_with_audit("ENT-CROSS", audit_ref_id="AUD-X-A")
+        resp_a = _post(
+            api_client, excel_a.read(), "tprm.xlsx", "TPRM", domain_folder.id
+        )
+        assert resp_a.status_code == 200, resp_a.json()
+        assert resp_a.json()["results"]["entity_assessments"]["successful"] == 1
+
+        # The entity itself is a global match by ref_id, so the second import
+        # must opt into updating it rather than treating it as a conflict.
+        excel_b = _tprm_excel_with_audit("ENT-CROSS", audit_ref_id="AUD-X-B")
+        resp_b = _post(
+            api_client,
+            excel_b.read(),
+            "tprm.xlsx",
+            "TPRM",
+            other_folder.id,
+            HTTP_X_ON_CONFLICT="update",
+        )
+        assert resp_b.status_code == 200, resp_b.json()
+        results_b = resp_b.json()["results"]["entity_assessments"]
+        assert results_b["successful"] == 1, results_b
+
+        assessments = list(EntityAssessment.objects.filter(name="Vendor Review"))
+        assert len(assessments) == 2
+        by_folder = {a.folder_id: a for a in assessments}
+        assert (
+            by_folder[domain_folder.id].compliance_assessment.ref_id == audit_a.ref_id
+        )
+        assert by_folder[other_folder.id].compliance_assessment.ref_id == audit_b.ref_id
+
+
+# TPRM import — entities may have no ref_id; other sheets fall back to entity name
+
+
+@pytest.mark.django_db
+class TestTprmEntityResolutionByName:
+    def test_entity_without_ref_id_is_created(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from tprm.models import Entity
+
+        excel = make_excel_file(
+            {"Entities": [{"name": "No RefId Corp", "description": ""}]}
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["entities"]["successful"] == 1
+        assert Entity.objects.filter(name="No RefId Corp").exists()
+
+    def test_solution_resolves_provider_by_entity_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from tprm.models import Solution
+
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "NameOnly Corp", "description": ""}],
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-NAME",
+                        "name": "Some Solution",
+                        "provider_entity_name": "NameOnly Corp",
+                    }
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entities"]["successful"] == 1, results["entities"]
+        assert results["solutions"]["successful"] == 1, results["solutions"]
+        assert (
+            Solution.objects.get(ref_id="SOL-NAME").provider_entity.name
+            == "NameOnly Corp"
+        )
+
+    def test_contract_representative_and_entity_assessment_resolve_by_entity_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "Full Flow Corp", "description": ""}],
+                "Contracts": [
+                    {
+                        "ref_id": "CON-NAME",
+                        "name": "Some Contract",
+                        "provider_entity_name": "Full Flow Corp",
+                    }
+                ],
+                "Representatives": [
+                    {
+                        "email": "contact@fullflow.test",
+                        "provider_entity_name": "Full Flow Corp",
+                    }
+                ],
+                "EntityAssessments": [
+                    {"entity_name": "Full Flow Corp", "name": "Full Flow Review"}
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["contracts"]["successful"] == 1, results["contracts"]
+        assert results["representatives"]["successful"] == 1, results["representatives"]
+        assert results["entity_assessments"]["successful"] == 1, results[
+            "entity_assessments"
+        ]
+
+    def test_unresolvable_entity_reference_fails_the_row(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-MISSING",
+                        "name": "Orphan Solution",
+                        "provider_entity_name": "Nobody Corp",
+                    }
+                ]
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["solutions"]["failed"] == 1
+
+    def test_unknown_ref_id_fails_even_when_name_would_match(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """A typo'd ref_id must surface as an error, not silently bind by name."""
+        excel = make_excel_file(
+            {
+                "Entities": [
+                    {"ref_id": "ENT-42", "name": "Strict Corp", "description": ""}
+                ],
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-STRICT",
+                        "name": "Strict Solution",
+                        "provider_entity_ref_id": "ENT-042",
+                        "provider_entity_name": "Strict Corp",
+                    }
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entities"]["successful"] == 1, results["entities"]
+        assert results["solutions"]["failed"] == 1, results["solutions"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TaskTemplate `enabled` round-trip
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestTaskTemplateEnabledRoundTrip:
+    """`enabled` must survive export -> re-import, in both directions."""
+
+    def _summary(self, rows):
+        return make_excel_file({"Summary": rows}, "tasks.xlsx").read()
+
+    def test_import_sets_enabled_flag(self, api_client, domain_folder, all_accessible):
+        rows = [
+            {
+                "ref_id": "PC-1",
+                "name": "Retired control",
+                "is_recurrent": "Yes",
+                "schedule_frequency": "MONTHLY",
+                "schedule_interval": 1,
+                "enabled": "No",
+            },
+            {
+                "ref_id": "PC-2",
+                "name": "Live control",
+                "is_recurrent": "Yes",
+                "schedule_frequency": "MONTHLY",
+                "schedule_interval": 1,
+                "enabled": "Yes",
+            },
+        ]
+        resp = _post(
+            api_client,
+            self._summary(rows),
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200
+        assert TaskTemplate.objects.get(ref_id="PC-1").enabled is False
+        assert TaskTemplate.objects.get(ref_id="PC-2").enabled is True
+
+    def test_export_emits_enabled_and_reimport_restores_it(
+        self, api_client, domain_folder, all_accessible
+    ):
+        TaskTemplate.objects.create(
+            ref_id="PC-3",
+            name="Retired control",
+            folder=domain_folder,
+            is_recurrent=True,
+            enabled=False,
+            schedule={"frequency": "MONTHLY", "interval": 1},
+        )
+        export = api_client.get("/api/task-templates/export_xlsx/")
+        assert export.status_code == 200
+
+        summary = openpyxl.load_workbook(io.BytesIO(export.content))["Summary"]
+        header = [c.value for c in summary[1]]
+        row = dict(zip(header, [c.value for c in summary[2]]))
+        assert row["enabled"] == "No"
+
+        # Flip it in the DB, then re-import the untouched export: the exported
+        # "No" has to win, otherwise the round-trip silently re-enables it.
+        TaskTemplate.objects.filter(ref_id="PC-3").update(enabled=True)
+        resp = _post(
+            api_client,
+            export.content,
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="update",
+        )
+        assert resp.status_code == 200
+        assert TaskTemplate.objects.get(ref_id="PC-3").enabled is False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence definitions + task-driven evidence creation, end to end
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestEvidenceImport:
+    def test_import_evidence_definitions(
+        self, api_client, domain_folder, all_accessible
+    ):
+        rows = [
+            {
+                "name": "Access review report",
+                "description": "quarterly export",
+                "status": "In review",
+                "expiry_date": "2027-01-31",
+            },
+            {
+                "name": "Firewall rule export",
+                "description": "",
+                "status": "missing",
+                "expiry_date": "",
+            },
+        ]
+        resp = _post(
+            api_client,
+            make_excel_file({"Sheet1": rows}, "evidences.xlsx").read(),
+            "evidences.xlsx",
+            "Evidence",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200, resp.json()
+        first = Evidence.objects.get(name="Access review report")
+        assert first.status == "in_review"
+        assert str(first.expiry_date) == "2027-01-31"
+        assert first.folder_id == domain_folder.id
+        # Definitions only: nothing was deposited, so no revision is opened.
+        assert first.revisions.count() == 0
+        assert Evidence.objects.get(name="Firewall rule export").status == "missing"
+
+    def test_evidence_template_is_downloadable(self, api_client):
+        resp = api_client.get("/api/data-wizard/templates/Evidence/")
+        assert resp.status_code == 200
+
+    def test_task_import_creates_and_links_named_evidence(
+        self, api_client, domain_folder, all_accessible
+    ):
+        rows = [
+            {
+                "ref_id": "PC-1",
+                "name": "Firewall review",
+                "is_recurrent": "Yes",
+                "schedule_frequency": "MONTHLY",
+                "schedule_interval": 3,
+                "evidences": "Panorama export|Rule diff",
+            }
+        ]
+        resp = _post(
+            api_client,
+            make_excel_file({"Summary": rows}, "tasks.xlsx").read(),
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200, resp.json()
+        template = TaskTemplate.objects.get(ref_id="PC-1")
+        assert sorted(e.name for e in template.evidences.all()) == [
+            "Panorama export",
+            "Rule diff",
+        ]
+        assert all(e.folder_id == domain_folder.id for e in template.evidences.all())
+
+    def test_task_import_reuses_an_evidence_already_defined(
+        self, api_client, domain_folder, all_accessible
+    ):
+        existing = Evidence.objects.create(
+            name="Panorama export", folder=domain_folder, status="approved"
+        )
+        rows = [{"ref_id": "PC-2", "name": "T", "evidences": "panorama export"}]
+        resp = _post(
+            api_client,
+            make_excel_file({"Summary": rows}, "tasks.xlsx").read(),
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200, resp.json()
+        assert list(TaskTemplate.objects.get(ref_id="PC-2").evidences.all()) == [
+            existing
+        ]
+        assert Evidence.objects.filter(name__iexact="panorama export").count() == 1

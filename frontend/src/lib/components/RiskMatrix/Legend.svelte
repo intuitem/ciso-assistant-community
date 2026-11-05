@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { isDark } from '$lib/utils/helpers';
-	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import { isDark } from '#lib/utils/helpers.js';
+	import type { RiskMatrixJsonDefinition } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		parsedRiskMatrix: RiskMatrixJsonDefinition;

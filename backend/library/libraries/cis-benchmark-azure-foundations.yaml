@@ -1,0 +1,1293 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cis-benchmark-azure-foundations
+locale: en
+ref_id: cis-benchmark-azure-foundations
+name: CIS Microsoft Azure Foundations Benchmark
+description: CIS Microsoft Azure Foundations Benchmark v6.0.0
+copyright: "\xA9 CIS Security"
+version: 1
+publication_date: 2026-04-19
+provider: CIS
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cis-benchmark-azure-foundations
+    ref_id: cis-benchmark-azure-foundations
+    name: CIS Microsoft Azure Foundations Benchmark
+    description: CIS Microsoft Azure Foundations Benchmark v6.0.0
+    implementation_groups_definition:
+    - ref_id: A
+      name: Automatic
+      description: null
+    - ref_id: M
+      name: Manual
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Analytics Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2
+      ref_id: '2.1'
+      name: Azure Databricks
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.1
+      name: Ensure that Azure Databricks is deployed in a customer-managed virtual
+        network (VNet)
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.2
+      name: Ensure that Network Security Groups are Configured for Databricks Subnets
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.3
+      name: Ensure that Traffic is Encrypted Between Cluster Worker Nodes
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.4
+      name: Ensure that Users and Groups are Synced from Microsoft Entra ID to Azure
+        Databricks
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.5
+      name: Ensure that Unity Catalog is Configured for Azure Databricks
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.6
+      name: Ensure that Usage is Restricted and Expiry is Enforced for Databricks
+        Personal Access Tokens
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.7
+      name: Ensure that Diagnostic Log Delivery is Configured for Azure Databricks
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.8
+      name: Ensure Critical Data in Azure Databricks is Encrypted with Customer-managed
+        Keys (CMK)
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.9
+      name: Ensure 'No Public IP' is Set to 'Enabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.10
+      name: Ensure 'Allow Public Network Access' is set to 'Disabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.11
+      name: Ensure Private Endpoints are used to access Azure Databricks workspaces
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:2.1
+      ref_id: 2.1.12
+      name: Ensure Azure Databricks groups are reviewed periodically
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Compute Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:3
+      ref_id: '3.1'
+      name: Virtual Machines
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:3.1
+      ref_id: 3.1.1
+      name: Ensure only MFA Enabled Identities can Access Privileged Virtual Machine
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Identity Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5
+      ref_id: '5.1'
+      name: Security Defaults (Per-User MFA)
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1
+      ref_id: 5.1.1
+      name: Ensure that 'security defaults' is Enabled in Microsoft Entra ID
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1
+      ref_id: 5.1.2
+      name: Ensure that 'Require Multifactor Authentication to register or join devices
+        with Microsoft Entra' is set to 'Yes'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1
+      ref_id: 5.1.3
+      name: Ensure that 'multifactor authentication' is 'enabled' For All Users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.1
+      ref_id: 5.1.4
+      name: Ensure that 'Allow users to remember multifactor authentication on devices
+        they trust' is Disabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5
+      ref_id: '5.3'
+      name: Periodic Identity Reviews
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      ref_id: 5.3.1
+      name: Ensure that Azure Admin Accounts Are Not Used for Daily Operations
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      ref_id: 5.3.2
+      name: Ensure that Guest Users are Reviewed on a Regular Basis
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      ref_id: 5.3.3
+      name: Ensure That Use of the 'User Access Administrator' Role is Restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      ref_id: 5.3.4
+      name: Ensure that All 'Privileged' Role Assignments are Periodically Reviewed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      ref_id: 5.3.5
+      name: Ensure Disabled User Accounts do not Have Read, Write, or Owner Permissions
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      ref_id: 5.3.6
+      name: Ensure 'Tenant Creator' Role Assignments are Periodically Reviewed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.3
+      ref_id: 5.3.7
+      name: Ensure All Non-privileged Role Assignments are Periodically Reviewed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5
+      ref_id: '5.4'
+      name: Ensure that No Custom Subscription Administrator Roles Exist
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5
+      ref_id: '5.5'
+      name: Ensure that a Custom Role is Assigned Permissions for Administering Resource
+        Locks
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5
+      ref_id: '5.6'
+      name: Ensure that 'Subscription leaving Microsoft Entra tenant' and 'Subscription
+        entering Microsoft Entra tenant' is set to 'Permit no one'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:5
+      ref_id: '5.7'
+      name: Ensure there are between 2 and 3 Subscription Owners
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Management and Governance Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6
+      ref_id: '6.1'
+      name: Logging and Monitoring
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1
+      ref_id: 6.1.1
+      name: Configuring Diagnostic Settings
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.1
+      name: Ensure that a 'Diagnostic Setting' Exists for Subscription Activity Logs
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.2
+      name: Ensure Diagnostic Setting Captures Appropriate Categories
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.3
+      name: Ensure the Storage Account Containing the Container with Activity Logs
+        is Encrypted with Customer-managed Key (CMK)
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.4
+      name: Ensure that Logging for Azure Key Vault is 'Enabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.5
+      name: Ensure that Network Security Group Flow Logs are Captured and Sent to
+        Log Analytics
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.6
+      name: Ensure that Virtual Network Flow Logs are Captured and Sent to Log Analytics
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.7
+      name: Ensure that a Microsoft Entra Diagnostic Setting Exists to Send Microsoft
+        Graph Activity Logs to an Appropriate Destination
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.8
+      name: Ensure that a Microsoft Entra Diagnostic Setting Exists to Send Microsoft
+        Entra Activity Logs to an Appropriate Destination
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.1
+      ref_id: 6.1.1.9
+      name: Ensure that Intune Logs are Captured and Sent to Log Analytics
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1
+      ref_id: 6.1.2
+      name: Monitoring Using Activity Log Alerts
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.1
+      name: Ensure that Activity Log Alert Exists for Create Policy Assignment
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.2
+      name: Ensure that Activity Log Alert exists for Delete Policy Assignment
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.3
+      name: Ensure that Activity Log Alert Exists for Create or Update Network Security
+        Group
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.4
+      name: Ensure that Activity Log Alert Exists for Delete Network Security Group
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.5
+      name: Ensure that Activity Log Alert Exists for Create or Update Security Solution
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.6
+      name: Ensure that Activity Log Alert Exists for Delete Security Solution
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.7
+      name: Ensure that Activity Log Alert Exists for Create or Update SQL Server
+        Firewall Rule
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.8
+      name: Ensure that Activity Log Alert Exists for Delete SQL Server Firewall Rule
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.9
+      name: Ensure that Activity Log Alert Exists for Create or Update Public IP Address
+        rule
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.10
+      name: Ensure that Activity Log Alert Exists for Delete Public IP Address rule
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.2
+      ref_id: 6.1.2.11
+      name: Ensure that an Activity Log Alert Exists for Service Health
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1
+      ref_id: 6.1.3
+      name: Configuring Application Insights
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.3
+      ref_id: 6.1.3.1
+      name: Ensure Application Insights are Configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1
+      ref_id: 6.1.4
+      name: Ensure that Azure Monitor Resource Logging is Enabled for All Services
+        that Support it
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.1
+      ref_id: 6.1.5
+      name: Ensure Basic, Free, and Consumption SKUs are not used on Production artifacts
+        requiring monitoring and SLA
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:6
+      ref_id: '6.2'
+      name: Ensure that Resource Locks are set for Mission-Critical Azure Resources
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Networking Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.1'
+      name: Ensure that RDP Access from the Internet is Evaluated and Restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.2'
+      name: Ensure that SSH Access from the Internet is Evaluated and Restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.3'
+      name: Ensure that UDP Port Access from the Internet is Evaluated and Restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.4'
+      name: Ensure that HTTP(S) Access from the Internet is Evaluated and Restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.5'
+      name: Ensure that Network Security Group Flow Log Retention Days is Set to Greater
+        than or equal to 90
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.6'
+      name: Ensure that Network Watcher is 'Enabled' for Azure Regions That are in
+        Use
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.7'
+      name: Ensure that Public IP Addresses are Evaluated on a Periodic Basis
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.8'
+      name: Ensure that Virtual Network Flow Log Retention Days is Set to Greater
+        than or Equal to 90
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.9'
+      name: Ensure 'Authentication type' is Set to 'Azure Active Directory' only for
+        Azure VPN Gateway Point-to-Site Configuration
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.10'
+      name: Ensure Azure Web Application Firewall (WAF) is Enabled on Azure Application
+        Gateway
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.11'
+      name: Ensure Subnets Are Associated with Network Security Groups
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.12'
+      name: Ensure the SSL Policy's 'Min protocol version' is Set to 'TLSv1_2' or
+        Higher on Azure Application Gateway
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.13'
+      name: Ensure 'HTTP2' is Set to 'Enabled' on Azure Application Gateway
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.14'
+      name: Ensure Request Body Inspection is Enabled in Azure Web Application Firewall
+        policy on Azure Application Gateway
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.15'
+      name: Ensure Bot Protection is Enabled in Azure Web Application Firewall Policy
+        on Azure Application Gateway
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:7
+      ref_id: '7.16'
+      name: Ensure Azure Network Security Perimeter is Used to Secure Azure Platform-as-a-service
+        Resources
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Security Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8
+      ref_id: '8.1'
+      name: Microsoft Defender for Cloud
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.1
+      name: Microsoft Cloud Security Posture Management (CSPM)
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.1
+      ref_id: 8.1.1.1
+      name: Ensure Microsoft Defender CSPM is Set to 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.2
+      name: 'Defender Plan: APIs'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.2
+      ref_id: 8.1.2.1
+      name: Ensure Microsoft Defender for APIs is Set to 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.3
+      name: 'Defender Plan: Servers'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3
+      ref_id: 8.1.3.1
+      name: Ensure that Defender for Servers is Set to 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3
+      ref_id: 8.1.3.2
+      name: Ensure that 'Vulnerability assessment for machines' Component Status is
+        set to 'On'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3
+      ref_id: 8.1.3.3
+      name: Ensure that 'Endpoint protection' Component Status is set to 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3
+      ref_id: 8.1.3.4
+      name: Ensure that 'Agentless scanning for machines' Component Status is Set
+        to 'On'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.3
+      ref_id: 8.1.3.5
+      name: Ensure that 'File Integrity Monitoring' Component Status is Set to 'On'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.4
+      name: 'Defender Plan: Containers'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.4
+      ref_id: 8.1.4.1
+      name: Ensure That Microsoft Defender for Containers Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.5
+      name: 'Defender Plan: Storage'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.5
+      ref_id: 8.1.5.1
+      name: Ensure That Microsoft Defender for Storage Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.5
+      ref_id: 8.1.5.2
+      name: Ensure Advanced Threat Protection Alerts for Storage Accounts Are Monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.6
+      name: 'Defender Plan: App Service'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.6
+      ref_id: 8.1.6.1
+      name: Ensure That Microsoft Defender for App Services Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.7
+      name: 'Defender Plan: Databases'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7
+      ref_id: 8.1.7.1
+      name: Ensure That Microsoft Defender for Azure Cosmos DB Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7
+      ref_id: 8.1.7.2
+      name: Ensure That Microsoft Defender for Open-Source Relational Databases Is
+        Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7
+      ref_id: 8.1.7.3
+      name: Ensure That Microsoft Defender for (Managed Instance) Azure SQL Databases
+        Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.7
+      ref_id: 8.1.7.4
+      name: Ensure That Microsoft Defender for SQL Servers on Machines Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.8
+      name: 'Defender Plan: Key Vault'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.8
+      ref_id: 8.1.8.1
+      name: Ensure That Microsoft Defender for Key Vault Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.9
+      name: 'Defender Plan: Resource Manager'
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.9
+      ref_id: 8.1.9.1
+      name: Ensure That Microsoft Defender for Resource Manager Is Set To 'On'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.10
+      name: Ensure that Microsoft Defender for Cloud is Configured to Check VM Operating
+        Systems for Updates
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.11
+      name: Ensure that non-deprecated Microsoft Cloud Security Benchmark policies
+        are not set to 'Disabled'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.12
+      name: Ensure That 'All users with the following roles' is Set to 'Owner'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.13
+      name: Ensure 'Additional email addresses' is Configured with a Security Contact
+        Email
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.14
+      name: Ensure that 'Notify about alerts with the following severity (or higher)'
+        is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.15
+      name: Ensure that 'Notify about attack paths with the following risk level (or
+        higher)' is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.1
+      ref_id: 8.1.16
+      name: Ensure that Microsoft Defender External Attack Surface Monitoring (EASM)
+        is Enabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8
+      ref_id: '8.2'
+      name: Microsoft Defender for IoT
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.2
+      ref_id: 8.2.1
+      name: Ensure That Microsoft Defender for IoT Hub Is Set To 'On'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8
+      ref_id: '8.3'
+      name: Key Vault
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.1
+      name: Ensure that the Expiration Date is Set for all Keys in Key Vaults using
+        RBAC
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.2
+      name: Ensure that the Expiration Date is set for All Keys in Key Vaults using
+        access policies (legacy)
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.3
+      name: Ensure that the Expiration Date is set for All Secrets in Key Vaults using
+        RBAC
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.4
+      name: Ensure that the Expiration Date is set for All Secrets in Key Vaults using
+        access policies (legacy)
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.5
+      name: Ensure 'Purge protection' is Set to 'Enabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.6
+      name: Ensure that Role Based Access Control for Azure Key Vault is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.7
+      name: Ensure Public Network Access is Disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.8
+      name: Ensure Private Endpoints are Used to Access Azure Key Vault
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.9
+      name: Ensure Automatic Key Rotation is Enabled within Azure Key Vault
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.10
+      name: Ensure that Azure Key Vault Managed HSM is Used when Required
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.3
+      ref_id: 8.3.11
+      name: Ensure Certificate 'Validity Period (in months)' is Less Than or Equal
+        to '12'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8
+      ref_id: '8.4'
+      name: Azure Bastion
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.4
+      ref_id: 8.4.1
+      name: Ensure an Azure Bastion Host Exists
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:8
+      ref_id: '8.5'
+      name: Ensure Azure DDoS Network Protection is Enabled on Virtual Networks
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Storage Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9
+      ref_id: '9.1'
+      name: Azure Files
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.1
+      ref_id: 9.1.1
+      name: Ensure Soft Delete for Azure File Shares is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.1
+      ref_id: 9.1.2
+      name: Ensure 'SMB protocol version' is Set to 'SMB 3.1.1' or Higher for SMB
+        file shares
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.1
+      ref_id: 9.1.3
+      name: Ensure 'SMB channel encryption' is Set to 'AES-256-GCM' or Higher for
+        SMB file shares
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9
+      ref_id: '9.2'
+      name: Azure Blob Storage
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.2
+      ref_id: 9.2.1
+      name: Ensure That Soft Delete for Blobs on Azure Blob Storage Storage Accounts
+        is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.2
+      ref_id: 9.2.2
+      name: Ensure that Soft Delete for Containers on Azure Blob Storage Storage Accounts
+        is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.2
+      ref_id: 9.2.3
+      name: Ensure 'Versioning' is Set to 'Enabled' on Azure Blob Storage Storage
+        Accounts
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9
+      ref_id: '9.3'
+      name: Storage Accounts
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.1
+      name: Secrets and Keys
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.1
+      ref_id: 9.3.1.1
+      name: Ensure That 'Enable key rotation reminders' is Enabled for Each Storage
+        Account
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.1
+      ref_id: 9.3.1.2
+      name: Ensure That Storage Account Access keys are Periodically Regenerated
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.1
+      ref_id: 9.3.1.3
+      name: Ensure 'Allow storage account key access' for Azure Storage Accounts is
+        'Disabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.2
+      name: Networking
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.2
+      ref_id: 9.3.2.1
+      name: Ensure Private Endpoints are Used to Access Storage Accounts
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.2
+      ref_id: 9.3.2.2
+      name: Ensure that 'Public Network Access' is 'Disabled' for Storage Accounts
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.2
+      ref_id: 9.3.2.3
+      name: Ensure Default Network Access Rule for Storage Accounts is Set to Deny
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.3
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.3
+      ref_id: 9.3.3.1
+      name: Ensure that 'Default to Microsoft Entra authorization in the Azure portal'
+        is Set to 'Enabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.4
+      name: Ensure that 'Secure transfer required' is Set to 'Enabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.5
+      name: Ensure 'Allow trusted Microsoft services to access this resource' is Enabled
+        for Storage Account Access
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.6
+      name: Ensure the 'Minimum TLS version' for Storage Accounts is Set to 'Version
+        1.2'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.7
+      name: Ensure 'Cross Tenant Replication' is Not Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.8
+      name: Ensure that 'Allow Blob Anonymous Access' is Set to 'Disabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.9
+      name: Ensure Azure Resource Manager Delete Locks are Applied to Azure Storage
+        Accounts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.10
+      name: Ensure Azure Resource Manager ReadOnly Locks are Considered for Azure
+        Storage Accounts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-azure-foundations:9.3
+      ref_id: 9.3.11
+      name: Ensure Redundancy is Set to 'geo-redundant storage (GRS)' on Critical
+        Azure Storage Accounts
+      implementation_groups:
+      - A

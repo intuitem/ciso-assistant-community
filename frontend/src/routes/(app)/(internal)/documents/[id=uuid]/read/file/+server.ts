@@ -1,0 +1,24 @@
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+// Proxy the IAM-scoped uploaded-file endpoint so the browser gets it with auth.
+export const GET: RequestHandler = async ({ fetch, url, locals }) => {
+	if (!(await locals.getFeatureFlags())?.document_management) {
+		error(403, 'Document management feature is disabled');
+	}
+	const rev = url.searchParams.get('rev');
+	if (!rev) error(400, 'Missing rev');
+	const res = await fetch(`${BASE_API_URL}/document-revisions/${rev}/file/`);
+	if (!res.ok) {
+		error(res.status, await res.text());
+	}
+	const buffer = await res.arrayBuffer();
+	return new Response(buffer, {
+		status: 200,
+		headers: {
+			'Content-Type': res.headers.get('Content-Type') || 'application/octet-stream',
+			'Content-Disposition': res.headers.get('Content-Disposition') || 'attachment'
+		}
+	});
+};

@@ -1,7 +1,7 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);

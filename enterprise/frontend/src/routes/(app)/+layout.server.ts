@@ -2,30 +2,39 @@ import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { env } from '$env/dynamic/public';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import {
+	PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS,
+	PUBLIC_LICENSE_EXPIRATION_MESSAGE
+} from '$app/env/public';
 
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
-// get `locals.user` and pass it to the `page` store
 export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) => {
-	if (!locals.user && !url.pathname.includes('/login')) {
+	const user = await locals.getUser();
+	if (!user && !url.pathname.includes('/login')) {
 		redirect(302, `/login?next=${url.pathname}`);
 	}
 
+	const [settings, featureflags] = await Promise.all([
+		locals.getSettings(),
+		locals.getFeatureFlags()
+	]);
+
 	if (
-		locals.user &&
-		locals.settings?.enforce_mfa &&
-		!locals.user.has_mfa_enabled &&
-		!locals.user.is_superuser &&
-		locals.user.is_local &&
-		!locals.user.is_sso &&
-		!url.pathname.startsWith('/setup-mfa')
+		user &&
+		settings?.enforce_mfa &&
+		!user.has_mfa_enabled &&
+		!user.is_superuser &&
+		user.is_local &&
+		!user.is_sso &&
+		!url.pathname.startsWith('/setup-mfa') &&
+		!url.pathname.startsWith('/reauthenticate')
 	) {
 		redirect(302, '/setup-mfa');
 	}
 
-	if (locals.user) {
+	if (user) {
 		const referer = request.headers.get('referer') ?? '';
 		const fromLogin = loginPageRegex.test(referer);
 		if (fromLogin) {
@@ -45,10 +54,12 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		viewable?: boolean;
 		children?: unknown[];
 	} | null = null;
-	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
-	if (locals.user && focusModeEnabled) {
+	const focusModeEnabled = featureflags?.focus_mode ?? false;
+	if (user && focusModeEnabled) {
 		try {
-			const treeRes = await fetch(`${BASE_API_URL}/folders/org_tree/?include_perimeters=false`);
+			const treeRes = await fetch(
+				`${BASE_API_URL}/folders/org_tree/?include_perimeters=false&no_focus=true`
+			);
 			if (treeRes.ok) {
 				orgTree = await treeRes.json();
 			}
@@ -68,18 +79,14 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 	} catch (e) {
 		console.error('Error fetching license status:', e);
 	}
-	const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
-		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
-		: 7;
 
-	const LICENSE_EXPIRATION_MESSAGE = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_MESSAGE')
-		? env.PUBLIC_LICENSE_EXPIRATION_MESSAGE
-		: '';
+	const LICENSE_EXPIRATION_NOTIFY_DAYS = PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS ?? 7;
+	const LICENSE_EXPIRATION_MESSAGE = PUBLIC_LICENSE_EXPIRATION_MESSAGE ?? '';
 
 	return {
-		user: locals.user,
-		settings: locals.settings,
-		featureflags: locals.featureflags,
+		user,
+		settings,
+		featureflags,
 		licenseStatus,
 		LICENSE_EXPIRATION_NOTIFY_DAYS,
 		LICENSE_EXPIRATION_MESSAGE,

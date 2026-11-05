@@ -25,7 +25,7 @@ Categories surfaced (in render order):
 | **Risk scenarios** | Scenarios you own | `owner` |
 | **Incidents** | Incidents you co-own | `owners` |
 | **Exceptions** | Security exceptions you co-own | `owners` |
-| **Follow-ups** | Findings assessments where you're an author | `authors` |
+| **Findings binders** | Findings binders where you're an author | `authors` |
 | **Findings** | Findings you own | `owner` |
 | **Validation flows** | Approval requests waiting for you | `approver` _(user, not actor)_ |
 | **Organisation objectives** | Objectives assigned to you | `assigned_to` |
@@ -77,4 +77,4 @@ The page fetches counts first (cheap aggregate query per category), then each ta
 
 - [Actors and teams](../concepts/actors-and-teams.md) — the actor model and how team membership resolves to assignments.
 - [Dashboards](dashboards.md) — the sibling surface for composed metric views.
-- [Notifications](notifications.md) — push-style alerts when an assignment changes hands or approaches its due date.
+- [Notifications](notifications.md) — in-app and email alerts when an assignment changes hands or approaches its due date.

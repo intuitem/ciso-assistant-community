@@ -1,0 +1,10 @@
+# allowlist: this directory collects credential files, and enumerating them leaks the next one
+*
+!pyproject.toml
+!uv.lock
+!ca_mcp/
+!ca_mcp.py
+!clica.py
+
+**/__pycache__/
+**/*.pyc

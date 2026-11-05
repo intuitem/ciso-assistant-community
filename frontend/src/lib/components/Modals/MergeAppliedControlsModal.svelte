@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { onDestroy, onMount } from 'svelte';
-	import type { urlModel } from '$lib/utils/types';
+	import type { urlModel } from '#lib/utils/types.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -75,13 +75,13 @@
 	let preview: any = $state(null);
 	let previewLoading = $state(false);
 	let previewError: string | null = $state(null);
-	let mdKeepDocId = $state('');
 	let submitting = $state(false);
 	let confirmPhrase = $state('');
 	let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let previewAbortController: AbortController | null = null;
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal-wide max-w-4xl space-y-5';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-6 w-modal-wide max-w-4xl space-y-5';
 	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	onMount(async () => {
@@ -136,7 +136,6 @@
 		if (typeof inner === 'object') {
 			const parts: string[] = [];
 			for (const [key, val] of Object.entries(inner)) {
-				if (key === 'managed_document_conflict') continue; // noise at this layer
 				const str = Array.isArray(val) ? val.join(' ') : typeof val === 'string' ? val : '';
 				if (str) parts.push(key === 'detail' ? str : `${key}: ${str}`);
 			}
@@ -179,9 +178,6 @@
 			} else {
 				preview = await res.json();
 				previewError = null;
-				if (preview?.managed_document_conflict?.candidates?.length) {
-					mdKeepDocId = mdKeepDocId || preview.managed_document_conflict.candidates[0].id;
-				}
 			}
 		} catch (e) {
 			if ((e as any)?.name === 'AbortError') return;
@@ -212,7 +208,6 @@
 		refreshPreview();
 	});
 
-	const mdConflict = $derived(preview?.managed_document_conflict ?? null);
 	const requiredConfirmPhrase = m.yes().toLowerCase();
 	const canConfirm = $derived(
 		!submitting &&
@@ -221,7 +216,6 @@
 			(targetMode !== 'new' || (newTargetName.length > 0 && newTargetFolderId.length > 0)) &&
 			(targetMode !== 'selected' || selectedSourceId.length > 0) &&
 			(targetMode !== 'another' || pickedExternalId.length > 0) &&
-			(!mdConflict || mdKeepDocId.length > 0) &&
 			confirmPhrase.trim().toLowerCase() === requiredConfirmPhrase
 	);
 
@@ -232,9 +226,6 @@
 				source_ids: sourceIds,
 				target: buildTargetPayload()
 			};
-			if (mdConflict) {
-				payload.managed_document_resolution = { keep: mdKeepDocId };
-			}
 			const res = await fetch(`/${URLModel}/merge`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -421,24 +412,6 @@
 					{/if}
 				{/if}
 			</section>
-
-			{#if mdConflict}
-				<section class="space-y-2 border-t border-surface-200-800 pt-4">
-					<h3 class="text-sm font-semibold text-surface-700-300">
-						<i class="fa-solid fa-file-lines text-amber-600"></i>
-						{m.managedDocumentConflict()}
-					</h3>
-					<p class="text-sm text-surface-600-400">{m.managedDocumentConflictHelp()}</p>
-					<div class="space-y-1">
-						{#each mdConflict.candidates as doc}
-							<label class="flex items-center gap-2 cursor-pointer text-sm">
-								<input type="radio" bind:group={mdKeepDocId} value={doc.id} />
-								<span>{doc.name}</span>
-							</label>
-						{/each}
-					</div>
-				</section>
-			{/if}
 		{/if}
 
 		<div class="space-y-1 border-t border-surface-200-800 pt-4">

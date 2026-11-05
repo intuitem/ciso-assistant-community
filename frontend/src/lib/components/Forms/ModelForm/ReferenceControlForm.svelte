@@ -1,11 +1,11 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -40,7 +40,7 @@
 	cacheLock={cacheLocks['csf_function']}
 	bind:cachedValue={formDataCache['csf_function']}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="annotation"
 	label={m.annotation()}

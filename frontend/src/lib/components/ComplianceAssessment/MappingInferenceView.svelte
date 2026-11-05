@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { resultBadgeStyle } from '$lib/utils/helpers';
+	import * as m from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { resultBadgeStyle } from '#lib/utils/helpers.js';
 
 	interface SourceFramework {
 		id: string;
@@ -36,16 +36,11 @@
 	};
 
 	type SourceRequirementData =
-		| SourceRequirementAssessmentSingular
-		| SourceRequirementAssessmentMany;
+		SourceRequirementAssessmentSingular | SourceRequirementAssessmentMany;
 
 	type MappingInference = {
 		result:
-			| 'not_assessed'
-			| 'partially_compliant'
-			| 'non_compliant'
-			| 'compliant'
-			| 'not_applicable';
+			'not_assessed' | 'partially_compliant' | 'non_compliant' | 'compliant' | 'not_applicable';
 		annotation?: string | null;
 		[key: string]: unknown; // (There are other fields unused by this component)
 	} & SourceRequirementData;
@@ -85,7 +80,7 @@
 	>
 	<button
 		onclick={() => (expandedInferences = !expandedInferences)}
-		class="block mt-2 text-blue-800"
+		class="block mt-2 text-blue-800 dark:text-blue-300"
 		aria-expanded={expandedInferences}
 	>
 		<i class="h-full {expandedInferences ? 'fas fa-chevron-up' : 'fas fa-chevron-down'}"></i>

@@ -28,7 +28,7 @@ def client():
 @pytest.fixture
 def authenticated_client(app_config):
     """Get an authenticated client"""
-    admin = User.objects.create_superuser("admin@tests.com", is_published=True)
+    admin = User.objects.create_superuser("admin@tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()

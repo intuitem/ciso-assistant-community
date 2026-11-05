@@ -97,14 +97,10 @@ class EvidenceGuidanceWorkflow(Workflow):
         try:
             RequirementAssessment = apps.get_model("core", "RequirementAssessment")
             ra = (
-                RequirementAssessment.objects.select_related(
-                    "requirement", "compliance_assessment__framework"
-                )
+                ctx.scope.queryset(RequirementAssessment)
+                .select_related("requirement", "compliance_assessment__framework")
                 .prefetch_related("applied_controls", "evidences")
-                .filter(
-                    id=ctx.parsed_context.object_id,
-                    compliance_assessment__folder_id__in=ctx.accessible_folder_ids,
-                )
+                .filter(id=ctx.parsed_context.object_id)
                 .first()
             )
             if not ra or not ra.requirement:
@@ -147,7 +143,7 @@ class EvidenceGuidanceWorkflow(Workflow):
         Evidence = apps.get_model("core", "Evidence")
 
         already_attached = context_info.get("existing_evidence_ids", set())
-        qs = Evidence.objects.filter(folder_id__in=ctx.accessible_folder_ids)
+        qs = ctx.scope.queryset(Evidence)
         if already_attached:
             qs = qs.exclude(id__in=already_attached)
 

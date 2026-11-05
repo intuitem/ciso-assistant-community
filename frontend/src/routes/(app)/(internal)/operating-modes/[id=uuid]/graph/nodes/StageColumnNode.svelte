@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { NodeResizer } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		id: string;

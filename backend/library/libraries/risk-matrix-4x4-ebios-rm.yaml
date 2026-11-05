@@ -4,7 +4,7 @@ ref_id: risk-matrix-4x4-ebios-rm
 name: 4x4 risk matrix from EBIOS-RM
 description: based on the official guide of the EBIOS RM approach
 copyright: public domain
-version: 5
+version: 6
 publication_date: 2025-05-02
 provider: intuitem
 packager: intuitem
@@ -173,6 +173,168 @@ objects:
       - 2
       - 2
       - 2
+    ebios_rm:
+      ro_to:
+        motivation:
+          - name: Very low
+            translations:
+              fr:
+                name: Très faible
+              de:
+                name: Sehr niedrig
+          - name: Low
+            translations:
+              fr:
+                name: Faible
+              de:
+                name: Niedrig
+          - name: Significant
+            translations:
+              fr:
+                name: Significatif
+              de:
+                name: Bedeutend
+          - name: Strong
+            translations:
+              fr:
+                name: Fort
+              de:
+                name: Stark
+        resources:
+          - name: Limited
+            translations:
+              fr:
+                name: Limité
+              de:
+                name: Begrenzt
+          - name: Significant
+            translations:
+              fr:
+                name: Significatif
+              de:
+                name: Bedeutend
+          - name: Important
+            translations:
+              fr:
+                name: Important
+              de:
+                name: Wichtig
+          - name: Unlimited
+            translations:
+              fr:
+                name: Illimité
+              de:
+                name: Unbegrenzt
+        activity:
+          - name: Very low
+            translations:
+              fr:
+                name: Très faible
+              de:
+                name: Sehr niedrig
+          - name: Low
+            translations:
+              fr:
+                name: Faible
+              de:
+                name: Niedrig
+          - name: Moderate
+            translations:
+              fr:
+                name: Modérée
+              de:
+                name: Mittel
+          - name: Important
+            translations:
+              fr:
+                name: Important
+              de:
+                name: Wichtig
+        pertinence:
+          - name: Irrelevant
+            translations:
+              fr:
+                name: Non pertinent
+              de:
+                name: Irrelevant
+          - name: Partially relevant
+            translations:
+              fr:
+                name: Partiellement pertinent
+              de:
+                name: Teilweise relevant
+          - name: Fairly relevant
+            translations:
+              fr:
+                name: Assez pertinent
+              de:
+                name: Ziemlich relevant
+          - name: Highly relevant
+            translations:
+              fr:
+                name: Très pertinent
+              de:
+                name: Sehr relevant
+        pertinence_grid:
+          - [0, 0, 1, 1]
+          - [0, 1, 2, 2]
+          - [1, 2, 2, 3]
+          - [1, 2, 3, 3]
+      success_probability:
+        - name: Low
+          translations:
+            fr:
+              name: Faible
+            de:
+              name: Niedrig
+        - name: Significant
+          translations:
+            fr:
+              name: Significative
+            de:
+              name: Bedeutend
+        - name: Very high
+          translations:
+            fr:
+              name: Très élevée
+            de:
+              name: Sehr hoch
+        - name: Near certain
+          translations:
+            fr:
+              name: Quasi-certaine
+            de:
+              name: Nahezu sicher
+      technical_difficulty:
+        - name: Negligible
+          translations:
+            fr:
+              name: Négligeable
+            de:
+              name: Vernachlässigbar
+        - name: Low
+          translations:
+            fr:
+              name: Faible
+            de:
+              name: Niedrig
+        - name: High
+          translations:
+            fr:
+              name: Élevée
+            de:
+              name: Hoch
+        - name: Very high
+          translations:
+            fr:
+              name: Très élevée
+            de:
+              name: Sehr hoch
+      likelihood_grid:
+        - [1, 1, 0, 0]
+        - [2, 2, 1, 0]
+        - [3, 2, 2, 1]
+        - [3, 3, 2, 1]
     translations:
       fr:
         name: Matrice 4x4 EBIOS-RM

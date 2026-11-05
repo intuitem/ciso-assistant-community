@@ -15,11 +15,13 @@ Two organisations can use CISO Assistant against the same framework and the same
 A terminology entry binds a **label** to a **field path** — the specific UI surface where the label appears. The shipped field paths today cover:
 
 - `ro_to.risk_origin` — Risk Origin types on RO/TO couples in EBIOS RM.
-- `qualifications` — qualification tags on incidents, risk scenarios, and BIA escalation thresholds.
+- `qualifications` — qualification tags on incidents, risk scenarios, and BIA escalation thresholds. The word _qualification_ itself can be swapped for _risk category_ across the interface via [General settings](../configuration/settings/general.md#display-and-interface).
 - `accreditation.status` and `accreditation.category` — labels on accreditation records.
 - `entity.relationship` — third-party relationship types.
 - `metric_definition.unit` — units shown alongside metric values.
 - `project.status` and `project.health` — workflow labels on projects.
+- `processing.nature` — the nature of a processing activity (collection, storage, disclosure, erasure, …) in the privacy register.
+- `personal_data.category` — categories of personal data (name, email, health data, …) in the privacy register.
 
 For each field path, the platform ships a **built-in** set of entries (state, organised crime, terrorist, activist, … for risk origins, for example). You can:
 

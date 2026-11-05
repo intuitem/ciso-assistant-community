@@ -1,31 +1,32 @@
 <script lang="ts">
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import RadarChart from '#lib/components/Chart/RadarChart.svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
-	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
-	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
-	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import IncidentMonthlyChart from '$lib/components/Chart/IncidentMonthlyChart.svelte';
-	import ExceptionSankeyChart from '$lib/components/Chart/ExceptionSankeyChart.svelte';
-	import FindingsSankeyChart from '$lib/components/Chart/FindingsSankeyChart.svelte';
-	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
-	import CalendarHeatmap from '$lib/components/Chart/CalendarHeatmap.svelte';
-	import Card from '$lib/components/DataViz/Card.svelte';
-	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
-	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
-	import DashboardGrid from '$lib/components/Dashboard/DashboardGrid.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '#lib/components/Chart/TreemapChart.svelte';
+	import GroupedBarChart from '#lib/components/Chart/GroupedBarChart.svelte';
+	import HalfDonutChart from '#lib/components/Chart/HalfDonutChart.svelte';
+	import NightingaleChart from '#lib/components/Chart/NightingaleChart.svelte';
+	import StackedBarsNormalized from '#lib/components/Chart/StackedBarsNormalized.svelte';
+	import IncidentMonthlyChart from '#lib/components/Chart/IncidentMonthlyChart.svelte';
+	import ExceptionSankeyChart from '#lib/components/Chart/ExceptionSankeyChart.svelte';
+	import FindingsSankeyChart from '#lib/components/Chart/FindingsSankeyChart.svelte';
+	import SunburstChart from '#lib/components/Chart/SunburstChart.svelte';
+	import CalendarHeatmap from '#lib/components/Chart/CalendarHeatmap.svelte';
+	import Card from '#lib/components/DataViz/Card.svelte';
+	import CardGroup from '#lib/components/DataViz/CardGroup.svelte';
+	import SimpleCard from '#lib/components/DataViz/SimpleCard.svelte';
+	import DashboardGrid from '#lib/components/Dashboard/DashboardGrid.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import type { PageData } from './$types';
 	import CounterCard from './CounterCard.svelte';
 
@@ -101,7 +102,12 @@
 	let group = $derived(page.url.searchParams.get('tab') || 'summary');
 	let selectedDashboardId = $derived(page.url.searchParams.get('dashboard') || '');
 	let canChangeSettings = $derived(
-		Object.hasOwn(data.user?.permissions ?? {}, 'change_globalsettings')
+		canPerformAction({
+			user: data.user,
+			action: 'change',
+			model: 'globalsettings',
+			domain: data.user?.root_folder_id ?? ''
+		})
 	);
 
 	let dashboardPickerOpen = $state(false);
@@ -139,8 +145,10 @@
 	});
 
 	function handleTabChange(tabValue: string): void {
-		page.url.searchParams.set('tab', tabValue);
-		goto(page.url);
+		// A fresh URL: goto() on the mutated live object skips the load.
+		const next = new URL(page.url.href);
+		next.searchParams.set('tab', tabValue);
+		goto(next);
 	}
 
 	async function handleCustomDashboardChange(dashboardId: string): Promise<void> {
@@ -168,19 +176,19 @@
 				return;
 			}
 			// Clear URL override so the new global default is the source of truth
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.set('tab', 'custom');
 			url.searchParams.delete('dashboard');
-			goto(url, { invalidateAll: true });
+			goto(url, { refreshAll: true });
 		} else {
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.set('tab', 'custom');
 			if (dashboardId) {
 				url.searchParams.set('dashboard', dashboardId);
 			} else {
 				url.searchParams.delete('dashboard');
 			}
-			goto(url, { invalidateAll: true });
+			goto(url, { refreshAll: true });
 		}
 	}
 </script>
@@ -742,7 +750,7 @@
 									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 								>
 									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.qualificationsChartTitle()}
+										{safeTranslate('qualificationsChartTitle')}
 									</h3>
 									<div class="overflow-y-auto max-h-[500px]">
 										<div style="height: {Math.max(224, qLabels.length * 28)}px">
@@ -760,7 +768,9 @@
 								<div
 									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 flex items-center justify-center"
 								>
-									<p class="text-surface-600-400">{m.noQualificationsFoundOnRiskScenarios()}</p>
+									<p class="text-surface-600-400">
+										{safeTranslate('noQualificationsFoundOnRiskScenarios')}
+									</p>
 								</div>
 							{/if}
 						</div>
@@ -822,7 +832,7 @@
 									{m.vulnerabilityDistribution()}
 								</h3>
 								<div class="h-96">
-									{#await import('$lib/components/Chart/VulnerabilitySankeyChart.svelte')}
+									{#await import('#lib/components/Chart/VulnerabilitySankeyChart.svelte')}
 										<LoadingSpinner />
 									{:then { default: VulnerabilitySankeyChart }}
 										<VulnerabilitySankeyChart {sankeyData} />
@@ -874,7 +884,12 @@
 												<div class="flex items-center gap-3">
 													<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
 													<h3 class="text-lg font-semibold text-surface-900-100">
-														{frameworkName}
+														<a
+															href="/frameworks/{frameworkData.framework_id}"
+															class="hover:text-blue-600 hover:underline"
+														>
+															{frameworkName}
+														</a>
 													</h3>
 												</div>
 												<div class="flex items-center gap-2">
@@ -929,8 +944,9 @@
 													<!-- Assessments Grid -->
 													<div class="grid gap-3">
 														{#each domain.assessments as assessment}
-															<div
-																class="group border border-surface-200-800 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
+															<a
+																href="/compliance-assessments/{assessment.assessment_id}"
+																class="block group border border-surface-200-800 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
 															>
 																<div class="flex justify-between items-start gap-4">
 																	<div class="flex-1 min-w-0">
@@ -992,7 +1008,7 @@
 																		</div>
 																	</div>
 																</div>
-															</div>
+															</a>
 														{/each}
 													</div>
 												</div>
@@ -1116,115 +1132,117 @@
 								</div>
 							</div>
 
-							<!-- Third Row: Incident Summary Cards -->
-							<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
-								<!-- Summary Cards (full width) -->
-								<div class="xl:col-span-1">
-									<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
-										<SimpleCard
-											count={operationsAnalytics?.summary_stats?.total_incidents ?? 0}
-											label={m.totalIncidents()}
-											href="/incidents/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={operationsAnalytics?.summary_stats?.incidents_this_month ?? 0}
-											label={m.incidentsThisMonth()}
-											href="/incidents/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={operationsAnalytics?.summary_stats?.open_incidents ?? 0}
-											label={m.openIncidents()}
-											href="/incidents/?status=new&status=ongoing&status=resolved"
-											emphasis={true}
-										/>
-									</CardGroup>
-								</div>
-							</div>
-
-							<!-- Third Row: Severity Breakdown and Qualifications Radar -->
-							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-								<!-- Severity Breakdown Chart -->
-								<div
-									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
-								>
-									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.incidentSeverityBreakdown()}
-									</h3>
-									<div class="h-80">
-										<DonutChart
-											name="incident_severity"
-											values={operationsAnalytics?.severity_breakdown ?? []}
-										/>
-									</div>
-								</div>
-
-								<!-- Qualifications Radar Chart -->
-								<div
-									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
-								>
-									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.incidentQualificationsRadar()}
-									</h3>
-									<div class="h-80">
-										{#if operationsAnalytics?.qualifications_breakdown?.labels?.length > 0}
-											<RadarChart
-												name="incident_qualifications"
-												title=""
-												labels={operationsAnalytics?.qualifications_breakdown?.labels ?? []}
-												values={operationsAnalytics?.qualifications_breakdown?.values ?? []}
+							{#if page.data?.featureflags?.incidents}
+								<!-- Third Row: Incident Summary Cards -->
+								<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
+									<!-- Summary Cards (full width) -->
+									<div class="xl:col-span-1">
+										<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
+											<SimpleCard
+												count={operationsAnalytics?.summary_stats?.total_incidents ?? 0}
+												label={m.totalIncidents()}
+												href="/incidents/"
+												emphasis={true}
 											/>
-										{:else}
-											<div class="flex items-center justify-center h-full text-surface-600-400">
-												<p>{m.noQualificationsData()}</p>
-											</div>
-										{/if}
+											<SimpleCard
+												count={operationsAnalytics?.summary_stats?.incidents_this_month ?? 0}
+												label={m.incidentsThisMonth()}
+												href="/incidents/"
+												emphasis={true}
+											/>
+											<SimpleCard
+												count={operationsAnalytics?.summary_stats?.open_incidents ?? 0}
+												label={m.openIncidents()}
+												href="/incidents/?status=new&status=ongoing&status=resolved"
+												emphasis={true}
+											/>
+										</CardGroup>
 									</div>
 								</div>
-							</div>
 
-							<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
-							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-								<!-- Monthly Incident Metrics (3/5 of width) -->
-								<div class="xl:col-span-3">
+								<!-- Third Row: Severity Breakdown and Qualifications Radar -->
+								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+									<!-- Severity Breakdown Chart -->
 									<div
 										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 									>
 										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-											{m.monthlyIncidentMetrics()}
-										</h3>
-										<div class="h-80">
-											<IncidentMonthlyChart
-												name="incident_monthly"
-												title=""
-												months={operationsAnalytics?.monthly_metrics?.months ?? []}
-												monthlyCount={operationsAnalytics?.monthly_metrics?.monthly_counts ?? []}
-												cumulativeCount={operationsAnalytics?.monthly_metrics?.cumulative_counts ??
-													[]}
-											/>
-										</div>
-									</div>
-								</div>
-
-								<!-- Detection Breakdown Chart (2/5 of width) -->
-								<div class="xl:col-span-2">
-									<div
-										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
-									>
-										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-											{m.incidentDetectionBreakdown()}
+											{m.incidentSeverityBreakdown()}
 										</h3>
 										<div class="h-80">
 											<DonutChart
-												name="incident_detection"
-												values={operationsAnalytics?.incident_detection_breakdown ?? []}
-												colors={['#3B82F6', '#EF4444']}
+												name="incident_severity"
+												values={operationsAnalytics?.severity_breakdown ?? []}
 											/>
 										</div>
 									</div>
+
+									<!-- Qualifications Radar Chart -->
+									<div
+										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+									>
+										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+											{safeTranslate('incidentQualificationsRadar')}
+										</h3>
+										<div class="h-80">
+											{#if operationsAnalytics?.qualifications_breakdown?.labels?.length > 0}
+												<RadarChart
+													name="incident_qualifications"
+													title=""
+													labels={operationsAnalytics?.qualifications_breakdown?.labels ?? []}
+													values={operationsAnalytics?.qualifications_breakdown?.values ?? []}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-surface-600-400">
+													<p>{safeTranslate('noQualificationsData')}</p>
+												</div>
+											{/if}
+										</div>
+									</div>
 								</div>
-							</div>
+
+								<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
+								<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+									<!-- Monthly Incident Metrics (3/5 of width) -->
+									<div class="xl:col-span-3">
+										<div
+											class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+										>
+											<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+												{m.monthlyIncidentMetrics()}
+											</h3>
+											<div class="h-80">
+												<IncidentMonthlyChart
+													name="incident_monthly"
+													title=""
+													months={operationsAnalytics?.monthly_metrics?.months ?? []}
+													monthlyCount={operationsAnalytics?.monthly_metrics?.monthly_counts ?? []}
+													cumulativeCount={operationsAnalytics?.monthly_metrics
+														?.cumulative_counts ?? []}
+												/>
+											</div>
+										</div>
+									</div>
+
+									<!-- Detection Breakdown Chart (2/5 of width) -->
+									<div class="xl:col-span-2">
+										<div
+											class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+										>
+											<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+												{m.incidentDetectionBreakdown()}
+											</h3>
+											<div class="h-80">
+												<DonutChart
+													name="incident_detection"
+													values={operationsAnalytics?.incident_detection_breakdown ?? []}
+													colors={['#3B82F6', '#EF4444']}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+							{/if}
 						</section>
 					{:else}
 						<div
@@ -1235,15 +1253,19 @@
 							</div>
 							<div class="text-surface-600-400">
 								<p class="text-xl font-semibold mb-2">{m.noOperationsData()}</p>
-								<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
+								{#if page.data?.featureflags?.incidents}
+									<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
+								{/if}
 							</div>
-							<a
-								href="/incidents"
-								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
-							>
-								<i class="fas fa-plus text-sm"></i>
-								{m.createIncident()}
-							</a>
+							{#if page.data?.featureflags?.incidents}
+								<a
+									href="/incidents"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								>
+									<i class="fas fa-plus text-sm"></i>
+									{m.createIncident()}
+								</a>
+							{/if}
 						</div>
 					{/if}
 				{:catch error}

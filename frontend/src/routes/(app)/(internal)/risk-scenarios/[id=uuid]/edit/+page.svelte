@@ -1,27 +1,27 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { modelSchema } from '$lib/utils/schemas';
-	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import type { StrengthOfKnowledgeEntry } from '#lib/utils/types.js';
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { page } from '$app/state';
-	import { goto } from '$lib/utils/breadcrumbs';
+	import { goto } from '#lib/utils/breadcrumbs.js';
 
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 	import {
@@ -29,7 +29,7 @@
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;
@@ -90,6 +90,24 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalThreatModelCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.threatModelCreateForm,
+				formAction: '?/createThreatModel',
+				model: data.threatModelModel,
+				invalidateAll: false,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + data.threatModelModel.localName)
+		});
+	}
+
 	let refreshKey = $state(false);
 	run(() => {
 		if (form?.newControl) {
@@ -105,6 +123,17 @@
 						}
 					: current
 			);
+			form = null;
+		}
+	});
+
+	run(() => {
+		if (form?.newThreatModel) {
+			refreshKey = !refreshKey;
+			_form.form.update((current: Record<string, any>) => ({
+				...current,
+				threat_models: form?.newThreatModel
+			}));
 			form = null;
 		}
 	});
@@ -178,6 +207,7 @@
 							form={_form}
 							multiple
 							optionsEndpoint="actors"
+							lazy
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],
@@ -240,6 +270,7 @@
 							classes: 'text-blue-500'
 						}}
 						field="assets"
+						portalDropdown
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						label={m.assets()}
 					/>
@@ -247,10 +278,12 @@
 						form={_form}
 						multiple
 						optionsEndpoint="threats"
+						lazy
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
 						optionsLabelField="auto"
 						field="threats"
+						portalDropdown
 						label={m.threats()}
 					/>
 					<AutocompleteSelect
@@ -261,6 +294,7 @@
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
+						portalDropdown
 						label={m.vulnerabilities()}
 					/>
 					<AutocompleteSelect
@@ -271,14 +305,17 @@
 						optionsLabelField="auto"
 						optionsExtraFields={[['folder', 'str']]}
 						field="incidents"
+						portalDropdown
 						label={m.incidents()}
 					/>
 					<AutocompleteSelect
 						multiple
 						form={_form}
 						optionsEndpoint="security-exceptions"
+						lazy
 						optionsExtraFields={[['folder', 'str']]}
 						field="security_exceptions"
+						portalDropdown
 						label={m.securityExceptions()}
 					/>
 				</div>
@@ -315,6 +352,7 @@
 					form={_form}
 					multiple
 					optionsEndpoint="risk-scenarios"
+					lazy
 					optionsExtraFields={[
 						['risk_assessment', 'str'],
 						['ref_id', 'str']
@@ -326,6 +364,43 @@
 					helpText={m.antecedentScenariosHelpText()}
 				/>
 			</div>
+			{#if page.data.featureflags?.threat_modeling}
+				<div class="card px-5 py-4 bg-surface-50-950 shadow-lg flex-1">
+					<div class="flex items-center gap-2 mb-2">
+						<i class="fa-solid fa-diagram-project text-xs text-indigo-400"></i>
+						<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
+							>{m.threatModel()}</span
+						>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="flex-1">
+							{#key refreshKey}
+								<AutocompleteSelect
+									form={_form}
+									nullable
+									optionsEndpoint="threat-models"
+									lazy
+									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
+									optionsExtraFields={[['folder', 'str']]}
+									optionsLabelField="auto"
+									field="threat_models"
+									label={m.threatModel()}
+									helpText={m.threatModelHelpText()}
+								/>
+							{/key}
+						</div>
+						<button
+							class="btn preset-tonal-primary shrink-0 h-10 w-10"
+							onclick={(_) => modalThreatModelCreateForm()}
+							type="button"
+							title={safeTranslate('add-' + data.threatModelModel.localName)}
+							aria-label={safeTranslate('add-' + data.threatModelModel.localName)}
+						>
+							<i class="fa-solid fa-plus text-sm"></i>
+						</button>
+					</div>
+				</div>
+			{/if}
 		</div>
 
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
@@ -354,8 +429,9 @@
 						</div>
 						<span
 							class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
-							>&times;</span
+							>×</span
 						>
+
 						<div class="min-w-36">
 							<Select
 								form={_form}
@@ -410,10 +486,15 @@
 										multiple
 										form={_form}
 										optionsEndpoint="applied-controls"
+										lazy
 										optionsExtraFields={[['folder', 'str']]}
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
 										]}
+										optionsInfoFields={{
+											fields: [{ field: 'category', translate: true }],
+											position: 'prefix'
+										}}
 										field="existing_applied_controls"
 										label={m.existingControls()}
 										helpText={m.existingControlsHelper()}
@@ -443,8 +524,9 @@
 							</div>
 							<span
 								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
-								>&times;</span
+								>×</span
 							>
+
 							<div class="min-w-36">
 								<Select
 									form={_form}
@@ -498,10 +580,15 @@
 										multiple
 										form={_form}
 										optionsEndpoint="applied-controls"
+										lazy
 										optionsExtraFields={[['folder', 'str']]}
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
 										]}
+										optionsInfoFields={{
+											fields: [{ field: 'category', translate: true }],
+											position: 'prefix'
+										}}
 										field="applied_controls"
 										label={m.extraAppliedControls()}
 										helpText={m.extraControlsHelper()}
@@ -531,8 +618,9 @@
 							</div>
 							<span
 								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
-								>&times;</span
+								>×</span
 							>
+
 							<div class="min-w-36">
 								<Select
 									form={_form}
@@ -577,7 +665,7 @@
 					multiple
 					optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 					field="qualifications"
-					label={m.qualifications()}
+					label={safeTranslate('qualifications')}
 					optionsLabelField="translated_name"
 				/>
 				<Select

@@ -1,0 +1,89 @@
+urn: urn:intuitem:risk:library:workflow-risk-high-risk-untreated
+locale: en
+ref_id: workflow-risk-high-risk-untreated
+name: Untreated high risks — weekly sweep
+description: Lists risk scenarios rated at or above the threshold whose treatment is still open. The level
+  index depends on your matrix; adjust it.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-risk-high-risk-untreated:workflow:high-risk-untreated
+    schema_version: 1
+    ref_id: high-risk-untreated
+    name: Untreated high risks — weekly sweep
+    description: Lists risk scenarios rated at or above the threshold whose treatment is still open. The
+      level index depends on your matrix; adjust it.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: risk@example.com
+      nodes:
+      - ref: every_monday
+        type: trigger
+        label: Monday 09:00
+        trigger_config:
+          type: schedule
+          cron_expression: 0 9 * * 1
+          timezone: UTC
+      - ref: fetch_risks
+        type: action
+        label: High risks left open
+        action_config:
+          type: read_objects
+          model: risk_scenario
+          mode: list
+          order_by: -current_level
+          limit: 50
+          filters:
+            operator: and
+            conditions:
+            - field: current_level
+              op: gte
+              value: 3
+            - field: treatment
+              op: eq
+              value: open
+      - ref: per_risk
+        type: loop
+        label: One line per scenario
+        loop_config:
+          collection: '{{nodes.fetch_risks.results}}'
+          collect: '{{item.name}}'
+          on_item_error: continue
+      - ref: note_risk
+        type: action
+        label: Log the scenario
+        action_config:
+          type: log
+          message: '{{item.ref_id}} {{item.name}} · {{item.risk_assessment.name}}'
+      - ref: send_digest
+        type: action
+        label: Email the sweep
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Untreated high risks: {{nodes.fetch_risks.count}}'
+          body: 'As of {{today}}, {{nodes.fetch_risks.count}} scenario(s) are rated high and still untreated:
+            {{nodes.per_risk.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: every_monday
+        target: fetch_risks
+      - source: fetch_risks
+        target: per_risk
+      - source: per_risk
+        target: note_risk
+        source_port: each
+      - source: note_risk
+        target: per_risk
+      - source: per_risk
+        target: send_digest
+        source_port: done
+      - source: send_digest
+        target: done

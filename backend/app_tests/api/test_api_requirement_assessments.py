@@ -138,12 +138,14 @@ class TestRequirementAssessmentsAuthenticated:
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
                         "field_visibility": compliance_assessment.framework.field_visibility,
+                        "result_aggregation": compliance_assessment.framework.result_aggregation,
                         "str": str(compliance_assessment.framework),
                     },
                 },
                 "requirement": {
                     "id": str(RequirementNode.objects.all()[0].id),
                     "urn": RequirementNode.objects.all()[0].urn,
+                    "parent_urn": RequirementNode.objects.all()[0].parent_urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
                     "questions": None,
@@ -151,6 +153,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "typical_evidence": RequirementNode.objects.all()[
                         0
                     ].typical_evidence,
+                    "evidence_required": RequirementNode.objects.all()[
+                        0
+                    ].evidence_required,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
                     "associated_reference_controls": RequirementNode.objects.all()[
                         0
@@ -239,6 +244,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
                         "field_visibility": compliance_assessment.framework.field_visibility,
+                        "result_aggregation": compliance_assessment.framework.result_aggregation,
                         "str": str(compliance_assessment.framework),
                     },
                 }
@@ -310,12 +316,14 @@ class TestRequirementAssessmentsAuthenticated:
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
                         "field_visibility": compliance_assessment.framework.field_visibility,
+                        "result_aggregation": compliance_assessment.framework.result_aggregation,
                         "str": str(compliance_assessment.framework),
                     },
                 },
                 "requirement": {
                     "id": str(RequirementNode.objects.all()[0].id),
                     "urn": RequirementNode.objects.all()[0].urn,
+                    "parent_urn": RequirementNode.objects.all()[0].parent_urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
                     "questions": None,
@@ -323,6 +331,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "typical_evidence": RequirementNode.objects.all()[
                         0
                     ].typical_evidence,
+                    "evidence_required": RequirementNode.objects.all()[
+                        0
+                    ].evidence_required,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
                     "associated_reference_controls": RequirementNode.objects.all()[
                         0

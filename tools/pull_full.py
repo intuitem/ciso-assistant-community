@@ -78,7 +78,7 @@ def build_parser():
     return p
 
 
-def get_all_ids(limit=5000):
+def get_all_ids(limit=200):
     ids, offset = [], 0
     while True:
         r = session.get(
@@ -91,7 +91,9 @@ def get_all_ids(limit=5000):
         ids.extend(item["id"] for item in data["results"])
         if not data.get("next"):
             return ids
-        offset += limit
+        # Advance by what was actually served: the server clamps limit to
+        # its ceiling, so stepping by the requested limit would skip rows.
+        offset += len(data["results"])
 
 
 def fetch_detail(obj_id):
@@ -100,7 +102,7 @@ def fetch_detail(obj_id):
     return r.json()
 
 
-def fetch_full_bulk(limit=5000):
+def fetch_full_bulk(limit=200):
     """Pull full-detail records via the single bulk endpoint, paginated."""
     results, offset = [], 0
     while True:
@@ -114,7 +116,9 @@ def fetch_full_bulk(limit=5000):
         results.extend(data["results"])
         if not data.get("next"):
             return results
-        offset += limit
+        # Advance by what was actually served: the server clamps limit to
+        # its ceiling, so stepping by the requested limit would skip rows.
+        offset += len(data["results"])
 
 
 def run_bulk():

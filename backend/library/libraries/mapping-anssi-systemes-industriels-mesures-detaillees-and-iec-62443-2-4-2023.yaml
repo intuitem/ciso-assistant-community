@@ -1,0 +1,394 @@
+urn: urn:intuitem:risk:library:mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-2-4-2023
+locale: en
+ref_id: mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-2-4-2023
+name: ANSSI Systèmes industriels - Mesures détaillées <-> IEC 62443-2-4
+description: Correspondences between the ANSSI guide 'La cybersécurité des systèmes industriels – Mesures
+  détaillées' (v2) and IEC 62443-2-4, as published by ANSSI in the guide (Annex A and per-recommendation
+  badges).
+copyright: Licence Ouverte v2.0 - Etalab (ANSSI)
+version: 1
+publication_date: 2026-09-30
+provider: ANSSI
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:anssi-systemes-industriels-mesures-detaillees
+- urn:intuitem:risk:library:iec-62443-2-4-2023
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-2-4-2023
+    ref_id: mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-2-4-2023
+    name: ANSSI Systèmes industriels - Mesures détaillées <-> IEC 62443-2-4
+    description: Correspondences between the ANSSI guide 'La cybersécurité des systèmes industriels –
+      Mesures détaillées' (v2) and IEC 62443-2-4, as published by ANSSI in the guide (Annex A and per-recommendation
+      badges).
+    source_framework_urn: urn:intuitem:risk:framework:anssi-systemes-industriels-mesures-detaillees
+    target_framework_urn: urn:intuitem:risk:framework:iec-62443-2-4-2023
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r2
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.05, SP01.06BR, SP01.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r4
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.02RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r4
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP06.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r5
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.02RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r5
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP06.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r6
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.02RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r6
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP06.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r7
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.01BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r7
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.01'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r8
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP12.01BR, SP12.05BR, SP12.06BR, SP12.08BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r9
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP12.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r10
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP12.04BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r15
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.01, SP01.02, SP01.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r16
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.05, SP01.06, SP01.07'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r18
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.01, SP01.02, SP01.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r19
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.01, SP01.02, SP01.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r20
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.01, SP01.02, SP01.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r26
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.02RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r26
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP06.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r29
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.01BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r29
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.01'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r39
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP06.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r41
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.08RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r41
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.09
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP09.01BR, SP09.02'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r42
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.08BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r51
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.05BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r55
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.03BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r55
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP11.06RE3'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r61
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.02RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r73
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP12.01BR, SP12.02BR, SP12.05BR, SP12.06BR, SP12.08BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r74
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP12.09'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r77
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP11.06RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r85
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r86
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP01.05BR, SP01.06BR, SP01.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r88
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.01BR, SP08.03BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r93
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.09
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP09.05, SP09.06, SP09.07, SP09.08'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r96
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.08RE2'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r99
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.07RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r99-plus
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.07RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r104
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02, SP03.03RE1, SP03.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r106
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r106-moins
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r108
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02, SP03.03RE1, SP03.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r108-moins
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02, SP03.03RE1, SP03.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r112
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r112-moins
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r117
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.04BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r123
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02, SP03.03RE1, SP03.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r124
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP07.02BR, SP07.03BR, SP07.04'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r125
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02, SP03.03RE1, SP03.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r127
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.02, SP03.03RE1, SP03.07BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r129
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP07.02BR, SP07.03BR, SP07.04'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r130
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.07RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r130
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP07.02BR, SP07.03BR, SP07.04'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r131
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.01BR, SP08.03BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r135
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP07.02BR, SP07.03BR, SP07.04'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r138
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP07.02BR, SP07.03BR, SP07.04'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r139
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.01BR, SP08.03BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r142
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.04
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP04.02'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r145
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.08RE2, SP03.10'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r147
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.04
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP04.02BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r149
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.01BR, SP08.03BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r151
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.02RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r153
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r153
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.05'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r154
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP07.02BR, SP07.03BR, SP07.04'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r156
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r156
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.05'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r160
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.08BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r161
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP10.03, SP10.04'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r168
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.02'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r168
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.03BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r168
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP11.06'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r170
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP11.02RE2'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r172
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP11.01RE1, SP11.06RE3'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r174
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP10.05RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r175
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP10.05RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r178
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r178
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.05'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r182
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r182
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.05, SP03.10RE4'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r183
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.01RE1, SP08.02RE1, SP08.03RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r185
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.08RE2, SP03.10'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r187
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP10.05RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r189
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP10.05RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r192
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.05'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r193
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP02.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r193
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP03.05, SP03.08BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r193
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.09
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP09.01'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r204
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.02RE1'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r206
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.03BR'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r209
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      relationship: intersect
+      annotation: 'IEC 62443-2-4: SP08.02RE1'

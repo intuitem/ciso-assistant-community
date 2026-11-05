@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { URL_MODEL_MAP } from '$lib/utils/crud';
-import { error, json } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import type { urlModel } from '$lib/utils/types';
+import type { urlModel } from '#lib/utils/types.js';
 
 export const GET: RequestHandler = async ({ params, fetch }) => {
 	const { model, id } = params;
@@ -18,5 +18,5 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 		throw error(response.status, await response.text());
 	}
 
-	return json(await response.json());
+	return Response.json(await response.json());
 };

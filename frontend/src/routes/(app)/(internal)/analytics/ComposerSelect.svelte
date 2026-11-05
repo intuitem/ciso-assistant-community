@@ -1,10 +1,11 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import { getOptions } from '$lib/utils/crud';
-	import { composerSchema } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import { getOptions } from '#lib/utils/crud.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import { composerSchema } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -18,9 +19,7 @@
 	let options: { label: string; value: string }[] = $state();
 
 	onMount(async () => {
-		const riskAssessments = await fetch('/risk-assessments')
-			.then((res) => res.json())
-			.then((res) => res.results);
+		const riskAssessments = await fetchAllPages(fetch, '/risk-assessments');
 		options = getOptions({
 			objects: riskAssessments,
 			label: 'str',
@@ -54,7 +53,7 @@
 						class="btn preset-filled-primary-500">{m.processButton()}</Anchor
 					>
 				{:else}
-					<p class="btn-base rounded-base select-none preset-filled-surface-500 opacity-30">
+					<p class="btn-base rounded-base select-none preset-tonal-surface opacity-30">
 						{m.processButton()}
 					</p>
 				{/if}

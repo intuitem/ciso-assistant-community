@@ -38,7 +38,7 @@ def _is_path_exempt(request) -> bool:
     """
     Check if the request path should be exempt from focus mode filtering.
     """
-    if request.path == "/api/folders/":
+    if request.path in ("/api/folders/", "/api/folders/org_tree/"):
         # Only exempt if no_focus is set
         return _is_truthy(request.GET.get("no_focus"))
     for exempt_path in FOCUS_MODE_EXEMPT_PATHS:

@@ -4,13 +4,14 @@ from decimal import Decimal, InvalidOperation
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import models
 from django.utils.dateparse import parse_date
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 
 
 class FieldType(models.TextChoices):
@@ -20,6 +21,7 @@ class FieldType(models.TextChoices):
     BOOLEAN = "boolean", _("Boolean")
     CHOICE = "choice", _("Choice")
     MULTI_CHOICE = "multi_choice", _("Multiple choice")
+    URL = "url", _("URL")
 
 
 # Each field type is stored in exactly one typed column of CustomFieldValue.
@@ -30,6 +32,7 @@ TYPE_TO_COLUMN = {
     FieldType.BOOLEAN: "value_boolean",
     FieldType.CHOICE: "value_text",
     FieldType.MULTI_CHOICE: "value_text",
+    FieldType.URL: "value_text",
 }
 
 # Only value_text-backed types can be searched (search scans value_text).
@@ -75,11 +78,19 @@ def coerce_value(field_type: str, raw):
             return False
         raise ValueError(f"'{raw}' is not a valid boolean")
 
+    if field_type == FieldType.URL:
+        value = str(raw)
+        try:
+            URLValidator(schemes=["http", "https"])(value)
+        except ValidationError:
+            raise ValueError(f"'{raw}' is not a valid URL")
+        return value
+
     # text, choice, multi_choice → stored as text
     return str(raw)
 
 
-class CustomFieldDefinition(FolderMixin, PublishInRootFolderMixin, AbstractBaseModel):
+class CustomFieldDefinition(FolderMixin, AbstractBaseModel):
     """Schema of an org-defined field attached to a host model.
 
     Scoping (design B): the inherited ``folder`` decides where the field applies.
@@ -182,9 +193,7 @@ class CustomFieldDefinition(FolderMixin, PublishInRootFolderMixin, AbstractBaseM
 
     @staticmethod
     def _ancestor_or_self_ids(folder: Folder) -> set:
-        ids = {folder.id}
-        ids.update(f.id for f in folder.get_parent_folders())
-        return ids
+        return {f.id for f in folder.get_parent_folders(include_self=True)}
 
     @classmethod
     def for_object(cls, obj) -> models.QuerySet["CustomFieldDefinition"]:
@@ -219,6 +228,8 @@ class CustomFieldChoice(AbstractBaseModel):
         return (
             (self.translations or {}).get(get_language(), {}).get("label", self.label)
         )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("custom field choice")
@@ -260,6 +271,8 @@ class CustomFieldValue(AbstractBaseModel):
     )
     value_date = models.DateField(null=True, blank=True)
     value_boolean = models.BooleanField(null=True, blank=True)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("custom field value")

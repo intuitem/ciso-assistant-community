@@ -21,8 +21,9 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## C
 
-- **Campaign** — An orchestration object for running many audits in parallel — for example, one audit per perimeter against the same framework. PRO feature.
+- **Campaign** — An orchestration object for running one assessment exercise across many targets at once: an **internal campaign** targets your perimeters, a **third-party campaign** targets your third parties. PRO feature.
 - **Catalog object** — A reusable building block of CISO Assistant: framework, threat, risk matrix, reference control, mapping, security advisory, CWE. Catalog objects are packaged into libraries.
+- **Commitment** — The delivery date an owner has actually promised for a piece of remediation work, and the record of the negotiation that produced it. Distinct from an ETA, which anyone can type in.
 - **Compliance assessment** — Internal model name for an **audit**. See **Audit**.
 - **Contract** — A third-party agreement attached to a supplier entity or solution, with terms, dates, and renewal information.
 - **Control** — Generic term. Disambiguate against **applied control** (concrete instance) and **reference control** (template).
@@ -40,6 +41,8 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Data transfer** — A record of cross-border or cross-entity movement of personal data, with destination, legal basis, and safeguards.
 - **Document revision** — A single revision of a [Managed document](#m). Carries a version number and a lifecycle status (draft → in review → change requested → validated → published → deprecated).
 - **Domain** — The top-level container in CISO Assistant: a business unit, subsidiary, project, or any boundary used for organising work and isolating permissions via role-based access control. Sub-domains nest underneath. Internally a `Folder`. _Demo_ and _Starter_ are reserved for internal features.
+- **DPIA** — Data protection impact assessment (GDPR Art. 35): the analysis of a processing likely to result in a high risk to people's rights. Carried out as a quick form on the processing; once accepted, it is the processing's DPIA of record. See [DPIA and screening](../concepts/dpia.md).
+- **DPIA screening** — The short check, also called pre-DPIA, that decides whether a processing needs a DPIA. Once accepted, it sets the processing's **DPIA required** flag.
 
 ## E
 
@@ -50,12 +53,14 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Escalation threshold** — A point-in-time / impact pair attached to an asset assessment inside a BIA: "after 4 hours of outage, impact is _high_". Lets a BIA model how disruption escalates rather than recording a single worst-case impact.
 - **Evidence** — A document, screenshot, configuration sample, or any other artifact attached to an applied control or requirement assessment to substantiate compliance.
 - **Evidence revision** — A single versioned iteration of an evidence object. Replacing an attachment creates a new revision rather than overwriting the previous one; revisions carry a version number, an SHA-256 integrity hash, optional observation, and a link to the task occurrence that produced them when applicable.
+- **External rating** — A score published about one of your third parties by an outside rating service (SecurityScorecard, Bitsight, CyberVadis, …), recorded with the provider's scale so readings from different providers can be compared.
 
 ## F
 
 - **Feared event** — In EBIOS RM, the undesirable outcome to be avoided on a primary asset — for example, a confidentiality breach of customer data.
 - **Filtering label** — A free-form tag that can be attached to most objects for categorisation, filtering, and reporting.
-- **Findings assessment** — A formal record tracking issues raised by an audit, a security review, or an external assessor, used to drive remediation through to closure.
+- **Finding** — A single issue to be remediated — a non-compliance, an observation, a vulnerability found in a pentest. Usually collected in a **findings binder**, but can stand alone.
+- **Findings binder** — A formal record collecting the issues raised by one review — an audit, a security review, a pentest, an external assessor's report — and driving them through to closure. Internally `FindingsAssessment`; surfaced as *Follow-up* in earlier versions.
 - **Focus mode** — A workspace mode that filters the entire UI to a single domain, hiding objects belonging to other domains. PRO feature.
 - **Folder** — Internal model name for a **domain**. See **Domain**.
 - **Framework** — A set of requirements covering patterns and expectations needed to comply with a regulation, prepare a certification, or establish a foundation. Shipped as a YAML library.
@@ -103,8 +108,9 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Personal data** — In a privacy register, any data referring to an identified or identifiable individual.
 - **Policy** — A specific type of applied control: a document describing what is expected from some part of your stakeholders. Lives in CISO Assistant so its lifecycle can be managed alongside the rest of your controls.
 - **Preset** — A reusable template describing a guided workflow: a set of starter objects to scaffold (audit, risk assessment, etc.) plus an ordered list of steps to follow. Library-backed or authored locally; applied to a domain to produce a [Journey](#j).
-- **Processing** — In a privacy register, an activity that operates on personal data (collection, storage, transfer, deletion). Captures purpose, lawful basis, recipients, and retention.
+- **Processing** — In a privacy register, an activity that operates on personal data (collection, storage, transfer, deletion). Captures purpose, lawful basis, recipients, and retention. Its **GDPR role** (controller, joint controller or data processor) puts it in the controller or the processor register.
 - **Processing nature** — A catalogued type of processing operation (collection, storage, transfer, disclosure, deletion, …) used to characterise a processing.
+- **Processor register** — The record of processings carried out on behalf of clients (GDPR Art. 30(2)): processings whose GDPR role is data processor, with the clients they serve. The controller register (Art. 30(1)) holds the rest. See [Privacy register](../concepts/privacy-register.md#controller-and-processor-registers).
 - **Project** — In the project-management module, a planned initiative with deliverables and milestones. Distinct from the legacy meaning of "project" in older CISO Assistant documentation — see **Perimeter**.
 - **Purpose** — In a privacy register, the lawful reason for which personal data is processed.
 
@@ -116,6 +122,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## R
 
+- **Rating** — A quick form outcome rule that classifies the answers to its scales into named levels, through a grid or rules: a DPIA's privacy risk crosses severity and likelihood. See [Scales and ratings](../concepts/quick-forms.md#scales-and-ratings).
 - **Recap** — The roll-up view of a business impact analysis, aggregating asset assessments and their escalation thresholds into a single readout.
 - **Recovery target** — A documented commitment for restoring an asset after disruption, typically a Recovery Time Objective (RTO) or Recovery Point Objective (RPO). Tracked on an asset assessment as "documented", "tested", and "targets met" flags.
 - **Reference control** — A template for an applied control. Provided by frameworks via libraries, or defined locally. Optional but recommended for keeping applied controls consistent across the organisation.
@@ -142,7 +149,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 ## S
 
 - **Security advisory** — A catalogued security warning published by a vendor or CERT (e.g. CVE entries). Linked to vulnerabilities and affected assets.
-- **Security exception** — A documented, time-bound deviation from a control or policy, approved through a workflow and tracked for review.
+- **Security exception** — A documented, time-bound deviation from a requirement, control or risk treatment, with owners and an expiration date. See [Security exceptions](../concepts/security-exceptions.md).
 - **Severity** — The shared ordinal scale used to qualify vulnerabilities, incidents, and findings: undefined / info / low / medium / high / critical. Drives SLA escalation and visual emphasis in dashboards.
 - **Solution** — A product or service provided by an entity.
 - **Stakeholder** — In EBIOS RM, an internal or external party with a relationship to the studied system. Evaluated for trust level and dependency.
@@ -156,6 +163,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Task template** — Internal model name for a **task definition**. See **Task definition**.
 - **Team** — A named grouping of users used for collaborative ownership of objects, with a leader, optional deputies, members, and an optional team email for notification routing. Distinct from a [User group](#u) (which is role-scoped to a domain — see the disambiguation in [Actors and teams](../concepts/actors-and-teams.md)).
 - **Terminology** — An organisation's overrides to the platform's default labels, used to align the UI with internal vocabulary.
+- **Third-party workspace** — The folder holding a third party's questionnaire, one per entity per domain. Access granted there does not reach up into the parent domain, which is what makes it safe to give an external party an account. Internally an *enclave* `Folder`.
 - **Threat** — A catalogued source of harm — reusable across scenarios. Optional: assessments can be performed without referencing threats explicitly.
 
 ## U
@@ -172,3 +180,4 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 ## W
 
 - **Webhook endpoint** — A registered URL CISO Assistant calls when configured events happen (e.g. an audit closed, an applied control updated). Used to notify external systems and trigger downstream automation.
+- **Workflow** — A small automation drawn on a canvas: a trigger, steps and wires. Runs inside CISO Assistant with the permissions of the user who published it, and only inside its domain. See [Workflows](../concepts/workflows.md).

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import Logo from '$lib/components/Logo/Logo.svelte';
+	import Logo from '#lib/components/Logo/Logo.svelte';
 	import Greetings from './Greetings.svelte';
 	import FormCard from './FormCard.svelte';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

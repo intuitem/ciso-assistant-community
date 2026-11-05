@@ -13,6 +13,18 @@
                     "type": "object",
                     "additionalProperties": true
                 },
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "command": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "config": {
                     "type": "object",
                     "properties": {
@@ -39,6 +51,18 @@
                         },
                         "emailAdmin": {
                             "type": "string"
+                        },
+                        "oidcProvider": {
+                            "type": "object",
+                            "properties": {
+                                "existingSecret": {
+                                    "type": "string"
+                                },
+                                "privateKey": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
                         },
                         "smtp": {
                             "type": "object",
@@ -89,6 +113,18 @@
                 "huey": {
                     "type": "object",
                     "properties": {
+                        "args": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "command": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
                         "env": {
                             "type": "array"
                         },
@@ -252,6 +288,18 @@
                 "annotations": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "command": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "config": {
                     "type": "object",
@@ -591,6 +639,27 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "env": {
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": true
+                },
+                "imagePullSecrets": {
+                    "type": "array"
+                },
                 "persistence": {
                     "type": "object",
                     "properties": {
@@ -616,6 +685,10 @@
                 },
                 "replicaCount": {
                     "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             },
             "additionalProperties": true

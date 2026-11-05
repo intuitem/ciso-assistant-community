@@ -1,13 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { page } from '$app/stores';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll } from '$app/navigation';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { page } from '$app/state';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	let { data }: { data: PageData } = $props();
 
@@ -57,12 +61,12 @@
 	};
 
 	async function updateStepStatus(stepId: string, newStatus: string) {
-		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ status: newStatus })
 		});
-		invalidateAll();
+		refreshAll();
 	}
 
 	function buildQueryString(params: Record<string, unknown> | null | undefined): string {
@@ -104,54 +108,57 @@
 
 	// --- Edit mode for step links ---
 	let editMode = $state(false);
-	let choicesCache: Record<string, { id: string; str: string; folder: string }[]> = $state({});
-	// Track in-flight requests without $state to avoid mutation-in-template errors
-	const _loadingChoices: Set<string> = new Set();
 
-	async function fetchChoices(targetModel: string) {
-		if (choicesCache[targetModel] || _loadingChoices.has(targetModel)) return;
-		_loadingChoices.add(targetModel);
-		try {
-			const resp = await fetch(`/${targetModel}`, { headers: { Accept: 'application/json' } });
-			if (resp.ok) {
-				const json = await resp.json();
-				const results = json.results ?? json;
-				choicesCache[targetModel] = Array.isArray(results)
-					? results.map((r: any) => ({
-							id: r.id,
-							str: r.str ?? r.name ?? r.id,
-							folder: r.folder?.str ?? r.folder?.name ?? ''
-						}))
-					: [];
-			}
-		} catch (e) {
-			console.error('Failed to fetch choices for', targetModel, e);
-		} finally {
-			_loadingChoices.delete(targetModel);
+	// One picker per direct-link step. Eager for now (fetches the target
+	// collection page by page) — pass `lazy` for server-side search via
+	// /<target_model>/autocomplete if step targets grow into large collections.
+	const editableSteps: any[] = (data.steps ?? []).filter(
+		(s: any) => s.target_model && s.target_ref != null
+	);
+	const stepLinkSchema = z.object(
+		Object.fromEntries(
+			editableSteps.map((s: any) => [s.id, z.array(z.string()).optional().nullable()])
+		)
+	);
+	const stepLinkForm = superForm(
+		defaults(
+			Object.fromEntries(editableSteps.map((s: any) => [s.id, s.target_ref ? [s.target_ref] : []])),
+			zod(stepLinkSchema)
+		),
+		{
+			SPA: true,
+			validators: zod(stepLinkSchema),
+			dataType: 'json',
+			invalidateAll: false,
+			applyAction: false,
+			resetForm: false,
+			taintedMessage: false,
+			validationMethod: 'auto'
 		}
+	);
+	// Only persist changes after the user actually interacted with a picker —
+	// hydration edge cases (e.g. an unreadable target) must not PATCH on load.
+	let touchedStepPickers: Record<string, boolean> = $state({});
+
+	function onStepTargetRefChange(step: any, value: unknown) {
+		if (!touchedStepPickers[step.id]) return;
+		const targetRef = (Array.isArray(value) ? (value[0] ?? null) : value) || null;
+		// Compare against the live server state, not the load-time snapshot in
+		// editableSteps — after a PATCH + refreshAll the snapshot is stale and
+		// would silently drop a revert to the original value.
+		const liveStep = (data.steps ?? []).find((s: any) => s.id === step.id);
+		const currentRef = (liveStep ? liveStep.target_ref : step.target_ref) ?? null;
+		if (targetRef === currentRef) return;
+		updateStepTargetRef(step.id, targetRef);
 	}
 
-	// Prefetch choices when edit mode is toggled on — only for direct-link steps
-	$effect(() => {
-		if (editMode && data.steps) {
-			const models = new Set(
-				data.steps
-					.filter((s: any) => s.target_model && s.target_ref != null)
-					.map((s: any) => s.target_model)
-			);
-			for (const model of models) {
-				fetchChoices(model);
-			}
-		}
-	});
-
 	async function updateStepTargetRef(stepId: string, targetRef: string | null) {
-		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ target_ref: targetRef })
 		});
-		invalidateAll();
+		refreshAll();
 	}
 
 	let renaming = $state(false);
@@ -168,13 +175,13 @@
 			renaming = false;
 			return;
 		}
-		await fetch(`/journeys/${$page.params.id}/rename`, {
+		await fetch(`/journeys/${page.params.id}/rename`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ name: trimmed })
 		});
 		renaming = false;
-		invalidateAll();
+		refreshAll();
 	}
 
 	let compactMode = $state(false);
@@ -183,11 +190,10 @@
 	async function upgradeJourney() {
 		upgrading = true;
 		try {
-			const response = await fetch(`/journeys/${$page.params.id}/upgrade`, {
-				method: 'POST'
-			});
+			const response = await fetch(`/journeys/${page.params.id}/upgrade`, { method: 'POST' });
+
 			if (response.ok) {
-				invalidateAll();
+				refreshAll();
 			}
 		} catch (e) {
 			console.error('Failed to upgrade journey', e);
@@ -209,9 +215,9 @@
 			},
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
-				const response = await fetch(`/journeys/${$page.params.id}`, {
-					method: 'DELETE'
-				});
+
+				const response = await fetch(`/journeys/${page.params.id}`, { method: 'DELETE' });
+
 				if (response.ok) {
 					goto('/presets', { label: m.presets(), breadcrumbAction: 'replace' });
 				}
@@ -481,23 +487,22 @@
 									{#if step.description && !compactMode}
 										<p class="text-sm text-surface-600-400 mt-1">{step.description}</p>
 									{/if}
-									{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}
-										<div class="mt-2">
-											<select
-												class="select select-sm text-sm max-w-xs bg-surface-50-950 text-surface-800-200 border-surface-300-700"
-												value={step.target_ref ?? ''}
-												onchange={(e) => {
-													const val = (e.target as HTMLSelectElement).value;
-													updateStepTargetRef(step.id, val || null);
+									{#if editMode && step.target_ref != null && step.target_model}
+										<div
+											class="mt-2 max-w-xs"
+											onfocusin={() => (touchedStepPickers[step.id] = true)}
+										>
+											<AutocompleteSelect
+												form={stepLinkForm}
+												field={step.id}
+												optionsEndpoint={step.target_model}
+												optionsInfoFields={{
+													fields: [{ field: 'folder', path: 'str' }]
 												}}
-											>
-												<option value="">{m.noLinkedObject()}</option>
-												{#each choicesCache[step.target_model] ?? [] as choice}
-													<option value={choice.id}>
-														{choice.str}{choice.folder ? ` — ${choice.folder}` : ''}
-													</option>
-												{/each}
-											</select>
+												nullable
+												placeholder={m.noLinkedObject()}
+												onChange={(value) => onStepTargetRefChange(step, value)}
+											/>
 										</div>
 									{/if}
 								</div>

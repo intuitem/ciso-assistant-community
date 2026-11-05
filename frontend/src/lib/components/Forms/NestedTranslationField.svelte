@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { locales } from '$paraglide/runtime';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+	import { m } from '#paraglide/messages.js';
+	import { locales } from '#paraglide/runtime.js';
+	import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
 
 	interface Subfield {
 		key: string;
@@ -47,7 +47,7 @@
 		<span class="text-sm font-semibold">{title}</span>
 		<button
 			type="button"
-			class="btn btn-sm variant-soft-primary"
+			class="btn btn-sm preset-tonal-primary"
 			onclick={addLocale}
 			disabled={Object.keys(value ?? {}).length >= locales.length}
 		>
@@ -73,7 +73,7 @@
 				</select>
 				<button
 					type="button"
-					class="btn-icon btn-icon-sm variant-soft-error"
+					class="btn-icon btn-icon-sm preset-tonal-error"
 					onclick={() => removeLocale(loc)}
 					title={m.delete()}
 				>

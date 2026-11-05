@@ -1,35 +1,36 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import type { ActionData, PageData } from './$types';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { isDark } from '$lib/utils/helpers';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { isDark } from '#lib/utils/helpers.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import RiskAcceptancesSection from '#lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
 
 	import { goto } from '$app/navigation';
+	import { openRiskAcceptanceModal } from '#lib/utils/riskAcceptance.js';
 
 	import { onMount } from 'svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import SyncToActionsRiskModal from '#lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -43,31 +44,43 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	let relationsOpen = $state(false);
+	const showRelations = $derived(
+		Boolean(page.data?.featureflags?.relations_graph) && hasRelationGraph('risk-scenarios')
+	);
+
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: model.name,
-		domain: data.scenario.folder.id
-	});
-	let color_map = $state({});
-	color_map['--'] = '#A9A9A9';
+	const canEditObject: boolean = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: model.name,
+			object: data.scenario
+		})
+	);
+	const canCreateAcceptance = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'add',
+			model: 'riskacceptance',
+			object: data.scenario
+		})
+	);
+	const NO_VALUE_COLOR = '#A9A9A9';
+	const probaColors = Object.fromEntries(
+		data.riskMatrix.probability.map((prob) => [prob.name, prob.hexcolor])
+	);
+	const impactColors = Object.fromEntries(
+		data.riskMatrix.impact.map((impact) => [impact.name, impact.hexcolor])
+	);
 
-	// Map colors for risk levels
-	data.riskMatrix.risk.forEach((risk, i) => {
-		color_map[risk.name] = risk.hexcolor;
-	});
-
-	// Map colors for probability levels
-	data.riskMatrix.probability.forEach((prob, i) => {
-		color_map[prob.name] = prob.hexcolor;
-	});
-
-	// Map colors for impact levels
-	data.riskMatrix.impact.forEach((impact, i) => {
-		color_map[impact.name] = impact.hexcolor;
-	});
+	function levelBadge(colors: Record<string, string | undefined>, level?: { name?: string }) {
+		const bg = level?.name ? colors[level.name] : NO_VALUE_COLOR;
+		return bg
+			? { class: isDark(bg) ? 'text-white' : 'text-surface-950', style: `background-color: ${bg}` }
+			: { class: 'bg-surface-200-800 text-surface-950-50', style: '' };
+	}
 
 	let classesCellText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
@@ -131,6 +144,13 @@
 			syncingToActionsIsLoading = false;
 	});
 
+	function modalRequestRiskAcceptance(): void {
+		openRiskAcceptanceModal(modalStore, {
+			folderId: data.scenario.folder.id,
+			riskScenarioIds: [page.params.id]
+		});
+	}
+
 	onMount(() => {
 		// Add event listener when component mounts
 		window.addEventListener('keydown', handleKeydown);
@@ -178,8 +198,9 @@
 					<p class="text-surface-400-600 italic text-sm">{m.noDescription()}</p>
 				{/if}
 			</div>
+			<RiskAcceptancesSection riskAcceptances={data.riskAcceptances} />
 		</div>
-		<div class="flex flex-col space-y-2 sm:my-auto shrink-0">
+		<div class="flex flex-col space-y-2 sm:self-start shrink-0">
 			{#if canEditObject}
 				<Anchor
 					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
@@ -210,7 +231,31 @@
 					</button>
 				{/if}
 			{/if}
-			<AuditTrailButton model="risk-scenarios" objectId={data.scenario.id} />
+			{#if canCreateAcceptance && !data.scenario.risk_assessment?.is_locked}
+				<button
+					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					onclick={() => modalRequestRiskAcceptance()}
+					data-testid="request-risk-acceptance-button"
+				>
+					<i class="fa-solid fa-signature mr-2"></i>
+					{m.requestRiskAcceptance()}
+				</button>
+			{/if}
+			<AuditTrailButton
+				model="risk-scenarios"
+				objectId={data.scenario.id}
+				folderId={data.scenario.folder?.id ?? user.root_folder_id}
+			/>
+			{#if showRelations}
+				<button
+					type="button"
+					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
+					data-testid="relations-button"
+					onclick={() => (relationsOpen = true)}
+				>
+					<i class="fa-solid fa-circle-nodes mr-2"></i>{m.relationsGraph()}
+				</button>
+			{/if}
 		</div>
 	</div>
 
@@ -328,7 +373,7 @@
 	</div>
 
 	<div class="flex flex-col sm:flex-row gap-2">
-		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full sm:w-1/2">
+		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full flex-1">
 			<h4 class="h4 font-semibold">{m.riskOrigin()}</h4>
 			{#if data.scenario.risk_origin}
 				<p class="font-semibold text-surface-600-400">
@@ -341,9 +386,7 @@
 				<p class="text-surface-400-600 italic text-sm">{m.undefined()}</p>
 			{/if}
 		</div>
-		<div
-			class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full sm:w-1/2 max-h-96 overflow-y-auto"
-		>
+		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full flex-1 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.antecedentScenarios()}</h4>
 			{#if data.scenario.antecedent_scenarios && data.scenario.antecedent_scenarios.length > 0}
 				<ul class="space-y-1">
@@ -359,6 +402,32 @@
 				<p class="text-surface-400-600 italic text-sm">{m.noAntecedentScenarios()}</p>
 			{/if}
 		</div>
+		{#if page.data?.featureflags?.threat_modeling}
+			<div
+				class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full flex-1 max-h-96 overflow-y-auto"
+			>
+				<h4 class="h4 font-semibold">{m.threatModel()}</h4>
+				{#if data.scenario.threat_models && data.scenario.threat_models.length > 0}
+					<ul class="space-y-1">
+						{#each data.scenario.threat_models as threatModel}
+							<li class="flex items-center gap-2">
+								<Anchor class="anchor text-sm font-semibold" href="/threat-models/{threatModel.id}">
+									{threatModel.str}
+								</Anchor>
+								<Anchor
+									class="anchor text-xs text-surface-600-400"
+									href="/threat-models/{threatModel.id}/graph"
+								>
+									<i class="fa-solid fa-diagram-project mr-1"></i>{m.graph()}
+								</Anchor>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="text-surface-400-600 italic text-sm">{m.undefined()}</p>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	{#if page.data?.featureflags?.inherent_risk}
@@ -370,14 +439,11 @@
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 					<span
-						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-							data.scenario.inherent_proba?.name
-								? color_map[data.scenario.inherent_proba.name]
-								: color_map['--']
-						)}"
-						style="background-color: {data.scenario.inherent_proba?.name
-							? color_map[data.scenario.inherent_proba.name]
-							: color_map['--']}"
+						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+							probaColors,
+							data.scenario.inherent_proba
+						).class}"
+						style={levelBadge(probaColors, data.scenario.inherent_proba).style}
 					>
 						{data.scenario.inherent_proba ? safeTranslate(data.scenario.inherent_proba.name) : '--'}
 					</span>
@@ -386,14 +452,11 @@
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 					<span
-						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-							data.scenario.inherent_impact?.name
-								? color_map[data.scenario.inherent_impact.name]
-								: color_map['--']
-						)}"
-						style="background-color: {data.scenario.inherent_impact?.name
-							? color_map[data.scenario.inherent_impact.name]
-							: color_map['--']}"
+						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+							impactColors,
+							data.scenario.inherent_impact
+						).class}"
+						style={levelBadge(impactColors, data.scenario.inherent_impact).style}
 					>
 						{data.scenario.inherent_impact
 							? safeTranslate(data.scenario.inherent_impact.name)
@@ -410,7 +473,7 @@
 							.inherent_level
 							? classesCellText(data.scenario.inherent_level.hexcolor)
 							: ''}"
-						style="background-color: {data.scenario.inherent_level?.hexcolor || color_map['--']}"
+						style="background-color: {data.scenario.inherent_level?.hexcolor || NO_VALUE_COLOR}"
 					>
 						{data.scenario.inherent_level ? safeTranslate(data.scenario.inherent_level.name) : '--'}
 					</span>
@@ -433,14 +496,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.current_proba?.name
-							? color_map[data.scenario.current_proba.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.current_proba?.name
-						? color_map[data.scenario.current_proba.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						probaColors,
+						data.scenario.current_proba
+					).class}"
+					style={levelBadge(probaColors, data.scenario.current_proba).style}
 				>
 					{data.scenario.current_proba ? safeTranslate(data.scenario.current_proba.name) : '--'}
 				</span>
@@ -449,14 +509,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.current_impact?.name
-							? color_map[data.scenario.current_impact.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.current_impact?.name
-						? color_map[data.scenario.current_impact.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						impactColors,
+						data.scenario.current_impact
+					).class}"
+					style={levelBadge(impactColors, data.scenario.current_impact).style}
 				>
 					{data.scenario.current_impact ? safeTranslate(data.scenario.current_impact.name) : '--'}
 				</span>
@@ -491,14 +548,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.residual_proba?.name
-							? color_map[data.scenario.residual_proba.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.residual_proba?.name
-						? color_map[data.scenario.residual_proba.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						probaColors,
+						data.scenario.residual_proba
+					).class}"
+					style={levelBadge(probaColors, data.scenario.residual_proba).style}
 				>
 					{data.scenario.residual_proba ? safeTranslate(data.scenario.residual_proba.name) : '--'}
 				</span>
@@ -507,14 +561,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.residual_impact?.name
-							? color_map[data.scenario.residual_impact.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.residual_impact?.name
-						? color_map[data.scenario.residual_impact.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						impactColors,
+						data.scenario.residual_impact
+					).class}"
+					style={levelBadge(impactColors, data.scenario.residual_impact).style}
 				>
 					{data.scenario.residual_impact ? safeTranslate(data.scenario.residual_impact.name) : '--'}
 				</span>
@@ -537,7 +588,7 @@
 	</div>
 	<div class="card px-4 py-2 bg-surface-50-950 shadow-lg space-y-2">
 		<div>
-			<p class="text-sm font-semibold text-surface-400-600">{m.qualifications()}</p>
+			<p class="text-sm font-semibold text-surface-400-600">{safeTranslate('qualifications')}</p>
 			<p>
 				<span class="font-semibold">
 					{#each data.scenario.qualifications.sort( (a, b) => safeTranslate(a.str).localeCompare(safeTranslate(b.str)) ) as qualification, i}
@@ -587,3 +638,15 @@
 		<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
 	{/if}
 </div>
+
+{#if showRelations}
+	{#await import('#lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+		<RelationsDrawer
+			open={relationsOpen}
+			urlModel="risk-scenarios"
+			id={data.scenario.id}
+			name={data.scenario.name ?? data.scenario.str ?? ''}
+			onClose={() => (relationsOpen = false)}
+		/>
+	{/await}
+{/if}

@@ -3,8 +3,9 @@
 The command realigns stored RequirementAssessment.result/score for audits
 built before the semantic compute_result aggregation. These tests cover the
 behaviours that matter operationally: it fixes stale results, honours
---dry-run, is idempotent, and never touches requirements that are not
-compute_result-driven (so a manually set result is preserved).
+--dry-run, is idempotent, never touches requirements that are neither
+compute_result-driven nor weighted on a scored question, and preserves a
+manually set result.
 """
 
 from io import StringIO
@@ -50,7 +51,6 @@ def command_setup(db):
     fw = Framework.objects.create(
         name="Recompute FW",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -62,7 +62,6 @@ def command_setup(db):
         ref_id="REQ-RESULT",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q1 = Question.objects.create(
         requirement_node=rn_result,
@@ -73,7 +72,6 @@ def command_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     q1_good = QuestionChoice.objects.create(
         question=q1,
@@ -84,7 +82,6 @@ def command_setup(db):
         compute_result="compliant",
         order=0,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q1,
@@ -95,7 +92,6 @@ def command_setup(db):
         compute_result="non_compliant",
         order=1,
         folder=folder,
-        is_published=True,
     )
     q2 = Question.objects.create(
         requirement_node=rn_result,
@@ -106,7 +102,6 @@ def command_setup(db):
         order=1,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     q2_good = QuestionChoice.objects.create(
         question=q2,
@@ -117,7 +112,6 @@ def command_setup(db):
         compute_result="compliant",
         order=0,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q2,
@@ -128,7 +122,6 @@ def command_setup(db):
         compute_result="non_compliant",
         order=1,
         folder=folder,
-        is_published=True,
     )
 
     # --- score-only requirement (no compute_result anywhere) ---
@@ -138,7 +131,6 @@ def command_setup(db):
         ref_id="REQ-SCORE",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q3 = Question.objects.create(
         requirement_node=rn_score,
@@ -149,7 +141,6 @@ def command_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q3,
@@ -159,7 +150,6 @@ def command_setup(db):
         add_score=5,
         order=0,
         folder=folder,
-        is_published=True,
     )
 
     perimeter = Perimeter.objects.create(name="Recompute Perim", folder=folder)
@@ -168,7 +158,6 @@ def command_setup(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -261,4 +250,59 @@ class TestRecomputeAssessmentResultsCommand:
         self._run(d["ca"])
 
         d["ra_score"].refresh_from_db()
+        assert d["ra_score"].result == RequirementAssessment.Result.COMPLIANT
+
+    def test_weighted_text_question_keeps_the_requirement_out_of_scope(
+        self, command_setup
+    ):
+        """A text question carries a weight but no score, so weighting it must not
+        drag the requirement into a run that would then clear its manual score."""
+        d = command_setup
+        rn = RequirementNode.objects.create(
+            framework=d["ca"].framework,
+            urn="urn:test:recompute:req:text",
+            ref_id="REQ-TEXT",
+            assessable=True,
+            folder=d["folder"],
+        )
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:recompute:q-text",
+            ref_id="QTEXT",
+            text="Free text",
+            type=Question.Type.TEXT,
+            order=0,
+            weight=3,
+            folder=d["folder"],
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=d["ca"], requirement=rn, folder=d["folder"]
+        )
+        _set_stored(ra, score=42, is_scored=True)
+
+        self._run(d["ca"])
+
+        ra.refresh_from_db()
+        assert ra.score == 42
+        assert ra.is_scored is True
+
+    def test_weighted_score_only_requirement_is_recomputed(self, command_setup):
+        """A weighted question puts a score-only requirement in scope: its stale
+        score is fixed and its manual result is preserved."""
+        d = command_setup
+        q3 = d["rn_score"].questions.get()
+        q3.weight = 3
+        q3.save(update_fields=["weight"])
+        _answer(d["ra_score"], q3, q3.choices.get(), d["folder"])
+        _set_stored(
+            d["ra_score"],
+            score=100,
+            is_scored=True,
+            result=RequirementAssessment.Result.COMPLIANT,
+        )
+
+        self._run(d["ca"])
+
+        d["ra_score"].refresh_from_db()
+        assert d["ra_score"].score == 5
         assert d["ra_score"].result == RequirementAssessment.Result.COMPLIANT

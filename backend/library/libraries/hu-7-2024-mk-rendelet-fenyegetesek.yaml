@@ -1,0 +1,365 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:aafeher:risk:library:hu-7-2024-mk-rendelet-fenyegetesek
+locale: hu
+ref_id: hu-7-2024-mk-rendelet-fenyegetesek
+name: "7/2024. (VI. 24.) MK rendelet \u2013 Fenyeget\xE9skatal\xF3gus"
+description: "A 7/2024. (VI. 24.) MK rendelet 3. mell\xE9klete (Fenyeget\xE9skatal\xF3\
+  gus): 47 fenyeget\xE9s, a le\xEDr\xE1sban a potenci\xE1lisan \xE9rintett inform\xE1\
+  ci\xF3biztons\xE1gi alapelvekkel (bizalmass\xE1g, s\xE9rtetlens\xE9g, rendelkez\xE9\
+  sre \xE1ll\xE1s). A rendelet a v\xE9delmi int\xE9zked\xE9seket nem rendeli fenyeget\xE9\
+  sekhez. A hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek \xE9s a hu-7-2024-mk-rendelet\
+  \ keretrendszerhez tartoz\xF3 fenyeget\xE9skatal\xF3gus.\nSz\xF6veg\xE1llapot: a\
+  \ 7/2024. MK rendelet njt.hu szerinti egys\xE9ges szerkezete (2025. 01. 02.)."
+copyright: "A jogszab\xE1lyok sz\xF6vege a szerz\u0151i jogr\xF3l sz\xF3l\xF3 1999.\
+  \ \xE9vi LXXVI. t\xF6rv\xE9ny 1. \xA7 (4) bekezd\xE9se alapj\xE1n nem \xE1ll szerz\u0151\
+  i jogi v\xE9delem alatt. Forr\xE1sok: Magyar K\xF6zl\xF6ny 2024/68. sz\xE1m, Nemzeti\
+  \ Jogszab\xE1lyt\xE1r (njt.hu). Hungarian legal texts are not subject to copyright\
+  \ (Act LXXVI of 1999, Section 1(4))."
+version: 1
+publication_date: 2026-10-14
+provider: MK
+packager: aafeher
+labels:
+- NIS2
+- HUNGARY
+- KIBERTV
+objects:
+  threats:
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:1
+    ref_id: '1'
+    name: "T\u0171z"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:2
+    ref_id: '2'
+    name: "Kedvez\u0151tlen k\xF6rnyezeti felt\xE9telek"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:3
+    ref_id: '3'
+    name: "V\xEDz"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:4
+    ref_id: '4'
+    name: "Szennyez\u0151d\xE9s, por, korr\xF3zi\xF3"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:5
+    ref_id: '5'
+    name: "Term\xE9szeti katasztr\xF3f\xE1k"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:6
+    ref_id: '6'
+    name: "Katasztr\xF3f\xE1k a k\xF6rnyezetben"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:7
+    ref_id: '7'
+    name: "Jelent\u0151s k\xF6rnyezeti esem\xE9nyek"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:8
+    ref_id: '8'
+    name: "\xC1ramell\xE1t\xE1s megszakad\xE1sa, vagy hib\xE1ja"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:9
+    ref_id: '9'
+    name: "Kommunik\xE1ci\xF3s h\xE1l\xF3zatok megszakad\xE1sa, vagy zavara"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:10
+    ref_id: '10'
+    name: "Besz\xE1ll\xEDt\xF3i l\xE1ncok megszakad\xE1sa, vagy zavara"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:11
+    ref_id: '11'
+    name: "K\xFCls\u0151 szolg\xE1ltat\xF3k hib\xE1ja, vagy m\u0171k\xF6d\xE9si zavara"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:12
+    ref_id: '12'
+    name: "Elektrom\xE1gneses interferencia"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:13
+    ref_id: '13'
+    name: "Kompromitt\xE1l\xF3 elektrom\xE1gneses kisug\xE1rz\xE1s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:14
+    ref_id: '14'
+    name: "K\xE9mked\xE9s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:15
+    ref_id: '15'
+    name: "Lehallgat\xE1s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:16
+    ref_id: '16'
+    name: "Eszk\xF6z\xF6k, adathordoz\xF3k, dokumentumok eltulajdon\xEDt\xE1sa"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:17
+    ref_id: '17'
+    name: "Eszk\xF6z\xF6k, adathordoz\xF3k, dokumentumok elveszt\xE9se"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:18
+    ref_id: '18'
+    name: "Rossz tervez\xE9s vagy az alkalmazkod\xE1s hi\xE1nya"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:19
+    ref_id: '19'
+    name: "V\xE9dett inform\xE1ci\xF3 nyilv\xE1noss\xE1gra ker\xFCl\xE9se"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:20
+    ref_id: '20'
+    name: "Nem megb\xEDzhat\xF3 forr\xE1sb\xF3l sz\xE1rmaz\xF3 inform\xE1ci\xF3k"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:21
+    ref_id: '21'
+    name: "Hardver vagy szoftver hamis\xEDt\xE1sa (manipul\xE1ci\xF3ja)"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:22
+    ref_id: '22'
+    name: "Inform\xE1ci\xF3manipul\xE1ci\xF3"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:23
+    ref_id: '23'
+    name: "Elektronikus inform\xE1ci\xF3s rendszerbe t\xF6rt\xE9n\u0151 illet\xE9\
+      ktelen bel\xE9p\xE9s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:24
+    ref_id: '24'
+    name: "Eszk\xF6z\xF6k vagy adathordoz\xF3k megsemmis\xFCl\xE9se"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:25
+    ref_id: '25'
+    name: "Eszk\xF6z\xF6k vagy az elektronikus inform\xE1ci\xF3s rendszer m\u0171\
+      k\xF6d\xE9s\xE9nek megszakad\xE1sa"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:26
+    ref_id: '26'
+    name: "Eszk\xF6z\xF6k vagy az elektronikus inform\xE1ci\xF3s rendszer hib\xE1\
+      s m\u0171k\xF6d\xE9se"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:27
+    ref_id: '27'
+    name: "Er\u0151forr\xE1sok hi\xE1nya"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:28
+    ref_id: '28'
+    name: "Szoftverek s\xE9r\xFCl\xE9kenys\xE9gei vagy hib\xE1i"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:29
+    ref_id: '29'
+    name: "Jogszab\xE1lyok vagy szerz\u0151d\xE9sek megszeg\xE9se"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:30
+    ref_id: '30'
+    name: "Eszk\xF6z\xF6k vagy az elektronikus inform\xE1ci\xF3s rendszer enged\xE9\
+      ly n\xE9lk\xFCli kezel\xE9se vagy haszn\xE1lata"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:31
+    ref_id: '31'
+    name: "Eszk\xF6z\xF6k vagy az elektronikus inform\xE1ci\xF3s rendszer hib\xE1\
+      s kezel\xE9se vagy haszn\xE1lata"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:32
+    ref_id: '32'
+    name: "Enged\xE9lyekkel val\xF3 vissza\xE9l\xE9s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:33
+    ref_id: '33'
+    name: "Szem\xE9lyi \xE1llom\xE1ny elveszt\xE9se"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:34
+    ref_id: '34'
+    name: "T\xE1mad\xE1s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:35
+    ref_id: '35'
+    name: "K\xE9nyszer\xEDt\xE9s, zsarol\xE1s vagy korrupci\xF3"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:36
+    ref_id: '36'
+    name: "Eltulajdon\xEDtott szem\xE9lyazonoss\xE1ggal t\xF6rt\xE9n\u0151 vissza\xE9\
+      l\xE9s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:37
+    ref_id: '37'
+    name: "Cselekm\xE9nyek letagad\xE1sa"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:38
+    ref_id: '38'
+    name: "Szem\xE9lyes adatokkal t\xF6rt\xE9n\u0151 vissza\xE9l\xE9s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:39
+    ref_id: '39'
+    name: "Rosszindulat\xFA szoftverek (malware)"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:40
+    ref_id: '40'
+    name: "Szolg\xE1ltat\xE1smegtagad\xE1ssal j\xE1r\xF3 t\xE1mad\xE1s (DOS)"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:41
+    ref_id: '41'
+    name: "Szabot\xE1zs"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:42
+    ref_id: '42'
+    name: "Pszichol\xF3giai manipul\xE1ci\xF3 (social engineering)"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:43
+    ref_id: '43'
+    name: "Manipul\xE1lt h\xE1l\xF3zati adatforgalom"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:44
+    ref_id: '44'
+    name: "Helyis\xE9gekbe t\xF6rt\xE9n\u0151 enged\xE9ly n\xE9lk\xFCli behatol\xE1\
+      s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:45
+    ref_id: '45'
+    name: "Adatveszt\xE9s"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:46
+    ref_id: '46'
+    name: "V\xE9dend\u0151 inform\xE1ci\xF3k s\xE9rtetlens\xE9g\xE9nek elveszt\xE9\
+      se"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ s\xE9rtetlens\xE9g (S)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."
+  - urn: urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:47
+    ref_id: '47'
+    name: "K\xE1rt\xE9kony mell\xE9khat\xE1sok"
+    description: "Potenci\xE1lisan \xE9rintett inform\xE1ci\xF3biztons\xE1gi alapelv(ek):\
+      \ bizalmass\xE1g (B), s\xE9rtetlens\xE9g (S), rendelkez\xE9sre \xE1ll\xE1s (R)."
+    annotation: "7/2024. (VI. 24.) MK rendelet 3. mell\xE9klet (Fenyeget\xE9skatal\xF3\
+      gus), 1. pont."

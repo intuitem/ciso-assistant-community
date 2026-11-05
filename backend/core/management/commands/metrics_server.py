@@ -29,11 +29,9 @@ from core.instance_metrics import (
     nb_risk_assessments_gauge,
     nb_risk_scenarios_gauge,
     nb_risk_acceptances_gauge,
-    nb_seats_gauge,
-    nb_editors_gauge,
-    expiration_gauge,
     created_at_gauge,
     last_login_gauge,
+    instance_status_extensions,
 )
 
 logger = logging.getLogger(__name__)
@@ -68,11 +66,10 @@ class MetricsUpdater:
             nb_risk_assessments_gauge.set(metrics.get("nb_risk_assessments", 0))
             nb_risk_scenarios_gauge.set(metrics.get("nb_risk_scenarios", 0))
             nb_risk_acceptances_gauge.set(metrics.get("nb_risk_acceptances", 0))
-            nb_seats_gauge.set(metrics.get("nb_seats", 0))
-            nb_editors_gauge.set(metrics.get("nb_editors", 0))
-            expiration_gauge.set(metrics.get("expiration", 0))
             created_at_gauge.set(metrics.get("created_at", 0))
             last_login_gauge.set(metrics.get("last_login", 0))
+            for extension in instance_status_extensions():
+                extension.update_metrics()
 
             logger.debug("Metrics updated successfully")
 

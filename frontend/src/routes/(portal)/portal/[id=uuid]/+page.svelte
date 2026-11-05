@@ -1,16 +1,17 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { gotoOrLoad, goto as breadcrumbGoto } from '#lib/utils/breadcrumbs.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import { deserialize } from '$app/forms';
-	import { openPortalExternal } from '$lib/utils/external-links';
-	import { m } from '$paraglide/messages';
-	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import AssessmentLaunchModal from '$lib/components/Modals/AssessmentLaunchModal.svelte';
+	import { openPortalExternal } from '#lib/utils/external-links.js';
+	import { m } from '#paraglide/messages.js';
+	import PortalGrid from '#lib/components/PortalGrid/PortalGrid.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import AssessmentLaunchModal from '#lib/components/Modals/AssessmentLaunchModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 
 	interface PortalItem {
@@ -25,7 +26,8 @@
 			| 'metric'
 			| 'certificationDocument'
 			| 'framework'
-			| 'assessment';
+			| 'assessment'
+			| 'quickForm';
 		target: {
 			model?: string;
 			url?: string;
@@ -33,6 +35,11 @@
 			dest?: string;
 			folder?: string;
 			user_names?: boolean;
+			quick_form?: string;
+			// Either wiring will do; a publication carries its own form and target folder.
+			publication?: string;
+			document_types?: string[];
+			document?: string;
 		};
 	}
 
@@ -41,6 +48,8 @@
 
 	let launching = $state(false);
 	let launchError = $state('');
+	// Set when a tile handed back an existing draft rather than creating a response.
+	let resumedRef = $state('');
 
 	function openCreate(model: string, title: string) {
 		const entry = data.createForms[model];
@@ -67,10 +76,14 @@
 		try {
 			const body = new FormData();
 			body.append('item', item.id ?? '');
-			const res = await fetch('?/launchAssessment', { method: 'POST', body });
+			const action = item.kind === 'quickForm' ? '?/launchQuickForm' : '?/launchAssessment';
+			const res = await fetch(action, { method: 'POST', body });
 			const result: any = deserialize(await res.text());
 			if (result.type === 'success' && result.data?.redirect) {
-				await goto(result.data.redirect);
+				if (result.data.resumed && result.data.ref_id) {
+					resumedRef = result.data.ref_id;
+				}
+				await gotoOrLoad(result.data.redirect);
 			} else {
 				launchError = result.data?.error || m.assessmentLaunchFailed();
 			}
@@ -81,32 +94,56 @@
 		}
 	}
 
+	// A publication carries its own domain, and its audience holds no folder rights —
+	// asking them to pick one is a hard block.
+	const needsDomain = (item: PortalItem) => !item.target.publication && !item.target.folder;
+
 	function openLaunchModal(item: PortalItem) {
 		const component: ModalComponent = {
 			ref: AssessmentLaunchModal,
 			props: {
 				item: item.id ?? '',
+				action: item.kind === 'quickForm' ? '?/launchQuickForm' : '?/launchAssessment',
 				showName: !!item.target.user_names,
 				defaultName: item.title,
-				showDomain: !item.target.folder
+				showDomain: needsDomain(item)
 			}
 		};
 		const modal: ModalSettings = { type: 'component', component, title: item.title };
 		modalStore.trigger(modal);
 	}
 
+	const typeQuery = (types?: string[]) =>
+		types?.length ? `?${types.map((t) => `type=${encodeURIComponent(t)}`).join('&')}` : '';
+	// No ?doc=: the reader opens the default language and offers the others.
+	const navigateHref = (t: PortalItem['target']) =>
+		t.model !== 'documents'
+			? `/${t.model}`
+			: t.document
+				? `/documents/${t.document}/read`
+				: `/documents${typeQuery(t.document_types)}`;
+
 	function trigger(item: PortalItem) {
 		if (openPortalExternal(item)) return;
 		if (item.kind === 'create' && item.target.model) openCreate(item.target.model, item.title);
-		else if (item.kind === 'navigate' && item.target.model) goto(`/${item.target.model}`);
-		else if (item.kind === 'assessment') {
+		else if (item.kind === 'navigate' && item.target.model)
+			breadcrumbGoto(navigateHref(item.target), {
+				label: URL_MODEL_MAP[item.target.model]?.localNamePlural ?? item.title,
+				breadcrumbAction: 'replace'
+			});
+		else if (item.kind === 'assessment' || item.kind === 'quickForm') {
 			// Launch directly only when nothing needs to be asked at click time.
-			if (!item.target.folder || item.target.user_names) openLaunchModal(item);
+			if (needsDomain(item) || item.target.user_names) openLaunchModal(item);
 			else launchAssessment(item);
 		}
 	}
 </script>
 
+{#if resumedRef}
+	<aside class="card preset-tonal-primary mb-6 p-4 text-sm">
+		<i class="fa-solid fa-rotate-left mr-2"></i>{m.quickFormResumedDraft({ ref: resumedRef })}
+	</aside>
+{/if}
 {#if launchError}
 	<aside class="card preset-tonal-error mb-6 p-4 text-sm">
 		<i class="fa-solid fa-triangle-exclamation mr-2"></i>{launchError}

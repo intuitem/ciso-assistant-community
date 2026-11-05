@@ -1,0 +1,13 @@
+subject: "CISO Assistant : Le formulaire rapide '${response_name}' a été rouvert"
+body: |
+  Bonjour,
+
+  La réponse suivante vous a été renvoyée pour modifications :
+
+  - Réponse : ${response_name}
+  - Formulaire : ${quick_form_name}
+  - Note du relecteur : ${observation}
+
+  Veuillez vous connecter à CISO Assistant pour mettre à jour vos réponses : [Ouvrir le formulaire](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Merci.
