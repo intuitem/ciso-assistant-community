@@ -2,16 +2,21 @@
 <ul class="evidence-list">
   {% for evidence in evidences %}
     <li>
-      {% if evidence.last_revision and evidence.last_revision.attachment %}
-        <a
-          target="_blank"
-          href="evidences/{{ archive_names|get_item:evidence.id|urlencode }}"
-          >{{ evidence.name }}</a
-        >
-      {% else %}
-        {{ evidence.name }}
-        <span class="muted">{% trans "No file attached" %}</span>
-      {% endif %}
+      {% with archive_name=archive_names|get_item:evidence.id %}
+        {% if archive_name %}
+          <a
+            target="_blank"
+            href="evidences/{{ archive_name|urlencode }}"
+            >{{ evidence.name }}</a
+          >
+        {% elif evidence.last_revision and evidence.last_revision.attachment %}
+          {{ evidence.name }}
+          <span class="muted">{% trans "File not found" %}</span>
+        {% else %}
+          {{ evidence.name }}
+          <span class="muted">{% trans "No file attached" %}</span>
+        {% endif %}
+      {% endwith %}
     </li>
   {% endfor %}
 </ul>

@@ -1668,6 +1668,10 @@ msgstr "Conforme sans preuve"
 msgid "No evidence"
 msgstr "Aucune preuve"
 
+#: core/templates/snippets/evidence_list.html
+msgid "File not found"
+msgstr "Fichier introuvable"
+
 #: core/templates/snippets/evidence_list.html:13
 msgid "No file attached"
 msgstr "Aucun fichier joint"

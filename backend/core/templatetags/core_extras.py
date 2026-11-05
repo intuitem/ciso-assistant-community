@@ -13,7 +13,8 @@ register = template.Library()
 
 @register.filter(name="render_markdown")
 def render_markdown(text: str | None) -> str:
-    return mark_safe(render_safe_markdown(text))
+    # render_safe_markdown escapes raw HTML and keeps only http(s) links
+    return mark_safe(render_safe_markdown(text))  # nosec B308 B703
 
 
 @register.simple_tag()
@@ -119,19 +120,22 @@ def bar_graph(assessments, ancestors, node=None, legend=False):
     if total > 0:
         for result in RESULT_BAR_ORDER:
             count = len([c for c in candidates if c.result == result])
-            percentage = round(count * 100 / total)
-            if percentage > 0:
-                segments.append((result, escape(result.label), percentage))
+            if count > 0:
+                width = count * 100 / total
+                percentage = f"{round(width)}%" if width >= 0.5 else "<1%"
+                segments.append(
+                    (result, escape(result.label), f"{width:.2f}", escape(percentage))
+                )
 
     content = '<div class="result-bar">'
-    for result, label, percentage in segments:
+    for result, label, width, percentage in segments:
         content += f"""
-            <div class="result-bar__segment result--{result}" style="width:{percentage}%" title="{label}: {percentage}%">
-            {percentage}%</div>"""
+            <div class="result-bar__segment result--{result}" style="width:{width}%" title="{label}: {percentage}">
+            {percentage}</div>"""
     content += "</div>"
     if legend and segments:
         content += '<ul class="result-legend">'
-        for result, label, percentage in segments:
-            content += f'<li><span class="result-legend__swatch result--{result}"></span>{label} ({percentage}%)</li>'
+        for result, label, _, percentage in segments:
+            content += f'<li><span class="result-legend__swatch result--{result}"></span>{label} ({percentage})</li>'
         content += "</ul>"
     return mark_safe(content)

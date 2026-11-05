@@ -17431,6 +17431,7 @@ def generate_html(
             "result": "",
             "status": "",
             "heading_level": min(depth + 2, 4),
+            "title": toc_entry["label"],
         }
 
         node_data["bar_graph"] = bool(children_nodes) and depth < 2
@@ -17495,6 +17496,11 @@ def generate_html(
 
     evidences = list(set(selected_evidences))
     archive_names = build_evidence_archive_names(evidences)
+    for evidence in evidences:
+        if evidence.id in archive_names and not default_storage.exists(
+            evidence.last_revision.attachment.name
+        ):
+            del archive_names[evidence.id]
 
     data = {
         "compliance_assessment": compliance_assessment,

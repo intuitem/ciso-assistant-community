@@ -2,7 +2,12 @@
 
 <div class="node">
   {% if not node.requirement_node.assessable %}
-    <h{{ node.heading_level }} class="section-title" id="req-{{ node.requirement_node.id }}">{{ node.requirement_node.display_long }}</h{{ node.heading_level }}>
+    <h{{ node.heading_level }} class="section-title" id="req-{{ node.requirement_node.id }}">{{ node.title }}</h{{ node.heading_level }}>
+    {% if node.requirement_node.display_short and node.requirement_node.description %}
+      <div class="markdown section-description">
+        {{ node.requirement_node.get_description_translated|render_markdown }}
+      </div>
+    {% endif %}
     {% if node.bar_graph %}
       {% bar_graph assessments ancestors node.requirement_node %}
     {% endif %}
