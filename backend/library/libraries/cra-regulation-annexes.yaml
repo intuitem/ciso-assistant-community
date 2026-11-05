@@ -7,10 +7,18 @@ description: Annexes to the REGULATION (EU) 2024/2847 OF THE EUROPEAN PARLIAMENT
   with digital elements and amending Regulations (EU) No 168/2013 and (EU) No 2019/1020
   and Directive (EU) 2020/1828 (Cyber Resilience Act)
 copyright: European Union law
-version: 3
+version: 4
 publication_date: 2024-06-25
 provider: EU
 packager: intuitem
+translations:
+  de:
+    name: Cyberresilienz-Verordnung – Anhänge (CRA)
+    description: |-
+      Anhänge der Verordnung (EU) 2024/2847 des Europäischen Parlaments und des Rates vom 23. Oktober 2024 über horizontale Cybersicherheitsanforderungen für Produkte mit digitalen Elementen und zur Änderung der Verordnungen (EU) Nr. 168/2013 und (EU) 2019/1020 und der Richtlinie (EU) 2020/1828 (Cyberresilienz-Verordnung).
+
+      Herkunft: Die Anforderungstexte und Überschriften wurden aus der amtlichen deutschen Sprachfassung in der konsolidierten EUR-Lex-Fassung 02024R2847-20241120 übernommen. Automatisierte Zuordnung und Prüfung durch den KI-Assistenten; keine maschinelle Übersetzung des Rechtstexts. Die Bibliotheksmetadaten wurden mit KI-Unterstützung formuliert. Maßgeblich sind die im Amtsblatt veröffentlichten Fassungen. Quelle: https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:02024R2847-20241120
+    copyright: Recht der Europäischen Union
 objects:
   framework:
     urn: urn:intuitem:risk:framework:cra-resolution-annexes
@@ -26,7 +34,11 @@ objects:
       depth: 1
       ref_id: '1'
       name: ANNEX I
-      description: ESSENTIAL REQUIREMENTS
+      description: ESSENTIAL CYBERSECURITY REQUIREMENTS
+      translations:
+        de:
+          name: ANHANG I
+          description: GRUNDLEGENDE CYBERSECURITYANFORDERUNGEN
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1
       assessable: false
       depth: 2
@@ -35,27 +47,42 @@ objects:
       name: Part I
       description: Cybersecurity requirements relating to the properties of products
         with digital elements
+      translations:
+        de:
+          name: Teil I
+          description: Cybersicherheitsanforderungen in Bezug auf die Eigenschaften von Produkten mit digitalen
+            Elementen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1
       ref_id: 1.1.1
-      description: Products with digital elements shall be designed, developed and
-        produced in such a way that they ensure an appropriate level of cybersecurity
-        based on the risks;
+      description: Products with digital elements shall be designed, developed and produced in such a way that
+        they ensure an appropriate level of cybersecurity based on the risks.
+      translations:
+        de:
+          description: Produkte mit digitalen Elementen werden so konzipiert, entwickelt und hergestellt, dass
+            sie angesichts der Risiken ein angemessenes Cybersicherheitsniveau gewährleisten.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1
       ref_id: 1.1.2
-      description: 'On the basis of the cybersecurity risk assessment referred to
-        in Article 10(2) and where applicable, products with digital elements shall:'
+      description: 'On the basis of the cybersecurity risk assessment referred to in Article 13(2) and where
+        applicable, products with digital elements shall:'
+      translations:
+        de:
+          description: Auf der Grundlage der Bewertung der Cybersicherheitsrisiken gemäß Artikel 13 Absatz 2
+            müssen Produkte mit digitalen Elementen, soweit zutreffend,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.a
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
       ref_id: 1.1.2.a
       description: be made available on the market without known exploitable vulnerabilities;
+      translations:
+        de:
+          description: ohne bekannte ausnutzbare Schwachstellen auf dem Markt bereitgestellt werden,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.b
       assessable: true
       depth: 4
@@ -65,6 +92,12 @@ objects:
         unless otherwise agreed between manufacturer and business user in relation
         to a tailor-made product with digital elements, including the possibility
         to reset the product to its original state;
+      translations:
+        de:
+          description: mit einer sicheren Standardkonfiguration auf dem Markt bereitgestellt werden, sofern
+            zwischen dem Hersteller und dem gewerblichen Nutzer in Bezug auf ein maßgeschneidertes Produkt mit
+            digitalen Elementen nichts anderes vereinbart wurde, und die Möglichkeit bieten, das Produkt in
+            seinen ursprünglichen Zustand zurückzusetzen,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.c
       assessable: true
       depth: 4
@@ -75,6 +108,13 @@ objects:
         within an appropriate timeframe enabled as a default setting, with a clear
         and easy-to-use opt-out mechanism, through the notification of available updates
         to users, and the option to temporarily postpone them;
+      translations:
+        de:
+          description: sicherstellen, dass Schwachstellen durch Sicherheitsaktualisierungen behoben werden können,
+            gegebenenfalls auch durch automatische Sicherheitsaktualisierungen, die als Standardeinstellung
+            innerhalb eines angemessenen Zeitrahmens installiert werden sowie über einen klaren und benutzerfreundlichen
+            Opt-out-Mechanismus verfügen, bei dem die Nutzer über verfügbare Aktualisierungen informiert werden
+            und sie vorübergehend verschieben können;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
       assessable: true
       depth: 4
@@ -83,6 +123,11 @@ objects:
       description: ensure protection from unauthorised access by appropriate control
         mechanisms, including but not limited to authentication, identity or access
         management systems, and report on possible unauthorised access;
+      translations:
+        de:
+          description: durch geeignete Kontrollmechanismen Schutz vor unbefugtem Zugriff bieten, darunter u.
+            a. zumindest Authentifizierungs-, Identitäts- oder Zugangsverwaltungssysteme, und einen möglicherweise
+            unbefugten Zugriff melden,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.e
       assessable: true
       depth: 4
@@ -92,6 +137,12 @@ objects:
         processed data, personal or other, such as by encrypting relevant data at
         rest or in transit by state of the art mechanisms, and by using other technical
         means;
+      translations:
+        de:
+          description: die Vertraulichkeit gespeicherter, übermittelter oder anderweitig verarbeiteter personenbezogener
+            oder sonstiger Daten schützen, z. B. durch Verschlüsselung relevanter Daten, die gespeichert sind
+            oder gerade verwendet oder übermittelt werden, durch modernste Mechanismen und durch den Einsatz
+            anderer technischer Mittel,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.f
       assessable: true
       depth: 4
@@ -100,14 +151,23 @@ objects:
       description: protect the integrity of stored, transmitted or otherwise processed
         data, personal or other, commands, programs and configuration against any
         manipulation or modification not authorised by the user, and report on corruptions;
+      translations:
+        de:
+          description: die Integrität gespeicherter, übermittelter oder anderweitig verarbeiteter Daten, ob
+            personenbezogener oder sonstiger Daten, Befehle, Programme und Konfigurationen vor einer vom Nutzer
+            nicht genehmigten Manipulation oder Veränderung schützen und deren Beschädigung melden,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.g
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
       ref_id: 1.1.2.g
-      description: process only data, personal or other, that are adequate, relevant
-        and limited to what is necessary in relation to the intended purpose of the
-        product with digital elements (minimisation of data);
+      description: process only data, personal or other, that are adequate, relevant and limited to what is
+        necessary in relation to the intended purpose of the product with digital elements (data minimisation);
+      translations:
+        de:
+          description: die Verarbeitung personenbezogener oder sonstiger Daten auf solche, die angemessen und
+            von Bedeutung sind, und auf das für die Zweckbestimmung des Produkts mit digitalen Elementen erforderliche
+            Maß beschränken („Datenminimierung“),
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.h
       assessable: true
       depth: 4
@@ -116,6 +176,11 @@ objects:
       description: protect the availability of essential and basic functions, also
         after an incident, including through resilience and mitigation measures against
         denial-of-service attacks;
+      translations:
+        de:
+          description: die Verfügbarkeit wesentlicher und grundlegender Funktionen, auch nach einem Sicherheitsvorfall,
+            einschließlich über Abwehr- und Eindämmungsmaßnahmen gegen Überlastungsangriffe auf Server (Denial-of-Service-Angriffe),
+            sicherstellen,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.i
       assessable: true
       depth: 4
@@ -123,6 +188,10 @@ objects:
       ref_id: 1.1.2.i
       description: minimise the negative impact by the products themselves or connected
         devices on the availability of services provided by other devices or networks;
+      translations:
+        de:
+          description: die negativen Auswirkungen von den Produkten selbst oder von vernetzten Geräten auf die
+            Verfügbarkeit der von anderen Geräten oder Netzen bereitgestellten Dienste minimieren,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.j
       assessable: true
       depth: 4
@@ -130,6 +199,10 @@ objects:
       ref_id: 1.1.2.j
       description: be designed, developed and produced to limit attack surfaces, including
         external interfaces;
+      translations:
+        de:
+          description: so konzipiert, entwickelt und hergestellt werden, dass sie — auch bei externen Schnittstellen
+            — möglichst geringe Angriffsflächen bieten,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
       assessable: true
       depth: 4
@@ -137,6 +210,10 @@ objects:
       ref_id: 1.1.2.k
       description: be designed, developed and produced to reduce the impact of an
         incident using appropriate exploitation mitigation mechanisms and techniques;
+      translations:
+        de:
+          description: so konzipiert, entwickelt und hergestellt werden, dass die Auswirkungen eines Sicherheitsvorfalls
+            durch geeignete Mechanismen und Techniken zur Minderung der möglichen Ausnutzung verringert werden,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.l
       assessable: true
       depth: 4
@@ -145,6 +222,11 @@ objects:
       description: provide security related information by recording and monitoring
         relevant internal activity, including the access to or modification of data,
         services or functions, with an opt-out mechanism for the user;
+      translations:
+        de:
+          description: sicherheitsbezogene Informationen durch Aufzeichnung und/oder Überwachung einschlägiger
+            interner Vorgänge wie Zugang zu Daten, Diensten oder Funktionen und Änderungen daran bereitstellen
+            und den Nutzern einen Opt-out-Mechanismus zur Verfügung stellen,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.m
       assessable: true
       depth: 4
@@ -153,18 +235,30 @@ objects:
       description: provide the possibility for users to securely and easily remove
         on a permanent basis all data and settings and, where such data can be transferred
         to other products or systems, ensure that this is done in a secure manner.
+      translations:
+        de:
+          description: den Nutzern die Möglichkeit bieten, alle Daten und Einstellungen dauerhaft sicher und
+            einfach zu löschen, und, wenn diese Daten auf andere Produkte oder Systeme übertragen werden können,
+            sicherstellen, dass dies auf sichere Weise geschieht.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1
       ref_id: '1.2'
       name: Part II
-      description: "Vulnerability\_handling\_requirements"
+      description: Vulnerability handling requirements
+      translations:
+        de:
+          name: Teil II
+          description: Anforderungen an die Behandlung von Schwachstellen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2
-      description: 'Manufacturers of the products with digital elements shall:'
+      description: 'Manufacturers of products with digital elements shall:'
+      translations:
+        de:
+          description: Die Hersteller von Produkten mit digitalen Elementen müssen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.1
       assessable: true
       depth: 4
@@ -174,6 +268,11 @@ objects:
         in products with digital elements, including by drawing up a software bill
         of materials in a commonly used and machine-readable format covering at the
         very least the top-level dependencies of the products;
+      translations:
+        de:
+          description: Schwachstellen und Komponenten der Produkte mit digitalen Elementen ermitteln und dokumentieren,
+            u. a. durch Erstellung einer Software-Stückliste in einem gängigen maschinenlesbaren Format, aus
+            der zumindest die obersten Abhängigkeiten der Produkte hervorgehen;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.2
       assessable: true
       depth: 4
@@ -183,6 +282,12 @@ objects:
         address and remediate vulnerabilities without delay, including by providing
         security updates; where technically feasible, new security updates shall be
         provided separately from functionality updates;
+      translations:
+        de:
+          description: im Hinblick auf die Risiken im Zusammenhang mit den Produkten mit digitalen Elementen
+            unverzüglich Schwachstellen behandeln und beheben, unter anderem durch Bereitstellung von Sicherheitsaktualisierungen;
+            soweit technisch machbar, müssen neue Sicherheitsaktualisierungen getrennt von den Funktionsaktualisierungen
+            bereitgestellt werden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.3
       assessable: true
       depth: 4
@@ -190,6 +295,10 @@ objects:
       ref_id: 1.2.3
       description: apply effective and regular tests and reviews of the security of
         the product with digital elements;
+      translations:
+        de:
+          description: die Sicherheit des Produkts mit digitalen Elementen regelmäßig und wirksam testen und
+            überprüfen;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.4
       assessable: true
       depth: 4
@@ -204,6 +313,17 @@ objects:
         security risks of publication to outweigh the security benefits, they may
         delay making public information regarding a fixed vulnerability until after
         users have been given the possibility to apply the relevant patch;
+      translations:
+        de:
+          description: sobald eine Sicherheitsaktualisierung bereitgestellt worden ist, Informationen über beseitigte
+            Schwachstellen teilen und veröffentlichen, einschließlich einer Beschreibung der Schwachstellen
+            mit Angaben, anhand deren die Nutzer das betroffene Produkt mit digitalen Elementen, die Auswirkungen
+            der Schwachstellen und ihre Schwere erkennen können, sowie eindeutige und verständliche Informationen,
+            die den Nutzern helfen, die Schwachstellen zu beheben; in hinreichend begründeten Fällen, in denen
+            die Hersteller der Auffassung sind, dass die Risiken der Veröffentlichung die Vorteile in Bezug
+            auf die Sicherheit überwiegen, können sie die Veröffentlichung von Informationen über eine behobene
+            Schwachstelle so lange aufschieben, bis den Nutzern die Möglichkeit gegeben wurde, den entsprechenden
+            Patch anzuwenden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.5
       assessable: true
       depth: 4
@@ -211,16 +331,24 @@ objects:
       ref_id: 1.2.5
       description: put in place and enforce a policy on coordinated vulnerability
         disclosure;
+      translations:
+        de:
+          description: eine Strategie für die koordinierte Offenlegung von Schwachstellen aufstellen und umsetzen;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.6
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
       ref_id: 1.2.6
-      description: take measures to facilitate the sharing of information about potential
-        vulnerabilities in their product with digital elements as well as in third
-        party components contained in that product, including by providing a contact
-        address for the reporting of the vulnerabilities discovered in the product
-        with digital elements;
+      description: take measures to facilitate the sharing of information about potential vulnerabilities in
+        their product with digital elements as well as in third-party components contained in that product,
+        including by providing a contact address for the reporting of the vulnerabilities discovered in the
+        product with digital elements;
+      translations:
+        de:
+          description: Maßnahmen ergreifen, um den Austausch von Informationen über mögliche Schwachstellen
+            in ihrem Produkt mit digitalen Elementen und darin enthaltenen Komponenten Dritter zu erleichtern,
+            und dazu u. a. eine Kontaktadresse für die Meldung der in dem Produkt mit digitalen Elementen entdeckten
+            Schwachstellen angeben;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.7
       assessable: true
       depth: 4
@@ -230,29 +358,45 @@ objects:
         with digital elements to ensure that vulnerabilities are fixed or mitigated
         in a timely manner and, where applicable for security updates, in an automatic
         manner;
+      translations:
+        de:
+          description: Mechanismen für die sichere Verbreitung von Aktualisierungen für Produkte mit digitalen
+            Elementen bereitstellen, damit Schwachstellen rechtzeitig und im Falle von Sicherheitsaktualisierungen
+            gegebenenfalls automatisch behoben oder eingedämmt werden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.8
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
       ref_id: 1.2.8
-      description: ensure that, where security updates are available to address identified
-        security issues, they are disseminated without delay and, unless otherwise
-        agreed between a manufacturer and a business user in relation to a tailor-
-        made product with digital elements, free of charge, accompanied by advisory
-        messages providing users with the relevant information, including on potential
-        action to be taken.
+      description: ensure that, where security updates are available to address identified security issues,
+        they are disseminated without delay and, unless otherwise agreed between a manufacturer and a business
+        user in relation to a tailor-made product with digital elements, free of charge, accompanied by advisory
+        messages providing users with the relevant information, including on potential action to be taken.
+      translations:
+        de:
+          description: dafür sorgen, dass Sicherheitsaktualisierungen, die zur Bewältigung festgestellter Sicherheitsprobleme
+            zur Verfügung stehen, unverzüglich und — sofern zwischen dem Hersteller und dem gewerblichen Nutzer
+            in Bezug auf ein maßgeschneidertes Produkt mit digitalen Elementen nichts anderes vereinbart wurde
+            — kostenlos verbreitet werden, zusammen mit Hinweisen und einschlägigen Informationen, auch über
+            zu treffende mögliche Maßnahmen.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2
       assessable: false
       depth: 1
       ref_id: '2'
       name: ANNEX II
       description: INFORMATION AND INSTRUCTIONS TO THE USER
+      translations:
+        de:
+          name: ANHANG II
+          description: INFORMATIONEN UND ANLEITUNGEN FÜR DEN NUTZER
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2
-      description: 'As a minimum, the product with digital elements shall be accompanied
-        by:'
+      description: 'At minimum, the product with digital elements shall be accompanied by:'
+      translations:
+        de:
+          description: 'Dem Produkt mit digitalen Elementen muss mindestens Folgendes beigefügt sein:'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.1
       assessable: true
       depth: 3
@@ -262,6 +406,11 @@ objects:
         manufacturer, and the postal address, the email address or other digital contact
         as well as, where available, the website at which the manufacturer can be
         contacted;
+      translations:
+        de:
+          description: Name, eingetragener Handelsname oder eingetragene Handelsmarke des Herstellers, die Postanschrift,
+            E-Mail-Adresse oder andere digitale Kontaktmöglichkeit und, falls vorhanden, Website, unter denen
+            der Hersteller erreichbar ist;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.2
       assessable: true
       depth: 3
@@ -271,13 +420,22 @@ objects:
         \ of the product with digital elements can be reported and received, and where\
         \ the manufacturer\u2019s policy on coordinated vulnerability disclosure can\
         \ be found;"
+      translations:
+        de:
+          description: die zentrale Kontaktstelle, bei der Informationen über Schwachstellen des Produkts mit
+            digitalen Elementen gemeldet werden können und entgegengenommen werden und das Konzept für die koordinierte
+            Offenlegung von Schwachstellen zu finden ist;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
       ref_id: '2.3'
-      description: name and type and any additional information enabling the unique
-        identification of the product with digital elements ;
+      description: name and type and any additional information enabling the unique identification of the product
+        with digital elements;
+      translations:
+        de:
+          description: Name und Typ sowie alle zusätzlichen Informationen, die eine eindeutige Identifizierung
+            des Produkts mit digitalen Elementen ermöglichen;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.4
       assessable: true
       depth: 3
@@ -286,22 +444,33 @@ objects:
       description: "the intended purpose of the product with digital elements, including\
         \ the security environment provided by the manufacturer, as well as the product\u2019\
         s essential functionalities and information about the security properties;"
+      translations:
+        de:
+          description: die Zweckbestimmung des Produkts mit digitalen Elementen, einschließlich des vom Hersteller
+            bereitgestellten Sicherheitsumfelds, sowie die Hauptfunktionen des Produkts und Informationen über
+            die Sicherheitseigenschaften;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
       ref_id: '2.5'
-      description: 'any known or foreseeable circumstance, related to the use of the
-        product with digital elements in accordance with its intended purpose or under
-        conditions of reasonably foreseeable misuse, which may lead to significant
-        cybersecurity risks; '
+      description: any known or foreseeable circumstance, related to the use of the product with digital elements
+        in accordance with its intended purpose or under conditions of reasonably foreseeable misuse, which
+        may lead to significant cybersecurity risks;
+      translations:
+        de:
+          description: alle bekannten oder vorhersehbaren Umstände im Zusammenhang mit der Zweckbestimmung des
+            Produkts mit digitalen Elementen oder dessen vernünftigerweise vorhersehbaren Fehlanwendung, die
+            zu erheblichen Cybersicherheitsrisiken führen können;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
       ref_id: '2.6'
-      description: 'where applicable, the internet address at which the EU declaration
-        of conformity can be accessed; '
+      description: where applicable, the internet address at which the EU declaration of conformity can be accessed;
+      translations:
+        de:
+          description: gegebenenfalls die Internetadresse, unter der die EU-Konformitätserklärung abrufbar ist;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.7
       assessable: true
       depth: 3
@@ -310,6 +479,11 @@ objects:
       description: the type of technical security support offered by the manufacturer
         and the end-date of the support period during which users can expect vulnerabilities
         to be handled and to receive security updates;
+      translations:
+        de:
+          description: die Art der vom Hersteller angebotenen technischen Sicherheitsunterstützung und das Enddatum
+            des Unterstützungszeitraums, in dem die Nutzer die Behebung von Schwachstellen und den Erhalt von
+            Sicherheitsaktualisierungen erwarten können;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
       assessable: true
       depth: 3
@@ -317,6 +491,10 @@ objects:
       ref_id: '2.8'
       description: 'detailed instructions or an internet address referring to such
         detailed instructions and information on:'
+      translations:
+        de:
+          description: ausführliche Anleitungen oder eine Internetadresse, unter der auf solche ausführlichen
+            Anleitungen und Informationen verwiesen wird, dazu,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.a
       assessable: true
       depth: 4
@@ -324,6 +502,10 @@ objects:
       ref_id: 2.8.a
       description: the necessary measures during initial commissioning and throughout
         the lifetime of the product with digital elements to ensure its secure use;
+      translations:
+        de:
+          description: welche Maßnahmen bei der ersten Inbetriebnahme und während der gesamten Lebensdauer des
+            Produkts mit digitalen Elementen getroffen werden müssen, um dessen sichere Verwendung sicherzustellen,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.b
       assessable: true
       depth: 4
@@ -331,12 +513,19 @@ objects:
       ref_id: 2.8.b
       description: how changes to the product with digital elements can affect the
         security of data;
+      translations:
+        de:
+          description: wie sich Änderungen am Produkt mit digitalen Elementen auf die Datensicherheit auswirken
+            können,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.c
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
       ref_id: 2.8.c
       description: how security-relevant updates can be installed;
+      translations:
+        de:
+          description: wie sicherheitsrelevante Aktualisierungen installiert werden können,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.d
       assessable: true
       depth: 4
@@ -344,23 +533,34 @@ objects:
       ref_id: 2.8.d
       description: the secure decommissioning of the product with digital elements,
         including information on how user data can be securely removed;
+      translations:
+        de:
+          description: wie eine sichere Außerbetriebnahme des Produkts mit digitalen Elementen erfolgt und wie
+            Nutzerdaten sicher entfernt werden können;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.e
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
       ref_id: 2.8.e
-      description: how the default setting enabling the automatic installation of
-        security updates, as required by Annex I, Part I, point (c), can be turned
-        off;
+      description: how the default setting enabling the automatic installation of security updates, as required
+        by Part I, point (2)(c), of Annex I, can be turned off;
+      translations:
+        de:
+          description: wie die Standardeinstellung, die die automatische Installation von Sicherheitsaktualisierungen
+            gemäß Anhang I Teil I Buchstabe c ermöglicht, deaktiviert werden kann;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.f
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
       ref_id: 2.8.f
-      description: where the product with digital elements is intended for integration
-        into other products with digital elements, the information necessary for the
-        integrator to comply with the essential requirements set out in Annex I and
-        the documentation requirements set out in Annex VII.
+      description: where the product with digital elements is intended for integration into other products with
+        digital elements, the information necessary for the integrator to comply with the essential cybersecurity
+        requirements set out in Annex I and the documentation requirements set out in Annex VII.
+      translations:
+        de:
+          description: wie der Integrator die grundlegenden Cybersicherheitsanforderungen in Anhang I und die
+            Anforderungen an die technische Dokumentation in Anhang VII erfüllen kann, wenn das Produkt mit
+            digitalen Elementen für die Integration in andere Produkte mit digitalen Elementen bestimmt ist;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.9
       assessable: true
       depth: 3
@@ -369,306 +569,471 @@ objects:
       description: If the manufacturer decides to make available the software bill
         of materials to the user, information on where the software bill of materials
         can be accessed.
+      translations:
+        de:
+          description: für den Fall, dass der Hersteller dem Nutzer die Software-Stückliste zur Verfügung stellt,
+            wo auf die Software-Stückliste zugegriffen werden kann.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3
       assessable: false
       depth: 1
       ref_id: '3'
       name: ANNEX III
       description: IMPORTANT PRODUCTS WITH DIGITAL ELEMENTS
+      translations:
+        de:
+          name: ANHANG III
+          description: WICHTIGE PRODUKTE MIT DIGITALEN ELEMENTEN
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3
       ref_id: '3.1'
       name: Class I
+      translations:
+        de:
+          name: Klasse I
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.1
-      description: Identity management systems  and privileged access management software
-        and hardware, including authentication and access control readers, including
-        biometric readers;
+      description: Identity management systems and privileged access management software and hardware, including
+        authentication and access control readers, including biometric readers
+      translations:
+        de:
+          description: Identitätsmanagementsysteme sowie Software und Hardware für die Verwaltung privilegierter
+            Zugänge bzw. Zugriffe, einschließlich Lesegeräte für die Authentifizierung und Zugangskontrolle,
+            auch biometrische Lesegeräte
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.2
-      description: Standalone and embedded browsers;
+      description: Standalone and embedded browsers
+      translations:
+        de:
+          description: eigenständige und eingebettete Browser
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.3
-      description: Password managers;
+      description: Password managers
+      translations:
+        de:
+          description: Passwort-Manager
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.4
-      description: Software that searches for, removes, or quarantines malicious software;
+      description: Software that searches for, removes, or quarantines malicious software
+      translations:
+        de:
+          description: Software für die Suche, Entfernung und Quarantäne von Schadsoftware
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.5
-      description: Products with digital elements with the function of virtual private
-        network (VPN);
+      description: Products with digital elements with the function of virtual private network (VPN)
+      translations:
+        de:
+          description: Produkte mit digitalen Elementen mit der Funktion eines virtuellen privaten Netzes (VPN)
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.6
-      description: Network management systems;
+      description: Network management systems
+      translations:
+        de:
+          description: Netzmanagementsysteme
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.7
-      description: Security information and event management (SIEM) systems;
+      description: Security information and event management (SIEM) systems
+      translations:
+        de:
+          description: Systeme für die Verwaltung von Sicherheitsinformationen und -ereignissen (SIEM)
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.8
-      description: Boot managers;
+      description: Boot managers
+      translations:
+        de:
+          description: Bootmanager
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.9
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.9
-      description: Public key infrastructure and digital certificate issuance software;
+      description: Public key infrastructure and digital certificate issuance software
+      translations:
+        de:
+          description: Public-Key-Infrastrukturen und Software für die Ausstellung digitaler Zertifikate
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.9'
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.9'
-      description: Physical and virtual network interfaces;
+      description: Physical and virtual network interfaces
+      translations:
+        de:
+          description: physische und virtuelle Netzschnittstellen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.10
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.10
-      description: Operating systems ;
+      description: Operating systems
+      translations:
+        de:
+          description: Betriebssysteme
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.11
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.11
-      description: Routers, modems intended for the connection to the internet, and
-        switches ;
+      description: Routers, modems intended for the connection to the internet, and switches
+      translations:
+        de:
+          description: Router, Modems für die Internetanbindung und Switches
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.12
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.12
-      description: Microprocessors with security-related functionalities;
+      description: Microprocessors with security-related functionalities
+      translations:
+        de:
+          description: Mikroprozessoren mit sicherheitsrelevanten Funktionen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.13
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.13
-      description: Microcontrollers with security-related functionalities;
+      description: Microcontrollers with security-related functionalities
+      translations:
+        de:
+          description: Mikrocontroller mit sicherheitsrelevanten Funktionen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.14
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.14
-      description: Application specific integrated circuits (ASIC) and field-programmable
-        gate arrays (FPGA) with security-related functionalities;
+      description: Application specific integrated circuits (ASIC) and field-programmable gate arrays (FPGA)
+        with security-related functionalities
+      translations:
+        de:
+          description: anwendungsspezifische integrierte Schaltungen (ASIC) und FPGA (Field Programmable Gate
+            Array) mit sicherheitsrelevanten Funktionen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.15
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.15
-      description: Smart home general purpose virtual assistants;
+      description: Smart home general purpose virtual assistants
+      translations:
+        de:
+          description: virtuelle Assistenten für die intelligente häusliche Umgebung mit allgemeinem Zweck
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.16
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.16
-      description: Smart home products with security functionalities, including smart
-        door locks, security cameras, baby monitoring systems and alarm systems;
+      description: Smart home products with security functionalities, including smart door locks, security cameras,
+        baby monitoring systems and alarm systems
+      translations:
+        de:
+          description: Produkte für die intelligente häusliche Umgebung mit Sicherheitsfunktionen, einschließlich
+            intelligenter Türschlösser, Sicherheitskameras, Babyüberwachungssysteme und Alarmanlagen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.17
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.17
-      description: Internet connected toys covered by Directive 2009/48/EC of the
-        European Parliament and of the Council1 that have social interactive features
-        (e.g. speaking or filming) or that have location tracking features;
+      description: |-
+        Internet connected toys covered by Directive 2009/48/EC of the European Parliament and of the Council ( 4 ) that have social interactive features (e.g. speaking or filming) or that have location tracking features
+
+        (4) Directive 2009/48/EC of the European Parliament and of the Council of 18 June 2009 on the safety of toys (OJ L 170, 30.6.2009, p. 1).
+      translations:
+        de:
+          description: |-
+            mit dem Internet verbundenes Spielzeug, das unter die Richtlinie 2009/48/EG des Europäischen Parlaments und des Rates ( 4 ) fällt und über Funktionen zur sozialen Interaktion (z. B. sprechen oder filmen) oder zur Ortung verfügt
+
+            (4) Richtlinie 2009/48/EG des Europäischen Parlaments und des Rates vom 18. Juni 2009 über die Sicherheit von Spielzeug (ABl. L 170 vom 30.6.2009, S. 1).
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.18
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
       ref_id: 3.1.18
-      description: Personal wearable products to be worn or placed on a human body
-        that have a health monitoring (such as tracking) purpose and to which Regulation
-        (EU) 2017/745 or Regulation (EU) 2017/746 do not apply, or personal wearable
-        products that are intended for the use by and for children.
+      description: Personal wearable products to be worn or placed on a human body that have a health monitoring
+        (such as tracking) purpose and to which Regulation (EU) 2017/745 or (EU) No 2017/746 do not apply, or
+        personal wearable products that are intended for the use by and for children
+      translations:
+        de:
+          description: am Körper tragbare Produkte, die zum Zwecke der Gesundheitsüberwachung (z. B. Tracking)
+            bestimmt sind und nicht unter die Verordnungen (EU) 2017/745 oder (EU) 2017/746 fallen, oder am
+            Körper tragbare Produkte, die für die Verwendung durch und für Kinder bestimmt sind
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3
       ref_id: '3.2'
       name: Class II
+      translations:
+        de:
+          name: Klasse II
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
       ref_id: 3.2.1
-      description: Hypervisors and container runtime systems that support virtualised
-        execution of operating systems and similar environments;
+      description: Hypervisors and container runtime systems that support virtualised execution of operating
+        systems and similar environments
+      translations:
+        de:
+          description: Hypervisoren und Container-Runtime-Systeme, die eine virtualisierte Ausführung von Betriebssystemen
+            und ähnlichen Umgebungen unterstützen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
       ref_id: 3.2.2
-      description: Firewalls, intrusion detection and prevention systems ;
+      description: Firewalls, intrusion detection and prevention systems
+      translations:
+        de:
+          description: Firewalls, Intrusion-Detection-Systeme und Intrusion-Prevention-Systeme
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
       ref_id: 3.2.3
-      description: Tamper-resistant microprocessors;
+      description: Tamper-resistant microprocessors
+      translations:
+        de:
+          description: manipulationssichere Mikroprozessoren
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
       ref_id: 3.2.4
-      description: Tamper-resistant microcontrollers.
+      description: Tamper-resistant microcontrollers
+      translations:
+        de:
+          description: manipulationssichere Mikrocontroller
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
       assessable: false
       depth: 1
       ref_id: '4'
       name: ANNEX IV
       description: CRITICAL PRODUCTS WITH DIGITAL ELEMENTS
+      translations:
+        de:
+          name: ANHANG IV
+          description: KRITISCHE PRODUKTE MIT DIGITALEN ELEMENTEN
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
       ref_id: '4.1'
-      description: Hardware Devices with Security Boxes;
+      description: Hardware Devices with Security Boxes
+      translations:
+        de:
+          description: Hardwaregeräte mit Sicherheitsboxen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4.2
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
       ref_id: '4.2'
-      description: Smart meter gateways within smart metering systems as defined in
-        Article 2(23) of Directive (EU) 2019/944 of the European Parliament and of
-        the Council and other devices for advanced security purposes, including for
-        secure cryptoprocessing;
+      description: |-
+        Smart meter gateways within smart metering systems as defined in Article 2, point (23) of Directive (EU) 2019/944 of the European Parliament and of the Council ( 5 ) and other devices for advanced security purposes, including for secure cryptoprocessing
+
+        (5) Directive (EU) 2019/944 of the European Parliament and of the Council of 5 June 2019 on common rules for the internal market for electricity and amending Directive 2012/27/EU (OJ L 158, 14.6.2019, p. 125).
+      translations:
+        de:
+          description: |-
+            Smart-Meter-Gateways in intelligenten Messsystemen im Sinne des Artikels 2 Nummer 23 der Richtlinie (EU) 2019/944 des Europäischen Parlaments und des Rates ( 5 ) sowie andere Geräte für fortgeschrittene Sicherheitszwecke, einschließlich der sicheren Kryptoverarbeitung
+
+            (5) Richtlinie (EU) 2019/944 des Europäischen Parlaments und des Rates vom 5. Juni 2019 mit gemeinsamen Vorschriften für den Elektrizitätsbinnenmarkt und zur Änderung der Richtlinie 2012/27/EU (ABl. L 158 vom 14.6.2019, S. 125).
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4.3
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
       ref_id: '4.3'
-      description: Smartcards or similar devices, including secure elements.
+      description: Smartcards or similar devices, including secure elements
+      translations:
+        de:
+          description: Chipkarten oder ähnliche Geräte, einschließlich Sicherheitselemente
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5
       assessable: false
       depth: 1
       ref_id: '5'
       name: ANNEX V
       description: EU DECLARATION OF CONFORMITY
+      translations:
+        de:
+          name: ANHANG V
+          description: EU-KONFORMITÄTSERKLÄRUNG
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5
       description: 'The EU declaration of conformity referred to in Article 28, shall
         contain all of the following information:'
+      translations:
+        de:
+          description: 'Die EU-Konformitätserklärung gemäß Artikel 28 enthält alle folgenden Angaben:'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.1'
-      description: Name and type and any additional information enabling the unique
-        identification of the product with digital elements;
+      description: Name and type and any additional information enabling the unique identification of the product
+        with digital elements
+      translations:
+        de:
+          description: den Namen und den Typ sowie alle zusätzlichen Informationen, die eine eindeutige Identifizierung
+            des Produkts mit digitalen Elementen ermöglichen
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.2'
-      description: Name and address of the manufacturer or its authorised representative;
+      description: Name and address of the manufacturer or its authorised representative
+      translations:
+        de:
+          description: den Namen und die Anschrift des Herstellers oder seines Bevollmächtigten
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.3'
-      description: A statement that the EU declaration of conformity is issued under
-        the sole responsibility of the provider;
+      description: A statement that the EU declaration of conformity is issued under the sole responsibility
+        of the provider
+      translations:
+        de:
+          description: eine Erklärung darüber, dass der Anbieter die alleinige Verantwortung für die Ausstellung
+            der EU-Konformitätserklärung trägt
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.4'
-      description: Object of the declaration (identification of the product with digital
-        elements allowing traceability, which may include a photograph, where appropriate);
+      description: Object of the declaration (identification of the product with digital elements allowing traceability,
+        which may include a photograph, where appropriate)
+      translations:
+        de:
+          description: den Gegenstand der Erklärung (Bezeichnung des Produkts mit digitalen Elementen zwecks
+            Rückverfolgbarkeit, gegebenenfalls mit Foto)
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.5'
-      description: A statement that the object of the declaration described above
-        is in conformity with the relevant Union harmonisation legislation;
+      description: A statement that the object of the declaration described above is in conformity with the
+        relevant Union harmonisation legislation
+      translations:
+        de:
+          description: eine Erklärung, dass der oben beschriebene Gegenstand der Erklärung den einschlägigen
+            Harmonisierungsrechtsvorschriften der Union entspricht
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.6'
-      description: References to any relevant harmonised standards used or any other
-        common specification or cybersecurity certification in relation to which conformity
-        is declared;
+      description: References to any relevant harmonised standards used or any other common specification or
+        cybersecurity certification in relation to which conformity is declared
+      translations:
+        de:
+          description: Verweise auf die verwendeten einschlägigen harmonisierten Normen oder sonstigen gemeinsamen
+            Spezifikationen oder die Cybersicherheitszertifizierung, für die die Konformität erklärt wird
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.7'
-      description: Where applicable, the name and number of the notified body, a description
-        of the conformity assessment procedure performed and identification of the
-        certificate issued;
+      description: Where applicable, the name and number of the notified body, a description of the conformity
+        assessment procedure performed and identification of the certificate issued
+      translations:
+        de:
+          description: gegebenenfalls den Namen und die Kennnummer der notifizierten Stelle, eine Beschreibung
+            des durchgeführten Konformitätsbewertungsverfahrens und die Kennnummer der ausgestellten Bescheinigung
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
       ref_id: '5.8'
-      description: 'Additional information:
-
-        Signed for and on behalf of:....................................... (place
-        and date of issue):
-
-        (name, function) (signature):'
+      description: |-
+        Additional information:
+        Signed for and on behalf of:
+        (place and date of issue):
+        (name, function) (signature):
+      translations:
+        de:
+          description: |-
+            weitere Angaben:
+            Unterzeichnet für und im Namen von:
+            (Ort und Datum der Ausstellung)
+            (Name, Funktion) (Unterschrift):
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
       assessable: false
       depth: 1
       ref_id: '6'
       name: ANNEX VI
       description: SIMPLIFIED EU DECLARATION OF CONFORMITY
+      translations:
+        de:
+          name: ANHANG VI
+          description: VEREINFACHTE EU-KONFORMITÄTSERKLÄRUNG
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node87
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
       description: 'The simplified EU declaration of conformity referred to in Article
         13(20) shall be provided as follows:'
+      translations:
+        de:
+          description: 'Die vereinfachte EU-Konformitätserklärung nach Artikel 13 Absatz 20 hat folgenden Wortlaut:'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node88
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
-      description: Hereby, [Name of manufacturer] declares that the product with digital
-        elements type [designation of type of product with digital element] is in
-        compliance with Regulation (EU) .../... of the European Parliament and of
-        the Council1.
+      description: |-
+        Hereby, … [name of manufacturer] declares that the product with digital elements type … [designation of type of product with digital element] is in compliance with Regulation (EU) 2024/2847 ( 6 ).
+
+        (6) OJ L, 2024/2847, 20.11.2024, ELI: <http://data.europa.eu/eli/reg/2024/2847/oj>.
+      translations:
+        de:
+          description: |-
+            Hiermit erklärt … [Name des Herstellers], dass der Typ des Produkts mit digitalen Elementen … [Bezeichnung des Typs des Produkts mit digitalen Elementen] der Verordnung (EU) 2024/2847 ( 6 ) entspricht.
+
+            (6) ABl. L, 2024/2847, 20.11.2024, ELI: <http://data.europa.eu/eli/reg/2024/2847/oj>.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node89
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
-      description: 'The full text of the EU declaration of conformity is available
-        at the following internet address:'
+      description: 'The full text of the EU declaration of conformity is available at the following internet
+        address: …'
+      translations:
+        de:
+          description: 'Der vollständige Text der EU-Konformitätserklärung kann unter der folgenden Internetadresse
+            abgerufen werden: …'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7
       assessable: false
       depth: 1
       ref_id: '7'
-      name: ANNEX  VII
-      description: CONTENTS OF THE TECHNICAL DOCUMENTATION
+      name: ANNEX VII
+      description: CONTENT OF THE TECHNICAL DOCUMENTATION
+      translations:
+        de:
+          name: ANHANG VII
+          description: INHALT DER TECHNISCHEN DOKUMENTATION
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       assessable: true
       depth: 2
@@ -676,24 +1041,38 @@ objects:
       description: 'The technical documentation referred to in Article 31 shall contain
         at least the following information, as applicable to the relevant product
         with digital elements:'
+      translations:
+        de:
+          description: 'Die in Artikel 31 genannte technische Dokumentation muss mindestens die folgenden Informationen
+            enthalten, soweit sie für das betreffende Produkt mit digitalen Elementen von Bedeutung sind:'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.1'
       description: 'a general description of the product with digital elements, including:'
+      translations:
+        de:
+          description: eine allgemeine Beschreibung des Produkts mit digitalen Elementen, einschließlich
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.a
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
       ref_id: 7.1.a
       description: its intended purpose;
+      translations:
+        de:
+          description: seiner Zweckbestimmung,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.b
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
       ref_id: 7.1.b
-      description: versions of software affecting compliance with essential requirements;
+      description: versions of software affecting compliance with essential cybersecurity requirements;
+      translations:
+        de:
+          description: Softwareversionen, die sich auf die Erfüllung der grundlegenden Cybersicherheitsanforderungen
+            auswirken,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.c
       assessable: true
       depth: 4
@@ -702,21 +1081,30 @@ objects:
       description: where the product with digital elements is a hardware product,
         photographs or illustrations showing external features, marking and internal
         layout;
+      translations:
+        de:
+          description: 'wenn es sich bei dem Produkt mit digitalen Elementen um ein Hardwareprodukt handelt:
+            Fotografien oder Abbildungen, aus denen äußere Merkmale, Kennzeichnungen und innerer Aufbau hervorgehen;'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.d
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
       ref_id: 7.1.d
       description: user information and instructions as set out in Annex II;
+      translations:
+        de:
+          description: Informationen und Anleitungen für die Nutzer gemäß Anhang II;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.2'
-      description: 'a description of the design, development and production of the
-        product with digital
-
-        elements and vulnerability handling processes, including:'
+      description: 'a description of the design, development and production of the product with digital elements
+        and vulnerability handling processes, including:'
+      translations:
+        de:
+          description: eine Beschreibung der Konzeption, Entwicklung und Herstellung des Produkts mit digitalen
+            Elementen und der Verfahren zur Behandlung von Schwachstellen, einschließlich
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.a
       assessable: true
       depth: 4
@@ -726,6 +1114,12 @@ objects:
         with digital elements, including, where applicable, drawings and schemes and
         a description of the system architecture explaining how software components
         build on or feed into each other and integrate into the overall processing;
+      translations:
+        de:
+          description: erforderlicher Informationen über die Konzeption und Entwicklung des Produkts mit digitalen
+            Elementen, gegebenenfalls mit Zeichnungen und Schemata und/oder einer Beschreibung der Systemarchitektur,
+            aus der hervorgeht, wie Softwarekomponenten aufeinander aufbauen, miteinander zusammenwirken und
+            sich in die Gesamtverarbeitung integrieren;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.b
       assessable: true
       depth: 4
@@ -737,6 +1131,13 @@ objects:
         provision of a contact address for the reporting of the vulnerabilities and
         a description of the technical solutions chosen for the secure distribution
         of updates;
+      translations:
+        de:
+          description: erforderlicher Informationen und Spezifikationen bezüglich der vom Hersteller festgelegten
+            Verfahren zur Behandlung von Schwachstellen, einschließlich der Software-Stückliste, des Konzepts
+            für die koordinierte Offenlegung von Schwachstellen, des Nachweises der Bereitstellung einer Kontaktadresse
+            für die Meldung der Schwachstellen und einer Beschreibung der gewählten technischen Lösungen für
+            die sichere Verbreitung von Aktualisierungen;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.c
       assessable: true
       depth: 4
@@ -745,195 +1146,293 @@ objects:
       description: necessary information and specifications of the production and
         monitoring processes of the product with digital elements and the validation
         of those processes;
+      translations:
+        de:
+          description: erforderlicher Informationen und Spezifikationen bezüglich der Herstellungs- und Überwachungsprozesse
+            des Produkts mit digitalen Elementen und der Validierung dieser Prozesse;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.3'
-      description: an assessment of the cybersecurity risks against which the product
-        with digital elements is designed, developed, produced, delivered and maintained
-        as laid down in Article 13 of this Regulation, including how the essential
-        requirements set out in Annex I, Part I, are applicable;
+      description: an assessment of the cybersecurity risks against which the product with digital elements
+        is designed, developed, produced, delivered and maintained pursuant to Article 13, including how the
+        essential cybersecurity requirements set out in Part I of Annex I are applicable;
+      translations:
+        de:
+          description: eine Bewertung der Cybersicherheitsrisiken, die bei der Konzeption, Entwicklung, Herstellung,
+            Lieferung und Wartung des Produkts mit digitalen Elementen nach Artikel 13 berücksichtigt werden,
+            einschließlich der Frage, inwieweit die grundlegenden Cybersicherheitsanforderungen gemäß Anhang
+            I Teil I Anwendung finden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.4'
-      description: relevant information that was taken into account to determine the
-        support period as referred to in Article 13(8) of the product with digital
-        elements;
+      description: relevant information that was taken into account to determine the support period pursuant
+        to Article 13(8) of the product with digital elements;
+      translations:
+        de:
+          description: einschlägige Informationen, die bei der Festlegung des Unterstützungszeitraums gemäß
+            Artikel 13 Absatz 8 des Produkts mit digitalen Elementen berücksichtigt wurden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.5'
-      description: a list of the harmonised standards applied in full or in part the
-        references of which have been published in the Official Journal of the European
-        Union, common specifications as set out in Article 27 of this Regulation or
-        European cybersecurity certification schemes adopted pursuant to Regulation
-        (EU) 2019/881 pursuant to Article 27(8) of this Regulation, and, where those
-        harmonised standards, common specifications or European cybersecurity certification
-        schemes have not been applied, descriptions of the solutions adopted to meet
-        the essential requirements set out in of Annex I, Parts I and II, including
-        a list of other relevant technical specifications applied. In the event of
-        partly applied harmonised standards, common specifications or European cybersecurity
-        certification schemes, the technical documentation shall specify the parts
-        which have been applied;
+      description: a list of the harmonised standards applied in full or in part the references of which have
+        been published in the Official Journal of the European Union, common specifications as set out in Article
+        27 of this Regulation or European cybersecurity certification schemes adopted pursuant to Regulation
+        (EU) 2019/881 pursuant to Article 27(8) of this Regulation, and, where those harmonised standards, common
+        specifications or European cybersecurity certification schemes have not been applied, descriptions of
+        the solutions adopted to meet the essential cybersecurity requirements set out in Parts I and II of
+        Annex I, including a list of other relevant technical specifications applied. In the event of partly
+        applied harmonised standards, common specifications or European cybersecurity certification schemes,
+        the technical documentation shall specify the parts which have been applied;
+      translations:
+        de:
+          description: eine Aufstellung der vollständig oder teilweise angewandten harmonisierten Normen, deren
+            Fundstellen im Amtsblatt der Europäischen Union veröffentlicht wurden, der in Artikel 27 dieser
+            Verordnung genannten gemeinsamen Spezifikationen oder der in Artikel 27 Absatz 8 dieser Verordnung
+            genannten europäischen Schemata für die Cybersicherheitszertifizierung, angenommen gemäß der Verordnung
+            (EU) 2019/881, und, falls keine solchen harmonisierten Normen, gemeinsamen Spezifikationen und europäischen
+            Schemata für die Cybersicherheitszertifizierung angewandt werden, Beschreibungen der Lösungen, mit
+            denen die grundlegenden Cybersicherheitsanforderungen in Anhang I Teile I und II erfüllt werden,
+            mit einer Aufstellung sonstiger angewandter einschlägiger technischer Spezifikationen. Bei einer
+            teilweisen Anwendung harmonisierter Normen, gemeinsamer Spezifikationen oder europäischer Schemata
+            für die Cybersicherheitszertifizierung ist in der technischen Dokumentation anzugeben, welche Teile
+            angewandt wurden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.6'
-      description: reports of the tests carried out to verify the conformity of the
-        product with digital elements and of the vulnerability handling processes
-        with the applicable essential requirements as set out in Annex I, Parts I
-        and II;
+      description: reports of the tests carried out to verify the conformity of the product with digital elements
+        and of the vulnerability handling processes with the applicable essential cybersecurity requirements
+        as set out in Parts I and II of Annex I;
+      translations:
+        de:
+          description: Berichte über die Tests und Prüfungen, die durchgeführt wurden, um die Konformität des
+            Produkts mit digitalen Elementen und der Verfahren zur Behandlung von Schwachstellen mit den geltenden
+            grundlegenden Cybersicherheitsanforderungen in Anhang I Teile I und II zu überprüfen;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.7'
       description: a copy of the EU declaration of conformity;
+      translations:
+        de:
+          description: ein Exemplar der EU-Konformitätserklärung;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
       ref_id: '7.8'
-      description: 'where applicable, the software bill of materials, further to a
-        reasoned request from a market surveillance authority provided that it is
-        necessary in order for this authority to be able to check compliance with
-        the essential requirements set out in Annex I. '
+      description: where applicable, the software bill of materials, further to a reasoned request from a market
+        surveillance authority provided that it is necessary in order for that authority to be able to check
+        compliance with the essential cybersecurity requirements set out in Annex I.
+      translations:
+        de:
+          description: gegebenenfalls auf begründetes Verlangen der Marktüberwachungsbehörde die Software-Stückliste,
+            sofern dies erforderlich ist, damit diese Behörde die Einhaltung der grundlegenden Cybersicherheitsanforderungen
+            in Anhang I überprüfen kann.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
       assessable: false
       depth: 1
       ref_id: '8'
-      name: ANNEX  VIII
+      name: ANNEX VIII
       description: CONFORMITY ASSESSMENT PROCEDURES
+      translations:
+        de:
+          name: ANHANG VIII
+          description: KONFORMITÄTSBEWERTUNGSVERFAHREN
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
       ref_id: '8.1'
       name: Part I
-      description: Conformity Assessment procedure based on internal control (based
-        on Module A)
+      description: Conformity assessment procedure based on internal control (based on module A)
+      translations:
+        de:
+          name: Teil I
+          description: Konformitätsbewertungsverfahren auf der Grundlage einer internen Kontrolle (auf der Grundlage
+            von Modul A)
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
       ref_id: 8.1.1
-      description: Internal control is the conformity assessment procedure whereby
-        the manufacturer fulfils the obligations laid down in points 2, 3 and 4, and
-        ensures and declares on its sole responsibility that the products with digital
-        elements satisfy all the essential requirements set out in Annex I, Part I,
-        and the manufacturer meets the essential requirements set out in Annex I,
-        Part II.
+      description: Internal control is the conformity assessment procedure whereby the manufacturer fulfils
+        the obligations set out in points 2, 3 and 4 of this Part, and ensures and declares on its sole responsibility
+        that the products with digital elements satisfy all the essential cybersecurity requirements set out
+        in Part I of Annex I and the manufacturer meets the essential cybersecurity requirements set out in
+        Part II of Annex I.
+      translations:
+        de:
+          description: Bei der internen Kontrolle handelt es sich um das Konformitätsbewertungsverfahren, mit
+            dem der Hersteller die in den Nummern 2, 3 und 4 des vorliegenden Teils festgelegten Pflichten erfüllt
+            sowie gewährleistet und auf eigene Verantwortung erklärt, dass die Produkte mit digitalen Elementen
+            allen grundlegenden Cybersicherheitsanforderungen in Anhang I Teil I genügen und dass der Hersteller
+            die grundlegenden Cybersicherheitsanforderungen in Anhang I Teil II erfüllt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
       ref_id: 8.1.2
-      description: 'The manufacturer shall draw up the technical documentation described
-        in Annex VII. '
+      description: The manufacturer shall draw up the technical documentation described in Annex VII.
+      translations:
+        de:
+          description: Der Hersteller erstellt die technische Dokumentation gemäß Anhang VII.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
       ref_id: 8.1.3
-      description: "Design, development, production and vulnerability handling of\
-        \ products with digital elements \nThe manufacturer shall take all measures\
-        \ necessary so that the design, development, production and vulnerability\
-        \ handling processes and their monitoring ensure compliance of the manufactured\
-        \ or developed products with digital elements and of the processes put in\
-        \ place by the manufacturer with the essential requirements set out in Annex\
-        \ I, Parts I and II."
+      description: |-
+        Design, development, production and vulnerability handling of products with digital elements
+        The manufacturer shall take all measures necessary so that the design, development, production and vulnerability handling processes and their monitoring ensure compliance of the manufactured or developed products with digital elements and of the processes put in place by the manufacturer with the essential cybersecurity requirements set out in Parts I and II of Annex I.
+      translations:
+        de:
+          description: |-
+            Konzeption, Entwicklung, Herstellung und Behandlung von Schwachstellen bei Produkten mit digitalen Elementen
+            Der Hersteller trifft alle erforderlichen Maßnahmen, damit die Verfahren der Konzeption, Entwicklung, Herstellung und Schwachstellenbehandlung und deren Überwachung die Konformität der hergestellten oder entwickelten Produkte mit digitalen Elementen und der vom Hersteller festgelegten Verfahren mit den grundlegenden Cybersicherheitsanforderungen in Anhang I Teile I und II gewährleisten.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
       ref_id: 8.1.4
       name: Conformity marking and declaration of conformity
+      translations:
+        de:
+          name: Konformitätskennzeichnung und Konformitätserklärung
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
       ref_id: 8.1.4.1
-      description: The manufacturer shall affix the CE marking to each individual
-        product with digital elements that satisfies the applicable requirements of
-        this Regulation.
+      description: 1. The manufacturer shall affix the CE marking to each individual product with digital elements
+        that satisfies the applicable requirements set out in this Regulation.
+      translations:
+        de:
+          description: 1. Der Hersteller bringt die CE-Kennzeichnung an jedem einzelnen Produkt mit digitalen
+            Elementen an, das den in dieser Verordnung festgelegten geltenden Anforderungen genügt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4.2
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
       ref_id: 8.1.4.2
-      description: The manufacturer shall draw up a written EU declaration of conformity
-        for each product with digital elements in accordance with Article 28 and keep
-        it together with the technical documentation at the disposal of the national
-        authorities for 10 years after the product with digital elements has been
-        placed on the market or for the support period, whichever is longer. The EU
-        declaration of conformity shall identify the product with digital elements
-        for which it has been drawn up. A copy of the EU declaration of conformity
-        shall be made available to the relevant authorities upon request.
+      description: 2. The manufacturer shall draw up a written EU declaration of conformity for each product
+        with digital elements in accordance with Article 28 and keep it together with the technical documentation
+        at the disposal of the national authorities for 10 years after the product with digital elements has
+        been placed on the market or for the support period, whichever is longer. The EU declaration of conformity
+        shall identify the product with digital elements for which it has been drawn up. A copy of the EU declaration
+        of conformity shall be made available to the relevant authorities upon request.
+      translations:
+        de:
+          description: 2. Der Hersteller stellt für jedes Produkt mit digitalen Elementen eine schriftliche
+            EU-Konformitätserklärung gemäß Artikel 28 aus und hält sie zusammen mit der technischen Dokumentation
+            für einen Zeitraum von zehn Jahren ab dem Inverkehrbringen des Produkts mit digitalen Elementen
+            oder während des Unterstützungszeitraums, je nachdem, welcher Zeitraum länger ist, für die nationalen
+            Behörden bereit. Aus der EU-Konformitätserklärung muss hervorgehen, für welches Produkt mit digitalen
+            Elementen sie ausgestellt wurde. Ein Exemplar der EU-Konformitätserklärung wird den einschlägigen
+            Behörden auf Verlangen zur Verfügung gestellt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.5
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
       ref_id: 8.1.5
       description: Authorised representatives
+      translations:
+        de:
+          description: Bevollmächtigte
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node116
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
-      description: "The manufacturer\u2019s obligations set out in point 4 may be\
-        \ fulfilled by its authorised representative, on its behalf and under its\
-        \ responsibility, provided that they are specified in the mandate."
+      description: The manufacturer’s obligations set out in point 4 may be fulfilled by its authorised representative,
+        on its behalf and under its responsibility, provided that the relevant obligations are specified in
+        the mandate.
+      translations:
+        de:
+          description: Die in Nummer 4 genannten Verpflichtungen des Herstellers können von seinem Bevollmächtigten
+            in seinem Auftrag und unter seiner Verantwortung erfüllt werden, falls die einschlägigen Verpflichtungen
+            im Auftrag festgelegt sind.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
       ref_id: '8.2'
       name: Part II
-      description: 'EU-type examination (based on Module B) '
+      description: EU-type examination (based on module B)
+      translations:
+        de:
+          name: Teil II
+          description: EU-Baumusterprüfung (auf der Grundlage von Modul B)
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.1
-      description: 'EU-type examination is the part of a conformity assessment procedure
-        in which a notified body examines the technical design and development of
-        a product with digital elements and the vulnerability handling processes put
-        in place by the manufacturer, and attests that a product with digital elements
-        meets the essential requirements set out in Annex I, Part I, and that the
-        manufacturer meets the essential requirements set out in Annex I, Part II. '
+      description: EU-type examination is the part of a conformity assessment procedure in which a notified
+        body examines the technical design and development of a product with digital elements and the vulnerability
+        handling processes put in place by the manufacturer, and attests that a product with digital elements
+        meets the essential cybersecurity requirements set out in Part I of Annex I and that the manufacturer
+        meets the essential cybersecurity requirements set out in Part II of Annex I.
+      translations:
+        de:
+          description: Bei der EU-Baumusterprüfung handelt es sich um den Teil eines Konformitätsbewertungsverfahrens,
+            bei dem eine notifizierte Stelle die technische Konzeption und Entwicklung eines Produkts mit digitalen
+            Elementen und die vom Hersteller festgelegten Verfahren zur Behandlung von Schwachstellen untersucht
+            und prüft und sodann bescheinigt, dass ein Produkt mit digitalen Elementen den grundlegenden Cybersicherheitsanforderungen
+            in Anhang I Teil I genügt und dass der Hersteller die grundlegenden Cybersicherheitsanforderungen
+            in Anhang I Teil II erfüllt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.2
-      description: EU-type examination shall be carried out by assessment of the adequacy
-        of the technical design and development of the product with digital elements
-        through examination of the technical documentation and supporting evidence
-        referred to in point 3, plus examination of specimens of one or more critical
+      description: EU-type examination shall be carried out by assessing the adequacy of the technical design
+        and development of the product with digital elements through the examination of the technical documentation
+        and supporting evidence referred to in point 3, and the examination of specimens of one or more critical
         parts of the product (combination of production type and design type).
+      translations:
+        de:
+          description: Die EU-Baumusterprüfung erfolgt als Bewertung der Eignung der technischen Konzeption
+            und Entwicklung des Produkts mit digitalen Elementen anhand der Prüfung der in Nummer 3 genannten
+            technischen Dokumentation und zusätzlichen Nachweise sowie der Prüfung von Mustern eines oder mehrerer
+            wichtiger Teile des Produkts (Kombination aus Bau- und Konzeptionsmuster).
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.3
-      description: 'The manufacturer shall lodge an application for EU-type examination
-        with a single notified body of its choice. '
+      description: The manufacturer shall lodge an application for EU-type examination with a single notified
+        body of its choice.
+      translations:
+        de:
+          description: Der Antrag auf EU-Baumusterprüfung wird vom Hersteller bei einer einzigen benannten Stelle
+            seiner Wahl eingereicht.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
-      description: 'The application shall include: '
+      description: 'The application shall include:'
+      translations:
+        de:
+          description: Der Antrag enthält
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.1
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
       ref_id: 8.2.3.1
-      description: the name and address of the manufacturer and, if the application
-        is lodged by the authorised representative, its name and address as well;
+      description: the name and address of the manufacturer and, if the application is lodged by the authorised
+        representative, the name and address of that authorised representative;
+      translations:
+        de:
+          description: den Namen und die Anschrift des Herstellers sowie, wenn der Antrag vom Bevollmächtigten
+            eingereicht wird, den Namen und die Anschrift des Bevollmächtigten;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.2
       assessable: true
       depth: 4
@@ -941,20 +1440,32 @@ objects:
       ref_id: 8.2.3.2
       description: a written declaration that the same application has not been lodged
         with any other notified body;
+      translations:
+        de:
+          description: eine schriftliche Erklärung, dass derselbe Antrag bei keiner anderen notifizierten Stelle
+            eingereicht worden ist;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
       ref_id: 8.2.3.3
-      description: the technical documentation, which shall make it possible to assess
-        the conformity of the product with digital elements with the applicable essential
-        requirements as set out in Annex I, Part I, and the manufacturer's vulnerability
-        handling processes set out in Annex I, Part II, and shall include an adequate
-        analysis and assessment of the risks. The technical documentation shall specify
-        the applicable requirements and cover, as far as relevant for the assessment,
-        the design, manufacture and operation of the product with digital elements.
-        The technical documentation shall contain, wherever applicable, at least the
-        elements set out in Annex VII;
+      description: the technical documentation, which shall make it possible to assess the conformity of the
+        product with digital elements with the applicable essential cybersecurity requirements as set out in
+        Part I of Annex I and the manufacturer’s vulnerability handling processes set out in Part II of Annex
+        I and shall include an adequate analysis and assessment of the risks. The technical documentation shall
+        specify the applicable requirements and cover, as far as relevant for the assessment, the design, manufacture
+        and operation of the product with digital elements. The technical documentation shall contain, wherever
+        applicable, at least the elements set out in Annex VII;
+      translations:
+        de:
+          description: die technische Dokumentation, anhand deren die Konformität des Produkts mit digitalen
+            Elementen mit den geltenden grundlegenden Cybersicherheitsanforderungen in Anhang I Teil I und die
+            Verfahren des Herstellers zur Behandlung von Schwachstellen gemäß Anhang I Teil II bewertet werden
+            können; sie muss auch eine angemessene Risikoanalyse und -bewertung enthalten. In der technischen
+            Dokumentation sind die geltenden Anforderungen aufzuführen und die Konzeption, die Herstellung und
+            die Arbeitsweise des Produkts mit digitalen Elementen zu erfassen, soweit sie für die Bewertung
+            von Bedeutung sind. Die technische Dokumentation enthält gegebenenfalls zumindest die in Anhang
+            VII aufgeführten Elemente;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.4
       assessable: true
       depth: 4
@@ -967,22 +1478,40 @@ objects:
         applied in full. The supporting evidence shall include, where necessary, the
         results of tests carried out by the appropriate laboratory of the manufacturer,
         or by another testing laboratory on its behalf and under its responsibility.
+      translations:
+        de:
+          description: zusätzliche Nachweise für die Eignung der Lösungen für die technische Konzeption und
+            Entwicklung und der Verfahren zur Behandlung von Schwachstellen. In diesen zusätzlichen Nachweisen
+            müssen alle Unterlagen vermerkt sein, nach denen vorgegangen wurde, insbesondere wenn die einschlägigen
+            harmonisierten Normen oder technischen Spezifikationen nicht in vollem Umfang angewandt worden sind.
+            Die Nachweise umfassen erforderlichenfalls die Ergebnisse von Prüfungen, die von einem geeigneten
+            Labor des Herstellers oder von einem anderen Prüflabor in seinem Auftrag und unter seiner Verantwortung
+            durchgeführt wurden.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.4
       description: 'The notified body shall:'
+      translations:
+        de:
+          description: Die notifizierte Stelle
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
       ref_id: 8.2.4.1
-      description: examine the technical documentation and supporting evidence to
-        assess the adequacy of the technical design and development of the product
-        with digital elements with the essential requirements set out in Annex I,
-        Part I, and of the vulnerability handling processes put in place by the manufacturer
-        with the essential requirements set out in Annex I, Part II;
+      description: examine the technical documentation and supporting evidence to assess the adequacy of the
+        technical design and development of the product with digital elements with the essential cybersecurity
+        requirements set out in Part I of Annex I and of the vulnerability handling processes put in place by
+        the manufacturer with the essential cybersecurity requirements set out in Part II of Annex I;
+      translations:
+        de:
+          description: prüft die technische Dokumentation und die zusätzlichen Nachweise, um die Übereinstimmung
+            der technischen Konzeption und Entwicklung des Produkts mit digitalen Elementen mit den grundlegenden
+            Cybersicherheitsanforderungen in Anhang I Teil I und der vom Hersteller festgelegten Verfahren zur
+            Behandlung von Schwachstellen mit den grundlegenden Cybersicherheitsanforderungen in Anhang I Teil
+            II zu bewerten;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.2
       assessable: true
       depth: 4
@@ -994,6 +1523,12 @@ objects:
         relevant harmonised standards or technical specifications, as well as the
         elements which have been designed and developed without applying the relevant
         provisions of those standards;
+      translations:
+        de:
+          description: überprüft, ob die Muster in Übereinstimmung mit der technischen Dokumentation entwickelt
+            oder hergestellt wurde/n, welche Elemente nach den geltenden Vorschriften der einschlägigen harmonisierten
+            Normen oder technischen Spezifikationen konzipiert und entwickelt wurden und welche Elemente ohne
+            Anwendung der einschlägigen Vorschriften dieser Normen konzipiert und entwickelt wurden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.3
       assessable: true
       depth: 4
@@ -1003,16 +1538,27 @@ objects:
         out, to check that, where the manufacturer has chosen to apply the solutions
         in the relevant harmonised standards or technical specifications for the requirements
         set out in Annex I, they have been applied correctly;
+      translations:
+        de:
+          description: führt geeignete Untersuchungen und Prüfungen durch bzw. veranlasst diese, um festzustellen,
+            ob die Lösungen aus den einschlägigen harmonisierten Normen oder technischen Spezifikationen im
+            Hinblick auf die Anforderungen in Anhang I korrekt angewandt worden sind, sofern sich der Hersteller
+            für ihre Anwendung entschieden hat;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.4
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
       ref_id: 8.2.4.4
-      description: carry out appropriate examinations and tests, or have them carried
-        out, to check that, where the solutions in the relevant harmonised standards
-        or technical specifications for the requirements set out in Annex I have not
-        been applied, the solutions adopted by the manufacturer meet the corresponding
-        essential requirements;
+      description: carry out appropriate examinations and tests, or have them carried out, to check that, where
+        the solutions in the relevant harmonised standards or technical specifications for the requirements
+        set out in Annex I have not been applied, the solutions adopted by the manufacturer meet the corresponding
+        essential cybersecurity requirements;
+      translations:
+        de:
+          description: führt geeignete Untersuchungen und Prüfungen durch bzw. veranlasst diese, um festzustellen,
+            ob die vom Hersteller gewählten Lösungen die entsprechenden grundlegenden Cybersicherheitsanforderungen
+            erfüllen, falls der Hersteller die Lösungen aus den einschlägigen harmonisierten Normen oder den
+            technischen Spezifikationen für die Anforderungen in Anhang I nicht angewandt hat;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.5
       assessable: true
       depth: 4
@@ -1020,6 +1566,9 @@ objects:
       ref_id: 8.2.4.5
       description: agree with the manufacturer on a location where the examinations
         and tests will be carried out.
+      translations:
+        de:
+          description: vereinbart mit dem Hersteller, wo die Untersuchungen und Prüfungen durchgeführt werden.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.5
       assessable: true
       depth: 3
@@ -1030,18 +1579,31 @@ objects:
         \ Without prejudice to its obligations vis-\xE0-vis the notifying authorities,\
         \ the notified body shall release the content of that report, in full or in\
         \ part, only with the agreement of the manufacturer."
+      translations:
+        de:
+          description: Die notifizierte Stelle erstellt einen Bericht über die Beurteilung der nach Nummer 4
+            ausgeführten Tätigkeiten und deren Ergebnisse. Unbeschadet ihrer Pflichten gegenüber den notifizierenden
+            Behörden veröffentlicht die notifizierte Stelle den Inhalt dieses Berichts oder Teile davon nur
+            mit Zustimmung des Herstellers.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.6
-      description: Where the type and the vulnerability handling processes meet the
-        essential requirements set out in Annex I, the notified body shall issue an
-        EU-type examination certificate to the manufacturer. The certificate shall
-        contain the name and address of the manufacturer, the conclusions of the examination,
-        the conditions (if any) for its validity and the necessary data for identification
-        of the approved type and vulnerability handling processes. The certificate
-        may have one or more annexes attached.
+      description: Where the type and the vulnerability handling processes meet the essential cybersecurity
+        requirements set out in Annex I, the notified body shall issue an EU-type examination certificate to
+        the manufacturer. The certificate shall contain the name and address of the manufacturer, the conclusions
+        of the examination, the conditions (if any) for its validity and the necessary data for identification
+        of the approved type and vulnerability handling processes. The certificate may have one or more annexes
+        attached.
+      translations:
+        de:
+          description: Entsprechen das Baumuster und die Verfahren zur Behandlung von Schwachstellen den grundlegenden
+            Cybersicherheitsanforderungen in Anhang I, so stellt die notifizierte Stelle dem Hersteller eine
+            EU-Baumusterprüfbescheinigung aus. Die Bescheinigung enthält den Namen und die Anschrift des Herstellers,
+            die Ergebnisse der Prüfung, etwaige Bedingungen für ihre Gültigkeit und die erforderlichen Daten
+            für die Identifizierung des zugelassenen Baumusters und des Verfahrens zur Behandlung von Schwachstellen.
+            Der Bescheinigung können ein oder mehrere Anhänge beigefügt werden.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node134
       assessable: true
       depth: 3
@@ -1050,44 +1612,70 @@ objects:
         to allow the conformity of manufactured or developed products with digital
         elements with the examined type and vulnerability handling processes to be
         evaluated and to allow for in-service control.
+      translations:
+        de:
+          description: Die Bescheinigung und ihre Anhänge enthalten alle einschlägigen Informationen, anhand
+            deren sich die Konformität der hergestellten oder entwickelten Produkte mit digitalen Elementen
+            mit dem geprüften Baumuster und die Konformität der Verfahren zur Behandlung von Schwachstellen
+            beurteilen und gegebenenfalls eine Kontrolle nach ihrer Inbetriebnahme durchführen lassen.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node135
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
-      description: Where the type and the vulnerability handling processes do not
-        satisfy the applicable essential requirements set out in Annex I, the notified
-        body shall refuse to issue an EU-type examination certificate and shall inform
-        the applicant accordingly, giving detailed reasons for its refusal.
+      description: Where the type and the vulnerability handling processes do not satisfy the applicable essential
+        cybersecurity requirements set out in Annex I, the notified body shall refuse to issue an EU-type examination
+        certificate and shall inform the applicant accordingly, giving detailed reasons for its refusal.
+      translations:
+        de:
+          description: Entsprechen das Baumuster und die Verfahren zur Behandlung von Schwachstellen nicht den
+            anwendbaren grundlegenden Cybersicherheitsanforderungen in Anhang I, so verweigert die notifizierte
+            Stelle die Ausstellung einer EU-Baumusterprüfbescheinigung und unterrichtet den Antragsteller darüber,
+            wobei sie ihre Weigerung ausführlich begründet.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.7
-      description: The notified body shall keep itself apprised of any changes in
-        the generally acknowledged state of the art which indicate that the approved
-        type and the vulnerability handling processes may no longer comply with the
-        applicable essential requirements set out in Annex I to this Regulation, and
-        shall determine whether such changes require further investigation. If so,
-        the notified body shall inform the manufacturer accordingly.
+      description: The notified body shall keep itself apprised of any changes in the generally acknowledged
+        state of the art which indicate that the approved type and the vulnerability handling processes may
+        no longer comply with the applicable essential cybersecurity requirements set out in Annex I, and shall
+        determine whether such changes require further investigation. If so, the notified body shall inform
+        the manufacturer accordingly.
+      translations:
+        de:
+          description: Die notifizierte Stelle hält sich über alle Änderungen des allgemein anerkannten Stands
+            der Technik auf dem Laufenden; deuten diese darauf hin, dass das zugelassene Baumuster und die Verfahren
+            zur Behandlung von Schwachstellen nicht mehr den geltenden grundlegenden Cybersicherheitsanforderungen
+            in Anhang I entsprechen, so entscheidet sie, ob derartige Änderungen weitere Untersuchungen nötig
+            machen. Ist dies der Fall, so setzt die notifizierte Stelle den Hersteller davon in Kenntnis.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node137
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
-      description: The manufacturer shall inform the notified body that holds the
-        technical documentation relating to the EU-type examination certificate of
-        all modifications to the approved type and the vulnerability handling processes
-        that may affect the conformity with the essential requirements set out in
-        Annex I, or the conditions for validity of the certificate. Such modifications
-        shall require additional approval in the form of an addition to the original
-        EU-type examination certificate.
+      description: The manufacturer shall inform the notified body that holds the technical documentation relating
+        to the EU-type examination certificate of all modifications to the approved type and the vulnerability
+        handling processes that may affect the conformity with the essential cybersecurity requirements set
+        out in Annex I, or the conditions for validity of the certificate. Such modifications shall require
+        additional approval in the form of an addition to the original EU-type examination certificate.
+      translations:
+        de:
+          description: Der Hersteller unterrichtet die notifizierte Stelle, der die technische Dokumentation
+            zur EU-Baumusterprüfbescheinigung vorliegt, über alle Änderungen an dem zugelassenen Baumuster und
+            dem Verfahren zur Behandlung von Schwachstellen, die die Übereinstimmung mit den grundlegenden Cybersicherheitsanforderungen
+            in Anhang I oder mit den Bedingungen für die Gültigkeit der Bescheinigung beeinträchtigen könnten.
+            Derartige Änderungen erfordern eine Zusatzgenehmigung in Form einer Ergänzung der ursprünglichen
+            EU-Baumusterprüfbescheinigung.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.8
-      description: The notified body shall carry out periodic audits to ensure that
-        the vulnerability handling processes as set out in Annex I, Part II, are implemented
-        adequately.
+      description: The notified body shall carry out periodic audits to ensure that the vulnerability handling
+        processes as set out in Part II of Annex I are implemented adequately.
+      translations:
+        de:
+          description: Die notifizierte Stelle führt regelmäßig Audits durch, um sicherzustellen, dass die in
+            Anhang I Teil II aufgeführten Verfahren zur Behandlung von Schwachstellen angemessen umgesetzt werden.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.9
       assessable: true
       depth: 3
@@ -1098,6 +1686,12 @@ objects:
         issued or withdrawn, and shall, periodically or upon request, make available
         to its notifying authorities the list of certificates and any additions thereto
         refused, suspended or otherwise restricted.
+      translations:
+        de:
+          description: Jede notifizierte Stelle unterrichtet ihre notifizierenden Behörden über die EU-Baumusterprüfbescheinigungen
+            und etwaige Ergänzungen dazu, die sie ausgestellt oder zurückgenommen hat, und übermittelt ihren
+            notifizierenden Behörden in regelmäßigen Abständen oder auf Verlangen eine Aufstellung aller Bescheinigungen
+            und Ergänzungen dazu, die sie verweigert, ausgesetzt oder auf andere Art eingeschränkt hat.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node140
       assessable: true
       depth: 3
@@ -1106,6 +1700,12 @@ objects:
         the EU-type examination certificates and any additions thereto which it has
         refused, withdrawn, suspended or otherwise restricted, and, upon request,
         concerning the certificates and additions thereto which it has issued.
+      translations:
+        de:
+          description: Jede notifizierte Stelle unterrichtet die übrigen notifizierten Stellen über die EU-Baumusterprüfbescheinigungen
+            und etwaige Ergänzungen dazu, die sie verweigert, zurückgenommen, ausgesetzt oder auf andere Weise
+            eingeschränkt hat, und auf Verlangen über die Bescheinigungen und Ergänzungen dazu, die sie ausgestellt
+            hat.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node141
       assessable: true
       depth: 3
@@ -1118,6 +1718,15 @@ objects:
         EU-type examination certificate, its annexes and additions, as well as the
         technical file including the documentation submitted by the manufacturer,
         until the expiry of the validity of the certificate.
+      translations:
+        de:
+          description: Auf Verlangen erhalten die Kommission, die Mitgliedstaaten und die anderen notifizierten
+            Stellen ein Exemplar der EU-Baumusterprüfbescheinigungen und jeglicher Ergänzungen. Die Kommission
+            und die Mitgliedstaaten erhalten auf Verlangen ein Exemplar der technischen Dokumentation und der
+            Ergebnisse der durch die notifizierte Stelle vorgenommenen Prüfungen. Die notifizierte Stelle bewahrt
+            ein Exemplar der EU-Baumusterprüfbescheinigung samt Anhängen und Ergänzungen sowie des technischen
+            Dossiers einschließlich der vom Hersteller eingereichten Unterlagen so lange auf, bis die Gültigkeitsdauer
+            der Bescheinigung endet.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.10
       assessable: true
       depth: 3
@@ -1128,61 +1737,97 @@ objects:
         disposal of the national authorities for 10 years after the product with digital
         elements has been placed on the market or for the support period, whichever
         is longer.
+      translations:
+        de:
+          description: Der Hersteller hält ein Exemplar der EU-Baumusterprüfbescheinigung samt Anhängen und
+            Ergänzungen zusammen mit der technischen Dokumentation zehn Jahre lang nach dem Inverkehrbringen
+            des Produkts mit digitalen Elementen oder während des Unterstützungszeitraums je nachdem, welcher
+            Zeitraum länger ist, für die nationalen Behörden bereit.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.11
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
       ref_id: 8.2.11
-      description: The manufacturer's authorised representative may lodge the application
-        referred to in point 3 and fulfil the obligations set out in points 7 and
-        10, provided that they are specified in the mandate.
+      description: The manufacturer’s authorised representative may lodge the application referred to in point
+        3 and fulfil the obligations set out in points 7 and 10, provided that the relevant obligations are
+        specified in the mandate.
+      translations:
+        de:
+          description: Der Bevollmächtigte des Herstellers kann den in Nummer 3 genannten Antrag einreichen
+            und die in den Nummern 7 und 10 genannten Pflichten erfüllen, falls die einschlägigen Verpflichtungen
+            in dem Auftrag festgelegt sind.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
       ref_id: '8.3'
       name: Part III
-      description: ' Conformity to type based on internal production control (based
-        on Module C)'
+      description: Conformity to type based on internal production control (based on module C)
+      translations:
+        de:
+          name: Teil III
+          description: Konformität mit dem Baumuster auf der Grundlage einer internen Fertigungskontrolle (auf
+            der Grundlage von Modul C)
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
       ref_id: 8.3.1
-      description: Conformity to type based on internal production control is the
-        part of a conformity assessment procedure whereby the manufacturer fulfils
-        the obligations laid down in points 2 and 3, and ensures and declares that
-        the products with digital elements concerned are in conformity with the type
-        described in the EU-type examination certificate and satisfy the essential
-        requirements set out in Annex I, Part I, and that the manufacturer meets the
-        essential requirements set out in Annex I, Part II.
+      description: Conformity to type based on internal production control is the part of a conformity assessment
+        procedure whereby the manufacturer fulfils the obligations set out in points 2 and 3 of this Part, and
+        ensures and declares that the products with digital elements concerned are in conformity with the type
+        described in the EU-type examination certificate and satisfy the essential cybersecurity requirements
+        set out in Part I of Annex I and that the manufacturer meets the essential cybersecurity requirements
+        set out in Part II of Annex I.
+      translations:
+        de:
+          description: Bei der Konformität mit dem Baumuster auf der Grundlage einer internen Fertigungskontrolle
+            handelt es sich um den Teil eines Konformitätsbewertungsverfahrens, bei dem der Hersteller die in
+            den Nummern 2 und 3 dieses Teils festgelegten Pflichten erfüllt sowie sicherstellt und erklärt,
+            dass die betreffenden Produkte mit digitalen Elementen dem in der EU-Baumusterprüfbescheinigung
+            beschriebenen Baumuster entsprechen und den grundlegenden Cybersicherheitsanforderungen in Anhang
+            I Teil I genügen und er die grundlegenden Cybersicherheitsanforderungen in Anhang I Teil II erfüllt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
       ref_id: 8.3.2
       name: Production
-      description: The manufacturer shall take all measures necessary so that the
-        production and its monitoring ensure conformity of the manufactured products
-        with digital elements with the approved type described in the EU-type examination
-        certificate and with the essential requirements as set out in Annex I, Part
-        I, and ensures that the manufacturer meets the essential requirements set
-        out in Annex I, Part II.
+      description: The manufacturer shall take all measures necessary so that the production and its monitoring
+        ensure conformity of the manufactured products with digital elements with the approved type described
+        in the EU-type examination certificate and with the essential cybersecurity requirements as set out
+        in Part I of Annex I and ensures that the manufacturer meets the essential cybersecurity requirements
+        set out in Part II of Annex I.
+      translations:
+        de:
+          name: Herstellung
+          description: Der Hersteller trifft alle erforderlichen Maßnahmen, damit die Konformität der hergestellten
+            Produkte mit digitalen Elementen mit dem in der EU-Baumusterprüfbescheinigung beschriebenen zugelassenen
+            Baumuster und den grundlegenden Cybersicherheitsanforderungen in Anhang I Teil I durch die Herstellung
+            und ihre Überwachung gewährleistet ist, und stellt sicher, dass er die grundlegenden Cybersicherheitsanforderungen
+            in Anhang I Teil II erfüllt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
       ref_id: 8.3.3
       name: Conformity marking and declaration of conformity
+      translations:
+        de:
+          name: Konformitätskennzeichnung und Konformitätserklärung
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3
       ref_id: 8.3.3.1
-      description: The manufacturer shall affix the CE marking to each individual
-        product with digital elements that is in conformity with the type described
-        in the EU-type examination certificate and satisfies the applicable requirements
-        of the legislative instrument.
+      description: The manufacturer shall affix the CE marking to each individual product with digital elements
+        that is in conformity with the type described in the EU-type examination certificate and satisfies the
+        applicable requirements set out in this Regulation.
+      translations:
+        de:
+          description: Der Hersteller bringt an jedem einzelnen Produkt mit digitalen Elementen, das mit dem
+            in der EU-Baumusterprüfbescheinigung beschriebenen Baumuster übereinstimmt und die in dieser Verordnung
+            festgelegten geltenden Anforderungen erfüllt, die CE-Kennzeichnung an.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3.2
       assessable: true
       depth: 4
@@ -1195,34 +1840,59 @@ objects:
         conformity shall identify the product model for which it has been drawn up.
         A copy of the declaration of conformity shall be made available to the relevant
         authorities upon request.
+      translations:
+        de:
+          description: Der Hersteller stellt für ein Produktmodell eine schriftliche Konformitätserklärung aus
+            und hält sie zehn Jahre lang nach dem Inverkehrbringen des Produkts mit digitalen Elementen oder
+            während des Unterstützungszeitraums, je nachdem, welcher Zeitraum länger ist, für die nationalen
+            Behörden bereit. Aus der Konformitätserklärung muss hervorgehen, für welches Produktmodell sie ausgestellt
+            wurde. Ein Exemplar der Konformitätserklärung wird den einschlägigen Behörden auf Verlangen zur
+            Verfügung gestellt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
       ref_id: 8.3.4
       name: Authorised representative
-      description: The manufacturer's obligations set out in point 3 may be fulfilled
-        by its authorised representative, on its behalf and under its responsibility,
-        provided that they are specified in the mandate.
+      description: The manufacturer’s obligations set out in point 3 may be fulfilled by its authorised representative,
+        on its behalf and under its responsibility, provided that the relevant obligations are specified in
+        the mandate.
+      translations:
+        de:
+          name: Bevollmächtigter
+          description: Die in Nummer 3 genannten Verpflichtungen des Herstellers können von seinem Bevollmächtigten
+            in seinem Auftrag und unter seiner Verantwortung erfüllt werden, falls die einschlägigen Verpflichtungen
+            im Auftrag festgelegt sind.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
       ref_id: '8.4'
       name: Part IV
-      description: Conformity based on full quality assurance (based on Module H)
+      description: Conformity based on full quality assurance (based on module H)
+      translations:
+        de:
+          name: Teil IV
+          description: Konformität auf der Grundlage einer umfassenden Qualitätssicherung (auf der Grundlage
+            von Modul H)
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
       ref_id: 8.4.1
-      description: Conformity based on full quality assurance is the conformity assessment
-        procedure whereby the manufacturer fulfils the obligations laid down in points
-        2 and 5, and ensures and declares on its sole responsibility that the products
-        with digital elements or product categories concerned satisfy the essential
-        requirements set out in Annex I, Part I, and that the vulnerability handling
-        processes put in place by the manufacturer meet the requirements set out in
-        Annex I, Part II.
+      description: Conformity based on full quality assurance is the conformity assessment procedure whereby
+        the manufacturer fulfils the obligations set out in points 2 and 5 of this Part, and ensures and declares
+        on its sole responsibility that the products with digital elements or product categories concerned satisfy
+        the essential cybersecurity requirements set out in Part I of Annex I and that the vulnerability handling
+        processes put in place by the manufacturer meet the requirements set out in Part II of Annex I.
+      translations:
+        de:
+          description: Bei der Konformität auf der Grundlage einer umfassenden Qualitätssicherung handelt es
+            sich um das Konformitätsbewertungsverfahren, mit dem der Hersteller die in den Nummern 2 und 5 festgelegten
+            Pflichten erfüllt sowie gewährleistet und auf eigene Verantwortung erklärt, dass die betreffenden
+            Produkte mit digitalen Elementen oder Produktkategorien den grundlegenden Cybersicherheitsanforderungen
+            in Anhang I Teil I und die vom Hersteller festgelegten Verfahren zur Behandlung von Schwachstellen
+            den grundlegenden Anforderungen in Anhang I Teil II genügen.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.2
       assessable: true
       depth: 3
@@ -1236,12 +1906,20 @@ objects:
         of the products with digital elements concerned and for handling vulnerabilities,
         maintain its effectiveness throughout the support period, and shall be subject
         to surveillance as specified in point 4.'
+      translations:
+        de:
+          description: |-
+            Konzeption, Entwicklung, Herstellung und Behandlung von Schwachstellen bei Produkten mit digitalen Elementen
+            Der Hersteller betreibt ein zugelassenes Qualitätssicherungssystem nach Nummer 3 für die Konzeption, Entwicklung und Endabnahme und Prüfung der betreffenden Produkte mit digitalen Elementen und für die Behandlung von Schwachstellen, erhält dessen Wirksamkeit während des Unterstützungszeitraums und unterliegt der Überwachung nach Nummer 4.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
       ref_id: 8.4.3
       name: Quality system
+      translations:
+        de:
+          name: Qualitätssicherungssystem
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1
       assessable: true
       depth: 4
@@ -1250,18 +1928,29 @@ objects:
       description: The manufacturer shall lodge an application for assessment of its
         quality system with the notified body of its choice, for the products with
         digital elements concerned.
+      translations:
+        de:
+          description: Der Hersteller beantragt bei einer notifizierten Stelle seiner Wahl die Bewertung seines
+            Qualitätssicherungssystems für die betreffenden Produkte mit digitalen Elementen.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
       description: 'The application shall include:'
+      translations:
+        de:
+          description: Der Antrag enthält
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
       ref_id: 8.4.3.1.1
-      description: the name and address of the manufacturer and, if the application
-        is lodged by the authorised representative, its name and address as well;
+      description: the name and address of the manufacturer and, if the application is lodged by the authorised
+        representative, the name and address of that authorised representative;
+      translations:
+        de:
+          description: den Namen und die Anschrift des Herstellers sowie, wenn der Antrag vom Bevollmächtigten
+            eingereicht wird, den Namen und die Anschrift des Bevollmächtigten;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.2
       assessable: true
       depth: 5
@@ -1271,12 +1960,20 @@ objects:
         with digital elements intended to be manufactured or developed. The technical
         documentation shall, wherever applicable, contain at least the elements as
         set out in Annex VII;
+      translations:
+        de:
+          description: die technische Dokumentation jeweils für ein Modell jeder herzustellenden oder zu entwickelnden
+            Kategorie von Produkten mit digitalen Elementen; die technische Dokumentation enthält gegebenenfalls
+            zumindest die in Anhang VII aufgeführten Elemente;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
       ref_id: 8.4.3.1.3
       description: the documentation concerning the quality system; and
+      translations:
+        de:
+          description: die Dokumentation zum Qualitätssicherungssystem;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.4
       assessable: true
       depth: 5
@@ -1284,15 +1981,25 @@ objects:
       ref_id: 8.4.3.1.4
       description: a written declaration that the same application has not been lodged
         with any other notified body.
+      translations:
+        de:
+          description: eine schriftliche Erklärung, dass derselbe Antrag bei keiner anderen notifizierten Stelle
+            eingereicht worden ist.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
       ref_id: 8.4.3.2
-      description: The quality system shall ensure compliance of the products with
-        digital elements with the essential requirements set out in Annex I, Part
-        I, and compliance of the vulnerability handling processes put in place by
-        the manufacturer with the requirements set out in Annex I, Part II.
+      description: The quality system shall ensure compliance of the products with digital elements with the
+        essential cybersecurity requirements set out in Part I of Annex I and compliance of the vulnerability
+        handling processes put in place by the manufacturer with the requirements set out in Part II of Annex
+        I.
+      translations:
+        de:
+          description: Das Qualitätssicherungssystem gewährleistet die Konformität des Produkts mit digitalen
+            Elementen mit den grundlegenden Cybersicherheitsanforderungen in Anhang I Teil I und die Konformität
+            der vom Hersteller festgelegten Verfahren zur Behandlung von Schwachstellen mit den grundlegenden
+            Anforderungen in Anhang I Teil II.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node162
       assessable: true
       depth: 4
@@ -1302,11 +2009,20 @@ objects:
         policies, procedures and instructions. That quality system documentation shall
         permit a consistent interpretation of the quality programmes, plans, manuals
         and records.
+      translations:
+        de:
+          description: Alle vom Hersteller berücksichtigten Grundlagen, Anforderungen und Vorschriften sind
+            systematisch und ordnungsgemäß in Form schriftlicher Grundsätze, Verfahren und Anweisungen zusammenzustellen.
+            Diese Unterlagen über das Qualitätssicherungssystem gewährleisten, dass die Qualitätssicherungsprogramme,
+            -pläne, -handbücher und qualitätsbezogene Aufzeichnungen einheitlich ausgelegt werden.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
       description: 'It shall, in particular, contain an adequate description of:'
+      translations:
+        de:
+          description: 'Sie enthalten insbesondere eine angemessene Beschreibung folgender Punkte:'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.1
       assessable: true
       depth: 5
@@ -1315,26 +2031,40 @@ objects:
       description: the quality objectives and the organisational structure, responsibilities
         and powers of the management with regard to design, development, product quality
         and vulnerability handling;
+      translations:
+        de:
+          description: Qualitätsziele sowie organisatorischer Aufbau, Zuständigkeiten und Befugnisse des Managements
+            in Bezug auf Konzeption, Entwicklung, Produktqualität und Behandlung von Schwachstellen;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
       ref_id: 8.4.3.2.2
-      description: the technical design and development specifications, including
-        standards, that will be applied and, where the relevant harmonised standards
-        or technical specifications will not be applied in full, the means that will
-        be used to ensure that the essential requirements set out in Annex I, Part
-        I, that apply to the products with digital elements will be met;
+      description: the technical design and development specifications, including standards, that will be applied
+        and, where the relevant harmonised standards or technical specifications will not be applied in full,
+        the means that will be used to ensure that the essential cybersecurity requirements set out in Part
+        I of Annex I that apply to the products with digital elements will be met;
+      translations:
+        de:
+          description: technische Spezifikationen für die Konzeption und Entwicklung, einschließlich der angewandten
+            Normen, sowie bei nicht vollständiger Anwendung der einschlägigen harmonisierten Normen bzw. technischen
+            Spezifikationen die Mittel, mit denen gewährleistet werden soll, dass die für die Produkte mit digitalen
+            Elementen geltenden grundlegenden Cybersicherheitsanforderungen in Anhang I Teil I erfüllt werden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
       ref_id: 8.4.3.2.3
-      description: the procedural specifications, including standards, that will be
-        applied and, where the relevant harmonised standards or technical specifications
-        will not be applied in full, the means that will be used to ensure that the
-        essential requirements set out in Annex I, Part II, that apply to the manufacturer
-        will be met;
+      description: the procedural specifications, including standards, that will be applied and, where the relevant
+        harmonised standards or technical specifications will not be applied in full, the means that will be
+        used to ensure that the essential cybersecurity requirements set out in Part II of Annex I that apply
+        to the manufacturer will be met;
+      translations:
+        de:
+          description: verfahrenstechnische Spezifikationen, einschließlich der angewandten Normen, sowie bei
+            nicht vollständiger Anwendung der einschlägigen harmonisierten Normen oder technischen Spezifikationen
+            die Mittel, mit denen gewährleistet werden soll, dass die für den Hersteller geltenden grundlegenden
+            Cybersicherheitsanforderungen in Anhang I Teil II erfüllt werden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.4
       assessable: true
       depth: 5
@@ -1344,6 +2074,12 @@ objects:
         verification techniques, processes and systematic actions that will be used
         when designing and developing the products with digital elements pertaining
         to the product category covered;
+      translations:
+        de:
+          description: Techniken zur Steuerung der Konzeption und Entwicklung sowie Techniken zur Überprüfung
+            der Konzeptions- und Entwicklungsergebnisse, Verfahren und systematische Maßnahmen, die bei der
+            Konzeption und Entwicklung der zur betreffenden Produktkategorie gehörenden Produkte mit digitalen
+            Elementen angewandt werden;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.5
       assessable: true
       depth: 5
@@ -1351,6 +2087,10 @@ objects:
       ref_id: 8.4.3.2.5
       description: the corresponding production, quality control and quality assurance
         techniques, processes and systematic actions that will be used;
+      translations:
+        de:
+          description: entsprechende angewandte Techniken, Verfahren und systematische Maßnahmen für die Herstellung,
+            Qualitätskontrolle und Qualitätssicherung;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.6
       assessable: true
       depth: 5
@@ -1358,6 +2098,10 @@ objects:
       ref_id: 8.4.3.2.6
       description: the examinations and tests that will be carried out before, during
         and after production, and the frequency with which they will be carried out;
+      translations:
+        de:
+          description: Prüfungen und Erprobungen, die vor, während und nach der Herstellung durchgeführt werden,
+            sowie deren Häufigkeit;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.7
       assessable: true
       depth: 5
@@ -1365,6 +2109,10 @@ objects:
       ref_id: 8.4.3.2.7
       description: the quality records, such as inspection reports and test data,
         calibration data and qualification reports on the personnel concerned;
+      translations:
+        de:
+          description: qualitätsbezogene Aufzeichnungen wie Kontrollberichte, Prüf- und Kalibrierungsdaten und
+            Berichte über die Qualifikation der in diesem Bereich beschäftigten Mitarbeiter;
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.8
       assessable: true
       depth: 5
@@ -1372,6 +2120,10 @@ objects:
       ref_id: 8.4.3.2.8
       description: the means of monitoring the achievement of the required design
         and product quality and the effective operation of the quality system.
+      translations:
+        de:
+          description: Mittel, mit denen die Verwirklichung der angestrebten Konzeptions- und Produktqualität
+            und die wirksame Arbeitsweise des Qualitätssicherungssystems überwacht werden können.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.3
       assessable: true
       depth: 4
@@ -1379,6 +2131,10 @@ objects:
       ref_id: 8.4.3.3
       description: The notified body shall assess the quality system to determine
         whether it satisfies the requirements referred to in point 3.2.
+      translations:
+        de:
+          description: Die notifizierte Stelle bewertet das Qualitätssicherungssystem, um festzustellen, ob
+            es den Anforderungen nach Nummer 3.2 genügt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node173
       assessable: true
       depth: 4
@@ -1387,32 +2143,51 @@ objects:
         of the elements of the quality system that comply with the corresponding specifications
         of the national standard that implements the relevant harmonised standard
         or technical specification.
+      translations:
+        de:
+          description: Bei den Bestandteilen des Qualitätssicherungssystems, die den entsprechenden Spezifikationen
+            der nationalen Norm zur Umsetzung der einschlägigen harmonisierten Norm oder einschlägigen technischen
+            Spezifikationen entsprechen, geht sie von einer Konformität mit diesen Anforderungen aus.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node174
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
-      description: In addition to experience in quality management systems, the auditing
-        team shall have at least one member experienced as an assessor in the relevant
-        product field and product technology concerned, and shall have knowledge of
-        the applicable requirements of this Regulation. The audit shall include an
-        assessment visit to the manufacturer's premises, where such premises exist.
-        The auditing team shall review the technical documentation referred to in
-        point 3.1, second indent, to verify the manufacturer's ability to identify
-        the applicable requirements of this Regulation and to carry out the necessary
-        examinations with a view to ensuring compliance of the product with digital
-        elements with those requirements.
+      description: In addition to experience in quality management systems, the auditing team shall have at
+        least one member experienced as an assessor in the relevant product field and product technology concerned,
+        and shall have knowledge of the applicable requirements set out in this Regulation. The audit shall
+        include an assessment visit to the manufacturer’s premises, where such premises exist. The auditing
+        team shall review the technical documentation referred to in point 3.1 (b), to verify the manufacturer’s
+        ability to identify the applicable requirements set out in this Regulation and to carry out the necessary
+        examinations with a view to ensuring compliance of the product with digital elements with those requirements.
+      translations:
+        de:
+          description: Zusätzlich zur Erfahrung mit Qualitätsmanagementsystemen verfügt mindestens ein Mitglied
+            des Auditteams über Erfahrungen mit der Bewertung in dem einschlägigen Bereich und der betreffenden
+            Technologie des Produkts und verfügt über Kenntnisse der in dieser Verordnung festgelegten geltenden
+            Anforderungen. Das Audit umfasst auch einen Kontrollbesuch in den Räumlichkeiten des Herstellers,
+            falls es solche gibt. Das Auditteam überprüft die in Nummer 3.1 Buchstabe b genannte technische
+            Dokumentation, um sich zu vergewissern, dass der Hersteller in der Lage ist, die in dieser Verordnung
+            festgelegten anwendbaren Anforderungen zu erkennen und die erforderlichen Prüfungen durchzuführen,
+            damit die Übereinstimmung des Produkts mit digitalen Elementen mit diesen Anforderungen gewährleistet
+            ist.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node175
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
       description: The manufacturer or its authorised representative shall be notified
         of the decision.
+      translations:
+        de:
+          description: Die Entscheidung wird dem Hersteller oder seinem Bevollmächtigten mitgeteilt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node176
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
       description: The notification shall contain the conclusions of the audit and
         the reasoned assessment decision.
+      translations:
+        de:
+          description: Die Mitteilung enthält die Ergebnisse des Audits und die Begründung der Bewertungsentscheidung.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.4
       assessable: true
       depth: 4
@@ -1421,6 +2196,11 @@ objects:
       description: The manufacturer shall undertake to fulfil the obligations arising
         out of the quality system as approved and to maintain it so that it remains
         adequate and efficient.
+      translations:
+        de:
+          description: Der Hersteller verpflichtet sich, die mit dem zugelassenen Qualitätssicherungssystem
+            verbundenen Pflichten zu erfüllen und dafür zu sorgen, dass das System stets sachgemäß und effizient
+            angewandt wird.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.5
       assessable: true
       depth: 4
@@ -1428,6 +2208,10 @@ objects:
       ref_id: 8.4.3.5
       description: The manufacturer shall keep the notified body that has approved
         the quality system informed of any intended change to the quality system.
+      translations:
+        de:
+          description: Der Hersteller unterrichtet die notifizierte Stelle, die das Qualitätssicherungssystem
+            zugelassen hat, über alle geplanten Änderungen des Qualitätssicherungssystems.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node179
       assessable: true
       depth: 4
@@ -1435,6 +2219,11 @@ objects:
       description: The notified body shall evaluate any proposed changes and decide
         whether the modified quality system will continue to satisfy the requirements
         referred to in point 3.2 or whether a reassessment is necessary.
+      translations:
+        de:
+          description: Die notifizierte Stelle prüft die geplanten Änderungen und entscheidet, ob das geänderte
+            Qualitätssicherungssystem noch den in Nummer 3.2 genannten Anforderungen entspricht oder ob eine
+            erneute Bewertung erforderlich ist.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node180
       assessable: true
       depth: 4
@@ -1442,12 +2231,19 @@ objects:
       description: It shall notify the manufacturer of its decision. The notification
         shall contain the conclusions of the examination and the reasoned assessment
         decision.
+      translations:
+        de:
+          description: Sie gibt dem Hersteller ihre Entscheidung bekannt. Die Mitteilung enthält die Ergebnisse
+            der Prüfung und die Begründung der Bewertungsentscheidung.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
       ref_id: 8.4.4
       name: Surveillance under the responsibility of the notified body
+      translations:
+        de:
+          name: Überwachung unter der Verantwortung der notifizierten Stelle
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.1
       assessable: true
       depth: 4
@@ -1455,6 +2251,10 @@ objects:
       ref_id: 8.4.4.1
       description: The purpose of surveillance is to make sure that the manufacturer
         duly fulfils the obligations arising out of the approved quality system.
+      translations:
+        de:
+          description: Die Überwachung soll gewährleisten, dass der Hersteller die mit dem zugelassenen Qualitätssicherungssystem
+            verbundenen Pflichten vorschriftsmäßig erfüllt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
       assessable: true
       depth: 4
@@ -1463,27 +2263,43 @@ objects:
       description: 'The manufacturer shall, for assessment purposes, allow the notified
         body access to the design, development, production, inspection, testing and
         storage sites, and shall provide it with all necessary information, in particular:'
+      translations:
+        de:
+          description: Der Hersteller gewährt der notifizierten Stelle zu Bewertungszwecken Zugang zu den Konzeptions-,
+            Herstellungs-, Abnahme-, Prüf- und Lagereinrichtungen und stellt ihr alle erforderlichen Unterlagen
+            zur Verfügung, insbesondere
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
       ref_id: 8.4.4.2.1
-      description: 'the quality system documentation; '
+      description: the quality system documentation;
+      translations:
+        de:
+          description: die Unterlagen über das Qualitätssicherungssystem,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
       ref_id: 8.4.4.2.2
-      description: 'the quality records as provided for by the design part of the
-        quality system, such as results of analyses, calculations and tests; '
+      description: the quality records as provided for by the design part of the quality system, such as results
+        of analyses, calculations and tests;
+      translations:
+        de:
+          description: die im Qualitätssicherungssystem für den Konzeptionsteil vorgesehenen Qualitätsberichte
+            wie Ergebnisse von Analysen, Berechnungen und Prüfungen,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
       ref_id: 8.4.4.2.3
-      description: 'the quality records as provided for by the manufacturing part
-        of the quality system, such as inspection reports and test data, calibration
-        data and qualification reports on the personnel concerned. '
+      description: the quality records as provided for by the manufacturing part of the quality system, such
+        as inspection reports and test data, calibration data and qualification reports on the personnel concerned.
+      translations:
+        de:
+          description: die im Qualitätssicherungssystem für den Fertigungsteil vorgesehenen Qualitätsberichte
+            wie Kontrollberichte, Prüf- und Kalibrierungsdaten und Berichte über die Qualifikation der in diesem
+            Bereich beschäftigten Mitarbeiter.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.3
       assessable: true
       depth: 4
@@ -1492,21 +2308,33 @@ objects:
       description: The notified body shall carry out periodic audits to make sure
         that the manufacturer maintains and applies the quality system and shall provide
         the manufacturer with an audit report.
+      translations:
+        de:
+          description: Die notifizierte Stelle führt regelmäßig Audits durch, um sicherzustellen, dass der Hersteller
+            das Qualitätssicherungssystem aufrechterhält und anwendet, und übergibt ihm einen entsprechenden
+            Prüfbericht.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
       ref_id: 8.4.5
       name: Conformity marking and declaration of conformity
+      translations:
+        de:
+          name: Konformitätskennzeichnung und Konformitätserklärung
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5
       ref_id: 8.4.5.1
-      description: The manufacturer shall affix the CE marking, and, under the responsibility
-        of the notified body referred to in point 3.1, the latter's identification
-        number to each individual product with digital elements that satisfies the
-        requirements set out in Annex I, Part I, to this Regulation.
+      description: The manufacturer shall affix the CE marking, and, under the responsibility of the notified
+        body referred to in point 3.1, the latter’s identification number to each individual product with digital
+        elements that satisfies the requirements set out in Part I of Annex I.
+      translations:
+        de:
+          description: Der Hersteller bringt an jedem einzelnen Produkt mit digitalen Elementen, das den Anforderungen
+            in Anhang I Teil I genügt, die CE-Kennzeichnung und unter der Verantwortung der in Absatz 3.1 genannten
+            notifizierten Stelle deren Kennnummer an.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5.2
       assessable: true
       depth: 4
@@ -1517,12 +2345,23 @@ objects:
         for 10 years after the product with digital elements has been placed on the
         market or for the support period, whichever is longer. The declaration of
         conformity shall identify the product model for which it has been drawn up.
+      translations:
+        de:
+          description: Der Hersteller stellt für jedes Produktmodell eine schriftliche Konformitätserklärung
+            aus und hält sie zehn Jahre lang nach dem Inverkehrbringen des Produkts mit digitalen Elementen
+            oder während des Unterstützungszeitraums, je nachdem, welcher Zeitraum länger ist, für die nationalen
+            Behörden bereit. Aus der Konformitätserklärung muss hervorgehen, für welches Produktmodell sie ausgestellt
+            wurde.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node191
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5
       description: A copy of the declaration of conformity shall be made available
         to the relevant authorities upon request.
+      translations:
+        de:
+          description: Ein Exemplar der Konformitätserklärung wird den einschlägigen Behörden auf Verlangen
+            zur Verfügung gestellt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
       assessable: true
       depth: 3
@@ -1532,12 +2371,20 @@ objects:
         after the product with digital elements has been placed on the market or for
         the support period, whichever is longer, keep at the disposal of the national
         authorities:'
+      translations:
+        de:
+          description: 'Der Hersteller hält für einen Zeitraum von mindestens zehn Jahren nach dem Inverkehrbringen
+            des Produkts mit digitalen Elementen oder während des Unterstützungszeitraums, je nachdem, welcher
+            Zeitraum länger ist, folgende Unterlagen für die nationalen Behörden bereit:'
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
       ref_id: 8.4.6.1
       description: the technical documentation referred to in point 3.1;
+      translations:
+        de:
+          description: die technische Dokumentation nach Nummer 3.1,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.2
       assessable: true
       depth: 4
@@ -1545,12 +2392,18 @@ objects:
       ref_id: 8.4.6.2
       description: the documentation concerning the quality system referred to in
         point 3.1;
+      translations:
+        de:
+          description: die Unterlagen über das Qualitätssicherungssystem nach Nummer 3.1,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
       ref_id: 8.4.6.3
       description: the change referred to in point 3.5, as approved;
+      translations:
+        de:
+          description: die Änderung nach Nummer 3.5 in ihrer genehmigten Form,
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.4
       assessable: true
       depth: 4
@@ -1558,6 +2411,9 @@ objects:
       ref_id: 8.4.6.4
       description: the decisions and reports of the notified body referred to in points
         3.5 and 4.3.
+      translations:
+        de:
+          description: die Entscheidungen und Berichte der notifizierten Stelle nach den Nummern 3.5 und 4.3.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.7
       assessable: true
       depth: 3
@@ -1567,6 +2423,12 @@ objects:
         system approvals issued or withdrawn, and shall, periodically or upon request,
         make available to its notifying authorities the list of quality system approvals
         refused, suspended or otherwise restricted.
+      translations:
+        de:
+          description: Jede notifizierte Stelle unterrichtet ihre notifizierenden Behörden über Zulassungen
+            von Qualitätssicherungssystemen, die sie ausgestellt oder zurückgenommen hat, und übermittelt ihnen
+            in regelmäßigen Abständen oder auf Verlangen eine Aufstellung aller Zulassungen von Qualitätssicherungssystemen,
+            die sie verweigert, ausgesetzt oder auf andere Art eingeschränkt hat.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node198
       assessable: true
       depth: 3
@@ -1574,12 +2436,30 @@ objects:
       description: Each notified body shall inform the other notified bodies of quality
         system approvals which it has refused, suspended or withdrawn, and, upon request,
         of quality system approvals which it has issued.
+      translations:
+        de:
+          description: Jede notifizierte Stelle unterrichtet die anderen notifizierten Stellen über Zulassungen
+            von Qualitätssicherungssystemen, die sie verweigert, ausgesetzt oder zurückgenommen hat, und auf
+            Verlangen über Zulassungen von Qualitätssicherungssystemen, die sie erteilt hat.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
       ref_id: 8.4.8
       name: Authorised representative
-      description: The manufacturer's obligations set out in points 3.1, 3.5, 5 and
-        6 may be fulfilled by its authorised representative, on its behalf and under
-        its responsibility, provided that they are specified in the mandate.
+      description: The manufacturer’s obligations set out in points 3.1, 3.5, 5 and 6 may be fulfilled by its
+        authorised representative, on its behalf and under its responsibility, provided that the relevant obligations
+        are specified in the mandate.
+      translations:
+        de:
+          name: Bevollmächtigter
+          description: Die in den Nummern 3.1, 3.5, 5 und 6 genannten Verpflichtungen des Herstellers können
+            von seinem Bevollmächtigten in seinem Auftrag und unter seiner Verantwortung erfüllt werden, sofern
+            die einschlägigen Verpflichtungen im Auftrag festgelegt sind.
+    translations:
+      de:
+        name: Cyberresilienz-Verordnung – Anhänge (CRA)
+        description: |-
+          Anhänge der Verordnung (EU) 2024/2847 des Europäischen Parlaments und des Rates vom 23. Oktober 2024 über horizontale Cybersicherheitsanforderungen für Produkte mit digitalen Elementen und zur Änderung der Verordnungen (EU) Nr. 168/2013 und (EU) 2019/1020 und der Richtlinie (EU) 2020/1828 (Cyberresilienz-Verordnung).
+
+          Herkunft: Die Anforderungstexte und Überschriften wurden aus der amtlichen deutschen Sprachfassung in der konsolidierten EUR-Lex-Fassung 02024R2847-20241120 übernommen. Automatisierte Zuordnung und Prüfung durch den KI-Assistenten; keine maschinelle Übersetzung des Rechtstexts. Die Bibliotheksmetadaten wurden mit KI-Unterstützung formuliert. Maßgeblich sind die im Amtsblatt veröffentlichten Fassungen. Quelle: https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:02024R2847-20241120

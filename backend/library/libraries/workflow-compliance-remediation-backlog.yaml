@@ -5,10 +5,17 @@ name: Remediation backlog digest
 description: Weekly list of requirements still assessed non-compliant and not yet done, so the backlog
   is reviewed rather than remembered.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Offene Abhilfemaßnahmen – Übersicht
+    description: |-
+      Wöchentliche Liste der weiterhin als nicht konform bewerteten und noch nicht erledigten Anforderungen, damit offene Abhilfemaßnahmen regelmäßig überprüft werden.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-compliance-remediation-backlog:workflow:remediation-backlog

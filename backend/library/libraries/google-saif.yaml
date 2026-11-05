@@ -4,10 +4,17 @@ ref_id: Google SAIF
 name: Google SAIF Framework
 description: Google's Secure AI Framework
 copyright: "\xA9 Google"
-version: 1
+version: 2
 publication_date: 2025-03-22
 provider: Google
 packager: intuitem
+translations:
+  de:
+    name: Google SAIF Framework
+    description: |-
+      Googles Rahmenwerk für sichere KI (Secure AI Framework).
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung der Herausgeber; keine unabhängige menschliche Prüfung. Die deutschen Ergänzungen umfassen die Bibliotheksmetadaten und Bedrohungstexte.
 objects:
   reference_controls:
   - urn: urn:intuitem:risk:reference_control:google-saif:gsc-01
@@ -150,48 +157,93 @@ objects:
   - urn: urn:intuitem:risk:threat:google-saif:dms
     ref_id: DMS
     name: Denial of ML Service
+    translations:
+      de:
+        name: Ausfall des ML-Dienstes
   - urn: urn:intuitem:risk:threat:google-saif:iic
     ref_id: IIC
     name: Insecure Integrated System
+    translations:
+      de:
+        name: Unsicheres integriertes System
   - urn: urn:intuitem:risk:threat:google-saif:mre
     ref_id: MRE
     name: Model Reverse Engineering
+    translations:
+      de:
+        name: Reverse Engineering des Modells
   - urn: urn:intuitem:risk:threat:google-saif:ra
     ref_id: RA
     name: Rogue Actions
+    translations:
+      de:
+        name: Unzulässige Aktionen
   - urn: urn:intuitem:risk:threat:google-saif:sdd
     ref_id: SDD
     name: Sensitive Data Disclosure
+    translations:
+      de:
+        name: Offenlegung sensibler Daten
   - urn: urn:intuitem:risk:threat:google-saif:isd
     ref_id: ISD
     name: Inferred Sensitive Information
+    translations:
+      de:
+        name: Ableitung sensibler Informationen
   - urn: urn:intuitem:risk:threat:google-saif:pij
     ref_id: PIJ
     name: Prompt Injection
+    translations:
+      de:
+        name: Prompt Injection
   - urn: urn:intuitem:risk:threat:google-saif:mev
     ref_id: MEV
     name: Model Evasion
+    translations:
+      de:
+        name: Umgehung des Modells
   - urn: urn:intuitem:risk:threat:google-saif:imo
     ref_id: IMO
     name: Insecure Model Output
+    translations:
+      de:
+        name: Unsichere Modellausgabe
   - urn: urn:intuitem:risk:threat:google-saif:dp
     ref_id: DP
     name: Data and Model Poisoning
+    translations:
+      de:
+        name: Vergiftung von Daten und Modellen
   - urn: urn:intuitem:risk:threat:google-saif:utd
     ref_id: UTD
     name: Unauthorized Training Data
+    translations:
+      de:
+        name: Nicht autorisierte Trainingsdaten
   - urn: urn:intuitem:risk:threat:google-saif:edh
     ref_id: EDH
     name: Excessive Data Handling
+    translations:
+      de:
+        name: Übermäßige Datenverarbeitung
   - urn: urn:intuitem:risk:threat:google-saif:mst
     ref_id: MST
     name: Model Source Tampering
+    translations:
+      de:
+        name: Manipulation der Modellquelle
   - urn: urn:intuitem:risk:threat:google-saif:mxf
     ref_id: MXF
     name: Model Exfiltration
+    translations:
+      de:
+        name: Exfiltration des Modells
   - urn: urn:intuitem:risk:threat:google-saif:mdt
     ref_id: MDT
     name: Model Deployment Tampering
+    translations:
+      de:
+        name: Manipulation der Modellbereitstellung
   framework:
     urn: urn:intuitem:risk:framework:google-saif
     ref_id: Google SAIF

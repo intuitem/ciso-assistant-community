@@ -33,10 +33,22 @@ description: 'Walks every requirement an audit says is compliant, partially comp
   listed at the foot of the document — the rule findings still land. Needs an AI provider configured in
   Global settings.'
 copyright: © intuitem
-version: 2
+version: 3
 publication_date: 2026-09-24
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Audit – KI-Prüfung der Nachweise
+    description: |-
+      Prüft jede Anforderung, die in einem Audit als konform, teilweise konform oder nicht anwendbar bewertet wurde – die drei Antworten, die eine überprüfbare Aussage enthalten. Meldet die Ergebnisse der plattformeigenen Qualitätsregeln und stellt dem konfigurierten KI-Anbieter nur die Fragen, die eine Regel nicht beantworten kann. Die Antworten werden als verwaltetes Dokument des Typs Record beim geprüften Audit abgelegt.
+      Zwei Startmöglichkeiten: manuell über „Mit Variablen ausführen“ mit audit_id des zu prüfenden Audits oder automatisch über den Trigger „An audit moved to in review“, sobald jemand das Audit in diesen Status versetzt. Trigger für interne Ereignisse werden bewusst deaktiviert importiert; der automatische Start muss daher in den Workflow-Triggern aktiviert werden.
+      Zuerst laufen die Regeln, ohne Kosten zu verursachen: Ihre Hinweise sind bereits formuliert und übersetzt und besitzen eine Regel-ID. Sie werden daher unverändert im Abschnitt Concerns erfasst. Nur Anforderungen, die die Regelprüfung bestehen, werden dem Modell vorgelegt. Jede Aussage erhält eine eigene Frage, denn „Belegt der Nachweis dies?“ und „Ist dieser Ausschluss begründet?“ sind unterschiedliche Fragen. Nicht konforme und noch nicht bewertete Anforderungen werden in der Übersicht gezählt, aber nicht weiter geprüft: Im ersten Fall ist die Abweichung bereits angegeben, im zweiten fehlt die Antwort. Beide enthalten keine zu prüfende Behauptung.
+      Das Modell soll keine Sicherheit vortäuschen: Es entscheidet zwischen „Diese Aussage ist belegt“ und „Ein Prüfer sollte dies ansehen“, kann aber selbst keinen Eintrag unter Concerns erzeugen. Hinter jedem Eintrag dort steht eine Regel-ID. Das Modell ändert auch weder ein Ergebnis noch eine Punktzahl – beides kann durch keinen Workflow geändert werden.
+      Das Dokument wird aus einzelnen Einträgen zusammengesetzt: Jede Anforderung fügt während der Schleife eine eigene Zeile in ihrem Abschnitt hinzu. Das Modell beurteilt also nur und verfasst keinen Gesamtbericht. Es erfolgt ein Aufruf je Anforderung und keiner für die Zusammenfassung. So kann kein Datensatz beim Zusammenfassen unbemerkt entfallen.
+      Die Schleife liest ihre Ergebnisse seitenweise. Die Anzahl der Anforderungen wird daher durch WORKFLOW_LOOP_MAX_ITEMS (500) begrenzt, nicht durch die Ausgabekapazität eines einzelnen Knotens. WORKFLOW_AI_MAX_CALLS_PER_RUN (standardmäßig 50) begrenzt die Anzahl der Modellaufrufe. Danach schlagen weitere Aufrufe fehl, der Lauf wird fortgesetzt und die Fehler werden am Dokumentende aufgeführt. Die Regelergebnisse werden weiterhin erfasst. Erfordert einen unter „Globale Einstellungen“ konfigurierten KI-Anbieter.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-compliance-audit-ai-review:workflow:audit-ai-review

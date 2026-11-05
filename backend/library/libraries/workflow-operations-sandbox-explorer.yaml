@@ -5,10 +5,17 @@ name: Read-only explorer
 description: Reads a few applied controls and writes what it found to the run log. Touches nothing — the
   safest way to press Execute for the first time and see how runs, variables and expressions fit together.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Workflow kennenlernen – nur lesen
+    description: |-
+      Liest einige angewendete Maßnahmen und schreibt die Ergebnisse ins Ausführungsprotokoll. Verändert keine Objekte und eignet sich zum ersten Ausprobieren von „Ausführen“, um das Zusammenspiel von Läufen, Variablen und Ausdrücken kennenzulernen.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-sandbox-explorer:workflow:sandbox-explorer

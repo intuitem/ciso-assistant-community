@@ -7,10 +7,17 @@ description: The ten most critical security risks for agentic AI applications, p
   are transcribed from each entry's "Prevention and Mitigation Guidelines". Scope a single audit to one
   agentic application. https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
 copyright: OWASP - Creative Commons Attribution-ShareAlike 4.0
-version: 1
+version: 2
 publication_date: '2025-12-09'
 provider: OWASP
 packager: intuitem
+translations:
+  de:
+    name: OWASP Top 10 für agentische Anwendungen 2026
+    description: |-
+      Die zehn kritischsten Sicherheitsrisiken für agentische KI-Anwendungen, veröffentlicht vom OWASP Gen AI Security Project – Agentic Security Initiative. Die Bedrohungen entsprechen den zehn ASI-Einträgen; die Anforderungen wurden aus den jeweiligen „Prevention and Mitigation Guidelines“ übernommen. Begrenzen Sie ein einzelnes Audit auf eine agentische Anwendung. https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung der Herausgeber; keine unabhängige menschliche Prüfung. Die deutschen Ergänzungen umfassen die Bibliotheksmetadaten und Bedrohungstexte.
 objects:
   threats:
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
@@ -35,6 +42,29 @@ objects:
       the agent’s objectives) and T07 Misaligned & Deceptive Behaviors (bypassing safeguards or deceiving
       humans). Together, these illustrate how attackers can subvert the agent’s objectives and action-selection
       logic, redirecting its autonomy toward unintended or harmful outcomes.
+    translations:
+      de:
+        name: Manipulation von Agentenzielen
+        description: 'KI-Agenten können autonom eine Reihe von Aufgaben ausführen, um ein Ziel zu erreichen.
+          Aufgrund grundlegender Schwächen bei der Verarbeitung natürlichsprachlicher Anweisungen und zugehöriger
+          Inhalte können Agenten und das zugrunde liegende Modell Anweisungen nicht zuverlässig von Begleitinhalten
+          unterscheiden. Angreifer können deshalb Ziele, Aufgabenauswahl oder Entscheidungswege eines Agenten
+          mit verschiedenen Techniken manipulieren, etwa durch promptbasierte Manipulation, täuschende Werkzeugausgaben,
+          schädliche Artefakte, gefälschte Nachrichten zwischen Agenten oder vergiftete externe Daten. Da
+          Agenten auf natürlichsprachlichen Eingaben ohne Typkennzeichnung und nur lose geregelter Orchestrierungslogik
+          beruhen, können sie legitime Anweisungen nicht zuverlässig von angreiferkontrollierten Inhalten
+          unterscheiden. Anders als LLM01:2025, das die Veränderung einer einzelnen Modellantwort behandelt,
+          erfasst ASI01 die weitergehenden Auswirkungen auf Agenten: Manipulierte Eingaben lenken Ziele, gegebenenfalls
+          die Planung sowie mehrstufiges Verhalten um. Die Manipulation von Agentenzielen unterscheidet sich
+          von ASI06 (Memory & Context Poisoning) und ASI10 (Rogue Agents), weil der Angreifer Ziele, Anweisungen
+          oder Entscheidungswege direkt verändert. Dabei ist unerheblich, ob die Manipulation interaktiv oder
+          durch vorab platzierte Eingaben wie Dokumente, Vorlagen oder externe Datenquellen erfolgt. ASI06
+          behandelt die dauerhafte Verfälschung gespeicherten Kontexts oder des Langzeitgedächtnisses; ASI10
+          erfasst autonome Fehlentwicklungen ohne aktive Kontrolle durch einen Angreifer. Im OWASP Agentic
+          AI Threats & Mitigations Guide entspricht ASI01 den Einträgen T06 Goal Manipulation (Veränderung
+          der Agentenziele) und T07 Misaligned & Deceptive Behaviors (Umgehung von Schutzmechanismen oder
+          Täuschung von Menschen). Gemeinsam zeigen sie, wie Angreifer Ziele und Aktionsauswahl eines Agenten
+          unterlaufen und seine Autonomie auf unbeabsichtigte oder schädliche Ergebnisse ausrichten können.'
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
     ref_id: ASI02
     name: Tool Misuse and Exploitation
@@ -53,6 +83,27 @@ objects:
       T2 Tool Misuse in the Agentic AI Threats and Mitigations Guide whilst T4 Resource Overload and T16
       Insecure Inter-Agent Protocol Abuse represent contributing factors that can amplify or enable tool
       exploitation. The entry aligns with AIVSS Core Risk: Agentic AI Tool Misuse.'
+    translations:
+      de:
+        name: Missbrauch und Ausnutzung von Werkzeugen
+        description: Agenten können legitime Werkzeuge infolge von Prompt Injection, Fehlausrichtung, unsicherer
+          Delegation oder mehrdeutigen Anweisungen missbrauchen. Dies kann zu Datenexfiltration, Manipulation
+          von Werkzeugausgaben oder Übernahme von Workflows führen. Die Risiken entstehen durch die Auswahl
+          und Anwendung der Werkzeuge durch den Agenten. Agentengedächtnis, dynamische Werkzeugauswahl und
+          Delegation können durch Verkettung, Berechtigungsausweitung und unbeabsichtigte Aktionen zum Missbrauch
+          beitragen. Es besteht ein Bezug zu LLM06:2025 (Excessive Agency), das übermäßige Autonomie behandelt;
+          hier liegt der Schwerpunkt jedoch auf dem Missbrauch legitimer Werkzeuge. Der Eintrag erfasst Fälle,
+          in denen ein Agent innerhalb seiner autorisierten Berechtigungen handelt, ein legitimes Werkzeug
+          aber unsicher oder entgegen seiner Bestimmung einsetzt, etwa indem er wertvolle Daten löscht, kostspielige
+          APIs übermäßig aufruft oder Informationen ausschleust. Geht der Missbrauch mit Berechtigungsausweitung
+          oder der Vererbung von Zugangsdaten einher, fällt er unter ASI03 (Identity & Privilege Abuse). Führt
+          er zur Ausführung beliebigen oder eingeschleusten Codes, wird er ASI05 (Unexpected Code Execution)
+          zugeordnet. Werkzeugdefinitionen werden zudem zunehmend über MCP-Server bereitgestellt, wodurch
+          eine natürliche Überschneidung mit ASI04 (Agentic Supply Chain Vulnerabilities) entsteht. Der Eintrag
+          entspricht T2 Tool Misuse im Agentic AI Threats and Mitigations Guide. T4 Resource Overload und
+          T16 Insecure Inter-Agent Protocol Abuse sind beitragende Faktoren, die die Ausnutzung von Werkzeugen
+          verstärken oder ermöglichen können. Der Eintrag entspricht außerdem dem AIVSS-Kernrisiko Agentic
+          AI Tool Misuse.
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
     ref_id: ASI03
     name: Identity and Privilege Abuse
@@ -74,6 +125,30 @@ objects:
       of systems and data the agent can reach. In the OWASP ASI Threats and Mitigations, it maps one-to-one
       to T3: Privilege Compromise, and in OWASP AIVSS it corresponds to Core Risk 2: Agent Access Control
       Violation.'
+    translations:
+      de:
+        name: Missbrauch von Identitäten und Berechtigungen
+        description: 'Der Missbrauch von Identitäten und Berechtigungen nutzt dynamische Vertrauensbeziehungen
+          und Delegation bei Agenten aus, um Zugriffsrechte auszuweiten und Schutzmaßnahmen zu umgehen. Dazu
+          werden Delegationsketten, Rollenvererbung, Steuerungsabläufe und Agentenkontext manipuliert; zum
+          Kontext zählen auch zwischengespeicherte Zugangsdaten oder Gesprächsverläufe über verbundene Systeme
+          hinweg. Identität umfasst hier sowohl die definierte Persona des Agenten als auch alle Authentisierungsmittel,
+          die ihn repräsentieren. Vertrauen zwischen Agenten oder geerbte Zugangsdaten können missbraucht
+          werden, um Zugriffe auszuweiten, Berechtigungen zu übernehmen oder unbefugte Handlungen auszuführen.
+          Das Risiko entsteht aus dem architektonischen Missverhältnis zwischen nutzerzentrierten Identitätssystemen
+          und dem Aufbau agentischer Systeme. Ohne eigene, klar abgegrenzte und geregelte Identität bleibt
+          die Zuordnung von Agentenhandlungen lückenhaft, sodass das Prinzip der geringsten Berechtigungen
+          nicht wirksam durchgesetzt werden kann. Identität umfasst in diesem Zusammenhang sowohl die zugewiesene
+          Persona als auch die zugehörigen Authentisierungsmittel wie API-Schlüssel, OAuth-Tokens und delegierte
+          Nutzersitzungen. Dies unterscheidet sich vom Szenario in ASI02 (Tools Misuse), bei dem ein Akteur
+          bereits erteilte Berechtigungen durch den Missbrauch seiner eigenen Werkzeuge unbeabsichtigt oder
+          unsicher nutzt. Der Missbrauch von Identitäten und Berechtigungen ist die agentische Weiterentwicklung
+          von Excessive Agency (LLM06:2025). Dabei wird häufig Prompt Injection (LLM01:2025) genutzt. Aufgrund
+          der Agentenberechtigungen, Werkzeuganbindungen und Multi-Agenten-Systeme können die Auswirkungen
+          über Sensitive Information Disclosure (LLM02:2025) hinausgehen und unmittelbar Vertraulichkeit,
+          Integrität und Verfügbarkeit erreichbarer Systeme und Daten kompromittieren. In OWASP ASI Threats
+          and Mitigations entspricht dies genau T3: Privilege Compromise, in OWASP AIVSS dem Kernrisiko 2:
+          Agent Access Control Violation.'
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
     ref_id: ASI04
     name: Agentic Supply Chain Vulnerabilities
@@ -93,6 +168,28 @@ objects:
       loaded, shared, and trusted. The entry maps to T17 Supply Chain Compromise in Agentic Threats and
       Mitigations and across T2 Tool Misuse, T11 Unexpected RCE and Code Attacks, T12 Agent Communication
       Poisoning, T13 Rogue Agent and T16 Insecure Inter-Agent Protocol Abuse.
+    translations:
+      de:
+        name: Schwachstellen in agentischen Lieferketten
+        description: 'Schwachstellen in agentischen Lieferketten entstehen, wenn Agenten, Werkzeuge und damit
+          verwendete Artefakte von Dritten bereitgestellt werden und bösartig, kompromittiert oder während
+          der Übertragung manipuliert sein können. Dies betrifft statisch wie dynamisch bezogene Komponenten:
+          Modelle und Modellgewichte, Werkzeuge, Plugins, Datensätze, andere Agenten, agentische Schnittstellen
+          wie MCP (Model Context Protocol) und A2A (Agent2Agent), Agentenregister und zugehörige Artefakte
+          sowie Aktualisierungskanäle. Solche Abhängigkeiten können unsicheren Code, verborgene Anweisungen
+          oder täuschendes Verhalten in die Ausführungskette des Agenten einbringen. LLM03:2025 Supply Chain
+          Vulnerabilities behandelt Lieferketten ausführlich, konzentriert sich jedoch auf statische Abhängigkeiten.
+          Anders als bei traditionellen KI- oder Softwarelieferketten werden Fähigkeiten in agentischen Ökosystemen
+          häufig erst zur Laufzeit zusammengestellt, indem externe Werkzeuge und Agentenpersonas dynamisch
+          geladen werden. Dadurch wächst die Angriffsfläche. Diese verteilte Koordination zur Laufzeit schafft
+          zusammen mit der Autonomie der Agenten eine dynamische Lieferkette, über die sich Schwachstellen
+          kaskadenartig zwischen Agenten ausbreiten können. Der Schwerpunkt verlagert sich dadurch von Manifesten
+          zur Laufzeitsicherheit vielfältiger und oft undurchsichtiger Komponenten. Die Behandlung dieses
+          Problems erfordert sorgfältig ausgewählte Entwicklungswerkzeuge und eine durchdachte Laufzeitorchestrierung
+          für dynamisch geladene, gemeinsam genutzte und als vertrauenswürdig behandelte Komponenten. Der
+          Eintrag entspricht T17 Supply Chain Compromise in Agentic Threats and Mitigations und berührt T2
+          Tool Misuse, T11 Unexpected RCE and Code Attacks, T12 Agent Communication Poisoning, T13 Rogue Agent
+          sowie T16 Insecure Inter-Agent Protocol Abuse.'
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
     ref_id: ASI05
     name: Unexpected Code Execution (RCE)
@@ -110,6 +207,25 @@ objects:
       or executed to orchestrated multi-tool chains that achieve execution through a sequence of otherwise
       legitimate tool calls. This risk aligns with T11 Unexpected RCE and Code Attacks in Agentic AI –
       Threats and Mitigations v1.1.
+    translations:
+      de:
+        name: Unerwartete Codeausführung (RCE)
+        description: 'Agentische Systeme, einschließlich verbreiteter Vibe-Coding-Werkzeuge, erzeugen und
+          führen häufig Code aus. Angreifer nutzen Codegenerierungsfunktionen oder integrierte Werkzeugzugriffe,
+          um Aktionen bis zur Remotecodeausführung (RCE), zum lokalen Missbrauch oder zur Ausnutzung interner
+          Systeme auszuweiten. Da der Agent den Code oft in Echtzeit erzeugt, kann dieser traditionelle Sicherheitsmaßnahmen
+          umgehen. Prompt Injection, Werkzeugmissbrauch oder unsichere Serialisierung können Text in unbeabsichtigtes
+          ausführbares Verhalten verwandeln. Zwar kann Codeausführung über dieselben Werkzeugschnittstellen
+          ausgelöst werden wie unter ASI02 beschrieben; ASI05 konzentriert sich jedoch auf unerwartete oder
+          durch Angreifer veranlasste Codeausführung. Dazu zählen Skripte, Binärprogramme, JIT-/WASM-Module,
+          deserialisierte Objekte, Template-Engines und Auswertungen im Arbeitsspeicher, die Hosts oder Container
+          kompromittieren, dauerhaften Zugriff ermöglichen oder aus einer Sandbox ausbrechen. Solche Folgen
+          erfordern Schutzmaßnahmen für Host und Laufzeitumgebung, die über gewöhnliche Kontrollen der Werkzeugnutzung
+          hinausgehen. Der Eintrag baut auf LLM01:2025 Prompt Injection und LLM05:2025 Improper Output Handling
+          auf und zeigt deren Weiterentwicklung in agentischen Systemen: Aus einer einzelnen manipulierten
+          Ausgabe, die interpretiert oder ausgeführt wird, entstehen orchestrierte Werkzeugketten, die über
+          eine Abfolge ansonsten legitimer Werkzeugaufrufe Code ausführen. Dieses Risiko entspricht T11 Unexpected
+          RCE and Code Attacks in Agentic AI – Threats and Mitigations v1.1.'
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
     ref_id: ASI06
     name: Memory & Context Poisoning
@@ -130,6 +246,29 @@ objects:
       to T1 Memory Poisoning in Agentic Threats and Mitigations, with related impacts in T4 Memory Overload,
       T6 Broken Goals, and T12 Shared Memory Poisoning. In AIVSS, the AARS fields Memory Use and Contextual
       Awareness raise the agentic vulnerability score.
+    translations:
+      de:
+        name: Vergiftung von Gedächtnis und Kontext
+        description: Agentische Systeme sind auf gespeicherte und abrufbare Informationen angewiesen, etwa
+          eine Momentaufnahme des Gesprächsverlaufs, ein Gedächtniswerkzeug oder erweiterten Kontext. Diese
+          ermöglichen Kontinuität über Aufgaben und Schlussfolgerungszyklen hinweg. Zum Kontext zählen alle
+          Informationen, die ein Agent behält, abruft oder wiederverwendet, darunter Zusammenfassungen, Embeddings
+          und RAG-Speicher. Einmalige Eingabeprompts, die unter LLM01:2025 Prompt Injection behandelt werden,
+          sind davon ausgenommen. Bei der Vergiftung von Gedächtnis und Kontext verfälschen Angreifer diesen
+          Kontext oder reichern ihn mit schädlichen oder irreführenden Daten an. Dadurch werden spätere Schlussfolgerungen,
+          Planungen oder Werkzeugnutzungen verzerrt, unsicher oder für die Datenexfiltration nutzbar. Eingabequellen
+          wie Uploads, API-Datenströme, Nutzereingaben oder der Austausch mit anderen Agenten können nicht
+          vertrauenswürdig oder nur teilweise geprüft sein. Das Risiko unterscheidet sich von ASI01 (Goal
+          Hijack), das direkte Zielmanipulation erfasst, und ASI08 (Cascading Failures), das die Verschlechterung
+          nach einer Vergiftung beschreibt. Gleichwohl führt Gedächtnisvergiftung häufig zu Zielmanipulation
+          (ASI01), weil verfälschter Kontext oder Langzeitspeicher die Interpretation von Zielen, den Schlussfolgerungsweg
+          oder die Werkzeugauswahl verändern können. Der Eintrag baut auf LLM01:2025 Prompt Injection, LLM04:2025
+          Data and Model Poisoning sowie LLM08:2025 Vector and Embedding Weaknesses auf. Sein Schwerpunkt
+          ist jedoch die dauerhafte Verfälschung des Agentengedächtnisses und abrufbaren Kontexts, die über
+          Sitzungen hinweg wirkt und autonome Schlussfolgerungen verändert. Er entspricht T1 Memory Poisoning
+          in Agentic Threats and Mitigations, mit verwandten Auswirkungen in T4 Memory Overload, T6 Broken
+          Goals und T12 Shared Memory Poisoning. In AIVSS erhöhen die AARS-Felder Memory Use und Contextual
+          Awareness die Bewertung agentischer Schwachstellen.
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
     ref_id: ASI07
     name: Insecure Inter-Agent Communication
@@ -147,6 +286,26 @@ objects:
       leading to misinformation, privilege confusion, or coordinated manipulation across distributed agentic
       systems. The entry is covered by T12 – Agent Communication Poisoning & T16 – Insecure Inter-Agent
       Protocol Abuse in Agentic Threats and Mitigations
+    translations:
+      de:
+        name: Unsichere Kommunikation zwischen Agenten
+        description: Multi-Agenten-Systeme sind auf kontinuierliche Kommunikation zwischen autonomen Agenten
+          angewiesen, die sich über APIs, Nachrichtenbusse und gemeinsamen Speicher koordinieren. Dadurch
+          wächst die Angriffsfläche erheblich. Dezentrale Architekturen, unterschiedliche Autonomiegrade und
+          uneinheitliches Vertrauen machen perimeterbasierte Sicherheitsmodelle unwirksam. Schwache Kontrollen
+          für Authentisierung, Integrität, Vertraulichkeit oder Autorisierung zwischen Agenten erlauben Angreifern,
+          Nachrichten abzufangen, zu manipulieren, zu fälschen oder zu blockieren. Unsichere Kommunikation
+          zwischen Agenten liegt vor, wenn der Austausch nicht angemessen authentisiert und weder auf Integrität
+          noch auf semantische Gültigkeit geprüft wird. So lassen sich Agentennachrichten und Handlungsabsichten
+          abfangen, fälschen oder verändern. Die Bedrohung umfasst Transport, Routing, Diensterkennung und
+          die semantische Ebene sowie verdeckte Kanäle oder Seitenkanäle, über die Agenten anhand zeitlicher
+          oder verhaltensbezogener Merkmale Daten offenlegen oder ableiten. Dies unterscheidet sich von ASI03
+          (Identity & Privilege Abuse), das Zugangsdaten und Berechtigungen betrifft, sowie von ASI06 (Memory
+          & Context Poisoning), das auf die Verfälschung gespeicherten Wissens abzielt. ASI07 behandelt die
+          Kompromittierung von Echtzeitnachrichten zwischen Agenten, die Fehlinformationen, Verwechslungen
+          von Berechtigungen oder koordinierte Manipulation in verteilten agentischen Systemen bewirkt. Der
+          Eintrag wird durch T12 – Agent Communication Poisoning und T16 – Insecure Inter-Agent Protocol Abuse
+          in Agentic Threats and Mitigations abgedeckt.
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
     ref_id: ASI08
     name: Cascading Failures
@@ -177,6 +336,41 @@ objects:
       system and the ability of humans to keep up with them to ensure secure and effective operation of
       the system. This leaves some unmitigated risks that the enterprise must evaluate carefully to ensure
       they are within the overall risk budget for the organization.'
+    translations:
+      de:
+        name: Kaskadierende Fehler
+        description: 'Kaskadierende Fehler in agentischen Systemen entstehen, wenn sich ein einzelner Fehler
+          – eine Halluzination, schädliche Eingabe, ein kompromittiertes Werkzeug oder vergiftetes Gedächtnis
+          – über autonome Agenten hinweg ausbreitet und zu systemweiten Schäden verstärkt. Da Agenten selbstständig
+          planen, Zustände speichern und Aufgaben delegieren, kann ein einzelner Fehler schrittweise menschliche
+          Kontrollen umgehen und in einem gespeicherten Zustand fortbestehen. Wenn Agenten neue Verbindungen
+          zu Werkzeugen oder anderen Agenten bilden, wirken solche latenten Fehler in privilegierte Vorgänge
+          hinein. Sie kompromittieren Vertraulichkeit, Integrität und Verfügbarkeit und verursachen weitreichende
+          Dienstausfälle in Agentennetzwerken, Systemen und Workflows. Kaskadierende Fehler beschreiben die
+          Ausbreitung und Verstärkung eines ursprünglichen Fehlers über Agenten, Werkzeuge und Workflows hinweg,
+          nicht die ursprüngliche Schwachstelle selbst. Dadurch erhält ein einzelner Fehler systemweite Auswirkungen.
+          ASI08 behandelt die Weiterverbreitung und Verstärkung von Fehlern statt ihrer Entstehung. Ordnen
+          Sie den ursprünglichen Mangel ASI04, ASI06 oder ASI07 zu, wenn er eine direkte Kompromittierung
+          darstellt, etwa eine manipulierte Abhängigkeit, vergiftetes Gedächtnis oder eine gefälschte Nachricht.
+          Wenden Sie ASI08 erst an, wenn sich dieser Mangel über Agenten, Sitzungen oder Workflows ausbreitet
+          und eine messbare Vervielfachung oder systemische Auswirkungen über den ursprünglichen Sicherheitsbruch
+          hinaus bewirkt. Beobachtbare Anzeichen sind eine schnelle Vervielfachung, bei der eine Fehlentscheidung
+          in kurzer Zeit viele nachgelagerte Agenten oder Aufgaben auslöst; die Ausbreitung über Domänen-
+          oder Mandantengrenzen hinaus; oszillierende Wiederholungsversuche oder Rückkopplungsschleifen zwischen
+          Agenten; sowie nachgelagerte Warteschlangenüberlastungen oder wiederholt identische Handlungsabsichten.
+          Diese Anzeichen bieten konkrete Erkennungsmöglichkeiten und machen ASI08 operativ handhabbar. Kaskadierende
+          Fehler verstärken sich zwischen verbundenen Agenten und verketten Risiken aus den OWASP LLM Top
+          10. LLM01:2025 Prompt Injection und LLM06:2025 Excessive Agency können autonome Werkzeugausführungen
+          auslösen, die Fehler ohne menschliche Prüfung verbreiten. LLM04:2025 Data and Model Poisoning in
+          dauerhaftem Gedächtnis kann Entscheidungen über Sitzungen und Workflows hinweg verzerren. Agentic
+          AI – Threats and Mitigations 1.1 behandelt diese Bedrohung unter T5 – Cascading Hallucination Attacks.
+          T8 – Repudiation and Untraceability hebt eine grundlegende Schutzmaßnahme hervor: kaskadierendes
+          Verhalten durch widerstandsfähige Protokollierung und Mechanismen zur Nichtabstreitbarkeit nachzuverfolgen,
+          zuzuordnen und zu prüfen, um unbemerkte Ausbreitung zu verhindern. Diese sich verstärkenden Bedrohungen
+          verdeutlichen jedoch eine mögliche Lücke zwischen Geschwindigkeit und Ausmaß der Fehlerausbreitung
+          in Multi-Agenten-Systemen und der Fähigkeit von Menschen, Schritt zu halten und einen sicheren,
+          wirksamen Betrieb zu gewährleisten. Es verbleiben Risiken, die das Unternehmen sorgfältig daraufhin
+          bewerten muss, ob sie innerhalb seines gesamten Risikobudgets liegen.'
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
     ref_id: ASI09
     name: Human-Agent Trust Exploitation
@@ -196,6 +390,28 @@ objects:
       LLM05:2025 Improper Output Handling, or results in LLM09:2025 Misinformation. Aligns with Agentic
       AI Threats and Mitigations Guide (T7) Misaligned & Deceptive, (T8) Repudiation & Untraceability,
       (T10) Overwhelming the Human in the Loop.
+    translations:
+      de:
+        name: Ausnutzung des Vertrauens zwischen Mensch und Agent
+        description: Intelligente Agenten können durch sprachliche Gewandtheit, emotionale Intelligenz und
+          wahrgenommene Fachkompetenz starkes Vertrauen bei menschlichen Nutzern aufbauen; dabei werden ihnen
+          menschliche Eigenschaften zugeschrieben (Anthropomorphisierung). Angreifer oder fehlgeleitete Gestaltungen
+          können dieses Vertrauen ausnutzen, um Nutzerentscheidungen zu beeinflussen, sensible Informationen
+          zu erlangen oder Ergebnisse für schädliche Zwecke zu lenken. In agentischen Systemen verstärkt sich
+          das Risiko, wenn Menschen sich übermäßig auf autonome Empfehlungen oder nicht überprüfbare Begründungen
+          verlassen und Aktionen ohne unabhängige Prüfung genehmigen. Durch Autoritätsgläubigkeit und überzeugend
+          wirkende Erklärungen können Angreifer die Aufsicht umgehen und Datenkompromittierungen, finanzielle
+          Verluste, Folgeschäden und Reputationsschäden verursachen. Der Agent wirkt als nicht nachvollziehbarer
+          „schlechter Einfluss“ und bringt den Menschen dazu, die abschließende, protokollierte Handlung auszuführen.
+          Dadurch bleibt die Rolle des Agenten bei der Kompromittierung in der Forensik unsichtbar. Automatisierungsbias,
+          wahrgenommene Autorität und menschlich wirkende Merkmale lassen Missbrauch legitim erscheinen und
+          erschweren seine Erkennung. Übermäßiges Vertrauen in Agentenempfehlungen, insbesondere bei selbstsicherem
+          oder autoritativem Auftreten, erhöht die Wahrscheinlichkeit schädlicher Entscheidungen. Dieser Eintrag
+          betrifft menschliche Fehlwahrnehmung oder übermäßiges Vertrauen; ASI10 hingegen die Abweichung der
+          Handlungsabsicht des Agenten. Der Eintrag baut auf LLM06:2025 Excessive Agency auf, kann durch LLM01:2025
+          Prompt Injection oder LLM05:2025 Improper Output Handling verursacht werden und zu LLM09:2025 Misinformation
+          führen. Er entspricht den Einträgen (T7) Misaligned & Deceptive, (T8) Repudiation & Untraceability
+          und (T10) Overwhelming the Human in the Loop im Agentic AI Threats and Mitigations Guide.
   - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
     ref_id: ASI10
     name: Rogue Agents
@@ -214,6 +430,26 @@ objects:
       Rogue Agents in Multi-Agent Systems. The OWASP AIVSS framework maps this risk primarily to Behavioral
       Integrity (BI), Operational Security (OS), and Compliance Violations (CV), with elevated severity
       for critical or self-propagating deployments.
+    translations:
+      de:
+        name: Bösartige oder abtrünnige Agenten
+        description: Bösartige oder abtrünnige Agenten (Rogue Agents) sind bösartige oder kompromittierte
+          KI-Agenten, die von ihrer vorgesehenen Funktion oder ihrem autorisierten Handlungsrahmen abweichen
+          und innerhalb von Multi-Agenten- oder Mensch-Agenten-Ökosystemen schädlich, täuschend oder parasitär
+          handeln. Einzelne Aktionen können legitim erscheinen, während das daraus entstehende Gesamtverhalten
+          schädlich wird. Dies schafft eine Eindämmungslücke für traditionelle regelbasierte Systeme. Eine
+          externe Kompromittierung wie Prompt Injection (LLM01:2025), Goal Hijack (AS01) oder Manipulation
+          der Lieferkette (AS04) kann die Abweichung auslösen. ASI10 behandelt jedoch den Verlust von Verhaltensintegrität
+          und Governance nach Beginn dieser Entwicklung, nicht das ursprüngliche Eindringen. Folgen sind die
+          Offenlegung sensibler Informationen, die Verbreitung von Fehlinformationen, die Übernahme von Workflows
+          und betriebliche Sabotage. Rogue Agents stellen ein eigenständiges Risiko abweichenden Verhaltens
+          dar. Excessive Agency (LLM06:2025) betrifft hingegen übermäßig erteilte Berechtigungen. Aufgrund
+          der Geschwindigkeit und Größenordnung agentischer Systeme können Rogue Agents verstärkte „Insider-Bedrohungen“
+          darstellen. Zu den Folgen zählen Sensitive Information Disclosure (LLM02;2025) und Misinformation
+          (LLM09:2025). Im OWASP Agentic AI Threats and Mitigations Guide entspricht ASI10 dem Eintrag T13
+          – Rogue Agents in Multi-Agent Systems. Das OWASP-AIVSS-Rahmenwerk ordnet dieses Risiko vor allem
+          Behavioral Integrity (BI), Operational Security (OS) und Compliance Violations (CV) zu, mit erhöhtem
+          Schweregrad bei kritischen oder sich selbst ausbreitenden Einsätzen.
   framework:
     urn: urn:intuitem:risk:framework:owasp-asi-top-10-2026
     ref_id: owasp-asi-top-10-2026

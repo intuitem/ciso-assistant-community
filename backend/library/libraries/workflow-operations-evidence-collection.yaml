@@ -14,10 +14,17 @@ description: 'Pulls a file from a tool on a schedule and files it as a new revis
   answers with a JSON object carrying a numeric "value". Leave metric_uuid empty and that half is
   skipped.'
 copyright: © intuitem
-version: 5
+version: 6
 publication_date: 2026-09-17
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Nachweise sammeln – Datei aus einem Tool abrufen
+    description: |-
+      Ruft nach Zeitplan eine Datei aus einem Tool ab und speichert sie als neue Nachweisversion, um manuelles Herunterladen und Hochladen zu vermeiden. Bei einer fehlerhaften Antwort oder Nichterreichbarkeit des Tools wird das Team gewarnt. Nach dem Import: evidence_uuid (die ID in der URL des Nachweises), tool_url und warn_to festlegen und das Secret tool_token hinterlegen. Die URL muss HTTPS verwenden, da der Ablauf das Token in einem Bearer-Header sendet und Zugangsdaten nicht unverschlüsselt übertragen werden dürfen. Benötigt das Tool keine Authentifizierung, den Authorization-Header entfernen. Erwartet eine Aufgabe diesen Nachweis, wird die Datei der aktuell fälligen Ausführung zugeordnet. Damit zeigt die Aufgabe den Nachweis als vorhanden an, wird jedoch nicht als erledigt markiert; dies bleibt eine bewusste Entscheidung. Optional erfasst der Lauf zusätzlich einen Zahlenwert desselben Tools: metric_uuid und metric_url festlegen. Der Endpunkt muss ein JSON-Objekt mit einem numerischen Feld „value“ liefern. Bleibt metric_uuid leer, wird dieser Teil übersprungen.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-evidence-collection:workflow:evidence-collection

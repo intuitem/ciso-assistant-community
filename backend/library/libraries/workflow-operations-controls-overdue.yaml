@@ -5,10 +5,17 @@ name: Overdue applied controls — weekly digest
 description: Controls whose ETA has passed and that are not active yet, mailed once a week to whoever
   chases them.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Überfällige Maßnahmen – Wochenübersicht
+    description: |-
+      Sendet einmal pro Woche eine E-Mail mit den Maßnahmen, deren geplanter Umsetzungstermin (ETA) überschritten ist und die noch nicht aktiv sind, an die für die Nachverfolgung zuständige Person.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-controls-overdue:workflow:controls-overdue

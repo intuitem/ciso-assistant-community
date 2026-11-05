@@ -7,10 +7,17 @@ description: Walks the whole third-party portfolio page by page and reports what
   To open an assessment for each one, swap the logging step for a create object step on entity_assessment
   with entity set to {{item.id}} — and run it deliberately, since it creates one per vendor per run.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Drittparteien prüfen – alle aktiven Anbieter
+    description: |-
+      Durchläuft das gesamte Drittparteienportfolio seitenweise und protokolliert die Ergebnisse. Die Schleife lädt ihre Seiten selbst. Der Ablauf besteht daher bei zwölf Anbietern aus denselben vier Schritten wie bei zwölfhundert. Soll für jeden Anbieter eine Prüfung angelegt werden, den Protokollierungsschritt durch eine Aktion zum Erstellen eines Objekts vom Typ entity_assessment ersetzen und entity auf {{item.id}} setzen. Diesen Ablauf bewusst starten, da er bei jedem Lauf eine Prüfung je Anbieter erstellt.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-vendor-portfolio-review:workflow:vendor-portfolio-review
