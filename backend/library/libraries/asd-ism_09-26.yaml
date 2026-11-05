@@ -905,16 +905,16 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:1
       name: Chief information security officer
-      description: "## Context\n\nThe role of the chief information security officer\
-        \ (CISO) is to anticipate changes in the threat and technology environment\
-        \ and lead proportionate and evidence-based improvements to their organisation\u2019\
-        s cyber security capabilities. This requires a combination of technical and\
-        \ soft skills, such as business acumen, leadership, communications and relationship\
-        \ building. In support of this, a CISO should adopt a continuous approach\
-        \ to learning and up-skilling to maintain pace with evolving cyber security\
-        \ frameworks and emerging technologies.\n\nThe role of the CISO within an\
-        \ organisation should cover both information technology (IT) and operational\
-        \ technology (OT). However, where appropriate and practical to do so, responsibility\
+      description: "The role of the chief information security officer (CISO) is to\
+        \ anticipate changes in the threat and technology environment and lead proportionate\
+        \ and evidence-based improvements to their organisation\u2019s cyber security\
+        \ capabilities. This requires a combination of technical and soft skills,\
+        \ such as business acumen, leadership, communications and relationship building.\
+        \ In support of this, a CISO should adopt a continuous approach to learning\
+        \ and up-skilling to maintain pace with evolving cyber security frameworks\
+        \ and emerging technologies.\n\nThe role of the CISO within an organisation\
+        \ should cover both information technology (IT) and operational technology\
+        \ (OT). However, where appropriate and practical to do so, responsibility\
         \ for OT cyber security may be delegated by the CISO. Within this section,\
         \ the breadth of responsibilities for IT and OT is collectively referenced\
         \ under the banner of cyber security."
@@ -2460,12 +2460,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:3
       name: Managed services and cloud services
-      description: '## Context
-
-
-        An outsourced cloud service may also constitute a managed service. In such
-        cases, security controls for outsourced cloud services should be applied in
-        place of equivalent security controls for managed services.
+      description: 'An outsourced cloud service may also constitute a managed service.
+        In such cases, security controls for outsourced cloud services should be applied
+        in place of equivalent security controls for managed services.
 
 
         An artificial intelligence (AI) application or service may constitute a managed
@@ -2479,7 +2476,7 @@ objects:
       name: Managed services
       description: "Managed service providers manage the services of an organisation\
         \ on their behalf. This may include application services, authentication services,\
-        \ backup services, desktop services, enterprise\n\nmobility services, gateway\
+        \ backup services, desktop services, enterprise mobility services, gateway\
         \ services, hosting services, network services, procurement services, security\
         \ services, support services, and many other business-related services. In\
         \ doing so, managed service providers may manage services from their customers\u2019\
@@ -2901,23 +2898,22 @@ objects:
         \ applicable to unprivileged users, privileged users, remote access and administrative\
         \ activities. Depending on the nature of the access, this may include the\
         \ use of individually attributable accounts, least privilege access, multi-factor\
-        \ authentication, separate privileged\n\noperating environments and secure\
-        \ administrative infrastructure. Service provider-specific restrictions, such\
-        \ as remote management tools, source network addresses and time windows approved\
-        \ by the customer, should be applied as additional safeguards rather than\
-        \ as substitutes for these measures.\n\nAn organisation should also ensure\
-        \ that its systems are not accessed or administered by service providers unless\
-        \ such requirements, and the measures used to control them, are documented\
-        \ in contractual arrangements. Service provider access should also be independently\
-        \ logged and analysed by the organisation in a timely manner to detect any\
-        \ anomalous, unexpected or unauthorised activity. Records of approved remote\
-        \ management tools, source network addresses and time windows should be maintained\
-        \ and made available to personnel responsible for monitoring service provider\
-        \ access.\n\nIf unauthorised access occurs, such as customer support representatives\
-        \ or platform engineers accessing encryption keys without authorisation, the\
-        \ service provider should immediately report the cyber security incident to\
-        \ its customer and make available all logs pertaining to the unauthorised\
-        \ access."
+        \ authentication, separate privileged operating environments and secure administrative\
+        \ infrastructure. Service provider-specific restrictions, such as remote management\
+        \ tools, source network addresses and time windows approved by the customer,\
+        \ should be applied as additional safeguards rather than as substitutes for\
+        \ these measures.\n\nAn organisation should also ensure that its systems are\
+        \ not accessed or administered by service providers unless such requirements,\
+        \ and the measures used to control them, are documented in contractual arrangements.\
+        \ Service provider access should also be independently logged and analysed\
+        \ by the organisation in a timely manner to detect any anomalous, unexpected\
+        \ or unauthorised activity. Records of approved remote management tools, source\
+        \ network addresses and time windows should be maintained and made available\
+        \ to personnel responsible for monitoring service provider access.\n\nIf unauthorised\
+        \ access occurs, such as customer support representatives or platform engineers\
+        \ accessing encryption keys without authorisation, the service provider should\
+        \ immediately report the cyber security incident to its customer and make\
+        \ available all logs pertaining to the unauthorised access."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1073
       assessable: true
       depth: 5
@@ -3119,16 +3115,13 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:4
       name: System-specific cyber security documentation
-      description: '## Context
-
-
-        System-specific cyber security documentation, such as a system security plan,
-        cyber security incident response plan, change and configuration management
-        plan, continuous monitoring plan, security assessment report, and plan of
-        action and milestones, supports the accurate and consistent application of
-        policies, processes and procedures for systems. As such, it is important that
-        they are developed by personnel with a good understanding of business requirements,
-        technologies being used and cyber security matters.
+      description: 'System-specific cyber security documentation, such as a system
+        security plan, cyber security incident response plan, change and configuration
+        management plan, continuous monitoring plan, security assessment report, and
+        plan of action and milestones, supports the accurate and consistent application
+        of policies, processes and procedures for systems. As such, it is important
+        that they are developed by personnel with a good understanding of business
+        requirements, technologies being used and cyber security matters.
 
 
         System-specific cyber security documentation may be presented in multiple
@@ -4209,13 +4202,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:7
       name: Cabling infrastructure
-      description: '## Context
-
-
-        This section applies only to facilities located within Australia. In doing
-        so, it covers common security controls for both single-tenant and shared facilities,
-        and specific security controls for only shared facilities, such as a single
-        floor or part of a floor within a multi-tenanted building.
+      description: 'This section applies only to facilities located within Australia.
+        In doing so, it covers common security controls for both single-tenant and
+        shared facilities, and specific security controls for only shared facilities,
+        such as a single floor or part of a floor within a multi-tenanted building.
 
 
         For the purposes of this section, a cable is defined as any fibre-optic or
@@ -5497,12 +5487,11 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:8
       name: Video conferencing and Internet Protocol telephony
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to Internet Protocol (IP) telephony and extends the \u2018Telephone systems\u2019\
-        \ section of these guidelines.\n\nFurthermore, where a video conferencing\
-        \ or IP telephony network is connected to another network from a different\
-        \ security domain, the \u2018Gateways\u2019 section of the [Guidelines for\
-        \ gateways](https://www.cyber.gov.au/ism/2026-09/guidelines-for-gateways)\
+      description: "This section describes security controls applicable to Internet\
+        \ Protocol (IP) telephony and extends the \u2018Telephone systems\u2019 section\
+        \ of these guidelines.\n\nFurthermore, where a video conferencing or IP telephony\
+        \ network is connected to another network from a different security domain,\
+        \ the \u2018Gateways\u2019 section of the [Guidelines for gateways](https://www.cyber.gov.au/ism/2026-09/guidelines-for-gateways)\
         \ applies."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:8:2:1
       assessable: false
@@ -6037,13 +6026,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:9
       name: Enterprise mobility
-      description: '## Context
-
-
-        Enterprise mobility generally refers to situations in which personnel work
-        in a mobile manner, such as part of office hot-desking arrangements, when
-        working from home, when travelling or simply when outside the office environment
-        during normal business hours. While enterprise mobility has traditionally
+      description: 'Enterprise mobility generally refers to situations in which personnel
+        work in a mobile manner, such as part of office hot-desking arrangements,
+        when working from home, when travelling or simply when outside the office
+        environment during normal business hours. While enterprise mobility has traditionally
         been used to refer to the use of mobile devices, such as smartphones, tablets
         and laptop computers, it is increasingly being applied to the use of desktop
         computers as part of working from home arrangements.
@@ -6217,12 +6203,11 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:9
       name: Mobile device management
-      description: "## Context\n\nThis section describes the hardening of privately\
-        \ owned and organisation-owned mobile devices, such as smartphones and tablets\
-        \ that use a mobile operating system. Alternatively, guidance for privately\
-        \ owned and organisation-owned mobile devices that use a desktop operating\
-        \ system is available in the \u2018Operating system hardening\u2019 section\
-        \ of the [Guidelines for system hardening.](https://www.cyber.gov.au/ism/2026-09/guidelines-for-system-hardening)"
+      description: "This section describes the hardening of privately owned and organisation-owned\
+        \ mobile devices, such as smartphones and tablets that use a mobile operating\
+        \ system. Alternatively, guidance for privately owned and organisation-owned\
+        \ mobile devices that use a desktop operating system is available in the \u2018\
+        Operating system hardening\u2019 section of the [Guidelines for system hardening.](https://www.cyber.gov.au/ism/2026-09/guidelines-for-system-hardening)"
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:9:2:1
       assessable: false
       depth: 4
@@ -6534,12 +6519,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:9
       name: Mobile device usage
-      description: '## Context
-
-
-        This section describes the usage of privately owned and organisation-owned
+      description: This section describes the usage of privately owned and organisation-owned
         mobile devices that use either a mobile operating system or a desktop operating
-        system.'
+        system.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:9:3:1
       assessable: false
       depth: 4
@@ -7119,12 +7101,12 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:10
       name: Evaluated product procurement
-      description: "## Context\n\nAn evaluated product provides a level of assurance\
-        \ in its security functionality that an unevaluated product does not. Evaluation\
-        \ documentation can assist an organisation in assessing the suitability of\
-        \ products and making informed procurement and deployment decisions.\n\nThe\
-        \ Australian Certification Authority within the Australian Signals Directorate\
-        \ (ASD) certifies product evaluations conducted by licensed commercial facilities,\
+      description: "An evaluated product provides a level of assurance in its security\
+        \ functionality that an unevaluated product does not. Evaluation documentation\
+        \ can assist an organisation in assessing the suitability of products and\
+        \ making informed procurement and deployment decisions.\n\nThe Australian\
+        \ Certification Authority within the Australian Signals Directorate (ASD)\
+        \ certifies product evaluations conducted by licensed commercial facilities,\
         \ in accordance with the Common Criteria (i.e. the International Organization\
         \ for Standardization/International Electrotechnical Commission 15408 series),\
         \ as part of the Australian Information Security Evaluation Program (AISEP).\n\
@@ -7164,7 +7146,7 @@ objects:
         \ the EAL number will not be published. In addition, PP modules contain additional\
         \ requirements that are complementary to or extend upon collaborative PPs.\
         \ For example, a stateful traffic filtering PP module may apply to a firewall\
-        \ evaluated against a\n\nnetwork device collaborative PP. As such, when procuring\
+        \ evaluated against a network device collaborative PP. As such, when procuring\
         \ an evaluated product that has completed a PP-based evaluation, it is important\
         \ to ensure that all applicable PP modules, as well as a software bill of\
         \ materials assessment if applicable, were included as part of the product\u2019\
@@ -7258,10 +7240,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:10
       name: Evaluated product usage
-      description: '## Context
-
-
-        An evaluated product is operating in an evaluated configuration if:
+      description: 'An evaluated product is operating in an evaluated configuration
+        if:
 
 
         - functionality that it uses was in the scope of the evaluation and it is
@@ -7761,11 +7741,7 @@ objects:
 
 
         - electrostatic memory devices, such as laser printer cartridges used in multifunction
-        devices
-
-
-        (MFDs)
-
+        devices (MFDs)
 
         - non-volatile magnetic memory, such as hard disks
 
@@ -8353,11 +8329,8 @@ objects:
 
         Furthermore, applying encryption to media may change the way it needs to be
         handled. In doing so, any change in handling needs to be based on the original
-        sensitivity or classification of the
-
-
-        media and the level of assurance in the cryptographic equipment, applications
-        or libraries being used to encrypt it.
+        sensitivity or classification of the media and the level of assurance in the
+        cryptographic equipment, applications or libraries being used to encrypt it.
 
 
         Finally, when encryption is applied to media, it is important that full disk
@@ -8481,12 +8454,9 @@ objects:
         transferred, or maliciously exfiltrated, onto the media and then onto another
         system. Alternatively, if suitable write-once media is not used, the destination
         system should have a mechanism through which read-only access can be ensured,
-        such as via a read-only device or
-
-
-        hardware write-blocker. However, the use of read-only mechanisms is not immune
-        to failure or compromise. Therefore, rewritable media should still be sanitised
-        following each data transfer.
+        such as via a read-only device or hardware write-blocker. However, the use
+        of read-only mechanisms is not immune to failure or compromise. Therefore,
+        rewritable media should still be sanitised following each data transfer.
 
 
         It is important to note that for most non-volatile flash memory media, it
@@ -8531,12 +8501,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:12
       name: Media sanitisation
-      description: '## Context
-
-
-        When sanitising hybrid hard drives, first separate the non-volatile magnetic
-        media from the circuit board containing non-volatile flash memory media and
-        then sanitise each separately.
+      description: 'When sanitising hybrid hard drives, first separate the non-volatile
+        magnetic media from the circuit board containing non-volatile flash memory
+        media and then sanitise each separately.
 
 
         When sanitising solid-state drives, the method for sanitising non-volatile
@@ -8546,13 +8513,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:12:2
       name: Media sanitisation processes and procedures
-      description: 'Using approved methods to sanitise media provides a level of assurance
+      description: Using approved methods to sanitise media provides a level of assurance
         that, to the extent possible, no data will be left following sanitisation.
-        The methods described in these guidelines are
-
-
-        designed not only to prevent common data recovery practices but also to protect
-        from those that could emerge in the future.'
+        The methods described in these guidelines are designed not only to prevent
+        common data recovery practices but also to protect from those that could emerge
+        in the future.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-0348
       assessable: true
       depth: 5
@@ -8646,7 +8611,7 @@ objects:
         \ tape and floppy disks can be sanitised by overwriting them at least once\
         \ (or three times if pre-2001 or under 15 GB) in their entirety with a random\
         \ pattern followed by a read back for verification, additional considerations\
-        \ apply to non-volatile\n\nmagnetic hard drives due to their use of a host-protected\
+        \ apply to non-volatile magnetic hard drives due to their use of a host-protected\
         \ area, device configuration overlay table and growth defects table.\n\nThe\
         \ host-protected area and device configuration overlay table of non-volatile\
         \ magnetic hard drives are normally not visible to a computer\u2019s Unified\
@@ -9161,20 +9126,18 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:12:3
       name: Degaussing magnetic media
-      description: 'Degaussing magnetic media changes its magnetic properties, permanently
+      description: Degaussing magnetic media changes its magnetic properties, permanently
         corrupting data. When degaussing magnetic media, care needs to be taken as
-        a degausser of insufficient magnetic field
-
-
-        strength will not be effective. In addition, since 2006 perpendicular magnetic
-        media has progressively replaced longitudinal magnetic media. As some older
-        degaussers are only capable of destroying longitudinal magnetic media, care
-        needs to be taken to ensure that a degausser with a suitable magnetic orientation
-        is also used. Furthermore, to ensure that degaussers are being used in the
-        correct manner to effectively destroy magnetic media, product-specific directions
-        provided by degausser manufacturers should be followed. Finally, to provide
-        an additional level of assurance following the use of a degausser, magnetic
-        media should be physically damaged by deforming any internal platters.'
+        a degausser of insufficient magnetic field strength will not be effective.
+        In addition, since 2006 perpendicular magnetic media has progressively replaced
+        longitudinal magnetic media. As some older degaussers are only capable of
+        destroying longitudinal magnetic media, care needs to be taken to ensure that
+        a degausser with a suitable magnetic orientation is also used. Furthermore,
+        to ensure that degaussers are being used in the correct manner to effectively
+        destroy magnetic media, product-specific directions provided by degausser
+        manufacturers should be followed. Finally, to provide an additional level
+        of assurance following the use of a degausser, magnetic media should be physically
+        damaged by deforming any internal platters.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-0361
       assessable: true
       depth: 5
@@ -9420,9 +9383,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13
       name: Operating system hardening
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to operating systems used on workstations and servers. Guidance on the use\
-        \ of mobile operating systems is available in the \u2018Mobile device management\u2019\
+      description: "This section describes security controls applicable to operating\
+        \ systems used on workstations and servers. Guidance on the use of mobile\
+        \ operating systems is available in the \u2018Mobile device management\u2019\
         \ section of the [Guidelines for enterprise mobility.](https://www.cyber.gov.au/ism/2026-09/guidelines-for-enterprise-mobility)"
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13:1:1
       assessable: false
@@ -9504,14 +9467,12 @@ objects:
       name: Standard Operating Environments
       description: 'Allowing workstations and servers to be set up, configured and
         maintained outside of centrally managed processes can result in an inconsistent
-        operating environment. Such operating
-
-
-        environments may assist malicious actors in gaining an initial foothold on
-        networks due to the higher likelihood of poorly configured or maintained workstations
-        and servers. Conversely, a standard operating environment (SOE), provided
-        via an automated build process or a golden image, is designed to facilitate
-        a standardised and consistent operating environment within an organisation.
+        operating environment. Such operating environments may assist malicious actors
+        in gaining an initial foothold on networks due to the higher likelihood of
+        poorly configured or maintained workstations and servers. Conversely, a standard
+        operating environment (SOE), provided via an automated build process or a
+        golden image, is designed to facilitate a standardised and consistent operating
+        environment within an organisation.
 
 
         When SOEs are obtained from third parties, such as service providers, there
@@ -10547,15 +10508,15 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13
       name: User application hardening
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to user applications typically installed on workstations, such as artificial\
-        \ intelligence (AI) applications, email clients, office productivity suites,\
-        \ Portable Document Format (PDF) applications, security products (e.g. antivirus\
-        \ applications, device access control applications, HIPS and software firewalls)\
-        \ and web browsers, including their extensions. Additional information on\
-        \ cloud-based versions of user applications can be found in the \u2018Managed\
-        \ services and cloud services\u2019 section of the [Guidelines for procurement\
-        \ and outsourcing.](https://www.cyber.gov.au/ism/2026-09/guidelines-for-procurement-and-outsourcing)\
+      description: "This section describes security controls applicable to user applications\
+        \ typically installed on workstations, such as artificial intelligence (AI)\
+        \ applications, email clients, office productivity suites, Portable Document\
+        \ Format (PDF) applications, security products (e.g. antivirus applications,\
+        \ device access control applications, HIPS and software firewalls) and web\
+        \ browsers, including their extensions. Additional information on cloud-based\
+        \ versions of user applications can be found in the \u2018Managed services\
+        \ and cloud services\u2019 section of the [Guidelines for procurement and\
+        \ outsourcing.](https://www.cyber.gov.au/ism/2026-09/guidelines-for-procurement-and-outsourcing)\
         \ Information on server applications can be found in the \u2018Server application\
         \ hardening\u2019 section of these guidelines."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13:2:1
@@ -10623,17 +10584,15 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13:2
       name: Hardening user application configurations
-      description: 'When user applications are deployed in their default state, or
+      description: When user applications are deployed in their default state, or
         with an unapproved configuration, it can lead to an insecure operating environment
-        that may allow malicious actors to gain an initial
-
-
-        foothold on networks. Many settings exist within user applications enabling
-        them to be configured in an approved secure state to minimise this security
-        risk. As such, ASD and vendors often produce hardening guidance to assist
-        in hardening the configuration of user applications. However, in situations
-        where ASD and vendor hardening guidance conflicts, precedence should be given
-        to implementing the most restrictive guidance.'
+        that may allow malicious actors to gain an initial foothold on networks. Many
+        settings exist within user applications enabling them to be configured in
+        an approved secure state to minimise this security risk. As such, ASD and
+        vendors often produce hardening guidance to assist in hardening the configuration
+        of user applications. However, in situations where ASD and vendor hardening
+        guidance conflicts, precedence should be given to implementing the most restrictive
+        guidance.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1915
       assessable: true
       depth: 5
@@ -11202,7 +11161,7 @@ objects:
       name: Security products
       description: "Human users\u2019 ability to change the security settings of security\
         \ products can be exploited by malicious actors using social engineering.\
-        \ To prevent human users from removing security\n\nfunctionality, or breaking\
+        \ To prevent human users from removing security functionality, or breaking\
         \ security functionality, human users should not have the ability to change\
         \ security settings for security products."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1825
@@ -11310,12 +11269,12 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13
       name: Server application hardening
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to server applications associated with specific server functionality, such\
-        \ as Microsoft Active Directory services, database management system applications,\
-        \ email server applications and web hosting applications. Information on user\
-        \ applications can be found in the \u2018User application hardening\u2019\
-        \ section of these guidelines."
+      description: "This section describes security controls applicable to server\
+        \ applications associated with specific server functionality, such as Microsoft\
+        \ Active Directory services, database management system applications, email\
+        \ server applications and web hosting applications. Information on user applications\
+        \ can be found in the \u2018User application hardening\u2019 section of these\
+        \ guidelines."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13:3:1
       assessable: false
       depth: 4
@@ -12405,18 +12364,16 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:13
       name: Virtualisation hardening
-      description: '## Context
-
-
-        This section describes security controls applicable to Type 1 hypervisors
-        (those that run on bare metal) and Type 2 hypervisors (those that run on top
-        of a general-purpose operating system). In doing so, Type 1 hypervisors should
-        be treated as operating systems while Type 2 hypervisors should be treated
-        as applications. As Type 1 hypervisors are themselves lightweight operating
-        systems, they can be treated as a combination of a software-based isolation
-        mechanism and an underlying operating system. Conversely, Type 2 hypervisors
-        will run on top of a general-purpose operating system that may be provided
-        by a different vendor to that of the software-based isolation mechanism.
+      description: 'This section describes security controls applicable to Type 1
+        hypervisors (those that run on bare metal) and Type 2 hypervisors (those that
+        run on top of a general-purpose operating system). In doing so, Type 1 hypervisors
+        should be treated as operating systems while Type 2 hypervisors should be
+        treated as applications. As Type 1 hypervisors are themselves lightweight
+        operating systems, they can be treated as a combination of a software-based
+        isolation mechanism and an underlying operating system. Conversely, Type 2
+        hypervisors will run on top of a general-purpose operating system that may
+        be provided by a different vendor to that of the software-based isolation
+        mechanism.
 
 
         Furthermore, containers enable versatile deployment of systems and, in doing
@@ -12589,12 +12546,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:14
       name: Identity and access management
-      description: '## Context
-
-
-        Where these guidelines refer to security clearances, this includes both Australian
-        security clearances and those from foreign governments that are formally recognised
-        by Australia.
+      description: 'Where these guidelines refer to security clearances, this includes
+        both Australian security clearances and those from foreign governments that
+        are formally recognised by Australia.
 
 
         In addition, while some security controls in these guidelines apply specifically
@@ -12921,11 +12875,9 @@ objects:
         potentially give full access to systems and their resources. As such, ensuring
         that privileged user accounts are prevented from accessing the internet, email
         and web services minimises opportunities for these accounts to be compromised.
-        However, if privileged user accounts are explicitly authorised to
-
-
-        access online services, they should be strictly limited to only what is required
-        for users to undertake their duties or functions.
+        However, if privileged user accounts are explicitly authorised to access online
+        services, they should be strictly limited to only what is required for users
+        to undertake their duties or functions.
 
 
         Finally, centrally logging and analysing privileged access events, as well
@@ -13175,10 +13127,10 @@ objects:
         \ cannot effectively restrict AI agents to the minimum permissions they require,\
         \ review their continued need, identify unauthorised or abandoned AI agents,\
         \ or investigate cyber security incidents involving them. As such, an organisation\
-        \ should develop, implement, maintain and\n\nregularly verify an AI agent\
-        \ register. An AI agent register may also record additional details, such\
-        \ as the AI models used by each AI agent and their versions, to support change\
-        \ management and cyber supply chain risk management activities."
+        \ should develop, implement, maintain and regularly verify an AI agent register.\
+        \ An AI agent register may also record additional details, such as the AI\
+        \ models used by each AI agent and their versions, to support change management\
+        \ and cyber supply chain risk management activities."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-2134
       assessable: true
       depth: 5
@@ -13311,13 +13263,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:14:1
       name: Temporary access to systems
-      description: 'Under strict circumstances, temporary access to systems and their
+      description: Under strict circumstances, temporary access to systems and their
         resources may be granted to personnel who lack an appropriate security clearance
-        or briefing. In such circumstances, personnel
-
-
-        should have their access controlled in such a way that they only have access
-        to data required for them to undertake their duties or functions.'
+        or briefing. In such circumstances, personnel should have their access controlled
+        in such a way that they only have access to data required for them to undertake
+        their duties or functions.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-0441
       assessable: true
       depth: 5
@@ -13645,9 +13595,9 @@ objects:
         \ themselves.\n\nWhen implementing multi-factor authentication, several different\
         \ authentication factors can be implemented. Unfortunately, some authentication\
         \ factors, such as biometrics or codes sent via Short Message Service, Voice\
-        \ over Internet Protocol or email, are more susceptible to compromise\n\n\
-        than others. For this reason, authentication factors that involve something\
-        \ people have should be used with something people know. Alternatively, something\
+        \ over Internet Protocol or email, are more susceptible to compromise than\
+        \ others. For this reason, authentication factors that involve something people\
+        \ have should be used with something people know. Alternatively, something\
         \ people have that is unlocked by something people know or are (often known\
         \ as passwordless multi-factor authentication) can be used. Furthermore, for\
         \ increased security, the use of phishing-resistant multi-factor authentication\
@@ -14172,21 +14122,20 @@ objects:
         \ an illicit consent grant attack, a human user is tricked into granting a\
         \ malicious third-party application consent to access data, after which the\
         \ application holds OAuth tokens that operate independently of the human user\u2019\
-        s credentials and survive\n\ncredential resets. Separately, the device code\
-        \ authentication flow can be abused so that a human user, believing they are\
-        \ signing themselves in, authorises a malicious actor\u2019s session.\n\n\
-        Importantly, malicious actors do not need to establish new consent grants\
-        \ if they can compromise an existing third-party application that has already\
-        \ been granted access, such as via a cyber supply chain attack against the\
-        \ application\u2019s vendor. As such, in addition to controlling how new consent\
-        \ is granted, an organisation should regularly review existing consent grants,\
-        \ revoke those that are unused or hold excessive permissions, and centrally\
-        \ log consent and token issuance activity to support the detection of anomalous\
-        \ use.\n\nFinally, while the device code authentication flow should be disabled\
-        \ by default, an organisation may have a legitimate business requirement for\
-        \ its use, such as for input-constrained devices. In such cases, its use should\
-        \ be restricted to the specific user accounts and managed devices that require\
-        \ it."
+        s credentials and survive credential resets. Separately, the device code authentication\
+        \ flow can be abused so that a human user, believing they are signing themselves\
+        \ in, authorises a malicious actor\u2019s session.\n\nImportantly, malicious\
+        \ actors do not need to establish new consent grants if they can compromise\
+        \ an existing third-party application that has already been granted access,\
+        \ such as via a cyber supply chain attack against the application\u2019s vendor.\
+        \ As such, in addition to controlling how new consent is granted, an organisation\
+        \ should regularly review existing consent grants, revoke those that are unused\
+        \ or hold excessive permissions, and centrally log consent and token issuance\
+        \ activity to support the detection of anomalous use.\n\nFinally, while the\
+        \ device code authentication flow should be disabled by default, an organisation\
+        \ may have a legitimate business requirement for its use, such as for input-constrained\
+        \ devices. In such cases, its use should be restricted to the specific user\
+        \ accounts and managed devices that require it."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-2137
       assessable: true
       depth: 5
@@ -14254,14 +14203,11 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:14
       name: Credential management
-      description: '## Context
-
-
-        The guidance within this section is equally applicable to all user accounts
-        unless specified otherwise. This includes unprivileged user accounts and privileged
-        user accounts, which include break glass accounts and service accounts. In
-        addition, the guidance is equally applicable to interactive authentication
-        and non-interactive authentication.'
+      description: The guidance within this section is equally applicable to all user
+        accounts unless specified otherwise. This includes unprivileged user accounts
+        and privileged user accounts, which include break glass accounts and service
+        accounts. In addition, the guidance is equally applicable to interactive authentication
+        and non-interactive authentication.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:14:2:1
       assessable: false
       depth: 4
@@ -14848,11 +14794,8 @@ objects:
         are left on card readers, one-time password tokens are left in laptop computer
         bags, security keys are left connected to computers or passwords are written
         down and stuck to computer monitors. To reduce this security risk, physical
-        credentials
-
-
-        should be kept separate from systems they are used to authenticate to, except
-        for when performing authentication activities.
+        credentials should be kept separate from systems they are used to authenticate
+        to, except for when performing authentication activities.
 
 
         If storing credentials on systems, sufficient protection should be implemented
@@ -15088,13 +15031,13 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:15
       name: System administration
-      description: "## Context\n\nSystem administration of cloud services brings unique\
-        \ challenges when compared to system administration of on-premises assets.\
-        \ Importantly, responsibility for system administration of cloud services\
-        \ is often shared between service providers and their customers. As the system\
-        \ administration processes and procedures implemented by service providers\
-        \ are often opaque to their customers, customers should consider a service\
-        \ provider\u2019s control plane to operate within a different security domain."
+      description: "System administration of cloud services brings unique challenges\
+        \ when compared to system administration of on-premises assets. Importantly,\
+        \ responsibility for system administration of cloud services is often shared\
+        \ between service providers and their customers. As the system administration\
+        \ processes and procedures implemented by service providers are often opaque\
+        \ to their customers, customers should consider a service provider\u2019s\
+        \ control plane to operate within a different security domain."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:15:1:1
       assessable: false
       depth: 4
@@ -15281,7 +15224,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:15:1
       name: Administrative infrastructure
-      description: 'The security of administrative activities can be improved by segregating
+      description: The security of administrative activities can be improved by segregating
         administrative infrastructure from the wider network and the internet. In
         doing so, the use of a jump server (also known as a jump host or jump box)
         that allows only necessary ports and services to be used can be an effective
@@ -15291,14 +15234,11 @@ objects:
         manage administrative tools; and perform logging, monitoring and alerting
         activities. In addition, using separate jump servers for the administration
         of critical servers (such as Microsoft Active Directory Domain Services domain
-        controllers,
-
-
-        Microsoft Active Directory Certificate Services servers, Microsoft Active
-        Directory Federation Services servers and Microsoft Entra Connect servers),
+        controllers, Microsoft Active Directory Certificate Services servers, Microsoft
+        Active Directory Federation Services servers and Microsoft Entra Connect servers),
         high-value servers (such as Domain Name System servers, database servers,
         email servers, file servers and web servers) and regular servers can further
-        assist in protecting these assets.'
+        assist in protecting these assets.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1385
       assessable: true
       depth: 5
@@ -15518,10 +15458,7 @@ objects:
         of attempted exploitation by malicious actors. For example, by prioritising
         patches or updates for vulnerabilities in online services as well as operating
         systems of internet-facing servers and internet-facing network devices. This
-        is
-
-
-        especially important when vulnerabilities are assessed as critical by vendors
+        is especially important when vulnerabilities are assessed as critical by vendors
         or working exploits exist.
 
 
@@ -16026,13 +15963,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:15:3
       name: Digital preservation policy
-      description: 'Developing, implementing and maintaining a digital preservation
+      description: Developing, implementing and maintaining a digital preservation
         policy, as part of digital continuity planning, can assist in ensuring the
-        long-term integrity and availability of data is
-
-
-        maintained, especially when taking into account the potential for data degradation
-        and removable media, hardware and software obsolescence.'
+        long-term integrity and availability of data is maintained, especially when
+        taking into account the potential for data degradation and removable media,
+        hardware and software obsolescence.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1510
       assessable: true
       depth: 5
@@ -16363,12 +16298,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:16
       name: Security monitoring
-      description: '## Context
-
-
-        This section describes security controls applicable to security-relevant event
-        logs. It is not intended for non-security-relevant event logs, such as operating
-        system and application performance- related event logs.'
+      description: This section describes security controls applicable to security-relevant
+        event logs. It is not intended for non-security-relevant event logs, such
+        as operating system and application performance- related event logs.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:16:1:1
       assessable: false
       depth: 4
@@ -16792,23 +16724,18 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:16
       name: Security assessments
-      description: '## Context
-
-
-        Security assessments are activities designed to provide assurance in the security
-        posture of systems and their operating environments. Security assessments
-        can include security control assessments, vulnerability scanning, vulnerability
-        assessments and penetration tests.
+      description: 'Security assessments are activities designed to provide assurance
+        in the security posture of systems and their operating environments. Security
+        assessments can include security control assessments, vulnerability scanning,
+        vulnerability assessments and penetration tests.
 
 
         Regardless of the security assessment activity performed, they should be conducted
         by suitably skilled personnel. In doing so, personnel can be internal to an
         organisation or from a third party, however, such personnel should be independent
-        of the system being assessed. This ensures that
-
-
-        there is no conflict of interest, perceived or otherwise, and that the activities
-        are undertaken in an objective manner.'
+        of the system being assessed. This ensures that there is no conflict of interest,
+        perceived or otherwise, and that the activities are undertaken in an objective
+        manner.'
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:16:2:1
       assessable: false
       depth: 4
@@ -17076,15 +17003,15 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17
       name: Software development fundamentals
-      description: "## Context\n\nThis section applies to human, artificial intelligence\
-        \ (AI)-assisted, AI-powered and AI-driven software development activities\
-        \ for traditional applications (including user applications and server applications),\
-        \ AI applications, mobile applications and web applications. Additional sections\
-        \ of these guidelines should also be consulted depending on the type of software\
-        \ development being undertaken. For example, the \u2018Web application development\u2019\
-        \ section of these guidelines should be consulted for additional security\
-        \ controls applicable to web applications. Where references are made to software\
-        \ developers, they apply to humans and AI."
+      description: "This section applies to human, artificial intelligence (AI)-assisted,\
+        \ AI-powered and AI-driven software development activities for traditional\
+        \ applications (including user applications and server applications), AI applications,\
+        \ mobile applications and web applications. Additional sections of these guidelines\
+        \ should also be consulted depending on the type of software development being\
+        \ undertaken. For example, the \u2018Web application development\u2019 section\
+        \ of these guidelines should be consulted for additional security controls\
+        \ applicable to web applications. Where references are made to software developers,\
+        \ they apply to humans and AI."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17:1:1
       assessable: false
       depth: 4
@@ -17702,20 +17629,17 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17:1
       name: Software artefacts
-      description: 'Software artefacts can include compiled code, third-party libraries,
+      description: Software artefacts can include compiled code, third-party libraries,
         configuration files and any other files consumed by the software development
         process. Software artefacts, whether developed internally or externally, may
         include malicious content or weaknesses designed for exploitation at a later
         stage. To assist in preventing the introduction of malicious content or weak
         software artefacts into an authoritative source for software, all software
-        artefacts should be
-
-
-        scanned for malicious content and undergo security testing (where appropriate)
-        before being stored in the authoritative source for software. Software artefact
-        dependencies should also be pinned to approved versions to prevent unexpected
-        changes, while being periodically tested for known weaknesses and updated
-        where necessary to address identified vulnerabilities.'
+        artefacts should be scanned for malicious content and undergo security testing
+        (where appropriate) before being stored in the authoritative source for software.
+        Software artefact dependencies should also be pinned to approved versions
+        to prevent unexpected changes, while being periodically tested for known weaknesses
+        and updated where necessary to address identified vulnerabilities.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-2026
       assessable: true
       depth: 5
@@ -18596,9 +18520,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17
       name: Artificial intelligence application development
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to AI application and AI model development and extends the \u2018Software\
-        \ development fundamentals\u2019 section of these guidelines."
+      description: "This section describes security controls applicable to AI application\
+        \ and AI model development and extends the \u2018Software development fundamentals\u2019\
+        \ section of these guidelines."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17:2:1
       assessable: false
       depth: 4
@@ -18975,9 +18899,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17
       name: Mobile application development
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to mobile application development and extends the \u2018Software development\
-        \ fundamentals\u2019 section of these guidelines."
+      description: "This section describes security controls applicable to mobile\
+        \ application development and extends the \u2018Software development fundamentals\u2019\
+        \ section of these guidelines."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17:3:1
       assessable: false
       depth: 4
@@ -19005,9 +18929,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17
       name: Web application development
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to web application development and extends the \u2018Software development\
-        \ fundamentals\u2019 section of these guidelines."
+      description: "This section describes security controls applicable to web application\
+        \ development and extends the \u2018Software development fundamentals\u2019\
+        \ section of these guidelines."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:17:4:1
       assessable: false
       depth: 4
@@ -19447,7 +19371,7 @@ objects:
       name: Protecting database contents
       description: "The sensitivity or classification associated with databases and\
         \ their contents should be determined to ensure that they are appropriately\
-        \ protected when administered or accessed by database\n\nusers. In cases where\
+        \ protected when administered or accessed by database users. In cases where\
         \ a database\u2019s contents are all the same sensitivity or classification,\
         \ an organisation should classify the entire database at this level and protect\
         \ it as such. Alternatively, in cases where a database\u2019s contents are\
@@ -20412,19 +20336,16 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:20:1
       name: Networked management interfaces
-      description: 'To assist in reducing the attack surface of networks, IT equipment
+      description: To assist in reducing the attack surface of networks, IT equipment
         residing on networks (such as servers) or constituting the makeup of network
         infrastructure (such as network devices) should not directly expose their
         networked management interfaces to the internet. In situations where this
         is not possible, such as for some cloud services and web applications, alternative
         measures will need to be implemented to protect weak or vulnerable networked
-        management interfaces
-
-
-        from being exploited by malicious actors to remotely compromise networks.
-        Ideally, IT equipment on networks, or constituting the makeup of network infrastructure,
-        should be managed via a dedicated management network that is segregated from
-        the wider network and the internet.'
+        management interfaces from being exploited by malicious actors to remotely
+        compromise networks. Ideally, IT equipment on networks, or constituting the
+        makeup of network infrastructure, should be managed via a dedicated management
+        network that is segregated from the wider network and the internet.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1863
       assessable: true
       depth: 5
@@ -20537,12 +20458,9 @@ objects:
 
         To aid in the transition from IPv4 to IPv6, numerous tunnelling protocols
         have been developed to enable interoperability between IPv4 and IPv6. Disabling
-        IPv6 tunnelling protocols on networks
-
-
-        that do not require such functionality will prevent malicious actors from
-        bypassing traditional network defences by encapsulating IPv6 data inside IPv4
-        packets.
+        IPv6 tunnelling protocols on networks that do not require such functionality
+        will prevent malicious actors from bypassing traditional network defences
+        by encapsulating IPv6 data inside IPv4 packets.
 
 
         Stateless Address Autoconfiguration is a method of stateless Internet Protocol
@@ -20668,13 +20586,10 @@ objects:
         devices and a Remote Authentication Dial-In User Service (RADIUS) server by
         using X.509 certificates. While EAP-TLS provides strong mutual authentication,
         it requires an organisation to have established a public key infrastructure.
-        This
-
-
-        involves deploying their own certificate authority and issuing X.509 certificates,
-        or sourcing them from a commercial certificate authority, for every device
-        that accesses their network. While this introduces additional costs and management
-        overheads, the security advantages are significant.'
+        This involves deploying their own certificate authority and issuing X.509
+        certificates, or sourcing them from a commercial certificate authority, for
+        every device that accesses their network. While this introduces additional
+        costs and management overheads, the security advantages are significant.'
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1321
       assessable: true
       depth: 5
@@ -21235,9 +21150,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:20
       name: Wired networks
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to wired networks and extends the \u2018Network design and configuration\u2019\
-        \ section of these guidelines."
+      description: "This section describes security controls applicable to wired networks\
+        \ and extends the \u2018Network design and configuration\u2019 section of\
+        \ these guidelines."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:20:2:1
       assessable: false
       depth: 4
@@ -21344,9 +21259,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:20
       name: Wireless networks
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to wireless networks and extends the \u2018Network design and configuration\u2019\
-        \ section of these guidelines."
+      description: "This section describes security controls applicable to wireless\
+        \ networks and extends the \u2018Network design and configuration\u2019 section\
+        \ of these guidelines."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:20:3:1
       assessable: false
       depth: 4
@@ -21598,22 +21513,20 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:20:3
       name: Caching 802.1X authentication outcomes
-      description: 'When 802.1X authentication is used as part of WPA3-Enterprise,
+      description: When 802.1X authentication is used as part of WPA3-Enterprise,
         a shared secret key known as the Pairwise Master Key (PMK) is generated upon
         successful authentication of devices. This PMK is then capable of being cached
         to assist with fast roaming between wireless access points. For example, when
         devices roam away from wireless access points they have authenticated to,
         they will not need to perform a full re-authentication should they roam back
-        while the cached PMK
-
-
-        remains valid. To further assist with roaming, wireless access points can
-        be configured to pre- authenticate devices to neighbouring wireless access
-        points that devices might roam to. Although requiring full authentication
-        for devices each time they roam between wireless access points is ideal, an
-        organisation can choose to use PMK caching and pre-authentication if they
-        have a business requirement for fast roaming. If PMK caching is used, the
-        PMK caching period should not be set to greater than 1440 minutes (24 hours).'
+        while the cached PMK remains valid. To further assist with roaming, wireless
+        access points can be configured to pre- authenticate devices to neighbouring
+        wireless access points that devices might roam to. Although requiring full
+        authentication for devices each time they roam between wireless access points
+        is ideal, an organisation can choose to use PMK caching and pre-authentication
+        if they have a business requirement for fast roaming. If PMK caching is used,
+        the PMK caching period should not be set to greater than 1440 minutes (24
+        hours).
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1330
       assessable: true
       depth: 5
@@ -21694,15 +21607,13 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:20:3
       name: Protecting management frames on wireless networks
-      description: 'An effective denial-of-service attack can be performed by exploiting
+      description: An effective denial-of-service attack can be performed by exploiting
         unprotected management frames using inexpensive commercial hardware. The 802.11
         standard provides no protection for management frames and therefore does not
         protect against spoofing or denial-of-service attacks. However, the 802.11w
-        amendment specifically addresses the protection of management frames
-
-
-        on wireless networks and should be enabled for WPA2. In WPA3, this feature
-        is built into the standard.'
+        amendment specifically addresses the protection of management frames on wireless
+        networks and should be enabled for WPA2. In WPA3, this feature is built into
+        the standard.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1335
       assessable: true
       depth: 5
@@ -22027,15 +21938,12 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21
       name: Cryptographic fundamentals
-      description: '## Context
-
-
-        The purpose of cryptography is to provide confidentiality, integrity, authentication
-        and non- repudiation of data. In doing so, confidentiality protects data by
-        making it unreadable to all but authorised entities, integrity protects data
-        from accidental or deliberate manipulation by entities, authentication ensures
-        that an entity is who they claim to be, and non-repudiation provides proof
-        that an entity performed a particular action.
+      description: 'The purpose of cryptography is to provide confidentiality, integrity,
+        authentication and non- repudiation of data. In doing so, confidentiality
+        protects data by making it unreadable to all but authorised entities, integrity
+        protects data from accidental or deliberate manipulation by entities, authentication
+        ensures that an entity is who they claim to be, and non-repudiation provides
+        proof that an entity performed a particular action.
 
 
         In employing cryptography, data at rest can be encrypted to protect sensitive
@@ -22093,14 +22001,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21:1
       name: Cryptographic key management processes and procedures
-      description: 'Well-documented cryptographic key management processes and procedures
+      description: Well-documented cryptographic key management processes and procedures
         can assist in the secure use and management of cryptographic keys and associated
         hardware and software. In doing so, cryptographic key management processes
-        and procedures should cover cryptographic
-
-
-        key generation, registration, distribution, installation, usage, protection,
-        storage, access, recovery and destruction.'
+        and procedures should cover cryptographic key generation, registration, distribution,
+        installation, usage, protection, storage, access, recovery and destruction.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-0507
       assessable: true
       depth: 5
@@ -22130,18 +22035,18 @@ objects:
         \ applications and libraries should be assessed by one of the following processes,\
         \ listed in order of preference:\n\n- a Common Criteria evaluation against\
         \ an ASD-endorsed Protection Profile\n- a Federal Information Processing Standard\
-        \ (FIPS) 140-3 cryptographic evaluation via the\n\nUnited States and Canada\u2019\
-        s Cryptographic Module Validation Program\n\n- a cryptographic evaluation\
-        \ via the United States and Canada\u2019s Cryptographic Algorithm\n\nValidation\
-        \ Program\n\n- a Common Criteria evaluation against an Evaluation Assurance\
-        \ Level\n- an independent security review by a reputable process or body.\n\
-        \nWhere a suitable Common Criteria evaluated product does not exist, an alternate\
-        \ product capable of securely implementing ASD-Approved Cryptographic Algorithms\
-        \ (AACAs) and ASD-Approved Cryptographic Protocols (AACPs) may be used. However,\
-        \ cyber supply chain security risks still need to be considered to ensure\
-        \ the product does not present a high risk. For example, an organisation should\
-        \ still follow robust and secure procurement processes by selecting a product\
-        \ from a supplier with:\n\n- a history of undertaking Common Criteria evaluations\
+        \ (FIPS) 140-3 cryptographic evaluation via the United States and Canada\u2019\
+        s Cryptographic Module Validation Program\n- a cryptographic evaluation via\
+        \ the United States and Canada\u2019s Cryptographic Algorithm Validation Program\n\
+        - a Common Criteria evaluation against an Evaluation Assurance Level\n- an\
+        \ independent security review by a reputable process or body.\n\nWhere a suitable\
+        \ Common Criteria evaluated product does not exist, an alternate product capable\
+        \ of securely implementing ASD-Approved Cryptographic Algorithms (AACAs) and\
+        \ ASD-Approved Cryptographic Protocols (AACPs) may be used. However, cyber\
+        \ supply chain security risks still need to be considered to ensure the product\
+        \ does not present a high risk. For example, an organisation should still\
+        \ follow robust and secure procurement processes by selecting a product from\
+        \ a supplier with:\n\n- a history of undertaking Common Criteria evaluations\
         \ for their other products\n- a demonstrated commitment to the security of\
         \ their products and services, including by adopting Secure by Design principles\
         \ and practices, responsively resolving known vulnerabilities, and providing\
@@ -22327,22 +22232,22 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21
       name: Cryptographic algorithms
-      description: "## Context\n\nThere is no guarantee of a cryptographic algorithm\u2019\
-        s resistance to currently unknown attacks. However, the cryptographic algorithms\
-        \ listed in this section have been extensively scrutinised by industry and\
-        \ academic communities in a practical and theoretical setting. Approval for\
-        \ the use of the cryptographic algorithms listed in this section is limited\
-        \ to cases where they are implemented in accordance with these guidelines.\n\
-        \nThe approved asymmetric cryptographic algorithms are:\n\n- Diffie-Hellman\
-        \ (DH) for agreeing on encryption session keys\n- Elliptic Curve Diffie-Hellman\
-        \ (ECDH) for agreeing on encryption session keys\n- Elliptic Curve Digital\
-        \ Signature Algorithm (ECDSA) for digital signatures\n- Module-Lattice-Based\
-        \ Digital Signature Algorithm (ML-DSA) for digital signatures\n- Module-Lattice-Based\
-        \ Key Encapsulation Mechanism (ML-KEM) for encapsulating encryption session\
-        \ keys (and similar keys)\n- Rivest-Shamir-Adleman (RSA) for digital signatures\
-        \ and transporting encryption session keys\n\n(and similar keys).\n\nThe only\
-        \ approved hashing algorithm for general-purpose use is Secure Hashing Algorithm\
-        \ 2 (SHA-2). However, Secure Hashing Algorithm 3 (SHA-3), including its extendable-output\
+      description: "There is no guarantee of a cryptographic algorithm\u2019s resistance\
+        \ to currently unknown attacks. However, the cryptographic algorithms listed\
+        \ in this section have been extensively scrutinised by industry and academic\
+        \ communities in a practical and theoretical setting. Approval for the use\
+        \ of the cryptographic algorithms listed in this section is limited to cases\
+        \ where they are implemented in accordance with these guidelines.\n\nThe approved\
+        \ asymmetric cryptographic algorithms are:\n\n- Diffie-Hellman (DH) for agreeing\
+        \ on encryption session keys\n- Elliptic Curve Diffie-Hellman (ECDH) for agreeing\
+        \ on encryption session keys\n- Elliptic Curve Digital Signature Algorithm\
+        \ (ECDSA) for digital signatures\n- Module-Lattice-Based Digital Signature\
+        \ Algorithm (ML-DSA) for digital signatures\n- Module-Lattice-Based Key Encapsulation\
+        \ Mechanism (ML-KEM) for encapsulating encryption session keys (and similar\
+        \ keys)\n- Rivest-Shamir-Adleman (RSA) for digital signatures and transporting\
+        \ encryption session keys (and similar keys).\n\nThe only approved hashing\
+        \ algorithm for general-purpose use is Secure Hashing Algorithm 2 (SHA-2).\
+        \ However, Secure Hashing Algorithm 3 (SHA-3), including its extendable-output\
         \ functions, is approved exclusively for use within ML-DSA and ML-KEM.\n\n\
         The only approved symmetric cryptographic algorithm is Advanced Encryption\
         \ Standard (AES).\n\nWhere there is a range of key sizes for a cryptographic\
@@ -22649,11 +22554,9 @@ objects:
       name: Using the Module-Lattice-Based Digital Signature Algorithm
       description: 'The effective security strength of ML-DSA has a complex dependency
         on numerous parameters with different effective security strengths targeted
-        by different standardised parameter sets. The
-
-
-        ML-DSA standard contains three different parameter sets: ML-DSA-44, ML-DSA-65
-        and ML-DSA- 87. The use of ML-DSA-65 and ML-DSA-87 is approved.
+        by different standardised parameter sets. The ML-DSA standard contains three
+        different parameter sets: ML-DSA-44, ML-DSA-65 and ML-DSA- 87. The use of
+        ML-DSA-65 and ML-DSA-87 is approved.
 
 
         When using ML-DSA for digital signing, it may be either hedged or deterministic,
@@ -23043,20 +22946,20 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21
       name: Cryptographic protocols
-      description: "## Context\n\nThere is no guarantee of a cryptographic protocol\u2019\
-        s resistance to currently unknown attacks. However, the cryptographic protocols\
-        \ listed in this section have been extensively scrutinised by industry and\
-        \ academic communities in a practical and theoretical setting. Approval for\
-        \ the use of the cryptographic protocols listed in this section is limited\
-        \ to cases where they are implemented in accordance with these guidelines.\n\
-        \nThe AACPs are:\n\n- Internet Protocol Security (IPsec)\n- Media Access Control\
-        \ Security\n- OpenPGP Message Format\n- Secure Shell (SSH)\n- Secure/Multipurpose\
-        \ Internet Mail Extensions (S/MIME)\n- Transport Layer Security (TLS)\n- Wi-Fi\
-        \ Protected Access 2\n- Wi-Fi Protected Access 3.\n\nHigh assurance cryptographic\
-        \ protocols, which are not covered in this section, can be used for the protection\
-        \ of SECRET and TOP SECRET data if they are suitably implemented in HACE.\
-        \ Further information on high assurance cryptographic protocols can be obtained\
-        \ from ASD."
+      description: "There is no guarantee of a cryptographic protocol\u2019s resistance\
+        \ to currently unknown attacks. However, the cryptographic protocols listed\
+        \ in this section have been extensively scrutinised by industry and academic\
+        \ communities in a practical and theoretical setting. Approval for the use\
+        \ of the cryptographic protocols listed in this section is limited to cases\
+        \ where they are implemented in accordance with these guidelines.\n\nThe AACPs\
+        \ are:\n\n- Internet Protocol Security (IPsec)\n- Media Access Control Security\n\
+        - OpenPGP Message Format\n- Secure Shell (SSH)\n- Secure/Multipurpose Internet\
+        \ Mail Extensions (S/MIME)\n- Transport Layer Security (TLS)\n- Wi-Fi Protected\
+        \ Access 2\n- Wi-Fi Protected Access 3.\n\nHigh assurance cryptographic protocols,\
+        \ which are not covered in this section, can be used for the protection of\
+        \ SECRET and TOP SECRET data if they are suitably implemented in HACE. Further\
+        \ information on high assurance cryptographic protocols can be obtained from\
+        \ ASD."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21:3:1
       assessable: false
       depth: 4
@@ -23109,10 +23012,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21
       name: Internet Protocol Security
-      description: "## Context\n\nWhen using IT equipment or applications that implement\
-        \ IPsec, security controls for using AACAs and AACPs in the \u2018Cryptographic\
-        \ algorithms\u2019 and \u2018Cryptographic protocols\u2019 sections of these\
-        \ guidelines will also need to be consulted."
+      description: "When using IT equipment or applications that implement IPsec,\
+        \ security controls for using AACAs and AACPs in the \u2018Cryptographic algorithms\u2019\
+        \ and \u2018Cryptographic protocols\u2019 sections of these guidelines will\
+        \ also need to be consulted."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21:4:1
       assessable: false
       depth: 4
@@ -23173,13 +23076,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21:4
       name: Key exchange
-      description: 'There are several methods for establishing shared keying material
+      description: There are several methods for establishing shared keying material
         for IPsec connections, including manual keying and the IKE protocol. As the
-        IKE protocol addresses several security risks associated
-
-
-        with manual keying, it is the preferred method for key establishment. As IKE
-        version 1 has been deprecated, IKE version 2 should be used.'
+        IKE protocol addresses several security risks associated with manual keying,
+        it is the preferred method for key establishment. As IKE version 1 has been
+        deprecated, IKE version 2 should be used.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-1233
       assessable: true
       depth: 5
@@ -23349,10 +23250,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21
       name: Secure Shell
-      description: "## Context\n\nWhen using IT equipment or applications that implement\
-        \ SSH, security controls for using AACAs and AACPs in the \u2018Cryptographic\
-        \ algorithms\u2019 and \u2018Cryptographic protocols\u2019 sections of these\
-        \ guidelines will also need to be consulted."
+      description: "When using IT equipment or applications that implement SSH, security\
+        \ controls for using AACAs and AACPs in the \u2018Cryptographic algorithms\u2019\
+        \ and \u2018Cryptographic protocols\u2019 sections of these guidelines will\
+        \ also need to be consulted."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21:5:1
       assessable: false
       depth: 4
@@ -23549,10 +23450,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21
       name: Secure/Multipurpose Internet Mail Extensions
-      description: "## Context\n\nWhen using IT equipment or applications that implement\
-        \ S/MIME, security controls for using AACAs and AACPs in the \u2018Cryptographic\
-        \ algorithms\u2019 and \u2018Cryptographic protocols\u2019 sections of these\
-        \ guidelines will also need to be consulted."
+      description: "When using IT equipment or applications that implement S/MIME,\
+        \ security controls for using AACAs and AACPs in the \u2018Cryptographic algorithms\u2019\
+        \ and \u2018Cryptographic protocols\u2019 sections of these guidelines will\
+        \ also need to be consulted."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21:6:1
       assessable: false
       depth: 4
@@ -23581,10 +23482,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21
       name: Transport Layer Security
-      description: "## Context\n\nWhen using IT equipment or applications that implement\
-        \ TLS, security controls for using AACAs and AACPs in the \u2018Cryptographic\
-        \ algorithms\u2019 and \u2018Cryptographic protocols\u2019 sections of these\
-        \ guidelines will also need to be consulted."
+      description: "When using IT equipment or applications that implement TLS, security\
+        \ controls for using AACAs and AACPs in the \u2018Cryptographic algorithms\u2019\
+        \ and \u2018Cryptographic protocols\u2019 sections of these guidelines will\
+        \ also need to be consulted."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:21:7:1
       assessable: false
       depth: 4
@@ -23739,18 +23640,18 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:22
       name: Gateways
-      description: "## Context\n\nGateways securely manage data flows between connected\
-        \ networks from different security domains. In doing so, gateways take on\
-        \ the highest sensitivity or classification of connected security domains.\n\
-        \nThis section describes security controls applicable to all types of gateways.\
-        \ Additional sections of these guidelines should also be consulted depending\
-        \ on the types of gateways being deployed and the security domains involved.\
-        \ For example, the \u2018Cross domain solutions\u2019 section of these guidelines\
-        \ should be consulted for gateways between different security domains where\
-        \ at least one security domain is classified SECRET or TOP SECRET.\n\nPersonnel\
-        \ involved in the planning, design, implementation or assessment of gateways\
-        \ should also refer to the Australian Signals Directorate\u2019s (ASD) [Gateway\
-        \ security guidance package](https://www.cyber.gov.au/gateway-security-guidance-package)\
+      description: "Gateways securely manage data flows between connected networks\
+        \ from different security domains. In doing so, gateways take on the highest\
+        \ sensitivity or classification of connected security domains.\n\nThis section\
+        \ describes security controls applicable to all types of gateways. Additional\
+        \ sections of these guidelines should also be consulted depending on the types\
+        \ of gateways being deployed and the security domains involved. For example,\
+        \ the \u2018Cross domain solutions\u2019 section of these guidelines should\
+        \ be consulted for gateways between different security domains where at least\
+        \ one security domain is classified SECRET or TOP SECRET.\n\nPersonnel involved\
+        \ in the planning, design, implementation or assessment of gateways should\
+        \ also refer to the Australian Signals Directorate\u2019s (ASD) [Gateway security\
+        \ guidance package](https://www.cyber.gov.au/gateway-security-guidance-package)\
         \ and, where applicable, the Department of Home Affairs\u2019 [Protective\
         \ Security Policy Framework](https://www.protectivesecurity.gov.au/) and its\
         \ associated [Australian Government Gateway Security Standard.](https://www.protectivesecurity.gov.au/publications-library/australian-government-gateway-security-standard-2026)"
@@ -24197,23 +24098,22 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:22
       name: Cross domain solutions
-      description: "## Context\n\nA cross domain solution (CDS) is a system comprised\
-        \ of security-enforcing functions tailored to mitigate specific security risks\
-        \ associated with accessing or transferring data between different security\
-        \ domains. CDSs may be an integrated appliance or, more commonly, composed\
-        \ of discrete technologies or sub-systems, with each sub-system consisting\
-        \ of hardware or software components.\n\nThis section defines two types of\
-        \ CDSs, Transfer CDSs and Access CDSs. Transfer CDSs facilitate the transfer\
-        \ of data in one direction (unidirectional) or multiple directions (bi-directional)\
-        \ between different security domains. In comparison, Access CDSs provide users\
-        \ with access to multiple security domains from a single device; however,\
-        \ they do not allow users to move data between the different security domains.\n\
-        \nThis section describes security controls applicable to CDSs and extends\
-        \ the \u2018Gateways\u2019 section of these guidelines. Additional sections\
-        \ of these guidelines should also be consulted depending on the types of CDSs\
-        \ being deployed.\n\nPersonnel involved in the planning, design, implementation\
-        \ or assessment of CDSs should also refer to ASD\u2019s [Introduction to Cross\
-        \ Domain Solutions](https://www.cyber.gov.au/publication/introduction-to-cross-domain-solutions)\
+      description: "A cross domain solution (CDS) is a system comprised of security-enforcing\
+        \ functions tailored to mitigate specific security risks associated with accessing\
+        \ or transferring data between different security domains. CDSs may be an\
+        \ integrated appliance or, more commonly, composed of discrete technologies\
+        \ or sub-systems, with each sub-system consisting of hardware or software\
+        \ components.\n\nThis section defines two types of CDSs, Transfer CDSs and\
+        \ Access CDSs. Transfer CDSs facilitate the transfer of data in one direction\
+        \ (unidirectional) or multiple directions (bi-directional) between different\
+        \ security domains. In comparison, Access CDSs provide users with access to\
+        \ multiple security domains from a single device; however, they do not allow\
+        \ users to move data between the different security domains.\n\nThis section\
+        \ describes security controls applicable to CDSs and extends the \u2018Gateways\u2019\
+        \ section of these guidelines. Additional sections of these guidelines should\
+        \ also be consulted depending on the types of CDSs being deployed.\n\nPersonnel\
+        \ involved in the planning, design, implementation or assessment of CDSs should\
+        \ also refer to ASD\u2019s [Introduction to Cross Domain Solutions](https://www.cyber.gov.au/publication/introduction-to-cross-domain-solutions)\
         \ and [Fundamentals of Cross Domain Solutions](https://www.cyber.gov.au/publication/fundamentals-of-cross-domain-solutions)\
         \ publications."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:22:2:1
@@ -24727,21 +24627,20 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:22
       name: Content filtering
-      description: "## Context\n\nThe following content filtering techniques should\
-        \ be considered as part of an organisation\u2019s content filtering implementation\
-        \ for gateways and CDSs:\n\n- Antivirus scans: Scans files for viruses and\
-        \ other malicious code.\n- Automated dynamic analysis: Analyses executable\
-        \ files run in a sandbox to detect suspicious behaviour.\n- File extension\
-        \ checks: Checks file extensions to determine purported file types.\n- File\
-        \ format checks: Checks files conform to defined file format specifications.\n\
-        - File type checks: Checks file headers to determine actual file types.\n\
-        - Keyword checks: Checks files for keywords that could indicate undesirable\
-        \ content.\n- Metadata checks: Checks files for metadata that should be removed.\n\
-        - Protective marking checks: Checks files for protective markings that may\
-        \ indicate undesirable content.\n- Manual inspections: Involves the manual\
-        \ inspection of files for suspicious or undesirable content that an automated\
-        \ system may miss, which is particularly important for multimedia and content\
-        \ rich files."
+      description: "The following content filtering techniques should be considered\
+        \ as part of an organisation\u2019s content filtering implementation for gateways\
+        \ and CDSs:\n\n- Antivirus scans: Scans files for viruses and other malicious\
+        \ code.\n- Automated dynamic analysis: Analyses executable files run in a\
+        \ sandbox to detect suspicious behaviour.\n- File extension checks: Checks\
+        \ file extensions to determine purported file types.\n- File format checks:\
+        \ Checks files conform to defined file format specifications.\n- File type\
+        \ checks: Checks file headers to determine actual file types.\n- Keyword checks:\
+        \ Checks files for keywords that could indicate undesirable content.\n- Metadata\
+        \ checks: Checks files for metadata that should be removed.\n- Protective\
+        \ marking checks: Checks files for protective markings that may indicate undesirable\
+        \ content.\n- Manual inspections: Involves the manual inspection of files\
+        \ for suspicious or undesirable content that an automated system may miss,\
+        \ which is particularly important for multimedia and content rich files."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:22:8:1
       assessable: false
       depth: 4
@@ -25160,10 +25059,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:23
       name: Data transfers
-      description: "## Context\n\nThis section describes security controls applicable\
-        \ to manual data transfers and data transfers using gateways or cross domain\
-        \ solutions (CDSs). For data transfers using gateways or CDSs, the \u2018\
-        Content filtering\u2019 section of the [Guidelines for gateways](https://www.cyber.gov.au/ism/2026-09/guidelines-for-gateways)\
+      description: "This section describes security controls applicable to manual\
+        \ data transfers and data transfers using gateways or cross domain solutions\
+        \ (CDSs). For data transfers using gateways or CDSs, the \u2018Content filtering\u2019\
+        \ section of the [Guidelines for gateways](https://www.cyber.gov.au/ism/2026-09/guidelines-for-gateways)\
         \ is also applicable."
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:23:1:1
       assessable: false
@@ -25236,13 +25135,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:asd-ism_09-26:cyber-security-guidelines:23:1
       name: Manual import of data
-      description: 'When manually importing data to systems, such as via the use of
+      description: When manually importing data to systems, such as via the use of
         removable media, the data should be scanned for malicious and active content
-        to reduce the likelihood of causing a malicious
-
-
-        code infection. In cases where security checks fail, data should be quarantined
-        until it can be reviewed and subsequently approved or not approved for release.'
+        to reduce the likelihood of causing a malicious code infection. In cases where
+        security checks fail, data should be quarantined until it can be reviewed
+        and subsequently approved or not approved for release.
     - urn: urn:intuitem:risk:req_node:asd-ism_09-26:ism-0657
       assessable: true
       depth: 5

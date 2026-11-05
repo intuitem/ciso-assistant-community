@@ -470,22 +470,26 @@ def markdownify_linked_block(document: fitz.Document, block: PdfBlock) -> str:
     return f"- {text}" if is_bullet else text
 
 
-def is_bullet_continuation(
+def is_wrapped_continuation(
     block: PdfBlock,
     previous_block: PdfBlock | None,
-    list_indent: float | None,
+    previous_is_list_item: bool,
 ) -> bool:
-    """Recognise a wrapped bullet line emitted as a separate PDF text block."""
-    if previous_block is None or list_indent is None:
+    """Join text blocks split by PDF layout within a sentence or list item."""
+    if previous_block is None:
         return False
-    text = normalize_paragraph(block.text)
-    vertical_gap = block.rect.y0 - previous_block.rect.y1
+    previous_text = normalize_paragraph(previous_block.text)
+    if not previous_text or previous_text.endswith((".", "!", "?", ":")):
+        return False
+    if block.page_index == previous_block.page_index:
+        vertical_gap = block.rect.y0 - previous_block.rect.y1
+        if previous_is_list_item:
+            return 0 <= vertical_gap <= 12 and block.rect.x0 >= previous_block.rect.x0 + 8
+        return 0 <= vertical_gap <= 8 and abs(block.rect.x0 - previous_block.rect.x0) <= 3
     return (
-        block.page_index == previous_block.page_index
-        and 0 <= vertical_gap <= 12
-        and block.rect.x0 >= list_indent + 8
-        and bool(text)
-        and text[0].islower()
+        block.page_index == previous_block.page_index + 1
+        and previous_block.rect.y1 >= 700
+        and block.rect.y0 <= 120
     )
 
 
@@ -494,14 +498,13 @@ def join_markdown_blocks(document: fitz.Document, blocks: Iterable[PdfBlock]) ->
     result = ""
     previous_is_list_item = False
     previous_block: PdfBlock | None = None
-    list_indent: float | None = None
     for pdf_block in blocks:
         block = markdownify_linked_block(document, pdf_block)
         if not block:
             continue
         is_list_item = block.startswith("- ")
-        if previous_is_list_item and not is_list_item and is_bullet_continuation(
-            pdf_block, previous_block, list_indent
+        if not is_list_item and is_wrapped_continuation(
+            pdf_block, previous_block, previous_is_list_item
         ):
             result += f" {block}"
             previous_block = pdf_block
@@ -512,7 +515,6 @@ def join_markdown_blocks(document: fitz.Document, blocks: Iterable[PdfBlock]) ->
         result += block
         previous_is_list_item = is_list_item
         previous_block = pdf_block
-        list_indent = pdf_block.rect.x0 if is_list_item else None
     return result
 
 
@@ -586,7 +588,7 @@ def extract_section_contexts(
             if normalize_paragraph(block.text)
         ]
         if paragraphs:
-            contexts[key] = "## Context\n\n" + join_markdown_blocks(document, paragraphs)
+            contexts[key] = join_markdown_blocks(document, paragraphs)
     return contexts
 
 
