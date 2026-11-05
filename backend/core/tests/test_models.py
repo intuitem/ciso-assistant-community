@@ -1436,6 +1436,10 @@ class TestLibrary:
     def test_library_reference_count_must_be_zero_for_library_deletion(
         self,
     ):
+        baseline = LoadedLibrary.objects.filter(
+            objects_meta__requirement_mapping_sets__isnull=True,
+            objects_meta__requirement_mapping_set__isnull=True,
+        ).count()
         library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
@@ -1476,11 +1480,15 @@ class TestLibrary:
                 objects_meta__requirement_mapping_sets__isnull=True,
                 objects_meta__requirement_mapping_set__isnull=True,
             ).count()
-            == 0
+            == baseline
         )
 
     @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_library_cannot_be_deleted_if_it_is_a_dependency_of_other_libraries(self):
+        baseline = LoadedLibrary.objects.filter(
+            objects_meta__requirement_mapping_sets__isnull=True,
+            objects_meta__requirement_mapping_set__isnull=True,
+        ).count()
         dependency_library = LoadedLibrary.objects.create(
             name="Dependency Library",
             description="Dependency Library description",
@@ -1512,7 +1520,7 @@ class TestLibrary:
                 objects_meta__requirement_mapping_sets__isnull=True,
                 objects_meta__requirement_mapping_set__isnull=True,
             ).count()
-            == 1
+            == baseline + 1
         )
 
         try:  # wrapping in try/except to avoid raising exception due to StoredLibrary not existing
@@ -1525,7 +1533,7 @@ class TestLibrary:
                 objects_meta__requirement_mapping_sets__isnull=True,
                 objects_meta__requirement_mapping_set__isnull=True,
             ).count()
-        ) == 0
+        ) == baseline
 
 
 @pytest.mark.django_db

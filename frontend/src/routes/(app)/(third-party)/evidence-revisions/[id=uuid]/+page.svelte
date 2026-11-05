@@ -1,22 +1,22 @@
 <script lang="ts">
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { getModelInfo } from '$lib/utils/crud.js';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import { getModelInfo } from '#lib/utils/crud.js';
 	import type { PageData } from './$types';
-	import AttachmentPreview from '$lib/components/AttachmentPreview/AttachmentPreview.svelte';
+	import AttachmentPreview from '#lib/components/AttachmentPreview/AttachmentPreview.svelte';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { defaults } from 'sveltekit-superforms';
 	import { z } from 'zod';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;

@@ -64,7 +64,7 @@ def entity_to_dora_ir(entity, entity_type_str: str) -> dict:
     }
 
     # Extract LEI and code from legal_identifiers JSONField
-    legal_ids = entity.legal_identifiers or {}
+    legal_ids = entity.legal_identifiers_dict
     lei = legal_ids.get("LEI", "")
     if lei:
         result["LEI"] = lei

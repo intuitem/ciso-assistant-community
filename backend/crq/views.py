@@ -42,7 +42,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "status",
-        "genericcollection",
+        "filtering_labels",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
@@ -1271,7 +1271,12 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
 
 class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     model = QuantitativeRiskHypothesis
-    filterset_fields = ["quantitative_risk_scenario", "risk_stage", "is_selected"]
+    filterset_fields = [
+        "quantitative_risk_scenario",
+        "risk_stage",
+        "is_selected",
+        "filtering_labels",
+    ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
 
@@ -1486,4 +1491,4 @@ class QuantitativeRiskStudyActionPlanBudgetOverview(
 ):
     def get(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
+        return Response(self.compute_budget_overview(qs, request.user))

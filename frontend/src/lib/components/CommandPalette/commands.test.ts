@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { CREATE_INTENT_PARAM, createIntentHref } from '$lib/utils/create-intent';
-import { NON_CREATABLE_URL_MODELS, URL_MODEL_MAP } from '$lib/utils/crud';
-import type { User } from '$lib/utils/types';
+import { CREATE_INTENT_PARAM, createIntentHref } from '#lib/utils/create-intent.js';
+import { NON_CREATABLE_URL_MODELS, URL_MODEL_MAP } from '#lib/utils/crud.js';
+import type { User } from '#lib/utils/types.js';
 import {
 	awaitingArgument,
 	buildCreateCommands,
@@ -25,7 +25,8 @@ const superuser = {
 	root_folder_id: ROOT,
 	is_admin: true,
 	roles: ['BI-RL-GLA'],
-	domain_permissions: { [ROOT]: everyPermission }
+	permission_sets: [everyPermission],
+	domain_permissions: { [ROOT]: 0 }
 } as unknown as User;
 
 /** Can see every page, but may create nothing. */
@@ -33,12 +34,15 @@ const readOnly = {
 	root_folder_id: ROOT,
 	is_admin: true,
 	roles: ['BI-RL-GLA'],
-	domain_permissions: {
-		[ROOT]: everyPermission.filter((codename) => !codename.startsWith('add_'))
-	}
+	permission_sets: [everyPermission.filter((codename) => !codename.startsWith('add_'))],
+	domain_permissions: { [ROOT]: 0 }
 } as unknown as User;
 
-const nobody = { root_folder_id: ROOT, domain_permissions: {} } as unknown as User;
+const nobody = {
+	root_folder_id: ROOT,
+	permission_sets: [],
+	domain_permissions: {}
+} as unknown as User;
 
 // Every flag on, so the derivation is exercised at its widest.
 const allFlags = new Proxy({}, { get: () => true }) as Record<string, boolean>;
@@ -59,9 +63,8 @@ describe('buildCreateCommands', () => {
 			root_folder_id: ROOT,
 			is_admin: true,
 			roles: ['BI-RL-GLA'],
-			domain_permissions: {
-				[ROOT]: [...everyPermission.filter((c) => !c.startsWith('add_')), 'add_asset']
-			}
+			permission_sets: [[...everyPermission.filter((c) => !c.startsWith('add_')), 'add_asset']],
+			domain_permissions: { [ROOT]: 0 }
 		} as unknown as User;
 		const hrefs = buildCreateCommands(assetsOnly, allFlags).map((command) => command.href);
 		expect(hrefs).toEqual(['/assets']);
@@ -172,8 +175,8 @@ describe('matchCommands', () => {
 
 describe('shipped command keywords', () => {
 	it('are single words in every locale', async () => {
-		const { baseLocale, locales } = await import('$paraglide/runtime');
-		const { commandKeywordAsk, commandKeywordSearch } = await import('$paraglide/messages');
+		const { baseLocale, locales } = await import('#paraglide/runtime.js');
+		const { commandKeywordAsk, commandKeywordSearch } = await import('#paraglide/messages.js');
 		for (const locale of locales) {
 			for (const message of [commandKeywordSearch, commandKeywordAsk]) {
 				const keyword = message({}, { locale });

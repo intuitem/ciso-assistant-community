@@ -70,7 +70,7 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      d.date, align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone], align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -114,6 +114,7 @@
           row-gutter: 3pt,
           column-gutter: 12pt,
           [Généré le], [#d.generated_at],
+          [Fuseau horaire], [#d.timezone - chaque heure indique son décalage UTC],
           [Identifiant du document], [#raw(d.id)],
         )
       ]
@@ -210,12 +211,13 @@
       )
       #set text(9pt)
       #v(3pt)
-      // Deux lignes : une liste de responsables longue chevaucherait.
+      // Une ligne chacun : une liste de responsables longue chevaucherait.
       #grid(
         columns: (2.6cm, 1fr),
         column-gutter: 6pt,
         row-gutter: 2pt,
         text(fill: muted)[Responsable], [#finding.owners],
+        text(fill: muted)[Priorité], [#finding.priority],
         text(fill: muted)[Échéance / Limite], [#finding.eta — #finding.due_date],
       )
       #if finding.description != "" [
@@ -225,6 +227,10 @@
       #if finding.observation != "" [
         #v(2pt)
         *Observation :* #finding.observation
+      ]
+      #if finding.recommendation != "" [
+        #v(2pt)
+        *Recommandation :* #finding.recommendation
       ]
       #if finding.controls.len() > 0 [
         #v(2pt)

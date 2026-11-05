@@ -20,7 +20,7 @@
     "@actions/github": "^6.0.0"
   },
   "overrides": {
-    "undici": "^6.26.0"
+    "undici": "^6.28.1"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",

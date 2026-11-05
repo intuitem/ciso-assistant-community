@@ -1,10 +1,10 @@
-import { getModelInfo } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadDetail } from '#lib/utils/load.js';
 import type { LayoutServerLoad } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { modelSchema } from '$lib/utils/schemas';
+import { modelSchema } from '#lib/utils/schemas.js';
 
 export const load: LayoutServerLoad = async (event) => {
 	const modelInfo = getModelInfo('applied-controls');

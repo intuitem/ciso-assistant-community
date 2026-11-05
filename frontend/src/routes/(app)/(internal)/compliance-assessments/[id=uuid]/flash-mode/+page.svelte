@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import { m } from '$paraglide/messages';
+	import { complianceResultTailwindColorMap } from '#lib/utils/constants.js';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import {
 		getFieldVisibility,
 		hasComputedResult,
 		computeRequirementScoreAndResult,
 		resultBadgeStyle,
 		requirementResultOptions
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 
 	interface Props {
 		data: PageData;
@@ -848,7 +848,10 @@
 		line-height: 1.5;
 		border: 1px solid #e2e8f0;
 		border-radius: 0.5rem;
-		resize: none;
+		field-sizing: content;
+		resize: vertical;
+		min-height: 3.5rem;
+		max-height: 40vh;
 		background: #fff;
 		color: #334155;
 		transition:

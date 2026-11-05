@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_HOOKS_URL } from '$app/env/public';
 
 // Public URL of a webhook trigger. Hooks are served through the
 // frontend origin (passthrough at /api/workflows/hooks/, short-circuited by
@@ -10,8 +10,9 @@ export function publicHookUrl(workflowId: string, nodeRef: string, secret: strin
 	// `location` only exists in the browser; SSR gets a relative URL instead
 	// of a crash (registrations load client-side, so this never renders there).
 	const base =
-		env.PUBLIC_HOOKS_URL?.replace(/\/$/, '') ||
+		PUBLIC_HOOKS_URL?.replace(/\/$/, '') ||
 		(typeof location === 'undefined' ? '' : location.origin);
+
 	return `${base}/api/workflows/hooks/${workflowId}/${nodeRef}/${secret}/`;
 }
 

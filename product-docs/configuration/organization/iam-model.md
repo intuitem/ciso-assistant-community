@@ -56,7 +56,7 @@ Each object type has granular **CRUD permissions** (create, read, update, delete
 
 #### Predefined Roles <a href="#ember940" id="ember940"></a>
 
-Permissions are grouped into a small set of **standard roles** — Administrator, Domain manager, Analyst, Reader, Approver, Respondent, Third-party respondent and Technical tester.
+Permissions are grouped into a small set of **standard roles** — Administrator, Domain manager, Analyst, Reader, Approver, Respondent, Third-party respondent and Technical tester, plus User creator in the PRO edition.
 
 See [User groups → Roles](user-groups.md#roles) for what each of them can and cannot do.
 

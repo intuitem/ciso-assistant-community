@@ -1,23 +1,22 @@
-import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
-import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
-import { bufferJsonResponse } from '$lib/utils/responses';
-import type { User } from '$lib/utils/types';
-import {
-	error,
-	isRedirect,
-	redirect,
-	type Handle,
-	type HandleFetch,
-	type HandleServerError,
-	type RequestEvent
-} from '@sveltejs/kit';
+import { error, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
+import { BASE_API_URL, DEFAULT_LANGUAGE } from '#lib/utils/constants.js';
+import { safeTranslate, setUseRiskCategoryLabel } from '#lib/utils/i18n.js';
+import { bufferJsonResponse } from '#lib/utils/responses.js';
+import type { User } from '#lib/utils/types.js';
 import { setFlash } from 'sveltekit-flash-message/server';
 
-import { loadFeatureFlags } from '$lib/feature-flags';
-import { logger, installJsonConsole } from '$lib/server/logger';
-import { paraglideMiddleware } from '$paraglide/server';
-import { sequence } from '@sveltejs/kit/hooks';
-import { defineCustomServerStrategy, toLocale } from '$paraglide/runtime';
+import { loadFeatureFlags } from '#lib/feature-flags.js';
+import { logger, installJsonConsole } from '#lib/server/logger.js';
+import { paraglideMiddleware } from '#paraglide/server.js';
+
+import {
+	sequence,
+	type Handle,
+	type HandleFetch,
+	type HandleServerError
+} from '@sveltejs/kit/hooks';
+
+import { defineCustomServerStrategy, toLocale } from '#paraglide/runtime.js';
 
 // Runs once at server start. When LOG_FORMAT=json, routes the whole SSR stdout
 // stream (including not-yet-migrated console.* call sites) through JSON output.
@@ -179,6 +178,16 @@ const noStoreForFeApi: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
+/**
+ * Keep instances out of search engines. A header rather than a robots.txt Disallow:
+ * crawlers blocked by robots.txt never see the noindex and still list known URLs.
+ */
+const noIndex: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
+	response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+	return response;
+};
+
 const handleRequest: Handle = async ({ event, resolve }) => {
 	// Inbound webhook passthrough: unauthenticated by design (the
 	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
@@ -202,9 +211,8 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 	const localeForRequest = await ensureDefaultLocale(event);
 	fallbackLocaleStore.set(event.request, localeForRequest);
 
-	return paraglideMiddleware(event.request, async ({ request: localizedRequest, locale }) => {
-		event.request = localizedRequest;
-
+	// No "url" strategy, so paraglide's request is a same-URL clone; event.request (readonly in Kit 3) is kept
+	return paraglideMiddleware(event.request, async ({ locale }) => {
 		event.locals.featureFlags = loadFeatureFlags();
 
 		await ensureCsrfToken(event);
@@ -287,21 +295,22 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle: Handle = sequence(noStoreForFeApi, handleRequest);
+export const handle: Handle = sequence(noIndex, noStoreForFeApi, handleRequest);
 
 // Replaces SvelteKit's default error logger, which printed every unmatched path
 // as a two-line stderr entry. A 404 on a path that was never a route is not an
 // application error: vulnerability scanners alone can produce tens of thousands
 // of those lines. Real failures still go out through the structured logger.
-export const handleError: HandleServerError = ({ error, status, message, event }) => {
-	if (status !== 404) {
+export const handleError: HandleServerError = ({ kind, error, event }) => {
+	// Kit 3 also passes error(...) throws and 404s here; only unknown errors are crashes
+	if (kind === 'unknown') {
 		// The global Error type does not declare Node's syscall code.
 		const errno = (e: Error) => (e as NodeJS.ErrnoException).code;
 		// `TypeError: fetch failed` serializes to just that: undici puts the
 		// reason on `cause`, and the stack says which call made it.
 		const cause = error instanceof Error ? error.cause : undefined;
 		logger.error('unhandled_server_error', {
-			status,
+			status: 500,
 			method: event.request.method,
 			path: event.url.pathname,
 			error,
@@ -312,7 +321,6 @@ export const handleError: HandleServerError = ({ error, status, message, event }
 			stack: error instanceof Error ? error.stack : undefined
 		});
 	}
-	return { message };
 };
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
@@ -367,38 +375,23 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		if (clonedResponse.status === 401 && request.method !== 'DELETE' && !isAuthEndpoint) {
 			try {
 				const data = await clonedResponse.json();
-				const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
+				const flows: Record<string, any>[] = data.data?.flows ?? [];
+				const mfaFlow = flows.find((flow) => flow.id === 'mfa_reauthenticate');
+				const next = encodeURIComponent(event.url.pathname + event.url.search);
 
 				if (!data.meta?.is_authenticated) {
 					// Allauth session has fully expired — force logout
 					logoutUser(event);
-				} else if (
-					data.data?.flows?.some((flow: Record<string, any>) =>
-						reauthenticationFlows.includes(flow.id)
-					)
-				) {
-					// locals.user is unset here: a form action runs before any load.
-					// Only a positively identified local account is signed out, so
-					// that they can re-enter their password; a lookup that fails
-					// says nothing, and an SSO logout costs a full IdP round-trip.
-					let user: User | null = null;
-					try {
-						user = await event.locals.getUser();
-					} catch (lookupError) {
-						if (isRedirect(lookupError)) throw lookupError;
-						logger.error('Could not resolve the current user on a 401', {
-							error: lookupError
-						});
-					}
-					if (user && !user.is_sso) {
-						setFlash(
-							{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
-							event
-						);
-						logoutUser(event);
-					}
+				} else if (mfaFlow) {
+					redirect(
+						302,
+						`/reauthenticate?method=mfa&types=${(mfaFlow.types ?? []).join(',')}&next=${next}`
+					);
+				} else if (flows.some((flow) => flow.id === 'reauthenticate')) {
+					redirect(302, `/reauthenticate?method=password&next=${next}`);
 				}
-			} catch {
+			} catch (err) {
+				if (isRedirect(err)) throw err;
 				// Malformed response — force logout to be safe
 				logoutUser(event);
 			}

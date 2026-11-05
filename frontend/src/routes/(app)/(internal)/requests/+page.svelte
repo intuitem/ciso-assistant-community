@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
+	import { refreshAll } from '$app/navigation';
 	import { deserialize } from '$app/forms';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -74,7 +75,7 @@
 			score: r.score,
 			outcomes: Object.entries(r.computed_outcome ?? {}).map(([ref_id, v]: [string, any]) => ({
 				ref_id,
-				label: v?.label ?? ref_id,
+				label: ruleLabel(v, ref_id),
 				color: v?.color,
 				description: v?.description
 			})),
@@ -115,7 +116,7 @@
 			await fetch('?/setStatus', { method: 'POST', body }).then(async (r) =>
 				deserialize(await r.text())
 			);
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = '';
 		}

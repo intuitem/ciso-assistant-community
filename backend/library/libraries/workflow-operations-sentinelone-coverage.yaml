@@ -1,0 +1,129 @@
+urn: urn:intuitem:risk:library:workflow-operations-sentinelone-coverage
+locale: en
+ref_id: workflow-operations-sentinelone-coverage
+name: SentinelOne — endpoint coverage metrics
+description: 'Reads three numbers from SentinelOne every morning and records each one as a sample of a
+  metric: agents deployed, agents running an out-of-date version, and threats not yet resolved (unresolved or in progress). After
+  importing: create three metric instances (numeric) and set their ids in metric_agents,
+  metric_outdated_agents and metric_open_threats; set console_url to your management console (for
+  example https://your-tenant.sentinelone.net); add an API token of a read-only service user as the
+  s1_api_token secret.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-10-07
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-sentinelone-coverage:workflow:sentinelone-coverage
+    schema_version: 1
+    ref_id: sentinelone-coverage
+    name: SentinelOne — endpoint coverage metrics
+    description: 'Every morning: count agents, out-of-date agents and unresolved threats in SentinelOne,
+      and record each count against its metric. A refused token or an unanswered request fails the run,
+      so a stalled collection shows in the run history.'
+    requires:
+      secrets:
+      - s1_api_token
+    graph:
+      variables:
+      - key: console_url
+        type: string
+        default_value: https://your-tenant.sentinelone.net
+      - key: metric_agents
+        type: string
+        default_value: ''
+      - key: metric_outdated_agents
+        type: string
+        default_value: ''
+      - key: metric_open_threats
+        type: string
+        default_value: ''
+      nodes:
+      - ref: every_morning
+        type: trigger
+        label: Every morning
+        trigger_config:
+          type: schedule
+          cron_expression: 0 5 * * *
+          timezone: UTC
+      - ref: count_agents
+        type: action
+        label: Count agents
+        action_config:
+          type: http_request
+          method: GET
+          url: '{{console_url}}/web/api/v2.1/agents?limit=1'
+          headers:
+            Authorization: ApiToken {{secrets.s1_api_token}}
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
+      - ref: record_agents
+        type: action
+        label: Record agents
+        action_config:
+          type: record_measurement
+          metric_instance: '{{metric_agents}}'
+          value: '{{nodes.count_agents.body.pagination.totalItems}}'
+          observation: Collected from SentinelOne on {{today}}
+      - ref: count_outdated_agents
+        type: action
+        label: Count out-of-date agents
+        action_config:
+          type: http_request
+          method: GET
+          url: '{{console_url}}/web/api/v2.1/agents?isUpToDate=false&limit=1'
+          headers:
+            Authorization: ApiToken {{secrets.s1_api_token}}
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
+      - ref: record_outdated_agents
+        type: action
+        label: Record out-of-date agents
+        action_config:
+          type: record_measurement
+          metric_instance: '{{metric_outdated_agents}}'
+          value: '{{nodes.count_outdated_agents.body.pagination.totalItems}}'
+          observation: Collected from SentinelOne on {{today}}
+      - ref: count_open_threats
+        type: action
+        label: Count unresolved threats
+        action_config:
+          type: http_request
+          method: GET
+          url: '{{console_url}}/web/api/v2.1/threats?incidentStatuses=unresolved,in_progress&limit=1'
+          headers:
+            Authorization: ApiToken {{secrets.s1_api_token}}
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
+      - ref: record_open_threats
+        type: action
+        label: Record unresolved threats
+        action_config:
+          type: record_measurement
+          metric_instance: '{{metric_open_threats}}'
+          value: '{{nodes.count_open_threats.body.pagination.totalItems}}'
+          observation: Collected from SentinelOne on {{today}}
+      - ref: done
+        type: end
+      edges:
+      - source: every_morning
+        target: count_agents
+      - source: count_agents
+        target: record_agents
+      - source: record_agents
+        target: count_outdated_agents
+      - source: count_outdated_agents
+        target: record_outdated_agents
+      - source: record_outdated_agents
+        target: count_open_threats
+      - source: count_open_threats
+        target: record_open_threats
+      - source: record_open_threats
+        target: done

@@ -1,15 +1,15 @@
 """Per-request credential resolution.
 
 Under HTTP transport each request carries its own PAT, so the credential cannot
-live in a module-level singleton the way it does for stdio. The MCP SDK exposes
-the originating Starlette request through its own context var, which is set in
-the same task that dispatches the tool call -- reading it here avoids threading
-a Context parameter through every tool.
+live in a module-level singleton the way it does for stdio. `capture_headers`
+runs as server middleware and publishes the request headers through a context
+var, in the same task that dispatches the tool call -- reading it here avoids
+threading a Context parameter through every tool.
 """
 
+import contextvars
 import logging
-
-from mcp.server.lowlevel.server import request_ctx
+from collections.abc import Mapping
 
 from . import config
 
@@ -17,6 +17,19 @@ logger = logging.getLogger(__name__)
 
 CUSTOM_HEADER = "x-ciso-token"
 _SCHEMES = ("token", "bearer")
+
+_headers: contextvars.ContextVar[Mapping[str, str] | None] = contextvars.ContextVar(
+    "ca_mcp_request_headers", default=None
+)
+
+
+async def capture_headers(ctx, call_next):
+    """Server middleware: expose the originating request's headers to tools."""
+    token = _headers.set(getattr(ctx.request, "headers", None))
+    try:
+        return await call_next(ctx)
+    finally:
+        _headers.reset(token)
 
 
 def _strip_scheme(value: str) -> str | None:
@@ -31,11 +44,7 @@ def _strip_scheme(value: str) -> str | None:
 
 def _request_headers():
     """Headers of the originating Starlette request, or None under stdio."""
-    try:
-        request = request_ctx.get().request
-    except LookupError:
-        return None
-    return getattr(request, "headers", None)
+    return _headers.get()
 
 
 def _describe(source: str, token: str) -> None:

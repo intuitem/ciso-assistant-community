@@ -1,20 +1,25 @@
 // define the content of forms
 
-import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
-import NotificationTitle from '$lib/components/ModelTable/field/NotificationTitle.svelte';
-import CommitmentTarget from '$lib/components/ModelTable/field/CommitmentTarget.svelte';
-import ScheduleDisplay from '$lib/components/ModelTable/field/ScheduleDisplay.svelte';
-import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
-import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
-import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
-import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
-import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
-import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
+import EvidenceFileName from '#lib/components/ModelTable/field/EvidenceFileName.svelte';
+import NotificationTitle from '#lib/components/ModelTable/field/NotificationTitle.svelte';
+import CommitmentTarget from '#lib/components/ModelTable/field/CommitmentTarget.svelte';
+import ScheduleDisplay from '#lib/components/ModelTable/field/ScheduleDisplay.svelte';
+import LanguageDisplay from '#lib/components/ModelTable/field/LanguageDisplay.svelte';
+import FrameworkName from '#lib/components/ModelTable/field/FrameworkName.svelte';
+import LibraryActions from '#lib/components/ModelTable/field/LibraryActions.svelte';
+import UserGroupNameDisplay from '#lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
+import LecChartPreview from '#lib/components/ModelTable/field/LecChartPreview.svelte';
+import TriggerTypesDisplay from '#lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
+import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
+import TierSource from '#lib/components/ModelTable/field/TierSource.svelte';
+import DpiaRequirementSource from '#lib/components/ModelTable/field/DpiaRequirementSource.svelte';
+import DpiaRequiredBadge from '#lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
+import VulnerabilitySlaState from '#lib/components/ModelTable/field/VulnerabilitySlaState.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
-import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
-import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
+import LibraryOverview from '#lib/components/ModelTable/field/LibraryOverview.svelte';
+import MarkdownDescription from '#lib/components/ModelTable/field/MarkdownDescription.svelte';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -187,6 +192,9 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	entities: 'tprm',
 	'entity-assessments': 'tprm',
 	'entity-scores': 'external_ratings',
+	tiers: 'tprm',
+	'entity-tier-changes': 'tprm',
+	'solution-tier-changes': 'tprm',
 	representatives: 'tprm',
 	solutions: 'tprm',
 	findings: 'follow_up',
@@ -248,6 +256,8 @@ export interface ModelMapEntry {
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
+	hideEmptyReverseTabs?: boolean;
+	reverseCountsEndpoint?: string;
 	selectFields?: SelectField[];
 	selectOptions?: Record<string, SelectFieldData[]>;
 	fileFields?: string[];
@@ -260,6 +270,16 @@ export interface ModelMapEntry {
 	 * rendered as Markdown for this model.
 	 */
 	markdownFields?: string[];
+	/**
+	 * Columns the list header must not offer to sort. Mostly values this model
+	 * computes in Python rather than storing, so there is no column for the
+	 * backend to ORDER BY: DRF drops the term and the header click does nothing.
+	 * Also stored values whose database order means nothing to the reader, like
+	 * the `schedule` JSON shown as a frequency on task templates. Listed per
+	 * model because the same name can be a stored column elsewhere, as
+	 * `progress` is on projects.
+	 */
+	unsortableColumns?: string[];
 }
 
 // A field can name one flag or several, and shows when any of them is on. Indexing
@@ -626,6 +646,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'metric_instances', urlModel: 'metric-instances' },
 			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
@@ -640,7 +661,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'applied_controls',
-				urlModel: 'document-containers'
+				urlModel: 'document-containers',
+				addExisting: {
+					parentField: 'control_documents'
+				}
 			},
 			{
 				field: 'applied_controls',
@@ -658,6 +682,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{
 				field: 'applied_controls',
+				urlModel: 'metric-instances',
+				addExisting: {
+					parentField: 'metric_instances'
+				}
+			},
+			{
+				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
 				disableCreate: true,
 				disableDelete: true
@@ -671,18 +702,37 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'applied_controls',
 				urlModel: 'findings',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'findings'
+				}
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'assets',
 				disableDelete: true,
-				disableCreate: true
+				addExisting: {
+					parentField: 'assets'
+				}
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'vulnerabilities',
+				disableDelete: true
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'incidents',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'incidents'
+				}
+			},
+			{
+				// Linked through the threat model's graph nodes, so edited there.
+				field: 'applied_controls',
+				urlModel: 'threat-models',
+				featureFlag: 'threat_modeling',
 				disableCreate: true,
 				disableDelete: true
 			}
@@ -806,8 +856,31 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'vulnerabilities',
 		verboseName: 'Vulnerability',
 		verboseNamePlural: 'Vulnerabilities',
+		flaggedFields: { state: 'vulnerability_sla' },
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'state' },
+			{ field: 'owner' },
+			{ field: 'folder' },
+			{ field: 'observation' },
+			{ field: 'detected_at', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'remediated_at', type: 'date' },
+			{ field: 'published_date', type: 'date' },
+			{ field: 'security_advisories' },
+			{ field: 'cwes' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -816,7 +889,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'cwes', urlModel: 'cwes' },
 			{ field: 'detected_at', type: 'date' },
 			{ field: 'eta', type: 'date' },
-			{ field: 'due_date', type: 'date' }
+			{ field: 'due_date', type: 'date' },
+			{ field: 'remediated_at', type: 'date' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		filters: [
@@ -829,12 +903,69 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'vulnerabilities',
 				urlModel: 'assets',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'assets'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'applied-controls',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'applied_controls'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'security-exceptions',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'security_exceptions'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'evidences',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'task-templates',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'task_templates'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'incidents',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'incidents'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'risk-scenarios',
 				disableCreate: true,
 				disableDelete: true
 			},
 			{
 				field: 'vulnerabilities',
-				urlModel: 'risk-scenarios',
+				urlModel: 'quantitative-risk-scenarios',
+				endpointUrl: 'crq/quantitative-risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				// Linked through the threat model's graph nodes, so edited there.
+				field: 'vulnerabilities',
+				urlModel: 'threat-models',
+				featureFlag: 'threat_modeling',
 				disableCreate: true,
 				disableDelete: true
 			},
@@ -852,7 +983,58 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'labels',
 		verboseName: 'Label',
 		verboseNamePlural: 'Labels',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		detailViewFields: [{ field: 'label' }, { field: 'created_at' }, { field: 'updated_at' }],
+		hideEmptyReverseTabs: true,
+		reverseCountsEndpoint: 'usage',
+		reverseForeignKeyFields: (
+			[
+				'applied-controls',
+				'risk-scenarios',
+				'assets',
+				'compliance-assessments',
+				'risk-assessments',
+				'ebios-rm',
+				'quantitative-risk-studies',
+				'business-impact-analysis',
+				'entity-assessments',
+				'threat-models',
+				'evidences',
+				'findings',
+				'findings-assessments',
+				'incidents',
+				'vulnerabilities',
+				'threats',
+				'reference-controls',
+				'task-templates',
+				'validation-flows',
+				'document-containers',
+				'entities',
+				'solutions',
+				'contracts',
+				'representatives',
+				'entity-scores',
+				'processings',
+				'projects',
+				'accreditations',
+				'generic-collections',
+				'responsibility-matrices',
+				'metric-definitions',
+				'metric-instances',
+				'dashboards',
+				'workflows',
+				'quantitative-risk-hypotheses',
+				'security-advisories',
+				'cwes',
+				'techniques',
+				'folders'
+			] as urlModel[]
+		).map((urlModel) => ({
+			field: 'filtering_labels',
+			urlModel,
+			disableCreate: true,
+			disableDelete: true
+		}))
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
@@ -1024,6 +1206,14 @@ export const URL_MODEL_MAP: ModelMap = {
 						position: 'prefix'
 					}
 				}
+			},
+			{
+				// Linked through the threat model's graph nodes, so edited there.
+				field: 'assets',
+				urlModel: 'threat-models',
+				featureFlag: 'threat_modeling',
+				disableCreate: true,
+				disableDelete: true
 			}
 		],
 		foreignKeyFields: [
@@ -1226,13 +1416,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'library' },
 			{ field: 'pages_count' },
-			{ field: 'responses_count' }
+			{ field: 'responses_count' },
+			{ field: 'always_review' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'library', urlModel: 'loaded-libraries' }
 		],
 		reverseForeignKeyFields: [
+			{ field: 'quick_form', urlModel: 'quick-form-publications' },
 			{ field: 'quick_form', urlModel: 'quick-form-responses', disableCreate: true }
 		]
 	},
@@ -1355,7 +1547,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'security-exceptions',
 				disableCreate: true,
 				disableDelete: true
-			}
+			},
+			{ field: 'evidences', urlModel: 'vulnerabilities', disableCreate: true, disableDelete: true }
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -1397,6 +1590,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'processings', urlModel: 'processings' },
 			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'classification', urlModel: 'classification-levels' }
 		],
@@ -1409,13 +1603,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'document_type' },
 			{ field: 'folder' },
 			{ field: 'classification' },
+			{ field: 'reviewers' },
 			{ field: 'policies' },
 			{ field: 'applied_controls' },
 			{ field: 'task_templates' },
 			{ field: 'processings' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
-		]
+		],
+		// Read off the default document's current revision, not the container.
+		unsortableColumns: ['progress', 'status', 'source']
 	},
 	'document-templates': {
 		name: 'documenttemplate',
@@ -1512,7 +1709,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'findings-assessments', disableCreate: true }
 		],
 		selectFields: [{ field: 'status' }, { field: 'score_calculation_method' }],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['progress']
 	},
 	requirements: {
 		name: 'requirement',
@@ -1566,7 +1764,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'generalSettings',
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
-		selectFields: [{ field: 'security_objective_scale' }, { field: 'default_language' }]
+		selectFields: [
+			{ field: 'security_objective_scale' },
+			{ field: 'default_language' },
+			{ field: 'report_timezone' }
+		]
 	},
 	'feature-flags': {
 		name: 'featureFlags',
@@ -1621,10 +1823,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
-			{ field: 'entity', urlModel: 'entity-scores' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'provider_entity', urlModel: 'solutions' },
-			{ field: 'provider_entity', urlModel: 'contracts' }
+			{ field: 'provider_entity', urlModel: 'contracts' },
+			{ field: 'entity', urlModel: 'entity-scores' },
+			{
+				field: 'entity',
+				urlModel: 'entity-tier-changes',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -1635,7 +1843,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'relationship',
 				urlModel: 'terminologies',
 				urlParams: 'field_path=entity.relationship'
-			}
+			},
+			{ field: 'tier', urlModel: 'tiers', urlParams: 'is_visible=true' }
 		],
 		selectFields: [
 			{ field: 'country' },
@@ -1662,7 +1871,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
-			{ field: 'validation_flows', urlModel: 'validation-flows' }
+			{ field: 'validation_flows', urlModel: 'validation-flows' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'conclusion' }],
 		// The first ten show without expanding, so they carry what an analyst reads
@@ -1672,7 +1882,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity' },
 			{ field: 'status' },
 			{ field: 'conclusion' },
-			{ field: 'criticality' },
 			{ field: 'due_date', type: 'date' },
 			{ field: 'representatives' },
 			{ field: 'reviewers' },
@@ -1687,11 +1896,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'observation' },
 			{ field: 'reference_link' },
 			{ field: 'evidence' },
+			{ field: 'filtering_labels' },
 			{ field: 'is_locked' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['completion', 'review_progress']
 	},
 	solutions: {
 		name: 'solution',
@@ -1714,7 +1925,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			dora_alternative_providers_identified: 'dora',
 			dora_alternative_providers: 'dora'
 		},
-		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts', disableDelete: true }],
+		reverseForeignKeyFields: [
+			{ field: 'solutions', urlModel: 'contracts', disableDelete: true },
+			{
+				field: 'solution',
+				urlModel: 'solution-tier-changes',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
@@ -1743,7 +1962,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity' },
 			{ field: 'recipient_entity' },
 			{ field: 'is_active' },
-			{ field: 'criticality' },
 			{ field: 'owner' },
 			{ field: 'assets' },
 			{ field: 'dora_ict_service_type' },
@@ -1819,6 +2037,56 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	tiers: {
+		name: 'tier',
+		localName: 'tier',
+		localNamePlural: 'tiers',
+		verboseName: 'Tier',
+		verboseNamePlural: 'Tiers',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'rank' },
+			{ field: 'hexcolor' },
+			{ field: 'is_visible' },
+			{ field: 'entities_count' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'tier', urlModel: 'entities', disableCreate: true, disableDelete: true }
+		]
+	},
+	'entity-tier-changes': {
+		name: 'entitytierchange',
+		localName: 'entityTierChange',
+		localNamePlural: 'entityTierChanges',
+		verboseName: 'Entity tier change',
+		verboseNamePlural: 'Entity tier changes',
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'tier', urlModel: 'tiers' },
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'source' }]
+	},
+	'solution-tier-changes': {
+		name: 'solutiontierchange',
+		localName: 'solutionTierChange',
+		localNamePlural: 'solutionTierChanges',
+		verboseName: 'Solution tier change',
+		verboseNamePlural: 'Solution tier changes',
+		foreignKeyFields: [
+			{ field: 'solution', urlModel: 'solutions' },
+			{ field: 'tier', urlModel: 'tiers' },
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'source' }]
 	},
 	'entity-scores': {
 		name: 'entityscore',
@@ -2022,11 +2290,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'role' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'nature', urlModel: 'terminologies' },
+			{ field: 'controllers', urlModel: 'entities' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
@@ -2041,6 +2310,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'nature' },
 			{ field: 'status' },
+			{ field: 'role' },
+			{ field: 'controllers' },
 			{ field: 'purposes' },
 			{ field: 'assigned_to' },
 			{ field: 'dpia_required' },
@@ -2069,6 +2340,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
+			{
+				field: 'processing',
+				urlModel: 'dpia-requirement-changes',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'processings',
 				urlModel: 'right-requests',
@@ -2182,6 +2459,19 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		]
+	},
+	'dpia-requirement-changes': {
+		endpointUrl: 'privacy/dpia-requirement-changes',
+		name: 'dpiarequirementchange',
+		localName: 'dpiaRequirementChange',
+		localNamePlural: 'dpiaRequirementChanges',
+		verboseName: 'DPIA requirement change',
+		verboseNamePlural: 'DPIA requirement changes',
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings' },
+			{ field: 'response', urlModel: 'quick-form-responses' }
+		],
+		selectFields: [{ field: 'source' }]
 	},
 	purposes: {
 		endpointUrl: 'privacy/purposes',
@@ -2303,6 +2593,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' },
+			{ field: 'classification', urlModel: 'classification-levels' },
+			{ field: 'responsibility_matrix', urlModel: 'responsibility-matrices' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'last_risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'validation_flows', urlModel: 'validation-flows' }
@@ -2354,12 +2646,21 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'terminologies',
 				urlParams: 'field_path=ro_to.risk_origin&is_visible=true'
 			},
+			{
+				field: 'target_objective_category',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=ro_to.target_objective_category&is_visible=true'
+			},
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [
-			{ field: 'motivation', valueType: 'number' },
-			{ field: 'resources', valueType: 'number' },
-			{ field: 'activity', valueType: 'number' }
+			...['motivation', 'resources', 'activity'].map((field) => ({
+				field,
+				valueType: 'number' as const,
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}))
 		]
 	},
 	stakeholders: {
@@ -2369,6 +2670,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'stakeholders',
 		verboseName: 'Stakeholder',
 		verboseNamePlural: 'Stakeholders',
+		// Criteria and criticality are shown by StakeholderCriticalityWidget.
+		detailViewFields: [
+			{ field: 'ebios_rm_study' },
+			{ field: 'entity' },
+			{ field: 'category' },
+			{ field: 'is_selected' },
+			{ field: 'applied_controls' },
+			{ field: 'justification' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -2422,6 +2735,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'strategic_scenario',
 				urlModel: 'attack-paths',
 				endpointUrl: 'ebios-rm/attack-paths'
+			}
+		],
+		selectFields: [
+			{
+				field: 'gravity',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
 			}
 		],
 		detailViewFields: [
@@ -2590,7 +2912,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'operating_mode', urlModel: 'operating-modes' },
 			{ field: 'elementary_action', urlModel: 'elementary-actions' },
-			{ field: 'antecedents', urlModel: 'elementary-actions' },
+			{ field: 'antecedents', urlModel: 'kill-chains' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'logic_operator' }]
@@ -2942,6 +3265,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'risk-scenarios',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'incidents',
+				urlModel: 'vulnerabilities',
+				disableCreate: true,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'vulnerabilities'
+				}
 			}
 		],
 		selectFields: [
@@ -3075,8 +3407,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'findings',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'task_templates',
+				urlModel: 'vulnerabilities',
+				disableCreate: true,
+				disableDelete: true
 			}
-		]
+		],
+		unsortableColumns: ['schedule']
 	},
 	'task-nodes': {
 		name: 'tasknode',
@@ -3341,6 +3680,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'assets' },
 			{ field: 'threats' },
+			{ field: 'vulnerabilities' },
 			{ field: 'qualifications' },
 			{ field: 'folder' },
 			{ field: 'observation' },
@@ -3573,6 +3913,24 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'genericcollection',
 				urlModel: 'policies',
 				addExisting: { parentField: 'policies' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'applied-controls',
+				addExisting: {
+					parentField: 'applied_controls',
+					optionsEndpoint: 'applied-controls?exclude_category=policy'
+				}
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'document-containers',
+				addExisting: { parentField: 'document_containers' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'business-impact-analysis',
+				addExisting: { parentField: 'business_impact_analyses' }
 			}
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
@@ -3867,6 +4225,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'collection_frequency' },
 			{ field: 'target_value' },
 			{ field: 'current_value' },
+			{ field: 'last_computed_at', type: 'datetime' },
 			{ field: 'evidences' },
 			{ field: 'filtering_labels' },
 			{ field: 'created_at', type: 'datetime' },
@@ -4041,6 +4400,33 @@ const FIELD_COMPONENT_MAP = {
 	},
 	workflows: {
 		trigger_types: TriggerTypesDisplay
+	},
+	entities: {
+		tier: TierBadge
+	},
+	solutions: {
+		tier: TierBadge
+	},
+	'entity-tier-changes': {
+		tier: TierBadge,
+		previous_tier: TierBadge,
+		source: TierSource
+	},
+	'solution-tier-changes': {
+		tier: TierBadge,
+		previous_tier: TierBadge,
+		source: TierSource
+	},
+	processings: {
+		dpia_required: DpiaRequiredBadge
+	},
+	vulnerabilities: {
+		state: VulnerabilitySlaState
+	},
+	'dpia-requirement-changes': {
+		dpia_required: DpiaRequiredBadge,
+		previous_dpia_required: DpiaRequiredBadge,
+		source: DpiaRequirementSource
 	}
 };
 

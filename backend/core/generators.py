@@ -1,16 +1,37 @@
 import io
+import multiprocessing
+import resource
+import traceback
+from collections import OrderedDict, defaultdict
+from datetime import date, datetime, timedelta, timezone, tzinfo
+from decimal import Decimal
 from math import ceil
+from multiprocessing.connection import Connection
+from typing import ClassVar
+from uuid import UUID
 
+import jinja2.filters
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from django.db.models import Count
+from django.utils.safestring import SafeString
 from django.utils.timezone import now
 from docx.shared import Cm
-from docxtpl import InlineImage
+from docxtpl import DocxTemplate, InlineImage
+from jinja2.exceptions import TemplateError
+from jinja2.runtime import (
+    BlockReference,
+    LoopContext,
+    Macro,
+    TemplateReference,
+)
+from jinja2.sandbox import ImmutableSandboxedEnvironment
+from jinja2.utils import Cycler, Joiner, Namespace
 from library.helpers import get_referential_translation
+from markupsafe import Markup
 
-from .utils import is_field_visible_to
+from .utils import format_report_timestamp, is_field_visible_to
 
 from .models import (
     AppliedControl,
@@ -393,7 +414,19 @@ _ACTION_PLAN_STATUS_FILLS = {
 }
 
 
-def action_plan_context(assessment, controls, lang="en", linked=None):
+def _report_time_context(tz: tzinfo) -> dict[str, str]:
+    """Return the report's `date`, `generated_at` and `timezone`, in `tz`."""
+    moment = now()
+    return {
+        "date": moment.astimezone(tz).strftime("%d/%m/%Y"),
+        "generated_at": format_report_timestamp(moment, tz),
+        "timezone": str(tz),
+    }
+
+
+def action_plan_context(
+    assessment, controls, lang="en", linked=None, tz: tzinfo = timezone.utc
+):
     """Payload for the action plan, grouped by status and sorted by ETA.
 
     `assessment` is whatever the controls hang off — a compliance assessment or a
@@ -441,8 +474,7 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
             "framework": str(framework) if framework else "",
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "groups": groups,
         "total": sum(len(g["controls"]) for g in groups),
     }
@@ -469,7 +501,9 @@ _CLOSED_FINDING_STATUSES = (
 )
 
 
-def findings_assessment_context(assessment, findings, lang="en"):
+def findings_assessment_context(
+    assessment, findings, lang="en", tz: tzinfo = timezone.utc
+):
     """Payload for the findings report.
 
     Findings are grouped by severity, worst first: a reader triages by severity,
@@ -489,6 +523,10 @@ def findings_assessment_context(assessment, findings, lang="en"):
                 "status_key": finding.status or "--",
                 "description": finding.description or "",
                 "observation": getattr(finding, "observation", "") or "",
+                "recommendation": finding.recommendation or "",
+                "priority": str(finding.get_priority_display())
+                if finding.priority
+                else "-",
                 "owners": ", ".join(str(a) for a in finding.owner.all()) or "-",
                 "eta": _date_str(finding.eta),
                 "due_date": _date_str(finding.due_date),
@@ -529,8 +567,7 @@ def findings_assessment_context(assessment, findings, lang="en"):
             "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "metrics": {
             "total": total,
             "closed": closed,
@@ -548,11 +585,7 @@ def findings_assessment_context(assessment, findings, lang="en"):
     }
 
 
-def _timestamp_str(value):
-    return value.strftime("%Y-%m-%d %H:%M:%S") if value else "-"
-
-
-def incident_context(incident, timeline_entries, lang="en"):
+def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezone.utc):
     """Payload for the incident report.
 
     The timeline is the substance: entries in chronological order, each keyed by
@@ -565,7 +598,7 @@ def incident_context(incident, timeline_entries, lang="en"):
             {
                 "entry": entry.entry or "-",
                 "type_key": entry.entry_type or "observation",
-                "timestamp": _timestamp_str(entry.timestamp),
+                "timestamp": format_report_timestamp(entry.timestamp, tz),
                 "author": str(entry.author) if entry.author else "",
                 "observation": entry.observation or "",
                 "evidences": [e.name for e in entry.evidences.all()],
@@ -592,13 +625,12 @@ def incident_context(incident, timeline_entries, lang="en"):
             "entities": [e.name for e in incident.entities.all()],
             "assets": [a.name for a in incident.assets.all()],
             "threats": [t.name for t in incident.threats.all()],
-            "reported_at": _timestamp_str(incident.reported_at),
-            "occurred_at": _timestamp_str(incident.occurred_at),
-            "resolved_at": _timestamp_str(incident.resolved_at),
+            "reported_at": format_report_timestamp(incident.reported_at, tz),
+            "occurred_at": format_report_timestamp(incident.occurred_at, tz),
+            "resolved_at": format_report_timestamp(incident.resolved_at, tz),
         },
         "id": str(incident.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "counts": {
             "total": len(entries),
             "detection": counts.get("detection", 0),
@@ -617,6 +649,7 @@ def risk_assessment_context(
     lang="en",
     label_standard="ISO",
     use_risk_category_label=False,
+    tz: tzinfo = timezone.utc,
 ):
     """Payload for the risk assessment report.
 
@@ -726,8 +759,7 @@ def risk_assessment_context(
             "due_date": _date_str(assessment.due_date),
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "include_inherent": include_inherent,
         # `risk_matrix_labels`: ISO says "Impact", EBIOS says "Severity".
         "label_standard": label_standard
@@ -758,7 +790,9 @@ def _risk_level(level):
     }
 
 
-def gen_audit_context(id, tree, lang, assessments=None, charts=True):
+def gen_audit_context(
+    id, tree, lang, assessments=None, charts=True, tz: tzinfo = timezone.utc
+):
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -893,12 +927,10 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     # Calculate category scores
     category_scores = aggregate_category_scores(tree)
 
-    max_score = 100  # default
-    for node in tree.values():
-        if node.get("max_score") is not None:
-            max_score = node["max_score"]
-            break
-    print(category_scores)
+    max_score = next(
+        (s for s in (audit.max_score, audit.framework.max_score) if s is not None),
+        100,
+    )
 
     for key, content in tree.items():
         total = sum(result_counts[content["urn"]].values())
@@ -1003,6 +1035,31 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
             "observation_sensitive_point": "Observatie / aandachtspunt",
             "opportunity_for_improvement": "Verbetermogelijkheid",
             "good_practice": "Goede praktijk",
+        },
+        "tr": {
+            "compliant": "Uyumlu",
+            "partially_compliant": "Kısmen uyumlu",
+            "non_compliant": "Uyumsuz",
+            "not_applicable": "Uygulanamaz",
+            "not_assessed": "Değerlendirilmedi",
+            "to_do": "Yapılacak",
+            "on_hold": "Beklemede",
+            "in_progress": "Devam ediyor",
+            "deprecated": "Kullanımdan kaldırıldı",
+            "active": "Aktif",
+            "degraded": "Kötüleşti",
+            "policy": "Politika",
+            "process": "Süreç",
+            "technical": "Teknik",
+            "physical": "Fiziksel",
+            "procedure": "Prosedür",
+            "in_review": "İncelemede",
+            "done": "Tamamlandı",
+            "major_nonconformity": "Büyük uygunsuzluk",
+            "minor_nonconformity": "Küçük uygunsuzluk",
+            "observation_sensitive_point": "Gözlem / hassas nokta",
+            "opportunity_for_improvement": "İyileştirme fırsatı",
+            "good_practice": "İyi uygulama",
         },
     }
 
@@ -1152,9 +1209,8 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
         "audit": _build_safe_audit_context(audit),
-        "date": now().strftime("%d/%m/%Y"),
         # Traceability on the cover: which render, of which audit.
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,
         "compliance_donut": donut_buffer,
@@ -1200,6 +1256,139 @@ def inline_charts_for_docx(context, doc, width=Cm(15)):
     return wrapped
 
 
+class DocxReportSandbox(ImmutableSandboxedEnvironment):
+    """Sandbox for user-supplied Word templates.
+
+    Only plain data and Jinja's own helpers expose attributes. Anything else in
+    the context is opaque: `InlineImage.tpl` alone leads to a `DocxTemplate`,
+    whose public methods render without a sandbox and read or write arbitrary
+    files. Data is matched on its exact type, since a subclass brings its own
+    methods (`numpy.float64.tofile` writes a file).
+    """
+
+    data_types: ClassVar[frozenset[type]] = frozenset(
+        {
+            str,
+            Markup,
+            SafeString,
+            int,
+            bool,
+            float,
+            Decimal,
+            UUID,
+            date,
+            datetime,
+            timedelta,
+            list,
+            tuple,
+            getattr(jinja2.filters, "_GroupTuple", tuple),
+            dict,
+            OrderedDict,
+            defaultdict,
+            range,
+        }
+    )
+    jinja_helper_types: ClassVar[tuple[type, ...]] = (
+        LoopContext,
+        Namespace,
+        Cycler,
+        Joiner,
+        Macro,
+        TemplateReference,
+        BlockReference,
+    )
+
+    def is_safe_attribute(self, obj: object, attr: str, value: object) -> bool:
+        readable = type(obj) in self.data_types or isinstance(
+            obj, self.jinja_helper_types
+        )
+        return readable and super().is_safe_attribute(obj, attr, value)
+
+
+def render_docx_report(doc: DocxTemplate, context: dict) -> None:
+    """Render `doc` in place with `context`, charts included."""
+    doc.render(
+        inline_charts_for_docx(context, doc),
+        jinja_env=DocxReportSandbox(),
+        autoescape=True,
+    )
+
+
+DOCX_RENDER_TIMEOUT = 60
+DOCX_RENDER_MEMORY = 1 << 30
+
+
+class DocxRenderError(Exception):
+    """A custom Word template failed to render; the message says why."""
+
+
+class DocxTemplateError(DocxRenderError):
+    """The Jinja template itself is wrong; the message is meant for its author."""
+
+
+class DocxRenderTimeout(DocxRenderError):
+    """A custom Word template ran longer than `DOCX_RENDER_TIMEOUT` seconds."""
+
+
+class DocxRenderCrash(DocxRenderError):
+    """The process rendering a custom Word template died, likely out of memory."""
+
+
+def _render_docx_in_child(doc: DocxTemplate, context: dict, conn: Connection) -> None:
+    try:
+        with open("/proc/self/statm") as statm:
+            used = int(statm.read().split()[0]) * resource.getpagesize()
+        resource.setrlimit(resource.RLIMIT_AS, (used + DOCX_RENDER_MEMORY,) * 2)
+    except OSError, ValueError:
+        pass
+    try:
+        render_docx_report(doc, context)
+        out = io.BytesIO()
+        doc.save(out)
+    except TemplateError as e:
+        conn.send(("template_error", str(e) or type(e).__name__))
+    except MemoryError:
+        # Closing the pipe unsent makes the parent report it as a crash.
+        return
+    except Exception:
+        conn.send(("error", traceback.format_exc()))
+    else:
+        conn.send(("report", out.getvalue()))
+
+
+def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
+    """Render `doc` with `context` in a forked child bounded in time and memory,
+    since a custom template can loop or allocate without limit.
+
+    Returns the rendered .docx; raises `DocxRenderTimeout` past
+    `DOCX_RENDER_TIMEOUT` seconds, `DocxRenderCrash` when the child dies,
+    `DocxTemplateError` when Jinja rejects the template, and `DocxRenderError`
+    carrying the child's traceback for any other failure.
+    """
+    recv, send = multiprocessing.Pipe(duplex=False)
+    child = multiprocessing.get_context("fork").Process(
+        target=_render_docx_in_child, args=(doc, context, send)
+    )
+    child.start()
+    send.close()
+    try:
+        if not recv.poll(DOCX_RENDER_TIMEOUT):
+            raise DocxRenderTimeout
+        try:
+            outcome, payload = recv.recv()
+        except EOFError, OSError:
+            raise DocxRenderCrash from None
+        if outcome == "template_error":
+            raise DocxTemplateError(payload)
+        if outcome == "error":
+            raise DocxRenderError(payload)
+        return payload
+    finally:
+        recv.close()
+        child.kill()
+        child.join()
+
+
 # Requirement-assessment fields governed by the audit's `field_visibility`;
 # `max_score` is not itself governed but is meaningless once `score` is dropped.
 _REDACTABLE_RA_FIELDS = (
@@ -1235,6 +1424,8 @@ REPORT_PROFILES = {
         # Each profile has its own self-contained template per locale, so
         # customising one cannot affect the others.
         "template": "audit_report",
+        # `CustomWordTemplate.template_key` of the PRO override.
+        "override_key": "audit_posture",
         # The reader's own role still applies on top; this is the ceiling.
         "role": "auditor",
         "discloses": (),
@@ -1253,6 +1444,7 @@ REPORT_PROFILES = {
     },
     "attestation": {
         "template": "attestation",
+        "override_key": "audit_attestation",
         "role": "respondent",
         # The questionnaire deliberately withholds the auditor's verdict while the
         # respondent is answering (THIRD_PARTY_VISIBILITY marks `result` auditor-only).
@@ -1297,6 +1489,13 @@ _STATE_LABELS = {
         Commitment.State.COMMITTED: "Engagé",
         Commitment.State.DECLINED: "Refusé",
         Commitment.State.FULFILLED: "Réalisé",
+    },
+    "tr": {
+        Commitment.State.UNDEFINED: "Tanımsız",
+        Commitment.State.IN_NEGOTIATION: "Müzakerede",
+        Commitment.State.COMMITTED: "Taahhüt edildi",
+        Commitment.State.DECLINED: "Reddedildi",
+        Commitment.State.FULFILLED: "Yerine getirildi",
     },
 }
 
@@ -1374,7 +1573,7 @@ def counterparty_context(audit):
     if entity_assessment is None or entity_assessment.entity is None:
         return None
     entity = entity_assessment.entity
-    identifiers = entity.legal_identifiers or {}
+    identifiers = entity.legal_identifiers_dict
     return {
         "entity": entity.name,
         "ref_id": entity.ref_id or "",

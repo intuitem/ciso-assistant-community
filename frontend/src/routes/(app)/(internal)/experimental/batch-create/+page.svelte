@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import * as m from '$paraglide/messages.js';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import * as m from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import type { PageData } from './$types';
 
 	interface Props {

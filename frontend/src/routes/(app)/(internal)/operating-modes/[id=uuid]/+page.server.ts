@@ -1,17 +1,17 @@
-import { getModelInfo } from '$lib/utils/crud';
+import { getModelInfo } from '#lib/utils/crud.js';
 import type { PageServerLoad } from './$types';
 import { fail, type Actions } from '@sveltejs/kit';
-import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
-import { loadDetail } from '$lib/utils/load';
-import { defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { discardBody } from '$lib/utils/responses';
-import { modelSchema } from '$lib/utils/schemas';
+import { nestedDeleteFormAction, nestedWriteFormAction } from '#lib/utils/actions.js';
+import { loadDetail } from '#lib/utils/load.js';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { discardBody } from '#lib/utils/responses.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'operating-modes';
@@ -25,15 +25,32 @@ export const load: PageServerLoad = async (event) => {
 
 	const readOptional = (res: Response) => (res.ok ? res.json() : discardBody(res).then(() => null));
 
-	const [detail, object, elementaryActions, killChainSteps, attackStageData, iconData] =
-		await Promise.all([
-			loadDetail({ event, model: model, id: event.params.id }),
-			event.fetch(objectEndpoint).then((res) => res.json()),
-			fetchAllPages<any>(event.fetch, eaEndpoint),
-			fetchAllPages<any>(event.fetch, killChainEndpoint),
-			event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`).then(readOptional),
-			event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`).then(readOptional)
-		]);
+	const [
+		detail,
+		object,
+		elementaryActions,
+		killChainSteps,
+		attackStageData,
+		iconData,
+		probabilityChoices
+	] = await Promise.all([
+		loadDetail({ event, model: model, id: event.params.id }),
+		event.fetch(objectEndpoint).then((res) => res.json()),
+		fetchAllPages<any>(event.fetch, eaEndpoint),
+		fetchAllPages<any>(event.fetch, killChainEndpoint),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`).then(readOptional),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`).then(readOptional),
+		event
+			.fetch(`${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/likelihood/`)
+			.then(readOptional)
+	]);
+
+	const studyId = detail.data?.ebios_rm_study?.id;
+	const ratingKit = studyId
+		? await event
+				.fetch(`${BASE_API_URL}/ebios-rm/studies/${studyId}/rating-kit/`)
+				.then(readOptional)
+		: null;
 
 	const eaInitialData: Record<string, any> = {};
 	if (object.folder) {
@@ -64,6 +81,8 @@ export const load: PageServerLoad = async (event) => {
 		object,
 		elementaryActions,
 		killChainSteps,
+		probabilityChoices: probabilityChoices ?? {},
+		ratingKit,
 		operatingModeId: event.params.id,
 		eaModel: {
 			urlModel: 'elementary-actions',

@@ -715,9 +715,9 @@ def _free_name(model, name, folder):
 
 
 def _build_graph_payload(graph, workflow, folder, warnings):
-    from .actions import _accessible_folder_ids
+    from core.reads import accessible_folder_ids
 
-    accessible = _accessible_folder_ids(folder)
+    accessible = accessible_folder_ids(folder)
     variable_ids = {v["key"]: str(uuid4()) for v in graph.get("variables") or []}
     node_ids = {n["ref"]: str(uuid4()) for n in graph["nodes"]}
     # (node ref, branch index) → fresh branch uuid, so edges can resolve their
@@ -899,7 +899,9 @@ def _strip_foreign_folder_filters(filters, workflow, label, warnings):
     emptied group) when nothing survives. Trees without folder conditions pass
     through untouched (pruning normalizes the shape, which would break
     round-trip fidelity)."""
-    from .events import _workflow_scope, walk_conditions
+    from core.reads import walk_conditions
+
+    from .events import _workflow_scope
 
     if not isinstance(filters, dict) or not filters:
         return filters if isinstance(filters, dict) else {}

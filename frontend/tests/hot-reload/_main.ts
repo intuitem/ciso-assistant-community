@@ -4,7 +4,7 @@ import type { Page as _Page } from '@playwright/test';
 import type { EntryPoint } from '../utilsv2/core/hot-reloader';
 
 // This works as $lib is kind of an indirect relative path.
-import { safeTranslate } from '$lib/utils/i18n';
+import { safeTranslate } from '#lib/utils/i18n.js';
 
 import { LoginPage } from './derived/login-page';
 import { LibraryListViewPage } from './derived/list-view';

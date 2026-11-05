@@ -20,7 +20,7 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 
 	// The tree endpoint 400s on a library with no framework, and the page only
 	// renders it when there is one, so don't ask.
-	const hasFramework = Boolean(library.objects_meta?.framework);
+	const hasFramework = Boolean(library.objects_meta?.framework || library.objects_meta?.frameworks);
 
 	return {
 		tree: hasFramework

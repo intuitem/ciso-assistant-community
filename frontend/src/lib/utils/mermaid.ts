@@ -1,4 +1,4 @@
-import { isDarkTheme } from '$lib/utils/echartsTheme';
+import { isDarkTheme } from '#lib/utils/echartsTheme.js';
 
 export const MERMAID_BLOCK_CLASS = 'mermaid-diagram';
 
@@ -21,8 +21,8 @@ function cacheSvg(key: string, svg: string) {
 	svgCache.set(key, svg);
 }
 
-function currentTheme(): 'dark' | 'default' {
-	return isDarkTheme() ? 'dark' : 'default';
+function currentTheme(): 'redux-dark-color' | 'redux-color' {
+	return isDarkTheme() ? 'redux-dark-color' : 'redux-color';
 }
 
 /** Renders every wrapped mermaid block under `root`; blocks that fail to parse keep their source. */
@@ -45,7 +45,8 @@ export async function renderMermaidBlocks(root: HTMLElement): Promise<void> {
 		startOnLoad: false,
 		securityLevel: 'strict',
 		suppressErrorRendering: true,
-		theme
+		theme,
+		look: 'neo'
 	});
 
 	for (const block of pending) {

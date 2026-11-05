@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	$pageTitle = 'Analytics Export';
 </script>

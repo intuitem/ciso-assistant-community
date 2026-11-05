@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
 import type { PageServerLoad } from './$types';
-import * as m from '$paraglide/messages';
+import * as m from '#paraglide/messages.js';
 
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/privacy/processings/agg_metrics/`;

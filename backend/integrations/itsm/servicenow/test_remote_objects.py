@@ -27,9 +27,12 @@ def _client(configuration):
         return ServiceNowClient(configuration)
 
 
-def _response(records):
+def _response(records, has_next=False):
     response = MagicMock()
     response.json.return_value = {"result": records}
+    response.links = {"first": {}, "last": {}}
+    if has_next:
+        response.links["next"] = {}
     return response
 
 
@@ -279,7 +282,9 @@ def test_list_paginates_past_mapped_records(mock_get, mock_sync, configuration):
     picker's lazy/eager probe to eager on a truncated list."""
     mapped = [f"rec{i}" for i in range(100)]
     mock_get.side_effect = [
-        _response([{"sys_id": sys_id, "number": "INC"} for sys_id in mapped]),
+        _response(
+            [{"sys_id": sys_id, "number": "INC"} for sys_id in mapped], has_next=True
+        ),
         _response(
             [{"sys_id": f"rec{i}", "number": f"INC{i:03d}"} for i in range(100, 160)]
         ),
@@ -305,7 +310,8 @@ def test_list_scan_budget_bounds_pagination(mock_get, mock_sync, configuration):
             [
                 {"sys_id": sys_id, "number": "INC"}
                 for sys_id in mapped[i * 100 : (i + 1) * 100]
-            ]
+            ],
+            has_next=True,
         )
         for i in range(10)
     ]
@@ -316,6 +322,42 @@ def test_list_scan_budget_bounds_pagination(mock_get, mock_sync, configuration):
 
     assert results == []
     assert mock_get.call_count == 5
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_list_pages_past_acl_short_page(mock_get, mock_sync, configuration):
+    """A page shortened by ACLs is not the last one while the Link header
+    says next, and the offset still steps by the requested page size."""
+    mock_get.side_effect = [
+        _response([{"sys_id": "rec1", "number": "INC001"}], has_next=True),
+        _response([], has_next=True),
+        _response([{"sys_id": "rec2", "number": "INC002"}]),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    results = client.list_remote_objects({"limit": 20})
+
+    assert [r["id"] for r in results] == ["rec1", "rec2"]
+    offsets = [c[1]["params"]["sysparm_offset"] for c in mock_get.call_args_list]
+    assert offsets == [0, 100, 200]
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_list_without_link_header_uses_page_length(mock_get, mock_sync, configuration):
+    first = _response([{"sys_id": f"rec{i}", "number": "INC"} for i in range(100)])
+    second = _response([{"sys_id": "rec100", "number": "INC"}])
+    first.links = second.links = {}
+    mock_get.side_effect = [first, second]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    results = client.list_remote_objects({"limit": 200})
+
+    assert len(results) == 101
+    assert mock_get.call_count == 2
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")

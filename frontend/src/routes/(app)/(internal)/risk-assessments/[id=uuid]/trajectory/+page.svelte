@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import RiskTrajectoryMatrix from '$lib/components/RiskMatrix/RiskTrajectoryMatrix.svelte';
-	import type { Stage } from '$lib/components/RiskMatrix/trajectory';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import RiskTrajectoryMatrix from '#lib/components/RiskMatrix/RiskTrajectoryMatrix.svelte';
+	import type { Stage } from '#lib/components/RiskMatrix/trajectory.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { data } = $props();
 

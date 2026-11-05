@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import RelationsGraph from './RelationsGraph.svelte';
 	import { metaFor } from './meta';
-	import { urlModelForDjangoName } from '$lib/utils/crud';
+	import { urlModelForDjangoName } from '#lib/utils/crud.js';
 	import {
 		createGraph,
 		merge,

@@ -24,7 +24,10 @@ export interface User {
 	is_superuser: boolean;
 	has_mfa_enabled: boolean;
 	accessible_domains: string[];
-	domain_permissions: Record<string, string[]>;
+	/** Distinct codename sets, each sent once; `domain_permissions` points into it. */
+	permission_sets: string[][];
+	/** Folder ID → index in `permission_sets` of the codenames the user holds there. */
+	domain_permissions: Record<string, number>;
 	root_folder_id: string;
 	preferences: {
 		lang?: string;
@@ -90,6 +93,9 @@ export const URL_MODEL = [
 	'contracts',
 	'custom-fields',
 	'entity-scores',
+	'tiers',
+	'entity-tier-changes',
+	'solution-tier-changes',
 	'representatives',
 	'vulnerabilities',
 	'security-advisories',
@@ -116,6 +122,7 @@ export const URL_MODEL = [
 	'processings',
 	'right-requests',
 	'data-breaches',
+	'dpia-requirement-changes',
 	'purposes',
 	'personal-data',
 	'data-subjects',
@@ -290,3 +297,24 @@ export interface CacheLock {
 export type SvelteEvent<E extends Event = Event, T extends EventTarget = Element> = E & {
 	currentTarget: EventTarget & T;
 };
+
+/** The questionnaire's compliance split and global score, as the audit page shows them. */
+export interface ComplianceOverview {
+	donut: {
+		values: {
+			name: string;
+			localName: string;
+			value: number;
+			itemStyle: { color: string };
+		}[];
+	};
+	global_score: {
+		maturity_score: number;
+		min_score: number | null;
+		max_score: number | null;
+		total_max_score: number | null;
+		score_calculation_method: string;
+	};
+	show_result: boolean;
+	show_score: boolean;
+}

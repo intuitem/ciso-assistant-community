@@ -814,6 +814,9 @@ def _snapshot_export_csv(rows, slug):
 
 
 class PublicFrameworkSnapshotExportView(PublicPortalAPIView):
+    def perform_content_negotiation(self, request, force=False):
+        return super().perform_content_negotiation(request, force=True)
+
     def get(self, request, token):
         snap = FrameworkSnapshot.objects.filter(public_token=token).first()
         if snap is None or not _is_publicly_reachable(snapshot_id=snap.id):

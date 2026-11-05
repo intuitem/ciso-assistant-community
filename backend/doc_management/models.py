@@ -66,12 +66,27 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         "privacy.Processing", blank=True, related_name="documents"
     )
     assets = models.ManyToManyField("core.Asset", blank=True, related_name="documents")
+    # When set, only these actors may approve or request changes on a revision, and
+    # they are the ones asked when one is submitted for review.
+    reviewers = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="reviewed_document_containers",
+        verbose_name=_("Reviewers"),
+    )
 
     fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Document container")
         verbose_name_plural = _("Document containers")
+        # Read access limited to the revision in force: no drafts, history or diffs.
+        permissions = [
+            (
+                "view_published_documentcontainer",
+                "Can view published document containers",
+            )
+        ]
 
     def save(self, *args, **kwargs):
         propagate = False
@@ -95,6 +110,16 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
     def __str__(self):
         return self.name or str(self.id)
+
+    def may_review(self, user) -> bool:
+        """With no reviewers set, review is open to anyone the permissions allow."""
+        if not self.reviewers.exists():
+            return True
+        from core.models import Actor
+
+        return self.reviewers.filter(
+            id__in=[a.id for a in Actor.get_all_for_user(user)]
+        ).exists()
 
 
 class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
@@ -124,6 +149,8 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     class Meta:
         verbose_name = _("Managed document")
         verbose_name_plural = _("Managed documents")
+
+    folder_from = "container"
 
     def save(self, *args, **kwargs):
         if self.container_id:
@@ -156,6 +183,10 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
     # "approver" once the revision reached one of these.
     APPROVED_STATUSES = frozenset(
         {Status.VALIDATED, Status.PUBLISHED, Status.DEPRECATED}
+    )
+
+    ACTIVE_STATUSES = frozenset(
+        {Status.DRAFT, Status.CHANGE_REQUESTED, Status.IN_REVIEW, Status.VALIDATED}
     )
 
     document = models.ForeignKey(
@@ -228,6 +259,8 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         if "content" in field_names:
             instance._loaded_content = instance.content
         return instance
+
+    folder_from = "document"
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
@@ -323,6 +356,8 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
         verbose_name = _("Document attachment")
         verbose_name_plural = _("Document attachments")
 
+    folder_from = "document"
+
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
         super().save(*args, **kwargs)
@@ -360,6 +395,8 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
         ordering = ["-created_at"]
         verbose_name = _("Document edit")
         verbose_name_plural = _("Document edits")
+
+    folder_from = "revision"
 
     def save(self, *args, **kwargs):
         self.folder = self.revision.folder

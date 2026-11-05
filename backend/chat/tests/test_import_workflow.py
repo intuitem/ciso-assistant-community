@@ -341,6 +341,13 @@ def test_risk_columns_map_export_and_legacy_names():
     assert mapped["asset"] == "assets"
 
 
+def test_risk_threats_column_is_mapped_with_its_singular_alias():
+    # A M2M field is not concrete, so only SOURCE_KEY_MAP makes it known.
+    mapped, unmapped = map_columns(["threats", "threat"], "risk_scenario")
+    assert mapped == {"threats": "threats", "threat": "threats"}
+    assert not unmapped
+
+
 def test_container_fk_and_computed_levels_are_never_mapped():
     mapped, unmapped = map_columns(
         ["risk_assessment", "current_level", "name"], "risk_scenario"

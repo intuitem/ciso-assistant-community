@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
 	import ReportView from './ReportView.svelte';
 	import type { PageData } from './$types';
 

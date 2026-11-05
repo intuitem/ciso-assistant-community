@@ -1,4 +1,4 @@
-import { safeTranslate } from '$lib/utils/i18n';
+import { safeTranslate } from '#lib/utils/i18n.js';
 
 // Compliance result breakdown shared by the framework tile and the snapshot drill-down.
 export const RESULT_META = [

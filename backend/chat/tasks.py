@@ -222,6 +222,7 @@ def _parse_library_yaml(filepath) -> list[dict]:
     Returns a list of dicts with: urn, ref_id, name, description, etc.
     """
     from core.utils import yaml_safe_load
+    from library.builder import normalize_objects
 
     try:
         with open(filepath, "r", encoding="utf-8") as f:
@@ -239,7 +240,8 @@ def _parse_library_yaml(filepath) -> list[dict]:
     provider = data.get("provider", "")
 
     entries = []
-    objects = data.get("objects", {})
+    # Both spellings are valid ("framework" is legacy): read the plural lists.
+    objects = normalize_objects(data.get("objects", {}))
 
     # Index the library itself as a summary entry
     if library_name:
@@ -260,8 +262,9 @@ def _parse_library_yaml(filepath) -> list[dict]:
         )
 
     # Extract framework requirement nodes
-    framework = objects.get("framework", {})
-    if isinstance(framework, dict):
+    for framework in objects.get("frameworks") or []:
+        if not isinstance(framework, dict):
+            continue
         framework_name = framework.get("name", library_name)
         framework_ref_id = framework.get("ref_id", library_ref_id)
         for node in framework.get("requirement_nodes", []):

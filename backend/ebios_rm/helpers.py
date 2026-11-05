@@ -18,6 +18,16 @@ from core.models import AppliedControl, Asset, RiskScenario
 import textwrap
 
 
+# Workshop order (strategic scenario, then attack path) used to number generated risk scenarios
+OPERATIONAL_SCENARIO_ORDER = (
+    "attack_path__strategic_scenario__ref_id",
+    "attack_path__strategic_scenario__created_at",
+    "attack_path__ref_id",
+    "attack_path__created_at",
+    "id",
+)
+
+
 def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
     """
     Generate data for circular ecosystem chart.
@@ -532,7 +542,9 @@ def detect_sync_sources(ebios_rm_study):
 
     Returns a dict with keys: operational_scenarios, attack_paths,
     strategic_scenarios, feared_events. Each value is a list (may be empty).
-    Returns None if nothing is selected at all.
+    Returns None if nothing is selected at all. When every candidate was
+    deselected in workshop 4, returns the dict with all lists empty so the
+    sync still archives the risk scenarios it previously created.
     """
     result = {
         "operational_scenarios": [],
@@ -551,18 +563,34 @@ def detect_sync_sources(ebios_rm_study):
         )
 
     # Level 1: selected operational scenarios (full EBIOS)
-    selected_os = [
-        os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
-    ]
+    all_os = list(
+        ebios_rm_study.operational_scenarios.order_by(*OPERATIONAL_SCENARIO_ORDER)
+    )
+    selected_os = [os for os in all_os if os.is_selected]
     if selected_os:
         result["operational_scenarios"] = selected_os
-        for os_obj in selected_os:
-            _cover_feared_events(os_obj.ro_to)
-            covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
+
+    # Any attack path that already has an operational scenario (selected or
+    # not) was already reviewed at the finest granularity in workshop 4, so
+    # neither it, its strategic scenario, nor its feared events must fall
+    # back to a coarser sync level below — even when the scenario ended up
+    # deselected there.
+    covered_ap_ids = set()
+    for os_obj in all_os:
+        covered_ap_ids.add(os_obj.attack_path_id)
+        covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
+        _cover_feared_events(os_obj.ro_to)
 
     # Level 2: selected attack paths not covered by an operational scenario
-    selected_ap = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
-    covered_ap_ids = {os_obj.attack_path_id for os_obj in selected_os}
+    selected_ap = list(
+        ebios_rm_study.attackpath_set.filter(is_selected=True).order_by(
+            "strategic_scenario__ref_id",
+            "strategic_scenario__created_at",
+            "ref_id",
+            "created_at",
+            "id",
+        )
+    )
     uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
     if uncovered_ap:
         result["attack_paths"] = uncovered_ap
@@ -571,7 +599,9 @@ def detect_sync_sources(ebios_rm_study):
             covered_ss_ids.add(ap.strategic_scenario_id)
 
     # Level 3: strategic scenarios not covered by attack paths or op scenarios
-    all_ss = list(ebios_rm_study.strategic_scenarios.all())
+    all_ss = list(
+        ebios_rm_study.strategic_scenarios.order_by("ref_id", "created_at", "id")
+    )
     uncovered_ss = [ss for ss in all_ss if ss.id not in covered_ss_ids]
     if uncovered_ss:
         result["strategic_scenarios"] = uncovered_ss
@@ -579,12 +609,16 @@ def detect_sync_sources(ebios_rm_study):
             _cover_feared_events(ss.ro_to_couple)
 
     # Level 4: selected feared events not already covered
-    selected_fe = list(ebios_rm_study.feared_events.filter(is_selected=True))
+    selected_fe = list(
+        ebios_rm_study.feared_events.filter(is_selected=True).order_by(
+            "ref_id", "created_at", "id"
+        )
+    )
     uncovered_fe = [fe for fe in selected_fe if fe.id not in covered_fe_ids]
     if uncovered_fe:
         result["feared_events"] = uncovered_fe
 
-    if not any(result.values()):
+    if not any(result.values()) and not all_os:
         return None
 
     return result
@@ -625,16 +659,20 @@ def build_sync_preview(ebios_rm_study, sources):
         source_data.append(_entry(ap.id, str(ap), "attack_path", ap.gravity))
 
     for ss in sources.get("strategic_scenarios", []):
-        source_data.append(
-            _entry(ss.id, ss.name, "strategic_scenario", ss.ro_to_couple.get_gravity())
-        )
+        source_data.append(_entry(ss.id, ss.name, "strategic_scenario", ss.gravity))
 
     for fe in sources.get("feared_events", []):
         source_data.append(_entry(fe.id, fe.name, "feared_event", fe.gravity))
 
     # Determine the sync mode label for the frontend
     active_modes = [k for k, v in sources.items() if v]
-    sync_mode = active_modes[0] if len(active_modes) == 1 else "mixed"
+    if not active_modes:
+        # Everything was deselected in workshop 4.
+        sync_mode = "operational_scenarios"
+    elif len(active_modes) == 1:
+        sync_mode = active_modes[0]
+    else:
+        sync_mode = "mixed"
 
     return {
         "sync_mode": sync_mode,
@@ -759,7 +797,6 @@ def _build_description(*parts):
 def _upsert_risk_scenario(
     risk_assessment,
     name,
-    ref_id,
     description,
     impact,
     likelihood,
@@ -788,7 +825,8 @@ def _upsert_risk_scenario(
         risk_scenario = RiskScenario(
             risk_assessment=risk_assessment,
             name=name,
-            ref_id=ref_id or RiskScenario.get_default_ref_id(risk_assessment),
+            # EBIOS ref_ids are only unique per parent (AP.01 under every strategic scenario)
+            ref_id=RiskScenario.get_default_ref_id(risk_assessment),
             description=description,
             risk_origin=risk_origin,
             **(extra_fields or {}),
@@ -859,7 +897,6 @@ def _sync_operational_scenarios(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=scenario_name,
-            ref_id=operational_scenario.ref_id,
             description=description,
             impact=operational_scenario.gravity,
             likelihood=operational_scenario.likelihood,
@@ -901,7 +938,6 @@ def _sync_attack_paths(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=scenario_name,
-            ref_id=attack_path.ref_id,
             description=description,
             impact=attack_path.gravity,
             likelihood=-1,
@@ -943,9 +979,8 @@ def _sync_strategic_scenarios(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=ss.name,
-            ref_id=ss.ref_id,
             description=description,
-            impact=ro_to.get_gravity(),
+            impact=ss.gravity,
             likelihood=-1,
             assets=_get_assets_with_descendants(
                 Asset.objects.filter(feared_events__in=feared_events)
@@ -988,7 +1023,6 @@ def _sync_feared_events(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=fe.name,
-            ref_id=fe.ref_id,
             description=description,
             impact=fe.gravity,
             likelihood=-1,

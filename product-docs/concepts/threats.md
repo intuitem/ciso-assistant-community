@@ -13,7 +13,9 @@ Threats are reusable building blocks: a single threat (say, "Phishing") may appe
 
 ## Where threats come from
 
-CISO Assistant ships with curated threat libraries based on common sources — MITRE ATT&CK, ENISA, the ISO 27005 illustrative threat catalogue, sector-specific catalogues. You can also create your own threats inside a domain, or contribute a custom threat library.
+CISO Assistant ships with curated threat libraries based on common sources — ENISA, the ISO 27005 illustrative threat catalogue, sector-specific catalogues. You can also create your own threats inside a domain, or contribute a custom threat library.
+
+Adversary techniques — _how_ an attacker acts, as catalogued by MITRE ATT&CK and ATLAS — are a separate catalogue. See [TTP catalogs and threat models](ttps-and-threat-models.md).
 
 ## Optional, but useful
 
@@ -23,4 +25,5 @@ A risk assessment _can_ be done without referencing threats — the platform doe
 
 - [Risk assessments](risk-assessments.md)
 - [Libraries](libraries.md)
+- [TTP catalogs and threat models](ttps-and-threat-models.md)
 - [Vocabulary → Threat](../introduction/vocabulary.md)

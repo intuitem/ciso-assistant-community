@@ -153,7 +153,7 @@ def validate_trigger_config(node, workflow=None):
 
 
 def _has_out_of_scope_folder(filters, scope):
-    from .events import walk_conditions
+    from core.reads import walk_conditions
 
     for condition in walk_conditions(filters):
         if condition.get("field") == "folder" and condition.get("op", "eq") in (

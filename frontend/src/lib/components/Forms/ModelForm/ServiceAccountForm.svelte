@@ -4,10 +4,10 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import ListSelector from '../ListSelector.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperForm<any, any>;
@@ -210,7 +210,7 @@
 		field="permissions"
 		label={m.permissions()}
 		optionsEndpoint="service-accounts/permissions"
-		optionsLabelField="normalized_codename"
+		optionsLabelField="action_label"
 		groupBy={[{ field: 'content_type', path: ['app_label'] }, { field: 'normalized_model' }]}
 		cacheLock={cacheLocks['permissions']}
 		bind:cachedValue={formDataCache['permissions']}

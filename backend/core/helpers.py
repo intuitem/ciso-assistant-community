@@ -9,7 +9,6 @@ from uuid import UUID
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -23,7 +22,11 @@ from statistics import mean
 import math
 
 from .models import *
-from .utils import build_answers_dict, camel_case
+from .utils import (
+    build_answers_dict,
+    camel_case,
+    restrict_to_respondent_assignments,
+)
 
 DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
@@ -394,7 +397,9 @@ def annotate_tree_with_aggregated_scores(
     contribute their own ceiling; 100% stays achievable.
 
     Leaves are included only when is_scored is True, the node is assessable,
-    and the result is not N/A.
+    and the result is not N/A. When the audit anchors N/A to its target, N/A
+    leaves are included with both layers set to the target projected onto
+    their scale (or their max when no target is set), like get_global_score.
     """
     method = compliance_assessment.score_calculation_method
     show_doc = compliance_assessment.show_documentation_score
@@ -409,14 +414,14 @@ def annotate_tree_with_aggregated_scores(
         else 100
     )
     ca_range = ca_max - ca_min if ca_max > ca_min else 1
+    anchor_na = compliance_assessment.anchor_na_to_target
 
     def _clean(value):
-        """Trim float-precision noise (~1e-9) from denormalized display values
-        without losing precision for upstream rollups, which use the raw
-        _aggregated_ratio."""
+        """A parent's value like the global score (clean_score): unrounded,
+        rendering rounds it."""
         if value is None:
             return None
-        return round(value, 9)
+        return clean_score(value)
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}
@@ -425,11 +430,9 @@ def annotate_tree_with_aggregated_scores(
             walk(child)
 
         if not children:
-            is_assessed = (
-                node.get("is_scored")
-                and node.get("assessable")
-                and node.get("result") != "not_applicable"
-            )
+            is_na = node.get("result") == "not_applicable"
+            anchored = bool(anchor_na and is_na and node.get("assessable"))
+            is_assessed = node.get("is_scored") and node.get("assessable") and not is_na
             score_val = node.get("score")
             # `is_scored` with `score is None` is a data inconsistency; treat
             # it as unscored to avoid producing a negative ratio on offset
@@ -437,18 +440,19 @@ def annotate_tree_with_aggregated_scores(
             if is_assessed and score_val is None:
                 is_assessed = False
             weight = node.get("weight") or 1
+            ra_min = (
+                node.get("min_score") if node.get("min_score") is not None else ca_min
+            )
+            ra_max = (
+                node.get("max_score") if node.get("max_score") is not None else ca_max
+            )
+            ra_range = ra_max - ra_min if ra_max > ra_min else 1
+            doc_val = node.get("documentation_score")
+            if anchored:
+                score_val = compliance_assessment.na_anchor_score(ra_min, ra_max)
+                doc_val = score_val
+                is_assessed = True
             if is_assessed:
-                ra_min = (
-                    node.get("min_score")
-                    if node.get("min_score") is not None
-                    else ca_min
-                )
-                ra_max = (
-                    node.get("max_score")
-                    if node.get("max_score") is not None
-                    else ca_max
-                )
-                ra_range = ra_max - ra_min if ra_max > ra_min else 1
                 ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val
                 node["aggregated_min_score"] = ra_min
@@ -461,13 +465,11 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
-                    # documentation_score=None keeps its legacy "no doc -> 0"
-                    # semantic so the tree matches the global score and radar,
-                    # which also map doc None -> 0 in _compute_score_for_field.
-                    # (score=None is excluded above; doc is not.)
-                    doc_val = node.get("documentation_score")
+                    # documentation_score=None counts as the bottom of the
+                    # scale, like _compute_raw_score_for_field, with every
+                    # method. (score=None is excluded above; doc is not.)
                     if doc_val is None:
-                        doc_val = 0
+                        doc_val = ra_min
                     doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
                     node["_aggregated_doc_ratio"] = doc_ratio
@@ -540,7 +542,7 @@ def annotate_tree_with_aggregated_scores(
                 node["_aggregated_doc_ratio"] = None
         elif method == ComplianceAssessment.CalculationMethod.SUM:
             if leaf_weight > 0:
-                node["aggregated_score"] = leaf_weighted_score
+                node["aggregated_score"] = _clean(leaf_weighted_score)
                 node["aggregated_max_score"] = leaf_weighted_max
                 node["aggregated_min_score"] = 0
                 # Ratio in [0, 1] for any future consumer (e.g. nested SUM).
@@ -550,7 +552,7 @@ def annotate_tree_with_aggregated_scores(
                     else None
                 )
                 if show_doc:
-                    node["aggregated_documentation_score"] = leaf_weighted_doc
+                    node["aggregated_documentation_score"] = _clean(leaf_weighted_doc)
                     node["_aggregated_doc_ratio"] = (
                         leaf_weighted_doc / leaf_weighted_max
                         if leaf_weighted_max
@@ -1113,6 +1115,10 @@ def combined_assessments_per_status(
             user, model, scoped_folder
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
+        if model is ComplianceAssessment:
+            viewable_assessments = restrict_to_respondent_assignments(
+                user, viewable_assessments, "requirement_assignments__actor__in"
+            )
 
         # Count by status in a single query
         status_counts = dict(
@@ -1425,14 +1431,24 @@ def build_audits_tree_metrics(user):
     return tree
 
 
+def _respondent_scoped_audit_ids(user, scoped_folder):
+    return restrict_to_respondent_assignments(
+        user,
+        ComplianceAssessment.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                user, ComplianceAssessment, scoped_folder
+            )
+        ),
+        "requirement_assignments__actor__in",
+    ).values_list("id", flat=True)
+
+
 def build_audits_stats(user, folder_id=None, object_ids=None):
     if object_ids is None:
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        object_ids = RoleAssignment.get_viewable_object_ids(
-            user, ComplianceAssessment, scoped_folder
-        )
+        object_ids = _respondent_scoped_audit_ids(user, scoped_folder)
     top_audits = list(
         ComplianceAssessment.objects.filter(id__in=object_ids)
         .order_by("-updated_at")
@@ -1512,12 +1528,20 @@ def get_metrics(user: User, folder_id):
 
     viewable_controls = viewable_items(AppliedControl, folder_id)
     viewable_risk_assessments = viewable_items(RiskAssessment, folder_id)
-    viewable_compliance_assessments = viewable_items(ComplianceAssessment, folder_id)
+    viewable_compliance_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(ComplianceAssessment, folder_id),
+        "requirement_assignments__actor__in",
+    )
     viewable_risk_scenarios = viewable_items(RiskScenario, folder_id)
     viewable_threats = viewable_items(Threat, folder_id)
     viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
     viewable_evidences = viewable_items(Evidence, folder_id)
-    viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
+    viewable_requirement_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(RequirementAssessment, folder_id),
+        "assignments__actor__in",
+    )
     controls_count = viewable_controls.count()
     missed_eta_count = (
         viewable_controls.filter(
@@ -1612,9 +1636,7 @@ def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    object_ids = RoleAssignment.get_viewable_object_ids(
-        user, ComplianceAssessment, scoped_folder
-    )
+    object_ids = _respondent_scoped_audit_ids(user, scoped_folder)
     progresses = list(_compute_progress_by_assessment(object_ids).values())
     progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
@@ -1661,8 +1683,10 @@ def get_compliance_analytics(user: User, folder_id=None):
         object_ids = RoleAssignment.get_viewable_object_ids(user, model, scoped_folder)
         return model.objects.filter(id__in=object_ids)
 
-    viewable_assessments = viewable_items(
-        ComplianceAssessment, folder_id
+    viewable_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(ComplianceAssessment, folder_id),
+        "requirement_assignments__actor__in",
     ).select_related("framework", "folder", "perimeter")
 
     progress_by_id = _compute_progress_by_assessment(
@@ -1755,9 +1779,6 @@ def get_instance_metrics():
     nb_risk_assessments = RiskAssessment.objects.all().count()
     nb_risk_scenarios = RiskScenario.objects.all().count()
     nb_risk_acceptances = RiskAcceptance.objects.all().count()
-    nb_seats = getattr(settings, "LICENSE_SEATS", 0)
-    nb_editors = len(User.get_editors())
-    expiration = getattr(settings, "LICENSE_EXPIRATION", -1)
 
     created_at = int(Folder.get_root_folder().created_at.timestamp())
     last_login_dt = max(
@@ -1785,9 +1806,6 @@ def get_instance_metrics():
         "nb_risk_assessments": nb_risk_assessments,
         "nb_risk_scenarios": nb_risk_scenarios,
         "nb_risk_acceptances": nb_risk_acceptances,
-        "nb_seats": nb_seats,
-        "nb_editors": nb_editors,
-        "expiration": expiration,
         "created_at": created_at,
         "last_login": last_login,
     }
@@ -1808,14 +1826,7 @@ def risk_status(user: User, risk_assessment_list):
         "transfer": list(),
         "cancelled": list(),
     }
-    mtg_status_out = {
-        "--": list(),
-        "to_do": list(),
-        "in_progress": list(),
-        "on_hold": list(),
-        "active": list(),
-        "deprecated": list(),
-    }
+    mtg_status_out = {status: list() for status in AppliedControl.Status.values}
 
     max_tmp = list()
     abbreviations = [x[0] for x in get_rating_options_abbr(user)]

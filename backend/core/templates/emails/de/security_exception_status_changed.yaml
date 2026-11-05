@@ -1,0 +1,15 @@
+subject: "CISO Assistant: Ausnahme '${exception_name}' hat jetzt den Status ${new_status}"
+body: |
+  Hallo,
+
+  Der Status der folgenden Ausnahme wurde geändert:
+
+  - Name: ${exception_name}
+  - Referenz-ID: ${exception_ref_id}
+  - Neuer Status: ${new_status}
+  - Aktualisiert von: ${actor_name}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Ausnahme anzuzeigen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

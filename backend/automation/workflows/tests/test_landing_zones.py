@@ -277,6 +277,28 @@ class TestRecordMeasurement:
         assert start_instance(version).status == WorkflowInstance.Status.FAILED
         assert not CustomMetricSample.objects.filter(metric_instance=metric).exists()
 
+    def test_a_derived_metric_is_refused(self):
+        """A derived series is its formula's: a recorded point would become
+        the next computation's `previous`."""
+        domain = make_domain("Derived")
+        metric = make_metric(domain)
+        definition = metric.metric_definition
+        definition.datasets = {
+            "c": {"model": "applied_control", "aggregates": [{"fn": "count"}]}
+        }
+        definition.expression = "c.count"
+        definition.save()
+        version = action_flow(
+            domain,
+            {
+                "type": "record_measurement",
+                "metric_instance": str(metric.id),
+                "value": "3",
+            },
+        )
+        assert start_instance(version).status == WorkflowInstance.Status.FAILED
+        assert not CustomMetricSample.objects.filter(metric_instance=metric).exists()
+
     def test_a_value_that_is_not_a_number_fails_the_node(self):
         domain = make_domain("Not a number")
         metric = make_metric(domain)

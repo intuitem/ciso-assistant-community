@@ -1,0 +1,17 @@
+subject: "CISO Assistant: Ihnen wurde '${exception_name}' zugewiesen"
+body: |
+  Hallo,
+
+  Ihnen wurde folgende Ausnahme zugewiesen:
+
+  - Name: ${exception_name}
+  - Beschreibung: ${exception_description}
+  - Referenz-ID: ${exception_ref_id}
+  - Schweregrad: ${exception_severity}
+  - Status: ${exception_status}
+  - Ablaufdatum: ${expiration_date}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Ausnahme anzuzeigen und zu verwalten: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

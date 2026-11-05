@@ -1,12 +1,32 @@
 """Integration coverage for SSRF guard wiring in doc_management."""
 
+from datetime import UTC, datetime
+from unittest.mock import patch
+from uuid import uuid4
+
 import pytest
+from django.db import connection
+from django.db.models import Prefetch
+from django.test.utils import CaptureQueriesContext
 
 from core.models import Policy
 from core.net_safety import BlockedRequestError
-from doc_management.models import DocumentContainer, DocumentRevision
-from doc_management.serializers import ManagedDocumentWriteSerializer
-from doc_management.views import DocumentRevisionViewSet, _safe_url_fetcher
+from doc_management.models import (
+    DocumentContainer,
+    DocumentRevision,
+    ManagedDocument,
+)
+from doc_management.serializers import (
+    DocumentContainerReadSerializer,
+    ManagedDocumentWriteSerializer,
+)
+from doc_management.access import PublishedReadMixin
+from doc_management.views import (
+    DocumentContainerViewSet,
+    DocumentRevisionViewSet,
+    _safe_url_fetcher,
+)
+from global_settings.models import GlobalSettings
 from iam.models import Folder, User
 
 
@@ -345,3 +365,196 @@ class TestPdfApproverRow:
     def test_validated_revision_names_its_approver(self):
         rev = self._revision(DocumentRevision.Status.VALIDATED)
         assert self._reviewer_name(rev) == str(rev.reviewer)
+
+
+@pytest.mark.django_db
+class TestPdfDatesInReportTimezone:
+    """The PDF prints local days in the report time zone: 23:30 UTC on 1 July is
+    already 2 July in Paris."""
+
+    LATE_EVENING_UTC = datetime(2026, 7, 1, 23, 30, tzinfo=UTC)
+
+    def _dates(self, report_timezone):
+        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        settings.value = {**(settings.value or {}), "report_timezone": report_timezone}
+        settings.save()
+        folder = Folder.objects.create(
+            name="PDF-dates", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        rev = s.save().revisions.first()
+        DocumentRevision.objects.filter(pk=rev.pk).update(
+            published_at=self.LATE_EVENING_UTC
+        )
+        rev.refresh_from_db()
+        user = User.objects.create_user(email="pdf-dates@test.com")
+
+        view = DocumentRevisionViewSet()
+        captured = {}
+
+        def capture(revision, context):
+            captured.update(context)
+            return "<html></html>"
+
+        view._resolve_document_html = capture
+        with patch(
+            "doc_management.views.timezone.now", return_value=self.LATE_EVENING_UTC
+        ):
+            view._render_pdf_bytes(rev, user)
+        return captured["published_at"], captured["date"]
+
+    def test_dates_are_local_days_in_the_report_time_zone(self):
+        assert self._dates("Europe/Paris") == ("2026-07-02", "2026-07-02")
+
+    def test_dates_stay_utc_days_by_default(self):
+        assert self._dates("UTC") == ("2026-07-01", "2026-07-01")
+
+
+@pytest.mark.django_db
+class TestContainerPendingRevision:
+    """A container keeps showing its published revision (that is the one in
+    force), so a newer revision still in the approval loop is invisible from the
+    list. `pending_revision` surfaces it without overwriting `status`.
+    """
+
+    def _container_with(self, *, pending_status=None, suffix=""):
+        folder = Folder.objects.create(
+            name=f"PR-{pending_status}{suffix}", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        doc.revisions.first().publish()
+        if pending_status:
+            DocumentRevision.objects.create(
+                document=doc, version_number=2, status=pending_status
+            )
+        doc.refresh_from_db()
+        return doc.container
+
+    def _serialize(self, container):
+        return DocumentContainerReadSerializer(container).data
+
+    def test_the_revision_in_force_is_not_reported_as_pending(self):
+        """A new document points current_revision at its own draft, and a
+        validated first revision stays current too. Reporting it as pending
+        showed the same revision twice in the table."""
+        folder = Folder.objects.create(
+            name="PR-current", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        assert doc.current_revision == doc.revisions.first()
+
+        data = self._serialize(doc.container)
+        assert data["status"] == DocumentRevision.Status.DRAFT
+        assert data["pending_revision"] is None
+
+    def test_no_pending_revision_when_only_published(self):
+        data = self._serialize(self._container_with())
+        assert data["pending_revision"] is None
+
+    def test_in_review_revision_is_reported_as_pending(self):
+        data = self._serialize(
+            self._container_with(pending_status=DocumentRevision.Status.IN_REVIEW)
+        )
+        assert data["pending_revision"] == {
+            "version_number": 2,
+            "status": DocumentRevision.Status.IN_REVIEW,
+        }
+
+    def test_validated_revision_is_reported_as_pending(self):
+        data = self._serialize(
+            self._container_with(pending_status=DocumentRevision.Status.VALIDATED)
+        )
+        assert data["pending_revision"]["status"] == DocumentRevision.Status.VALIDATED
+
+    def test_published_status_and_progress_survive_a_pending_revision(self):
+        data = self._serialize(
+            self._container_with(pending_status=DocumentRevision.Status.IN_REVIEW)
+        )
+        assert data["status"] == DocumentRevision.Status.PUBLISHED
+        assert data["progress"] == 100
+
+    def _revision_queries(self, count):
+        batch = uuid4().hex[:6]
+        for i in range(count):
+            self._container_with(
+                pending_status=DocumentRevision.Status.IN_REVIEW, suffix=f"-{batch}-{i}"
+            )
+        # Mirrors DocumentContainerViewSet.get_queryset: current_revision feeds
+        # status/progress, revisions feeds pending_revision.
+        qs = DocumentContainer.objects.filter(
+            folder__name__startswith=f"PR-in_review-{batch}"
+        ).prefetch_related(
+            Prefetch(
+                "documents",
+                queryset=ManagedDocument.objects.select_related(
+                    "current_revision"
+                ).prefetch_related("revisions"),
+            )
+        )
+        with CaptureQueriesContext(connection) as ctx:
+            data = DocumentContainerReadSerializer(list(qs), many=True).data
+        assert len(data) == count
+        assert all(d["pending_revision"] is not None for d in data)
+        return sum(
+            1 for q in ctx.captured_queries if "documentrevision" in q["sql"].lower()
+        )
+
+    def test_pending_revision_does_not_query_per_container(self):
+        """It must come off the prefetch: `revisions` is not covered by the
+        viewset's `current_revision` select_related, so a naive lookup is one
+        query per row."""
+        assert self._revision_queries(5) == self._revision_queries(1)
+
+
+@pytest.mark.django_db
+class TestCatalogQueryCount:
+    """`catalog` reads five revision fields the list serializer never touches.
+
+    Goes through the real action rather than a copy of the queryset: the defect
+    lives in the seam between `get_queryset` and `catalog`.
+    """
+
+    def _published_container(self, suffix):
+        folder = Folder.objects.create(
+            name=f"CAT-{suffix}", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        doc.revisions.first().publish()
+
+    def _revision_queries(self, count):
+        batch = uuid4().hex[:6]
+        for i in range(count):
+            self._published_container(f"{batch}-{i}")
+        scoped = DocumentContainer.objects.filter(
+            folder__name__startswith=f"CAT-{batch}"
+        )
+        view = DocumentContainerViewSet()
+        with patch.object(PublishedReadMixin, "get_queryset", return_value=scoped):
+            with CaptureQueriesContext(connection) as ctx:
+                response = view.catalog(request=None)
+        assert len(response.data) == count
+        return sum(
+            1 for q in ctx.captured_queries if "documentrevision" in q["sql"].lower()
+        )
+
+    def test_catalog_does_not_query_per_published_revision(self):
+        assert self._revision_queries(3) == self._revision_queries(1)

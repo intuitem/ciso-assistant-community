@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from huey import crontab
-from huey.contrib.djhuey import db_periodic_task
+from huey.contrib.djhuey import db_periodic_task, db_task
 
 import logging.config
 from django.conf import settings
@@ -46,8 +46,8 @@ def _update_stale_status(frequencies: list):
 
 
 @db_periodic_task(crontab(minute="*/15"))
-def check_realtime_metric_staleness():
-    _update_stale_status([MetricInstance.Frequency.REALTIME])
+def check_15min_metric_staleness():
+    _update_stale_status([MetricInstance.Frequency.EVERY_15_MINUTES])
 
 
 @db_periodic_task(crontab(minute="5"))
@@ -98,3 +98,87 @@ def cleanup_old_builtin_metric_samples():
         logger.warning(
             "Metrology tables do not exist yet — skipping builtin metric sample cleanup"
         )
+
+
+# ---------- derived metrics ----------
+
+
+@db_task()
+def compute_derived_metric_task(instance_id, only_if_due=False, full=False):
+    """A dataset formula, by id: its refresh and the sweep land here (a
+    metric formula goes through the recompute job, metrology.recompute). The
+    sweep passes ``only_if_due`` so a duplicate it queued while the queue
+    lagged finds the instance already computed and writes nothing. ``full``
+    still recomputes a metric formula's whole series, for a task queued
+    before the job existed."""
+    from metrology.derived import DerivedMetricError, compute_sample
+
+    instance = (
+        MetricInstance.objects.select_related("metric_definition", "folder")
+        .filter(id=instance_id)
+        .first()
+    )
+    if instance is None:
+        return
+    try:
+        compute_sample(instance, only_if_due=only_if_due, full=full)
+    except DerivedMetricError as e:
+        # Recorded on the instance by compute_sample; the log is for operators.
+        logger.warning(
+            "derived metric computation failed",
+            metric_instance_id=str(instance.id),
+            error=e.message,
+        )
+
+
+@db_task()
+def recompute_marked_formulas():
+    """The recompute job: every marked metric formula, in dependency order
+    (metrology.recompute)."""
+    from metrology.recompute import run_job
+
+    run_job()
+
+
+@db_periodic_task(crontab(minute="*/15"))  # derived.SWEEP_INTERVAL
+def compute_due_derived_metrics():
+    """The backstop sweep. Dataset formulas past their interval are queued,
+    each on its own. Metric formulas past their interval are marked from the
+    period their last run reached, and the recompute job takes them with
+    every other marked one. A dataset formula's new sample marks the metric
+    formulas reading it, so they read it fresh."""
+    from metrology.derived import due_instances
+    from metrology.recompute import request_recompute
+    from metrology.series import FULL, mark
+
+    try:
+        due = due_instances()
+    except DatabaseError:
+        logger.warning("Metrology tables do not exist yet — skipping derived metrics")
+        return
+    formulas = 0
+    for instance in due:
+        if not instance.metric_definition.reads_metrics:
+            compute_derived_metric_task(str(instance.id), only_if_due=True)
+            continue
+        formulas += 1
+        if instance.recompute_from is None:
+            mark([instance.id], instance.last_computed_at or FULL)
+    if formulas:
+        request_recompute()
+    if due:
+        logger.info("derived metrics sweep", due=len(due), formulas=formulas)
+
+
+@db_periodic_task(crontab(hour="3", minute="30"))
+def downsample_derived_metric_samples():
+    """Older than a week, one derived sample per instance per day."""
+    from metrology.derived import downsample_derived_samples
+
+    try:
+        deleted = downsample_derived_samples()
+    except DatabaseError:
+        logger.warning("Metrology tables do not exist yet — skipping downsampling")
+        return
+    if deleted:
+        logger.info("derived metric samples downsampled", deleted=deleted)

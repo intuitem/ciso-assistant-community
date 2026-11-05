@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { enhance } from '$app/forms';
 	import { superForm, defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import type { PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: { error?: string; result?: any } | null } = $props();

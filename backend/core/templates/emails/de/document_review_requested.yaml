@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Dokument '${document_name}' wartet auf Ihre Prüfung"
+body: |
+  Hallo,
+
+  ${actor_name} hat Ihnen eine Revision des folgenden Dokuments zur Prüfung vorgelegt:
+
+  - Dokument: ${document_name}
+  - Version: ${version_number}
+  - Zusammenfassung der Änderungen: ${change_summary}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um sie zu genehmigen oder Änderungen anzufordern: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

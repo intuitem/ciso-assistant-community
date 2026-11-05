@@ -1,10 +1,20 @@
 """Analysis MCP tools for CISO Assistant"""
 
+from decimal import ROUND_HALF_UP, Decimal
+
 from ..client import make_get_request, fetch_all_results
 from ..utils.response_formatter import (
     success_response,
     error_response,
 )
+
+
+def _display_score(value) -> float:
+    """A score as the app shows it: two decimals, half up (the API sends it
+    unrounded)."""
+    return float(
+        Decimal(repr(round(value, 9))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
 
 
 async def get_all_audits_with_metrics(
@@ -66,7 +76,7 @@ async def get_all_audits_with_metrics(
 
         def _fmt_score(value):
             # -1 is the backend sentinel for "nothing scored"
-            return "N/A" if value is None or value == -1 else value
+            return "N/A" if value is None or value == -1 else _display_score(value)
 
         result = "# Compliance Assessments - Summary\n\n"
         result += f"Total Audits: {len(audits)}\n\n"
@@ -330,7 +340,7 @@ async def get_audit_global_score(audit_name: str):
 
     def _fmt(value):
         # -1 is the backend sentinel for "nothing scored"
-        return "N/A" if value is None or value == -1 else value
+        return "N/A" if value is None or value == -1 else _display_score(value)
 
     if not scores.get("scoring_enabled", True):
         return success_response(

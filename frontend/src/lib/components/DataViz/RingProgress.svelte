@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { isDarkTheme, mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { isDarkTheme, mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { roundScore } from '#lib/utils/helpers.js';
 
 	interface Props {
 		width?: string;
@@ -17,6 +18,7 @@
 		strokeWidth?: number;
 		fontSize?: number;
 		title?: string;
+		radius?: string;
 	}
 
 	let {
@@ -32,7 +34,8 @@
 		backgroundColor,
 		strokeWidth = 20,
 		fontSize = 32,
-		title = ''
+		title = '',
+		radius = '65%'
 	}: Props = $props();
 
 	const chart_id = `${name}_${crypto.randomUUID().slice(0, 8)}_div`;
@@ -43,7 +46,7 @@
 		const range = max - min;
 		return range > 0 ? Math.min(100, Math.max(0, ((value - min) / range) * 100)) : 0;
 	});
-	const displayValue = $derived(Math.round(value * 10) / 10);
+	const displayValue = $derived(roundScore(value, isPercentage ? 1 : 2));
 
 	function buildOption() {
 		// Recomputed on every theme flip so the value and track stay readable on both surfaces.
@@ -64,7 +67,7 @@
 			series: [
 				{
 					type: 'gauge',
-					radius: '65%',
+					radius: radius,
 					center: ['50%', '45%'],
 					startAngle: 90,
 					endAngle: -270,

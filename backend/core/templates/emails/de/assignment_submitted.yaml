@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Aufgabe für '${assessment_name}' eingereicht"
+body: |
+  Hallo,
+
+  Für das folgende Audit wurde eine Aufgabe zur Prüfung eingereicht:
+
+  - Audit: ${assessment_name}
+  - Eingereicht von: ${actor_names}
+  - Bewertete Anforderungen: ${requirement_count}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um die Einreichung zu prüfen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

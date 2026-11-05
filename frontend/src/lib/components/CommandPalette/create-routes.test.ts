@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { CREATE_ROUTE_OVERRIDES, URL_MODEL_MAP } from '$lib/utils/crud';
-import { THIRD_PARTY_URL_MODEL } from '$lib/utils/types';
-import type { User } from '$lib/utils/types';
+import { CREATE_ROUTE_OVERRIDES, URL_MODEL_MAP } from '#lib/utils/crud.js';
+import { THIRD_PARTY_URL_MODEL } from '#lib/utils/types.js';
+import type { User } from '#lib/utils/types.js';
 import { buildCreateCommands } from './commands';
 
 const ROOT = '00000000-0000-0000-0000-000000000000';
@@ -14,12 +14,10 @@ const superuser = {
 	root_folder_id: ROOT,
 	is_admin: true,
 	roles: ['BI-RL-GLA'],
-	domain_permissions: {
-		[ROOT]: Object.values(URL_MODEL_MAP).flatMap((model) => [
-			`add_${model.name}`,
-			`view_${model.name}`
-		])
-	}
+	permission_sets: [
+		Object.values(URL_MODEL_MAP).flatMap((model) => [`add_${model.name}`, `view_${model.name}`])
+	],
+	domain_permissions: { [ROOT]: 0 }
 } as unknown as User;
 
 const allFlags = new Proxy({}, { get: () => true }) as Record<string, boolean>;

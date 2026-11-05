@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type * as echarts from 'echarts';
 	const symbolSizeOffset = 10;
 	interface Props {
@@ -44,14 +45,6 @@
 	let currentEmphasisNodeId: number | null = null;
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
-
-	function escapeHtml(str: string): string {
-		return str
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;');
-	}
 
 	// Translate node names
 	const translatedData = $derived({

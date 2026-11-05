@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.0.4](https://img.shields.io/badge/AppVersion-v4.0.4-informational?style=flat-square)
+![Version: 0.13.7](https://img.shields.io/badge/Version-0.13.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.2.1](https://img.shields.io/badge/AppVersion-v4.2.1-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -26,7 +26,7 @@ helm-docs
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://qdrant.github.io/qdrant-helm | qdrant | 1.18.2 |
+| https://qdrant.github.io/qdrant-helm | qdrant | 1.19.1 |
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 16.6.3 |
 
 ## Installing the chart
@@ -149,7 +149,7 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | backend.name | string | `"backend"` | Backend container name |
 | backend.nodeSelector | object | `{}` | Default node selector for backend |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
-| backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence |
+| backend.persistence.localStorage.enabled | bool | `true` | Enable Local Storage persistence |
 | backend.persistence.localStorage.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC |
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |

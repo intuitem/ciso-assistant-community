@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { emailSchema } from '$lib/utils/schemas';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import { emailSchema } from '#lib/utils/schemas.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import Logo from '$lib/components/Logo/Logo.svelte';
+	import Logo from '#lib/components/Logo/Logo.svelte';
 
 	interface Props {
 		data: PageData;

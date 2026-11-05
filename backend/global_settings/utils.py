@@ -119,6 +119,22 @@ def get_user_hideable_feature_flags() -> frozenset:
     return frozenset(declared) & get_supported_feature_flags()
 
 
+def apply_flag_requirements(value: dict, turned_off=frozenset()) -> dict:
+    """Keep the flags a flag needs on with it (FeatureFlagsSerializer.FLAG_REQUIRES):
+    a flag that is on turns them on, unless this write turned one of them off,
+    which turns the flag off instead. Every flags write path calls it. In place;
+    returns `value`."""
+    requires = getattr(_edition_feature_flags_serializer(), "FLAG_REQUIRES", {})
+    for flag, required in requires.items():
+        if not value.get(flag):
+            continue
+        if required & set(turned_off):
+            value[flag] = False
+        else:
+            value.update(dict.fromkeys(required, True))
+    return value
+
+
 def get_feature_flag_defaults() -> dict:
     """The value each supported flag takes when nothing was chosen, read off the
     edition's serializer like `get_supported_feature_flags`."""

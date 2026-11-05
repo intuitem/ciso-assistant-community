@@ -1,6 +1,6 @@
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '$lib/components/ModelTable/types';
-import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '#lib/utils/crud.js';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 

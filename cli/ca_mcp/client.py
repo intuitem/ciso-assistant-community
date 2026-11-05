@@ -1,8 +1,9 @@
 """HTTP client utilities for CISO Assistant API"""
 
+import re
 import requests
 import sys
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 from rich import print as rprint
 from .auth import get_request_token
 from .config import (
@@ -155,6 +156,45 @@ def make_patch_request(endpoint, payload):
         url,
         headers=get_json_headers(),
         json=payload,
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
+
+
+def content_disposition_header(filename):
+    """Content-Disposition for a raw-body upload, as the frontend builds it.
+
+    HTTP headers are Latin-1 only, so a raw UTF-8 filename cannot be sent
+    as-is: emit an ASCII-safe fallback plus an RFC 5987 `filename*`. The ASCII
+    pass also drops CR/LF and quoting characters, blocking header injection.
+    """
+    ascii_name = re.sub(r"[^\x20-\x7e]", "-", filename)
+    ascii_name = re.sub(r'[;"%\\]', "-", ascii_name)
+    return (
+        f'attachment; filename="{ascii_name}"; '
+        f"filename*=utf-8''{quote(filename, safe='')}"
+    )
+
+
+def make_upload_request(endpoint, filename, data):
+    """
+    POST a file as the raw request body (no multipart), as the frontend does
+
+    Args:
+        endpoint: API endpoint (e.g., "/evidences/{id}/upload/")
+        filename: Original file name, carried in Content-Disposition
+        data: File content (bytes or a binary file object, streamed)
+
+    Returns:
+        Response object
+    """
+    url = f"{API_URL}{endpoint}"
+    headers = get_headers()
+    headers["Content-Disposition"] = content_disposition_header(filename)
+    return requests.post(
+        url,
+        headers=headers,
+        data=data,
         verify=VERIFY_CERTIFICATE,
         timeout=HTTP_TIMEOUT,
     )

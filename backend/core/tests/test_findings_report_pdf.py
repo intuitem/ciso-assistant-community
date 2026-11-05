@@ -1,9 +1,14 @@
 """The findings report, rendered by Typst."""
 
+import io
+from datetime import datetime, timezone
+
+import openpyxl
 import pymupdf
 import pytest
 from django.urls import reverse
 from rest_framework import status as http
+from rest_framework.test import APIClient
 
 from core.generators import findings_assessment_context
 from core.models import Finding, FilteringLabel, FindingsAssessment
@@ -12,6 +17,7 @@ from core.tests.test_audit_word_export import (  # noqa: F401
     admin_client,
     app_config,
 )
+from global_settings.models import GlobalSettings
 from iam.models import Folder
 
 
@@ -38,6 +44,8 @@ def _findings(assessment_obj, severities, rich=False):
                 severity=severity,
                 status="identified",
                 observation="Confirmed with the owner." if rich else "",
+                recommendation="Rotate the key." if rich else "",
+                priority=1 if rich else None,
             )
         )
     if rich:
@@ -58,7 +66,7 @@ def _render(assessment_obj, lang="en"):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
 def test_renders_in_each_locale(assessment, lang):
     _findings(assessment, [4, 2])
     pdf, _ = _render(assessment, lang)
@@ -130,17 +138,31 @@ def test_endpoint_returns_a_pdf(admin_client, assessment):  # noqa: F811
 def test_locale_fallback_is_whole_document():
     assert localized_template("findings_report", "de") == "findings_report_en.typ"
     assert localized_template("findings_report", "fr") == "findings_report_fr.typ"
+    assert localized_template("findings_report", "tr") == "findings_report_tr.typ"
+
+
+def test_turkish_status_label_names_the_undefined_marker():
+    """`Finding.Status.UNDEFINED` is stored as "--", so the status badge needs
+    that key, not only `undefined`."""
+    src = (TEMPLATE_DIR / "findings_report_tr.typ").read_text()
+    block = src[src.index("#let status-label = (") :]
+    block = block[: block.index("\n)")]
+    assert '"--":' in block
 
 
 def test_templates_avoid_auto_column_sizing():
     """`auto` overflows and overlaps once content is wider than the page."""
-    for name in ("findings_report_en.typ", "findings_report_fr.typ"):
+    for name in (
+        "findings_report_en.typ",
+        "findings_report_fr.typ",
+        "findings_report_tr.typ",
+    ):
         src = (TEMPLATE_DIR / name).read_text()
         assert "columns: (auto, 1fr, auto, 1fr, auto, 1fr)" not in src
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
 def test_every_optional_block_compiles(assessment, lang):
     """Optional blocks are only compiled when their data is present: a fixture
     with empty labels never reaches the label branch, which is how a broken
@@ -206,7 +228,11 @@ def test_actors_are_named_and_observations_are_whole(assessment):
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "lang,category,status",
-    [("en", "Pentest", "In progress"), ("fr", "Test d'intrusion", "En cours")],
+    [
+        ("en", "Pentest", "In progress"),
+        ("fr", "Test d'intrusion", "En cours"),
+        ("tr", "Sızma testi", "Devam ediyor"),
+    ],
 )
 def test_assessment_category_and_status_are_localised(
     assessment, lang, category, status
@@ -223,3 +249,145 @@ def test_assessment_category_and_status_are_localised(
 
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
     assert category in text and status in text
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+def test_recommendation_and_priority_reach_the_report(assessment, lang):
+    """Issue #4944: the report dropped the recommendation and the priority."""
+    _findings(assessment, [3], rich=True)
+    pdf, payload = _render(assessment, lang)
+
+    finding = payload["groups"][0]["findings"][0]
+    assert finding["recommendation"] == "Rotate the key."
+    assert finding["priority"] == "P1"
+
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert "Rotate the key." in text
+    assert "P1" in text
+
+
+@pytest.mark.django_db
+def test_markdown_export_carries_recommendation_and_priority(
+    admin_client,  # noqa: F811
+    assessment,
+):
+    _findings(assessment, [3], rich=True)
+    url = reverse("findings-assessments-md", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    content = response.content.decode()
+    assert "- **Priority**: P1" in content
+    assert "- **Recommendation**: Rotate the key." in content
+
+
+@pytest.mark.django_db
+def test_xlsx_export_carries_recommendation(admin_client, assessment):  # noqa: F811
+    _findings(assessment, [3], rich=True)
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    sheet = openpyxl.load_workbook(io.BytesIO(response.content))["Findings"]
+    rows = list(sheet.iter_rows(values_only=True))
+    header, first = rows[0], rows[1]
+    assert "recommendation" in header
+    assert first[header.index("recommendation")] == "Rotate the key."
+
+
+@pytest.mark.django_db
+def test_xlsx_export_strips_control_characters(admin_client, assessment):  # noqa: F811
+    """openpyxl refuses control characters, which used to fail the whole export."""
+    (finding,) = _findings(assessment, [3], rich=True)
+    finding.recommendation = "Rotate\x0b the key."
+    finding.save()
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    sheet = openpyxl.load_workbook(io.BytesIO(response.content))["Findings"]
+    rows = list(sheet.iter_rows(values_only=True))
+    header, first = rows[0], rows[1]
+    assert first[header.index("recommendation")] == "Rotate the key."
+
+
+@pytest.mark.django_db
+def test_xlsx_export_escapes_formula_hidden_behind_control_character(
+    admin_client,  # noqa: F811
+    assessment,
+):
+    (finding,) = _findings(assessment, [3], rich=True)
+    finding.name = "=1+1"
+    finding.recommendation = '\x01=HYPERLINK("http://x")'
+    finding.save()
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    sheet = openpyxl.load_workbook(io.BytesIO(response.content))["Findings"]
+    rows = list(sheet.iter_rows(values_only=True))
+    header, first = rows[0], rows[1]
+    assert first[header.index("name")] == "'=1+1"
+    assert first[header.index("recommendation")] == '\'=HYPERLINK("http://x")'
+    assert first[header.index("priority")] == "P1"
+
+
+@pytest.mark.django_db
+def test_xlsx_export_keeps_undefined_status_importable(
+    admin_client,  # noqa: F811
+    assessment,
+):
+    (finding,) = _findings(assessment, [3], rich=True)
+    finding.status = Finding.Status.UNDEFINED
+    finding.save()
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    sheet = openpyxl.load_workbook(io.BytesIO(response.content))["Findings"]
+    rows = list(sheet.iter_rows(values_only=True))
+    header, first = rows[0], rows[1]
+    assert first[header.index("status")] == "--"
+
+
+@pytest.mark.django_db
+def test_xlsx_export_prints_times_in_the_instance_timezone(
+    admin_client: APIClient,  # noqa: F811
+    assessment: FindingsAssessment,
+) -> None:
+    settings, _ = GlobalSettings.objects.get_or_create(name="general")
+    settings.value = {**(settings.value or {}), "report_timezone": "Europe/Paris"}
+    settings.save()
+    [finding] = _findings(assessment, [3])
+    Finding.objects.filter(pk=finding.pk).update(
+        created_at=datetime(2026, 7, 1, 8, 0, tzinfo=timezone.utc)
+    )
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+
+    sheet = openpyxl.load_workbook(io.BytesIO(admin_client.get(url).content))[
+        "Findings"
+    ]
+    header, first = list(sheet.iter_rows(values_only=True))[:2]
+    assert first[header.index("created_at")] == "2026-07-01 10:00:00 (UTC+02:00)"
+
+
+@pytest.mark.django_db
+def test_markdown_export_prints_times_in_the_instance_timezone(
+    admin_client: APIClient,  # noqa: F811
+    assessment: FindingsAssessment,
+) -> None:
+    settings, _ = GlobalSettings.objects.get_or_create(name="general")
+    settings.value = {**(settings.value or {}), "report_timezone": "Europe/Paris"}
+    settings.save()
+    FindingsAssessment.objects.filter(pk=assessment.pk).update(
+        created_at=datetime(2026, 7, 1, 8, 0, tzinfo=timezone.utc)
+    )
+    url = reverse("findings-assessments-md", kwargs={"pk": str(assessment.pk)})
+
+    content = admin_client.get(url).content.decode()
+
+    assert "- **Created**: 2026-07-01 10:00:00 (UTC+02:00)" in content
+    assert content.index("- **Time Zone**: Europe/Paris") < content.index(
+        "## Assessment Information"
+    )

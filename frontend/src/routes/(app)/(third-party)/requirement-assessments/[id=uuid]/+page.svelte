@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { complianceResultColorMap, complianceStatusColorMap } from '#lib/utils/constants.js';
 	import {
 		displayScoreColor,
 		formatScoreValue,
@@ -10,19 +10,20 @@
 		getRequirementTitle,
 		getSecureRedirect,
 		alignmentColorMap
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
-	import { hideSuggestions } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import { hideSuggestions } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import { countMasked } from '$lib/utils/related-visibility';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import { countMasked } from '#lib/utils/related-visibility.js';
 
 	interface Props {
 		data: PageData;
@@ -163,38 +164,53 @@
 			</div>
 		{/if}
 		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
-			{#if showScore}
-				<div class="shrink-0 relative">
-					<Progress value={formatScoreValue(score, max_score, false, min_score)} min={0} max={100}>
-						<Progress.Circle class="[--size:--spacing(10)]">
-							<Progress.CircleTrack />
-							<Progress.CircleRange class={displayScoreColor(score, max_score, false, min_score)} />
-						</Progress.Circle>
-						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="text-xs font-bold">{score}</span>
+			<ScorePair>
+				{#snippet implementation()}
+					{#if showScore}
+						<div
+							class="shrink-0 relative"
+							title={showDocumentationScore ? m.implementationScore() : m.score()}
+						>
+							<Progress
+								value={formatScoreValue(score, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(score, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{score}</span>
+								</div>
+							</Progress>
 						</div>
-					</Progress>
-				</div>
-			{/if}
-			{#if showDocumentationScore}
-				<div class="shrink-0 relative">
-					<Progress
-						value={formatScoreValue(documentationScore, max_score, false, min_score)}
-						min={0}
-						max={100}
-					>
-						<Progress.Circle class="[--size:--spacing(10)]">
-							<Progress.CircleTrack />
-							<Progress.CircleRange
-								class={displayScoreColor(documentationScore, max_score, false, min_score)}
-							/>
-						</Progress.Circle>
-						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="text-xs font-bold">{documentationScore}</span>
+					{/if}
+				{/snippet}
+				{#snippet documentation()}
+					{#if showDocumentationScore}
+						<div class="shrink-0 relative" title={m.documentationScore()}>
+							<Progress
+								value={formatScoreValue(documentationScore, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(documentationScore, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{documentationScore}</span>
+								</div>
+							</Progress>
 						</div>
-					</Progress>
-				</div>
-			{/if}
+					{/if}
+				{/snippet}
+			</ScorePair>
 		{/if}
 		<div class="ml-auto shrink-0 self-center">
 			<AuditTrailButton

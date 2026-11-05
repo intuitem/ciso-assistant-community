@@ -12,10 +12,16 @@ class StoredLibrarySerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
     loaded_library = serializers.SerializerMethodField()
     filtering_labels = FieldsRelatedField(many=True, fields=["id", "label"])
-    is_preset = serializers.BooleanField(read_only=True)
+    is_preset = serializers.SerializerMethodField()
     profile = serializers.SerializerMethodField()
     scaffolded_objects = serializers.SerializerMethodField()
     overview = serializers.SerializerMethodField()
+
+    def get_is_preset(self, obj) -> bool:
+        # Annotated by the list, which leaves `content` unread.
+        if hasattr(obj, "_is_preset"):
+            return obj._is_preset
+        return obj.is_preset
 
     def get_loaded_library(self, obj) -> Optional[str]:
         loaded_library = obj.get_loaded_library()
@@ -32,12 +38,12 @@ class StoredLibrarySerializer(ReferentialSerializer):
         ]
 
     def get_profile(self, obj) -> Optional[dict]:
-        if obj.is_preset:
+        if self.get_is_preset(obj):
             return obj.content.get("preset", {}).get("profile")
         return None
 
     def get_scaffolded_objects(self, obj) -> Optional[list]:
-        if not obj.is_preset:
+        if not self.get_is_preset(obj):
             return None
         items = obj.content.get("preset", {}).get("scaffolded_objects", [])
         if not items:

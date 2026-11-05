@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		row: any;

@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import SliderInput from '$lib/components/Forms/SliderInput.svelte';
-	import ProjectCustomFieldsPanel from '$lib/components/Forms/ProjectCustomFieldsPanel.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import SliderInput from '#lib/components/Forms/SliderInput.svelte';
+	import ProjectCustomFieldsPanel from '#lib/components/Forms/ProjectCustomFieldsPanel.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -146,7 +146,7 @@
 				errorMessage = String(text || `HTTP ${res.status}`);
 				return false;
 			}
-			await invalidateAll();
+			await refreshAll();
 			return true;
 		} finally {
 			savingSection = null;
@@ -954,7 +954,7 @@
 				model="pmbok.project"
 				folderId={project.folder?.id}
 				values={project.custom_fields}
-				onSaved={invalidateAll}
+				onSaved={refreshAll}
 			/>
 		</Tabs.Content>
 		<Tabs.Content value="charter" class="p-6">
@@ -1565,6 +1565,7 @@
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="actors?user__is_third_party=False"
+							lazy
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],
@@ -1589,6 +1590,7 @@
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="actors?user__is_third_party=False"
+							lazy
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],

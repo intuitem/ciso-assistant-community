@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Ihre Aufgabe für '${assessment_name}' wurde zur Überarbeitung zurückgegeben"
+body: |
+  Hallo,
+
+  Ihre Aufgabe für das folgende Audit wurde zur Überarbeitung zurückgegeben:
+
+  - Audit: ${assessment_name}
+  ${reviewer_observation}
+
+  Wenden Sie sich für weitere Informationen bitte an das zuständige Team.
+
+  Vielen Dank.

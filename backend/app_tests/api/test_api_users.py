@@ -8,6 +8,7 @@ from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.serializers import UserWriteSerializer
+from core.startup import ensure_user_creator_group
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
@@ -1594,3 +1595,161 @@ class TestExpiredUsersTaskLastAdminBackstop:
         expired_user.refresh_from_db()
         assert expired_admin.is_active is True
         assert expired_user.is_active is False
+
+
+@pytest.mark.django_db
+class TestUserCreatorEditionGate:
+    """The User creator role and group only exist where DELEGATED_USER_CREATION
+    is set (the enterprise settings), mirroring CONFIGURABLE_DEFAULT_ROLE."""
+
+    def test_not_provisioned_without_the_setting(self):
+        # The test database was built by startup() under community settings.
+        assert not Role.objects.filter(name="BI-RL-UCR").exists()
+        assert not UserGroup.objects.filter(name="BI-UG-GUC").exists()
+
+    def test_startup_provisions_them_with_the_setting(self):
+        from django.apps import apps as django_apps
+        from django.test import override_settings
+
+        from core.startup import startup
+
+        migratable = [
+            c for c in django_apps.get_app_configs() if c.models_module is not None
+        ]
+        with override_settings(DELEGATED_USER_CREATION=True):
+            startup(sender=migratable[-1])
+
+        assert Role.objects.filter(name="BI-RL-UCR", builtin=True).exists()
+        assert UserGroup.objects.filter(
+            name="BI-UG-GUC", folder=Folder.get_root_folder(), builtin=True
+        ).exists()
+
+
+@pytest.mark.django_db
+class TestGlobalUserCreatorGroup:
+    """The builtin "Global - User creator" group lets a non-admin (typically a
+    domain manager) create users, and nothing more: placing them in groups
+    still needs change_usergroup, and editing or deleting them stays with
+    administrators."""
+
+    @pytest.fixture(autouse=True)
+    def user_creator_group(self, app_config):
+        ensure_user_creator_group()
+
+    @pytest.fixture
+    def creator_client(self, authenticated_client):
+        creator = User.objects.create_user("creator@tests.com")
+        UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
+        return _client_for(creator)
+
+    def test_group_grants_create_and_view_user_on_global_only(self, app_config):
+        group = UserGroup.objects.get(name="BI-UG-GUC")
+        ra = RoleAssignment.objects.get(user_group=group)
+
+        assert group.builtin and ra.builtin
+        assert ra.is_recursive is False
+        assert list(ra.perimeter_folders.all()) == [Folder.get_root_folder()]
+        assert set(ra.role.permissions.values_list("codename", flat=True)) == {
+            "add_user",
+            "view_user",
+        }
+        assert str(group) == "Global - User creator"
+
+    def test_domain_group_backfill_keeps_it_non_recursive(self, app_config):
+        """create_default_ug_and_ra forces recursion on the per-domain builtin
+        assignments; it must leave this Global one alone."""
+        domain = Folder.objects.create(
+            name="backfill domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        assert UserGroup.objects.filter(folder=domain, builtin=True).exists()
+
+        ra = RoleAssignment.objects.get(user_group__name="BI-UG-GUC")
+        assert ra.is_recursive is False
+
+    def test_interrupted_provisioning_leaves_nothing_behind(self, app_config):
+        """The group and its grant are written together: a run that fails half-way
+        must not leave a group that the next startup's existence check would
+        skip forever."""
+        UserGroup.objects.filter(name="BI-UG-GUC").delete()
+
+        with patch.object(RoleAssignment.objects, "create", side_effect=RuntimeError):
+            with pytest.raises(RuntimeError):
+                ensure_user_creator_group()
+        assert not UserGroup.objects.filter(name="BI-UG-GUC").exists()
+
+        ensure_user_creator_group()
+        ra = RoleAssignment.objects.get(user_group__name="BI-UG-GUC")
+        assert ra.is_recursive is False
+        assert list(ra.perimeter_folders.all()) == [Folder.get_root_folder()]
+
+    def test_member_can_create_and_list_users(self, creator_client):
+        response = creator_client.post(
+            reverse("users-list"), {"email": "newcomer@tests.com"}, format="json"
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED, response.content
+        listed = creator_client.get(reverse("users-list"), {"limit": 1000}).json()
+        assert "newcomer@tests.com" in {row["email"] for row in listed["results"]}
+
+    def test_member_cannot_grant_groups_on_create(self, creator_client):
+        reader_group = UserGroup.objects.get(name="BI-UG-GAD")
+
+        response = creator_client.post(
+            reverse("users-list"),
+            {"email": "preloaded@tests.com", "user_groups": [str(reader_group.id)]},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert not User.objects.filter(email="preloaded@tests.com").exists()
+
+    def test_member_cannot_edit_or_delete_users(self, creator_client):
+        target = User.objects.create_user("existing@tests.com")
+
+        patch_response = creator_client.patch(
+            reverse("users-detail", args=[target.id]),
+            {"first_name": "Renamed"},
+            format="json",
+        )
+        delete_response = creator_client.delete(
+            reverse("users-detail", args=[target.id])
+        )
+
+        assert patch_response.status_code == status.HTTP_403_FORBIDDEN
+        assert delete_response.status_code == status.HTTP_403_FORBIDDEN
+        target.refresh_from_db()
+        assert target.first_name == ""
+
+    def test_domain_manager_creates_user_then_places_them(self, authenticated_client):
+        """The intended flow: create the user, then add them to a group of the
+        manager's own domain through add-members."""
+        domain = Folder.objects.create(
+            name="managed domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        manager = User.objects.create_user("domain.manager@tests.com")
+        UserGroup.objects.get(name="BI-UG-DMA", folder=domain).user_set.add(manager)
+        UserGroup.objects.get(name="BI-UG-GUC").user_set.add(manager)
+        client = _client_for(manager)
+
+        created = client.post(
+            reverse("users-list"), {"email": "recruit@tests.com"}, format="json"
+        )
+        assert created.status_code == status.HTTP_201_CREATED, created.content
+        recruit = User.objects.get(email="recruit@tests.com")
+
+        analysts = UserGroup.objects.get(name="BI-UG-ANA", folder=domain)
+        placed = client.post(
+            reverse("user-groups-add-members", args=[analysts.id]),
+            {"users": [str(recruit.id)]},
+            format="json",
+        )
+        assert placed.status_code == status.HTTP_200_OK, placed.content
+        assert analysts.user_set.filter(pk=recruit.pk).exists()

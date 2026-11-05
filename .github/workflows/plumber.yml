@@ -19,10 +19,10 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: getplumber/plumber@a697e9c316b058d279861719c73b87093fb5a60f # v0.3.86
+      - uses: getplumber/plumber@4804289c25a4417f689d8fdc6622a293bb47fc0e # v0.6.1
         with:
           github-token: ${{ secrets.PLUMBER_TOKEN || github.token }}
-          threshold: 85
+          min-points: 100
           # Publish this repo's Plumber Score to score.getplumber.io so the
           # README badge stays live. Only publishes on the default branch;
           # never fails the build. All published scores are public.

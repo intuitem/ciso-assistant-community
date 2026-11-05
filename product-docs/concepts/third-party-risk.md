@@ -20,6 +20,8 @@ The actual review of a third party is an **entity assessment**. It can:
 - Use a questionnaire — custom, or imported from a library (CAIQ, SIG, …).
 - Trigger an audit that lives in the entity's third-party workspace, so the third party can fill it in directly.
 - Capture the residual risk you accept by working with this entity.
+- Carry **labels**, to sort and filter assessments in the list. The list offers labels as an opt-in column and a filter, labels can be added or removed in bulk, and the CSV/Excel export of the list includes them. Only labels you are allowed to see appear, on screen and in the export.
+- Carry [custom fields](../features/custom-fields.md), when the feature is enabled.
 
 ### The third-party workspace
 
@@ -33,7 +35,7 @@ Instances created before this rule was introduced gave each *assessment* its own
 
 ### Revisions
 
-Reassessing a vendor is a **New revision**, from the entity assessment's page. It creates a fresh assessment for the same third party in the same workspace, with a questionnaire that carries over the previous round's answers, results and evidences — so the vendor confirms or corrects rather than starting from a blank form. Solutions, reviewers, authors and representatives come across too.
+Reassessing a vendor is a **New revision**, from the entity assessment's page. It creates a fresh assessment for the same third party in the same workspace, with a questionnaire that carries over the previous round's answers, results and evidences — so the vendor confirms or corrects rather than starting from a blank form. Solutions, reviewers, authors, representatives, labels and custom field values come across too.
 
 Two things deliberately do not: the **criticality** rating and its inputs, which are a judgement to be made again each round, and the source assessment itself, which is left untouched as the record of the previous round.
 
@@ -42,6 +44,21 @@ Because name and version identify an assessment within a domain, a revision need
 ### The register
 
 The entity list carries a **Last assessment** column — the most recent assessment for each third party, with its date and status — so the register answers "who is overdue for a review?" without opening anything. Third parties that have never been assessed are shown as **Never assessed**, and can be filtered on that.
+
+## Tier
+
+An entity's **tier** is its criticality on your organisation's scale, managed under **Third parties > Criticality**. The default scale has four tiers: _Critical_, _Important_, _Standard_ and _Low impact_. Solutions are ranked on the same scale.
+
+The tier and the entity assessment answer different questions. The tier is a qualification: how much the vendor matters to you, and so how closely to follow it. The assessment is the vendor's posture: how well it protects what you entrust to it. A critical vendor can have an excellent posture.
+
+A tier is set in one of two ways:
+
+- **Assessed.** A tiering form is filled for the entity and accepted. The form computes a value from the answers, and its bands and knock-out rules turn that value into a tier. Two forms ship with the platform, one of them built on the EBIOS RM stakeholder criteria.
+- **Forced.** Someone who can edit the entity picks a tier directly, with an optional reason.
+
+The latest decision wins, whichever way it was made. Each change is kept in the entity's **Tier history**: the tier before and after, who made the change, when, and which response it came from.
+
+See [Tiering your vendors](../guides/vendor-tiering.md) for the walkthrough and how to adapt the forms to your method.
 
 ## External ratings
 
@@ -103,4 +120,5 @@ Treating third parties as a parallel surface — rather than just "another perim
 - [Domains](domains.md)
 - [Audits](audits.md)
 - [Guide → Third-party risk management](../guides/tprm.md)
+- [Guide → Tiering your vendors](../guides/vendor-tiering.md)
 - [Vocabulary → Entity / Solution / Contract / Representative / Entity assessment](../introduction/vocabulary.md)

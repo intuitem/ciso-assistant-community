@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, test, expect } from 'vitest';
 import { get } from 'svelte/store';
 import {
 	slugifyFrameworkName,
@@ -8,13 +8,21 @@ import {
 	validateDraft,
 	buildTree,
 	serializeDraft,
+	hydrateDraft,
 	createBuilderState,
 	nodePassesIgFilter,
+	applyUrnMap,
+	describeSaveError,
+	rebaseExpression,
+	staircaseCoverage,
+	levelsInGroupOrder,
+	type OutcomeRule,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
 	type Question
 } from './builder-state';
+import { BuilderRequestError } from './builder-api';
 
 const FW_ID = 'a1b2c3d4-0000-0000-0000-000000000000';
 
@@ -153,6 +161,7 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 		typical_evidence: null,
 		weight: 1,
 		importance: '',
+		evidence_required: false,
 		display_mode: 'default',
 		threats: [],
 		reference_controls: [],
@@ -399,6 +408,7 @@ describe('buildTree', () => {
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
+			evidence_required: false,
 			display_mode: 'default',
 			framework: 'fw-1',
 			folder: 'folder-1',
@@ -428,6 +438,7 @@ describe('buildTree', () => {
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
+			evidence_required: false,
 			display_mode: 'default',
 			framework: 'fw-1',
 			folder: 'folder-1',
@@ -547,6 +558,7 @@ describe('serializeDraft round-trip', () => {
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
+			evidence_required: false,
 			display_mode: 'default',
 			framework: 'fw-1',
 			folder: 'folder-1',
@@ -558,6 +570,37 @@ describe('serializeDraft round-trip', () => {
 		const ids = draft.nodes.map((x) => x.id);
 		expect(new Set(ids).size).toBe(ids.length);
 		expect(ids).toEqual(['n1']);
+	});
+
+	it('keeps a page score aggregation through serialize and hydrate', () => {
+		const fw = makeFramework();
+		const page: RequirementNode = {
+			id: 'p1',
+			urn: 'urn:x:qf_page:form:p1',
+			ref_id: 'p1',
+			name: 'Data access',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			aggregation: 'max',
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			evidence_required: false,
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1',
+			threats: [],
+			reference_controls: []
+		};
+		const draft = serializeDraft(fw, buildTree([page], []));
+		expect(draft.nodes[0].aggregation).toBe('max');
+		const { nodes } = hydrateDraft(draft, 'fw-1');
+		expect(nodes[0].aggregation).toBe('max');
 	});
 });
 
@@ -1074,6 +1117,107 @@ describe('node_id repair on draft load', () => {
 	});
 });
 
+describe('applyUrnMap', () => {
+	it('adopts canonical URNs by editor URN or id, keeping ids', () => {
+		const node = makeNode({ urn: null, ref_id: '2', parent_urn: null });
+		const q: Question = {
+			...makeQuestion({ requirement_node: node.id }),
+			id: 'tmp-q',
+			urn: 'urn:custom:risk:question:form:2-q1',
+			depends_on: {
+				question: 'urn:custom:risk:question:form:2-q0',
+				answers: ['urn:custom:risk:question_choice:form:2-q0-c1']
+			},
+			choices: [{ ...makeChoice('tmp-c', 1), urn: null, question: 'tmp-q' }]
+		};
+		const page = 'urn:custom:risk:qf_page:form:2';
+		const [mapped] = applyUrnMap(buildTree([node], [q]), {
+			[node.id.toLowerCase()]: page,
+			'urn:custom:risk:question:form:2-q1': `${page}:question:2-q1`,
+			'urn:custom:risk:question:form:2-q0': `${page}:question:2-q0`,
+			'urn:custom:risk:question_choice:form:2-q0-c1': `${page}:question:2-q0:choice:1`,
+			'tmp-c': `${page}:question:2-q1:choice:1`
+		});
+		expect(mapped.node.urn).toBe(page);
+		expect(mapped.node.id).toBe(node.id);
+		const question = mapped.questions[0].question;
+		expect(question.id).toBe('tmp-q');
+		expect(question.urn).toBe(`${page}:question:2-q1`);
+		expect(question.depends_on).toEqual({
+			question: `${page}:question:2-q0`,
+			answers: [`${page}:question:2-q0:choice:1`]
+		});
+		expect(question.choices[0].urn).toBe(`${page}:question:2-q1:choice:1`);
+	});
+
+	it('leaves unmapped URNs alone', () => {
+		const node = makeNode({ urn: 'urn:custom:risk:qf_page:form:1', parent_urn: null });
+		const [mapped] = applyUrnMap(buildTree([node], []), {});
+		expect(mapped.node.urn).toBe('urn:custom:risk:qf_page:form:1');
+	});
+});
+
+describe('rebaseExpression', () => {
+	const urnMap = {
+		'urn:x:risk:qf_page:f:1': 'urn:x:risk:qf_page:f:intro',
+		'urn:x:risk:question:f:1-q1': 'urn:x:risk:qf_page:f:intro:question:1-q1',
+		'urn:x:risk:question_choice:f:1-q1-c1': 'urn:x:risk:qf_page:f:intro:question:1-q1:choice:1',
+		'tmp-id': 'urn:x:risk:qf_page:f:intro:question:1-q1'
+	};
+
+	it('follows renamed pages, questions and choices', () => {
+		expect(rebaseExpression('pages["1"].score', urnMap)).toBe('pages["intro"].score');
+		expect(rebaseExpression("pages['1'].score > 2.0", urnMap)).toBe("pages['intro'].score > 2.0");
+		expect(rebaseExpression('"1-q1-c1" in answers["1-q1"].selected_choices', urnMap)).toBe(
+			'"intro:question:1-q1:choice:1" in answers["intro:question:1-q1"].selected_choices'
+		);
+	});
+
+	it('leaves plain values and unknown ids alone', () => {
+		expect(rebaseExpression('answers["1-q1"].value == "1"', urnMap)).toBe(
+			'answers["intro:question:1-q1"].value == "1"'
+		);
+		expect(rebaseExpression('pages["other"].score', urnMap)).toBe('pages["other"].score');
+		expect(rebaseExpression('pages["1"].score', {})).toBe('pages["1"].score');
+	});
+
+	it('follows renamed framework requirements', () => {
+		const frameworkMap = {
+			'urn:x:risk:req_node:fw:b-draft': 'urn:x:risk:req_node:fw:b',
+			'urn:x:risk:req_node:fw:b-draft:question:q7': 'urn:x:risk:req_node:fw:b:question:1'
+		};
+		expect(
+			rebaseExpression(
+				'requirements["b-draft"].score > 1 && answers["b-draft:question:q7"].answered',
+				frameworkMap
+			)
+		).toBe('requirements["b"].score > 1 && answers["b:question:1"].answered');
+	});
+});
+
+describe('describeSaveError', () => {
+	it('lists where each expression failed', () => {
+		const text = describeSaveError(
+			new BuilderRequestError('invalidExpressions', [
+				{ where: 'outcome', ref_id: 'criticality', error: 'no such key' },
+				{ where: 'page_visibility', ref_id: 'security', error: 'bad' },
+				'urn:x is duplicated'
+			])
+		);
+		const [summary, ...lines] = text.split('\n');
+		expect(summary).not.toBe('invalidExpressions');
+		expect(lines).toEqual([
+			'Rule criticality: no such key',
+			'Page security: bad',
+			'urn:x is duplicated'
+		]);
+	});
+
+	it('falls back to the message alone', () => {
+		expect(describeSaveError(new Error('boom'))).toBe('boom');
+	});
+});
+
 describe('URN rewrite on namespace / ref_id change', () => {
 	it('rewrites node, question, depends_on and choice URNs when ref_id changes', () => {
 		const fw = makeFramework({ ref_id: 'old', urn_namespace: 'custom' });
@@ -1395,5 +1539,127 @@ describe('nodePassesIgFilter', () => {
 		expect(nodePassesIgFilter(null, new Set(['A']))).toBe(false);
 		expect(nodePassesIgFilter(undefined, new Set(['A']))).toBe(false);
 		expect(nodePassesIgFilter([], new Set(['A']))).toBe(false);
+	});
+});
+
+describe('staircaseCoverage', () => {
+	const leaf = (groups: string[]) =>
+		({
+			node: { assessable: true, implementation_groups: groups },
+			questions: [],
+			children: [],
+			depth: 2
+		}) as unknown as BuilderNode;
+	const section = (...children: BuilderNode[]) =>
+		({ node: { assessable: false }, questions: [], children, depth: 1 }) as unknown as BuilderNode;
+	const roots = [section(leaf(['1', '2']), leaf(['3'])), section(leaf(['2'])), section()];
+	const rule = {
+		ref_id: 'ml',
+		annotation: '',
+		color: null,
+		expression: '',
+		kind: 'staircase' as const,
+		staircase_levels: ['1', '2', '3']
+	};
+
+	test('counts per section, listed tags', () => {
+		expect(staircaseCoverage({ ...rule, per: 'depth_1' }, roots)).toEqual({
+			sections: 2,
+			counts: [1, 2, 1]
+		});
+	});
+
+	test('cumulative tags count at higher levels, whole audit is one section', () => {
+		expect(staircaseCoverage({ ...rule, cumulative: true }, roots)).toEqual({
+			sections: 1,
+			counts: [1, 2, 3]
+		});
+	});
+});
+
+describe('levelsInGroupOrder', () => {
+	const rules = [
+		{
+			ref_id: 'ml',
+			annotation: '',
+			color: null,
+			expression: '',
+			kind: 'staircase' as const,
+			staircase_levels: ['1', '2']
+		},
+		{ ref_id: 'flag', annotation: '', color: null, expression: 'true' }
+	];
+	const levelsAfter = (before: string[], after: string[]) =>
+		levelsInGroupOrder(rules, before, after)[0].staircase_levels;
+
+	test('levels follow a reorder and leave other rules alone', () => {
+		const [ml, flag] = levelsInGroupOrder(rules, ['1', '2', '3'], ['2', '1', '3']);
+		expect(ml.staircase_levels).toEqual(['2', '1']);
+		expect(flag).toBe(rules[1]);
+	});
+
+	test('a renamed group renames its level, a deleted one drops it', () => {
+		expect(levelsAfter(['1', '2', '3'], ['one', '2', '3'])).toEqual(['one', '2']);
+		expect(levelsAfter(['1', '2', '3'], ['1', '3'])).toEqual(['1']);
+		expect(levelsAfter(['1', '2'], ['1', '1', '2'])).toEqual(['1', '2']);
+	});
+});
+
+describe('setBaseLocale on outcome rules', () => {
+	test('keeps staircase levels as group ids and swaps their labels', () => {
+		const rules = [
+			{
+				ref_id: 'ml',
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'staircase' as const,
+				label: 'Maturity level',
+				staircase_levels: ['1', '2'],
+				per: 'depth_1' as const,
+				floor_label: 'Level zero',
+				section_label: 'strategies',
+				translations: {
+					fr: {
+						label: 'Niveau de maturité',
+						floor_label: 'Niveau zéro',
+						section_label: 'stratégies'
+					}
+				}
+			},
+			{
+				ref_id: 'risk',
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'rating' as const,
+				levels: [{ ref_id: 'low', label: 'Low', translations: { fr: { label: 'Faible' } } }]
+			}
+		];
+		const s = createBuilderState(
+			makeFramework({
+				available_languages: ['en', 'fr'],
+				outcomes_definition: rules as unknown as OutcomeRule[]
+			}),
+			[],
+			[]
+		);
+		s.setBaseLocale('fr');
+		const [ml, risk] = get(s.framework).outcomes_definition ?? [];
+		expect(ml.staircase_levels).toEqual(['1', '2']);
+		expect([ml.label, ml.floor_label, ml.section_label]).toEqual([
+			'Niveau de maturité',
+			'Niveau zéro',
+			'stratégies'
+		]);
+		expect(ml.translations?.en).toEqual({
+			label: 'Maturity level',
+			floor_label: 'Level zero',
+			section_label: 'strategies'
+		});
+		expect(risk.levels?.[0]).toMatchObject({
+			label: 'Faible',
+			translations: { en: { label: 'Low' } }
+		});
 	});
 });

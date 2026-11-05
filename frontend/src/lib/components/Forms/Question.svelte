@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { isQuestionVisible } from '$lib/utils/helpers';
-	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { isQuestionVisible } from '#lib/utils/helpers.js';
+	import * as m from '#paraglide/messages.js';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 	import SliderInput from './SliderInput.svelte';
 
@@ -27,6 +27,8 @@
 		references?: Record<string, any[]>;
 		/** Search the objects an object-reference question may point at. */
 		onSearchReferences?: (urn: string, search: string) => Promise<any[]>;
+		/** Object-reference questions shown but not editable (e.g. a fixed subject). */
+		lockedUrns?: string[];
 	}
 
 	let {
@@ -45,8 +47,11 @@
 		onRemoveAttachment,
 		attachmentHref,
 		references = {},
-		onSearchReferences
+		onSearchReferences,
+		lockedUrns = []
 	}: Props = $props();
+
+	const questionEntries = $derived(Object.entries(questions ?? {}));
 
 	// Object-reference pickers: one open dropdown at a time, results per question.
 	let refOpen = $state<string | null>(null);
@@ -170,11 +175,22 @@
 	{/if}
 
 	<ul class="control flex flex-col gap-4 whitespace-pre-line">
-		{#each Object.entries(questions) as [urn, question]}
+		{#each questionEntries as [urn, question], i}
+			{@const group = question.config?.group}
+			{#if group && group !== questionEntries[i - 1]?.[1].config?.group}
+				<li
+					class="mt-2 border-l-4 border-surface-300-700 pl-3 text-sm font-semibold"
+					style:border-color={question.config?.group_color}
+					style:color={question.config?.group_color}
+				>
+					{group}
+				</li>
+			{/if}
 			<!-- Only render if visible according to depends_on -->
 			{#if isQuestionVisible(question, internalAnswers, questions)}
 				<li
 					class="flex flex-col justify-between gap-2 rounded-xl border border-surface-200-800 bg-surface-50-950 px-4 py-3"
+					data-question-urn={urn}
 				>
 					<p class="flex flex-wrap items-baseline gap-x-2 font-semibold">
 						<span>{question.text}</span>
@@ -187,6 +203,9 @@
 							>{safeTranslate(question.type)}</span
 						>
 					</p>
+					{#if question.annotation && !shallow}
+						<p class="text-xs text-surface-600-400 whitespace-pre-line">{question.annotation}</p>
+					{/if}
 
 					{#if shallow}
 						{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}
@@ -255,8 +274,8 @@
 										{#if option.description}
 											<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 												<Tooltip.Trigger>
-													{#snippet child({ props })}
-														<span {...props} class="underline"
+													{#snippet element(attributes)}
+														<span {...attributes} class="underline"
 															><i class="ml-2 fa-solid fa-circle-info"></i></span
 														>
 													{/snippet}
@@ -295,8 +314,8 @@
 									{#if option.description}
 										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 											<Tooltip.Trigger>
-												{#snippet child({ props })}
-													<span {...props} class="underline"
+												{#snippet element(attributes)}
+													<span {...attributes} class="underline"
 														><i class="ml-2 fa-solid fa-circle-info"></i></span
 													>
 												{/snippet}
@@ -425,6 +444,8 @@
 						{/if}
 					{:else if question.type === 'object_reference'}
 						{@const picked = references[urn] ?? []}
+						{@const locked =
+							disabled || lockedUrns.some((u) => u.toLowerCase() === urn.toLowerCase())}
 						<div class="flex flex-col gap-2">
 							{#if picked.length}
 								<ul class="flex flex-col gap-1">
@@ -437,7 +458,7 @@
 											{#if option.folder}
 												<span class="shrink-0 text-xs text-surface-400">{option.folder}</span>
 											{/if}
-											{#if !disabled && onSearchReferences}
+											{#if !locked && onSearchReferences}
 												<button
 													type="button"
 													class="shrink-0 text-surface-400 hover:text-error-500"
@@ -450,11 +471,16 @@
 										</li>
 									{/each}
 								</ul>
-							{:else if disabled || !onSearchReferences}
+								{#if locked && !disabled}
+									<p class="text-xs text-surface-500" data-testid="subject-locked">
+										<i class="fa-solid fa-lock mr-1"></i>{m.subjectLockedHint()}
+									</p>
+								{/if}
+							{:else if locked || !onSearchReferences}
 								<p class="text-xs italic text-surface-400">{m.objectReferenceNone()}</p>
 							{/if}
 
-							{#if !disabled && onSearchReferences}
+							{#if !locked && onSearchReferences}
 								<div class="flex items-center gap-2">
 									<input
 										type="text"
@@ -492,6 +518,11 @@
 															: 'fa-circle'} text-xs opacity-60"
 													></i>
 													<span class="min-w-0 grow truncate">{option.label}</span>
+													{#if option.on_subject}
+														<span class="badge preset-tonal-primary shrink-0 text-xs"
+															>{m.referenceOnSubject()}</span
+														>
+													{/if}
 													{#if option.folder}
 														<span class="shrink-0 text-xs text-surface-400">{option.folder}</span>
 													{/if}

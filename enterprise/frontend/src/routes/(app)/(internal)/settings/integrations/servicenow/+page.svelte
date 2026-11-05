@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { copy } from '@svelte-put/copy';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import type { ActionData, PageData } from './$types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
-	import { ASSET_LOCAL_FIELDS } from '$lib/components/Forms/integrationModels';
-	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import FieldMapper from '#lib/components/Forms/FieldMapper.svelte';
+	import { ASSET_LOCAL_FIELDS } from '#lib/components/Forms/integrationModels.js';
+	import WebhookSecretGenerator from '#lib/components/Forms/WebhookSecretGenerator.svelte';
 	import { z } from 'zod';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { describeTestFailure } from '#lib/utils/integration-test.js';
 
 	interface Props {
 		data: PageData;
@@ -62,7 +63,7 @@
 
 	let showApiTokenField = $state(!data?.config?.has_api_token);
 	let showWebhookSecretField = $state(!data?.config?.has_webhook_secret);
-	let testConnectionState: { loading: boolean; success?: boolean } = $state({
+	let testConnectionState: { loading: boolean; success?: boolean; detail?: string } = $state({
 		loading: false,
 		success: undefined
 	});
@@ -159,7 +160,11 @@
 										configuration_id: page.data?.config?.id
 									})
 								});
-								testConnectionState = { loading: false, success: response.ok };
+								testConnectionState = {
+									loading: false,
+									success: response.ok,
+									detail: response.ok ? '' : await describeTestFailure(response)
+								};
 								if (testConnectionState.success && !page.data?.config?.id) {
 									// Submit the form to save the integration if the connection is successful
 									form.submit();
@@ -172,7 +177,11 @@
 							{:else if testConnectionState.success === true}
 								<span class="text-success-700-300 font-semibold">{m.connectionSuccessful()}</span>
 							{:else if testConnectionState.success === false}
-								<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
+								<span class="text-error-500 font-semibold"
+									>{m.connectionFailed()}{testConnectionState.detail
+										? `: ${testConnectionState.detail}`
+										: ''}</span
+								>
 							{/if}
 						</div>
 					</span>

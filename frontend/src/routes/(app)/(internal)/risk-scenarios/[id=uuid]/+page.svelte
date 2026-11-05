@@ -1,36 +1,36 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import type { ActionData, PageData } from './$types';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { isDark } from '$lib/utils/helpers';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { isDark } from '#lib/utils/helpers.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import RiskAcceptancesSection from '#lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
 
 	import { goto } from '$app/navigation';
-	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
+	import { openRiskAcceptanceModal } from '#lib/utils/riskAcceptance.js';
 
 	import { onMount } from 'svelte';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import SyncToActionsRiskModal from '#lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -640,7 +640,7 @@
 </div>
 
 {#if showRelations}
-	{#await import('$lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+	{#await import('#lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
 		<RelationsDrawer
 			open={relationsOpen}
 			urlModel="risk-scenarios"

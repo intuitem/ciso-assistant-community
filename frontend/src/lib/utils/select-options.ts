@@ -1,5 +1,5 @@
-import { formatSelectFieldData } from '$lib/utils/select-field';
-import type { SelectField } from '$lib/utils/crud';
+import { formatSelectFieldData } from '#lib/utils/select-field.js';
+import type { SelectField } from '#lib/utils/crud.js';
 
 /** Choice-field options, fetched when a form opens rather than on page load. */
 export async function ensureSelectOptions(
@@ -40,6 +40,7 @@ export async function ensureSelectOptions(
 	);
 
 	// Always set: forms index it unguarded. Always fresh: they rewrite option
-	// values in place, and the model can outlive the modal.
-	model.selectOptions = structuredClone({ ...existing, ...fetched });
+	// values in place, and the model can outlive the modal. JSON rather than
+	// structuredClone: `existing` may be a $state proxy, which can't be cloned.
+	model.selectOptions = JSON.parse(JSON.stringify({ ...existing, ...fetched }));
 }

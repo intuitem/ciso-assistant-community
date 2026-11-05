@@ -133,3 +133,4 @@ A **policy** is a specific type of applied control: a document describing what i
 - [Findings binders](findings-assessments.md)
 - [Philosophy → Decoupling principle](../introduction/philosophy.md)
 - [Vocabulary → Applied control / Reference control / Evidence](../introduction/vocabulary.md)
+- [Security exceptions](security-exceptions.md)

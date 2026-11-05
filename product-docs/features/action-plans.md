@@ -75,3 +75,4 @@ PDF exports are templated — they include the assessment metadata at the top an
 - [Flash mode](flash-mode.md) — bulk authoring of controls from inside an action plan.
 - [Kanban mode](kanban-mode.md) — the visual swim-lane alternative for monitoring the same set of controls by status.
 - [Audits](../concepts/audits.md), [Risk assessments](../concepts/risk-assessments.md), [Findings binders](../concepts/findings-assessments.md), [EBIOS RM](../concepts/ebios-rm.md), [Quantitative risk studies](../concepts/quantitative-risk-studies.md) — the assessments that expose an action plan.
+- [Risk trajectory](risk-trajectory.md) — turns the ETAs of a risk assessment's extra controls into a projected date for each scenario's residual risk.

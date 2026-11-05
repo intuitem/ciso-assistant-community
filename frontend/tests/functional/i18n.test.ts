@@ -1,6 +1,6 @@
 import { locales, setLocale } from '../../src/paraglide/runtime.js';
 import { expect, test } from '../utils/test-utils.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 test('switching locale works properly', async ({ logedPage, analyticsPage, sideBar, page }) => {
 	// Cycles through every locale with a full SSR reload each time: the default

@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

@@ -207,3 +207,32 @@ class TestTechniqueRoundTrip:
         # whichever null-urn row the DB happens to return first.
         assert rebuilt.catalog is None
         assert rebuilt.parent is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("method", ["manual", "express"])
+def test_round_trip_keeps_quotation_method_and_likelihood(
+    ebios_domain, admin_user, method
+):
+    """Operating modes are not exported: the scenario likelihood must survive alone."""
+    scenario = ebios_domain["operational_scenario"]
+    EbiosRMStudy.objects.filter(pk=scenario.ebios_rm_study_id).update(
+        quotation_method=method
+    )
+    OperationalScenario.objects.filter(pk=scenario.pk).update(likelihood=2)
+
+    response = export_domain(ebios_domain["domain"], admin_user)
+    json_dump = process_uploaded_file(io.BytesIO(response.content))
+    result = import_objects(
+        json_dump,
+        domain_name="TTPX Imported",
+        load_missing_libraries=True,
+        user=admin_user,
+    )
+    assert result["message"] == "Import successful"
+
+    imported = OperationalScenario.objects.get(
+        ebios_rm_study__folder__name="TTPX Imported"
+    )
+    assert imported.ebios_rm_study.quotation_method == method
+    assert imported.likelihood == 2

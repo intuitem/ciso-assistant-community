@@ -5,37 +5,70 @@ ref_id: ITIL4
 name: "ITIL 4 Management Practices"
 description: "Référentiel complet des 34 pratiques de gestion d'ITIL 4 pour le management des services. Inclut 14 pratiques de gestion générale, 17 pratiques de gestion de services et 3 pratiques de gestion technique. Version 1.0 alignée sur le référentiel AXELOS."
 copyright: © AXELOS Limited 2019. ITIL® est une marque déposée d'AXELOS Limited.
-version: 1
+version: 2
 publication_date: 2026-02-16
 provider: AXELOS Limited
 packager: Nadia QOUDHADH
+translations:
+  es:
+    name: "Prácticas de gestión de ITIL 4"
+    description: "Marco de referencia completo de las 34 prácticas de gestión de ITIL 4 para la gestión de servicios. Incluye 14 prácticas de gestión general, 17 prácticas de gestión de servicios y 3 prácticas de gestión técnica. Versión 1.0 alineada con el marco de AXELOS."
+    copyright: "© AXELOS Limited 2019. ITIL® es una marca registrada de AXELOS Limited."
 objects:
   framework:
     urn: urn:intuitem:risk:framework:itil4
     ref_id: ITIL4
     name: "ITIL 4 Management Practices"
     description: "Référentiel complet des 34 pratiques de gestion d'ITIL 4 pour le management des services"
+    translations:
+      es:
+        name: "Prácticas de gestión de ITIL 4"
+        description: "Marco de referencia completo de las 34 prácticas de gestión de ITIL 4 para la gestión de servicios"
     min_score: 0
     max_score: 5
     scores_definition:
       - score: 0
         name: "Non défini"
         description: "La pratique n'est pas mise en œuvre"
+        translations:
+          es:
+            name: "No definido"
+            description: "La práctica no está implementada"
       - score: 1
         name: "Initial"
         description: "La pratique est réalisée de manière réactive et non standardisée"
+        translations:
+          es:
+            name: "Inicial"
+            description: "La práctica se realiza de forma reactiva y no estandarizada"
       - score: 2
         name: "Reproductible"
         description: "La pratique est gérée mais encore réactive"
+        translations:
+          es:
+            name: "Repetible"
+            description: "La práctica está gestionada, pero sigue siendo reactiva"
       - score: 3
         name: "Défini"
         description: "La pratique est proactive et standardisée"
+        translations:
+          es:
+            name: "Definido"
+            description: "La práctica es proactiva y está estandarizada"
       - score: 4
         name: "Maîtrisé"
         description: "La pratique est mesurée et contrôlée"
+        translations:
+          es:
+            name: "Gestionado"
+            description: "La práctica se mide y se controla"
       - score: 5
         name: "Optimisé"
         description: "La pratique est continuellement améliorée"
+        translations:
+          es:
+            name: "Optimizado"
+            description: "La práctica se mejora de forma continua"
     requirement_nodes:
       # ===== NŒUD RACINE =====
       - urn: urn:intuitem:risk:req_node:itil4:root
@@ -44,6 +77,10 @@ objects:
         ref_id: "ITIL4-ROOT"
         name: "ITIL 4 Management Practices"
         description: "Les 34 pratiques de gestion ITIL 4 réparties en trois catégories"
+        translations:
+          es:
+            name: "Prácticas de gestión de ITIL 4"
+            description: "Las 34 prácticas de gestión de ITIL 4, distribuidas en tres categorías"
 
       # ===== CATÉGORIE 1 : Pratiques de gestion générale =====
       - urn: urn:intuitem:risk:req_node:itil4:general
@@ -53,6 +90,10 @@ objects:
         ref_id: "ITIL4-GEN"
         name: "Pratiques de gestion générale"
         description: "Pratiques adaptées des domaines de gestion d'entreprise générale"
+        translations:
+          es:
+            name: "Prácticas de gestión general"
+            description: "Prácticas adoptadas y adaptadas de los dominios de gestión general de empresas"
 
       - urn: urn:intuitem:risk:req_node:itil4:architecture-management
         assessable: true
@@ -61,6 +102,10 @@ objects:
         ref_id: "ITIL4-GEN-01"
         name: "Gestion de l’architecture"
         description: "Détailler l’ensemble des éléments constituant une organisation et les interactions entre ces éléments"
+        translations:
+          es:
+            name: "Gestión de la arquitectura"
+            description: "Comprender todos los elementos que componen una organización y cómo se interrelacionan"
 
       - urn: urn:intuitem:risk:req_node:itil4:continual-improvement
         assessable: true
@@ -69,6 +114,10 @@ objects:
         ref_id: "ITIL4-GEN-02"
         name: "Amélioration continue"
         description: "Aligner les pratiques et les services de l’organisation sur les besoins changeants du business"
+        translations:
+          es:
+            name: "Mejora continua"
+            description: "Alinear las prácticas y los servicios de la organización con las necesidades cambiantes del negocio"
 
       - urn: urn:intuitem:risk:req_node:itil4:information-security
         assessable: true
@@ -77,6 +126,10 @@ objects:
         ref_id: "ITIL4-GEN-03"
         name: "Gestion de la sécurité de l’information"
         description: "Protéger les informations dont l’organisation a besoin pour mener ses activités"
+        translations:
+          es:
+            name: "Gestión de la seguridad de la información"
+            description: "Proteger la información que la organización necesita para llevar a cabo su negocio"
 
       - urn: urn:intuitem:risk:req_node:itil4:knowledge-management
         assessable: true
@@ -85,6 +138,10 @@ objects:
         ref_id: "ITIL4-GEN-04"
         name: "Gestion des connaissances"
         description: "Maintenir et améliorer l'utilisation efficace des informations et connaissances dans l'organisation"
+        translations:
+          es:
+            name: "Gestión del conocimiento"
+            description: "Mantener y mejorar el uso eficaz y eficiente de la información y el conocimiento en la organización"
 
       - urn: urn:intuitem:risk:req_node:itil4:measurement-reporting
         assessable: true
@@ -93,6 +150,10 @@ objects:
         ref_id: "ITIL4-GEN-05"
         name: "Mesure et rapports"
         description: "Supporter une prise de décision éclairée et une amélioration continue"
+        translations:
+          es:
+            name: "Medición y reporte"
+            description: "Apoyar la toma de decisiones informada y la mejora continua"
 
       - urn: urn:intuitem:risk:req_node:itil4:organizational-change
         assessable: true
@@ -101,6 +162,10 @@ objects:
         ref_id: "ITIL4-GEN-06"
         name: "Gestion du changement organisationnel"
         description: "S'assurer que les changements organisationnels sont implémentés avec succès"
+        translations:
+          es:
+            name: "Gestión del cambio organizacional"
+            description: "Asegurar que los cambios en la organización se implementen con éxito"
 
       - urn: urn:intuitem:risk:req_node:itil4:portfolio-management
         assessable: true
@@ -109,6 +174,10 @@ objects:
         ref_id: "ITIL4-GEN-07"
         name: "Gestion de portefeuille"
         description: "Gérer la combinaison optimale de programmes, projets et services"
+        translations:
+          es:
+            name: "Gestión del portafolio"
+            description: "Gestionar la combinación óptima de programas, proyectos, productos y servicios"
 
       - urn: urn:intuitem:risk:req_node:itil4:project-management
         assessable: true
@@ -117,6 +186,10 @@ objects:
         ref_id: "ITIL4-GEN-08"
         name: "Gestion des projets"
         description: "Assurer la livraison réussie de l'ensemble des projets"
+        translations:
+          es:
+            name: "Gestión de proyectos"
+            description: "Asegurar la entrega exitosa de todos los proyectos de la organización"
 
       - urn: urn:intuitem:risk:req_node:itil4:relationship-management
         assessable: true
@@ -125,6 +198,10 @@ objects:
         ref_id: "ITIL4-GEN-09"
         name: "Gestion des relations"
         description: "Établir et entretenir des liens avec les parties prenantes"
+        translations:
+          es:
+            name: "Gestión de las relaciones"
+            description: "Establecer y fomentar los vínculos con las partes interesadas"
 
       - urn: urn:intuitem:risk:req_node:itil4:risk-management
         assessable: true
@@ -133,6 +210,10 @@ objects:
         ref_id: "ITIL4-GEN-10"
         name: "Gestion des risques"
         description: "Identifier, évaluer et gérer les risques"
+        translations:
+          es:
+            name: "Gestión de riesgos"
+            description: "Identificar, evaluar y gestionar los riesgos de la organización"
 
       - urn: urn:intuitem:risk:req_node:itil4:financial-management
         assessable: true
@@ -141,6 +222,10 @@ objects:
         ref_id: "ITIL4-GEN-11"
         name: "Gestion financière des services"
         description: "Gérer efficacement les ressources et investissements financiers"
+        translations:
+          es:
+            name: "Gestión financiera de los servicios"
+            description: "Gestionar de forma eficaz los recursos y las inversiones financieras de la organización"
 
       - urn: urn:intuitem:risk:req_node:itil4:strategy-management
         assessable: true
@@ -149,6 +234,10 @@ objects:
         ref_id: "ITIL4-GEN-12"
         name: "Gestion de la stratégie"
         description: "Formuler les objectifs et allouer les ressources nécessaires"
+        translations:
+          es:
+            name: "Gestión de la estrategia"
+            description: "Formular los objetivos de la organización y asignar los recursos necesarios para alcanzarlos"
 
       - urn: urn:intuitem:risk:req_node:itil4:supplier-management
         assessable: true
@@ -157,6 +246,10 @@ objects:
         ref_id: "ITIL4-GEN-13"
         name: "Gestion des fournisseurs"
         description: "Gérer les performances et relations avec les fournisseurs"
+        translations:
+          es:
+            name: "Gestión de proveedores"
+            description: "Gestionar el desempeño de los proveedores y la relación con ellos"
 
       - urn: urn:intuitem:risk:req_node:itil4:workforce-talent
         assessable: true
@@ -165,6 +258,10 @@ objects:
         ref_id: "ITIL4-GEN-14"
         name: "Gestion des effectifs et des talents"
         description: "Disposer des bonnes personnes avec les compétences appropriées"
+        translations:
+          es:
+            name: "Gestión de la fuerza laboral y del talento"
+            description: "Asegurar que la organización cuente con las personas adecuadas, con las competencias apropiadas"
 
       # ===== CATÉGORIE 2 : Pratiques de gestion de services =====
       - urn: urn:intuitem:risk:req_node:itil4:service
@@ -174,6 +271,10 @@ objects:
         ref_id: "ITIL4-SVC"
         name: "Pratiques de gestion de services"
         description: "Pratiques développées dans les secteurs de la gestion des services et de l'ITSM"
+        translations:
+          es:
+            name: "Prácticas de gestión de servicios"
+            description: "Prácticas desarrolladas en la industria de la gestión de servicios y de la gestión de servicios de TI (ITSM)"
 
       - urn: urn:intuitem:risk:req_node:itil4:availability-management
         assessable: true
@@ -182,6 +283,10 @@ objects:
         ref_id: "ITIL4-SVC-01"
         name: "Gestion de la disponibilité"
         description: "Garantir que les services délivrent les niveaux de disponibilité convenus"
+        translations:
+          es:
+            name: "Gestión de la disponibilidad"
+            description: "Asegurar que los servicios entreguen los niveles de disponibilidad acordados"
 
       - urn: urn:intuitem:risk:req_node:itil4:business-analysis
         assessable: true
@@ -190,6 +295,10 @@ objects:
         ref_id: "ITIL4-SVC-02"
         name: "Business analysis"
         description: "Analyser les besoins métier et recommander des solutions"
+        translations:
+          es:
+            name: "Análisis de negocio"
+            description: "Analizar las necesidades del negocio y recomendar soluciones"
 
       - urn: urn:intuitem:risk:req_node:itil4:capacity-performance
         assessable: true
@@ -198,6 +307,10 @@ objects:
         ref_id: "ITIL4-SVC-03"
         name: "Gestion de la capacité et de la performance"
         description: "S'assurer que les services atteignent les niveaux de performance attendus"
+        translations:
+          es:
+            name: "Gestión de la capacidad y el desempeño"
+            description: "Asegurar que los servicios alcancen el desempeño acordado y esperado"
 
       - urn: urn:intuitem:risk:req_node:itil4:change-control
         assessable: true
@@ -206,6 +319,10 @@ objects:
         ref_id: "ITIL4-SVC-04"
         name: "Contrôle des changements"
         description: "Maximiser le nombre de changements réussis en évaluant les risques"
+        translations:
+          es:
+            name: "Control de cambios"
+            description: "Maximizar el número de cambios exitosos, evaluando adecuadamente los riesgos"
 
       - urn: urn:intuitem:risk:req_node:itil4:incident-management
         assessable: true
@@ -214,6 +331,10 @@ objects:
         ref_id: "ITIL4-SVC-05"
         name: "Gestion des incidents"
         description: "Réduire l'impact des incidents en restaurant le service rapidement"
+        translations:
+          es:
+            name: "Gestión de incidentes"
+            description: "Minimizar el impacto negativo de los incidentes restableciendo el servicio lo antes posible"
 
       - urn: urn:intuitem:risk:req_node:itil4:it-asset-management
         assessable: true
@@ -222,6 +343,10 @@ objects:
         ref_id: "ITIL4-SVC-06"
         name: "Gestion des actifs informatiques"
         description: "Planifier et gérer le cycle de vie des actifs informatiques"
+        translations:
+          es:
+            name: "Gestión de activos de TI"
+            description: "Planificar y gestionar el ciclo de vida completo de los activos de TI"
 
       - urn: urn:intuitem:risk:req_node:itil4:monitoring-event
         assessable: true
@@ -230,6 +355,10 @@ objects:
         ref_id: "ITIL4-SVC-07"
         name: "Surveillance et gestion des événements"
         description: "Observer les services et enregistrer les changements d'état"
+        translations:
+          es:
+            name: "Monitoreo y gestión de eventos"
+            description: "Observar sistemáticamente los servicios y registrar los cambios de estado"
 
       - urn: urn:intuitem:risk:req_node:itil4:problem-management
         assessable: true
@@ -238,6 +367,10 @@ objects:
         ref_id: "ITIL4-SVC-08"
         name: "Gestion des problèmes"
         description: "Identifier les causes des incidents et gérer les solutions de contournement"
+        translations:
+          es:
+            name: "Gestión de problemas"
+            description: "Identificar las causas de los incidentes y gestionar las soluciones temporales y los errores conocidos"
 
       - urn: urn:intuitem:risk:req_node:itil4:release-management
         assessable: true
@@ -246,6 +379,10 @@ objects:
         ref_id: "ITIL4-SVC-09"
         name: "Gestion des mises en production"
         description: "Mettre à disposition des services et fonctionnalités nouveaux ou modifiés"
+        translations:
+          es:
+            name: "Gestión de liberaciones"
+            description: "Poner a disposición servicios y funcionalidades nuevos o modificados"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-catalogue
         assessable: true
@@ -254,6 +391,10 @@ objects:
         ref_id: "ITIL4-SVC-10"
         name: "Gestion du catalogue des services"
         description: "Fournir une source unique d'informations sur les services"
+        translations:
+          es:
+            name: "Gestión del catálogo de servicios"
+            description: "Proporcionar una fuente única y consistente de información sobre los servicios"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-configuration
         assessable: true
@@ -262,6 +403,10 @@ objects:
         ref_id: "ITIL4-SVC-11"
         name: "Gestion de la configuration des services"
         description: "Assurer la disponibilité d'informations fiables sur la configuration"
+        translations:
+          es:
+            name: "Gestión de la configuración del servicio"
+            description: "Asegurar que haya información precisa y confiable sobre la configuración de los servicios cuando y donde se necesite"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-continuity
         assessable: true
@@ -270,6 +415,10 @@ objects:
         ref_id: "ITIL4-SVC-12"
         name: "Gestion de la continuité des services"
         description: "Maintenir les services en cas de désastre"
+        translations:
+          es:
+            name: "Gestión de la continuidad del servicio"
+            description: "Asegurar que la disponibilidad y el desempeño de los servicios se mantengan en un nivel suficiente en caso de desastre"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-design
         assessable: true
@@ -278,6 +427,10 @@ objects:
         ref_id: "ITIL4-SVC-13"
         name: "Conception des services"
         description: "Concevoir des produits et services adaptés au besoin et à l'utilisation"
+        translations:
+          es:
+            name: "Diseño de servicios"
+            description: "Diseñar productos y servicios adecuados para su propósito y su uso"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-desk
         assessable: true
@@ -286,6 +439,10 @@ objects:
         ref_id: "ITIL4-SVC-14"
         name: "Centre de services"
         description: "Point de contact unique pour les utilisateurs"
+        translations:
+          es:
+            name: "Mesa de servicio"
+            description: "Punto único de contacto para los usuarios"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-level
         assessable: true
@@ -294,6 +451,10 @@ objects:
         ref_id: "ITIL4-SVC-15"
         name: "Gestion des niveaux de service"
         description: "Définir et gérer les niveaux de service cibles"
+        translations:
+          es:
+            name: "Gestión de niveles de servicio"
+            description: "Establecer objetivos claros, basados en el negocio, para los niveles de servicio, y gestionarlos"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-request
         assessable: true
@@ -302,6 +463,10 @@ objects:
         ref_id: "ITIL4-SVC-16"
         name: "Gestion des demandes de service"
         description: "Traiter efficacement les demandes de service des utilisateurs"
+        translations:
+          es:
+            name: "Gestión de solicitudes de servicio"
+            description: "Atender de forma eficaz y amigable las solicitudes de servicio de los usuarios"
 
       - urn: urn:intuitem:risk:req_node:itil4:service-validation
         assessable: true
@@ -310,6 +475,10 @@ objects:
         ref_id: "ITIL4-SVC-17"
         name: "Validation et test des services"
         description: "S'assurer que les services répondent aux exigences définies"
+        translations:
+          es:
+            name: "Validación y prueba de servicios"
+            description: "Asegurar que los servicios cumplan los requisitos definidos"
 
       # ===== CATÉGORIE 3 : Pratiques de gestion technique =====
       - urn: urn:intuitem:risk:req_node:itil4:technical
@@ -319,6 +488,10 @@ objects:
         ref_id: "ITIL4-TECH"
         name: "Pratiques de gestion technique"
         description: "Pratiques adaptées des domaines de gestion technologique pour les services informatiques"
+        translations:
+          es:
+            name: "Prácticas de gestión técnica"
+            description: "Prácticas adaptadas de los dominios de gestión de tecnología para los servicios de TI"
 
       - urn: urn:intuitem:risk:req_node:itil4:deployment-management
         assessable: true
@@ -327,6 +500,10 @@ objects:
         ref_id: "ITIL4-TECH-01"
         name: "Gestion des déploiements"
         description: "Déplacer des composants vers les environnements de production"
+        translations:
+          es:
+            name: "Gestión de despliegues"
+            description: "Mover componentes de hardware o software, nuevos o modificados, a los entornos de producción"
 
       - urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
         assessable: true
@@ -335,6 +512,10 @@ objects:
         ref_id: "ITIL4-TECH-02"
         name: "Gestion de l’infrastructure et des plates-formes"
         description: "Superviser l'infrastructure et les plates-formes utilisées"
+        translations:
+          es:
+            name: "Gestión de infraestructura y plataformas"
+            description: "Supervisar la infraestructura y las plataformas que utiliza la organización"
 
       - urn: urn:intuitem:risk:req_node:itil4:software-development
         assessable: true
@@ -343,3 +524,7 @@ objects:
         ref_id: "ITIL4-TECH-03"
         name: "Développement et gestion des logiciels"
         description: "S'assurer que les applications répondent aux besoins des parties prenantes"
+        translations:
+          es:
+            name: "Desarrollo y gestión de software"
+            description: "Asegurar que las aplicaciones satisfagan las necesidades de las partes interesadas"

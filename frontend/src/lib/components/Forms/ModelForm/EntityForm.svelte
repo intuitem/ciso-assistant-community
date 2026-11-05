@@ -1,16 +1,16 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
 	import LegalIdentifierField from '../LegalIdentifierField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -42,8 +42,7 @@
 		return ((dependency * penetration) / (maturity * trust)).toFixed(2).replace(/\.?0+$/, '');
 	};
 
-	let doraEnabled = $derived(!!$page.data?.featureflags?.dora);
-
+	let doraEnabled = $derived(!!page.data?.featureflags?.dora);
 	let defaultCriticality = $derived(
 		getCriticality(
 			$formData.default_dependency,
@@ -76,6 +75,26 @@
 		helpText={m.moreOnTerminologiesHelpText()}
 		multiple
 	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint={`tiers?selectable=${object.tier?.id ?? object.tier ?? ''}`}
+		field="tier"
+		cacheLock={cacheLocks['tier']}
+		bind:cachedValue={formDataCache['tier']}
+		label={m.tier()}
+		helpText={m.tierHelpText()}
+		nullable
+	/>
+	{#if ($formData.tier ?? null) !== (object.tier?.id ?? object.tier ?? null)}
+		<TextField
+			{form}
+			field="tier_note"
+			label={m.tierNote()}
+			helpText={m.tierNoteHelpText()}
+			cacheLock={cacheLocks['tier_note']}
+			bind:cachedValue={formDataCache['tier_note']}
+		/>
+	{/if}
 {/if}
 <LegalIdentifierField
 	{form}
