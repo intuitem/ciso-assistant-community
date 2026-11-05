@@ -170,6 +170,7 @@ services:
     command:
       {% if enable_debug %}- "--api.insecure=true"{% endif %}
       - "--providers.docker=true"
+      - "--providers.docker.network=ciso-assistant-default"
       - "--providers.docker.exposedbydefault=false"{% if can_do_tls %}
       - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
       - "--entrypoints.web.address=:80"
@@ -187,5 +188,6 @@ services:
 
 networks:
   default:
+    name: ciso-assistant-default
   cache:
     internal: true
