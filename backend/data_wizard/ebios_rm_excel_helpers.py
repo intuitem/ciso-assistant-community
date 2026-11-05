@@ -7,6 +7,8 @@ import re
 from openpyxl import load_workbook
 from io import BytesIO
 
+from core.utils import unescape_excel_formula
+
 # Sheet name patterns - match by prefix
 SHEET_PREFIXES = {
     "study": "1.1",
@@ -64,7 +66,7 @@ def get_sheet_rows(sheet):
         row_dict = {}
         for i, cell in enumerate(row):
             if i < len(headers):
-                row_dict[headers[i]] = cell
+                row_dict[headers[i]] = unescape_excel_formula(cell)
         result.append(row_dict)
     return result
 
