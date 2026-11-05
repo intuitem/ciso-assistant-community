@@ -52,6 +52,7 @@
 	"estonian": "Εσθονικά",
 	"slovak": "Σλοβακικά",
 	"slovenian": "Σλοβενικά",
+	"norwegian": "Νορβηγικά",
 	"addThreat": "Προσθήκη απειλής",
 	"addVulnerability": "Προσθήκη ευπάθειας",
 	"addReferenceControl": "Προσθήκη πρότυπου ελέγχου",
@@ -2298,8 +2299,6 @@
 	"builderUnsavedChangesNavigation": "Έχετε μη αποθηκευμένες αλλαγές που θα χαθούν. Έξοδος ούτως ή άλλως;",
 	"fieldVisibility": "Ορατότητα πεδίων",
 	"fieldVisibilityHelpText": "Ελέγξτε ποια πεδία μπορεί να βλέπει και να επεξεργάζεται κάθε ρόλος.",
-	"visibilityAuditorRespondent": "Επιθεωρητής + Ερωτώμενος",
-	"visibilityAuditorOnly": "Μόνο επιθεωρητής",
 	"visibilityHidden": "Κρυφό",
 	"answers": "Απαντήσεις",
 	"respondentAlignment": "Συμφωνία ερωτώμενου",
@@ -2748,5 +2747,7 @@
 	"dpiaRequirementChanges": "Ιστορικό απαίτησης DPIA",
 	"previously": "Προηγουμένως",
 	"vulnerabilityOpenWithRemediationDate": "Ανοιχτή ευπάθεια έχει ημερομηνία αποκατάστασης",
-	"vulnerabilityResolvedWithoutRemediationDate": "Επιλυμένη ευπάθεια δεν έχει ημερομηνία αποκατάστασης"
+	"vulnerabilityResolvedWithoutRemediationDate": "Επιλυμένη ευπάθεια δεν έχει ημερομηνία αποκατάστασης",
+	"reportTimezone": "Ζώνη ώρας αναφορών",
+	"reportTimezoneHelpText": "Περιοχή που χρησιμοποιείται για τις ώρες στις αναφορές και τις εξαγωγές. Κάθε ώρα εμφανίζει τη διαφορά της από την UTC. Οι ώρες στην οθόνη δεν επηρεάζονται."
 }

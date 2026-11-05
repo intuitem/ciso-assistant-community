@@ -76,6 +76,22 @@
 	bind:cachedValue={formDataCache['classification']}
 />
 
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors?is_third_party=false"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="reviewers"
+	helpText={m.documentReviewersHelpText()}
+	label={m.reviewers()}
+	cacheLock={cacheLocks['reviewers']}
+	bind:cachedValue={formDataCache['reviewers']}
+/>
+
 <Dropdown
 	open={false}
 	style="hover:text-primary-700"

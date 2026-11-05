@@ -1590,6 +1590,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'processings', urlModel: 'processings' },
 			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'classification', urlModel: 'classification-levels' }
 		],
@@ -1602,6 +1603,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'document_type' },
 			{ field: 'folder' },
 			{ field: 'classification' },
+			{ field: 'reviewers' },
 			{ field: 'policies' },
 			{ field: 'applied_controls' },
 			{ field: 'task_templates' },
@@ -1762,7 +1764,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'generalSettings',
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
-		selectFields: [{ field: 'security_objective_scale' }, { field: 'default_language' }]
+		selectFields: [
+			{ field: 'security_objective_scale' },
+			{ field: 'default_language' },
+			{ field: 'report_timezone' }
+		]
 	},
 	'feature-flags': {
 		name: 'featureFlags',
@@ -1865,7 +1871,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
-			{ field: 'validation_flows', urlModel: 'validation-flows' }
+			{ field: 'validation_flows', urlModel: 'validation-flows' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'conclusion' }],
 		// The first ten show without expanding, so they carry what an analyst reads
@@ -1889,6 +1896,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'observation' },
 			{ field: 'reference_link' },
 			{ field: 'evidence' },
+			{ field: 'filtering_labels' },
 			{ field: 'is_locked' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
@@ -3905,6 +3913,24 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'genericcollection',
 				urlModel: 'policies',
 				addExisting: { parentField: 'policies' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'applied-controls',
+				addExisting: {
+					parentField: 'applied_controls',
+					optionsEndpoint: 'applied-controls?exclude_category=policy'
+				}
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'document-containers',
+				addExisting: { parentField: 'document_containers' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'business-impact-analysis',
+				addExisting: { parentField: 'business_impact_analyses' }
 			}
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]

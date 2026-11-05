@@ -1,4 +1,5 @@
 import { expect, test } from '../utils/test-utils.js';
+import { generateWorkingPat } from '../utils/pat.js';
 
 test('my profile settings page loads correctly', async ({ logedPage, page }) => {
 	await test.step('navigate to my profile settings page', async () => {
@@ -29,4 +30,11 @@ test('my profile settings page loads correctly', async ({ logedPage, page }) => 
 	await test.step('personal access tokens section is visible', async () => {
 		await expect(page.locator('dt').filter({ hasText: 'Personal Access Tokens' })).toBeVisible();
 	});
+});
+
+test('local user can generate a personal access token the API accepts', async ({
+	logedPage,
+	page
+}) => {
+	await generateWorkingPat(page, logedPage.password, 'local-pat');
 });

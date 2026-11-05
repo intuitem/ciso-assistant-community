@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Validatie '${validation_ref_id}' is ${new_status}"
+body: |
+  Hallo,
+
+  Het validatieverzoek '${validation_ref_id}' is bijgewerkt:
+
+  - Nieuwe status: ${new_status}
+  - Bijgewerkt door: ${actor_name}
+  - Domein: ${folder_name}
+  - Notities: ${event_notes}
+
+  Het validatieverzoek bekijken: [Validatie bekijken](${validation_url})
+
+  Bedankt.

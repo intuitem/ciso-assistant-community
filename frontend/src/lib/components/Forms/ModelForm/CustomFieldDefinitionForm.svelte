@@ -35,6 +35,7 @@
 		{ label: m.project(), value: 'pmbok.project' },
 		{ label: m.asset(), value: 'core.asset' },
 		{ label: m.appliedControl(), value: 'core.appliedcontrol' },
+		{ label: m.entityAssessment(), value: 'tprm.entityassessment' },
 		{ label: m.securityException(), value: 'core.securityexception' }
 	];
 

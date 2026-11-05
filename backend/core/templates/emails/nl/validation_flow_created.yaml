@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Nieuw validatieverzoek wacht op uw goedkeuring"
+body: |
+  Hallo,
+
+  Er is een nieuw validatieverzoek ter goedkeuring aan u toegewezen:
+
+  - Referentie: ${validation_ref_id}
+  - Aanvrager: ${requester_name}
+  - Validatiedeadline: ${validation_deadline}
+  - Domein: ${folder_name}
+
+  Controleer en behandel dit validatieverzoek: [Validatie bekijken](${validation_url})
+
+  Bedankt.

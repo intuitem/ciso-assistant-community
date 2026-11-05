@@ -41,12 +41,14 @@ Each language version moves through **Draft → In review → Change requested �
 {% stepper %}
 {% step %}
 ### Submit for Review
-From a draft, **Submit for Review** hands the document to a reviewer.
+From a draft, **Submit for Review** hands the document to a reviewer. If the document has **Reviewers** set, they are notified (the submitter excepted).
 {% endstep %}
 
 {% step %}
 ### Approve or Request changes
-A reviewer either **Approves** the revision (→ Validated) or uses **Request changes** to send it back with reviewer comments (→ Change requested).
+A reviewer either **Approves** the revision (→ Validated) or uses **Request changes** to send it back with reviewer comments (→ Change requested). The author is notified of the outcome, and again on publication.
+
+When the document has **Reviewers** set, only they can approve or request changes; a team listed there counts for all its members. With no reviewers set, anyone allowed to edit the document can.
 {% endstep %}
 
 {% step %}

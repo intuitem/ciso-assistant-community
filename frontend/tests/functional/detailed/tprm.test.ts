@@ -152,6 +152,8 @@ test('user can create representatives, solutions and entity assessments inside e
 		await page.goto('/analytics/tprm');
 		await page.locator('body[data-hydrated="true"]').waitFor();
 		await expect(page.locator('#page-title')).toHaveText('Overview');
+		await expect(page.getByTestId('vendor-posture')).toBeVisible();
+		await page.getByTestId('tab-assessments').click();
 		const cards = page.getByTestId('cards-list').locator('div');
 		await expect(page.getByTestId('no-data-available')).not.toBeVisible();
 		await expect(cards.first().getByTestId('provider')).toContainText(

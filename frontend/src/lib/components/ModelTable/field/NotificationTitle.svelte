@@ -33,8 +33,15 @@
 		const message = messageKey ? (m as Record<string, any>)[messageKey] : undefined;
 		// No catalog entry yet: show the key, so the gap is visible.
 		if (typeof message !== 'function') return meta?.type ?? '';
+		// `foo_key: 'accepted'` in the stored context renders as `{foo}` = m.accepted().
+		const params: Record<string, any> = { ...(meta?.context ?? {}) };
+		for (const [name, value] of Object.entries(params)) {
+			if (!name.endsWith('_key')) continue;
+			const label = (m as Record<string, any>)[String(value)];
+			params[name.slice(0, -4)] = typeof label === 'function' ? label() : value;
+		}
 		try {
-			return message(meta?.context ?? {});
+			return message(params);
 		} catch (error) {
 			console.error(`Could not render ${messageKey}:`, error);
 			return meta?.type ?? '';

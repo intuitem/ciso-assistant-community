@@ -1,0 +1,17 @@
+subject: "CISO Assistant: U bent toegewezen aan '${control_name}'"
+body: |
+  Hallo,
+
+  U bent toegewezen aan de volgende beheersmaatregel:
+
+  - Naam: ${control_name}
+  - Beschrijving: ${control_description}
+  - Ref ID: ${control_ref_id}
+  - Status: ${control_status}
+  - Prioriteit: ${control_priority}
+  - ETA: ${control_eta}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om deze beheersmaatregel te bekijken en te beheren: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

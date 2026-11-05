@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Risicoacceptatie '${acceptance_name}': ${decision}"
+body: |
+  Hallo,
+
+  Een risicoacceptatie voor risicoscenario's waarvan u eigenaar bent, heeft een nieuwe status:
+
+  - Naam: ${acceptance_name}
+  - Status: ${decision}
+  - Besloten door: ${actor_name}
+  - Rechtvaardiging: ${justification}
+  - Risicoscenario's: ${risk_scenarios}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om het te bekijken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

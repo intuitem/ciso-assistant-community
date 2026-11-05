@@ -30,6 +30,7 @@ OBJECTS = {
     "compliance_assessments": "compliance-assessments",
     "evidences": "evidences",
     "findings": "findings",
+    "findings_assessments": "findings-assessments",
     "folders": "folders",
     "incidents": "incidents",
     "perimeters": "perimeters",

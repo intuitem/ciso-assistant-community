@@ -49,6 +49,7 @@
 	"estonian": "Estonia",
 	"slovak": "Slovakia",
 	"slovenian": "Slovenia",
+	"norwegian": "Norwegia",
 	"addThreat": "Tambahkan ancaman",
 	"addVulnerability": "Tambahkan kerentanan",
 	"addReferenceControl": "Tambahkan kontrol referensi",
@@ -1764,8 +1765,6 @@
 	"builderUnsavedChangesNavigation": "Anda memiliki perubahan yang belum disimpan dan akan hilang. Tetap keluar?",
 	"fieldVisibility": "Visibilitas bidang",
 	"fieldVisibilityHelpText": "Kontrol bidang mana yang dapat dilihat dan diedit oleh setiap peran.",
-	"visibilityAuditorRespondent": "Auditor + Responden",
-	"visibilityAuditorOnly": "Hanya auditor",
 	"visibilityHidden": "Tersembunyi",
 	"answers": "Jawaban",
 	"respondentAlignment": "Penyelarasan responden",
@@ -2323,5 +2322,7 @@
 	"dpiaRequirementChanges": "Riwayat persyaratan DPIA",
 	"previously": "Sebelumnya",
 	"vulnerabilityOpenWithRemediationDate": "Kerentanan terbuka memiliki tanggal remediasi",
-	"vulnerabilityResolvedWithoutRemediationDate": "Kerentanan yang selesai tidak memiliki tanggal remediasi"
+	"vulnerabilityResolvedWithoutRemediationDate": "Kerentanan yang selesai tidak memiliki tanggal remediasi",
+	"reportTimezone": "Zona waktu laporan",
+	"reportTimezoneHelpText": "Wilayah yang digunakan untuk waktu yang tercetak dalam laporan dan ekspor. Setiap waktu menampilkan selisihnya terhadap UTC. Waktu di layar tidak terpengaruh."
 }

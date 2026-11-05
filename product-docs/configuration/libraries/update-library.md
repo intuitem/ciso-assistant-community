@@ -25,7 +25,7 @@ CISO Assistant accepts the upload only if `version` is higher than the version a
 
 Use this action to load a newer library version into your instance. This applies both to an updated custom library you imported using the steps above and to a built-in library update made available after a CISO Assistant upgrade:
 
-1. Go to **Governance > Libraries**.
+1. Go to **Catalog > Libraries**.
 2. Click **Update available** to filter the list to libraries with a newer version.
 3. In the relevant row, click the <img src="../../.gitbook/assets/update_library_button.png" alt="Green circular button with an upward arrow" data-size="line"> button at the far right.
 

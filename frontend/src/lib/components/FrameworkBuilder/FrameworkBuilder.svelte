@@ -13,6 +13,7 @@
 		type RequirementNode,
 		type Question,
 		remapGrid,
+		levelsInGroupOrder,
 		type OutcomeRule,
 		type Scale
 	} from './builder-state';
@@ -278,6 +279,12 @@
 							question.choices.some((c) => c.add_score !== null && c.add_score !== undefined)
 					) || walk(bn.children)
 			);
+		return walk($rootNodesStore);
+	});
+
+	const hasRequiredEvidence = $derived.by(() => {
+		const walk = (nodes: BuilderNode[]): boolean =>
+			nodes.some((bn) => (bn.node.assessable && bn.node.evidence_required) || walk(bn.children));
 		return walk($rootNodesStore);
 	});
 
@@ -1088,6 +1095,7 @@
 									pages={rulePages}
 									catalog={celCatalog}
 									groups={ruleGroups}
+									nodes={$rootNodesStore}
 									scales={$frameworkStore.scales_definition ?? []}
 									measured={measuredScales}
 									onaddscales={(added) =>
@@ -1129,7 +1137,16 @@
 											};
 										})}
 										onupdate={(groups) =>
-											builder.updateFramework({ implementation_groups_definition: groups })}
+											builder.updateFramework({
+												implementation_groups_definition: groups,
+												outcomes_definition: levelsInGroupOrder(
+													$frameworkStore.outcomes_definition ?? [],
+													($frameworkStore.implementation_groups_definition ?? []).map((g) =>
+														String((g as Record<string, unknown>).ref_id ?? '')
+													),
+													groups.map((g) => g.ref_id)
+												)
+											})}
 										activeLanguage={$activeLanguageStore}
 									/>
 								</div>
@@ -1139,6 +1156,7 @@
 									<VisibilityEditor
 										value={$frameworkStore.field_visibility}
 										onChange={(next) => builder.updateFramework({ field_visibility: next })}
+										evidenceRequired={hasRequiredEvidence}
 									/>
 								</div>
 							{/if}
