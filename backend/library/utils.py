@@ -617,6 +617,11 @@ class QuickFormImporter:
             return f"[QUICK_FORM_ERROR] {error}"
         if error := outcome_rule_id_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
+        if any(
+            isinstance(rule, dict) and rule.get("kind") == "weakest_link"
+            for rule in self.quick_form_data.get("outcomes_definition") or []
+        ):
+            return "[QUICK_FORM_ERROR] A weakest-link rule applies to frameworks, not quick forms"
         from core.quick_form_apply import validate_on_accept_document
 
         if errors := validate_on_accept_document(self.quick_form_data):

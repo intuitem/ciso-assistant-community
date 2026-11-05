@@ -74,7 +74,7 @@
 						<td class="py-2 pr-3">
 							<details>
 								<summary class="cursor-pointer font-medium text-surface-900-50">
-									{section.name ?? ruleLabel(rule, rule.ref_id)}
+									{section.name || section.ref_id || ruleLabel(rule, rule.ref_id)}
 								</summary>
 								<ul class="mt-2 space-y-1.5">
 									{#each section.nodes as node (node.urn)}
@@ -92,7 +92,7 @@
 														<Anchor
 															breadcrumbAction="push"
 															href={`/requirement-assessments/${driver.id}`}
-															class="anchor">{driver.ref_id ?? driver.name ?? driver.urn}</Anchor
+															class="anchor">{driver.ref_id || driver.name || driver.urn}</Anchor
 														>
 													{/each}
 												</div>

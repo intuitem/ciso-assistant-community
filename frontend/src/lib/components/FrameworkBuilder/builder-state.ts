@@ -149,7 +149,12 @@ export interface OutcomeRule {
 	/** Weakest links: the depth of the nodes rated (1 = top level), and what the results are
 	 *  called and weigh. */
 	rated_depth?: number;
-	result_labels?: Partial<Record<'compliant' | 'partially_compliant' | 'non_compliant', string>>;
+	result_labels?: Partial<
+		Record<
+			'compliant' | 'partially_compliant' | 'non_compliant' | 'not_assessed' | 'not_applicable',
+			string
+		>
+	>;
 	result_weights?: Partial<Record<'compliant' | 'partially_compliant' | 'non_compliant', number>>;
 	/** Frameworks: the rule applies only to audits whose scope includes one of these groups. */
 	implementation_groups?: string[];

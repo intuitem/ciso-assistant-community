@@ -116,7 +116,7 @@ def fetch(source: Path | None, name: str) -> bytes:
     if source:
         return (source / name).read_bytes()
     url = f"https://raw.githubusercontent.com/{REPO}/{COMMIT}/{name}"
-    with urllib.request.urlopen(url, timeout=60) as response:
+    with urllib.request.urlopen(url, timeout=60) as response:  # nosec B310
         return response.read()
 
 
@@ -307,14 +307,15 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
     pairs, missing = [], set()
     for entry in e8_map["maps"]:
         assert entry["relationship"] == "intersects-with", entry["relationship"]
-        action = entry["sources"][0]["id-ref"]
+        actions = [source["id-ref"] for source in entry["sources"]]
         for target in entry["targets"]:
             ism = target["id-ref"]
             if ism not in by_ism:
                 missing.add(ism)
             for source in by_ism.get(ism, []):
-                for urn in instances[action]:
-                    pairs.append((source, urn))
+                for action in actions:
+                    for urn in instances[action]:
+                        pairs.append((source, urn))
     if missing:
         print(f"E8 ISM ids not in {E8}: {sorted(missing)}", file=sys.stderr)
     seen = set()
@@ -395,7 +396,9 @@ def main():
         args.output_dir / f"{SLUG}.yaml",
         library(SLUG, NAME, DESCRIPTION, {"framework": framework}),
     )
-    mapping, _ = build_e8_mapping(mappings, instances, args.output_dir / f"{E8}.yaml")
+    mapping, _ = build_e8_mapping(
+        mappings, instances, root / f"backend/library/libraries/{E8}.yaml"
+    )
     write(args.output_dir / f"mapping-{E8}-and-{SLUG}.yaml", mapping)
 
 

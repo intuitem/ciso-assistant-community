@@ -193,9 +193,6 @@
 				label: rule.annotation || m.builderRuleKindWeakestLink(),
 				rated_depth: 2,
 				per: 'depth_1',
-				...(rule.implementation_groups
-					? { implementation_groups: rule.implementation_groups }
-					: {}),
 				...(rule.translations ? { translations: rule.translations } : {})
 			};
 		} else {

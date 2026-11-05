@@ -22,6 +22,7 @@ from core.weakest_link import (
     weakest_link_rules,
 )
 from iam.models import Folder
+from library.utils import QuickFormImporter
 
 RULE = {"ref_id": "eff", "kind": "weakest_link", "rated_depth": 2, "per": "depth_1"}
 
@@ -200,6 +201,28 @@ def test_asd_essentials_library_rule():
     out = compute_weakest_link(rule, nodes, ras)
     assert [len(s["nodes"]) for s in out["sections"]] == [7, 10, 16, 16, 16, 16, 13, 10]
     assert out["score"] == 1.0
+
+
+def test_library_publish_refuses_the_rule_in_a_quick_form():
+    form = {
+        "urn": "urn:test:risk:quick_form:wl",
+        "ref_id": "wl",
+        "outcomes_definition": [RULE],
+        "pages": [
+            {
+                "urn": "urn:test:risk:qf_page:wl:p",
+                "ref_id": "p",
+                "questions": {
+                    "urn:test:risk:qf_page:wl:p:question:q": {
+                        "type": "text",
+                        "text": "Q",
+                    }
+                },
+            }
+        ],
+    }
+    error = QuickFormImporter(form).init()
+    assert error and "weakest-link" in error
 
 
 def make_audit(results, **audit_fields):
