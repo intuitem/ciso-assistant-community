@@ -5,7 +5,7 @@ description: Configure Active Directory Federation Service (AD FS) as an Identit
 # Active Directory Federation Service (AD FS)
 
 {% hint style="danger" %}
-Self-signed certificates won't work with CISO Assistant (even on a locally tested instance). On the other hand, certificates issued by Active Directory Certificate Services (AD CS) will work.
+<mark style="color:red;">Self-signed certificates won't work with CISO Assistant (even on a locally tested instance). On the other hand, certificates issued by Active Directory Certificate Services (AD CS) will work.</mark>
 {% endhint %}
 
 Open your **Server Manager**
