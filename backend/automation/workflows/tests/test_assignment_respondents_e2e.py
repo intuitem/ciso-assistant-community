@@ -52,11 +52,12 @@ def make_domain(name, parent=None):
     return domain
 
 
-def install(domain):
+def install(domain, framework_urns=TARGETED):
+    """``framework_urns=None`` keeps the shipped default."""
     entry = yaml.safe_load(LIBRARY.read_text())["objects"]["workflows"][0]
     for variable in entry["graph"]["variables"]:
-        if variable["key"] == "framework_urns":
-            variable["default_value"] = TARGETED
+        if variable["key"] == "framework_urns" and framework_urns is not None:
+            variable["default_value"] = framework_urns
     workflow, _warnings = import_workflow(entry, domain, user=publisher_user())
     workflow.draft_version.publish(publisher_user())
     workflow.triggers.update(enabled=True)
@@ -65,7 +66,7 @@ def install(domain):
 
 def make_audit(domain, urn=TARGETED, framework_folder=None):
     framework = Framework.objects.create(
-        name=urn, urn=urn, folder=framework_folder or domain
+        name=urn or "No URN", urn=urn, folder=framework_folder or domain
     )
     perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
     return ComplianceAssessment.objects.create(
@@ -245,6 +246,22 @@ class TestAssignmentRespondents:
         assignment = RequirementAssignment.objects.create(
             compliance_assessment=make_audit(domain, framework_folder=sibling),
             folder=domain,
+        )
+        assignment.actor.add(Actor.objects.get(user=user))
+
+        dispatch_internal_event_task.call_local(last_update(assignment).pk, 0)
+
+        instance = WorkflowInstance.objects.get(workflow=workflow)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        assert respondents(domain) == set()
+
+    @pytest.mark.parametrize("framework_urns", [None, f"{TARGETED},"])
+    def test_a_framework_without_urn_never_matches(self, run_now, framework_urns):
+        domain = make_domain("Domain")
+        workflow = install(domain, framework_urns)
+        user = User.objects.create_user(email="direct@example.com")
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=make_audit(domain, urn=None), folder=domain
         )
         assignment.actor.add(Actor.objects.get(user=user))
 

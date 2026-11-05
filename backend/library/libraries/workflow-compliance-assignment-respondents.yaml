@@ -93,6 +93,10 @@ objects:
             - variable: found
               op: eq
               value: true
+            # An empty URN would match an empty or trailing-comma list.
+            - variable: framework_urn
+              op: neq
+              value: ''
             - variable: framework_urn
               op: in
               value: '{{framework_urns}}'

@@ -137,6 +137,7 @@ See [Triggers](triggers.md).
 - Several conditions on a branch: **AND** or **OR**.
 - **otherwise** cannot be deleted or reordered. Every branch must be wired.
 - Comparison follows the variable type (§7).
+- `in` against an empty list, or one with a trailing comma, matches an empty value. Add `neq` empty on the same branch.
 
 See [Condition](steps.md#condition).
 
