@@ -77,7 +77,7 @@ You can skip this step if you're in a test environment, but please keep in mind 
 {% hint style="info" %}
 If for some reason this window didn't open itself automatically, go back on **AD FS Management**, click **Relying Party Trust**, right-click **CISO Assistant**, then click **Edit Claim Issuance Policy...**
 
-  ![](../../../.gitbook/assets/sso/adfs_policy_rule_step_0.png)
+<img src="../../../.gitbook/assets/sso/adfs_policy_rule_step_0.png" alt="" width="100%">
 
 {% endhint %}
 
