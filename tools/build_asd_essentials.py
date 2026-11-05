@@ -14,10 +14,10 @@ domains, as in ASD's per-domain resolved catalogs. The IGPs (not effective /
 partially effective / fully effective) are the action's annotation: ASD uses
 them to guide the assessor, who rates the action.
 
-Implementation groups are the priority phases, cumulative: a phase n domain is
-in groups n..3, so selecting "2" assesses phases 1 and 2. The two capability
-domains apply across all phases (ASD reports them as "All"), so they are in
-every group.
+Implementation groups are the priority phases: a technical domain is in its own
+phase only, so assessing several phases means selecting several groups. The two
+capability domains apply across all phases (ASD reports them as "All"), so they
+are in every group.
 
 Also writes the transition mapping from essential-eight-2023, whose ref_ids are
 ISM controls: ASD maps each action to the Essential Eight ISM controls.
@@ -92,16 +92,21 @@ PHASES = [
     (
         "2",
         "Priority phase 2",
-        "Adds critical processes and services and privileged environments.",
+        "Critical processes and services and privileged environments, with the capability "
+        "domains.",
     ),
-    ("3", "Priority phase 3", "Adds business systems and user devices."),
+    (
+        "3",
+        "Priority phase 3",
+        "Business systems and user devices, with the capability domains.",
+    ),
 ]
 
 DESCRIPTION = f"""The ASD Essentials for enterprise IT helps organisations protect enterprise IT environments from sophisticated cyber threats. It replaces the Essential Eight. Principles describe the security outcomes, actions what to do to achieve them, and domains where the actions apply: six technical domains, sequenced by priority phase, and two capability domains that apply across all phases.
 
 Each action is rated separately in each domain it applies to, so it appears under each of its domains. Rate it from its Indicators of Good Practice: fully effective = compliant, partially effective = partially compliant, not effective = non compliant.
 
-Select a priority phase when creating an audit: the earlier phases and the capability domains are included.
+Select the priority phases to assess when creating an audit, for example 1 and 2 for the first two phases: each phase covers its own domains and the capability domains.
 
 Assessment (ASD Essentials assessment process guide): a principle is rated, in each domain, by its lowest applicable action rating, and not assessed while any applicable action is not assessed. Each domain reports its principles at each rating and a percentage: not effective 0, partially effective 0.5, fully effective 1, summed and divided by the number of applicable principles.
 https://www.cyber.gov.au/essentials/essentials-for-enterprise-it"""
@@ -154,7 +159,7 @@ def load(source: Path | None):
 
 
 def igps(action: dict) -> str:
-    lines = []
+    blocks = []
     for part in action["parts"]:
         if part.get("class") != "indicators-of-good-practice":
             continue
@@ -162,9 +167,9 @@ def igps(action: dict) -> str:
         assert set(by_tier) <= set(TIERS), by_tier.keys()
         for tier in TIERS:
             if by_tier.get(tier):
-                lines.append(f"{tier}:")
-                lines += [f"- {item['prose']}" for item in by_tier[tier]]
-    return "\n".join(lines)
+                items = [f"- {i['id']}: {i['prose']}" for i in by_tier[tier]]
+                blocks.append("\n".join([f"{tier}:", *items]))
+    return "\n\n".join(blocks)
 
 
 def principles(catalog: dict) -> dict:
@@ -200,8 +205,7 @@ def title_of(domain: str) -> str:
 
 
 def groups_for(domain: str, phase: str) -> list[str]:
-    start = 1 if domain in CAPABILITY else int(phase)
-    return [str(n) for n in range(start, 4)]
+    return ["1", "2", "3"] if domain in CAPABILITY else [phase]
 
 
 def build_framework(catalog, profiles):
@@ -367,10 +371,17 @@ def _str_representer(dumper, data):
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=style)
 
 
+class NoAliasDumper(yaml.Dumper):
+    def ignore_aliases(self, data):
+        return True
+
+
 def write(path: Path, data: dict):
     yaml.add_representer(str, _str_representer)
     path.write_text(
-        yaml.dump(data, sort_keys=False, allow_unicode=True, width=100),
+        yaml.dump(
+            data, Dumper=NoAliasDumper, sort_keys=False, allow_unicode=True, width=100
+        ),
         encoding="utf-8",
     )
     print(f"wrote {path}")

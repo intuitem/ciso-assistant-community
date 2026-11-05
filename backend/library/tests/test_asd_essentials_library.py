@@ -27,11 +27,15 @@ PRINCIPLES_PER_DOMAIN = {
     "Business systems": 13,
     "User devices": 10,
 }
-FIRST_PHASE = {
-    "Governance and culture",
-    "Visibility and response",
-    "Boundary services",
-    "Identity services",
+DOMAIN_GROUPS = {
+    "Governance and culture": ["1", "2", "3"],
+    "Visibility and response": ["1", "2", "3"],
+    "Boundary services": ["1"],
+    "Identity services": ["1"],
+    "Critical processes and services": ["2"],
+    "Privileged environments": ["2"],
+    "Business systems": ["3"],
+    "User devices": ["3"],
 }
 
 
@@ -68,13 +72,20 @@ class TestAsdEssentialsLibrary:
         assert len(set(actions.values_list("ref_id", flat=True))) == 58
         assert all(a.annotation for a in actions)
 
-    def test_a_phase_includes_earlier_phases_and_capability_domains(self, framework):
+    def test_a_domain_is_in_its_own_phase_and_capability_domains_in_all(
+        self, framework
+    ):
         domains = RequirementNode.objects.filter(
             framework=framework, parent_urn__isnull=True
         )
-        in_phase_1 = {d.name for d in domains if "1" in d.implementation_groups}
-        assert in_phase_1 == FIRST_PHASE
-        assert all("3" in d.implementation_groups for d in domains)
+        assert {d.name: d.implementation_groups for d in domains} == DOMAIN_GROUPS
+
+    def test_guidance_keeps_asd_ids_under_separate_headings(self, framework):
+        action = RequirementNode.objects.filter(
+            framework=framework, ref_id="IT.GOV-01.1"
+        ).first()
+        assert "- IT.GOV-01.1.NE-1: " in action.annotation
+        assert "\n\nPartially effective:\n- IT.GOV-01.1.PE-1: " in action.annotation
 
     def test_transition_mapping_links_existing_requirements(self, framework):
         load("essential-eight-2023")

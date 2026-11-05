@@ -31,6 +31,10 @@
 	);
 	const annotation = $derived(rule.translations?.[getLocale()]?.annotation || rule.annotation);
 	const percent = (score: number | null) => (score === null ? '—' : `${Math.round(score * 100)}%`);
+	const sectionScore = (section: WeakestLinkResult['sections'][number]) =>
+		section.score === null
+			? label(section.counts.not_assessed ? 'not_assessed' : 'not_applicable')
+			: percent(section.score);
 </script>
 
 <div class="space-y-4">
@@ -70,7 +74,7 @@
 			</thead>
 			<tbody>
 				{#each result.sections as section (section.urn)}
-					<tr class="border-t border-surface-200-800 align-top">
+					<tr class="border-t border-surface-100-900 align-top">
 						<td class="py-2 pr-3">
 							<details>
 								<summary class="cursor-pointer font-medium text-surface-900-50">
@@ -111,8 +115,7 @@
 								{section.counts[column]}
 							</td>
 						{/each}
-						<td class="py-2 pl-3 text-right font-semibold tabular-nums">{percent(section.score)}</td
-						>
+						<td class="py-2 pl-3 text-right font-semibold tabular-nums">{sectionScore(section)}</td>
 					</tr>
 				{/each}
 			</tbody>
