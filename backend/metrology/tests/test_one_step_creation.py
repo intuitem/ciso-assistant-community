@@ -501,9 +501,7 @@ class TestPeriodOnEnteredValues:
         assert stored.raw_value() == 2
         assert stored.source == CustomMetricSample.Source.MANUAL
 
-    def test_the_current_value_is_the_latest_period_s_not_the_last_typed(
-        self, frozen
-    ):  # noqa: F811
+    def test_the_current_value_is_the_latest_period_s_not_the_last_typed(self, frozen):  # noqa: F811
         es = make_domain("Spain")
         instance = make_instance(es, make_definition())
         for moment, period, value in (
