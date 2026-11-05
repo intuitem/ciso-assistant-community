@@ -1,10 +1,10 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error, fail, type NumericRange } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { Actions, PageServerLoad } from './$types';
 
 const ENDPOINT = `${BASE_API_URL}/iam/connected-apps`;
