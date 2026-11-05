@@ -1,0 +1,63 @@
+name: Enterprise backend tests
+permissions:
+  contents: read
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - "enterprise/backend/**"
+      - ".github/workflows/enterprise-backend-tests.yml"
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  GITHUB_WORKFLOW: github_actions
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    env:
+      backend-directory: ./backend
+      enterprise-tests-directory: ./enterprise/backend/tests
+      DJANGO_DEBUG: "True"
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      EMAIL_HOST: localhost
+      EMAIL_PORT: 1025
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://127.0.0.1:5173
+    services:
+      postgres:
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # test credential
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    strategy:
+      matrix:
+        python-version: ["3.14"]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      # The enterprise code runs on the community backend's environment, which
+      # carries the test tooling (pytest-django); see enterprise/backend/tests/pytest.ini.
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: uv sync --locked
+      - name: Run enterprise backend tests
+        working-directory: ${{ env.enterprise-tests-directory }}
+        run: uv run --project ../../../backend pytest

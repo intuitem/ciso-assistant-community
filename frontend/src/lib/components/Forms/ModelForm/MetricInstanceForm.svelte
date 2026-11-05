@@ -1,14 +1,14 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import HiddenInput from '../HiddenInput.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import type { SuperForm, SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import InputChoicesEditor from '$lib/components/Metrology/InputChoicesEditor.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import InputChoicesEditor from '#lib/components/Metrology/InputChoicesEditor.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
@@ -44,9 +44,9 @@
 	// place to change, whether the formula is the metric's own or its
 	// definition's.
 	import { onMount, tick } from 'svelte';
-	import FormulaDrawer from '$lib/components/Metrology/FormulaDrawer.svelte';
-	import type { Composition, Saved } from '$lib/components/Metrology/ComposeMetricEditor.svelte';
-	import type { DefinitionComposition } from '$lib/components/Metrology/DefinitionFormulaPanel.svelte';
+	import FormulaDrawer from '#lib/components/Metrology/FormulaDrawer.svelte';
+	import type { Composition, Saved } from '#lib/components/Metrology/ComposeMetricEditor.svelte';
+	import type { DefinitionComposition } from '#lib/components/Metrology/DefinitionFormulaPanel.svelte';
 
 	let composition = $state<any>(null);
 	async function loadComposition() {
@@ -179,6 +179,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -192,6 +193,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="evidences"
+	lazy
 	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
 	field="evidences"

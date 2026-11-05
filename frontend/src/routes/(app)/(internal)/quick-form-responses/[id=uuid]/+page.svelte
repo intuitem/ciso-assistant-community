@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
+	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import RatingOutcomes from '$lib/components/QuickForms/RatingOutcomes.svelte';
-	import SubjectFacts from '$lib/components/QuickForms/SubjectFacts.svelte';
-	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { isDark } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { urlModelForDjangoName, localNameForDjangoName } from '$lib/utils/crud';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import RatingOutcomes from '#lib/components/QuickForms/RatingOutcomes.svelte';
+	import SubjectFacts from '#lib/components/QuickForms/SubjectFacts.svelte';
+	import ProjectionCard from '#lib/components/QuickForms/ProjectionCard.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { urlModelForDjangoName, localNameForDjangoName } from '#lib/utils/crud.js';
 	import type { PageData } from './$types';
 
 	// Referenceable models (core/object_references.py REFERENCEABLE) to their routes.
@@ -26,6 +26,7 @@
 		vulnerability: 'vulnerabilities',
 		perimeter: 'perimeters',
 		entity: 'entities',
+		solution: 'solutions',
 		processing: 'processings'
 	};
 
@@ -99,6 +100,20 @@
 	// Override at accept, per target: what the reviewer may pick, the refusals
 	// that still leave the call to them, and the payload the target reads.
 	type OverrideOption = { id: string; name: string };
+	const TIER_OVERRIDE = {
+		reasons: ['noTierResolved'],
+		options: async () => {
+			try {
+				const res = await fetch('/tiers?is_visible=true');
+				const body = res.ok ? await res.json().catch(() => null) : null;
+				const tiers = body?.results ?? body;
+				return Array.isArray(tiers) && tiers.length ? tiers : null;
+			} catch {
+				return null;
+			}
+		},
+		payload: (value: string) => ({ tier: value })
+	};
 	const OVERRIDABLE: Record<
 		string,
 		{
@@ -107,20 +122,8 @@
 			payload: (value: string) => Record<string, unknown>;
 		}
 	> = {
-		'entity.tier': {
-			reasons: ['noTierResolved'],
-			options: async () => {
-				try {
-					const res = await fetch('/tiers?is_visible=true');
-					const body = res.ok ? await res.json().catch(() => null) : null;
-					const tiers = body?.results ?? body;
-					return Array.isArray(tiers) && tiers.length ? tiers : null;
-				} catch {
-					return null;
-				}
-			},
-			payload: (value) => ({ tier: value })
-		},
+		'entity.tier': TIER_OVERRIDE,
+		'solution.tier': TIER_OVERRIDE,
 		'processing.dpia_required': {
 			reasons: ['reviewerDecides', 'noVerdictResolved', 'conflictingVerdicts'],
 			options: async () => [
@@ -222,7 +225,7 @@
 					background: 'preset-filled-error-500'
 				});
 			}
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = false;
 		}
@@ -251,7 +254,7 @@
 		const result: any = deserialize(await res.text());
 		const failure = actionError(result);
 		if (failure) throw new Error(failure);
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	async function removeAttachment(_urn: string, attachmentId: string) {

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import { m } from '$paraglide/messages';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import { m } from '#paraglide/messages.js';
 	import WorkflowGraphPreview from './WorkflowGraphPreview.svelte';
 
 	interface Props {

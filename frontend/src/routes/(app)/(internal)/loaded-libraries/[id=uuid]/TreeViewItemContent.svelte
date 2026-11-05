@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getRequirementTitle } from '$lib/utils/helpers';
-	import { getOptions } from '$lib/utils/crud';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { getRequirementTitle } from '#lib/utils/helpers.js';
+	import { getOptions } from '#lib/utils/crud.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		ref_id: string;

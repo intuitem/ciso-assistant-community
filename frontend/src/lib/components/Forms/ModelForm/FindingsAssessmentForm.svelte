@@ -1,13 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
 	import Select from '../Select.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import { m } from '#paraglide/messages.js';
 	import Checkbox from '../Checkbox.svelte';
 
 	interface Props {
@@ -60,6 +60,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -75,6 +76,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],

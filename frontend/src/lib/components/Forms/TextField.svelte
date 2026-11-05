@@ -3,8 +3,8 @@
 
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	import type { CacheLock } from '$lib/utils/types';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import type { CacheLock } from '#lib/utils/types.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		class?: string;

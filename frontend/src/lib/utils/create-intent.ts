@@ -24,7 +24,7 @@ export function consumeCreateIntent({ urlModel, modelName, open }: CreateIntent)
 
 	// Raw replaceState, as ModelTable does for filters. `page.url` keeps the stale param,
 	// which is harmless — the next command carries a new one.
-	const cleaned = new URL(page.url);
+	const cleaned = new URL(page.url.href);
 	cleaned.searchParams.delete(CREATE_INTENT_PARAM);
 	history.replaceState(history.state, '', cleaned.pathname + cleaned.search);
 

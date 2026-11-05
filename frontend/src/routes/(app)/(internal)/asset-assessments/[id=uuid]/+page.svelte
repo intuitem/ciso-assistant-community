@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import LineHeatmap from '$lib/components/DataViz/LineHeatmap.svelte';
-	import ObjectivesComparisonTable from '$lib/components/Assets/ObjectivesComparisonTable.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import LineHeatmap from '#lib/components/DataViz/LineHeatmap.svelte';
+	import ObjectivesComparisonTable from '#lib/components/Assets/ObjectivesComparisonTable.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {

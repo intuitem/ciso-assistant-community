@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { ContextMenu } from 'bits-ui';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { modelSchema } from '$lib/utils/schemas';
-	import { getModelInfo } from '$lib/utils/crud';
-	import { createModalCache } from '$lib/utils/stores';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import { getModelInfo } from '#lib/utils/crud.js';
+	import { createModalCache } from '#lib/utils/stores.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		row: any;

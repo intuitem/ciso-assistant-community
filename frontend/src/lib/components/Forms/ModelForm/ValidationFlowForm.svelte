@@ -1,14 +1,14 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {

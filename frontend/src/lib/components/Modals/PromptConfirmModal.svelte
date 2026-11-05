@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { urlModel } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { urlModel } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';

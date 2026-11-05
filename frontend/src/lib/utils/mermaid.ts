@@ -1,4 +1,4 @@
-import { isDarkTheme } from '$lib/utils/echartsTheme';
+import { isDarkTheme } from '#lib/utils/echartsTheme.js';
 
 export const MERMAID_BLOCK_CLASS = 'mermaid-diagram';
 

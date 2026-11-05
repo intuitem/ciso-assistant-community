@@ -1,13 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import Select from '../Select.svelte';
-	import OrderedEntryList from '$lib/components/OrderedEntryList.svelte';
+	import OrderedEntryList from '#lib/components/OrderedEntryList.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
@@ -65,7 +65,7 @@
 	// metric whose formula is its definition's.
 	import DefinitionFormulaEditor, {
 		type FormulaPreview
-	} from '$lib/components/Metrology/DefinitionFormulaEditor.svelte';
+	} from '#lib/components/Metrology/DefinitionFormulaEditor.svelte';
 	import { untrack } from 'svelte';
 
 	const { value: datasetsValue } = formFieldProxy(form, 'datasets');

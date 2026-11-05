@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages.js';
-	import { toCamelCase } from '$lib/utils/locales';
-	import { isDark } from '$lib/utils/helpers';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
+	import * as m from '#paraglide/messages.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { isDark } from '#lib/utils/helpers.js';
 
 	// Background + readable text color for a colored option (e.g. risk probability/impact).
 	// Returns an empty string when no color is mapped, so plain selects are untouched.

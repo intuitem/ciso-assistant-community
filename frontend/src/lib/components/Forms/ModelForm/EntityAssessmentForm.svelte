@@ -1,16 +1,17 @@
 <script lang="ts">
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -33,6 +34,7 @@
 	}: Props = $props();
 
 	const { form: formData } = form;
+	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	// Creating almost always means sending a questionnaire, so the audit is on by
 	// default; on edit it stays off. `??` would keep the schema's `false`.
@@ -56,6 +58,30 @@
 			console.error('Could not resolve the entity folder', e);
 		}
 	}
+
+	// Global plus a perimeter is saved in the perimeter's domain; show that domain's fields.
+	async function followPerimeterFolder(perimeterId: string, folder: string) {
+		try {
+			const [perimeter, current] = await Promise.all([
+				fetch(`/perimeters/${perimeterId}`).then((res) => res.json()),
+				fetch(`/folders/${folder}`).then((res) => res.json())
+			]);
+			// Only Global has a null parent; content_type comes back as a display label.
+			if (current?.parent_folder !== null) return;
+			if ($formData.perimeter !== perimeterId || $formData.folder !== folder) return;
+			const target = perimeter?.folder?.id ?? perimeter?.folder;
+			if (target) form.form.update((data) => ({ ...data, folder: target }), { taint: false });
+		} catch (e) {
+			console.error('Could not resolve the perimeter folder', e);
+		}
+	}
+
+	// Derived so the effect reruns on a perimeter change, not on every keystroke in the form.
+	const perimeterId = $derived($formData.perimeter);
+	$effect(() => {
+		const folder = $folderId;
+		if (perimeterId && folder) followPerimeterFolder(perimeterId, folder);
+	});
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
@@ -209,6 +235,7 @@
 			{form}
 			multiple
 			optionsEndpoint="users"
+			lazy
 			optionsDetailedUrlParameters={[
 				['is_third_party', 'true'],
 				['representative__entity', selectedEntity || '']
@@ -277,6 +304,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -291,6 +319,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -302,8 +331,21 @@
 		label={m.reviewers()}
 	/>
 	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
+	<AutocompleteSelect
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidence"
 		cacheLock={cacheLocks['evidence']}
@@ -327,3 +369,4 @@
 		bind:cachedValue={formDataCache['reference_link']}
 	/>
 </Dropdown>
+<CustomFieldsSection {form} model="tprm.entityassessment" folderId={$folderId} />

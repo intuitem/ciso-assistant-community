@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { invalidateAll, goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll, goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { setContext } from 'svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -127,6 +127,7 @@
 					taskTemplates.find((t) => t.id === domain.task_template)?.name ??
 					null
 				);
+
 			case 'action': {
 				const config = domain.action_config ?? {};
 				switch (config.type) {
@@ -158,6 +159,7 @@
 					subprocessCandidates.find((w) => w.id === domain.subprocess_workflow)?.name ??
 					null
 				);
+
 			case 'event':
 				return domain.event_key || null;
 			case 'loop': {
@@ -903,7 +905,7 @@
 			versionGone = true;
 			saveError = m.draftNoLongerExists();
 			saveState = 'error';
-			await invalidateAll();
+			await refreshAll();
 			return false;
 		}
 		if (!res.ok) {
@@ -977,7 +979,7 @@
 		});
 		if (res.ok) {
 			await refreshRegistrations();
-			await invalidateAll();
+			await refreshAll();
 			return;
 		}
 		const body = await res.json().catch(() => ({}));
@@ -1022,7 +1024,7 @@
 			if (res.ok || res.status === 404) {
 				versionGone = true;
 				if (saveTimer) clearTimeout(saveTimer);
-				await invalidateAll();
+				await refreshAll();
 				// Force the remount: when this draft was auto-drafted in-session,
 				// page data (still the published version) is unchanged by the
 				// reload, so the page's {#key} alone would never fire.
@@ -1241,7 +1243,7 @@
 		// Flush pending edits like startRun does, or navigating away drops them.
 		const pending = saveState === 'dirty' || saveState === 'saving' || saveState === 'error';
 		if (!readonly && pending && !(await save())) return;
-		await goto(`/workflows/${workflowId}?version=${version.id}`, { invalidateAll: true });
+		await goto(`/workflows/${workflowId}?version=${version.id}`, { refreshAll: true });
 	}
 
 	async function restoreVersion(version: any) {
@@ -1256,7 +1258,7 @@
 			});
 			if (res.ok) {
 				// The new draft becomes the default active version.
-				await goto(`/workflows/${workflowId}`, { invalidateAll: true });
+				await goto(`/workflows/${workflowId}`, { refreshAll: true });
 				return;
 			}
 			const body = await res.json().catch(() => ({}));
@@ -1324,7 +1326,9 @@
 		const manual = triggerNodes.find(
 			(n) => (n.data.domain as any)?.trigger_config?.type === 'manual'
 		);
+
 		if (manual) return ((manual.data.domain as any).ref as string) ?? null;
+
 		if (triggerNodes.length <= 1) {
 			return ((triggerNodes[0]?.data.domain as any)?.ref as string) ?? null;
 		}
@@ -1616,6 +1620,7 @@
 			.filter((b: any) => !b.is_default)
 			.sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
 			.forEach((b: any, index: number) => (b.order = index));
+
 		// A wired branch drops its edge; the default keeps its guaranteed slot.
 		edges = edges.filter((e) => (e.data?.domain as any)?.source_branch !== branchId);
 		refreshVisuals();
@@ -2258,10 +2263,9 @@
 												<button
 													type="button"
 													class="btn preset-tonal text-xs"
-													onclick={() => (runVarsOpen = false)}
+													onclick={() => (runVarsOpen = false)}>{m.cancel()}</button
 												>
-													{m.cancel()}
-												</button>
+
 												<button
 													type="button"
 													class="btn preset-filled-primary-500 text-xs"

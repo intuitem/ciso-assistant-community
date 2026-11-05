@@ -21,6 +21,7 @@ from core.models import (
     TaskNode,
     TaskTemplate,
     ValidationFlow,
+    Vulnerability,
 )
 from iam.models import RoleAssignment
 from tprm.models import Contract, EntityAssessment
@@ -510,6 +511,33 @@ def _rules(today: date) -> list[Rule]:
                 risk_scenarios__isnull=True,
             ).exclude(status=Incident.Status.DISMISSED),
             ("status", "reported_at"),
+        ),
+        # The remediation date is the user's to keep consistent with the status.
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "vulnerabilityOpenWithRemediationDate",
+            _("Open vulnerability has a remediation date"),
+            Vulnerability,
+            "vulnerability",
+            "vulnerabilities",
+            lambda qs: qs.filter(remediated_at__isnull=False).exclude(
+                status__in=Vulnerability.RESOLVED_STATUSES
+            ),
+            ("status", "remediated_at"),
+        ),
+        Rule(
+            OPERATIONS,
+            "info",
+            "vulnerabilityResolvedWithoutRemediationDate",
+            _("Resolved vulnerability has no remediation date"),
+            Vulnerability,
+            "vulnerability",
+            "vulnerabilities",
+            lambda qs: qs.filter(
+                status__in=Vulnerability.RESOLVED_STATUSES, remediated_at__isnull=True
+            ),
+            ("status", "remediated_at"),
         ),
     ]
 

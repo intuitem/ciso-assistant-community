@@ -1,4 +1,4 @@
-import type { SelectField, SelectFieldData } from '$lib/utils/crud';
+import type { SelectField, SelectFieldData } from '#lib/utils/crud.js';
 
 export function formatSelectFieldData(
 	responseData: Record<string, string>,

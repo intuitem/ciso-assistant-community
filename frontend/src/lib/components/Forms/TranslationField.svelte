@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
-	import type { CacheLock } from '$lib/utils/types';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { locales } from '$paraglide/runtime';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+	import { locales } from '#paraglide/runtime.js';
+	import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
 
 	interface Props {
 		form: SuperForm<Record<string, unknown>, any>;

@@ -173,6 +173,78 @@ Microsoft's own PowerShell sample requests this scope with a **double** slash â€
 
 ***
 
+## Request payload
+
+Each audit entry is sent as its own request: a JSON array holding exactly **one** OCSF event. Entries are never batched into a single request.
+
+```http
+POST {endpoint}/dataCollectionRules/{immutableId}/streams/{stream}?api-version=2023-01-01
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+A representative body, for an update to an applied control:
+
+```json
+[
+  {
+    "activity_id": 3,
+    "category_uid": 6,
+    "class_uid": 6003,
+    "type_uid": 600303,
+    "severity_id": 1,
+    "status_id": 1,
+    "time": 1792487667512,
+    "metadata": {
+      "version": "1.8.0",
+      "product": { "name": "CISO Assistant", "vendor_name": "intuitem" },
+      "correlation_uid": "9b1e4c2a-7f3d-4e8b-a6c5-1d2f3e4a5b6c"
+    },
+    "actor": {
+      "user": {
+        "uid": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+        "email_addr": "jane.doe@example.com"
+      }
+    },
+    "api": {
+      "operation": "update",
+      "service": { "name": "appliedcontrol" }
+    },
+    "src_endpoint": { "ip": "203.0.113.42" },
+    "resources": [
+      {
+        "type": "appliedcontrol",
+        "uid": "3f2b8c1e-6d4a-4b7e-9a1c-2e5f7d8b9c01",
+        "name": "Enforce MFA on all admin accounts"
+      }
+    ],
+    "unmapped": {
+      "changes": {
+        "status": ["in_progress", "active"],
+        "eta": ["2026-10-31", "2026-10-15"]
+      },
+      "folder_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"
+    }
+  }
+]
+```
+
+{% file src="../.gitbook/assets/ciso-assistant-sentinel-sample-post.json" %}
+
+The body is sent minified; it is indented here for readability. Things to know when building the stream declaration and the transformation:
+
+| Field | Behaviour |
+| --- | --- |
+| `time` | Epoch **milliseconds**, integer. There is no `TimeGenerated` in the body; the transformation derives it. |
+| `activity_id`, `api.operation` | `1` / `create`, `2` / `read`, `3` / `update`, `4` / `delete`. `type_uid` is always `600300 + activity_id`. |
+| `actor` | `{}` when the change has no user behind it, such as a system task. |
+| `src_endpoint` | `{}` when no client IP was recorded. |
+| `metadata.correlation_uid` | Omitted when the entry has no request correlation id. |
+| `unmapped.changes` | Free-form. A plain field is `[old, new]`. A many-to-many change arrives as its own event, shaped `{"owner": {"type": "m2m", "operation": "add", "objects": ["John Smith"]}}`. Keep it `dynamic`. |
+| `unmapped.folder_id` | The domain the object belongs to; `null` for objects outside any domain. |
+
+***
+
 ## Part 3 â€” Verify it works
 
 ### Generate an event

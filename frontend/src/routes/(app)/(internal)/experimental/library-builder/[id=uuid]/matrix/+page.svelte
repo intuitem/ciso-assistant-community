@@ -1,13 +1,13 @@
 <script lang="ts">
-	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
-	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
+	import LevelEditor from '#lib/components/RiskMatrixEditor/LevelEditor.svelte';
+	import GridEditor from '#lib/components/RiskMatrixEditor/GridEditor.svelte';
 	import EbiosRmSectionEditor from './EbiosRmSectionEditor.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { LOCALE_MAP, language } from '$lib/utils/locales';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { LOCALE_MAP, language } from '#lib/utils/locales.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	const toastStore = getToastStore();
 

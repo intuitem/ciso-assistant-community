@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	const modifierKey =
 		browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? '⌘' : 'Ctrl';
@@ -103,7 +104,37 @@
 			label: 'businessImpactAnalysis',
 			icon: 'fa-solid fa-arrows-to-eye',
 			color: '#14b8a6'
-		}
+		},
+		techniques: { label: 'techniques', icon: 'fa-solid fa-crosshairs', color: '#b91c1c' },
+		cwes: { label: 'cwes', icon: 'fa-solid fa-bug-slash', color: '#9a3412' },
+		'security-advisories': {
+			label: 'securityAdvisories',
+			icon: 'fa-solid fa-shield-virus',
+			color: '#ea580c'
+		},
+		'metric-definitions': {
+			label: 'metricDefinitions',
+			icon: 'fa-solid fa-ruler',
+			color: '#1d4ed8'
+		},
+		dashboards: { label: 'dashboards', icon: 'fa-solid fa-gauge', color: '#4f46e5' },
+		'generic-collections': {
+			label: 'genericCollections',
+			icon: 'fa-solid fa-layer-group',
+			color: '#0d9488'
+		},
+		'responsibility-matrices': {
+			label: 'responsibilityMatrices',
+			icon: 'fa-solid fa-table-list',
+			color: '#7c3aed'
+		},
+		workflows: { label: 'workflows', icon: 'fa-solid fa-diagram-next', color: '#475569' },
+		'quantitative-risk-hypotheses': {
+			label: 'quantitativeRiskHypotheses',
+			icon: 'fa-solid fa-flask',
+			color: '#db2777'
+		},
+		representatives: { label: 'representatives', icon: 'fa-solid fa-user-tie', color: '#0369a1' }
 	};
 
 	interface SearchResult {
@@ -150,7 +181,7 @@
 	function submitSearch() {
 		const q = searchInput.trim();
 		if (!q) return;
-		goto(`/search?q=${encodeURIComponent(q)}`, { invalidateAll: true });
+		goto(`/search?q=${encodeURIComponent(q)}`, { refreshAll: true });
 	}
 
 	function toggleTypeFilter(type: string) {
@@ -240,7 +271,7 @@
 		} else if (e.key === 'Enter' && !isInInput && selectedIndex >= 0) {
 			e.preventDefault();
 			const result = flatResults[selectedIndex];
-			if (result) goto(result.url);
+			if (result) gotoOrLoad(result.url);
 		} else if (e.key === 'Escape' && !isInInput) {
 			selectedIndex = -1;
 		}

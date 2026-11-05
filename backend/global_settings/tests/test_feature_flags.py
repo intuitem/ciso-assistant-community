@@ -172,6 +172,53 @@ def test_startup_seeds_declared_defaults(no_flags_row):
     assert ff_is_enabled("incidents") is True
 
 
+@pytest.mark.parametrize("vulnerabilities", [True, False])
+def test_startup_seeds_a_dependent_flag_off_when_its_requirement_is(
+    db, vulnerabilities
+):
+    """vulnerability_sla defaults on but needs vulnerabilities: seeded on next to a
+    disabled module, the next save of the flags would switch that module back on."""
+    from core.startup import seed_feature_flag_defaults
+
+    row, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS
+    )
+    row.value = {
+        name: value
+        for name, value in (row.value or {}).items()
+        if name != "vulnerability_sla"
+    } | {"vulnerabilities": vulnerabilities}
+    row.save()
+
+    seed_feature_flag_defaults()
+
+    row.refresh_from_db()
+    assert row.value["vulnerabilities"] is vulnerabilities
+    assert row.value["vulnerability_sla"] is vulnerabilities
+
+
+def test_full_put_leaving_out_a_dependent_flag_keeps_it(db):
+    """A full PUT fills in defaults for what it leaves out. vulnerability_sla
+    defaults on, which would switch vulnerabilities back on: it keeps its value."""
+    row, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS
+    )
+    row.value = {
+        **(row.value or {}),
+        "vulnerabilities": False,
+        "vulnerability_sla": False,
+    }
+    row.save()
+
+    serializer = FeatureFlagsSerializer(row, data={"vulnerabilities": False})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    row.refresh_from_db()
+    assert row.value["vulnerabilities"] is False
+    assert row.value["vulnerability_sla"] is False
+
+
 def test_startup_leaves_an_explicit_choice_alone(flags_row):
     from core.startup import seed_feature_flag_defaults
 

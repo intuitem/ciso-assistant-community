@@ -1,23 +1,23 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
-	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
-	import NotificationBell from '$lib/components/NotificationBell/NotificationBell.svelte';
-	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
-	import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
+	import CommandPalette from '#lib/components/CommandPalette/CommandPalette.svelte';
+	import ThemeToggle from '#lib/components/ThemeToggle/ThemeToggle.svelte';
+	import NotificationBell from '#lib/components/NotificationBell/NotificationBell.svelte';
+	import ChatWidget from '#lib/components/ChatWidget/ChatWidget.svelte';
+	import { safeTranslate, setUseRiskCategoryLabel } from '#lib/utils/i18n.js';
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
 	import '../../app.css';
 
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { onMount } from 'svelte';
-	import { initThemeFromUser } from '$lib/utils/theme';
-	import { invalidateAll } from '$app/navigation';
-	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import SideBar from '$lib/components/SideBar/SideBar.svelte';
-	import FocusModeSelector from '$lib/components/FocusMode/FocusModeSelector.svelte';
-	import { deleteCookie, getCookie } from '$lib/utils/cookies';
+	import { initThemeFromUser } from '#lib/utils/theme.js';
+	import { refreshAll } from '$app/navigation';
+	import Breadcrumbs from '#lib/components/Breadcrumbs/Breadcrumbs.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import SideBar from '#lib/components/SideBar/SideBar.svelte';
+	import FocusModeSelector from '#lib/components/FocusMode/FocusModeSelector.svelte';
+	import { deleteCookie, getCookie } from '#lib/utils/cookies.js';
 	import {
 		clientSideToast,
 		pageTitle,
@@ -25,11 +25,11 @@
 		modelDescription,
 		clearFocusMode,
 		focusMode
-	} from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	} from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
 	import type { LayoutData } from './$types';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: LayoutData;
@@ -61,12 +61,12 @@
 	});
 
 	// Display title, model name, and description from either page data or manual store setting
-	const displayTitle = $derived($page.data?.title || $pageTitle);
+	const displayTitle = $derived(page.data?.title || $pageTitle);
 
 	// Auto-detect model from URL for list pages
 	// Match pattern: /model-name or /model-name/ (but not /model-name/uuid or /model-name/something)
 	const urlModel = $derived(() => {
-		const path = $page.url.pathname;
+		const path = page.url.pathname;
 		const match = path.match(/^\/([a-z-]+)\/?$/);
 		return match ? match[1] : null;
 	});
@@ -80,6 +80,7 @@
 			.split('-')
 			.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
 			.join('');
+
 		return `${camelCase}Description`;
 	});
 
@@ -87,22 +88,22 @@
 	// List page: URL matches /model-name pattern (e.g., /risk-assessments)
 	// Detail page: has an object title from loadDetail (e.g., /risk-assessments/uuid)
 	const matchesListUrl = $derived(!!urlModel());
-	const hasObjectTitle = $derived(!!$page.data?.title);
+	const hasObjectTitle = $derived(!!page.data?.title);
 
 	// For list pages: show description subtitle
 	// For detail pages: show model name subtitle
 	const displayModelName = $derived(
-		hasObjectTitle ? $page.data?.modelVerboseName || $modelName : ''
+		hasObjectTitle ? page.data?.modelVerboseName || $modelName : ''
 	);
 
 	const displayModelDescription = $derived(
 		(() => {
 			// Only show description on list pages (not on detail pages with object titles)
 			if (hasObjectTitle) return '';
-			if (!matchesListUrl && !$page.data?.modelDescriptionKey) return '';
+			if (!matchesListUrl && !page.data?.modelDescriptionKey) return '';
 
 			// List pages: get description from i18n
-			const descKey = $page.data?.modelDescriptionKey || urlDescriptionKey();
+			const descKey = page.data?.modelDescriptionKey || urlDescriptionKey();
 			if (descKey && m[descKey]) {
 				return m[descKey]();
 			}
@@ -123,7 +124,7 @@
 					if (number <= 0) return;
 					clientSideToast.set({
 						message: m.waitingRiskAcceptances({
-							number: number,
+							number,
 							s: number > 1 ? 's' : '',
 							itPlural: number > 1 ? 'i' : 'e'
 						}),
@@ -141,10 +142,10 @@
 	const licenseAboutToExpire =
 		licenseStatus?.status === 'active' && licenseStatus?.days_left <= licenseExpirationNotifyDays;
 	import type { PageData, ActionData } from './$types';
-	import { getStartedTrigger } from '$lib/utils/stores';
+	import { getStartedTrigger } from '#lib/utils/stores.js';
 
-	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
-	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
+	import { getSidebarVisibleItems } from '#lib/utils/sidebar-config.js';
+	import { interceptExternalLinks, setGlobalModalStore } from '#lib/utils/external-links.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -156,7 +157,7 @@
 		setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
 	});
 
-	const clientSettings = $derived($page.data.clientSettings);
+	const clientSettings = $derived(page.data.clientSettings);
 
 	// Initialize external link interceptor
 	$effect(() => {
@@ -169,7 +170,7 @@
 	$effect(() => {
 		if (browser && !data?.featureflags?.focus_mode && $focusMode.id) {
 			clearFocusMode();
-			invalidateAll();
+			refreshAll();
 		}
 	});
 </script>
@@ -181,6 +182,7 @@
 <!-- App Shell -->
 <div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
+
 	<div class="sticky top-0 z-50 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
 		{#if data.licenseStatus.status === 'expired'}
 			<aside class="preset-tonal-warning text-center w-full items-center py-2">
@@ -279,7 +281,7 @@
 	</div>
 	<!-- Router Slot -->
 	<CommandPalette bind:this={commandPalette} />
-	{#if $page.data.featureflags?.chat_mode}
+	{#if page.data.featureflags?.chat_mode}
 		<ChatWidget />
 	{/if}
 	<main

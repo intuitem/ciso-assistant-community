@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Désigné relecteur : ${object_type} '${object_name}'"
+body: |
+  Bonjour,
+
+  Vous avez été désigné comme relecteur de l'élément suivant :
+
+  - Type : ${object_type}
+  - Nom : ${object_name}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour le relire : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

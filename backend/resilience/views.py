@@ -179,6 +179,7 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
         "authors",
         "risk_matrix",
         "status",
+        "filtering_labels",
     ]
 
     export_config = {

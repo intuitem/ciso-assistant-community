@@ -686,7 +686,9 @@ def _extract_status_marker(text: str) -> str:
     return f"{key}={normalized}"
 
 
-def _search_folder_evidence(query: str, folder_id: str, top_k: int = 6) -> list[dict]:
+def _search_folder_evidence(
+    query: str, folder_id: str, user, top_k: int = 6
+) -> list[dict]:
     """Folder-scoped, library-excluded RAG search for the questionnaire agent.
 
     Differences vs ``chat.rag.search``:
@@ -705,7 +707,17 @@ def _search_folder_evidence(query: str, folder_id: str, top_k: int = 6) -> list[
     from qdrant_client.models import FieldCondition, Filter, MatchValue
 
     from .providers import get_embedder
-    from .rag import COLLECTION_NAME, _get_reranker, get_qdrant_client
+    from .rag import (
+        COLLECTION_NAME,
+        _get_reranker,
+        _user_partition_filter,
+        get_qdrant_client,
+    )
+    from .scoping import ReadScope
+
+    readable = _user_partition_filter(ReadScope(user), None, None)
+    if readable is None:
+        return []
 
     try:
         client = get_qdrant_client()
@@ -724,7 +736,10 @@ def _search_folder_evidence(query: str, folder_id: str, top_k: int = 6) -> list[
         return []
 
     qfilter = Filter(
-        must=[FieldCondition(key="folder_id", match=MatchValue(value=folder_id_str))]
+        must=[
+            FieldCondition(key="folder_id", match=MatchValue(value=folder_id_str)),
+            readable,
+        ]
     )
 
     try:
@@ -1261,7 +1276,7 @@ def _process_question(
     t0 = time.time()
     query = question.text
     try:
-        results = _search_folder_evidence(query, run.folder_id, top_k=6)
+        results = _search_folder_evidence(query, run.folder_id, run.owner, top_k=6)
     except Exception as e:
         logger.error("Folder-scoped search failed for q %s: %s", question.id, e)
         results = []
@@ -1500,7 +1515,9 @@ def retry_question_with_hints(
     hint_dicts = [_applied_control_to_rag_dict(ac) for ac in hint_controls]
 
     try:
-        rag_results = _search_folder_evidence(question.text, run.folder_id, top_k=4)
+        rag_results = _search_folder_evidence(
+            question.text, run.folder_id, run.owner, top_k=4
+        )
     except Exception as e:
         logger.error(
             "Folder-scoped search failed during retry for q %s: %s",

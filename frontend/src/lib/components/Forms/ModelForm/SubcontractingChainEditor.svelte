@@ -2,8 +2,8 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
-	import { fetchAllPages } from '$lib/utils/pagination';
+	import { m } from '#paraglide/messages.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 
 	interface ChainRow {
 		subcontractor: string;

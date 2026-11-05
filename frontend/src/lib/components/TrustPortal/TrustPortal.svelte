@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import { openPortalExternal, isSafeExternalUrl } from '$lib/utils/external-links';
-	import { m } from '$paraglide/messages';
+	import PortalGrid from '#lib/components/PortalGrid/PortalGrid.svelte';
+	import { openPortalExternal, isSafeExternalUrl } from '#lib/utils/external-links.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { portal }: { portal: { name: string; branding?: any; sections?: any[] } } = $props();
 	// Backend validates branding, but this is an unauthenticated surface — guard anyway.

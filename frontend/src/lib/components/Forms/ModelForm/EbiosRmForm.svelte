@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import { m } from '$paraglide/messages';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -117,6 +117,18 @@
 		cacheLock={cacheLocks['classification']}
 		bind:cachedValue={formDataCache['classification']}
 	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
 	{#if hasEntities}
 		<AutocompleteSelect
 			{form}
@@ -189,6 +201,7 @@
 			{form}
 			field="description"
 			label={m.description()}
+			helpText={m.studyDescriptionHelpText()}
 			cacheLock={cacheLocks['description']}
 			bind:cachedValue={formDataCache['description']}
 			data-focusindex="1"
@@ -261,6 +274,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			lazy
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -275,6 +289,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			lazy
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -284,6 +299,18 @@
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}
 			label={m.reviewers()}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			createFromSelection={true}
+			optionsEndpoint="filtering-labels"
+			optionsLabelField="label"
+			translateOptions={false}
+			field="filtering_labels"
+			helpText={m.labelsHelpText()}
+			label={m.labels()}
+			allowUserOptions="append"
 		/>
 		<TextField
 			type="date"
@@ -307,6 +334,7 @@
 			{form}
 			field="objectives"
 			label={m.objectives()}
+			helpText={m.studyObjectivesHelpText()}
 			cacheLock={cacheLocks['objectives']}
 			bind:cachedValue={formDataCache['objectives']}
 		/>
@@ -314,6 +342,7 @@
 			{form}
 			field="constraints_hypotheses"
 			label={m.constraintsHypotheses()}
+			helpText={m.constraintsHypothesesHelpText()}
 			cacheLock={cacheLocks['constraints_hypotheses']}
 			bind:cachedValue={formDataCache['constraints_hypotheses']}
 		/>

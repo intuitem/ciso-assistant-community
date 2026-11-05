@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { canPerformAction } from '#lib/utils/access-control.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Tier {
@@ -16,6 +17,7 @@
 		rank: number;
 		hexcolor: string;
 		is_visible: boolean;
+		compliance_target: number | null;
 		builtin: boolean;
 		entities_count: number;
 		solutions_count?: number;
@@ -29,6 +31,7 @@
 	let { data }: Props = $props();
 
 	const toastStore = getToastStore();
+	const modalStore = getModalStore();
 
 	let tiers: Tier[] = $state([]);
 	$effect(() => {
@@ -93,7 +96,12 @@
 				const detail =
 					result.type === 'failure' ? (result.data?.error as Record<string, any>) : undefined;
 				const message =
-					detail?.error ?? detail?.detail ?? detail?.name?.[0] ?? detail?.rank?.[0] ?? undefined;
+					detail?.error ??
+					detail?.detail ??
+					detail?.name?.[0] ??
+					detail?.rank?.[0] ??
+					detail?.compliance_target?.[0] ??
+					undefined;
 				toastStore.trigger({
 					message: message ? safeTranslate(String(message)) : m.anErrorOccurred(),
 					background: 'preset-filled-error-500'
@@ -102,7 +110,7 @@
 			}
 			return true;
 		} finally {
-			await invalidateAll();
+			await refreshAll();
 			busy = false;
 		}
 	}
@@ -130,6 +138,29 @@
 		if (await callAction('create', { name: newName.trim(), hexcolor: newColor })) {
 			newName = '';
 		}
+	}
+
+	const PROPAGATION_MODES = [
+		{ value: 'off', label: m.tierPropagationOff },
+		{ value: 'suggest', label: m.tierPropagationSuggest },
+		{ value: 'floor', label: m.tierPropagationFloor }
+	];
+
+	function setPropagation(mode: string) {
+		const count = data.propagation.below_floor;
+		if (mode !== 'floor' || data.propagation.mode === 'floor' || !count) {
+			callAction('propagation', { mode });
+			return;
+		}
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.tierPropagationFloorConfirmTitle(),
+			body: m.tierPropagationFloorConfirmBody({ count }),
+			response: (confirmed: boolean) => {
+				if (confirmed) callAction('propagation', { mode });
+			}
+		};
+		modalStore.trigger(modal);
 	}
 
 	function onDrop(index: number) {
@@ -274,6 +305,46 @@
 								</a>
 
 								{#if canEdit}
+									<label
+										class="flex items-center gap-1.5 text-sm text-surface-600-400"
+										title={m.complianceTargetHelp()}
+									>
+										<span class="whitespace-nowrap">{m.complianceTarget()}</span>
+										<input
+											type="number"
+											min="0"
+											max="100"
+											step="1"
+											class="input w-20 px-2 py-1 text-sm tabular-nums"
+											value={tier.compliance_target ?? ''}
+											placeholder="—"
+											disabled={busy}
+											data-testid="tier-compliance-target"
+											onchange={async (e) => {
+												const input = e.currentTarget;
+												const raw = input.value.trim();
+												const value = raw === '' ? null : Number(raw);
+												// Svelte skips rewriting an unchanged value, so a rejected entry would stay on screen.
+												const reset = () => (input.value = String(tier.compliance_target ?? ''));
+												// Unparseable text reads as '' and would clear the target.
+												if (input.validity.badInput) return reset();
+												if (
+													value !== tier.compliance_target &&
+													!(await update(tier, { compliance_target: value }))
+												)
+													reset();
+											}}
+										/>
+										<span aria-hidden="true">%</span>
+									</label>
+								{:else if tier.compliance_target != null}
+									<span class="text-sm text-surface-600-400 whitespace-nowrap">
+										{m.complianceTarget()}
+										<span class="font-semibold tabular-nums">{tier.compliance_target}%</span>
+									</span>
+								{/if}
+
+								{#if canEdit}
 									<button
 										type="button"
 										class="btn-icon btn-icon-sm {tier.is_visible
@@ -366,6 +437,33 @@
 		</section>
 
 		<aside class="flex flex-col gap-5">
+			<section
+				class="card bg-surface-100-900/60 p-4 flex flex-col gap-3"
+				data-testid="tier-propagation"
+			>
+				<h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-surface-500">
+					{m.tierPropagation()}
+				</h2>
+				<div
+					class="flex rounded-base border border-surface-200-800 p-0.5"
+					role="group"
+					aria-label={m.tierPropagation()}
+				>
+					{#each PROPAGATION_MODES as mode (mode.value)}
+						<button
+							type="button"
+							aria-pressed={data.propagation.mode === mode.value}
+							class="btn btn-sm flex-1 {data.propagation.mode === mode.value
+								? 'preset-filled-primary-500'
+								: 'hover:preset-tonal'}"
+							disabled={busy || !canEdit}
+							onclick={() => setPropagation(mode.value)}>{mode.label()}</button
+						>
+					{/each}
+				</div>
+				<p class="text-xs text-surface-500">{m.tierPropagationHelp()}</p>
+			</section>
+
 			<!-- Where the vendors sit on the scale, as one strip of the scale's own colours. -->
 			<section class="card bg-surface-100-900/60 p-4 flex flex-col gap-3">
 				<h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-surface-500">
@@ -417,43 +515,47 @@
 				<h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-surface-500">
 					{m.tiersFedBy()}
 				</h2>
-				{#if (data.fedBy ?? []).length === 0}
-					<p class="text-sm text-surface-500">{m.tiersFedByNone()}</p>
-					<a class="anchor text-sm" href="/libraries?object_type=quick_forms">{m.libraries()}</a>
-				{:else}
-					<ul class="flex flex-col gap-2.5 text-sm">
-						{#each data.fedBy as quickForm (quickForm.id)}
-							<li class="flex items-start gap-2.5">
-								{#if quickForm.problems.length}
-									<i
-										class="fa-solid fa-triangle-exclamation mt-0.5 text-warning-600-400"
-										aria-hidden="true"
-									></i>
-								{:else}
-									<i class="fa-solid fa-circle-check mt-0.5 text-success-500" aria-hidden="true"
-									></i>
-								{/if}
-								<div class="flex min-w-0 flex-col">
-									<a class="anchor font-medium" href={`/quick-forms/${quickForm.id}`}
-										>{quickForm.name}</a
-									>
-									{#if quickForm.library}
-										<span class="truncate text-xs text-surface-500">{quickForm.library}</span>
-									{/if}
-									{#if quickForm.problems.length}
-										<span class="text-xs text-warning-700 dark:text-warning-400">
-											{quickForm.problems.map((p: string) => safeTranslate(p)).join(', ')}
-										</span>
-									{/if}
-								</div>
-							</li>
-						{/each}
-					</ul>
-				{/if}
+				<h3 class="text-sm font-semibold">{m.tiersFedByVendors()}</h3>
+				{@render fedByList(data.fedBy, m.tiersFedByNone())}
+				<h3 class="text-sm font-semibold">{m.tiersFedBySolutions()}</h3>
+				{@render fedByList(data.fedBySolutions, m.tiersFedBySolutionsNone())}
 			</section>
 		</aside>
 	</div>
 </div>
+
+{#snippet fedByList(forms: any[], none: string)}
+	{#if (forms ?? []).length === 0}
+		<p class="text-sm text-surface-500">{none}</p>
+		<a class="anchor text-sm" href="/libraries?object_type=quick_forms">{m.libraries()}</a>
+	{:else}
+		<ul class="flex flex-col gap-2.5 text-sm">
+			{#each forms as quickForm (quickForm.id)}
+				<li class="flex items-start gap-2.5">
+					{#if quickForm.problems.length}
+						<i
+							class="fa-solid fa-triangle-exclamation mt-0.5 text-warning-600-400"
+							aria-hidden="true"
+						></i>
+					{:else}
+						<i class="fa-solid fa-circle-check mt-0.5 text-success-500" aria-hidden="true"></i>
+					{/if}
+					<div class="flex min-w-0 flex-col">
+						<a class="anchor font-medium" href={`/quick-forms/${quickForm.id}`}>{quickForm.name}</a>
+						{#if quickForm.library}
+							<span class="truncate text-xs text-surface-500">{quickForm.library}</span>
+						{/if}
+						{#if quickForm.problems.length}
+							<span class="text-xs text-warning-700 dark:text-warning-400">
+								{quickForm.problems.map((p: string) => safeTranslate(p)).join(', ')}
+							</span>
+						{/if}
+					</div>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+{/snippet}
 
 <style>
 	/* One staggered entrance for the ladder; nothing moves after that. */

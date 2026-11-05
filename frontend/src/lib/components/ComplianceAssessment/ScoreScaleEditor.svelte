@@ -1,9 +1,9 @@
 <script lang="ts">
 	// Organisation score scale (general settings): one of the presets, or a
 	// custom range with its own labels and translations.
-	import * as m from '$paraglide/messages';
-	import { getLocale, locales } from '$paraglide/runtime';
-	import { defaultLangLabels } from '$lib/utils/locales';
+	import * as m from '#paraglide/messages.js';
+	import { getLocale, locales } from '#paraglide/runtime.js';
+	import { defaultLangLabels } from '#lib/utils/locales.js';
 	import {
 		SCORE_SCALE_PRESETS,
 		MAX_LABELLED_LEVELS,
@@ -14,7 +14,7 @@
 		seedLevels,
 		type ScoreLevel,
 		type ScoreScaleValue
-	} from '$lib/utils/score-scales';
+	} from '#lib/utils/score-scales.js';
 
 	interface Props {
 		value: ScoreScaleValue;

@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from django.db.utils import IntegrityError
 
 from django.conf import settings
+from django.test import override_settings
 from iam.models import Folder, Role, User, UserGroup
 from knox.models import AuthToken
 
@@ -287,3 +288,74 @@ class TestBackupRestoreEdgeCases:
             status.HTTP_400_BAD_REQUEST,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+def reject_restored_data():
+    """BACKUP_RESTORE_VALIDATORS stub objecting to any restored data."""
+    return "rejectedByValidator"
+
+
+def accept_restored_data():
+    """BACKUP_RESTORE_VALIDATORS stub accepting any restored data."""
+    return None
+
+
+def crash_on_restored_data():
+    """BACKUP_RESTORE_VALIDATORS stub failing to run, as on a database error."""
+    raise RuntimeError("restore check crashed")
+
+
+@pytest.mark.django_db(transaction=True)
+class TestBackupRestoreValidators:
+    """Deployments (e.g. the enterprise license rules) check restored data
+    through settings.BACKUP_RESTORE_VALIDATORS; an objection rolls back."""
+
+    def test_objection_rolls_the_restore_back(self, authenticated_client, monkeypatch):
+        # The reload itself is stubbed: it is the helper the failed-restore path
+        # also uses, and a flush + loaddata round trip does not complete on the
+        # SQLite test database (flush re-runs startup, which re-seeds data).
+        reloaded = []
+        monkeypatch.setattr("serdes.views._reload_current_backup", reloaded.append)
+        Folder.objects.create(
+            name="Domain Before Restore",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        backup = create_mock_backup_data(include_enterprise=False)
+
+        with override_settings(
+            BACKUP_RESTORE_VALIDATORS=[f"{__name__}.reject_restored_data"]
+        ):
+            resp = send_backup_to_api(authenticated_client, backup)
+
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.json() == {"error": "rejectedByValidator"}
+        # The state dumped before the restore is the one put back.
+        assert len(reloaded) == 1
+        assert "Domain Before Restore" in reloaded[0]
+
+    def test_crashing_check_rolls_the_restore_back(
+        self, authenticated_client, monkeypatch
+    ):
+        reloaded = []
+        monkeypatch.setattr("serdes.views._reload_current_backup", reloaded.append)
+        backup = create_mock_backup_data(include_enterprise=False)
+
+        with override_settings(
+            BACKUP_RESTORE_VALIDATORS=[f"{__name__}.crash_on_restored_data"]
+        ):
+            resp = send_backup_to_api(authenticated_client, backup)
+
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert resp.json() == {"error": "RestoreCheckFailed"}
+        assert len(reloaded) == 1
+
+    def test_restore_kept_when_validators_accept(self, authenticated_client):
+        backup = create_mock_backup_data(include_enterprise=False)
+        with override_settings(
+            BACKUP_RESTORE_VALIDATORS=[f"{__name__}.accept_restored_data"]
+        ):
+            resp = send_backup_to_api(authenticated_client, backup)
+
+        assert resp.status_code == status.HTTP_200_OK
+        assert Folder.objects.filter(name="Test Backup Domain").exists()

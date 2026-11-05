@@ -28,12 +28,12 @@
 	import { onMount } from 'svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import DatasetEditor from './DatasetEditor.svelte';
 	import type { ReadableModel } from './DatasetEditor.svelte';
 	import MetricInputsEditor from './MetricInputsEditor.svelte';
 	import type { DefinitionOption } from './MetricInputsEditor.svelte';
-	import CelInput from '$lib/components/Cel/CelInput.svelte';
+	import CelInput from '#lib/components/Cel/CelInput.svelte';
 	import {
 		datasetReferences,
 		foldersWithSeveral,
@@ -41,7 +41,7 @@
 		formulaScope,
 		inputReferences,
 		type MetricInput
-	} from '$lib/utils/derived-metrics';
+	} from '#lib/utils/derived-metrics.js';
 
 	interface Props {
 		// A form holding `datasets`, `inputs`, `expression` and `folder`: the

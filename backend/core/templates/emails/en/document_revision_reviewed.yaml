@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Document '${document_name}' (version ${version_number}): ${decision}"
+body: |
+  Hello,
+
+  A revision you wrote has a new status:
+
+  - Document: ${document_name}
+  - Version: ${version_number}
+  - Status: ${decision}
+  - By: ${actor_name}
+  - Reviewer comments: ${reviewer_comments}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view it: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

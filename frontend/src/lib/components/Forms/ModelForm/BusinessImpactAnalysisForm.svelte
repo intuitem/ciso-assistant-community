@@ -1,12 +1,12 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -70,6 +70,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -84,6 +85,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -93,6 +95,18 @@
 	cacheLock={cacheLocks['reviewers']}
 	bind:cachedValue={formDataCache['reviewers']}
 	label={m.reviewers()}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	translateOptions={false}
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	allowUserOptions="append"
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	{#if !page.data.user.is_third_party}

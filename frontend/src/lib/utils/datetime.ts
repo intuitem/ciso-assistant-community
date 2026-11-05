@@ -1,5 +1,5 @@
 import { page } from '$app/state';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export type DateFormatPreference =
 	'auto' | 'iso' | 'ddmmyyyy' | 'mmddyyyy' | 'long_dmy' | 'long_mdy';

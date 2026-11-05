@@ -1,0 +1,504 @@
+urn: urn:intuitem:risk:library:solution-tiering
+locale: en
+ref_id: solution-tiering
+name: Solution tiering
+description: |
+  A short starter form to tier a solution, the service a vendor provides, by its inherent risk: three questions on business and operations impact, three on data, privacy and security. Start it from a solution with "Assess tier"; an accepted response writes the tier onto the solution.
+copyright: © intuitem
+version: 2
+publication_date: 2026-10-19
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:solution-tiering
+    ref_id: solution-tiering
+    name: Solution tiering
+    description: |-
+      Tiers a solution by its inherent risk, before any review of its security posture. A vendor providing several solutions gets one tier per solution.
+
+      Each scored answer runs from 1 (low) to 4 (critical). Business impact and data exposure are each the average of their three answers, and the inherent risk is the higher of the two: a solution that runs a critical process matters even if it holds no data, and the reverse.
+
+      Some answers or answer combinations raise the tier directly: a regulated critical function; a solution whose failure stops a critical or customer-facing process and that is either sole-source or takes more than six months to replace; special-category personal data, payment or health data, credentials or secrets; or privileged access to your systems.
+    annotation: 'An accepted response sets the solution''s tier on the default scale: Critical from an inherent
+      risk of 3.3, Important from 2.6, Standard from 2.0, Low impact below. A regulated critical function
+      or a single point of failure makes the solution at least Critical; special-category personal data,
+      payment or health data, credentials or secrets, or privileged access at least Important. The tier
+      is the highest of these. Each dimension averages three answers,
+      so it moves in steps of a third: 3.3 is reached by 4-4-2 or 3-3-4, 2.6 by 3-3-2. The tiers are named
+      by key, so a renamed or reordered scale keeps working; a scale without these keys sends responses
+      to review.'
+    ref_id_prefix: ST
+    subject_question_urn: urn:intuitem:risk:qf_page:solution-tiering:context:question:solution
+    on_accept:
+    - target: solution.tier
+      config:
+        mapping:
+        - outcome: inherent
+          thresholds:
+          - tier: critical
+            min: 3.3
+          - tier: important
+            min: 2.6
+          - tier: standard
+            min: 2.0
+          - tier: low-impact
+        - outcome: regulated_function
+          tier: critical
+        - outcome: single_point_of_failure
+          tier: critical
+        - outcome: special_data
+          tier: important
+        - outcome: privileged_access
+          tier: important
+    scores_definition:
+      min: 0
+      max: 4
+      aggregation: pages_mean
+    outcomes_definition:
+    - ref_id: business
+      label: Business impact
+      kind: number
+      expression: pages["business"].score
+      translations:
+        fr:
+          label: Impact métier
+        de:
+          label: Geschäftliche Auswirkungen
+    - ref_id: data
+      label: Data exposure
+      kind: number
+      expression: pages["data"].score
+      translations:
+        fr:
+          label: Exposition des données
+        de:
+          label: Datenexposition
+    - ref_id: inherent
+      label: Inherent risk
+      kind: number
+      expression: 'values.business > values.data ? values.business : values.data'
+      translations:
+        fr:
+          label: Risque intrinsèque
+        de:
+          label: Inhärentes Risiko
+    - ref_id: regulated_function
+      label: Regulated critical function
+      color: '#dc2626'
+      expression: '"context:question:regulated:choice:yes" in answers["context:question:regulated"].selected_choices'
+      translations:
+        fr:
+          label: Fonction critique réglementée
+        de:
+          label: Regulierte kritische Funktion
+    - ref_id: single_point_of_failure
+      label: Single point of failure
+      color: '#dc2626'
+      expression: '"business:question:b1:choice:stops" in answers["business:question:b1"].selected_choices
+        && "business:question:b3:choice:sole" in answers["business:question:b3"].selected_choices'
+      translations:
+        fr:
+          label: Point de défaillance unique
+        de:
+          label: Single Point of Failure
+    - ref_id: special_data
+      label: Special-category data
+      color: '#ea580c'
+      expression: '"data:question:d1:choice:special" in answers["data:question:d1"].selected_choices'
+      translations:
+        fr:
+          label: Données sensibles
+        de:
+          label: Besondere Datenkategorien
+    - ref_id: privileged_access
+      label: Privileged access
+      color: '#ea580c'
+      expression: '"data:question:d3:choice:privileged" in answers["data:question:d3"].selected_choices'
+      translations:
+        fr:
+          label: Accès à privilèges
+        de:
+          label: Privilegierter Zugriff
+    - ref_id: regulated_unsure
+      label: Regulated function to confirm
+      color: '#ca8a04'
+      expression: '"context:question:regulated:choice:unsure" in answers["context:question:regulated"].selected_choices'
+      translations:
+        fr:
+          label: Fonction réglementée à confirmer
+        de:
+          label: Regulierte Funktion zu bestätigen
+    pages:
+    - urn: urn:intuitem:risk:qf_page:solution-tiering:context
+      ref_id: context
+      name: Context
+      questions:
+        urn:intuitem:risk:qf_page:solution-tiering:context:question:solution:
+          type: object_reference
+          text: Solution
+          config:
+            model: solution
+          translations:
+            fr:
+              text: Solution
+            de:
+              text: Lösung
+        urn:intuitem:risk:qf_page:solution-tiering:context:question:regulated:
+          type: unique_choice
+          text: Does the solution support a regulated critical function, such as a DORA critical or important
+            function or a NIS2 essential service?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:context:question:regulated:choice:yes
+            value: 'Yes'
+            translations:
+              fr:
+                value: Oui
+              de:
+                value: Ja
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:context:question:regulated:choice:no
+            value: 'No'
+            translations:
+              fr:
+                value: Non
+              de:
+                value: Nein
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:context:question:regulated:choice:unsure
+            value: Unsure
+            translations:
+              fr:
+                value: Je ne sais pas
+              de:
+                value: Unklar
+          translations:
+            fr:
+              text: La solution soutient-elle une fonction critique réglementée, comme une fonction critique
+                ou importante au sens de DORA ou un service essentiel au sens de NIS2 ?
+            de:
+              text: Unterstützt die Lösung eine regulierte kritische Funktion, etwa eine kritische oder
+                wichtige Funktion nach DORA oder einen wesentlichen Dienst nach NIS2?
+      translations:
+        fr:
+          name: Contexte
+        de:
+          name: Kontext
+    - urn: urn:intuitem:risk:qf_page:solution-tiering:business
+      ref_id: business
+      name: Business and operations impact
+      aggregation: mean
+      questions:
+        urn:intuitem:risk:qf_page:solution-tiering:business:question:b1:
+          type: unique_choice
+          text: If the solution stopped, what would the impact be?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b1:choice:negligible
+            value: Negligible
+            add_score: 1
+            translations:
+              fr:
+                value: Négligeable
+              de:
+                value: Vernachlässigbar
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b1:choice:workaround
+            value: An inconvenience, a workaround exists
+            add_score: 2
+            translations:
+              fr:
+                value: Une gêne, une solution de contournement existe
+              de:
+                value: Unannehmlichkeiten, eine Ausweichlösung ist vorhanden
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b1:choice:disruption
+            value: Significant disruption to a business process
+            add_score: 3
+            translations:
+              fr:
+                value: Une perturbation importante d'un processus métier
+              de:
+                value: Erhebliche Störung eines Geschäftsprozesses
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b1:choice:stops
+            value: A critical or customer-facing process stops
+            add_score: 4
+            translations:
+              fr:
+                value: Un processus critique ou au contact des clients s'arrête
+              de:
+                value: Ein kritischer Prozess oder ein Prozess mit direktem Kundenkontakt kommt zum Stillstand
+          translations:
+            fr:
+              text: Si la solution s'arrêtait, quel en serait l'impact ?
+            de:
+              text: Welche Auswirkungen hätte ein Ausfall der Lösung?
+        urn:intuitem:risk:qf_page:solution-tiering:business:question:b2:
+          type: unique_choice
+          text: How long could you operate without it?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b2:choice:month
+            value: More than a month
+            add_score: 1
+            translations:
+              fr:
+                value: Plus d'un mois
+              de:
+                value: Mehr als einen Monat
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b2:choice:weeks
+            value: One week to one month
+            add_score: 2
+            translations:
+              fr:
+                value: D'une semaine à un mois
+              de:
+                value: Eine Woche bis einen Monat
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b2:choice:days
+            value: One day to one week
+            add_score: 3
+            translations:
+              fr:
+                value: D'un jour à une semaine
+              de:
+                value: Einen Tag bis eine Woche
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b2:choice:hours
+            value: Less than a day
+            add_score: 4
+            translations:
+              fr:
+                value: Moins d'un jour
+              de:
+                value: Weniger als einen Tag
+          translations:
+            fr:
+              text: Combien de temps pourriez-vous fonctionner sans elle ?
+            de:
+              text: Wie lange könnten Sie ohne diese Leistung weiterarbeiten?
+        urn:intuitem:risk:qf_page:solution-tiering:business:question:b3:
+          type: unique_choice
+          text: How hard would it be to replace the solution?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b3:choice:easy
+            value: Many alternatives, a switch takes days
+            add_score: 1
+            translations:
+              fr:
+                value: Nombreuses alternatives, un changement prend quelques jours
+              de:
+                value: Viele Alternativen, ein Wechsel dauert Tage
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b3:choice:weeks
+            value: A switch takes weeks
+            add_score: 2
+            translations:
+              fr:
+                value: Un changement prend quelques semaines
+              de:
+                value: Ein Wechsel dauert Wochen
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b3:choice:months
+            value: A switch takes months
+            add_score: 3
+            translations:
+              fr:
+                value: Un changement prend plusieurs mois
+              de:
+                value: Ein Wechsel dauert Monate
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:business:question:b3:choice:sole
+            value: Sole source, or more than six months to switch
+            add_score: 4
+            translations:
+              fr:
+                value: Solution unique, ou plus de six mois pour en changer
+              de:
+                value: Keine alternative Bezugsquelle oder mehr als sechs Monate für einen Wechsel
+          translations:
+            fr:
+              text: Quelle serait la difficulté de remplacer cette solution ?
+            de:
+              text: Wie schwierig wäre es, die Lösung zu ersetzen?
+      translations:
+        fr:
+          name: Impact métier et opérationnel
+        de:
+          name: Geschäftliche und betriebliche Auswirkungen
+    - urn: urn:intuitem:risk:qf_page:solution-tiering:data
+      ref_id: data
+      name: Data, privacy and security
+      aggregation: mean
+      questions:
+        urn:intuitem:risk:qf_page:solution-tiering:data:question:d1:
+          type: unique_choice
+          text: What is the most sensitive data the solution accesses, stores or processes?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d1:choice:public
+            value: None, or public data only
+            add_score: 1
+            translations:
+              fr:
+                value: Aucune, ou uniquement des données publiques
+              de:
+                value: Keine oder nur öffentliche Daten
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d1:choice:internal
+            value: Internal data
+            add_score: 2
+            translations:
+              fr:
+                value: Données internes
+              de:
+                value: Interne Daten
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d1:choice:confidential
+            value: Confidential or personal data
+            add_score: 3
+            translations:
+              fr:
+                value: Données confidentielles ou personnelles
+              de:
+                value: Vertrauliche oder personenbezogene Daten
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d1:choice:special
+            value: Special-category personal data, payment or health data, credentials or secrets
+            add_score: 4
+            translations:
+              fr:
+                value: Données personnelles sensibles, données de paiement ou de santé, identifiants ou
+                  secrets
+              de:
+                value: Besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten
+                  oder Geheimnisse
+          translations:
+            fr:
+              text: Quelles sont les données les plus sensibles auxquelles la solution accède, qu'elle
+                stocke ou qu'elle traite ?
+            de:
+              text: Welche Daten sind am sensibelsten unter denen, auf die die Lösung zugreift oder die
+                sie speichert oder verarbeitet?
+        urn:intuitem:risk:qf_page:solution-tiering:data:question:d2:
+          type: unique_choice
+          text: How many people's personal data does the solution handle?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d2:choice:none
+            value: None
+            add_score: 1
+            translations:
+              fr:
+                value: Aucune
+              de:
+                value: Keine
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d2:choice:small
+            value: Fewer than 1,000
+            add_score: 2
+            translations:
+              fr:
+                value: Moins de 1 000
+              de:
+                value: Weniger als 1.000
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d2:choice:medium
+            value: 1,000 to 100,000
+            add_score: 3
+            translations:
+              fr:
+                value: De 1 000 à 100 000
+              de:
+                value: 1.000 bis 100.000
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d2:choice:large
+            value: More than 100,000
+            add_score: 4
+            translations:
+              fr:
+                value: Plus de 100 000
+              de:
+                value: Mehr als 100.000
+          translations:
+            fr:
+              text: Combien de personnes sont concernées par les données personnelles que traite la solution
+                ?
+            de:
+              text: Von wie vielen Personen verarbeitet die Lösung personenbezogene Daten?
+        urn:intuitem:risk:qf_page:solution-tiering:data:question:d3:
+          type: unique_choice
+          text: What access does the solution have to your systems or network?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d3:choice:none
+            value: None
+            add_score: 1
+            translations:
+              fr:
+                value: Aucun
+              de:
+                value: Keine
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d3:choice:portal
+            value: User accounts on the solution itself
+            add_score: 2
+            translations:
+              fr:
+                value: Des comptes utilisateurs sur la solution elle-même
+              de:
+                value: Benutzerkonten auf der Lösung selbst
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d3:choice:integration
+            value: An integration (API) or remote access
+            add_score: 3
+            translations:
+              fr:
+                value: Une intégration (API) ou un accès à distance
+              de:
+                value: Eine Integration (API) oder Fernzugriff
+          - urn: urn:intuitem:risk:qf_page:solution-tiering:data:question:d3:choice:privileged
+            value: Privileged or administrator access, or a presence on your network
+            add_score: 4
+            translations:
+              fr:
+                value: Un accès à privilèges ou administrateur, ou une présence sur votre réseau
+              de:
+                value: Privilegierter Zugriff, Administratorzugriff oder Präsenz in Ihrem Netzwerk
+          translations:
+            fr:
+              text: De quel accès la solution dispose-t-elle à vos systèmes ou à votre réseau ?
+            de:
+              text: Welchen Zugriff hat die Lösung auf Ihre Systeme oder Ihr Netzwerk?
+      translations:
+        fr:
+          name: Données, vie privée et sécurité
+        de:
+          name: Daten, Datenschutz und Sicherheit
+    translations:
+      fr:
+        name: Criticité des solutions
+        description: |-
+          Classe une solution selon son risque intrinsèque, avant toute revue de sa posture de sécurité. Un fournisseur qui fournit plusieurs solutions reçoit un niveau par solution.
+
+          Chaque réponse notée va de 1 (faible) à 4 (critique). L'impact métier et l'exposition des données sont chacun la moyenne de leurs trois réponses, et le risque intrinsèque est le plus élevé des deux : une solution qui fait tourner un processus critique compte même si elle ne détient aucune donnée, et inversement.
+
+          Certaines réponses ou combinaisons de réponses relèvent directement le niveau : une fonction critique réglementée ; une solution dont la défaillance arrête un processus critique ou exposé aux clients, et qui est soit sans alternative, soit longue à remplacer (plus de six mois) ; des données personnelles sensibles, des données de paiement ou de santé, des identifiants ou des secrets ; ou un accès à privilèges à vos systèmes.
+        annotation: 'Une réponse acceptée attribue le niveau de la solution sur l''échelle par défaut
+          : Critique à partir d''un risque intrinsèque de 3,3, Important à partir de 2,6, Standard à partir
+          de 2,0, Faible impact en dessous. Une fonction critique réglementée ou un point de défaillance
+          unique rend la solution au moins Critique ; des données personnelles sensibles, des données de paiement
+          ou de santé, des identifiants ou des secrets, ou un accès à privilèges,
+          au moins Important. Le niveau retenu est le plus élevé de ces résultats. Chaque dimension fait
+          la moyenne de trois réponses et évolue donc par tiers : 3,3 est atteint avec 4-4-2 ou 3-3-4,
+          2,6 avec 3-3-2. Les niveaux sont désignés par leur clé : une échelle renommée ou réordonnée
+          continue de fonctionner, une échelle sans ces clés envoie les réponses en relecture.'
+      de:
+        name: Lösungseinstufung
+        description: |-
+          Stuft eine Lösung nach ihrem inhärenten Risiko ein, bevor ihr Sicherheitsstatus geprüft wird. Bei einem Anbieter mit mehreren Lösungen wird jede Lösung gesondert eingestuft.
+
+          Jede bewertete Antwort erhält 1 (niedrig) bis 4 (kritisch) Punkte. Geschäftliche Auswirkungen und Datenexposition ergeben sich jeweils aus dem Mittelwert ihrer drei Antworten. Das inhärente Risiko ist der höhere der beiden Werte: Eine Lösung, die einen kritischen Prozess betreibt, ist auch ohne Datenhaltung bedeutsam – und umgekehrt.
+
+          Einige Antworten oder Antwortkombinationen erhöhen die Stufe unmittelbar: eine regulierte kritische Funktion; eine Lösung, deren Ausfall einen kritischen Prozess oder einen Prozess mit direktem Kundenkontakt zum Stillstand bringt und für die entweder keine alternative Bezugsquelle besteht oder ein Wechsel mehr als sechs Monate dauert; besondere Kategorien personenbezogener Daten, Zahlungs- oder Gesundheitsdaten, Zugangsdaten oder Geheimnisse; oder privilegierter Zugriff auf Ihre Systeme.
+        annotation: 'Eine angenommene Antwort setzt die Stufe der Lösung auf der Standardskala:
+          Kritisch ab einem inhärenten Risiko von 3,3, Wichtig ab 2,6, Standard ab 2,0, darunter
+          Geringe Auswirkungen. Eine regulierte kritische Funktion oder ein Single Point of Failure
+          führt mindestens zu Kritisch; besondere Kategorien personenbezogener Daten, Zahlungs- oder
+          Gesundheitsdaten, Zugangsdaten oder Geheimnisse sowie privilegierter Zugriff mindestens zu
+          Wichtig. Es gilt jeweils die höchste Stufe. Jede Dimension ist der
+          Mittelwert von drei Antworten und verändert sich daher in Drittelschritten: 3,3 wird mit
+          4-4-2 oder 3-3-4 erreicht, 2,6 mit 3-3-2. Die Stufen werden über ihre Schlüssel referenziert,
+          sodass umbenannte oder neu geordnete Skalen weiterhin funktionieren. Bei einer Skala ohne
+          diese Schlüssel werden die Antworten zur Prüfung weitergeleitet.'
+translations:
+  fr:
+    name: Criticité des solutions
+    description: 'Un formulaire de départ, court, pour classer une solution selon son risque intrinsèque
+      : trois questions sur l''impact métier et opérationnel, trois sur les données, la vie privée et
+      la sécurité. Lancez-le depuis une solution avec « Évaluer le niveau » ; une réponse acceptée attribue
+      le niveau à la solution.'
+  de:
+    name: Lösungseinstufung
+    description: |-
+      Ein kurzes Einstiegsformular zur Einstufung einer Lösung, also der Leistung eines Anbieters, nach ihrem inhärenten Risiko: drei Fragen zu geschäftlichen und betrieblichen Auswirkungen sowie drei zu Daten, Datenschutz und Sicherheit. Starten Sie es bei einer Lösung über „Stufe bewerten“; eine angenommene Antwort überträgt die Stufe auf die Lösung.
+
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { UserEditSchema } from '$lib/utils/schemas';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
+	import { UserEditSchema } from '#lib/utils/schemas.js';
 	import type { PageData } from './$types';
 
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

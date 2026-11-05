@@ -748,6 +748,19 @@ def _build_related_filter(related_filter: dict, model_class) -> dict | None:
     if condition == "overdue":
         from django.utils import timezone
 
+        related_model = model_class._meta.get_field(relation).related_model
+        if hasattr(related_model, "overdue_q"):
+            return {
+                "q": Q(
+                    **{
+                        f"{relation}__in": related_model.objects.filter(
+                            related_model.overdue_q()
+                        )
+                    }
+                ),
+                "label": f"{relation} overdue",
+            }
+
         today = timezone.now().date()
         # Try eta first, then expiry_date
         return {
@@ -795,6 +808,9 @@ def _build_date_filter(date_filter: str, model_class) -> dict | None:
     now = timezone.now()
 
     if date_filter == "overdue":
+        if hasattr(model_class, "overdue_q"):
+            # Model defines its own "overdue" from a due date (e.g. the SLA)
+            return {"q": model_class.overdue_q(), "label": "overdue (due date passed)"}
         if hasattr(model_class, "eta_missed_q"):
             # Model defines its own "overdue" logic
             return {"q": model_class.eta_missed_q(), "label": "overdue (ETA missed)"}

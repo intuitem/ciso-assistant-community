@@ -1,4 +1,4 @@
-import type { Scope } from '$lib/components/Cel/compute-assist';
+import type { Scope } from '#lib/components/Cel/compute-assist.js';
 
 // Helpers shared by the dataset editor and the metric definition form.
 

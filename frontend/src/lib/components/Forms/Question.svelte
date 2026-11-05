@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { isQuestionVisible } from '$lib/utils/helpers';
-	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { isQuestionVisible } from '#lib/utils/helpers.js';
+	import * as m from '#paraglide/messages.js';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 	import SliderInput from './SliderInput.svelte';
 
@@ -203,6 +203,9 @@
 							>{safeTranslate(question.type)}</span
 						>
 					</p>
+					{#if question.annotation && !shallow}
+						<p class="text-xs text-surface-600-400 whitespace-pre-line">{question.annotation}</p>
+					{/if}
 
 					{#if shallow}
 						{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}

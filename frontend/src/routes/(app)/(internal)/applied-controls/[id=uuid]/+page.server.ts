@@ -1,14 +1,14 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { urlParamModelVerboseName } from '$lib/utils/crud';
-import { safeTranslate } from '$lib/utils/i18n';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { urlParamModelVerboseName } from '#lib/utils/crud.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { fail, message, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { Actions } from '@sveltejs/kit';
-import { modelSchema } from '$lib/utils/schemas';
-import { handleErrorResponse } from '$lib/utils/actions';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { handleErrorResponse } from '#lib/utils/actions.js';
 
 export const actions: Actions = {
 	duplicate: async (event) => {

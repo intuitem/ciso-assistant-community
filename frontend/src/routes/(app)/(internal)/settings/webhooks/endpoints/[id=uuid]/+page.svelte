@@ -1,20 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import { m } from '$paraglide/messages';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import { m } from '#paraglide/messages.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { webhookEndpointSchema } from '$lib/utils/schemas';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import ListSelector from '$lib/components/Forms/ListSelector.svelte';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { goto } from '$lib/utils/breadcrumbs';
+	import { webhookEndpointSchema } from '#lib/utils/schemas.js';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import ListSelector from '#lib/components/Forms/ListSelector.svelte';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { goto } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
-	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import WebhookSecretGenerator from '#lib/components/Forms/WebhookSecretGenerator.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { SHOW_PAYLOAD_FORMAT, SHOW_TARGET_DOMAINS } from '../constants';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
 
 	interface Props {
 		data: PageData;

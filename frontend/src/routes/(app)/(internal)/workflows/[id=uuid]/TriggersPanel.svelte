@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
 	interface Props {

@@ -1547,11 +1547,30 @@ STATUS_LABELS = {
 }
 
 
+def _related_names(items) -> str:
+    """Names of related objects as the API returns them ({id, str} dicts)."""
+    return ", ".join(
+        o.get("str", str(o)) if isinstance(o, dict) else str(o) for o in items or []
+    )
+
+
+def _sla_label(state) -> str:
+    """The SLA state of a vulnerability, with the end of an exception."""
+    if not state:
+        return "-"
+    label = state.get("name", "-")
+    if state.get("until"):
+        label += f" until {state['until']}"
+    return label
+
+
 async def get_vulnerabilities(
     folder: str = None,
     status: str = None,
     severity: int = None,
+    sla: str = None,
     search: str = None,
+    ordering: str = None,
     limit: int = None,
     offset: int = None,
 ):
@@ -1561,7 +1580,9 @@ async def get_vulnerabilities(
         folder: Folder ID/name to filter by
         status: Filter by status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
         severity: Filter by severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
+        sla: Filter by SLA state, comma-separated for several: overdue | today | caution | on track | excepted | resolved
         search: Search term to filter results
+        ordering: Field to order by, '-' prefix for descending; 'state' lists the most urgent SLA first
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -1578,9 +1599,14 @@ async def get_vulnerabilities(
         if severity is not None:
             params["severity"] = severity
             filters["severity"] = SEVERITY_LABELS.get(severity, str(severity))
+        if sla:
+            params["state"] = [state.strip() for state in sla.split(",")]
+            filters["sla"] = sla
         if search:
             params["search"] = search
             filters["search"] = search
+        if ordering:
+            params["ordering"] = ordering
 
         if limit is not None:
             params["limit"] = limit
@@ -1603,8 +1629,8 @@ async def get_vulnerabilities(
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|ID|Name|Ref ID|Status|Severity|Folder|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result += "|ID|Name|Ref ID|Status|Severity|SLA|Due date|Assigned to|Folder|\n"
+        result += "|---|---|---|---|---|---|---|---|---|\n"
 
         for vuln in vulnerabilities:
             vuln_id = vuln.get("id", "N/A")
@@ -1621,7 +1647,10 @@ async def get_vulnerabilities(
             else:
                 vuln_folder = str(vuln_folder) if vuln_folder else "-"
 
-            result += f"|{vuln_id}|{name}|{ref_id}|{vuln_status}|{vuln_severity}|{vuln_folder}|\n"
+            sla = _sla_label(vuln.get("state"))
+            due_date = vuln.get("due_date") or "-"
+            owners = _related_names(vuln.get("owner")) or "-"
+            result += f"|{vuln_id}|{name}|{ref_id}|{vuln_status}|{vuln_severity}|{sla}|{due_date}|{owners}|{vuln_folder}|\n"
 
         return success_response(
             result,
@@ -1662,7 +1691,10 @@ async def get_vulnerability(vulnerability_id: str):
         result += f"**Ref ID:** {vuln.get('ref_id') or '-'}\n"
         result += f"**Status:** {vuln_status}\n"
         result += f"**Severity:** {vuln_severity}\n"
+        result += f"**SLA:** {_sla_label(vuln.get('state'))}\n"
+        result += f"**Assigned to:** {_related_names(vuln.get('owner')) or '-'}\n"
         result += f"**Description:** {vuln.get('description') or '-'}\n"
+        result += f"**Observation:** {vuln.get('observation') or '-'}\n"
 
         folder = vuln.get("folder")
         if isinstance(folder, dict):
@@ -1670,23 +1702,43 @@ async def get_vulnerability(vulnerability_id: str):
         elif folder:
             result += f"**Folder:** {folder}\n"
 
-        filtering_labels = vuln.get("filtering_labels", [])
-        if filtering_labels:
-            result += f"**Labels:** {', '.join(str(l) for l in filtering_labels)}\n"
+        for label, key in (
+            ("Detection date", "detected_at"),
+            ("Published date", "published_date"),
+            ("Due date", "due_date"),
+            ("ETA", "eta"),
+            ("Remediation date", "remediated_at"),
+        ):
+            result += f"**{label}:** {vuln.get(key) or '-'}\n"
 
-        applied_controls = vuln.get("applied_controls", [])
-        if applied_controls:
-            result += (
-                f"**Applied Controls:** {', '.join(str(c) for c in applied_controls)}\n"
-            )
+        for label, key in (
+            ("Labels", "filtering_labels"),
+            ("Applied Controls", "applied_controls"),
+            ("Assets", "assets"),
+            ("Security Exceptions", "security_exceptions"),
+            ("Evidences", "evidences"),
+            ("Security Advisories", "security_advisories"),
+            ("CWEs", "cwes"),
+        ):
+            names = _related_names(vuln.get(key))
+            if names:
+                result += f"**{label}:** {names}\n"
 
-        assets = vuln.get("assets", [])
-        if assets:
-            result += f"**Assets:** {', '.join(str(a) for a in assets)}\n"
-
-        security_exceptions = vuln.get("security_exceptions", [])
-        if security_exceptions:
-            result += f"**Security Exceptions:** {', '.join(str(e) for e in security_exceptions)}\n"
+        # Incidents and tasks point to the vulnerability: list them by filter.
+        for label, endpoint in (
+            ("Incidents", "/incidents/"),
+            ("Tasks", "/task-templates/"),
+        ):
+            linked = make_get_request(endpoint, params={"vulnerabilities": resolved_id})
+            if linked.status_code == 200:
+                names = _related_names(
+                    [
+                        {"str": o.get("name")}
+                        for o in get_paginated_results(linked.json())
+                    ]
+                )
+                if names:
+                    result += f"**{label}:** {names}\n"
 
         return success_response(
             result,

@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import { isDark } from '$lib/utils/helpers';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 
 	let { data } = $props();
 	let scheme = $derived(data.scheme);
@@ -69,7 +69,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: body ? JSON.stringify(body) : undefined
 			});
-			if (res.ok) await invalidateAll();
+			if (res.ok) await refreshAll();
 			else {
 				const d = await res.json().catch(() => null);
 				notifyError(d?.detail || d?.error || d?.abbreviation || m.error());
@@ -135,10 +135,10 @@
 				})
 			]);
 			if (results.some((r) => !r.ok)) notifyError(m.error());
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			notifyError(m.error());
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = false;
 		}

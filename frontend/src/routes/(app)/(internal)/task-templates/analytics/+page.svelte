@@ -1,8 +1,8 @@
 <script lang="ts">
-	import TaskTemplatesAnalytics from '$lib/components/DataViz/TaskTemplatesAnalytics.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import TaskTemplatesAnalytics from '#lib/components/DataViz/TaskTemplatesAnalytics.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { PageData } from './$types';
 
 	interface Props {

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import { createPickerForm } from '$lib/components/AssetGraph/picker';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import { createPickerForm } from '#lib/components/AssetGraph/picker.js';
 	import AssetBoard from './AssetBoard.svelte';
 	import type { PageData } from './$types';
 
@@ -15,13 +15,13 @@
 	const folderPicker = createPickerForm('folder', data.selectedFolderId || null);
 
 	function handleFolderChange(folderId: string | null) {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (folderId) {
 			url.searchParams.set('folder', folderId);
 		} else {
 			url.searchParams.delete('folder');
 		}
-		goto(url, { replaceState: false, invalidateAll: true });
+		goto(url, { replace: false, refreshAll: true });
 	}
 </script>
 

@@ -1,5 +1,5 @@
-import { formatSelectFieldData } from '$lib/utils/select-field';
-import type { SelectField } from '$lib/utils/crud';
+import { formatSelectFieldData } from '#lib/utils/select-field.js';
+import type { SelectField } from '#lib/utils/crud.js';
 
 /** Choice-field options, fetched when a form opens rather than on page load. */
 export async function ensureSelectOptions(

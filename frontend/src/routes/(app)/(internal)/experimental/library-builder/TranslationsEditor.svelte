@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { LOCALE_MAP, language } from '$lib/utils/locales';
+	import { m } from '#paraglide/messages.js';
+	import { LOCALE_MAP, language } from '#lib/utils/locales.js';
 
 	interface Field {
 		key: string;

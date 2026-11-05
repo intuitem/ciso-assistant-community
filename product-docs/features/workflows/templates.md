@@ -6,6 +6,8 @@ description: "The ready-made workflows that ship as libraries, by domain, and wh
 
 CISO Assistant ships ready-made workflows as libraries. Install one from the library catalog and it becomes a normal workflow in the domain you choose: a draft you can inspect, adjust and publish. Nothing syncs back to the library afterwards, so you can change anything.
 
+Quick reference: [cheat sheet](cheat-sheet.md#export-import-and-templates).
+
 Every template follows the same rules:
 
 - It never renders a judgment. Templates notify, file, link and record facts (a date passed, a control opened). Approvals, results and severities stay with people.

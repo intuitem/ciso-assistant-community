@@ -1,4 +1,4 @@
-import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
+import { nestedDeleteFormAction, nestedWriteFormAction } from '#lib/utils/actions.js';
 import { type Actions } from '@sveltejs/kit';
 
 export const actions: Actions = {

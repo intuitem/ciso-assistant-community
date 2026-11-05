@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DashboardGrid from '$lib/components/Dashboard/DashboardGrid.svelte';
-	import { m } from '$paraglide/messages';
+	import DashboardGrid from '#lib/components/Dashboard/DashboardGrid.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

@@ -26,7 +26,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 
-	import RecursiveTreeViewItem from '$lib/components/TreeView/RecursiveTreeViewItem.svelte';
+	import RecursiveTreeViewItem from '#lib/components/TreeView/RecursiveTreeViewItem.svelte';
 	import type { TreeViewNode } from './types';
 
 	interface Props {

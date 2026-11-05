@@ -1,0 +1,15 @@
+subject: "CISO Assistant: U bent toegewezen aan '${incident_name}'"
+body: |
+  Hallo,
+
+  U bent toegewezen aan het volgende incident:
+
+  - Naam: ${incident_name}
+  - Ref ID: ${incident_ref_id}
+  - Ernst: ${incident_severity}
+  - Status: ${incident_status}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om dit incident te bekijken en te beheren: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

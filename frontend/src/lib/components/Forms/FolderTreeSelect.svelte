@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import type { CacheLock } from '$lib/utils/types';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import FolderTreeNode, { type TreeNode } from '../FocusMode/FolderTreeNode.svelte';
 
 	const PERSONAL_SENTINEL = '__personal__';
