@@ -19,11 +19,10 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_deny
 from django.views.decorators.csrf import csrf_exempt
-from knox.auth import TokenAuthentication
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from rest_framework.exceptions import AuthenticationFailed
 
-from iam.authentication import is_self_registered
+from iam.authentication import KnoxTokenAuthentication, is_self_registered
 from iam.mcp_access import is_mcp_request, refusal_reason
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
 from iam.oidc_adapter import MCP_SCOPES
@@ -95,7 +94,7 @@ def _user_from_knox_cookie(request):
     if not raw:
         return None
     try:
-        user, _ = TokenAuthentication().authenticate_credentials(raw.encode())
+        user, _ = KnoxTokenAuthentication().authenticate_credentials(raw.encode())
     except AuthenticationFailed:
         return None
     return user if user.is_active else None
@@ -191,6 +190,11 @@ class CISOAuthorizationView(AuthorizationView):
                     ConnectionProfile.objects.all(), key=lambda p: p.rank
                 )
             ]
+            # backend-mcp may run read-only; this process cannot tell
+            context["offers_writes"] = any(
+                item["profile"].can_create or item["profile"].can_update
+                for item in context["profiles"]
+            )
         return context
 
     def dispatch(self, request, *args, **kwargs):

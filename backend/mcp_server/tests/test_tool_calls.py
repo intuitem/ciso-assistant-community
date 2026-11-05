@@ -146,3 +146,12 @@ class TestAudit:
         assert actor["app_name"] == "Claude Code"
         assert actor["app_uid"] == "abc"
         assert log_entry_to_raw(entry)["via_app"] == VIA
+
+
+def test_params_merge_into_a_pagination_link():
+    path = transport._with_params("/folders/?limit=100&offset=100", {"limit": 100})
+    assert path == "/folders/?offset=100&limit=100"
+    assert transport._with_params("/folders/", {"id": ["a", "b"]}) == (
+        "/folders/?id=a&id=b"
+    )
+    assert transport._with_params("/folders/", None) == "/folders/"

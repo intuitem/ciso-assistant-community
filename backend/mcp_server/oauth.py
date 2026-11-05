@@ -102,4 +102,4 @@ def _verify_in_thread(raw: str) -> AccessToken | None:
 
 class CISOTokenVerifier:
     async def verify_token(self, token: str) -> AccessToken | None:
-        return await sync_to_async(_verify_in_thread)(token)
+        return await sync_to_async(_verify_in_thread, thread_sensitive=False)(token)

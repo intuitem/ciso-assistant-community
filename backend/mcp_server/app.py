@@ -66,7 +66,7 @@ def _with_kill_switch(app, mcp_path):
         if (
             scope["type"] == "http"
             and scope["path"].rstrip("/") == mcp_path.rstrip("/")
-            and not await sync_to_async(enabled)()
+            and not await sync_to_async(enabled, thread_sensitive=False)()
         ):
             response = JSONResponse(
                 {"error": "MCP is disabled by your administrator."}, status_code=403
@@ -94,7 +94,7 @@ def _with_authorization_server_metadata(app, issuer_path):
 
     async def asgi(scope, receive, send):
         if scope["type"] == "http" and scope["path"] == path:
-            upstream = await sync_to_async(anonymous_get)(
+            upstream = await sync_to_async(anonymous_get, thread_sensitive=False)(
                 "/.well-known/openid-configuration"
             )
             response = Response(

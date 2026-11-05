@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
+from django.core.cache import cache
 from django.utils import timezone
 from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
@@ -2516,6 +2517,8 @@ class ConnectedAppUse(models.Model):
 
     THROTTLE = timedelta(minutes=1)
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="connected_app_uses"
     )
@@ -2532,19 +2535,16 @@ class ConnectedAppUse(models.Model):
 
     @classmethod
     def record(cls, user_id, client_id) -> None:
-        # at most one write per app and user per THROTTLE: this runs on every call
-        now = timezone.now()
-        updated = (
-            cls.objects.filter(user_id=user_id, client_id=client_id)
-            .filter(
-                Q(last_used_at__isnull=True) | Q(last_used_at__lt=now - cls.THROTTLE)
-            )
-            .update(last_used_at=now)
+        # this runs on every call: within THROTTLE, the cache answers and the
+        # database is not touched
+        key = f"connected-app-use:{user_id}:{client_id}"
+        if not cache.add(key, True, cls.THROTTLE.total_seconds()):
+            return
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"last_used_at": timezone.now()},
         )
-        if not updated:
-            cls.objects.get_or_create(
-                user_id=user_id, client_id=client_id, defaults={"last_used_at": now}
-            )
 
     @classmethod
     def record_authorization(cls, user_id, client_id) -> None:
@@ -2567,6 +2567,8 @@ class ConnectionProfile(models.Model):
         ("Read and update", False, True, False),
         ("Read, create and update", True, True, False),
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)
@@ -2617,6 +2619,8 @@ class ConnectionProfile(models.Model):
 class AppGrant(models.Model):
     """Which profile a connection uses. Keyed by user and client, not by token:
     allauth issues new tokens at each refresh and copies no data across."""
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="app_grants")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")

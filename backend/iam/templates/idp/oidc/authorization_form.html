@@ -20,6 +20,7 @@
     .profile input { margin-top: .3rem; }
     .profile p { margin: .15rem 0 0; font-size: .9rem; color: #4b5563; }
     .errors { color: #b91c1c; font-size: .9rem; }
+    .note { margin: .75rem 0 0; font-size: .85rem; color: #6b7280; }
     .actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
     button { border-radius: 8px; padding: .6rem 1.2rem; font-size: 1rem; cursor: pointer; }
     .primary { background: #7c3aed; color: #fff; border: none; }
@@ -66,6 +67,9 @@
                 </div>
               </label>
             {% endfor %}
+          {% endif %}
+          {% if offers_writes %}
+            <p class="note">{% translate "Creating, changing and deleting data only work if your administrator has turned on the write tools." %}</p>
           {% endif %}
         </fieldset>
         {% if form.errors %}<div class="errors">{{ form.non_field_errors }}{{ form.profile.errors }}</div>{% endif %}

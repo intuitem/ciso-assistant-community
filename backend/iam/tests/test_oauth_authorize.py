@@ -69,6 +69,23 @@ def test_invalid_knox_cookie_is_sent_to_login(client, oauth_client):
     assert "/login?" in response["Location"]
 
 
+def test_a_scim_token_cookie_is_not_a_session(client, oauth_client):
+    from iam.models import SCIMToken
+
+    user = User.objects._create_user(
+        email="scim@example.com",
+        password=None,
+        mailing=False,
+        initial_group=None,
+        can_connect_apps=True,
+    )
+    auth_token, raw = AuthToken.objects.create(user=user)
+    SCIMToken.objects.create(auth_token=auth_token)
+    client.cookies["token"] = raw
+    response = client.get(AUTHORIZE_URL, _params(oauth_client))
+    assert "/login?" in response["Location"]
+
+
 def test_logged_in_user_gets_code_and_iss(client, oauth_client, knox_token):
     client.cookies["token"] = knox_token
     response = client.get(AUTHORIZE_URL, _params(oauth_client))

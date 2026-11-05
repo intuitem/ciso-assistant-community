@@ -149,6 +149,7 @@ class TestConsent:
         assert items[2]["summary"] == (
             "This app will be able to read, change and delete data in CISO Assistant."
         )
+        assert b"turned on the write tools" in page.content
         assert "scopes" not in page.context["form"].fields
         assert str(default.pk) in page.content.decode()
 

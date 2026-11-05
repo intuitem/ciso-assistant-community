@@ -1,7 +1,7 @@
 import json
 from concurrent.futures import ThreadPoolExecutor
 from contextvars import ContextVar
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import parse_qsl, urlencode, urlsplit
 
 from auditlog import get_logentry_model
 from django.conf import settings
@@ -66,15 +66,27 @@ def _get_handler() -> BaseHandler:
     return _handler
 
 
+def _with_params(endpoint, params) -> str:
+    # pagination links already carry a query string: merge, params winning
+    parts = urlsplit(endpoint)
+    query = [
+        (key, value)
+        for key, value in parse_qsl(parts.query, keep_blank_values=True)
+        if key not in (params or {})
+    ]
+    for key, value in (params or {}).items():
+        values = value if isinstance(value, (list, tuple)) else [value]
+        query += [(key, v) for v in values]
+    return parts.path + ("?" + urlencode(query) if query else "")
+
+
 def request_as(
     user, method, endpoint, *, params=None, json=None, data=None, headers=None
 ) -> Response:
     """Run one API call through the full middleware stack as `user`, so RBAC,
     audit logging and every other request hook behave as for a REST call."""
     public = urlsplit(settings.CISO_ASSISTANT_URL)
-    path = API_PREFIX + endpoint
-    if params:
-        path += "?" + urlencode(params, doseq=True)
+    path = API_PREFIX + _with_params(endpoint, params)
     extra = {
         "HTTP_" + name.upper().replace("-", "_"): value
         for name, value in (headers or {}).items()
