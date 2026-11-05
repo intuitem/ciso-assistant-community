@@ -419,13 +419,13 @@ objects:
       function or authorized scope, acting harmfully, deceptively, or parasitically within multi-agent
       or human-agent ecosystems. The agent’s actions may individually appear legitimate, but its emergent
       behavior becomes harmful, creating a containment gap for traditional rule-based systems. While external
-      compromise, such as Prompt Injection (LLM01:2025), Goal Hijack (AS01) or Supply Chain tampering
-      (AS04) can initiate the divergence, ASI10 focuses on the loss of behavioral integrity and governance
+      compromise, such as Prompt Injection (LLM01:2025), Goal Hijack (ASI01) or Supply Chain tampering
+      (ASI04) can initiate the divergence, ASI10 focuses on the loss of behavioral integrity and governance
       once the drift begins, not the initial intrusion itself. Consequences include sensitive information
       disclosure, misinformation propagation, workflow hijacking, and operational sabotage. Rogue Agents
       represent a distinct risk of behavioral divergence, unlike Excessive Agency (LLM06:2025), which
       focuses on over-granted permissions, and can be amplified "insider threats" due to the speed and
-      scale of Agentic systems. Consequences include Sensitive Information Disclosure (LLM02;2025), Misinformation
+      scale of Agentic systems. Consequences include Sensitive Information Disclosure (LLM02:2025), Misinformation
       (LLM09:2025). In the OWASP Agentic AI Threats and Mitigations guide, ASI10 corresponds to T13 –
       Rogue Agents in Multi-Agent Systems. The OWASP AIVSS framework maps this risk primarily to Behavioral
       Integrity (BI), Operational Security (OS), and Compliance Violations (CV), with elevated severity
@@ -438,14 +438,14 @@ objects:
           und innerhalb von Multi-Agenten- oder Mensch-Agenten-Ökosystemen schädlich, täuschend oder parasitär
           handeln. Einzelne Aktionen können legitim erscheinen, während das daraus entstehende Gesamtverhalten
           schädlich wird. Dies schafft eine Eindämmungslücke für traditionelle regelbasierte Systeme. Eine
-          externe Kompromittierung wie Prompt Injection (LLM01:2025), Goal Hijack (AS01) oder Manipulation
-          der Lieferkette (AS04) kann die Abweichung auslösen. ASI10 behandelt jedoch den Verlust von Verhaltensintegrität
+          externe Kompromittierung wie Prompt Injection (LLM01:2025), Goal Hijack (ASI01) oder Manipulation
+          der Lieferkette (ASI04) kann die Abweichung auslösen. ASI10 behandelt jedoch den Verlust von Verhaltensintegrität
           und Governance nach Beginn dieser Entwicklung, nicht das ursprüngliche Eindringen. Folgen sind die
           Offenlegung sensibler Informationen, die Verbreitung von Fehlinformationen, die Übernahme von Workflows
           und betriebliche Sabotage. Rogue Agents stellen ein eigenständiges Risiko abweichenden Verhaltens
           dar. Excessive Agency (LLM06:2025) betrifft hingegen übermäßig erteilte Berechtigungen. Aufgrund
           der Geschwindigkeit und Größenordnung agentischer Systeme können Rogue Agents verstärkte „Insider-Bedrohungen“
-          darstellen. Zu den Folgen zählen Sensitive Information Disclosure (LLM02;2025) und Misinformation
+          darstellen. Zu den Folgen zählen Sensitive Information Disclosure (LLM02:2025) und Misinformation
           (LLM09:2025). Im OWASP Agentic AI Threats and Mitigations Guide entspricht ASI10 dem Eintrag T13
           – Rogue Agents in Multi-Agent Systems. Das OWASP-AIVSS-Rahmenwerk ordnet dieses Risiko vor allem
           Behavioral Integrity (BI), Operational Security (OS) und Compliance Violations (CV) zu, mit erhöhtem
@@ -1515,13 +1515,13 @@ objects:
         function or authorized scope, acting harmfully, deceptively, or parasitically within multi-agent
         or human-agent ecosystems. The agent’s actions may individually appear legitimate, but its emergent
         behavior becomes harmful, creating a containment gap for traditional rule-based systems. While
-        external compromise, such as Prompt Injection (LLM01:2025), Goal Hijack (AS01) or Supply Chain
-        tampering (AS04) can initiate the divergence, ASI10 focuses on the loss of behavioral integrity
+        external compromise, such as Prompt Injection (LLM01:2025), Goal Hijack (ASI01) or Supply Chain
+        tampering (ASI04) can initiate the divergence, ASI10 focuses on the loss of behavioral integrity
         and governance once the drift begins, not the initial intrusion itself. Consequences include sensitive
         information disclosure, misinformation propagation, workflow hijacking, and operational sabotage.
         Rogue Agents represent a distinct risk of behavioral divergence, unlike Excessive Agency (LLM06:2025),
         which focuses on over-granted permissions, and can be amplified "insider threats" due to the speed
-        and scale of Agentic systems. Consequences include Sensitive Information Disclosure (LLM02;2025),
+        and scale of Agentic systems. Consequences include Sensitive Information Disclosure (LLM02:2025),
         Misinformation (LLM09:2025). In the OWASP Agentic AI Threats and Mitigations guide, ASI10 corresponds
         to T13 – Rogue Agents in Multi-Agent Systems. The OWASP AIVSS framework maps this risk primarily
         to Behavioral Integrity (BI), Operational Security (OS), and Compliance Violations (CV), with
