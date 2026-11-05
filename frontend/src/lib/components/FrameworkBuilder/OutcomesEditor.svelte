@@ -193,6 +193,9 @@
 				label: rule.annotation || m.builderRuleKindWeakestLink(),
 				rated_depth: 2,
 				per: 'depth_1',
+				...(rule.implementation_groups
+					? { implementation_groups: rule.implementation_groups }
+					: {}),
 				...(rule.translations ? { translations: rule.translations } : {})
 			};
 		} else {
@@ -433,6 +436,32 @@
 		</label>
 	{/snippet}
 
+	{#snippet groupsField(rule: OutcomeRule, index: number)}
+		{#if mode === 'framework' && groups.length}
+			<div class="block" role="group" aria-label={m.builderRuleGroups()}>
+				<span class="text-xs text-surface-600-400">{m.builderRuleGroups()}</span>
+				<div class="flex flex-wrap gap-1 mt-0.5" data-testid="outcome-rule-groups">
+					{#each groups as group (group.id)}
+						{@const on = (rule.implementation_groups ?? []).includes(group.id)}
+						<button
+							type="button"
+							aria-pressed={on}
+							title={group.label}
+							class="text-xs px-2 py-0.5 rounded-full border {on
+								? 'border-primary-500 bg-primary-100-900 text-primary-800-200'
+								: 'border-surface-200-800 text-surface-600-400 hover:bg-surface-100-900'}"
+							onclick={() => toggleGroup(index, group.id)}>{group.id}</button
+						>
+					{/each}
+					{#if !rule.implementation_groups?.length}
+						<span class="text-xs text-surface-500 self-center">({m.builderRuleGroupsAll()})</span>
+					{/if}
+				</div>
+				<span class="text-xs text-surface-500">{m.builderRuleGroupsHint()}</span>
+			</div>
+		{/if}
+	{/snippet}
+
 	{#snippet idField(rule: OutcomeRule, index: number)}
 		{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
 		<label class="block">
@@ -575,6 +604,7 @@
 				<div class="px-3 pb-3 pt-2 border-t border-surface-200-800 space-y-3">
 					{@render idField(rule, index)}
 					{@render kindSelect(rule, index)}
+					{@render groupsField(rule, index)}
 					<WeakestLinkRuleEditor
 						{rule}
 						{activeLanguage}
@@ -602,31 +632,7 @@
 
 					{@render kindSelect(rule, index)}
 
-					{#if mode === 'framework' && groups.length}
-						<div class="block" role="group" aria-label={m.builderRuleGroups()}>
-							<span class="text-xs text-surface-600-400">{m.builderRuleGroups()}</span>
-							<div class="flex flex-wrap gap-1 mt-0.5" data-testid="outcome-rule-groups">
-								{#each groups as group (group.id)}
-									{@const on = (rule.implementation_groups ?? []).includes(group.id)}
-									<button
-										type="button"
-										aria-pressed={on}
-										title={group.label}
-										class="text-xs px-2 py-0.5 rounded-full border {on
-											? 'border-primary-500 bg-primary-100-900 text-primary-800-200'
-											: 'border-surface-200-800 text-surface-600-400 hover:bg-surface-100-900'}"
-										onclick={() => toggleGroup(index, group.id)}>{group.id}</button
-									>
-								{/each}
-								{#if !rule.implementation_groups?.length}
-									<span class="text-xs text-surface-500 self-center"
-										>({m.builderRuleGroupsAll()})</span
-									>
-								{/if}
-							</div>
-							<span class="text-xs text-surface-500">{m.builderRuleGroupsHint()}</span>
-						</div>
-					{/if}
+					{@render groupsField(rule, index)}
 
 					<div class="block">
 						<span class="text-xs text-surface-600-400">{m.builderCelExpression()}</span>

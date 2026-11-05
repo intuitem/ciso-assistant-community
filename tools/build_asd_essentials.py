@@ -307,15 +307,15 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
     pairs, missing = [], set()
     for entry in e8_map["maps"]:
         assert entry["relationship"] == "intersects-with", entry["relationship"]
-        actions = [source["id-ref"] for source in entry["sources"]]
+        assert len(entry["sources"]) == 1, entry["sources"]
+        action = entry["sources"][0]["id-ref"]
         for target in entry["targets"]:
             ism = target["id-ref"]
             if ism not in by_ism:
                 missing.add(ism)
             for source in by_ism.get(ism, []):
-                for action in actions:
-                    for urn in instances[action]:
-                        pairs.append((source, urn))
+                for urn in instances[action]:
+                    pairs.append((source, urn))
     if missing:
         print(f"E8 ISM ids not in {E8}: {sorted(missing)}", file=sys.stderr)
     seen = set()
