@@ -89,16 +89,42 @@ describe('computeRefId', () => {
 		expect(computeRefId(['foo', 'bar', null], null, 'section')).toBe('4');
 	});
 
-	it('computes question ref_id', () => {
-		expect(computeRefId(['2.1-q1', '2.1-q3'], '2.1', 'question')).toBe('2.1-q4');
+	it('numbers questions without repeating the parent ref_id', () => {
+		expect(computeRefId(['1', '3'], '2.1', 'question')).toBe('4');
+	});
+
+	it('numbers questions after legacy "<parent>-qN" ref_ids', () => {
+		expect(computeRefId(['2.1-q1', '2.1-q3'], '2.1', 'question')).toBe('4');
 	});
 
 	it('computes first question ref_id', () => {
-		expect(computeRefId([], '2.1', 'question')).toBe('2.1-q1');
+		expect(computeRefId([], '2.1', 'question')).toBe('1');
+	});
+
+	it('skips named questions when numbering', () => {
+		expect(computeRefId(['headcount', '2'], '2.1', 'question')).toBe('3');
+	});
+
+	it('skips a named question ending in digits ("iso-27001")', () => {
+		expect(computeRefId(['iso-27001', '2'], '2.1', 'question')).toBe('3');
+	});
+
+	it('counts a collision-suffixed question ("5-2") as its number', () => {
+		// 5-2 means the number 5 is in use, so the next default is 6, not 4.
+		expect(computeRefId(['1', '2', '3', '5-2'], '2.1', 'question')).toBe('6');
+	});
+
+	it('starts at 1 when every existing question is named', () => {
+		// The named sibling must not push the first default to 2.
+		expect(computeRefId(['headcount'], '2.1', 'question')).toBe('1');
 	});
 
 	it('computes choice ref_id', () => {
 		expect(computeRefId(['2.1-q1-c1'], '2.1-q1', 'choice')).toBe('2.1-q1-c2');
+	});
+
+	it('counts a collision-suffixed choice ("c5-2") as its number', () => {
+		expect(computeRefId(['2.1-q1-c5-2'], '2.1-q1', 'choice')).toBe('2.1-q1-c6');
 	});
 
 	it('computes first choice ref_id', () => {

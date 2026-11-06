@@ -106,11 +106,9 @@ def mint_missing_urns(framework) -> bool:
         if node.urn:
             wrote = _normalize(node) or wrote
             continue
-        leaf = (
-            urn_safe_leaf(node.ref_id or "")
-            or urn_safe_leaf(node.name or "")
-            or f"node{index + 1}"
-        )
+        # node{N} without a ref_id, never the name slug: aligns with the
+        # library-builder URN scheme ADR and keeps the leaf short.
+        leaf = urn_safe_leaf(node.ref_id or "") or f"node{index + 1}"
         candidate = f"{node_base}:{leaf}"
         suffix = 2
         while (

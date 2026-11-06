@@ -13,6 +13,7 @@ from rest_framework import serializers
 
 from urllib.parse import urlparse
 
+from core.models import LibraryDraft
 from core.utils import get_report_timezone, get_report_timezone_names
 from core.net_safety import (
     BlockedRequestError,
@@ -271,14 +272,17 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                         }
                     )
             if key == "default_packager":
-                # Identity alphabet of library packagers / ref_ids
-                # (core.LibraryDraft.IDENTITY_REGEX). fullmatch, not match:
-                # `$` would still accept a trailing newline.
-                if not isinstance(value, str) or not re.fullmatch(
-                    r"[a-z0-9_-]+", value
-                ):
+                # Identity alphabet and length of library packagers
+                # (core.LibraryDraft.IDENTITY_REGEX / PACKAGER_MAX_LENGTH).
+                # fullmatch, not match: `$` would still accept a trailing newline.
+                # The length cap applies to a new value only: the settings form
+                # resubmits one predating it unchanged.
+                unchanged = value == (instance.value or {}).get("default_packager")
+                _max = LibraryDraft.PACKAGER_MAX_LENGTH
+                pattern = r"[a-z0-9_-]+" if unchanged else rf"[a-z0-9_-]{{1,{_max}}}"
+                if not isinstance(value, str) or not re.fullmatch(pattern, value):
                     raise serializers.ValidationError(
-                        {"default_packager": "Must match [a-z0-9_-]+."}
+                        {"default_packager": f"Must match [a-z0-9_-]{{1,{_max}}}."}
                     )
             if key == "disabled_email_templates":
                 if not isinstance(value, list) or not all(

@@ -1440,11 +1440,24 @@ class LibraryDraftViewSet(BaseModelViewSet):
             packager = document.get("packager") or "custom"
             ref_id = str(document.get("ref_id") or "imported-library").lower()
 
+        # The packager is the URN namespace (RFC 8141 NID, 32 chars) and must be
+        # URN-safe; a longer or non-URN-safe one mints URNs the builder refuses
+        # (same identity gate as check_identity / adopt). objects.create below
+        # skips field validators, so check here.
+        packager = str(packager).lower()
+        if len(packager) > LibraryDraft.PACKAGER_MAX_LENGTH or not re.match(
+            LibraryDraft.IDENTITY_REGEX, packager
+        ):
+            return Response(
+                {"error": "packagerTooLong"},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
         draft = LibraryDraft.objects.create(
             name=document.get("name") or ref_id,
             description=document.get("description"),
             folder=folder,
-            packager=str(packager),
+            packager=packager,
             ref_id=ref_id,
             locale=document.get("locale") or "en",
             version=document.get("version") or 1,
