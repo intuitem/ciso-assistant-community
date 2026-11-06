@@ -45,6 +45,7 @@ from .tools.read_tools import (
     get_asset_classes,
     get_users,
     get_teams,
+    get_documents,
 )
 
 from .tools.aggregate_tools import count_objects
@@ -87,10 +88,12 @@ from .tools.write_tools import (
     create_evidence,
     create_incident,
     create_timeline_entry,
+    create_document,
 )
 
 from .tools.update_tools import (
     update_team,
+    update_document,
     update_folder,
     update_user,
     update_evidence,
@@ -203,6 +206,7 @@ READ_TOOLS = [
     get_asset_classes,
     get_users,
     get_teams,
+    get_documents,
     get_all_audits_with_metrics,
     get_audit_gap_analysis,
     get_audit_global_score,
@@ -232,6 +236,8 @@ WRITE_TOOLS = [
     update_folder,
     create_team,
     update_team,
+    create_document,
+    update_document,
     update_user,
     create_perimeter,
     create_asset,

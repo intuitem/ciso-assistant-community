@@ -619,6 +619,129 @@ class TestCreateTeam:
 
 
 # ---------------------------------------------------------------------------
+# resolve_managed_document_id
+# ---------------------------------------------------------------------------
+
+
+class TestResolveManagedDocument:
+    def test_uuid_passthrough(self):
+        with patch.object(resolvers, "fetch_all_results") as fetch:
+            assert resolvers.resolve_managed_document_id(UUID_A) == UUID_A
+            fetch.assert_not_called()
+
+    def test_by_name_uses_search_and_exact_match(self):
+        docs = [
+            {"id": UUID_A, "display_name": "AI policy"},
+            {"id": UUID_B, "display_name": "AI policy v2"},
+        ]
+        fake = _router({"/managed-documents/": docs})
+        with patch.object(resolvers, "fetch_all_results", fake):
+            assert resolvers.resolve_managed_document_id("AI policy") == UUID_A
+        assert fake.calls == [("/managed-documents/", {"search": "AI policy"})]
+
+    def test_ambiguous(self):
+        docs = [
+            {"id": UUID_A, "display_name": "AI policy"},
+            {"id": UUID_B, "display_name": "AI policy"},
+        ]
+        with patch.object(
+            resolvers, "fetch_all_results", _router({"/managed-documents/": docs})
+        ):
+            with pytest.raises(ValueError, match="Ambiguous"):
+                resolvers.resolve_managed_document_id("AI policy")
+
+    def test_not_found(self):
+        with patch.object(
+            resolvers, "fetch_all_results", _router({"/managed-documents/": []})
+        ):
+            with pytest.raises(ValueError, match="not found"):
+                resolvers.resolve_managed_document_id("nobody")
+
+
+# ---------------------------------------------------------------------------
+# create_document
+# ---------------------------------------------------------------------------
+
+
+class TestCreateDocument:
+    def test_full_payload_sets_content(self):
+        post = Mock(
+            return_value=_response(
+                201,
+                {
+                    "id": UUID_A,
+                    "name": "AI policy",
+                    "display_name": "AI policy",
+                    "current_revision": {"id": UUID_D, "version_number": 1},
+                },
+            )
+        )
+        patch_req = Mock(return_value=_response(200, {}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            patch.object(write_tools, "make_patch_request", patch_req),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+            patch.object(write_tools, "resolve_folder_id", return_value=UUID_PE),
+            patch.object(resolvers, "resolve_id_or_name", return_value=UUID_B),
+        ):
+            result = run(
+                write_tools.create_document(
+                    name="AI policy",
+                    document_type="policy",
+                    description="d",
+                    folder_id="Engineering",
+                    content="# AI policy\n\ncontent",
+                    locale="en",
+                    policy="POL-AI",
+                )
+            )
+        assert "Created document" in result
+        assert "revision: 1" in result
+        assert post.call_args.args == (
+            "/managed-documents/",
+            {
+                "name": "AI policy",
+                "description": "d",
+                "document_type": "policy",
+                "folder": UUID_PE,
+                "locale": "en",
+                "policy": UUID_B,
+            },
+        )
+        assert patch_req.call_args.args == (
+            f"/document-revisions/{UUID_D}/",
+            {"content": "# AI policy\n\ncontent"},
+        )
+
+    def test_minimal_payload_no_content_patch(self):
+        post = Mock(
+            return_value=_response(
+                201, {"id": UUID_A, "name": "Doc", "current_revision": {"id": UUID_D}}
+            )
+        )
+        patch_req = Mock()
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            patch.object(write_tools, "make_patch_request", patch_req),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+        ):
+            result = run(write_tools.create_document(name="Doc"))
+        assert "Created document" in result
+        assert post.call_args.args == (
+            "/managed-documents/",
+            {"name": "Doc", "description": "", "document_type": "policy"},
+        )
+        patch_req.assert_not_called()
+
+    def test_invalid_document_type(self):
+        post = Mock()
+        with patch.object(write_tools, "make_post_request", post):
+            result = run(write_tools.create_document(name="Doc", document_type="bogus"))
+        post.assert_not_called()
+        assert "Invalid document_type" in result
+
+
+# ---------------------------------------------------------------------------
 # create_risk_scenario / create_risk_assessment / create_task_template
 # ---------------------------------------------------------------------------
 
@@ -955,6 +1078,81 @@ class TestUpdateTools:
         patch_req.assert_not_called()
         assert "No fields" in result
 
+    def test_update_document_metadata_and_content(self):
+        get_req = Mock(
+            return_value=_response(
+                200, {"current_revision": {"id": UUID_D, "version_number": 2}}
+            )
+        )
+        with (
+            self._patch_ok({"id": UUID_A, "display_name": "AI policy v2"}) as patch_req,
+            patch.object(
+                update_tools, "resolve_managed_document_id", return_value=UUID_A
+            ),
+            patch.object(update_tools, "make_get_request", get_req),
+        ):
+            result = run(
+                update_tools.update_document(
+                    document_id="AI policy",
+                    name="AI policy v2",
+                    content="# new content",
+                )
+            )
+        assert "Updated document" in result
+        assert "Updated content (revision 2)" in result
+        assert patch_req.call_args_list[0].args == (
+            f"/managed-documents/{UUID_A}/",
+            {"name": "AI policy v2"},
+        )
+        assert patch_req.call_args_list[1].args == (
+            f"/document-revisions/{UUID_D}/",
+            {"content": "# new content"},
+        )
+
+    def test_update_document_content_only_fetches_current_revision(self):
+        get_req = Mock(
+            return_value=_response(200, {"current_revision": {"id": UUID_D}})
+        )
+        with (
+            self._patch_ok() as patch_req,
+            patch.object(
+                update_tools, "resolve_managed_document_id", return_value=UUID_A
+            ),
+            patch.object(update_tools, "make_get_request", get_req),
+        ):
+            run(update_tools.update_document(document_id=UUID_A, content="body"))
+        get_req.assert_called_once_with(f"/managed-documents/{UUID_A}/")
+        assert patch_req.call_args.args == (
+            f"/document-revisions/{UUID_D}/",
+            {"content": "body"},
+        )
+
+    def test_update_document_locked_revision_surfaces_backend_error(self):
+        get_req = Mock(
+            return_value=_response(200, {"current_revision": {"id": UUID_D}})
+        )
+        locked = _response(400, text="This revision is locked.")
+        with (
+            patch.object(update_tools, "make_patch_request", return_value=locked),
+            patch.object(
+                update_tools, "resolve_managed_document_id", return_value=UUID_A
+            ),
+            patch.object(update_tools, "make_get_request", get_req),
+        ):
+            result = run(update_tools.update_document(document_id=UUID_A, content="x"))
+        assert "locked" in result
+
+    def test_update_document_no_fields(self):
+        with (
+            self._patch_ok() as patch_req,
+            patch.object(
+                update_tools, "resolve_managed_document_id", return_value=UUID_A
+            ),
+        ):
+            result = run(update_tools.update_document(document_id=UUID_A))
+        patch_req.assert_not_called()
+        assert "No fields" in result
+
 
 # ---------------------------------------------------------------------------
 # server registration
@@ -984,6 +1182,9 @@ class TestRegistration:
             "get_teams",
             "create_team",
             "update_team",
+            "get_documents",
+            "create_document",
+            "update_document",
         } <= names
 
     def test_read_only_profile_hides_new_tools(self):
@@ -992,5 +1193,8 @@ class TestRegistration:
         assert "update_perimeter" not in names
         assert "create_team" not in names
         assert "update_team" not in names
+        assert "create_document" not in names
+        assert "update_document" not in names
         assert "get_users" in names
         assert "get_teams" in names
+        assert "get_documents" in names

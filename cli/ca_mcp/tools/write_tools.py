@@ -5,6 +5,7 @@ from pathlib import Path
 from ..client import (
     make_post_request,
     make_get_request,
+    make_patch_request,
     make_upload_request,
     make_delete_request,
 )
@@ -1975,6 +1976,96 @@ async def create_evidence(
             return created
     except Exception as e:
         return f"Error in create_evidence: {str(e)}"
+
+
+DOCUMENT_TYPES = [
+    "policy",
+    "procedure",
+    "charter",
+    "record",
+    "meeting_minutes",
+    "other",
+]
+
+
+async def create_document(
+    name: str,
+    document_type: str = "policy",
+    description: str = "",
+    folder_id: str = None,
+    content: str = None,
+    locale: str = None,
+    template_used: str = None,
+    policy: str = None,
+) -> str:
+    """Create a managed document (a markdown policy, procedure, charter, record...)
+
+    This creates the document and its first (draft) revision in one call. The
+    content can be edited later with update_document as long as the revision
+    stays a draft (or has changes requested) — once submitted for review or
+    published, a new draft must be created first (not yet exposed via MCP).
+
+    Args:
+        name: Document name
+        document_type: policy | procedure | charter | record | meeting_minutes | other
+        description: Description
+        folder_id: Folder ID/name
+        content: Markdown content for the initial draft revision
+        locale: Locale code, e.g. "en", "fr" (defaults to your preferred language)
+        template_used: Reference ID of a document template to seed the content from
+            (ignored if content is also given)
+        policy: Existing Policy ID/name to link this document to (groups it under
+            that policy's document container instead of creating a new one)
+    """
+    try:
+        from ..resolvers import resolve_id_or_name
+
+        if document_type not in DOCUMENT_TYPES:
+            return f"Error: Invalid document_type '{document_type}'. Must be one of: {', '.join(DOCUMENT_TYPES)}"
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {
+            "name": name,
+            "description": description,
+            "document_type": document_type,
+        }
+
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if locale is not None:
+            payload["locale"] = locale
+        if template_used is not None:
+            payload["template_used"] = template_used
+        if policy is not None:
+            payload["policy"] = resolve_id_or_name(policy, "/policies/")
+
+        res = make_post_request("/managed-documents/", payload)
+
+        if res.status_code != 201:
+            return f"Error creating document: {res.status_code} - {res.text}"
+
+        document = res.json()
+        document_id = document.get("id")
+        label = document.get("display_name") or document.get("name") or name
+        revision = document.get("current_revision") or {}
+        revision_id = revision.get("id") if isinstance(revision, dict) else None
+        version = revision.get("version_number", 1) if isinstance(revision, dict) else 1
+
+        if content is not None and revision_id:
+            rev_res = make_patch_request(
+                f"/document-revisions/{revision_id}/", {"content": content}
+            )
+            if rev_res.status_code != 200:
+                return (
+                    f"Created document: {label} (ID: {document_id}) but failed to "
+                    f"set content: {rev_res.status_code} - {rev_res.text}"
+                )
+
+        return f"Created document: {label} (ID: {document_id}, revision: {version})"
+    except Exception as e:
+        return f"Error in create_document: {str(e)}"
 
 
 async def create_incident(

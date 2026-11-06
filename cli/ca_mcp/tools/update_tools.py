@@ -32,6 +32,7 @@ from ..resolvers import (
     resolve_in_folder_or_global,
     _is_uuid,
     resolve_vulnerability_id,
+    resolve_managed_document_id,
 )
 from .write_tools import (
     _normalize_applied_control_status,
@@ -324,6 +325,80 @@ async def update_team(
             return f"Error updating team: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_team: {str(e)}"
+
+
+async def update_document(
+    document_id: str,
+    name: str = None,
+    description: str = None,
+    content: str = None,
+    template_used: str = None,
+    locale: str = None,
+) -> str:
+    """Update a managed document's metadata and/or markdown content
+
+    Args:
+        document_id: Document ID or name
+        name: New name
+        description: New description
+        content: New markdown content for the current revision. Only works while
+            that revision is a draft or has changes requested — once it has
+            been submitted for review or published it is locked, and a new
+            draft must be created first (not yet exposed via MCP)
+        template_used: Reference ID of a document template
+        locale: Locale code, e.g. "en", "fr"
+    """
+    try:
+        resolved_id = resolve_managed_document_id(document_id)
+
+        payload = {}
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if template_used is not None:
+            payload["template_used"] = template_used
+        if locale is not None:
+            payload["locale"] = locale
+
+        results = []
+
+        if payload:
+            res = make_patch_request(f"/managed-documents/{resolved_id}/", payload)
+            if res.status_code != 200:
+                return f"Error updating document: {res.status_code} - {res.text}"
+            document = res.json()
+            label = document.get("display_name") or document.get("name")
+            results.append(f"Updated document: {label} (ID: {document.get('id')})")
+
+        if content is not None:
+            doc_res = make_get_request(f"/managed-documents/{resolved_id}/")
+            if doc_res.status_code != 200:
+                return (
+                    f"Error fetching document: {doc_res.status_code} - {doc_res.text}"
+                )
+            revision = doc_res.json().get("current_revision") or {}
+            revision_id = revision.get("id") if isinstance(revision, dict) else None
+            if not revision_id:
+                return "Error: Document has no current revision to update"
+            rev_res = make_patch_request(
+                f"/document-revisions/{revision_id}/", {"content": content}
+            )
+            if rev_res.status_code != 200:
+                return (
+                    f"Error updating document content: {rev_res.status_code} - "
+                    f"{rev_res.text}"
+                )
+            results.append(
+                f"Updated content (revision {revision.get('version_number', '?')})"
+            )
+
+        if not results:
+            return "Error: No fields provided to update"
+
+        return "; ".join(results)
+    except Exception as e:
+        return f"Error in update_document: {str(e)}"
 
 
 async def update_folder(

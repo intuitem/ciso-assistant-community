@@ -1975,3 +1975,98 @@ async def get_teams(
             "Report this error to the user",
             retry_allowed=False,
         )
+
+
+async def get_documents(
+    folder: str = None,
+    document_type: str = None,
+    locale: str = None,
+    policy: str = None,
+    search: str = None,
+):
+    """List managed documents - markdown policies, procedures, charters, records...
+
+    Args:
+        folder: Folder ID/name
+        document_type: policy | procedure | charter | record | meeting_minutes | other
+        locale: Locale code, e.g. "en", "fr"
+        policy: Policy ID/name this document is linked to
+        search: Search term (matches document name or description)
+    """
+    try:
+        from ..resolvers import resolve_folder_id, resolve_id_or_name
+
+        params = {}
+        filters = {}
+
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+        if document_type:
+            params["container__document_type"] = document_type
+            filters["document_type"] = document_type
+        if locale:
+            params["locale"] = locale
+            filters["locale"] = locale
+        if policy:
+            params["container__policies"] = resolve_id_or_name(policy, "/policies/")
+            filters["policy"] = policy
+        if search:
+            params["search"] = search
+            filters["search"] = search
+
+        res = make_get_request("/managed-documents/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        documents = get_paginated_results(data)
+
+        if not documents:
+            return empty_response("documents", filters)
+
+        result = found_line(documents, "documents")
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|UUID|Name|Type|Locale|Status|Version|Folder|\n"
+        result += "|---|---|---|---|---|---|---|\n"
+
+        for doc in documents:
+            doc_id = doc.get("id", "N/A")
+            name = doc.get("display_name") or doc.get("name") or "N/A"
+            doc_type = doc.get("document_type") or "N/A"
+            locale_val = doc.get("locale", "N/A")
+            revision = doc.get("current_revision") or {}
+            status_val = (
+                revision.get("status", "N/A") if isinstance(revision, dict) else "N/A"
+            )
+            version = (
+                revision.get("version_number", "N/A")
+                if isinstance(revision, dict)
+                else "N/A"
+            )
+            folder_obj = doc.get("folder") or {}
+            folder_name = (
+                folder_obj.get("str", "N/A") if isinstance(folder_obj, dict) else "N/A"
+            )
+
+            result += (
+                f"|{doc_id}|{name}|{doc_type}|{locale_val}|{status_val}|{version}"
+                f"|{folder_name}|\n"
+            )
+
+        return success_response(
+            result,
+            "get_documents",
+            "Use update_document to edit metadata or markdown content, "
+            "or create_document for a new one",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
