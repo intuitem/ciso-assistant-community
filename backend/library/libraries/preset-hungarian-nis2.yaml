@@ -1,0 +1,494 @@
+urn: urn:aafeher:risk:preset:hu-nis2
+locale: hu
+ref_id: preset-hungarian-nis2
+name: "Magyar NIS2-megfelelés"
+description: "Lépésenkénti felkészülési program a Magyarország kiberbiztonságáról szóló 2024. évi LXIX. törvény (Kiberbiztonsági tv.) szerinti megfeleléshez a Szabályozott Tevékenységek Felügyeleti Hatósága (SZTFH) felügyelete alá tartozó alapvető és fontos szervezetek (1. § (1) d) és e) pont) számára. Betölti a 7/2024. (VI. 24.) MK rendelet védelmi intézkedéseinek katalógusát, fenyegetéskatalógusát és négyfokozatú kockázati mátrixát; létrehozza a szervezeti és az EIR-szintű értékelést, a rendelet fenyegetéseire épülő kockázatelemzést, az információbiztonsági szabályzatot és a biztonsági eseménykezelési tervet, a visszatérő kötelezettségeket pedig ütemezett feladatként rögzíti."
+version: 1
+provider: aafeher
+packager: aafeher
+translations:
+  en:
+    name: "Hungarian NIS2 compliance"
+    description: "Step-by-step preparation programme for compliance with Act LXIX of 2024 on the cybersecurity of Hungary (Cybersecurity Act) for essential and important entities supervised by the Supervisory Authority for Regulated Activities (SZTFH) (Section 1(1)(d) and (e)). Loads the security measures catalogue, the threat catalogue and the four-level risk matrix of MK Decree 7/2024 (VI. 24.); creates the organisation-level and EIR-level assessments, a risk assessment built on the decree's threats, the information security policy and the security incident management plan, and schedules the recurring obligations as tasks."
+
+dependencies:
+  - urn:aafeher:risk:library:hu-7-2024-mk-rendelet
+  - urn:aafeher:risk:library:hu-7-2024-mk-rendelet-fenyegetesek
+  - urn:aafeher:risk:library:hu-7-2024-mk-rendelet-kockazati-matrix
+  - urn:intuitem:risk:library:vendor-due-diligence
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - general
+        - critical-infrastructure
+      region:
+        - hu
+        - eu
+      goal: nis2-compliance
+
+    feature_flags:
+      enable:
+        - compliance
+        - risk_management
+        - tprm
+        - incidents
+        - follow_up
+        - policy_documents
+        - exceptions
+        - risk_acceptances
+        - tasks
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "NIS2 kockázatelemzés"
+        risk_matrix: urn:aafeher:risk:library:hu-7-2024-mk-rendelet-kockazati-matrix
+        ref: main_ra
+        translations:
+          en:
+            name: "NIS2 risk assessment"
+      - type: compliance_assessment
+        name: "Védelmi intézkedések – szervezeti szint"
+        framework: urn:aafeher:risk:library:hu-7-2024-mk-rendelet
+        ref: org_audit
+        translations:
+          en:
+            name: "Security measures – organisation level"
+      - type: compliance_assessment
+        name: "Védelmi intézkedések – minta EIR"
+        framework: urn:aafeher:risk:library:hu-7-2024-mk-rendelet
+        ref: eir_audit
+        translations:
+          en:
+            name: "Security measures – sample EIR"
+
+      # --- Organisational obligations (Cybersecurity Act) ---
+      - type: applied_control
+        name: "Nyilvántartásba vétel az SZTFH-nál"
+        description: "A nyilvántartásba vételhez szükséges adatok – köztük az elektronikus információs rendszer biztonságáért felelős személy adatai – megküldése az SZTFH-nak a működés megkezdését vagy a Kiberbiztonsági tv. hatálya alá kerülést követő 30 napon belül (8. § (5)), és az adatok változásának bejelentése a változást követő 14 napon belül (8. § (3) a))."
+        category: process
+        csf_function: govern
+        priority: 1
+        status: to_do
+        ref: ctrl_registration
+        translations:
+          en:
+            name: "Registration with the SZTFH"
+            description: "Send the data required for registration – including the data of the person responsible for the security of the electronic information system – to the SZTFH within 30 days of starting operations or coming into the scope of the Cybersecurity Act (Section 8(5)), and report changes to the data within 14 days of the change (Section 8(3)(a))."
+      - type: applied_control
+        name: "Az elektronikus információs rendszer biztonságáért felelős személy kijelölése"
+        description: "A felelős személy kijelölése a szervezeten belül, vagy megállapodás külső személlyel (Kiberbiztonsági tv. 11. §); feladatainak, hatáskörének és helyettesítésének rögzítése. A feladatot csak cselekvőképes, büntetlen előéletű személy láthatja el; kritikus szervezetként vagy az ország védelme és biztonsága szempontjából jelentős szervezetként kijelölt szervezetnél előírt végzettség és szakképzettség is szükséges."
+        category: process
+        csf_function: govern
+        priority: 1
+        status: to_do
+        ref: ctrl_ibf
+        translations:
+          en:
+            name: "Appointment of the person responsible for the security of the electronic information system"
+            description: "Appoint the responsible person within the organisation, or conclude an agreement with an external person (Cybersecurity Act, Section 11), and document their duties, powers and deputy. Only a person with full legal capacity and a clean criminal record may perform the role; in an organisation designated as critical or as significant for national defence and security, the prescribed education and qualification are also required."
+      - type: applied_control
+        name: "Az EIR-ek biztonsági osztályba sorolása"
+        description: "Az elektronikus információs rendszerek „alap”, „jelentős” vagy „magas” biztonsági osztályba sorolása hatáselemzés alapján (7/2024. MK rendelet 1. melléklet 2.1.2.). A besorolásról a szervezet vezetője dönt; az eredményt az elektronikus információs rendszerek nyilvántartásában vagy belső szabályzatban kell rögzíteni, és legalább kétévente felül kell vizsgálni (Kiberbiztonsági tv. 10. § (2) és (7))."
+        category: process
+        csf_function: identify
+        priority: 1
+        status: to_do
+        ref: ctrl_classification
+        translations:
+          en:
+            name: "Security classification of the EIRs"
+            description: "Classify the electronic information systems into the Alap (basic), Jelentős (substantial) or Magas (high) security class based on an impact analysis (MK Decree 7/2024, annex 1, point 2.1.2). The head of the organisation decides on the classification; the result is recorded in the register of electronic information systems or in an internal regulation and reviewed at least every two years (Cybersecurity Act, Section 10(2) and (7))."
+      - type: applied_control
+        name: "A vezető és a felelős kiberbiztonsági képzése"
+        description: "A szervezet vezetője a vezetővé válását követő egy éven belül legalább 8 órás képzésen, ezt követően évente legalább 4 órás továbbképzésen vesz részt (17/2025. (VII. 24.) EM rendelet 4. § (1)); az elektronikus információs rendszer biztonságáért felelős személy évente legalább 20 órás, legalább három tárgykört felölelő továbbképzésen vesz részt (3. § (1)). A felnőttképző által kiállított tanúsítványt (5. § (6)) csatolja bizonyítékként, mert a képzés elvégzését a hatóság vizsgálhatja (6. § (5))."
+        category: process
+        csf_function: govern
+        priority: 2
+        status: to_do
+        ref: ctrl_training
+        translations:
+          en:
+            name: "Cybersecurity training of the head and the responsible person"
+            description: "The head of the organisation attends training of at least 8 hours within one year of becoming head, then further training of at least 4 hours every year (EM Decree 17/2025 (VII. 24.), Section 4(1)); the person responsible for the security of the electronic information system attends at least 20 hours of further training a year covering at least three subject areas (Section 3(1)). Attach the certificate issued by the training provider (Section 5(6)) as evidence, since the authority may check that the training was completed (Section 6(5))."
+
+      # --- Policies ---
+      - type: policy
+        name: "Információbiztonsági szabályzat"
+        description: "A felhasználókra és az elektronikus információbiztonsági követelményekre vonatkozó információbiztonsági szabályzat kiadása és legalább kétévenkénti felülvizsgálata (Kiberbiztonsági tv. 6. § (3) 7.; 7/2024. MK rendelet 2. melléklet 1.1.)."
+        priority: 1
+        status: to_do
+        ref: policy_ibsz
+        translations:
+          en:
+            name: "Information security policy"
+            description: "Issue the information security policy covering users and electronic information security requirements, and review it at least every two years (Cybersecurity Act, Section 6(3) point 7; MK Decree 7/2024, annex 2, point 1.1)."
+      - type: policy
+        name: "Biztonsági eseménykezelési terv"
+        description: "A biztonsági eseménykezelési terv kidolgozása (7/2024. MK rendelet 2. melléklet 9.34.): az incidensek észlelése, értékelése, kezelése, bejelentése és a helyreállítás. Azt a fenyegetést, incidensközeli helyzetet vagy incidenst, amely a szervezet működésében vagy szolgáltatásnyújtásában súlyos zavart vagy vagyoni hátrányt, illetve más természetes vagy jogi személyeknek jelentős vagyoni vagy nem vagyoni kárt okoz, a nemzeti kiberbiztonsági incidenskezelő központnak kell bejelenteni (Kiberbiztonsági tv. 66. § (2)). Incidens esetén a tudomásszerzéstől számított 24 órán belül első bejelentést, 72 órán belül eseménybejelentést, az eseménybejelentést követő egy hónapon belül zárójelentést kell benyújtani (418/2024. (XII. 23.) Korm. rendelet 77. § (1)). Az érintetteket az incidensekről és a lehetséges fenyegetésekről haladéktalanul tájékoztatni kell (Kiberbiztonsági tv. 6. § (5) f))."
+        priority: 1
+        status: to_do
+        ref: policy_incident
+        translations:
+          en:
+            name: "Security incident management plan"
+            description: "Draft the security incident management plan (MK Decree 7/2024, annex 2, point 9.34): detection, assessment, handling and reporting of incidents, and recovery. Threats, near misses and incidents that cause severe disruption or financial loss in the organisation's operations or services, or considerable pecuniary or non-pecuniary damage to other natural or legal persons, must be reported to the national cybersecurity incident response centre (Cybersecurity Act, Section 66(2)). For an incident, a first notification is due within 24 hours and an incident notification within 72 hours of becoming aware of it, and a final report within one month of the incident notification (Government Decree 418/2024 (XII. 23.), Section 77(1)). Those affected must be informed of incidents and possible threats without delay (Cybersecurity Act, Section 6(5)(f))."
+
+      # --- Recurring obligations ---
+      - type: task_template
+        name: "Kétévenkénti felülvizsgálat"
+        description: "A védelmi intézkedések időszakos értékelése az információbiztonsági szabályzat és a biztonsági osztályba sorolás felülvizsgálatával egyidejűleg, legalább kétévente (Kiberbiztonsági tv. 6. § (4), 10. § (7))."
+        is_recurrent: true
+        schedule:
+          interval: 2
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Biennial review"
+            description: "Periodic evaluation of the security measures together with the review of the information security policy and the security classification, at least every two years (Cybersecurity Act, Sections 6(4) and 10(7))."
+      - type: task_template
+        name: "Kiberbiztonsági audit"
+        description: "A kiberbiztonsági audit elvégeztetése az SZTFH nyilvántartásában szereplő auditorral kétévente, első alkalommal a nyilvántartásba vételt követő 2 éven belül (Kiberbiztonsági tv. 16. §). Az e) pont szerinti mikrovállalkozásokra nem vonatkozik."
+        is_recurrent: true
+        schedule:
+          interval: 2
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Cybersecurity audit"
+            description: "Have the cybersecurity audit carried out by an auditor in the SZTFH register every two years, the first time within two years of registration (Cybersecurity Act, Section 16). Does not apply to micro-enterprises under point (e)."
+      - type: task_template
+        name: "Kiberbiztonsági felügyeleti díj megfizetése"
+        description: "Az éves kiberbiztonsági felügyeleti díj megfizetése az SZTFH részére (Kiberbiztonsági tv. 7. §). A díj összegéről az SZTFH a tárgyév március 31-ig tájékoztat, a díjat főszabály szerint május 31-ig kell megfizetni (2/2025. (I. 31.) SZTFH rendelet)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Payment of the cybersecurity supervision fee"
+            description: "Pay the annual cybersecurity supervision fee to the SZTFH (Cybersecurity Act, Section 7). The SZTFH gives notice of the amount by 31 March of the year; as a rule the fee is due by 31 May (SZTFH Decree 2/2025 (I. 31.))."
+      - type: task_template
+        name: "A vezető és a felelős éves továbbképzése"
+        description: "A szervezet vezetőjének évente legalább 4 órás, az elektronikus információs rendszer biztonságáért felelős személynek évente legalább 20 órás továbbképzése (17/2025. (VII. 24.) EM rendelet 3. § (1), 4. § (1))."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Annual further training of the head and the responsible person"
+            description: "Further training every year: at least 4 hours for the head of the organisation and at least 20 hours for the person responsible for the security of the electronic information system (EM Decree 17/2025 (VII. 24.), Sections 3(1) and 4(1))."
+      - type: task_template
+        name: "Kiberbiztonsági gyakorlat (alapvető szervezetnél)"
+        description: "Az alapvető szervezet kétévente kiberbiztonsági gyakorlatot folytat le, önállóan vagy a nemzeti kiberbiztonsági incidenskezelő központ irányításával; önálló gyakorlat után az értékelő beszámolót 30 napon belül meg kell küldeni a központnak (418/2024. (XII. 23.) Korm. rendelet 10. §). Fontos szervezetnél csak kötelezés esetén szükséges."
+        is_recurrent: true
+        schedule:
+          interval: 2
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Cybersecurity exercise (essential entities)"
+            description: "An essential entity conducts a cybersecurity exercise every two years, on its own or under the direction of the national cybersecurity incident response centre; after an exercise conducted on its own, the evaluation report is sent to the centre within 30 days (Government Decree 418/2024 (XII. 23.), Section 10). An important entity needs it only when ordered to."
+
+      # --- Entities (typical supply chain) ---
+      - type: entity
+        name: "Felhő- vagy tárhelyszolgáltató"
+        description: "A kritikus rendszerek felhőinfrastruktúráját vagy tárhelyét biztosító szolgáltató."
+        translations:
+          en:
+            name: "Cloud / hosting provider"
+            description: "Provider of cloud infrastructure or hosting services for critical systems."
+      - type: entity
+        name: "Menedzselt biztonsági szolgáltató (MSSP)"
+        description: "Biztonsági felügyeletet, incidensészlelést vagy SOC-szolgáltatást nyújtó külső szolgáltató. Ha a szervezet az incidensek kezelését nem maga végzi, az SZTFH nyilvántartásában szereplő gazdálkodó szervezetek közül választ (Kiberbiztonsági tv. 70. § (7))."
+        translations:
+          en:
+            name: "Managed security services provider (MSSP)"
+            description: "External provider of security monitoring, incident detection or SOC services. If the organisation does not handle incidents itself, it chooses from the business organisations in the SZTFH register (Cybersecurity Act, Section 70(7))."
+      - type: entity
+        name: "Hálózati eszközök szállítója"
+        description: "Hálózati eszközök, tűzfalak vagy távközlési berendezések szállítója."
+        translations:
+          en:
+            name: "Network equipment supplier"
+            description: "Supplier of networking hardware, firewalls or telecommunications equipment."
+      - type: entity
+        name: "Üzleti szoftver szállítója"
+        description: "Kritikus üzleti alkalmazások (ERP, SCADA, üzemeltetéstechnológia) szállítója."
+        translations:
+          en:
+            name: "Business software vendor"
+            description: "Vendor of critical business applications (ERP, SCADA, operational technology)."
+
+      # --- Assets ---
+      - type: asset
+        name: "A Kiberbiztonsági tv. hatálya alá tartozó szolgáltatás"
+        description: "Az a szolgáltatás vagy tevékenység, amelynek nyújtása miatt a szervezet alapvető vagy fontos szervezetnek minősül."
+        asset_type: PR
+        ref: asset_service
+        translations:
+          en:
+            name: "Service in scope of the Cybersecurity Act"
+            description: "The service or activity whose provision makes the organisation an essential or important entity."
+      - type: asset
+        name: "A szolgáltatás adatai"
+        description: "A szolgáltatás nyújtásához szükséges adatok: ügyféladatok, működési és konfigurációs adatok."
+        asset_type: PR
+        ref: asset_data
+        translations:
+          en:
+            name: "Service data"
+            description: "Data needed to deliver the service: customer, operational and configuration data."
+      - type: asset
+        name: "Hálózati infrastruktúra"
+        description: "Az elektronikus információs rendszereket kiszolgáló hálózati eszközök, tűzfalak, DNS és kapcsolatok."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          en:
+            name: "Network infrastructure"
+            description: "Network devices, firewalls, DNS and connectivity serving the electronic information systems."
+      - type: asset
+        name: "Személyazonosság- és hozzáférés-kezelés"
+        description: "Címtár, egyszeri bejelentkezés (SSO), többtényezős hitelesítés (MFA) és a kiemelt jogosultságok kezelése."
+        asset_type: SP
+        ref: asset_iam
+        translations:
+          en:
+            name: "Identity and access management"
+            description: "Directory services, SSO, MFA and privileged access management."
+      - type: asset
+        name: "Végpontok és felhasználói eszközök"
+        description: "Munkaállomások, hordozható számítógépek, mobileszközök és más felhasználói eszközök."
+        asset_type: SP
+        ref: asset_endpoints
+        translations:
+          en:
+            name: "Endpoints and user devices"
+            description: "Workstations, laptops, mobile devices and other user equipment."
+      - type: asset
+        name: "Üzleti alkalmazások"
+        description: "A szolgáltatás nyújtásához nélkülözhetetlen alkalmazások és üzemeltetéstechnológiai (OT) rendszerek, például ERP, SCADA, ipari vezérlőrendszerek."
+        asset_type: SP
+        ref: asset_apps
+        translations:
+          en:
+            name: "Business applications"
+            description: "Applications and operational technology (OT) systems essential to delivering the service, e.g. ERP, SCADA, industrial control systems."
+
+      # --- Risk scenarios (threats: MK Decree 7/2024, annex 3) ---
+      - type: risk_scenario
+        name: "Az ellátási lánc kompromittálása"
+        description: "Egy kritikus beszállító (felhő, hálózat, szoftver) kompromittálódik vagy kiesik, és ezen keresztül a támadó közvetett hozzáférést szerez a szervezet elektronikus információs rendszereihez, vagy a szolgáltatás zavart szenved."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_apps]
+        threat_urns:
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:10
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:11
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:21
+        translations:
+          en:
+            name: "Supply chain compromise"
+            description: "A critical supplier (cloud, network, software) is compromised or fails, giving attackers indirect access to the organisation's electronic information systems or disrupting the service."
+      - type: risk_scenario
+        name: "Zsarolóvírus-támadás"
+        description: "Zsarolóvírus titkosítja a kritikus rendszereket és adatokat, ami tartós szolgáltatáskiesést okoz, és bejelentési kötelezettséget von maga után."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_apps, asset_data, asset_endpoints]
+        threat_urns:
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:39
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:35
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:25
+        translations:
+          en:
+            name: "Ransomware attack"
+            description: "Ransomware encrypts critical systems and data, causing prolonged service disruption and triggering the reporting obligation."
+      - type: risk_scenario
+        name: "Hitelesítő adatok kompromittálása és oldalirányú mozgás"
+        description: "A támadó adathalászattal vagy jelszótámadással érvényes hitelesítő adatokat szerez, majd a jogosultságokkal visszaélve oldalirányban mozog a rendszerekben."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_iam, asset_network, asset_endpoints]
+        threat_urns:
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:42
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:36
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:32
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:23
+        translations:
+          en:
+            name: "Credential compromise and lateral movement"
+            description: "Attackers obtain valid credentials through phishing or password attacks, then abuse the privileges to move laterally across the systems."
+      - type: risk_scenario
+        name: "Sérülékenység kihasználása"
+        description: "A támadó egy nem javított szoftveres sérülékenységet kihasználva illetéktelenül belép az elektronikus információs rendszerbe, például egy internetről elérhető alkalmazáson vagy hálózati eszközön keresztül."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_apps, asset_network, asset_endpoints]
+        threat_urns:
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:28
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:23
+        translations:
+          en:
+            name: "Exploitation of a vulnerability"
+            description: "An attacker exploits an unpatched software vulnerability to gain unauthorised access to the electronic information system, e.g. through an internet-facing application or network device."
+      - type: risk_scenario
+        name: "Szolgáltatásmegtagadással járó támadás"
+        description: "Szolgáltatásmegtagadással járó (DoS/DDoS) támadás elérhetetlenné teszi a Kiberbiztonsági tv. hatálya alá tartozó szolgáltatást."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_service]
+        threat_urns:
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:40
+        translations:
+          en:
+            name: "Denial-of-service attack"
+            description: "A denial-of-service (DoS/DDoS) attack makes the service in scope of the Cybersecurity Act unavailable."
+      - type: risk_scenario
+        name: "A szolgáltatás adatainak kiszivárgása"
+        description: "Egy rendszer kompromittálását követően védett vagy személyes adatok kerülnek illetéktelen kezekbe."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_data, asset_apps]
+        threat_urns:
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:19
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:38
+        translations:
+          en:
+            name: "Data breach of service data"
+            description: "Following a system compromise, protected or personal data falls into unauthorised hands."
+      - type: risk_scenario
+        name: "Áramellátás vagy kommunikációs kapcsolat kiesése"
+        description: "Az áramellátás vagy a kommunikációs hálózatok megszakadása, illetve zavara miatt a szolgáltatás nem nyújtható."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_service]
+        threat_urns:
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:8
+          - urn:aafeher:risk:threat:hu-7-2024-mk-rendelet:9
+        translations:
+          en:
+            name: "Power or communications outage"
+            description: "An interruption or disruption of the power supply or communication networks prevents the service from being delivered."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Sérülékenységvizsgálati és audit-megállapítások"
+        category: audit
+        ref: findings
+        translations:
+          en:
+            name: "Vulnerability scan and audit findings"
+
+    journey:
+      steps:
+        - key: registration
+          title: "Nyilvántartásba vétel és szervezeti kötelezettségek"
+          description: "Ellenőrizze, hogy a szervezet az SZTFH felügyelete alá tartozó alapvető vagy fontos szervezet-e (Kiberbiztonsági tv. 1. § (1) d) és e) pont; az a)–c) pont szerinti szervezeteket a nemzeti kiberbiztonsági hatóság felügyeli, részben eltérő szabályok szerint). Tekintse át az előre létrehozott intézkedéseket – nyilvántartásba vétel 30 napon belül, a felelős személy kijelölése, osztályba sorolás, képzés –, és rendeljen hozzájuk felelőst és határidőt."
+          target_model: applied-controls
+          translations:
+            en:
+              title: "Registration and organisational obligations"
+              description: "Check that the organisation is an essential or important entity supervised by the SZTFH (Cybersecurity Act, Section 1(1)(d) and (e); entities under points (a)–(c) are supervised by the national cybersecurity authority under partly different rules). Review the pre-created controls – registration within 30 days, appointment of the responsible person, classification, training – and assign owners and deadlines."
+        - key: eir_inventory
+          title: "Az elektronikus információs rendszerek (EIR) nyilvántartása"
+          description: "Vegye fel eszközként a Kiberbiztonsági tv. hatálya alá tartozó szolgáltatást, annak adatait, és minden elektronikus információs rendszert, amely a szolgáltatás nyújtását támogatja: a saját rendszerek mellett a használt központi rendszereket és szolgáltatásokat, valamint az egyéb támogató rendszereket is (Kiberbiztonsági tv. 6. § (3) 1.). Ez a lista lesz az EIR-nyilvántartás alapja, amelyet az auditornak is át kell adni; formáját az 1/2025. (I. 31.) SZTFH rendelet 1. melléklete határozza meg (megnevezés, támogatott üzleti cél, besorolási szempont bizalmasság, sértetlenség és rendelkezésre állás szerint, indoklás)."
+          target_model: assets
+          translations:
+            en:
+              title: "Register the electronic information systems (EIR)"
+              description: "Record as assets the service in scope of the Cybersecurity Act, its data and every electronic information system that supports the service: besides the organisation's own systems, also the central systems and services it uses and its other supporting systems (Cybersecurity Act, Section 6(3) point 1). This list is the basis of the EIR register, which also has to be handed over to the auditor; its format is set by annex 1 of SZTFH Decree 1/2025 (I. 31.) (name, business purpose supported, classification criterion by confidentiality, integrity and availability, justification)."
+        - key: classification
+          title: "Biztonsági osztályba sorolás"
+          description: "Sorolja az EIR-eket „alap”, „jelentős” vagy „magas” biztonsági osztályba a szervezet vezetője által jóváhagyott hatáselemzés alapján. A hatáselemzés káreseményszintjei (csekély, közepes, nagy) a kockázati mátrix hatásfokozatai is. Az osztályt a rendszerben kezelt adatok és a rendszer funkciói határozzák meg (7/2024. MK rendelet 1. melléklet 2.1.2.): adja meg az elsődleges eszközök Biztonsági céljait bizalmasság, sértetlenség (Integritás) és rendelkezésre állás szerint, a rendszereknél pedig az „Ezek függenek tőle” mezőben a támogatott elsődleges eszközöket; a rendszerek a legmagasabb értéket öröklik. A Beállításokban választható FIPS-199 skálán – amely a teljes példányra érvényes – Alacsony = alap, Mérsékelt = jelentős, Magas = magas. Más skála esetén az osztályt az eszköz Címkék mezőjében is rögzítheti. Az osztály határozza meg, mely követelménycsoportokat kell értékelni."
+          target_model: applied-controls
+          target_ref: ctrl_classification
+          translations:
+            en:
+              title: "Security classification"
+              description: "Classify the EIRs into the Alap (basic), Jelentős (substantial) or Magas (high) security class based on an impact analysis approved by the head of the organisation. The damage levels of the impact analysis (minor, moderate, major) are also the impact levels of the risk matrix. The class is determined by the data handled in the system and by its functions (MK Decree 7/2024, annex 1, point 2.1.2): set the Security objectives of the primary assets for confidentiality, integrity and availability, and on each system enter the primary assets it supports; the systems inherit the highest value. On the FIPS-199 scale, selectable in the Settings and applying to the whole instance, Low = Alap, Moderate = Jelentős, High = Magas. With another scale you can record the class in the Labels field of the asset instead. The class determines which requirement groups have to be assessed."
+        - key: risk_assessment
+          title: "Kockázatelemzés"
+          description: "Vizsgálja meg a 7/2024. MK rendelet 3. mellékletének mind a 47 fenyegetését (1. melléklet 5.1.1.1.): értékelje az előre létrehozott forgatókönyveket, és a még le nem fedett fenyegetésekhez vegyen fel továbbiakat. A mátrix a rendelet négy kockázati kategóriáját használja; az „alacsony” feletti kockázat felvállalását kockázatonként, indoklással kell jóváhagyni (5.1.2.2.), ezt a Kockázatelfogadások között rögzítheti. Ha az eredmény indokolja, pontosítsa az osztályba sorolást (5.1.2.3.)."
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            en:
+              title: "Risk assessment"
+              description: "Examine all 47 threats of annex 3 of MK Decree 7/2024 (annex 1, point 5.1.1.1): assess the pre-created scenarios and add further ones for the threats not yet covered. The matrix uses the decree's four risk categories; accepting a risk above the lowest category, Alacsony (low), requires per-risk justification and approval (point 5.1.2.2), which you can record under Risk acceptances. If the results warrant it, refine the security classification (point 5.1.2.3)."
+        - key: org_measures
+          title: "A szervezeti szintű védelmi intézkedések értékelése"
+          description: "A szervezeti értékelés Megvalósítási csoportok mezőjében válassza ki a legmagasabb osztályú EIR szerinti SZ csoportot (például J-SZ), szükség esetén a kiegészítő intézkedéseket (KIEG) is, majd értékelje a követelményeket. A szervezeti szintű követelményeket egyszer, valamennyi EIR-re egységesen kell vizsgálni."
+          target_model: compliance-assessments
+          target_ref: org_audit
+          translations:
+            en:
+              title: "Assess the organisation-level security measures"
+              description: "In the Implementation groups field of the organisation-level assessment select the SZ group matching the highest-class EIR (e.g. J-SZ), and the supplementary measures (KIEG) where needed, then assess the requirements. The organisation-level requirements are assessed once, uniformly for all EIRs."
+        - key: eir_measures
+          title: "Az EIR-szintű védelmi intézkedések értékelése"
+          description: "Az EIR-szintű értékelésen válassza ki a rendszer osztályának EIR csoportját (például J-EIR), és az Eszközök mezőben kapcsolja hozzá a rendszert. Minden további EIR-hez hozzon létre külön értékelést; ha kiindulási auditként a szervezeti értékelést választja, a szervezeti szintű követelmények eredményei átmásolódnak. Egyetlen EIR esetén a két értékelés együtt adja a teljes képet (például J-SZ és J-EIR). Az értékelés és intézkedési terve a rendszerbiztonsági terv alapja, amelyet a szervezet vezetője vagy a felelős személy hagy jóvá (7/2024. MK rendelet 1. melléklet 1.1.3.)."
+          target_model: compliance-assessments
+          target_ref: eir_audit
+          translations:
+            en:
+              title: "Assess the EIR-level security measures"
+              description: "On the EIR-level assessment select the EIR group of the system's class (e.g. J-EIR) and link the system in the Assets field. Create a separate assessment for each further EIR; if you choose the organisation-level assessment as baseline, the results of the organisation-level requirements are copied. With a single EIR the two assessments together give the full picture (e.g. J-SZ and J-EIR). The assessment and its action plan are the basis of the system security plan, which is approved by the head of the organisation or the responsible person (MK Decree 7/2024, annex 1, point 1.1.3)."
+        - key: policy
+          title: "Információbiztonsági szabályzat"
+          description: "Készítse el és adja ki az információbiztonsági szabályzatot (Kiberbiztonsági tv. 6. § (3) 7.). A szöveg a szabályzat oldalán szerkeszthető, verziókezelhető és PDF-be exportálható; felülvizsgálata legalább kétévente esedékes."
+          target_model: policies
+          target_ref: policy_ibsz
+          translations:
+            en:
+              title: "Information security policy"
+              description: "Draft and issue the information security policy (Cybersecurity Act, Section 6(3) point 7). The text can be edited, versioned and exported to PDF on the policy page; it has to be reviewed at least every two years."
+        - key: action_plan
+          title: "Intézkedési terv és eltérések"
+          description: "Rendeljen alkalmazott intézkedéseket a nem teljesülő követelményekhez, jelöljön ki felelőst és határidőt; az értékelések Intézkedési terv nézete a 2. melléklet 1.4. pontja szerinti intézkedési terv alapja. A védelmi intézkedésektől való eltérést a szervezet saját kockázatelemzésével kell alátámasztani (2. § (2)); az eltérést és a helyettesítő intézkedést rögzítse a Kivételek között. Az eltéréseket a szervezet vezetője vagy a kockázatok felvállalására jogosult személy hagyja jóvá (1. melléklet 3.1.3.), az auditornak pedig az 1/2025. (I. 31.) SZTFH rendelet 4. melléklete szerinti nyilvántartásban kell átadni."
+          target_model: applied-controls
+          translations:
+            en:
+              title: "Action plan and deviations"
+              description: "Link applied controls to the requirements that are not met and assign owners and deadlines; the Action plan view of the assessments is the basis of the action plan under annex 2, point 1.4. Any deviation from the security measures must be supported by the organisation's own risk analysis (Section 2(2)); record the deviation and the compensating control under Exceptions. Deviations are approved by the head of the organisation or the person entitled to accept risks (annex 1, point 3.1.3) and handed over to the auditor in the register under annex 4 of SZTFH Decree 1/2025 (I. 31.)."
+        - key: operation_decision
+          title: "Döntés az EIR használatbavételéről"
+          description: "A rendszerbiztonsági terv, az értékelés, a kockázatelemzés és az intézkedési terv alapján a szervezet vezetője dönt a rendszer használatbavételéről vagy használatának folytatásáról; ezt a feladatot nem ruházhatja át, és a döntést jegyzőkönyvben kell dokumentálni (Kiberbiztonsági tv. 6. § (3) 12.; 7/2024. MK rendelet 1. melléklet 1.1.6.). Minden EIR-hez hozzon létre egy kockázatelfogadást: jóváhagyóként adja meg a vezetőt, kapcsolja hozzá a vállalt maradványkockázatokat, és az indoklásban hivatkozzon a jegyzőkönyvre."
+          target_model: risk-acceptances
+          translations:
+            en:
+              title: "Decision on putting the EIR into use"
+              description: "Based on the system security plan, the assessment, the risk analysis and the action plan, the head of the organisation decides on putting the system into use or continuing its use; this duty cannot be delegated and the decision has to be documented in minutes (Cybersecurity Act, Section 6(3) point 12; MK Decree 7/2024, annex 1, point 1.1.6). Create a risk acceptance for each EIR: set the head of the organisation as approver, link the residual risks taken on and refer to the minutes in the justification."
+        - key: vendors
+          title: "Az ellátási lánc kezelése"
+          description: "Tekintse át az előre létrehozott beszállítókat, vegye fel a hiányzó kritikus beszállítókat, és értékelje a biztonsági helyzetüket. A kiberbiztonsági követelményeknek a közreműködőkkel kötött szerződésekben kötelemként kell teljesülniük (Kiberbiztonsági tv. 6. § (5) d)); az ellátási lánc kockázatait a 7/2024. MK rendelet 2. melléklet 15.5. pontja szerint kell felmérni."
+          target_model: entities
+          translations:
+            en:
+              title: "Manage the supply chain"
+              description: "Review the pre-created suppliers, add any missing critical ones and assess their security posture. The cybersecurity requirements must be fulfilled as obligations in the contracts with contractors (Cybersecurity Act, Section 6(5)(d)); supply chain risks are assessed under MK Decree 7/2024, annex 2, point 15.5."
+        - key: incident_readiness
+          title: "Felkészülés az incidenskezelésre"
+          description: "Készítse el a biztonsági eseménykezelési tervet. A súlyos zavart vagy vagyoni hátrányt, illetve másoknak jelentős kárt okozó fenyegetést, incidensközeli helyzetet és incidenst a nemzeti kiberbiztonsági incidenskezelő központnak kell bejelenteni (Kiberbiztonsági tv. 66. § (2)); incidens esetén első bejelentés 24 órán belül, eseménybejelentés 72 órán belül, zárójelentés az eseménybejelentést követő egy hónapon belül (418/2024. Korm. rendelet 77. § (1)). Az érintetteket haladéktalanul tájékoztatni kell (Kiberbiztonsági tv. 6. § (5) f)). Az incidenseket az Incidensek menüben követheti."
+          target_model: policies
+          target_ref: policy_incident
+          translations:
+            en:
+              title: "Prepare incident management"
+              description: "Draft the security incident management plan. Threats, near misses and incidents causing severe disruption or financial loss, or considerable damage to others, must be reported to the national cybersecurity incident response centre (Cybersecurity Act, Section 66(2)); for an incident: first notification within 24 hours, incident notification within 72 hours, final report within one month of the incident notification (Government Decree 418/2024, Section 77(1)). Those affected must be informed without delay (Cybersecurity Act, Section 6(5)(f)). Track incidents in the Incidents menu."
+        - key: audit_findings
+          title: "Felkészülés az auditra és a megállapítások követése"
+          description: "A nyilvántartásba vételt követő 120 napon belül kössön megállapodást az SZTFH nyilvántartásában szereplő auditorral, és adja át neki az EIR-ek osztályba sorolását tartalmazó nyilvántartást és a kitöltött kérdőívet (1/2025. SZTFH rendelet 3. § (3)). Az auditot első alkalommal a nyilvántartásba vételt követő 2 éven belül, utána kétévente kell elvégeztetni (Kiberbiztonsági tv. 16. §; az e) pont szerinti mikrovállalkozásokra nem vonatkozik). Az auditor sérülékenységvizsgálatot, „jelentős” vagy „magas” osztálynál behatolásvizsgálatot is végezhet (Kiberbiztonsági tv. 22. § (1)). Az audit és a sérülékenységvizsgálatok megállapításait itt rögzítse, és kövesse a javításukat; az auditor által átadott bizonyítékokat 5 évig meg kell őrizni (1/2025. SZTFH rendelet 6. § (3))."
+          target_model: findings-assessments
+          target_ref: findings
+          translations:
+            en:
+              title: "Prepare for the audit and track the findings"
+              description: "Within 120 days of registration conclude an agreement with an auditor in the SZTFH register and hand over the register containing the security classification of the EIRs and the completed questionnaire (SZTFH Decree 1/2025, Section 3(3)). The first audit is due within two years of registration, then every two years (Cybersecurity Act, Section 16; does not apply to micro-enterprises under point (e)). The auditor may also run vulnerability scans and, for the Jelentős (substantial) or Magas (high) class, penetration tests (Cybersecurity Act, Section 22(1)). Record the findings of the audit and of vulnerability scans here and track their remediation; the evidence handed over by the auditor has to be kept for five years (SZTFH Decree 1/2025, Section 6(3))."
+        - key: recurring
+          title: "Visszatérő kötelezettségek"
+          description: "Tekintse át az ütemezett feladatokat (kétévenkénti felülvizsgálat, audit, felügyeleti díj, továbbképzés, gyakorlat): adja meg az első esedékességet és a felelőst, a szervezetre nem vonatkozó feladatnál pedig kapcsolja ki az Engedélyezve beállítást."
+          target_model: task-templates
+          translations:
+            en:
+              title: "Recurring obligations"
+              description: "Review the scheduled tasks (biennial review, audit, supervision fee, further training, exercise): set the first due date and the assignee, and clear the Enabled setting of any task that does not apply to your organisation."
