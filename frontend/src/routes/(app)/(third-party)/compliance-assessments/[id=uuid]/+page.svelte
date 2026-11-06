@@ -20,6 +20,8 @@
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import MaturityStaircase from './MaturityStaircase.svelte';
 	import type { StaircaseResult } from './staircase';
+	import WeakestLinkSummary from './WeakestLinkSummary.svelte';
+	import type { WeakestLinkResult } from './weakest-link';
 
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
@@ -127,7 +129,7 @@
 	// Verdicts follow the result's visibility, computed numbers the score's.
 	const shownRules = $derived(
 		outcomeRules.filter((rule) =>
-			rule.kind === 'staircase'
+			rule.kind === 'staircase' || rule.kind === 'weakest_link'
 				? false
 				: rule.kind === 'number'
 					? showScore &&
@@ -194,6 +196,21 @@
 			[]) as Record<string, any>[];
 		return groups.find((g) => g.ref_id === id)?.name || id;
 	};
+	type ShownWeakestLink = WeakestLinkResult & { rule: Record<string, any> };
+	const weakestLinks = $derived(
+		showResult
+			? ((compliance_assessment.weakest_links ?? []) as WeakestLinkResult[]).flatMap((w) => {
+					const rule = outcomeRules.find((r) => r.ref_id === w.ref_id);
+					return rule && w.sections.length ? [{ ...w, rule }] : [];
+				})
+			: []
+	);
+	let openWeakestLink = $state<ShownWeakestLink | null>(null);
+	let weakestLinkDialog: HTMLDialogElement | undefined = $state();
+	function openWeakestLinkDialog(w: ShownWeakestLink) {
+		openWeakestLink = w;
+		setTimeout(() => weakestLinkDialog?.showModal(), 0);
+	}
 	let openStaircase = $state<ShownStaircase | null>(null);
 	let staircaseDialog: HTMLDialogElement | undefined = $state();
 	function openStaircaseDialog(s: ShownStaircase) {
@@ -1249,7 +1266,7 @@
 					{/if}
 
 					<!-- Insights -->
-					{#if staircases.length || showVerdicts || ((has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party)}
+					{#if staircases.length || weakestLinks.length || showVerdicts || ((has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party)}
 						<div>
 							<span
 								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
@@ -1276,6 +1293,23 @@
 												>{ruleLabel(staircase.rule, staircase.ref_id)}</span
 											>
 										</div>
+									</button>
+								{/each}
+								{#each weakestLinks as weakestLink (weakestLink.ref_id)}
+									<button
+										type="button"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer text-left"
+										onclick={() => openWeakestLinkDialog(weakestLink)}
+										data-testid="weakest-link-tile"
+									>
+										<div
+											class="flex items-center justify-center min-w-7 h-7 px-1 rounded-lg bg-primary-500 text-white text-xs font-bold tabular-nums shrink-0"
+										>
+											{weakestLink.score === null ? '—' : `${Math.round(weakestLink.score * 100)}%`}
+										</div>
+										<span class="text-sm font-semibold leading-tight"
+											>{ruleLabel(weakestLink.rule, weakestLink.ref_id)}</span
+										>
 									</button>
 								{/each}
 								{#if showVerdicts}
@@ -1624,6 +1658,30 @@
 					</div>
 				{/each}
 			</div>
+		</div>
+	</dialog>
+{/if}
+{#if openWeakestLink}
+	<dialog
+		bind:this={weakestLinkDialog}
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl max-h-[85vh] rounded-2xl bg-surface-50-950 shadow-2xl border border-surface-200-800 p-0 overflow-hidden backdrop:bg-black/40"
+		aria-labelledby="weakest-link-dialog-title"
+		onclose={() => (openWeakestLink = null)}
+	>
+		<div class="flex justify-between items-center px-6 py-4 border-b border-surface-100-900">
+			<h3 id="weakest-link-dialog-title" class="text-lg font-bold text-surface-900-100">
+				{ruleLabel(openWeakestLink.rule, openWeakestLink.ref_id)}
+			</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-600-400 hover:text-surface-700-300"
+				aria-label={m.close()}
+				onclick={() => weakestLinkDialog?.close()}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 max-h-[calc(85vh-64px)] overflow-auto">
+			<WeakestLinkSummary result={openWeakestLink} rule={openWeakestLink.rule} />
 		</div>
 	</dialog>
 {/if}
