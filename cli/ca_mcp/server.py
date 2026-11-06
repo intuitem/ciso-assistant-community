@@ -89,6 +89,11 @@ from .tools.write_tools import (
     create_incident,
     create_timeline_entry,
     create_document,
+    submit_document_for_review,
+    approve_document,
+    request_document_changes,
+    publish_document,
+    create_document_draft,
 )
 
 from .tools.update_tools import (
@@ -238,6 +243,11 @@ WRITE_TOOLS = [
     update_team,
     create_document,
     update_document,
+    submit_document_for_review,
+    approve_document,
+    request_document_changes,
+    publish_document,
+    create_document_draft,
     update_user,
     create_perimeter,
     create_asset,

@@ -8,6 +8,7 @@ from ..client import (
     make_patch_request,
     make_upload_request,
     make_delete_request,
+    get_paginated_results,
 )
 from ..resolvers import (
     resolve_ebios_rm_study_id,
@@ -2181,6 +2182,170 @@ async def create_document(
         return f"Created document: {label} (ID: {document_id}, revision: {version})"
     except Exception as e:
         return f"Error in create_document: {str(e)}"
+
+
+def _get_latest_revision(document_id: str):
+    """Return (revision_dict, error) for a document's most recent revision.
+
+    This is the one any edit/submit/approve/publish action targets.
+    `current_revision` is NOT safe for this: it tracks the *published*
+    revision and only moves on publish(), so it goes stale as soon as a new
+    draft is created after a publish cycle. DocumentRevision's default
+    ordering is -version_number, so the first result here is always correct.
+    """
+    res = make_get_request("/document-revisions/", params={"document": document_id})
+    if res.status_code != 200:
+        return (
+            None,
+            f"Error fetching document revisions: {res.status_code} - {res.text}",
+        )
+
+    revisions = get_paginated_results(res.json())
+    if not revisions:
+        return None, "Error: Document has no revisions"
+
+    return revisions[0], None
+
+
+async def submit_document_for_review(document_id: str) -> str:
+    """Submit a document's draft (or change-requested) revision for review
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(
+            f"/document-revisions/{revision['id']}/submit-for-review/", {}
+        )
+        if res.status_code != 200:
+            return (
+                f"Error submitting document for review: {res.status_code} - {res.text}"
+            )
+
+        return (
+            f"Submitted for review: revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in submit_document_for_review: {str(e)}"
+
+
+async def approve_document(document_id: str) -> str:
+    """Approve (validate) a document's in-review revision
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(f"/document-revisions/{revision['id']}/approve/", {})
+        if res.status_code != 200:
+            return f"Error approving document: {res.status_code} - {res.text}"
+
+        return (
+            f"Approved (validated): revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in approve_document: {str(e)}"
+
+
+async def request_document_changes(document_id: str, comments: str = None) -> str:
+    """Send a document's in-review revision back to the author for changes
+
+    Args:
+        document_id: Document ID or name
+        comments: Reviewer comments explaining what needs to change
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        payload = {"reviewer_comments": comments} if comments is not None else {}
+        res = make_post_request(
+            f"/document-revisions/{revision['id']}/request-changes/", payload
+        )
+        if res.status_code != 200:
+            return f"Error requesting changes: {res.status_code} - {res.text}"
+
+        return (
+            f"Requested changes on revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in request_document_changes: {str(e)}"
+
+
+async def publish_document(document_id: str) -> str:
+    """Publish a document's validated revision, making it the current one
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(f"/document-revisions/{revision['id']}/publish/", {})
+        if res.status_code != 200:
+            return f"Error publishing document: {res.status_code} - {res.text}"
+
+        return (
+            f"Published: revision {revision.get('version_number', '?')} of document "
+            f"(ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in publish_document: {str(e)}"
+
+
+async def create_document_draft(document_id: str) -> str:
+    """Create a new draft revision for a document, cloned from its latest content
+
+    Needed to edit a document again once it has been published (a published
+    revision is locked). Fails if a draft already exists for the document.
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+
+        res = make_post_request(
+            f"/managed-documents/{resolved_id}/create-new-draft/", {}
+        )
+        if res.status_code != 201:
+            return f"Error creating draft: {res.status_code} - {res.text}"
+
+        draft = res.json()
+        return (
+            f"Created draft: revision {draft.get('version_number')} "
+            f"(ID: {draft.get('id')}) of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in create_document_draft: {str(e)}"
 
 
 async def create_incident(

@@ -742,6 +742,177 @@ class TestCreateDocument:
 
 
 # ---------------------------------------------------------------------------
+# _get_latest_revision
+# ---------------------------------------------------------------------------
+
+
+class TestGetLatestRevision:
+    def test_returns_first_result(self):
+        get_req = Mock(
+            return_value=_response(
+                200, {"results": [{"id": UUID_D, "version_number": 2}, {"id": UUID_B}]}
+            )
+        )
+        with patch.object(write_tools, "make_get_request", get_req):
+            revision, error = write_tools._get_latest_revision(UUID_A)
+        assert error is None
+        assert revision == {"id": UUID_D, "version_number": 2}
+        get_req.assert_called_once_with(
+            "/document-revisions/", params={"document": UUID_A}
+        )
+
+    def test_no_revisions(self):
+        with patch.object(
+            write_tools,
+            "make_get_request",
+            return_value=_response(200, {"results": []}),
+        ):
+            revision, error = write_tools._get_latest_revision(UUID_A)
+        assert revision is None
+        assert "no revisions" in error
+
+    def test_http_error(self):
+        with patch.object(
+            write_tools, "make_get_request", return_value=_response(404, text="nope")
+        ):
+            revision, error = write_tools._get_latest_revision(UUID_A)
+        assert revision is None
+        assert "404" in error
+
+
+# ---------------------------------------------------------------------------
+# document review workflow
+# ---------------------------------------------------------------------------
+
+
+class TestDocumentWorkflow:
+    def _mock_latest(self, revision_id=UUID_D, version=3):
+        return patch.object(
+            write_tools,
+            "_get_latest_revision",
+            return_value=({"id": revision_id, "version_number": version}, None),
+        )
+
+    def _mock_resolve(self):
+        return patch.object(
+            resolvers, "resolve_managed_document_id", return_value=UUID_A
+        )
+
+    def test_submit_document_for_review(self):
+        post = Mock(return_value=_response(200, {"status": "in_review"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            self._mock_latest(),
+            self._mock_resolve(),
+        ):
+            result = run(write_tools.submit_document_for_review("My policy"))
+        assert "Submitted for review" in result
+        assert "revision 3" in result
+        assert post.call_args.args == (
+            f"/document-revisions/{UUID_D}/submit-for-review/",
+            {},
+        )
+
+    def test_approve_document(self):
+        post = Mock(return_value=_response(200, {"status": "validated"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            self._mock_latest(),
+            self._mock_resolve(),
+        ):
+            result = run(write_tools.approve_document(UUID_A))
+        assert "Approved" in result
+        assert post.call_args.args == (
+            f"/document-revisions/{UUID_D}/approve/",
+            {},
+        )
+
+    def test_request_document_changes_with_comments(self):
+        post = Mock(return_value=_response(200, {"status": "change_requested"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            self._mock_latest(),
+            self._mock_resolve(),
+        ):
+            result = run(
+                write_tools.request_document_changes(UUID_A, comments="Fix section 2")
+            )
+        assert "Requested changes" in result
+        assert post.call_args.args == (
+            f"/document-revisions/{UUID_D}/request-changes/",
+            {"reviewer_comments": "Fix section 2"},
+        )
+
+    def test_request_document_changes_without_comments(self):
+        post = Mock(return_value=_response(200, {"status": "change_requested"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            self._mock_latest(),
+            self._mock_resolve(),
+        ):
+            run(write_tools.request_document_changes(UUID_A))
+        assert post.call_args.args == (
+            f"/document-revisions/{UUID_D}/request-changes/",
+            {},
+        )
+
+    def test_publish_document(self):
+        post = Mock(return_value=_response(200, {"status": "published"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            self._mock_latest(),
+            self._mock_resolve(),
+        ):
+            result = run(write_tools.publish_document(UUID_A))
+        assert "Published" in result
+        assert post.call_args.args == (
+            f"/document-revisions/{UUID_D}/publish/",
+            {},
+        )
+
+    def test_workflow_action_rejected_by_backend_surfaces_error(self):
+        rejected = _response(400, text="Only in-review revisions can be approved.")
+        with (
+            patch.object(write_tools, "make_post_request", return_value=rejected),
+            self._mock_latest(),
+            self._mock_resolve(),
+        ):
+            result = run(write_tools.approve_document(UUID_A))
+        assert "Error approving document" in result
+        assert "Only in-review revisions" in result
+
+    def test_create_document_draft(self):
+        post = Mock(
+            return_value=_response(
+                201, {"id": UUID_D, "version_number": 2, "status": "draft"}
+            )
+        )
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            self._mock_resolve(),
+        ):
+            result = run(write_tools.create_document_draft(UUID_A))
+        assert "Created draft" in result
+        assert "revision 2" in result
+        assert post.call_args.args == (
+            f"/managed-documents/{UUID_A}/create-new-draft/",
+            {},
+        )
+
+    def test_create_document_draft_conflict_surfaces_error(self):
+        conflict = _response(
+            400, text="A draft revision already exists for this document."
+        )
+        with (
+            patch.object(write_tools, "make_post_request", return_value=conflict),
+            self._mock_resolve(),
+        ):
+            result = run(write_tools.create_document_draft(UUID_A))
+        assert "Error creating draft" in result
+        assert "already exists" in result
+
+
+# ---------------------------------------------------------------------------
 # create_risk_scenario / create_risk_assessment / create_task_template
 # ---------------------------------------------------------------------------
 
@@ -1079,17 +1250,16 @@ class TestUpdateTools:
         assert "No fields" in result
 
     def test_update_document_metadata_and_content(self):
-        get_req = Mock(
-            return_value=_response(
-                200, {"current_revision": {"id": UUID_D, "version_number": 2}}
-            )
-        )
         with (
             self._patch_ok({"id": UUID_A, "display_name": "AI policy v2"}) as patch_req,
             patch.object(
                 update_tools, "resolve_managed_document_id", return_value=UUID_A
             ),
-            patch.object(update_tools, "make_get_request", get_req),
+            patch.object(
+                update_tools,
+                "_get_latest_revision",
+                return_value=({"id": UUID_D, "version_number": 2}, None),
+            ),
         ):
             result = run(
                 update_tools.update_document(
@@ -1109,35 +1279,50 @@ class TestUpdateTools:
             {"content": "# new content"},
         )
 
-    def test_update_document_content_only_fetches_current_revision(self):
-        get_req = Mock(
-            return_value=_response(200, {"current_revision": {"id": UUID_D}})
-        )
+    def test_update_document_content_only_fetches_latest_revision(self):
+        get_latest = Mock(return_value=({"id": UUID_D}, None))
         with (
             self._patch_ok() as patch_req,
             patch.object(
                 update_tools, "resolve_managed_document_id", return_value=UUID_A
             ),
-            patch.object(update_tools, "make_get_request", get_req),
+            patch.object(update_tools, "_get_latest_revision", get_latest),
         ):
             run(update_tools.update_document(document_id=UUID_A, content="body"))
-        get_req.assert_called_once_with(f"/managed-documents/{UUID_A}/")
+        get_latest.assert_called_once_with(UUID_A)
         assert patch_req.call_args.args == (
             f"/document-revisions/{UUID_D}/",
             {"content": "body"},
         )
 
+    def test_update_document_no_revision_surfaces_error(self):
+        with (
+            patch.object(update_tools, "make_patch_request") as patch_req,
+            patch.object(
+                update_tools, "resolve_managed_document_id", return_value=UUID_A
+            ),
+            patch.object(
+                update_tools,
+                "_get_latest_revision",
+                return_value=(None, "Error: Document has no revisions"),
+            ),
+        ):
+            result = run(update_tools.update_document(document_id=UUID_A, content="x"))
+        patch_req.assert_not_called()
+        assert "no revisions" in result
+
     def test_update_document_locked_revision_surfaces_backend_error(self):
-        get_req = Mock(
-            return_value=_response(200, {"current_revision": {"id": UUID_D}})
-        )
         locked = _response(400, text="This revision is locked.")
         with (
             patch.object(update_tools, "make_patch_request", return_value=locked),
             patch.object(
                 update_tools, "resolve_managed_document_id", return_value=UUID_A
             ),
-            patch.object(update_tools, "make_get_request", get_req),
+            patch.object(
+                update_tools,
+                "_get_latest_revision",
+                return_value=({"id": UUID_D}, None),
+            ),
         ):
             result = run(update_tools.update_document(document_id=UUID_A, content="x"))
         assert "locked" in result
@@ -1185,6 +1370,11 @@ class TestRegistration:
             "get_documents",
             "create_document",
             "update_document",
+            "submit_document_for_review",
+            "approve_document",
+            "request_document_changes",
+            "publish_document",
+            "create_document_draft",
         } <= names
 
     def test_read_only_profile_hides_new_tools(self):
@@ -1195,6 +1385,11 @@ class TestRegistration:
         assert "update_team" not in names
         assert "create_document" not in names
         assert "update_document" not in names
+        assert "submit_document_for_review" not in names
+        assert "approve_document" not in names
+        assert "request_document_changes" not in names
+        assert "publish_document" not in names
+        assert "create_document_draft" not in names
         assert "get_users" in names
         assert "get_teams" in names
         assert "get_documents" in names

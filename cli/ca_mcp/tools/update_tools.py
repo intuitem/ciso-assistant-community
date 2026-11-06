@@ -45,6 +45,7 @@ from .write_tools import (
     MANUAL_TIMELINE_ENTRY_TYPES,
     INVALID_TIMELINE_ENTRY_TYPE_ERROR,
     _build_schedule,
+    _get_latest_revision,
 )
 
 
@@ -342,10 +343,10 @@ async def update_document(
         document_id: Document ID or name
         name: New name
         description: New description
-        content: New markdown content for the current revision. Only works while
+        content: New markdown content for the latest revision. Only works while
             that revision is a draft or has changes requested — once it has
-            been submitted for review or published it is locked, and a new
-            draft must be created first (not yet exposed via MCP)
+            been submitted for review or published it is locked; call
+            create_document_draft first to start a new editable revision
         template_used: Reference ID of a document template
         locale: Locale code, e.g. "en", "fr"
     """
@@ -373,17 +374,11 @@ async def update_document(
             results.append(f"Updated document: {label} (ID: {document.get('id')})")
 
         if content is not None:
-            doc_res = make_get_request(f"/managed-documents/{resolved_id}/")
-            if doc_res.status_code != 200:
-                return (
-                    f"Error fetching document: {doc_res.status_code} - {doc_res.text}"
-                )
-            revision = doc_res.json().get("current_revision") or {}
-            revision_id = revision.get("id") if isinstance(revision, dict) else None
-            if not revision_id:
-                return "Error: Document has no current revision to update"
+            revision, error = _get_latest_revision(resolved_id)
+            if error:
+                return error
             rev_res = make_patch_request(
-                f"/document-revisions/{revision_id}/", {"content": content}
+                f"/document-revisions/{revision['id']}/", {"content": content}
             )
             if rev_res.status_code != 200:
                 return (

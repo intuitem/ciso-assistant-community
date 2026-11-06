@@ -29,7 +29,7 @@ Copilot Studio connections keep working as configured.
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
 
-The CISO Assistant MCP server provides **116 tools** covering:
+The CISO Assistant MCP server provides **134 tools** covering:
 
 - Risk management (assessments, scenarios, matrices)
 - Compliance audits (frameworks, requirements)
