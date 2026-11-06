@@ -1624,6 +1624,88 @@ async def update_task_template(
         return f"Error in update_task_template: {str(e)}"
 
 
+TASK_NODE_STATUSES = ["pending", "in_progress", "completed", "cancelled"]
+
+
+async def update_task_node(
+    task_node_id: str = None,
+    task_template: str = None,
+    due_date: str = None,
+    status: str = None,
+    observation: str = None,
+) -> str:
+    """Update one occurrence (TaskNode) of a recurring task template: its status
+    and/or observation. observation is a plain text field with no size limit
+    (backed by a TEXT column) - a full markdown review report fits fine.
+
+    Identify the occurrence either directly by task_node_id (from
+    get_task_nodes or list_objects("task_nodes")), or by task_template +
+    due_date - e.g. "the January occurrence" of a monthly control.
+
+    Args:
+        task_node_id: Task node UUID
+        task_template: Task template ID/name (used with due_date instead of task_node_id)
+        due_date: Due date of the occurrence: exact YYYY-MM-DD, or YYYY-MM to
+            match a whole month (must be unambiguous - exactly one occurrence)
+        status: pending | in_progress | completed | cancelled
+        observation: Observation text (markdown supported)
+    """
+    try:
+        if task_node_id:
+            resolved_id = task_node_id
+        elif task_template and due_date:
+            resolved_template_id = resolve_task_template_id(task_template)
+            params = {"task_template": resolved_template_id}
+            if len(due_date) == 7:
+                year, month = due_date.split("-")
+                params["due_date__year"] = year
+                params["due_date__month"] = month
+            else:
+                params["due_date"] = due_date
+
+            nodes, error = fetch_all_results("/task-nodes/", params=params)
+            if error:
+                return f"Error finding task occurrence: {error}"
+            if not nodes:
+                return (
+                    f"Error: No task occurrence found for template "
+                    f"'{task_template}' due {due_date}"
+                )
+            if len(nodes) > 1:
+                dates = [n.get("due_date") for n in nodes]
+                return (
+                    f"Error: Ambiguous occurrence, found {len(nodes)} for "
+                    f"{due_date}: {dates}. Pass an exact YYYY-MM-DD or task_node_id"
+                )
+            resolved_id = nodes[0]["id"]
+        else:
+            return "Error: Pass either task_node_id, or both task_template and due_date"
+
+        payload = {}
+        if status is not None:
+            if status not in TASK_NODE_STATUSES:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(TASK_NODE_STATUSES)}"
+            payload["status"] = status
+        if observation is not None:
+            payload["observation"] = observation
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/task-nodes/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            node = res.json()
+            return (
+                f"Updated task occurrence (ID: {node.get('id', resolved_id)}, "
+                f"due {node.get('due_date', 'N/A')}): status={node.get('status')}"
+            )
+        else:
+            return f"Error updating task occurrence: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_task_node: {str(e)}"
+
+
 async def delete_task_template(task_id: str) -> str:
     """Delete task template
 

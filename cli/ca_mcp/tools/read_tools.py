@@ -1574,6 +1574,120 @@ async def get_task_template_details(task_id: str):
         return f"Error in get_task_template_details: {str(e)}"
 
 
+TASK_NODE_STATUSES = ["pending", "in_progress", "completed", "cancelled"]
+
+
+async def get_task_nodes(
+    task_template: str = None,
+    status: str = None,
+    due_date: str = None,
+    folder: str = None,
+    past: bool = None,
+    search: str = None,
+    limit: int = None,
+    offset: int = None,
+):
+    """List task occurrences (one per due date) generated from recurring task
+    templates - e.g. the January and February instances of a monthly control.
+
+    Use update_task_node to mark one as pending/in_progress/completed/cancelled
+    or attach an observation.
+
+    Args:
+        task_template: Task template ID/name
+        status: pending | in_progress | completed | cancelled
+        due_date: Exact due date YYYY-MM-DD, or YYYY-MM to match a whole month
+        folder: Folder ID/name
+        past: True for overdue occurrences only, False for upcoming/today only
+        search: Search term (matches observation)
+        limit: Max rows to return
+        offset: Row to start from, for paging
+    """
+    try:
+        from ..resolvers import resolve_folder_id, resolve_task_template_id
+
+        params = {}
+        filters = {}
+
+        if task_template:
+            params["task_template"] = resolve_task_template_id(task_template)
+            filters["task_template"] = task_template
+        if status:
+            if status not in TASK_NODE_STATUSES:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(TASK_NODE_STATUSES)}"
+            params["status"] = status
+            filters["status"] = status
+        if due_date:
+            if len(due_date) == 7:
+                year, month = due_date.split("-")
+                params["due_date__year"] = year
+                params["due_date__month"] = month
+            else:
+                params["due_date"] = due_date
+            filters["due_date"] = due_date
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+        if past is not None:
+            params["past"] = past
+            filters["past"] = past
+        if search:
+            params["search"] = search
+            filters["search"] = search
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
+
+        res = make_get_request("/task-nodes/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        nodes = get_paginated_results(data)
+
+        if not nodes:
+            return empty_response("task occurrences", filters)
+
+        result = found_line(nodes, "task occurrences")
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|ID|Task Template|Due Date|Scheduled Date|Status|Observation|\n"
+        result += "|---|---|---|---|---|---|\n"
+
+        for node in nodes:
+            node_id = node.get("id", "N/A")
+            template = node.get("task_template") or {}
+            template_name = (
+                template.get("str", "N/A") if isinstance(template, dict) else "N/A"
+            )
+            due_date_val = node.get("due_date", "N/A")
+            scheduled_date_val = node.get("scheduled_date", "N/A")
+            status_val = node.get("status", "N/A")
+            observation = (node.get("observation") or "")[:60]
+
+            result += (
+                f"|{node_id}|{template_name}|{due_date_val}|{scheduled_date_val}"
+                f"|{status_val}|{observation}|\n"
+            )
+
+        return success_response(
+            result,
+            "get_task_nodes",
+            "Use update_task_node (task_node_id, or task_template + due_date) "
+            "to set status/observation",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
 SEVERITY_LABELS = {
     -1: "undefined",
     0: "info",

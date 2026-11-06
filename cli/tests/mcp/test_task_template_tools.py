@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
 
+from ca_mcp import resolvers  # noqa: E402
 from ca_mcp.tools import (  # noqa: E402
     read_tools,
     update_tools,
@@ -17,9 +18,12 @@ from ca_mcp.tools import (  # noqa: E402
 )
 from tests.mcp.helpers import (  # noqa: E402
     UUID_A,
+    UUID_B,
     UUID_C,
+    UUID_D,
     UUID_F,
     _response,
+    _router,
     run,
 )
 
@@ -286,3 +290,222 @@ class TestGetTaskTemplateDetails:
         assert header_cols == sep_cols == body_cols
         assert "Every 1 Daily" in lines[2]
         assert "2026-11-10" in lines[2]
+
+
+# ---------------------------------------------------------------------------
+# update_task_node
+# ---------------------------------------------------------------------------
+
+
+class TestUpdateTaskNode:
+    def _patch_ok(self, body=None):
+        return patch.object(
+            update_tools,
+            "make_patch_request",
+            return_value=_response(
+                200,
+                body or {"id": UUID_D, "due_date": "2026-01-15", "status": "completed"},
+            ),
+        )
+
+    def test_by_task_node_id(self):
+        with self._patch_ok() as patch_req:
+            result = run(
+                update_tools.update_task_node(
+                    task_node_id=UUID_D,
+                    status="completed",
+                    observation="# Review report\n\nAll good.",
+                )
+            )
+        assert "Updated task occurrence" in result
+        assert patch_req.call_args.args == (
+            f"/task-nodes/{UUID_D}/",
+            {"status": "completed", "observation": "# Review report\n\nAll good."},
+        )
+
+    def test_by_task_template_and_exact_due_date(self):
+        fake = _router({"/task-nodes/": [{"id": UUID_D, "due_date": "2026-01-15"}]})
+        with (
+            self._patch_ok() as patch_req,
+            patch.object(update_tools, "fetch_all_results", fake),
+            patch.object(update_tools, "resolve_task_template_id", return_value=UUID_A),
+        ):
+            run(
+                update_tools.update_task_node(
+                    task_template="Monthly review",
+                    due_date="2026-01-15",
+                    status="in_progress",
+                )
+            )
+        assert fake.calls == [
+            ("/task-nodes/", {"task_template": UUID_A, "due_date": "2026-01-15"})
+        ]
+        assert patch_req.call_args.args == (
+            f"/task-nodes/{UUID_D}/",
+            {"status": "in_progress"},
+        )
+
+    def test_by_task_template_and_month(self):
+        fake = _router({"/task-nodes/": [{"id": UUID_D, "due_date": "2026-01-15"}]})
+        with (
+            self._patch_ok() as patch_req,
+            patch.object(update_tools, "fetch_all_results", fake),
+            patch.object(update_tools, "resolve_task_template_id", return_value=UUID_A),
+        ):
+            run(
+                update_tools.update_task_node(
+                    task_template="Monthly review",
+                    due_date="2026-01",
+                    status="completed",
+                )
+            )
+        assert fake.calls == [
+            (
+                "/task-nodes/",
+                {
+                    "task_template": UUID_A,
+                    "due_date__year": "2026",
+                    "due_date__month": "01",
+                },
+            )
+        ]
+        assert patch_req.call_args.args[0] == f"/task-nodes/{UUID_D}/"
+
+    def test_ambiguous_month_is_rejected(self):
+        fake = _router(
+            {
+                "/task-nodes/": [
+                    {"id": UUID_D, "due_date": "2026-01-05"},
+                    {"id": UUID_B, "due_date": "2026-01-20"},
+                ]
+            }
+        )
+        with (
+            patch.object(update_tools, "make_patch_request") as patch_req,
+            patch.object(update_tools, "fetch_all_results", fake),
+            patch.object(update_tools, "resolve_task_template_id", return_value=UUID_A),
+        ):
+            result = run(
+                update_tools.update_task_node(
+                    task_template="Weekly check",
+                    due_date="2026-01",
+                    status="completed",
+                )
+            )
+        patch_req.assert_not_called()
+        assert "Ambiguous" in result
+
+    def test_no_occurrence_found(self):
+        fake = _router({"/task-nodes/": []})
+        with (
+            patch.object(update_tools, "make_patch_request") as patch_req,
+            patch.object(update_tools, "fetch_all_results", fake),
+            patch.object(update_tools, "resolve_task_template_id", return_value=UUID_A),
+        ):
+            result = run(
+                update_tools.update_task_node(
+                    task_template="Monthly review",
+                    due_date="2026-03",
+                    status="completed",
+                )
+            )
+        patch_req.assert_not_called()
+        assert "No task occurrence found" in result
+
+    def test_missing_identification_is_rejected(self):
+        with patch.object(update_tools, "make_patch_request") as patch_req:
+            result = run(update_tools.update_task_node(status="completed"))
+        patch_req.assert_not_called()
+        assert "Pass either task_node_id" in result
+
+    def test_invalid_status_is_rejected(self):
+        with patch.object(update_tools, "make_patch_request") as patch_req:
+            result = run(
+                update_tools.update_task_node(task_node_id=UUID_D, status="bogus")
+            )
+        patch_req.assert_not_called()
+        assert "Invalid status" in result
+
+    def test_no_fields_to_update(self):
+        with patch.object(update_tools, "make_patch_request") as patch_req:
+            result = run(update_tools.update_task_node(task_node_id=UUID_D))
+        patch_req.assert_not_called()
+        assert "No fields" in result
+
+
+# ---------------------------------------------------------------------------
+# get_task_nodes
+# ---------------------------------------------------------------------------
+
+
+class TestGetTaskNodes:
+    def test_filters_resolved_and_passed(self):
+        get_req = Mock(return_value=_response(200, {"results": []}))
+        with (
+            patch.object(read_tools, "make_get_request", get_req),
+            patch.object(
+                resolvers, "resolve_task_template_id", return_value=UUID_A
+            ) as resolve_template,
+            patch.object(
+                resolvers, "resolve_folder_id", return_value=UUID_F
+            ) as resolve_folder,
+        ):
+            run(
+                read_tools.get_task_nodes(
+                    task_template="Monthly review",
+                    status="completed",
+                    due_date="2026-01-15",
+                    folder="Engineering",
+                    past=True,
+                )
+            )
+        resolve_template.assert_called_once_with("Monthly review")
+        resolve_folder.assert_called_once_with("Engineering")
+        assert get_req.call_args.kwargs["params"] == {
+            "task_template": UUID_A,
+            "status": "completed",
+            "due_date": "2026-01-15",
+            "folder": UUID_F,
+            "past": True,
+        }
+
+    def test_month_filter_splits_into_year_and_month(self):
+        get_req = Mock(return_value=_response(200, {"results": []}))
+        with patch.object(read_tools, "make_get_request", get_req):
+            result = run(read_tools.get_task_nodes(due_date="2026-02"))
+        assert get_req.call_args.kwargs["params"] == {
+            "due_date__year": "2026",
+            "due_date__month": "02",
+        }
+        assert "No task occurrences found" in result
+
+    def test_invalid_status_is_rejected(self):
+        get_req = Mock()
+        with patch.object(read_tools, "make_get_request", get_req):
+            result = run(read_tools.get_task_nodes(status="bogus"))
+        get_req.assert_not_called()
+        assert "Invalid status" in result
+
+    def test_renders_table(self):
+        get_req = Mock(
+            return_value=_response(
+                200,
+                {
+                    "results": [
+                        {
+                            "id": UUID_D,
+                            "task_template": {"str": "Monthly review"},
+                            "due_date": "2026-01-15",
+                            "scheduled_date": "2026-01-15",
+                            "status": "pending",
+                            "observation": "note",
+                        }
+                    ]
+                },
+            )
+        )
+        with patch.object(read_tools, "make_get_request", get_req):
+            result = run(read_tools.get_task_nodes())
+        assert "Monthly review" in result
+        assert "2026-01-15" in result
+        assert "pending" in result

@@ -1375,6 +1375,8 @@ class TestRegistration:
             "request_document_changes",
             "publish_document",
             "create_document_draft",
+            "get_task_nodes",
+            "update_task_node",
         } <= names
 
     def test_read_only_profile_hides_new_tools(self):
@@ -1390,6 +1392,8 @@ class TestRegistration:
         assert "request_document_changes" not in names
         assert "publish_document" not in names
         assert "create_document_draft" not in names
+        assert "update_task_node" not in names
         assert "get_users" in names
         assert "get_teams" in names
         assert "get_documents" in names
+        assert "get_task_nodes" in names
