@@ -1421,6 +1421,81 @@ async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
         return f"Error in refresh_quantitative_risk_study_simulations: {str(e)}"
 
 
+SCHEDULE_FREQUENCIES = ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+SCHEDULE_OVERDUE_BEHAVIORS = ["DELAY_NEXT", "NO_IMPACT"]
+
+
+def _build_schedule(
+    frequency=None,
+    interval=None,
+    days_of_week=None,
+    weeks_of_month=None,
+    months_of_year=None,
+    end_date=None,
+    occurrences=None,
+    overdue_behavior=None,
+):
+    """Build a TaskTemplate.schedule object from individual fields.
+
+    Mirrors the backend's SCHEDULE_JSONSCHEMA (interval/frequency required
+    together, everything else optional). Returns (schedule_dict, error) -
+    schedule_dict is None when no schedule_* field was given at all, and
+    error is a user-facing message when the given fields are invalid.
+    """
+    given = any(
+        v is not None
+        for v in (
+            frequency,
+            interval,
+            days_of_week,
+            weeks_of_month,
+            months_of_year,
+            end_date,
+            occurrences,
+            overdue_behavior,
+        )
+    )
+    if not given:
+        return None, None
+
+    if frequency is None or interval is None:
+        return (
+            None,
+            "Error: schedule_frequency and schedule_interval are both required "
+            "to set a schedule",
+        )
+    if frequency not in SCHEDULE_FREQUENCIES:
+        return (
+            None,
+            f"Error: Invalid schedule_frequency '{frequency}'. Must be one of: "
+            f"{', '.join(SCHEDULE_FREQUENCIES)}",
+        )
+    if (
+        overdue_behavior is not None
+        and overdue_behavior not in SCHEDULE_OVERDUE_BEHAVIORS
+    ):
+        return (
+            None,
+            f"Error: Invalid schedule_overdue_behavior '{overdue_behavior}'. "
+            f"Must be one of: {', '.join(SCHEDULE_OVERDUE_BEHAVIORS)}",
+        )
+
+    schedule = {"interval": interval, "frequency": frequency}
+    if days_of_week is not None:
+        schedule["days_of_week"] = days_of_week
+    if weeks_of_month is not None:
+        schedule["weeks_of_month"] = weeks_of_month
+    if months_of_year is not None:
+        schedule["months_of_year"] = months_of_year
+    if end_date is not None:
+        schedule["end_date"] = end_date
+    if occurrences is not None:
+        schedule["occurrences"] = occurrences
+    if overdue_behavior is not None:
+        schedule["overdue_behavior"] = overdue_behavior
+    return schedule, None
+
+
 async def create_task_template(
     name: str,
     folder_id: str,
@@ -1429,9 +1504,16 @@ async def create_task_template(
     observation: str = None,
     evidences: list = None,
     task_date: str = None,
-    is_recurrent: bool = False,
+    is_recurrent: bool = None,
     ref_id: str = None,
-    schedule: str = None,
+    schedule_frequency: str = None,
+    schedule_interval: int = None,
+    schedule_days_of_week: list = None,
+    schedule_weeks_of_month: list = None,
+    schedule_months_of_year: list = None,
+    schedule_end_date: str = None,
+    schedule_occurrences: int = None,
+    schedule_overdue_behavior: str = None,
     enabled: bool = True,
     link: str = None,
     assigned_to: list = None,
@@ -1444,6 +1526,11 @@ async def create_task_template(
 ) -> str:
     """Create task template
 
+    A task template is either a single occurrence (give task_date) or a
+    recurring one (give the schedule_* fields): setting any schedule_* field
+    makes the template recurrent automatically unless is_recurrent is passed
+    explicitly.
+
     Args:
         name: Task template name (required)
         folder_id: Folder ID/name (required)
@@ -1452,9 +1539,21 @@ async def create_task_template(
         observation: Observation text
         evidences: Array of evidence UUIDs
         task_date: Task date (YYYY-MM-DD)
-        is_recurrent: Recurrent flag
+        is_recurrent: Recurrent flag (defaults to True when a schedule is
+            given, False otherwise)
         ref_id: Reference ID
-        schedule: Schedule definition
+        schedule_frequency: DAILY | WEEKLY | MONTHLY | YEARLY (required to set
+            a schedule)
+        schedule_interval: Number of periods between occurrences, e.g. 2 for
+            "every 2 weeks" (required to set a schedule)
+        schedule_days_of_week: Days of the week the task repeats on (Monday=1
+            .. Sunday=7)
+        schedule_weeks_of_month: Which week(s) of the month, for a given
+            weekday (1=first .. 4=fourth, -1=last)
+        schedule_months_of_year: Months of the year (1=January .. 12=December)
+        schedule_end_date: Date the recurrence ends (YYYY-MM-DD)
+        schedule_occurrences: Number of occurrences before the recurrence stops
+        schedule_overdue_behavior: DELAY_NEXT | NO_IMPACT (default NO_IMPACT)
         enabled: Enabled flag
         link: Link to evidence (e.g. Jira ticket)
         assigned_to: List of assignees as actor UUIDs, emails or names
@@ -1468,6 +1567,22 @@ async def create_task_template(
     try:
         # Resolve folder name to ID if needed
         folder_id = resolve_folder_id(folder_id)
+
+        schedule, schedule_error = _build_schedule(
+            schedule_frequency,
+            schedule_interval,
+            schedule_days_of_week,
+            schedule_weeks_of_month,
+            schedule_months_of_year,
+            schedule_end_date,
+            schedule_occurrences,
+            schedule_overdue_behavior,
+        )
+        if schedule_error:
+            return schedule_error
+
+        if is_recurrent is None:
+            is_recurrent = schedule is not None
 
         payload = {
             "name": name,

@@ -1421,6 +1421,40 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         return f"Error in get_quantitative_risk_hypotheses: {str(e)}"
 
 
+_WEEKDAY_NAMES = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Sun"}
+
+
+def _format_schedule(schedule):
+    """Render a TaskTemplate.schedule object as a short human-readable phrase."""
+    if not schedule:
+        return "N/A"
+
+    interval = schedule.get("interval")
+    frequency = (schedule.get("frequency") or "").capitalize()
+    parts = [f"Every {interval} {frequency}" if interval else frequency]
+
+    days = schedule.get("days_of_week")
+    if days:
+        parts.append("on " + ", ".join(_WEEKDAY_NAMES.get(d, str(d)) for d in days))
+    weeks = schedule.get("weeks_of_month")
+    if weeks:
+        parts.append("week(s) " + ", ".join(str(w) for w in weeks))
+    months = schedule.get("months_of_year")
+    if months:
+        parts.append("in month(s) " + ", ".join(str(m) for m in months))
+    end_date = schedule.get("end_date")
+    if end_date:
+        parts.append(f"until {end_date}")
+    occurrences = schedule.get("occurrences")
+    if occurrences:
+        parts.append(f"for {occurrences} occurrence(s)")
+    overdue = schedule.get("overdue_behavior")
+    if overdue and overdue != "NO_IMPACT":
+        parts.append(f"(overdue: {overdue})")
+
+    return "; ".join(parts)
+
+
 async def get_task_templates(
     limit: int = None, offset: int = None, ordering: str = None, search: str = None
 ):
@@ -1461,8 +1495,8 @@ async def get_task_templates(
         result = (
             found_line(tasks, "task templates", paginated=True, offset=offset) + "\n\n"
         )
-        result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|\n"
-        result += "|---|---|---|---|---|---|---|---|\n"
+        result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|Next Occurrence|\n"
+        result += "|---|---|---|---|---|---|---|---|---|\n"
 
         for task in tasks:
             task_id = task.get("id", "N/A")
@@ -1473,8 +1507,12 @@ async def get_task_templates(
             is_recurrent = "Yes" if task.get("is_recurrent") else "No"
             enabled = "Yes" if task.get("enabled") else "No"
             task_date = task.get("task_date", "N/A")
+            next_occurrence = task.get("next_occurrence") or "N/A"
 
-            result += f"|{task_id}|{name}|{description}|{ref_id}|{status}|{is_recurrent}|{enabled}|{task_date}|\n"
+            result += (
+                f"|{task_id}|{name}|{description}|{ref_id}|{status}|{is_recurrent}"
+                f"|{enabled}|{task_date}|{next_occurrence}|\n"
+            )
 
         return result
     except Exception as e:
@@ -1499,8 +1537,13 @@ async def get_task_template_details(task_id: str):
         task = res.json()
 
         # Create result
-        result = f"|ID|Name|Description|Ref ID|Status|Task Date|Recurrent|Enabled|Published|Link|Folder|Path|Observation|Evidences|Created|Updated|Assets|Applied Controls|Compliance Assessment|Risk Assessment|Assign To|\n"
-        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        result = (
+            "|ID|Name|Description|Ref ID|Status|Task Date|Recurrent|Enabled"
+            "|Schedule|Next Occurrence|Last Occurrence Status|Next Occurrence Status"
+            "|Link|Folder|Path|Observation|Evidences|Created|Updated|Assets"
+            "|Applied Controls|Compliance Assessment|Risk Assessment|Assign To|\n"
+        )
+        result += "|---" * 24 + "|\n"
         result += f"|{task.get('id', 'N/A')}|{task.get('name', 'N/A')}"
         result += f"|{task.get('description', 'N/A')}"
         result += f"|{task.get('ref_id', 'N/A')}"
@@ -1508,6 +1551,10 @@ async def get_task_template_details(task_id: str):
         result += f"|{task.get('task_date', 'N/A')}"
         result += f"|{'Yes' if task.get('is_recurrent') else 'No'}"
         result += f"|{'Yes' if task.get('enabled') else 'No'}"
+        result += f"|{_format_schedule(task.get('schedule'))}"
+        result += f"|{task.get('next_occurrence') or 'N/A'}"
+        result += f"|{task.get('last_occurrence_status') or 'N/A'}"
+        result += f"|{task.get('next_occurrence_status') or 'N/A'}"
         result += f"|{task.get('link', 'N/A')}"
         result += f"|{task.get('folder', 'N/A')}"
         result += f"|{task.get('path', 'N/A')}"

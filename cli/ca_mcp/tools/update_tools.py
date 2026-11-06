@@ -44,6 +44,7 @@ from .write_tools import (
     _severity_value,
     MANUAL_TIMELINE_ENTRY_TYPES,
     INVALID_TIMELINE_ENTRY_TYPE_ERROR,
+    _build_schedule,
 )
 
 
@@ -1477,7 +1478,14 @@ async def update_task_template(
     task_date: str = None,
     is_recurrent: bool = None,
     ref_id: str = None,
-    schedule: str = None,
+    schedule_frequency: str = None,
+    schedule_interval: int = None,
+    schedule_days_of_week: list = None,
+    schedule_weeks_of_month: list = None,
+    schedule_months_of_year: list = None,
+    schedule_end_date: str = None,
+    schedule_occurrences: int = None,
+    schedule_overdue_behavior: str = None,
     enabled: bool = None,
     link: str = None,
     folder_id: str = None,
@@ -1491,6 +1499,10 @@ async def update_task_template(
 ) -> str:
     """Update task template properties
 
+    Setting any schedule_* field replaces the whole schedule (not a partial
+    merge) and makes the template recurrent automatically unless is_recurrent
+    is passed explicitly.
+
     Args:
         task_id: Task template ID/name (required)
         name: Task template name
@@ -1499,9 +1511,21 @@ async def update_task_template(
         observation: Observation text
         evidences: Array of evidence UUIDs
         task_date: Task date (YYYY-MM-DD)
-        is_recurrent: Recurrent flag
+        is_recurrent: Recurrent flag (defaults to True when a schedule is
+            given)
         ref_id: Reference ID
-        schedule: Schedule definition
+        schedule_frequency: DAILY | WEEKLY | MONTHLY | YEARLY (required to set
+            a schedule)
+        schedule_interval: Number of periods between occurrences, e.g. 2 for
+            "every 2 weeks" (required to set a schedule)
+        schedule_days_of_week: Days of the week the task repeats on (Monday=1
+            .. Sunday=7)
+        schedule_weeks_of_month: Which week(s) of the month, for a given
+            weekday (1=first .. 4=fourth, -1=last)
+        schedule_months_of_year: Months of the year (1=January .. 12=December)
+        schedule_end_date: Date the recurrence ends (YYYY-MM-DD)
+        schedule_occurrences: Number of occurrences before the recurrence stops
+        schedule_overdue_behavior: DELAY_NEXT | NO_IMPACT (default NO_IMPACT)
         enabled: Enabled flag
         link: Link to evidence (e.g. Jira ticket)
         folder_id: Folder ID/name
@@ -1514,6 +1538,22 @@ async def update_task_template(
         findings_assessment: Array of finding assessment UUIDs
     """
     try:
+        schedule, schedule_error = _build_schedule(
+            schedule_frequency,
+            schedule_interval,
+            schedule_days_of_week,
+            schedule_weeks_of_month,
+            schedule_months_of_year,
+            schedule_end_date,
+            schedule_occurrences,
+            schedule_overdue_behavior,
+        )
+        if schedule_error:
+            return schedule_error
+
+        if schedule is not None and is_recurrent is None:
+            is_recurrent = True
+
         # Build update payload with only provided fields
         payload = {}
 
