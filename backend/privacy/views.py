@@ -21,7 +21,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
-from django.db.models import Case, Count, F, Prefetch, Q, When
+from django.db.models import Case, Count, Exists, F, OuterRef, Prefetch, Q, When
 from itertools import chain
 from collections import defaultdict
 
@@ -325,9 +325,11 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "dpia_required",
         "dpia_required_source",
     ]
+    # The flag is computed on read, so sorting on it goes through an annotation
+    ordering_remap = {"has_sensitive_personal_data": "sensitive_personal_data_sort"}
 
     def get_queryset(self):
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related("folder", "dpia_screening")
@@ -347,6 +349,17 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 ),
             )
         )
+        if "has_sensitive_personal_data" in self.request.query_params.get(
+            "ordering", ""
+        ):
+            qs = qs.annotate(
+                sensitive_personal_data_sort=Exists(
+                    PersonalData.objects.filter(
+                        processing=OuterRef("pk"), is_sensitive=True
+                    )
+                )
+            )
+        return qs
 
     export_config = {
         "fields": {
