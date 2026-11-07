@@ -115,6 +115,18 @@ IGNORED_PERMISSIONS = Q(content_type__model__in=IGNORED_PERMISSION_MODELS) | Q(
     ]
 )
 
+# Reduced views (see the restricted-view-permissions ADR): `view_<model>` stays the
+# full view, and `view_<model>_restricted` grants the same rows, of which the
+# serializers show less.
+RESTRICTED_VIEW_PERMISSIONS: Final = {"view_user": "view_user_restricted"}
+
+
+def row_view_codenames(view_codename: str) -> list[str]:
+    """The codenames granting the rows `view_codename` grants."""
+    restricted = RESTRICTED_VIEW_PERMISSIONS.get(view_codename)
+    return [view_codename, restricted] if restricted else [view_codename]
+
+
 type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
 """Default permission prefixes available for all models (django-native)."""
 
@@ -1109,7 +1121,14 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name = _("user")
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
-        permissions = (("backup", "backup"), ("restore", "restore"))
+        permissions = (
+            ("backup", "backup"),
+            ("restore", "restore"),
+            (
+                "view_user_restricted",
+                "Can view users without their account details",
+            ),
+        )
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
@@ -1543,16 +1562,44 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return permission
 
     @staticmethod
+    def _resolve_grant_permissions(
+        permission: tuple[PermissionPrefix, type[models.Model]]
+        | Permission
+        | list[Permission],
+    ) -> list[Permission]:
+        """
+        Resolve the permissions any of which grants `permission`.
+
+        A `("view", model)` pair asks which rows are visible, so it also resolves the
+        model's restricted view permission, if any (see `RESTRICTED_VIEW_PERMISSIONS`).
+        A `Permission` stays exact: checking `view_user` itself means the full view.
+        """
+        if isinstance(permission, list):
+            return permission
+        if isinstance(permission, tuple) and permission[0] == "view":
+            codename = f"view_{permission[1].__name__.lower()}"
+            codenames = row_view_codenames(codename)
+            if len(codenames) > 1:
+                permissions = list(Permission.objects.filter(codename__in=codenames))
+                if permissions:
+                    return permissions
+        return [RoleAssignment._resolve_permission(permission)]
+
+    @staticmethod
     def is_access_allowed(
         user: AbstractBaseUser | AnonymousUser,
-        perm: Permission,
+        perm: Permission | list[Permission],
         folder: Folder,
     ) -> bool:
-        """Return `True` if the `user` `User` has the `perm` `Permission` on the `folder` `Folder`, return `False` otherwise."""
+        """Return `True` if the `user` `User` has the `perm` `Permission` (or any of a list of them) on the `folder` `Folder`, return `False` otherwise."""
         from core.models import FilteringLabel
 
         if not isinstance(user, User):
             return False
+
+        grant_permissions = perm if isinstance(perm, list) else [perm]
+        # Alternatives (`_resolve_grant_permissions`) share their model and action.
+        perm = grant_permissions[0]
 
         model = perm.content_type.model_class()
         perm_prefix = perm.codename.split("_")[0]
@@ -1581,7 +1628,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if (not is_folder_focused) and (not folder.is_root()):
                 return False
 
-        grant_folder_set = RoleAssignment._get_grant_folder_set(user, perm)
+        grant_folder_set = RoleAssignment._get_grant_folder_set(user, grant_permissions)
         non_recursive_ids = set(grant_folder_set.non_recursive_grant_folder_ids)
         recursive_ids = set(grant_folder_set.recursive_grant_folder_ids)
 
@@ -1626,7 +1673,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             obj = obj.specific
             model = type(obj)
 
-        permission = RoleAssignment._resolve_permission((perm_prefix, model))
+        permissions = RoleAssignment._resolve_grant_permissions((perm_prefix, model))
 
         # Not all objects (`obj`) have a `folder` field.
         # So we need `get_iam_folder_id` to resolve their folder (IAM folder).
@@ -1639,7 +1686,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         iam_folder = Folder.objects.get(id=iam_scope_folder_id)
 
-        return RoleAssignment.is_access_allowed(user, permission, iam_folder)
+        return RoleAssignment.is_access_allowed(user, permissions, iam_folder)
 
     @staticmethod
     def is_object_readable(
@@ -1710,12 +1757,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def _get_permission_grant_sources(
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
-        permission: Permission | None,
+        permission: Permission | list[Permission] | None,
     ) -> tuple[QuerySet[RoleAssignment], QuerySet[Folder]]:
         """
         Return a tuple containing:
 
-        - `role_assignments`: The `principal`'s role assignments to this `permission`.
+        - `role_assignments`: The `principal`'s role assignments to this `permission` (to any of them, for a list).
         - `default_role_folders`: The folders which grants this `permission` to the user with their `folder.default_role`.
         """
         if isinstance(principal, User):
@@ -1729,7 +1776,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             id__in=RoleAssignment._get_default_role_folder_ids(principal)
         )
 
-        if permission is not None:
+        if isinstance(permission, list):
+            role_assignments = role_assignments.filter(role__permissions__in=permission)
+            default_role_folders = default_role_folders.filter(
+                default_role__permissions__in=permission
+            )
+        elif permission is not None:
             role_assignments = role_assignments.filter(role__permissions=permission)
             default_role_folders = default_role_folders.filter(
                 default_role__permissions=permission
@@ -1740,16 +1792,20 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def _get_grant_folder_set(
         user: AbstractBaseUser | AnonymousUser,
-        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+        permission: tuple[PermissionPrefix, type[models.Model]]
+        | Permission
+        | list[Permission],
     ) -> GrantFolderSet:
         """Return the set of allowed folders IDs (as a `GrantFolderSet`)."""
         if not isinstance(user, User):
             return GrantFolderSet.none()
 
-        permission = RoleAssignment._resolve_permission(permission)
+        permissions = RoleAssignment._resolve_grant_permissions(permission)
 
         role_assignments, default_role_folders = (
-            RoleAssignment._get_permission_grant_sources(user, permission)
+            RoleAssignment._get_permission_grant_sources(
+                user, permissions if len(permissions) > 1 else permissions[0]
+            )
         )
 
         # `.order_by()` disable the model's default ordering (which can cause problems for `.union` (unioned querysets)).
@@ -1833,14 +1889,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def get_allowed_folder_ids(
         user: AbstractBaseUser | AnonymousUser,
-        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+        permission: tuple[PermissionPrefix, type[models.Model]]
+        | Permission
+        | list[Permission],
         *,
         base_folder: Optional[Folder] = None,
     ) -> QuerySet[uuid.UUID]:
         """
         Return the `QuerySet` of allowed folder IDs for a specific permission.
 
-        The `permission` is either a (`perm_prefix`, `model`) pair (e.g. `("view", AppliedControl)`) or a django `Permission`.
+        The `permission` is either a (`perm_prefix`, `model`) pair (e.g. `("view", AppliedControl)`), a django `Permission`, or a list of them of one model and action, any of which grants.
 
         Example:
         ```

@@ -7,8 +7,10 @@ from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.serializers import UserWriteSerializer
+from core.serializers import UserReadSerializer, UserWriteSerializer
 from core.startup import ensure_user_creator_group
+from core.models import Actor
+from core.views import UserFilter
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
@@ -1753,3 +1755,295 @@ class TestGlobalUserCreatorGroup:
         )
         assert placed.status_code == status.HTTP_200_OK, placed.content
         assert analysts.user_set.filter(pk=recruit.pk).exists()
+
+
+@pytest.mark.django_db
+class TestUserAccountFieldsVisibility:
+    """Every domain member sees users through `view_user_restricted`, ambient on
+    the root folder. Account and security fields stay with the user themself and
+    with holders of `view_user` or `change_user` on the user's folder; everyone
+    else gets the directory fields."""
+
+    TARGET_EXPIRY = "2030-01-01"
+    # Spelled out rather than imported, so dropping a field from the serializer's
+    # list fails here.
+    ACCOUNT_FIELDS = {
+        "is_superuser",
+        "has_mfa_enabled",
+        "expiry_date",
+        "keep_local_login",
+        "is_scim_managed",
+        "is_jit_provisioned",
+        "observation",
+    }
+    # Directory only: the ambient baseline role, a domain Reader, the Global
+    # analyst and approver groups and a custom role holding only the restricted
+    # view on Global.
+    VIEWERS = ["ambient", "reader", "global_analyst", "global_approver", "restricted"]
+    # Account fields through `view_user` or `change_user` on Global.
+    ACCOUNT_VIEWERS = [
+        "superuser",
+        "manager",
+        "full_viewer",
+        "change_only",
+        "global_reader",
+        "creator",
+    ]
+
+    @pytest.fixture
+    def env(self, authenticated_client):
+        domain = Folder.objects.create(
+            name="account fields domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+
+        # Sorts before admin@tests.com, so a superuser-first order is visible.
+        target = User.objects.create_user("aaron.target@tests.com")
+        target.expiry_date = self.TARGET_EXPIRY
+        target.keep_local_login = True
+        target.observation = "contractor, leaves in January"
+        target.save()
+        # Users live in Global, which is where a custom user manager role applies.
+        assert target.folder_id == Folder.get_root_folder().id
+        # Sorts first by email, so an order that drops `-is_active` shows.
+        User.objects.create_user("aardvark.inactive@tests.com", is_active=False)
+
+        root = Folder.get_root_folder()
+
+        # The Auditee role holds no user permission: its view of users is ambient.
+        ambient = User.objects.create_user("ambient@tests.com")
+        auditees = UserGroup.objects.get(name="BI-UG-ADE", folder=domain)
+        assert not auditees.roleassignment_set.filter(
+            role__permissions__codename__in=["view_user", "view_user_restricted"]
+        ).exists()
+        auditees.user_set.add(ambient)
+
+        reader = User.objects.create_user("reader@tests.com")
+        UserGroup.objects.get(name="BI-UG-AUD", folder=domain).user_set.add(reader)
+
+        global_analyst = User.objects.create_user("global.analyst@tests.com")
+        UserGroup.objects.get(name="BI-UG-ANA", folder=root).user_set.add(
+            global_analyst
+        )
+        global_approver = User.objects.create_user("global.approver@tests.com")
+        UserGroup.objects.get(name="BI-UG-GAP", folder=root).user_set.add(
+            global_approver
+        )
+        restricted = _make_user_manager(
+            "restricted@tests.com", ["view_user_restricted"]
+        )
+
+        global_reader = User.objects.create_user("global.reader@tests.com")
+        UserGroup.objects.get(name="BI-UG-GAD", folder=root).user_set.add(global_reader)
+        ensure_user_creator_group()
+        creator = User.objects.create_user("creator@tests.com")
+        UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
+        # Not superusers: account access from view_user, change_user, or both.
+        manager = _make_user_manager("manager@tests.com", ["view_user", "change_user"])
+        full_viewer = _make_user_manager("full.viewer@tests.com", ["view_user"])
+        change_only = _make_user_manager(
+            "change.only@tests.com", ["view_user_restricted", "change_user"]
+        )
+
+        users = {
+            "ambient": ambient,
+            "reader": reader,
+            "global_analyst": global_analyst,
+            "global_approver": global_approver,
+            "restricted": restricted,
+        }
+        account_viewers = {
+            "manager": manager,
+            "full_viewer": full_viewer,
+            "change_only": change_only,
+            "global_reader": global_reader,
+            "creator": creator,
+        }
+        return SimpleNamespace(
+            target=target,
+            admin_client=authenticated_client,
+            admins={
+                "superuser": authenticated_client,
+                **{name: _client_for(user) for name, user in account_viewers.items()},
+            },
+            clients={name: _client_for(user) for name, user in users.items()},
+            users=users,
+        )
+
+    @staticmethod
+    def _rows(response):
+        assert response.status_code == status.HTTP_200_OK, response.content
+        data = response.data
+        return data["results"] if isinstance(data, dict) else data
+
+    def _payloads(self, client, user):
+        """The user as served by the list, the detail and the edit-form read."""
+        listed = {
+            row["email"]: row for row in self._rows(client.get(reverse(API_ENDPOINT)))
+        }
+        detail = client.get(reverse("users-detail", args=[user.id]))
+        write = client.get(reverse("users-object", args=[user.id]))
+        assert detail.status_code == status.HTTP_200_OK, detail.content
+        assert write.status_code == status.HTTP_200_OK, write.content
+        return [listed[user.email], detail.data, write.data]
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_viewer_gets_directory_fields_only(self, env, viewer):
+        for payload in self._payloads(env.clients[viewer], env.target):
+            assert payload["email"] == env.target.email
+            assert payload["is_active"] is True
+            assert not self.ACCOUNT_FIELDS & set(payload)
+
+        write = self._payloads(env.clients[viewer], env.target)[2]
+        assert "user_groups" not in write and "is_local" not in write
+
+    @pytest.mark.parametrize("admin", ACCOUNT_VIEWERS)
+    def test_admin_gets_account_fields(self, env, admin):
+        payloads = self._payloads(env.admins[admin], env.target)
+        assert "is_local" in payloads[2] and "user_groups" in payloads[2]
+        for payload in payloads:
+            assert self.ACCOUNT_FIELDS <= set(payload)
+            assert payload["expiry_date"] == self.TARGET_EXPIRY
+            assert payload["keep_local_login"] is True
+            assert payload["observation"] == "contractor, leaves in January"
+            assert payload["is_superuser"] is False
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_self_gets_own_account_fields(self, env, viewer):
+        user = env.users[viewer]
+        payloads = self._payloads(env.clients[viewer], user)
+        assert "is_local" in payloads[2] and "user_groups" in payloads[2]
+        for payload in payloads:
+            assert self.ACCOUNT_FIELDS <= set(payload)
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    @pytest.mark.parametrize(
+        "query",
+        [
+            "keep_local_login=true",
+            f"expiry_date={TARGET_EXPIRY}",
+            "expiry_date__gte=2029-12-31",
+            "expiry_date__lt=2031-01-01",
+            "expiry_date__isnull=false",
+        ],
+    )
+    def test_account_filters_match_administered_users_only(self, env, viewer, query):
+        url = f"{reverse(API_ENDPOINT)}?{query}"
+        assert env.target.email not in {
+            row["email"] for row in self._rows(env.clients[viewer].get(url))
+        }
+        for admin_client in env.admins.values():
+            assert env.target.email in {
+                row["email"] for row in self._rows(admin_client.get(url))
+            }
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_account_filter_matches_own_record(self, env, viewer):
+        user = env.users[viewer]
+        user.keep_local_login = True
+        user.save()
+        url = f"{reverse(API_ENDPOINT)}?keep_local_login=true"
+        assert user.email in {
+            row["email"] for row in self._rows(env.clients[viewer].get(url))
+        }
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_viewer_order_reveals_no_account_field(self, env, viewer):
+        client = env.clients[viewer]
+
+        def emails(query=""):
+            return [
+                row["email"]
+                for row in self._rows(client.get(f"{reverse(API_ENDPOINT)}?{query}"))
+            ]
+
+        rows = self._rows(client.get(reverse(API_ENDPOINT)))
+        default = [row["email"] for row in rows]
+        # Superusers are not listed first.
+        assert default == [
+            row["email"]
+            for row in sorted(rows, key=lambda r: (not r["is_active"], r["email"]))
+        ]
+        for field in ("is_superuser", "expiry_date", "keep_local_login"):
+            assert emails(f"ordering={field}") == default
+            assert emails(f"ordering=-{field}") == default
+
+    def test_restricted_view_grants_rows(self, env):
+        client = env.clients["restricted"]
+        listed = self._rows(client.get(reverse(API_ENDPOINT)))
+        assert env.target.email in {row["email"] for row in listed}
+        detail = client.get(reverse("users-detail", args=[env.target.id]))
+        assert detail.status_code == status.HTTP_200_OK
+        found = self._rows(client.get(f"{reverse('users-autocomplete')}?search=aaron"))
+        assert env.target.email in {row["email"] for row in found}
+        actors = self._rows(client.get(reverse("actors-list")))
+        assert str(Actor.objects.get(user=env.target).id) in {
+            str(row["id"]) for row in actors
+        }
+
+        # Without it, other users stay out of sight.
+        nobody = _client_for(User.objects.create_user("nobody@tests.com"))
+        listed = self._rows(nobody.get(reverse(API_ENDPOINT)))
+        assert env.target.email not in {row["email"] for row in listed}
+        detail = nobody.get(reverse("users-detail", args=[env.target.id]))
+        assert detail.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_kernel_counts_restricted_view_for_rows_only(self, env):
+        user = env.users["restricted"]
+        root = Folder.get_root_folder()
+        view_user = Permission.objects.get(codename="view_user")
+
+        assert env.target.id in set(RoleAssignment.get_viewable_object_ids(user, User))
+        assert RoleAssignment.is_object_readable(user, User, env.target.id)
+        # Asked for by permission, `view_user` means the full view.
+        assert root.id not in set(
+            RoleAssignment.get_allowed_folder_ids(user, view_user)
+        )
+        assert not RoleAssignment.is_access_allowed(user, view_user, root)
+
+    def test_baseline_role_holds_the_restricted_view(self):
+        codenames = set(
+            Role.objects.get(name="BI-RL-BSL").permissions.values_list(
+                "codename", flat=True
+            )
+        )
+        assert "view_user_restricted" in codenames
+        assert "view_user" not in codenames
+
+    @pytest.mark.parametrize(
+        "serializer_class", [UserReadSerializer, UserWriteSerializer]
+    )
+    def test_hidden_without_request(self, env, serializer_class):
+        assert not self.ACCOUNT_FIELDS & set(serializer_class(env.target).data)
+
+    def test_account_filter_without_request_matches_nothing(self, env):
+        filterset = UserFilter(
+            data={"keep_local_login": True}, queryset=User.objects.all()
+        )
+        assert not filterset.qs.exists()
+
+    def test_picker_skips_account_lookup(self, env):
+        # Pickers query on every keystroke and don't order on account fields.
+        with patch("core.views.user_account_folder_ids", side_effect=AssertionError):
+            found = self._rows(
+                env.admin_client.get(f"{reverse('users-autocomplete')}?search=aaron")
+            )
+        assert env.target.email in {row["email"] for row in found}
+
+    def test_admin_order_keeps_account_fields(self, env):
+        def emails(query=""):
+            return [
+                row["email"]
+                for row in self._rows(
+                    env.admin_client.get(f"{reverse(API_ENDPOINT)}?{query}")
+                )
+            ]
+
+        assert emails()[0] == "admin@tests.com"
+        assert emails("ordering=is_superuser")[-1] == "admin@tests.com"

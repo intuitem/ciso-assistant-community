@@ -8,6 +8,7 @@ import json
 import mimetypes
 import re
 from django_filters.filterset import filterset_factory
+from django_filters.constants import EMPTY_VALUES
 from django_filters.utils import try_dbfield
 from django import forms
 from django_filters.widgets import QueryArrayWidget
@@ -136,7 +137,15 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from iam.models import (
+    Folder,
+    IdPGroup,
+    Permission,
+    RoleAssignment,
+    User,
+    UserGroup,
+    row_view_codenames,
+)
 from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
@@ -199,7 +208,11 @@ from core.models import (
     rescale_score,
 )
 from core.pagination import CustomLimitOffsetPagination
-from core.serializers import ComplianceAssessmentReadSerializer
+from core.serializers import (
+    USER_ACCOUNT_FIELDS,
+    ComplianceAssessmentReadSerializer,
+    user_account_folder_ids,
+)
 from core.utils import (
     build_answers_dict,
     escape_excel_formula,
@@ -1621,7 +1634,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         view_all_role_assignments = role_assignments.filter(
             perimeter_folders=root_folder,
-            role__permissions__codename=perm_codename,
+            role__permissions__codename__in=row_view_codenames(perm_codename),
             is_recursive=True,
         )
         can_user_view_all = view_all_role_assignments.exists()
@@ -1907,12 +1920,15 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         folder = Folder.get_folder(obj)
         if folder is None:
             return False
-        try:
-            perm = Permission.objects.get(codename=f"view_{obj._meta.model_name}")
-        except Permission.DoesNotExist:
+        perms = list(
+            Permission.objects.filter(
+                codename__in=row_view_codenames(f"view_{obj._meta.model_name}")
+            )
+        )
+        if not perms:
             return False
         return RoleAssignment.is_access_allowed(
-            user=self.request.user, perm=perm, folder=folder
+            user=self.request.user, perm=perms, folder=folder
         )
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
@@ -8633,6 +8649,23 @@ class UserFilter(GenericFilterSet):
     # Add-only member pickers: drop users already in the given group.
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
 
+    def filter_queryset(self, queryset):
+        # Account fields are only serialized to who may see them (see
+        # USER_ACCOUNT_FIELDS); matching on them for anyone else would give the
+        # values away, so while any of their lookups is set, other rows never match.
+        if any(
+            self.form.cleaned_data.get(name) not in EMPTY_VALUES
+            for name, f in self.filters.items()
+            if f.field_name in USER_ACCOUNT_FIELDS
+        ):
+            if self.request is None:
+                return queryset.none()
+            queryset = queryset.filter(
+                Q(folder_id__in=user_account_folder_ids(self.request))
+                | Q(pk=self.request.user.pk)
+            )
+        return super().filter_queryset(queryset)
+
     def filter_exclude_user_groups(self, queryset, name, value):
         # Only honour the exclusion for a group the caller can actually read, so
         # this endpoint can't be used to infer membership of groups they can't see.
@@ -9011,10 +9044,67 @@ class UserViewSet(BaseModelViewSet):
     """
 
     model = User
-    ordering = ["-is_active", "-is_superuser", "email", "id"]
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
     autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
+
+    # Sorting on an account field (or listing superusers first) gives its values
+    # away, so it is only offered to whoever may see every listed user's account.
+    DIRECTORY_ORDERING_FIELDS = [
+        "id",
+        "created_at",
+        "updated_at",
+        "folder",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "is_third_party",
+        "date_joined",
+    ]
+
+    def filter_queryset(self, queryset):
+        # Checked against the rows about to be listed. Single-object actions don't
+        # sort and pickers don't need superusers first, so both skip the query and
+        # get the directory ordering.
+        if not self.detail and self.action != "autocomplete":
+            self._all_accounts_visible = (
+                not queryset.exclude(
+                    folder_id__in=user_account_folder_ids(self.request)
+                )
+                .exclude(pk=self.request.user.pk)
+                .exists()
+            )
+        return super().filter_queryset(queryset)
+
+    def _sees_every_account(self) -> bool:
+        if getattr(self, "request", None) is None:
+            # Schema generation introspects the ordering without a request.
+            return True
+        return getattr(self, "_all_accounts_visible", False)
+
+    @property
+    def ordering(self):
+        if self._sees_every_account():
+            return ["-is_active", "-is_superuser", "email", "id"]
+        return ["-is_active", "email", "id"]
+
+    @property
+    def ordering_fields(self):
+        if self._sees_every_account():
+            return "__all__"
+        return self.DIRECTORY_ORDERING_FIELDS
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        # The base action builds the serializer without context; the account
+        # fields need the request to decide what this requester may see.
+        serializer_class = self.get_serializer_class(action="update")
+        return Response(
+            serializer_class(
+                self.get_object(), context=self.get_serializer_context()
+            ).data
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get language choices")

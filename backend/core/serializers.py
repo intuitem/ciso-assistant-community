@@ -2589,7 +2589,66 @@ class TeamReadSerializer(BaseModelSerializer):
         ]
 
 
-class UserReadSerializer(BaseModelSerializer):
+# Account and security state of a user. Every domain member lists users through
+# `view_user_restricted`, ambient on the root folder; these fields are for the user
+# themself and for whoever holds `view_user` or `change_user` on the user's folder
+# (see the restricted-view-permissions ADR).
+USER_ACCOUNT_FIELDS = (
+    "is_superuser",
+    "has_mfa_enabled",
+    "expiry_date",
+    "keep_local_login",
+    "is_scim_managed",
+    "is_jit_provisioned",
+    "observation",
+)
+
+
+def user_account_folder_ids(request) -> models.QuerySet:
+    """Folders where the requester may see users' account fields, as a subquery
+    looked up once per request. `view_user` is passed as a permission, not as a
+    `("view", User)` pair, so that its restricted counterpart doesn't count."""
+    folder_ids = getattr(request, "_user_account_folder_ids", None)
+    if folder_ids is None:
+        folder_ids = RoleAssignment.get_allowed_folder_ids(
+            request.user,
+            list(
+                Permission.objects.filter(
+                    codename__in=("view_user", "change_user"),
+                    content_type__app_label=User._meta.app_label,
+                    content_type__model=User._meta.model_name,
+                )
+            ),
+        )
+        request._user_account_folder_ids = folder_ids
+    return folder_ids
+
+
+def can_see_user_account(request, user: User) -> bool:
+    if user.pk == request.user.pk:
+        return True
+    # Asked once per serialized row, so tested in memory.
+    folder_ids = getattr(request, "_user_account_folder_id_set", None)
+    if folder_ids is None:
+        folder_ids = set(user_account_folder_ids(request))
+        request._user_account_folder_id_set = folder_ids
+    return user.folder_id in folder_ids
+
+
+class UserAccountFieldsMixin:
+    account_fields = USER_ACCOUNT_FIELDS
+
+    def hide_account_fields(self, instance, data: dict) -> dict:
+        """Drop the account fields unless the requester may see them. Without a
+        request, nobody may."""
+        request = self.context.get("request")
+        if request is None or not can_see_user_account(request, instance):
+            for field in self.account_fields:
+                data.pop(field, None)
+        return data
+
+
+class UserReadSerializer(UserAccountFieldsMixin, BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
@@ -2601,6 +2660,9 @@ class UserReadSerializer(BaseModelSerializer):
         # code from the write serializer instead.
         code = obj.language_code()
         return dict(settings.LANGUAGES).get(code, code)
+
+    def to_representation(self, instance):
+        return self.hide_account_fields(instance, super().to_representation(instance))
 
     class Meta:
         model = User
@@ -2640,7 +2702,12 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
         ]
 
 
-class UserWriteSerializer(BaseModelSerializer):
+class UserWriteSerializer(UserAccountFieldsMixin, BaseModelSerializer):
+    # The edit form's state. `user_groups` is not the directory field here: the
+    # `object` action reads it through the viewset's visibility-filtered prefetch,
+    # but a write drops that prefetch and returns the raw membership.
+    account_fields = (*USER_ACCOUNT_FIELDS, "is_local", "user_groups")
+
     is_local = serializers.BooleanField(required=False)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
     # Deployment-owned bootstrap flag (CISO_ASSISTANT_SUPERUSER_EMAIL,
@@ -3044,7 +3111,7 @@ class UserWriteSerializer(BaseModelSerializer):
         # and admin-account guards will refuse before the user hits a 403.
         data["is_scim_managed"] = instance.is_scim_managed
         data["is_jit_provisioned"] = instance.is_jit_provisioned
-        return data
+        return self.hide_account_fields(instance, data)
 
     def create(self, validated_data):
         send_mail = mailer.mailing_enabled()
