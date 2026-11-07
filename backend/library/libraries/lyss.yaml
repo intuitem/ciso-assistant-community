@@ -3,8 +3,8 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:lyss:risk:library:lyss
 locale: en
 ref_id: LYSS
-name: "LYSS \u2014 Lyaazale Switch Security (draft 0.5.0)"
-description: 'LYSS (Lyaazale Switch Security) specification 0.5.0-draft (draft): vendor-neutral
+name: "LYSS \u2014 Lyaazale Switch Security (draft 0.6.0)"
+description: 'LYSS (Lyaazale Switch Security) specification 0.6.0-draft (draft): vendor-neutral
   security controls for managed network switches, in three cumulative conformance
   levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is one control (LYSS-<DOMAIN>-<NNN>);
   its annotation gives the rationale, vendor-neutral test procedure and informative
@@ -13,16 +13,16 @@ description: 'LYSS (Lyaazale Switch Security) specification 0.5.0-draft (draft):
   change before LYSS 1.0. Author: Mouad Lyaazale. Generated from spec/lyss-spec.yaml
   by tools/build_ciso_library.py in the LYSS repository (https://github.com/lyss-project/lyss).'
 copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
-version: 50000
-publication_date: 2026-11-05
+version: 60000
+publication_date: 2026-11-07
 provider: Mouad Lyaazale
 packager: LYSS project
 objects:
   frameworks:
   - urn: urn:lyss:risk:framework:lyss
     ref_id: LYSS
-    name: "LYSS \u2014 Lyaazale Switch Security (draft 0.5.0)"
-    description: 'LYSS (Lyaazale Switch Security) specification 0.5.0-draft (draft):
+    name: "LYSS \u2014 Lyaazale Switch Security (draft 0.6.0)"
+    description: 'LYSS (Lyaazale Switch Security) specification 0.6.0-draft (draft):
       vendor-neutral security controls for managed network switches, in three cumulative
       conformance levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is
       one control (LYSS-<DOMAIN>-<NNN>); its annotation gives the rationale, vendor-neutral
@@ -712,81 +712,133 @@ objects:
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-020
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-020
       name: DHCP snooping is enabled on user VLANs
-      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
-        rationale and test procedure are not written yet.
+      description: DHCP snooping is enabled globally and on every VLAN used by an
+        access port, so that DHCP server messages are only accepted from trusted (uplink)
+        ports.
+      annotation: 'Rationale: A rogue DHCP server on a user port can hand out its
+        own gateway and DNS server and intercept traffic; DHCP snooping drops server
+        messages from untrusted ports and builds the binding table that ARP inspection
+        and IP source guard rely on.
 
 
-        Informative references: ISO/IEC 27001:2022 A.8.20.'
+        Test procedure: Fail if DHCP snooping is not enabled globally, or if a VLAN
+        used by an access port is not in the snooping VLAN list. Pass if it is enabled
+        and every such VLAN is covered (on platforms where snooping applies to the
+        whole bridge, the bridge setting covers every access port). Not applicable
+        without access ports.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.8.22; NIST SP 800-53
+        r5 SC-7, SI-4.'
       typical_evidence: '- Running configuration of the switch
 
         - LYSS assessment report showing the verdict and evidence for LYSS-ACC-020'
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-021
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-021
       name: Dynamic ARP inspection is enabled on user VLANs
-      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
-        rationale and test procedure are not written yet.
+      description: ARP packets received on access ports are checked against the DHCP
+        snooping bindings (or static ARP access lists) on every VLAN used by an access
+        port.
+      annotation: 'Rationale: Without ARP inspection, any user device can claim the
+        gateway''s IP address (ARP spoofing) and read or alter the traffic of every
+        host in the VLAN.
 
 
-        Informative references: ISO/IEC 27001:2022 A.8.20.'
+        Test procedure: Fail if a VLAN used by an access port is not covered by dynamic
+        ARP inspection, or if the platform offers no ARP inspection (the report names
+        the platform limit). Pass if every such VLAN is covered. Not applicable without
+        access ports.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.8.22; NIST SP 800-53
+        r5 SC-7, SI-4.'
       typical_evidence: '- Running configuration of the switch
 
         - LYSS assessment report showing the verdict and evidence for LYSS-ACC-021'
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-022
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-022
       name: Access ports require 802.1X or MAC authentication
-      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
-        rationale and test procedure are not written yet.
+      description: Every access port authenticates the connected device (IEEE 802.1X,
+        or MAC authentication bypass for devices without a supplicant) before granting
+        network access.
+      annotation: 'Rationale: Without port authentication, anyone who can plug a cable
+        into a wall socket is on the internal network.
 
 
-        Informative references: ISO/IEC 27001:2022 A.8.20, A.5.15; CIS Controls v8
-        13.9.'
+        Test procedure: Fail if port authentication is not enabled globally where
+        the platform requires it, or if an access port has no 802.1X / MAC authentication
+        setting. Pass if every access port has one. Not applicable without access
+        ports.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.5.15; NIST SP 800-53
+        r5 IA-3, AC-3; CIS Controls v8 13.9.'
       typical_evidence: '- Running configuration of the switch
 
         - LYSS assessment report showing the verdict and evidence for LYSS-ACC-022'
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-023
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-023
-      name: Storm control limits broadcast/multicast on access ports
-      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
-        rationale and test procedure are not written yet.
+      name: Storm control limits broadcast traffic on access ports
+      description: Every access port limits the rate of broadcast traffic it accepts
+        (storm control).
+      annotation: 'Rationale: A loop or a misbehaving device on one user port can
+        flood broadcast traffic to every port of the VLAN and take the network down;
+        a rate limit contains it on the offending port.
 
 
-        Informative references: ISO/IEC 27001:2022 A.8.20.'
+        Test procedure: Fail if an access port has no broadcast rate limit. Pass if
+        every access port has one. Unknown when the platform sets it on the switch
+        chip and the setting cannot be read. Not applicable without access ports.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.8.6; NIST SP 800-53 r5
+        SC-5.'
       typical_evidence: '- Running configuration of the switch
 
         - LYSS assessment report showing the verdict and evidence for LYSS-ACC-023'
       implementation_groups:
       - L3
     - urn: urn:lyss:risk:req_node:lyss:lyss-acc-024
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:lyss:risk:req_node:lyss:l3.acc
       ref_id: LYSS-ACC-024
-      name: Neighbor discovery (CDP/LLDP) is disabled on untrusted access ports
-      annotation: 'Draft control (LYSS specification 0.5.0-draft): requirement text,
-        rationale and test procedure are not written yet.
+      name: Neighbor discovery (CDP/LLDP) is not sent on untrusted access ports
+      description: Access ports do not transmit CDP or LLDP advertisements, except
+        ports that serve IP phones (a voice VLAN), which need LLDP-MED or CDP.
+      annotation: 'Rationale: CDP and LLDP advertisements tell anyone on a user port
+        the switch name, model, software version, management address and VLANs, which
+        helps an attacker choose an exploit.
 
 
-        Informative references: ISO/IEC 27001:2022 A.8.20.'
+        Test procedure: Pass if neighbor discovery transmission is disabled globally,
+        or on every access port without a voice VLAN, for each protocol the platform
+        sends by default or that is enabled. Fail otherwise. Not applicable without
+        access ports.
+
+
+        Informative references: ISO/IEC 27001:2022 A.8.20, A.8.9; NIST SP 800-53 r5
+        CM-7; CIS Controls v8 4.8.'
       typical_evidence: '- Running configuration of the switch
 
         - LYSS assessment report showing the verdict and evidence for LYSS-ACC-024'
