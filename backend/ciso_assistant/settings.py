@@ -896,6 +896,38 @@ if not IDP_OIDC_PRIVATE_KEY:
                 "could not persist the OIDC signing key, keeping it in memory: %s", exc
             )
 
+IDP_OIDC_ADAPTER = "iam.oidc_adapter.CISOOIDCAdapter"
+
+# OAuth Dynamic Client Registration (RFC 7591), for MCP clients such as Copilot
+# Studio. Off by default: once on, anyone can register a client.
+OAUTH_DCR_ENABLED = os.environ.get("OAUTH_DCR_ENABLED", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+IDP_OIDC_DCR_ENABLED = OAUTH_DCR_ENABLED
+# Copilot Studio cannot present an initial access token.
+IDP_OIDC_DCR_REQUIRES_INITIAL_ACCESS_TOKEN = False
+OAUTH_DCR_ALLOWED_REDIRECT_HOSTS = [
+    host.strip().lower()
+    for host in os.environ.get("OAUTH_DCR_ALLOWED_REDIRECT_HOSTS", "").split(",")
+    if host.strip()
+]
+
+# allauth issues a new refresh token at each refresh, so this is an idle limit:
+# an app unused for this many days must sign in again. 0 = never expires.
+OAUTH_REFRESH_TOKEN_IDLE_DAYS = int(
+    os.environ.get("OAUTH_REFRESH_TOKEN_IDLE_DAYS", "30")
+)
+IDP_OIDC_REFRESH_TOKEN_EXPIRES_IN = OAUTH_REFRESH_TOKEN_IDLE_DAYS * 24 * 3600 or None
+
+# Per-connection budget on the MCP server (backend-mcp), on top of the per-call
+# caps in ca_mcp: an agent could otherwise page through everything. 0 = no limit.
+MCP_MAX_CALLS_PER_MINUTE = int(os.environ.get("MCP_MAX_CALLS_PER_MINUTE", "60"))
+MCP_MAX_RESPONSE_CHARS_PER_HOUR = int(
+    os.environ.get("MCP_MAX_RESPONSE_CHARS_PER_HOUR", "2000000")
+)
+
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
 MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev

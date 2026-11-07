@@ -1,0 +1,86 @@
+{% load i18n %}{% get_current_language as LANG %}<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Authorize access" %} - CISO Assistant</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f4f7; color: #1f2937; margin: 0; }
+    .card { max-width: 480px; margin: 8vh auto; background: #fff; border-radius: 12px;
+            padding: 2rem; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+    h1 { font-size: 1.25rem; margin: 0 0 .5rem; }
+    .who { color: #6b7280; margin: 0 0 1.5rem; }
+    .warning { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px;
+               padding: .75rem 1rem; margin-bottom: 1.5rem; font-size: .9rem; }
+    .warning ul { margin: .5rem 0 0; padding-left: 1.2rem; word-break: break-all; }
+    form ul { list-style: none; padding: 0; }
+    fieldset { border: 1px solid #d1d5db; border-radius: 8px; padding: .75rem 1rem; }
+    legend { font-weight: 600; padding: 0 .25rem; }
+    .profile { display: flex; gap: .6rem; align-items: flex-start; padding: .5rem 0; }
+    .profile input { margin-top: .3rem; }
+    .profile p { margin: .15rem 0 0; font-size: .9rem; color: #4b5563; }
+    .errors { color: #b91c1c; font-size: .9rem; }
+    .note { margin: .75rem 0 0; font-size: .85rem; color: #6b7280; }
+    .actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
+    button { border-radius: 8px; padding: .6rem 1.2rem; font-size: 1rem; cursor: pointer; }
+    .primary { background: #7c3aed; color: #fff; border: none; }
+    .secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>{% blocktranslate with name=client.name %}{{ name }} wants to access CISO Assistant{% endblocktranslate %}</h1>
+    <p class="who">{% blocktranslate with email=request.user.email %}Signed in as {{ email }}{% endblocktranslate %}</p>
+    {% if self_registered %}
+      <div class="warning">
+        <strong>{% translate "You are adding a new app." %}</strong>
+        {% translate "Your administrator has not checked it. Only approve if you started this connection and you trust where it sends you back:" %}
+        <ul>{% for uri in client.get_redirect_uris %}<li><code>{{ uri }}</code></li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+    <form method="post" action="{% url 'idp:oidc:authorization' %}">
+      {% csrf_token %}
+      {% if form.mcp_request %}
+        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+        {% if form.email %}<p>{{ form.email.label_tag }} {{ form.email }}</p>{% endif %}
+        <fieldset>
+          <legend>{% translate "What this app may do" %}</legend>
+          {% if profiles|length == 1 %}
+            {% with item=profiles.0 %}
+              <input type="hidden" name="profile" value="{{ item.profile.pk }}">
+              <div class="profile">
+                <div>
+                  <strong>{{ item.profile.name }}</strong>
+                  <p>{{ item.summary }}</p>
+                  {% if item.profile.description %}<p>{{ item.profile.description }}</p>{% endif %}
+                </div>
+              </div>
+            {% endwith %}
+          {% else %}
+            {% for item in profiles %}
+              <label class="profile">
+                <input type="radio" name="profile" value="{{ item.profile.pk }}"{% if item.checked %} checked{% endif %} required>
+                <div>
+                  <strong>{{ item.profile.name }}</strong>
+                  <p>{{ item.summary }}</p>
+                  {% if item.profile.description %}<p>{{ item.profile.description }}</p>{% endif %}
+                </div>
+              </label>
+            {% endfor %}
+          {% endif %}
+          {% if offers_writes %}
+            <p class="note">{% translate "Creating, changing and deleting data only work if your administrator has turned on the write tools." %}</p>
+          {% endif %}
+        </fieldset>
+        {% if form.errors %}<div class="errors">{{ form.non_field_errors }}{{ form.profile.errors }}</div>{% endif %}
+      {% else %}
+        {{ form }}
+      {% endif %}
+      <div class="actions">
+        <button type="submit" name="action" value="cancel" class="secondary" formnovalidate>{% translate "Cancel" %}</button>
+        <button type="submit" name="action" value="grant" class="primary">{% translate "Authorize" %}</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

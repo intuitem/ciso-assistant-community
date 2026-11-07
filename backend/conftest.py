@@ -9,3 +9,29 @@ def _cold_feature_flags_cache():
 
     clear_feature_flags_cache()
     yield
+
+
+@pytest.fixture
+def mcp_on(db):
+    from global_settings.models import GlobalSettings
+    from global_settings.utils import clear_feature_flags_cache
+
+    settings_row, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+    )
+    settings_row.value = {**(settings_row.value or {}), "mcp": True}
+    settings_row.save()
+    clear_feature_flags_cache()
+
+
+@pytest.fixture
+def app_profile(db):
+    """A profile for the connections a test makes: a transactional test flushes
+    the built-in ones startup creates."""
+    from iam.models import ConnectionProfile
+
+    profile, _ = ConnectionProfile.objects.get_or_create(
+        name="Read, create and update",
+        defaults={"can_create": True, "can_update": True, "is_default": True},
+    )
+    return profile

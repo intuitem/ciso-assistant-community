@@ -169,6 +169,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-robot',
 					href: '/service-accounts',
 					adminOnly: true
+				},
+				{
+					name: 'connectedApps',
+					fa_icon: 'fa-solid fa-plug',
+					href: '/connected-apps',
+					adminOnly: true
 				}
 			]
 		},

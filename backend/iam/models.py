@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
+from django.core.cache import cache
 from django.utils import timezone
 from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
@@ -927,6 +928,7 @@ class UserManager(BaseUserManager):
                 observation=extra_fields.get("observation"),
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
+                can_connect_apps=extra_fields.get("can_connect_apps", False),
                 expiry_date=extra_fields.get("expiry_date"),
                 is_jit_provisioned=extra_fields.get("is_jit_provisioned", False),
             ),
@@ -1025,6 +1027,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         default=False,
         help_text=_(
             "If True allow the user to log in using the normal login form even with SSO forced."
+        ),
+    )
+    can_connect_apps = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True allow the user to connect AI apps (MCP) with their account."
         ),
     )
     is_third_party = models.BooleanField(default=False)
@@ -2500,6 +2508,135 @@ class ServiceAccount(AbstractBaseModel):
         return self.name
 
 
+class ConnectedAppUse(models.Model):
+    """When a user authorized an app, and when its tokens were last accepted.
+
+    Kept apart from allauth's Token rows: access tokens are replaced every hour,
+    and the date would go with them.
+    """
+
+    THROTTLE = timedelta(minutes=1)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="connected_app_uses"
+    )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    authorized_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "client"], name="unique_connected_app_use"
+            )
+        ]
+
+    @classmethod
+    def record(cls, user_id, client_id) -> None:
+        # this runs on every call: within THROTTLE, the cache answers and the
+        # database is not touched
+        key = f"connected-app-use:{user_id}:{client_id}"
+        if not cache.add(key, True, cls.THROTTLE.total_seconds()):
+            return
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"last_used_at": timezone.now()},
+        )
+
+    @classmethod
+    def record_authorization(cls, user_id, client_id) -> None:
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"authorized_at": timezone.now()},
+        )
+
+
+class ConnectionProfile(models.Model):
+    """What an AI app may do once connected: read always, plus create and update
+    (which includes delete). It only narrows: the app never gets more than the
+    user who connects it."""
+
+    # (name, can_create, can_update, is_default): one per combination
+    BUILTIN = (
+        ("Read only", False, False, True),
+        ("Read and create", True, False, False),
+        ("Read and update", False, True, False),
+        ("Read, create and update", True, True, False),
+    )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, default="")
+    can_create = models.BooleanField(default=False)
+    can_update = models.BooleanField(default=False)
+    builtin = models.BooleanField(default=False)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def actions(self) -> list[str]:
+        return (
+            ["read"]
+            + (["create"] if self.can_create else [])
+            + (["update"] if self.can_update else [])
+        )
+
+    @property
+    def rank(self) -> tuple[int, bool]:
+        return (self.can_create + self.can_update, self.can_update)
+
+    @classmethod
+    def default(cls) -> "ConnectionProfile | None":
+        return cls.objects.filter(is_default=True).first()
+
+    @classmethod
+    def sync_builtin(cls) -> None:
+        for name, can_create, can_update, is_default in cls.BUILTIN:
+            cls.objects.update_or_create(
+                name=name,
+                defaults={
+                    "can_create": can_create,
+                    "can_update": can_update,
+                    "is_default": is_default,
+                    "builtin": True,
+                },
+            )
+
+
+class AppGrant(models.Model):
+    """Which profile a connection uses. Keyed by user and client, not by token:
+    allauth issues new tokens at each refresh and copies no data across."""
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="app_grants")
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    # deleting a profile must go through revoking its connections, or their
+    # tokens would outlive the grant
+    profile = models.ForeignKey(
+        ConnectionProfile, on_delete=models.PROTECT, related_name="grants"
+    )
+    granted_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "client"], name="unique_app_grant")
+        ]
+
+
 common_exclude = ["created_at", "updated_at"]
 # `preferences` is personal UI state (language, theme, date format, hidden
 # modules) with no security meaning, and every toggle would otherwise log the
@@ -2528,6 +2665,7 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(Role, exclude_fields=common_exclude)
+auditlog.register(ConnectionProfile, exclude_fields=common_exclude)
 auditlog.register(UserGroup, exclude_fields=common_exclude)
 auditlog.register(PersonalAccessToken)
 auditlog.register(SCIMToken)
@@ -2542,3 +2680,31 @@ def _skip_builtin_rbac(sender, instance, **kwargs):
 
 for _rbac_model in (RoleAssignment, Role, UserGroup):
     pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)
+
+
+_APP_ACCESS_FIELDS = ("can_connect_apps", "is_active")
+
+
+def _note_lost_app_access(sender, instance, update_fields=None, **kwargs):
+    # unticking the flag or deactivating is a decision about this person: their
+    # connections must not come back if it is reverted, so the tokens go
+    if instance._state.adding or (
+        update_fields is not None and not set(update_fields) & set(_APP_ACCESS_FIELDS)
+    ):
+        return
+    before = User.objects.filter(pk=instance.pk).values(*_APP_ACCESS_FIELDS).first()
+    instance._lost_app_access = bool(before) and any(
+        before[field] and not getattr(instance, field) for field in _APP_ACCESS_FIELDS
+    )
+
+
+def _revoke_lost_app_access(sender, instance, **kwargs):
+    if getattr(instance, "_lost_app_access", False):
+        from iam.mcp_access import revoke_app_tokens
+
+        instance._lost_app_access = False
+        revoke_app_tokens([instance.pk])
+
+
+models.signals.pre_save.connect(_note_lost_app_access, sender=User)
+models.signals.post_save.connect(_revoke_lost_app_access, sender=User)

@@ -483,8 +483,8 @@ only through the proxy.
 
 {% hint style="info" %}
 The service defaults to **read-only**. To allow an assistant to create or modify
-records, set `CA_MCP_READ_ONLY=false` in the `mcp` service environment and
-recreate it. See [Read-only by default](#read-only-by-default) before you do.
+records, set `CA_MCP_READ_ONLY=false` in the `mcp` service environment
+(`backend-mcp` in `docker-compose-build.yml`) and recreate it. See [Read-only by default](#read-only-by-default) before you do.
 {% endhint %}
 
 If you generated your deployment with `config/make_config.py`, answer yes to the
@@ -533,6 +533,11 @@ For a server that should not be published at all, ChatGPT offers a Secure MCP
 Tunnel, which reaches a private or on-premises server without a public listener.
 
 #### Each user brings their own token
+
+{% hint style="info" %}
+Users can also sign in with their CISO Assistant account instead of pasting a
+token. See [MCP sign-in with OAuth](mcp-oauth.md).
+{% endhint %}
 
 By default the server holds **no** credential of its own in HTTP mode. Every
 request must carry the caller's Personal Access Token, and the call runs with

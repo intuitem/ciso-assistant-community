@@ -5,6 +5,11 @@ from knox.auth import TokenAuthentication
 from rest_framework import exceptions
 
 
+def is_self_registered(client) -> bool:
+    data = getattr(client, "data", None) or {}
+    return bool(data.get("dcr") or data.get("cimd"))
+
+
 class KnoxTokenAuthentication(TokenAuthentication):
     def authenticate_credentials(self, token):
         user, auth_token = super().authenticate_credentials(token)
@@ -20,10 +25,23 @@ class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):
             # No/invalid bearer token: fall through to the next authenticator.
             return None
         user, token = result
-        if user is not None and getattr(user, "is_authenticated", False):
-            # User-bound OIDC token (e.g. authorization_code): honor as-is.
-            return (user, token)
         client = getattr(token, "client", None)
+        if user is not None and getattr(user, "is_authenticated", False):
+            # Nobody vetted a self-registered client: the user only consented to
+            # MCP scopes, and /api checks no scopes, so keep it off /api entirely.
+            if client is not None and is_self_registered(client):
+                raise exceptions.AuthenticationFailed(
+                    "This client can only access the MCP endpoint."
+                )
+            if client is not None:
+                from iam.models import ConnectedAppUse
+
+                if not user.can_connect_apps:
+                    raise exceptions.AuthenticationFailed(
+                        "Connecting apps is not allowed for this user."
+                    )
+                ConnectedAppUse.record(user.pk, client.pk)
+            return (user, token)
         service_account = (
             getattr(client, "service_account", None) if client is not None else None
         )

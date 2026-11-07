@@ -2333,6 +2333,7 @@ export const listViewFields = {
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
+			'canConnectApps',
 			'is_third_party',
 			'hasMfaEnabled'
 		],
@@ -2345,6 +2346,7 @@ export const listViewFields = {
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
+			'can_connect_apps',
 			'is_third_party',
 			'has_mfa_enabled'
 		],
