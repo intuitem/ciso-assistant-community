@@ -5,6 +5,7 @@
 	import SideBarCategory from '#lib/components/SideBar/SideBarCategory.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import { canSeeNavItem } from '#lib/components/SideBar/navVisibility.js';
 	import { driverInstance } from '#lib/utils/stores.js';
 
@@ -24,6 +25,25 @@
 	}
 
 	let { sideBarVisibleItems }: Props = $props();
+
+	// Open the section holding the current page, e.g. after jumping there from the command palette.
+	$effect(() => {
+		const path = page.url.pathname;
+		let best: { section: string; length: number } | undefined;
+		for (const item of items) {
+			for (const subItem of item.items) {
+				const href = subItem.href?.split('?')[0];
+				if (!href || href === '/') continue;
+				if ((path === href || path.startsWith(href + '/')) && href.length > (best?.length ?? 0)) {
+					best = { section: item.name, length: href.length };
+				}
+			}
+		}
+		const section = best?.section;
+		untrack(() => {
+			if (section && !$lastAccordionItem.includes(section)) $lastAccordionItem = [section];
+		});
+	});
 
 	function handleValueChange(details: { value: string[] }) {
 		$lastAccordionItem = details.value;

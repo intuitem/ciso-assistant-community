@@ -11,9 +11,11 @@
 		scrollTarget?: HTMLElement;
 		/** Mirror the page number in the URL (standalone tables only) */
 		syncToUrl?: boolean;
+		/** Follow page changes from the URL; off for a second copy of the same table's pager */
+		followUrl?: boolean;
 	}
 
-	let { handler, URLModel, scrollTarget, syncToUrl = false }: Props = $props();
+	let { handler, URLModel, scrollTarget, syncToUrl = false, followUrl = true }: Props = $props();
 
 	const pageNumber = handler.getPageNumber();
 	const rowsPerPage = handler.getRowsPerPage();
@@ -43,6 +45,7 @@
 	};
 
 	afterNavigate(({ shallow, type }) => {
+		if (!followUrl) return;
 		if (shallow && type === 'goto') return;
 		if (!page.url) return;
 

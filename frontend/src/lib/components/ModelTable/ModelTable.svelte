@@ -453,6 +453,7 @@
 			totalRows: source?.meta?.count
 		}
 	);
+	const topPageCount = handler.getPageCount();
 
 	const rows = handler.getRows();
 	const relatedFieldNames = $derived(
@@ -1141,6 +1142,9 @@
 			{/if}
 			{#if pagination && rowsPerPage}
 				<RowsPerPage {handler} />
+				{#if $topPageCount > 1}
+					<Pagination {handler} {URLModel} syncToUrl={syncFiltersToUrl} followUrl={false} />
+				{/if}
 			{/if}
 			{#if showColumnSelector}
 				<ColumnSelector
@@ -1304,10 +1308,14 @@
 																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{safeTranslate(val.str)}</Anchor
+																					>{key === 'applied_controls' && val.ref_id
+																						? `${val.ref_id} - `
+																						: ''}{safeTranslate(val.str)}</Anchor
 																				>
 																			{:else}
-																				{safeTranslate(val.str)}
+																				{key === 'applied_controls' && val.ref_id
+																					? `${val.ref_id} - `
+																					: ''}{safeTranslate(val.str)}
 																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
@@ -1456,15 +1464,13 @@
 														{value.name}
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{@const displayValue = [
-															'name',
-															'description',
-															'observation',
-															'ref_id',
-															'key'
-														].includes(key)
-															? (value ?? '-')
-															: safeTranslate(value ?? '-')}
+														{@const displayValue =
+															['name', 'description', 'observation', 'ref_id', 'key'].includes(
+																key
+															) ||
+															(key.startsWith('cf__') && typeof value === 'string')
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
 
 														{#if displayValue?.length > 300}
 															{displayValue.slice(0, 300)}...

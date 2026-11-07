@@ -108,6 +108,11 @@ class TestParseTimeToSeconds:
     def test_leading_zeros(self):
         assert _parse_time_to_seconds("01m30s") == 90
 
+    def test_days_as_exported(self):
+        assert _parse_time_to_seconds("14d") == 14 * 86400
+        assert _parse_time_to_seconds("1d3h05m") == 86400 + 3 * 3600 + 300
+        assert _parse_time_to_seconds("14j") == 14 * 86400  # French export
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # _reverse_scale_value

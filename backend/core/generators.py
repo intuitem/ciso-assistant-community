@@ -996,7 +996,14 @@ def gen_audit_context(
                 "total_score": 0,  # Sum of all scores
                 "item_count": 0,  # Number of scoreable items
                 "scored_count": 0,  # Number of items that have been scored
+                "assessable_count": 0,
+                "not_applicable_count": 0,
             }
+
+            if node_data.get("assessable", False):
+                scores["assessable_count"] = 1
+                if node_data.get("result") == "not_applicable":
+                    scores["not_applicable_count"] = 1
 
             # Check if the current node is scoreable
             if node_data.get("is_scored", False):
@@ -1014,6 +1021,8 @@ def gen_audit_context(
                 scores["total_score"] += child_scores["total_score"]
                 scores["item_count"] += child_scores["item_count"]
                 scores["scored_count"] += child_scores["scored_count"]
+                scores["assessable_count"] += child_scores["assessable_count"]
+                scores["not_applicable_count"] += child_scores["not_applicable_count"]
 
             return scores
 
@@ -1035,6 +1044,8 @@ def gen_audit_context(
                 "item_count": scores["item_count"],
                 "scored_count": scores["scored_count"],
                 "average_score": round(average_score, 1),
+                "all_not_applicable": scores["assessable_count"] > 0
+                and scores["not_applicable_count"] == scores["assessable_count"],
             }
 
         return category_scores
@@ -1250,9 +1261,14 @@ def gen_audit_context(
     spider_chart_buffer = (
         plot_spider_chart(spider_data, colors=custom_colors) if charts else None
     )
+    radar_scores = {
+        urn: score
+        for urn, score in category_scores.items()
+        if not score["all_not_applicable"]
+    }
     category_radar_buffer = (
-        plot_category_radar(category_scores, max_score=max_score, colors=custom_colors)
-        if charts
+        plot_category_radar(radar_scores, max_score=max_score, colors=custom_colors)
+        if charts and radar_scores
         else None
     )
     # `assessments` lets a caller pass a row-level-scoped set (see

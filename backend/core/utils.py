@@ -11,7 +11,7 @@ from typing import Literal
 from datetime import datetime, timedelta, date, timezone, tzinfo
 from zoneinfo import ZoneInfo
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 from django.conf import settings
 
 from rest_framework.exceptions import ValidationError
@@ -216,6 +216,11 @@ def get_global_currency() -> str:
     general_settings = GlobalSettings.objects.filter(name="general").first()
     value = general_settings.value if general_settings else None
     return (value or {}).get("currency") or "€"
+
+
+def duration_day_unit() -> str:
+    """Day suffix for compact durations: French writes "j" (jour)."""
+    return "j" if (get_language() or "").startswith("fr") else "d"
 
 
 def format_currency(value, currency: str) -> str:
