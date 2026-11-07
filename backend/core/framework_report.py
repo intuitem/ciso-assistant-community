@@ -9,6 +9,7 @@ from collections import defaultdict
 from copy import copy
 
 from core.audit_inheritance import _ca_scale
+from core.models import RequirementAssessment
 from core.utils import is_field_visible_to
 
 LAYERS = ("implementation_score", "documentation_score", "maturity_score")
@@ -86,10 +87,14 @@ def inherited_requirement(ca, ra, overlay):
     )
     effective.is_scored = effective.score is not None
     effective.documentation_score = None
+    # Only a counted score is on the winning audit's scale: an unscored answer
+    # brings none, and an N/A one counts at this audit's own target.
     setattr(
         effective,
         OTHER_SCALE,
-        (source_scale.get("min"), source_scale.get("max")) != _ca_scale(ca),
+        effective.score is not None
+        and effective.result != RequirementAssessment.Result.NOT_APPLICABLE
+        and (source_scale.get("min"), source_scale.get("max")) != _ca_scale(ca),
     )
     return effective
 

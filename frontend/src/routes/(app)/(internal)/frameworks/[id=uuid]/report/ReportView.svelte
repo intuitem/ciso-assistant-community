@@ -266,6 +266,12 @@
 		'not_assessed'
 	];
 
+	// Audits whose compliance the viewer reads. A score-only audit (CyFun) hides
+	// it: its rows would only add "not assessed" to the distribution.
+	let resultVisibleAuditIds = $derived(
+		new Set(complianceAssessments.filter((ca) => ca.result_visible).map((ca) => ca.id))
+	);
+
 	function distribution(rs: ReportRow[]): Record<Result, number> {
 		const d: Record<Result, number> = {
 			compliant: 0,
@@ -275,6 +281,7 @@
 			not_assessed: 0
 		};
 		for (const r of rs) {
+			if (!resultVisibleAuditIds.has(r.compliance_assessment_id)) continue;
 			const k: Result = (r.result as Result | null) ?? 'not_assessed';
 			d[k]++;
 		}
@@ -335,11 +342,14 @@
 	function toEffective(r: ReportRow): ReportRow {
 		const inh = r.inheritance;
 		if (!applyInheritance || !inh || !inh.inherited) return r;
+		// The inherited score as this audit counts it: none when it is on another
+		// audit's scale (the overlay's own value is rescaled and rounded).
+		const score = r.combined_scores ? r.combined_scores.implementation_score : inh.effective_score;
 		return {
 			...r,
 			result: inh.effective_result,
-			score: inh.effective_score,
-			is_scored: inh.effective_score !== null,
+			score,
+			is_scored: score !== null,
 			// Inheritance carries no documentation score.
 			documentation_score: null,
 			scores: r.combined_scores ?? r.scores,

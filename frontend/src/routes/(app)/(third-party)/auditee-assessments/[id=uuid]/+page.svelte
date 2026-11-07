@@ -1585,7 +1585,23 @@
 									<!-- Score -->
 									{#if showScore}
 										<div class="flex flex-col w-full place-items-center">
-											{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
+											{#if complianceAssessment.scoring_enabled && isNotApplicable(requirementAssessment)}
+												<!-- Not applicable, computed score or not: what it counts for, greyed. -->
+												<NotApplicableScores
+													value={requirementAssessment.anchored_score}
+													min={requirementAssessment.effective_min_score ??
+														complianceAssessment.min_score}
+													max={requirementAssessment.effective_max_score ??
+														complianceAssessment.max_score}
+													scoresDefinition={requirementAssessment.effective_scores_definition ??
+														complianceAssessment.scores_definition}
+													showImplementation
+													showDocumentation={showDocumentationScore}
+													implementationLabel={complianceAssessment.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+												/>
+											{:else if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
 												{@const raMin =
 													requirementAssessment.effective_min_score ??
 													complianceAssessment.min_score}
@@ -1622,7 +1638,7 @@
 														</Progress>
 													</div>
 												</div>
-											{:else if complianceAssessment.scoring_enabled && !isNotApplicable(requirementAssessment)}
+											{:else if complianceAssessment.scoring_enabled}
 												{@const raMin =
 													requirementAssessment.effective_min_score ??
 													complianceAssessment.min_score}
@@ -1673,22 +1689,6 @@
 														{/if}
 													{/snippet}
 												</ScorePair>
-											{:else if complianceAssessment.scoring_enabled}
-												<!-- Not applicable: what it counts for, greyed. -->
-												<NotApplicableScores
-													value={requirementAssessment.anchored_score}
-													min={requirementAssessment.effective_min_score ??
-														complianceAssessment.min_score}
-													max={requirementAssessment.effective_max_score ??
-														complianceAssessment.max_score}
-													scoresDefinition={requirementAssessment.effective_scores_definition ??
-														complianceAssessment.scores_definition}
-													showImplementation
-													showDocumentation={showDocumentationScore}
-													implementationLabel={complianceAssessment.show_documentation_score
-														? m.implementationScore()
-														: m.score()}
-												/>
 											{/if}
 										</div>
 									{/if}

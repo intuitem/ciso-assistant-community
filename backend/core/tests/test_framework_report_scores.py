@@ -398,3 +398,37 @@ def test_combined_view_leaves_out_other_scales(admin_client, framework):
     assert combined["total"] == _layers(None, None, None)
     assert combined["sections"][f"{URN}:s11"] == _layers(None, None, None)
     assert combined["sections"][f"{URN}:s21"] == _layers(5.0, 1.0, 3.0)
+
+
+@pytest.mark.django_db
+def test_combined_view_keeps_scoreless_answers_from_other_scales(
+    admin_client, framework
+):
+    """An answer inherited from an audit on another scale brings no score of
+    that scale when it has none, or when it is N/A (it counts at this audit's
+    own target): the combined scores stay."""
+    root = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    child_folder = Folder.objects.create(name="Child", parent_folder=root)
+    parent = _audit(
+        "Parent",
+        root,
+        framework,
+        {
+            "R111": ("compliant", None, None),
+            "R211": ("not_applicable", None, None),
+        },
+    )
+    ComplianceAssessment.objects.filter(pk=parent.pk).update(min_score=0, max_score=100)
+    _audit("Child", child_folder, framework, ANSWERS)
+    _enable_inheritance("parent_wins")
+
+    report = _report(admin_client, framework)
+    rows = _row_scores(report, "Child")
+    assert rows["R111"]["inheritance"]["inherited"] is True
+    assert rows["R111"]["combined_scores"] == _layers(None, None, None)
+    assert rows["R211"]["combined_scores"] == _layers(3.0, None, None)
+
+    # Implementation: S11 counts R112 (N/A, 0.5), S21 R211 (N/A, 0.5) -> 3.0.
+    combined = _audit_entry(report, "Child")["combined_scores"]
+    assert combined["total"] == _layers(3.0, None, None)
+    assert combined["sections"][f"{URN}:s21"] == _layers(3.0, None, None)

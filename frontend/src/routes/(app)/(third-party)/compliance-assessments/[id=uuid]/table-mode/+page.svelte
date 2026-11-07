@@ -742,7 +742,20 @@
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		{@const raScoresDef = ra.effective_scores_definition ?? data.scores.scores_definition}
-		{#if hasComputedScore(ra.requirement.questions)}
+		{#if isNotApplicable(ra)}
+			<!-- Not applicable, computed score or not: what it counts for, greyed. -->
+			<NotApplicableScores
+				value={ra.anchored_score}
+				min={raMin}
+				max={raMax}
+				scoresDefinition={raScoresDef}
+				showImplementation={showScore}
+				showDocumentation={complianceAssessment.show_documentation_score && showDocumentationScore}
+				implementationLabel={complianceAssessment.show_documentation_score
+					? m.implementationScore()
+					: m.score()}
+			/>
+		{:else if hasComputedScore(ra.requirement.questions)}
 			<div class="flex flex-col gap-1">
 				<span class="text-xs font-semibold text-surface-500 italic">{m.score()}</span>
 				<ScoreControl
@@ -753,7 +766,7 @@
 					scoresDefinition={raScoresDef}
 				/>
 			</div>
-		{:else if !isNotApplicable(ra)}
+		{:else}
 			<div class="flex flex-row flex-wrap items-start gap-x-6 gap-y-2">
 				<ScorePair>
 					{#snippet implementation()}
@@ -807,19 +820,6 @@
 					{/snippet}
 				</ScorePair>
 			</div>
-		{:else}
-			<!-- Not applicable: what it counts for, greyed. -->
-			<NotApplicableScores
-				value={ra.anchored_score}
-				min={raMin}
-				max={raMax}
-				scoresDefinition={raScoresDef}
-				showImplementation={showScore}
-				showDocumentation={complianceAssessment.show_documentation_score && showDocumentationScore}
-				implementationLabel={complianceAssessment.show_documentation_score
-					? m.implementationScore()
-					: m.score()}
-			/>
 		{/if}
 	{:else if showScore && showDocumentationScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}

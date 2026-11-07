@@ -1076,7 +1076,21 @@
 						</div>
 					{/if}
 					{#if page.data.compliance_assessment_score.scoring_enabled}
-						{#if computedScore !== null || hasComputedScore(page.data.requirementAssessment.requirement.questions)}
+						{#if formNotApplicable}
+							<!-- Not applicable, computed score or not: what it counts for, greyed. -->
+							<NotApplicableScores
+								value={data.requirementAssessment.anchored_score}
+								min={resolvedMin}
+								max={resolvedMax}
+								scoresDefinition={resolvedScoresDef}
+								showImplementation={showScore}
+								showDocumentation={showDocumentationScore &&
+									page.data.compliance_assessment_score.show_documentation_score}
+								implementationLabel={page.data.compliance_assessment_score.show_documentation_score
+									? m.implementationScore()
+									: m.score()}
+							/>
+						{:else if computedScore !== null || hasComputedScore(page.data.requirementAssessment.requirement.questions)}
 							{#if showScore}
 								<div class="flex flex-col space-y-2" data-testid="score-field">
 									<div class="flex flex-row items-center space-x-4">
@@ -1145,7 +1159,7 @@
 									{/if}
 								</div>
 							{/if}
-						{:else if !formNotApplicable}
+						{:else}
 							{@const docScoreShown =
 								showDocumentationScore &&
 								page.data.compliance_assessment_score.show_documentation_score}
@@ -1207,20 +1221,6 @@
 									{/if}
 								{/snippet}
 							</ScorePair>
-						{:else}
-							<!-- Not applicable: what it counts for, greyed. -->
-							<NotApplicableScores
-								value={data.requirementAssessment.anchored_score}
-								min={resolvedMin}
-								max={resolvedMax}
-								scoresDefinition={resolvedScoresDef}
-								showImplementation={showScore}
-								showDocumentation={showDocumentationScore &&
-									page.data.compliance_assessment_score.show_documentation_score}
-								implementationLabel={page.data.compliance_assessment_score.show_documentation_score
-									? m.implementationScore()
-									: m.score()}
-							/>
 						{/if}
 					{/if}
 
