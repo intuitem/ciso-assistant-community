@@ -8,13 +8,16 @@ audit's numbers. The page averages them across audits.
 from collections import defaultdict
 from copy import copy
 
-from core.audit_inheritance import _ca_scale, normalize_score
+from core.audit_inheritance import _ca_scale
 from core.utils import is_field_visible_to
 
 LAYERS = ("implementation_score", "documentation_score", "maturity_score")
 
 # Where the page puts requirements whose parent is not a section node.
 TOP_SECTION = "__top__"
+
+# Set on an inherited reading whose source audit is on another scale.
+OTHER_SCALE = "_inherited_from_other_scale"
 
 
 def visible_layers(ca, role: str) -> frozenset[str]:
@@ -24,10 +27,9 @@ def visible_layers(ca, role: str) -> frozenset[str]:
     def visible(field):
         return is_field_visible_to(ca, field, role)
 
+    # Compliance may stay hidden: whether a requirement is N/A is part of what
+    # its score means (the applicability toggle sets it in score-only audits).
     if not (visible("score") and visible("is_scored")):
-        return frozenset()
-    if ca.anchor_na_to_target and not visible("result"):
-        # An N/A requirement counts at the target: its scores would tell.
         return frozenset()
     if ca.show_documentation_score and not visible("documentation_score"):
         # The maturity score would give the documentation score away.
@@ -35,8 +37,11 @@ def visible_layers(ca, role: str) -> frozenset[str]:
     return frozenset(LAYERS)
 
 
-def _layers(ca, scores: dict, visible, *, inherited: bool) -> dict:
-    if inherited and ca.show_documentation_score:
+def _layers(ca, scores: dict, visible, *, inherited: bool, other_scale: bool) -> dict:
+    if other_scale:
+        # Scores on different scales are never combined.
+        visible = frozenset()
+    elif inherited and ca.show_documentation_score:
         # Inheritance carries no documentation score, so neither the
         # documentation nor the maturity score of an inherited answer exists.
         visible = visible & {"implementation_score"}
@@ -58,6 +63,7 @@ def requirement_scores(ca, ra, visible, *, inherited: bool) -> dict:
         ),
         visible,
         inherited=inherited,
+        other_scale=getattr(ra, OTHER_SCALE, False),
     )
 
 
@@ -65,20 +71,26 @@ def inherited_requirement(ca, ra, overlay):
     """The requirement assessment as the combined view reads it: the compliance
     and implementation score inherited from the winning audit in place of its
     own, or None when it inherits nothing. ``overlay`` is the row's redacted
-    inheritance block; its score is on the overlay's scale, brought back to the
-    audit's."""
+    inheritance block. The score is the winning audit's as recorded; when that
+    audit is on another scale, it is marked (OTHER_SCALE) and never combined."""
     if not overlay or not overlay.get("inherited"):
         return None
-    scale = overlay.get("scale") or {}
+    source = overlay.get("source") or {}
+    source_scale = source.get("scale") or {}
     effective = copy(ra)
     effective.result = overlay.get("effective_result")
-    effective.score = normalize_score(
-        overlay.get("effective_score"),
-        (scale.get("min"), scale.get("max")),
-        _ca_scale(ca),
+    # effective_score is None when the source has no score or the viewer may
+    # not read it; raw_score is the same value before any rescaling.
+    effective.score = (
+        source.get("raw_score") if overlay.get("effective_score") is not None else None
     )
     effective.is_scored = effective.score is not None
     effective.documentation_score = None
+    setattr(
+        effective,
+        OTHER_SCALE,
+        (source_scale.get("min"), source_scale.get("max")) != _ca_scale(ca),
+    )
     return effective
 
 
@@ -93,6 +105,7 @@ def audit_scores(ca, ras, *, section_of, visible, inherited_ids) -> dict:
             ca.get_scores_for(group),
             visible,
             inherited=any(ra.id in inherited_ids for ra in group),
+            other_scale=any(getattr(ra, OTHER_SCALE, False) for ra in group),
         )
 
     by_section = defaultdict(list)

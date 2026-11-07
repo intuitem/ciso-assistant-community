@@ -3787,6 +3787,7 @@
 	"apiIntegration": "API",
 	"apiSnippetHelp": "Stuur scanresultaten naar deze beoordeling. Hergebruik de geretourneerde run_id om een uitvoering op te bouwen of bij te werken. Toegestane resultaten: geslaagd, mislukt, niet van toepassing, fout, niet gecontroleerd. Je kunt ook een bestand via een POST-verzoek naar import-results/ verzenden, samen met een veld voor één asset (uuid) of meerdere assets (JSON-lijst): een CSV- of XLSX-bestand met de kolommen ref_id, result (optioneel actual, expected, message), of een OCSF Compliance Finding JSON (klasse 2003). Voor andere CSV-indelingen is de parameter mapping nodig — het importvenster op het tabblad Runs stelt deze voor je samen.",
 	"applicable": "Van toepassing",
+	"notApplicableCountsAsScore": "Niet van toepassing: telt als {score}",
 	"appliedAt": "Toegepast op",
 	"appliedBy": "Toegepast door",
 	"appliedControlsAnalytics": "Analyse van toegepaste beheersmaatregelen",

@@ -11554,7 +11554,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     #      needs a persisted completion flag (rejected) or write-time answer
     #      cleanup (out of scope).
     #   2. result visible on the audit: result set
-    #   3. score-only audit: score strictly above the resolved minimum
+    #   3. score-only audit: not applicable (the applicability toggle sets it
+    #      and no score follows), or score strictly above the resolved minimum
     #      (requirement override, then audit, then framework). The scoring
     #      toggle pre-fills scores at that minimum, so a score left at min is
     #      indistinguishable from an untouched one and must not count.
@@ -11601,7 +11602,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 Value(0),
             )
         )
-        content = result_assessed if result_visible else score_progressed
+        content = (
+            result_assessed
+            if result_visible
+            else Q(result=cls.Result.NOT_APPLICABLE) | score_progressed
+        )
         if has_questions_annotation:
             # A question counts whether or not it computes anything: fully
             # answered seeded rows complete the carriers for informational
@@ -11655,6 +11660,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             return result_assessed or score_assessed or questionnaire_fully_answered
         if result_visible:
             return result_assessed
+        if result == RequirementAssessment.Result.NOT_APPLICABLE:
+            return True
         resolved_min = (
             requirement_min_score
             if requirement_min_score is not None

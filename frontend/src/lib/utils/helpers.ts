@@ -752,6 +752,23 @@ export function getFieldVisibility(
 }
 
 /**
+ * Whether the viewer gets the applicability toggle: in a score-only audit
+ * (compliance hidden from the auditor too) a requirement is marked not
+ * applicable through it, since compliance is the only place N/A lives.
+ * Editable for a role that edits scores (mirrors the backend's
+ * `is_applicability_write`).
+ */
+export function showApplicabilityToggle(
+	complianceAssessment: Record<string, any> | null | undefined,
+	viewerRole: 'respondent' | 'auditor'
+): boolean {
+	return (
+		isFieldVisible(complianceAssessment, 'score', viewerRole) &&
+		!isFieldVisible(complianceAssessment, 'result', 'auditor')
+	);
+}
+
+/**
  * Check whether any question in a questions object has at least one choice with
  * a *resolvable* `compute_result`. Mirrors `resolveComputeResult`: empty strings,
  * whitespace, and unknown values are not treated as result-bearing, so a

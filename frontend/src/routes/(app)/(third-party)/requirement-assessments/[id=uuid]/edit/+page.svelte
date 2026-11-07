@@ -20,6 +20,7 @@
 		getFieldVisibility,
 		isFieldVisible,
 		isFieldEditable,
+		showApplicabilityToggle,
 		alignmentColorMap
 	} from '#lib/utils/helpers.js';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
@@ -27,6 +28,8 @@
 	import { hideSuggestions } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import ApplicabilityToggle from '#lib/components/ComplianceAssessment/ApplicabilityToggle.svelte';
+	import NotApplicableScores from '#lib/components/ComplianceAssessment/NotApplicableScores.svelte';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import { countMasked } from '#lib/utils/related-visibility.js';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
@@ -445,6 +448,18 @@
 	// Entering a score is what makes a requirement scored (as in table mode).
 	function markScored() {
 		requirementAssessmentForm.form.update((d) => ({ ...d, is_scored: true }));
+	}
+
+	// Score-only audits mark N/A through the applicability toggle. The form's
+	// result starts from the requirement's applicability (see +page.server.ts),
+	// so it reads the same whether compliance is shown or not.
+	const applicabilityToggle = $derived(
+		page.data.compliance_assessment_score.scoring_enabled &&
+			showApplicabilityToggle(complianceAssessment, viewerRole)
+	);
+	const formNotApplicable = $derived($formStore.result === 'not_applicable');
+	function setApplicability(result: 'not_assessed' | 'not_applicable') {
+		requirementAssessmentForm.form.update((d) => ({ ...d, result }));
 	}
 
 	$effect(() => {
@@ -1041,6 +1056,13 @@
 							{/if}
 						</div>
 					{/if}
+					{#if applicabilityToggle}
+						<ApplicabilityToggle
+							applicable={!formNotApplicable}
+							disabled={!canEditScore}
+							onChange={setApplicability}
+						/>
+					{/if}
 					{#if showExtendedResult}
 						<div data-testid="extended-result-field">
 							<Select
@@ -1123,7 +1145,7 @@
 									{/if}
 								</div>
 							{/if}
-						{:else if data.result !== 'not_applicable'}
+						{:else if !formNotApplicable}
 							{@const docScoreShown =
 								showDocumentationScore &&
 								page.data.compliance_assessment_score.show_documentation_score}
@@ -1185,6 +1207,20 @@
 									{/if}
 								{/snippet}
 							</ScorePair>
+						{:else}
+							<!-- Not applicable: what it counts for, greyed. -->
+							<NotApplicableScores
+								value={data.requirementAssessment.anchored_score}
+								min={resolvedMin}
+								max={resolvedMax}
+								scoresDefinition={resolvedScoresDef}
+								showImplementation={showScore}
+								showDocumentation={showDocumentationScore &&
+									page.data.compliance_assessment_score.show_documentation_score}
+								implementationLabel={page.data.compliance_assessment_score.show_documentation_score
+									? m.implementationScore()
+									: m.score()}
+							/>
 						{/if}
 					{/if}
 

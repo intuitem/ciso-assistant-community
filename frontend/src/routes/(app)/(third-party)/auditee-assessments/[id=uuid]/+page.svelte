@@ -30,6 +30,7 @@
 		hasComputedScore,
 		resultBadgeStyle,
 		isFieldEditable as isFieldEditableHelper,
+		showApplicabilityToggle,
 		shouldShowAutoQuestion,
 		buildAutoAlignmentQuestion,
 		alignmentValueFromChoiceUrn,
@@ -41,6 +42,8 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import ApplicabilityToggle from '#lib/components/ComplianceAssessment/ApplicabilityToggle.svelte';
+	import NotApplicableScores from '#lib/components/ComplianceAssessment/NotApplicableScores.svelte';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDate } from '#lib/utils/datetime.js';
 	import { Accordion, Popover, Progress } from '@skeletonlabs/skeleton-svelte';
@@ -137,6 +140,21 @@
 	const canEditResult = $derived(isFieldEditable('result'));
 	const canEditScore = $derived(isFieldEditable('score'));
 	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
+	// Score-only audits mark N/A through the applicability toggle.
+	const applicabilityToggle = $derived(
+		Boolean(complianceAssessment.scoring_enabled) &&
+			showApplicabilityToggle(complianceAssessment, viewerRole)
+	);
+	// Applicability whether compliance is shown or not: a score-only audit hides
+	// `result` and reads `not_applicable`; the toggle keeps both in step.
+	function isNotApplicable(ra: Record<string, any>): boolean {
+		return 'result' in ra ? ra.result === 'not_applicable' : Boolean(ra.not_applicable);
+	}
+	function setApplicability(ra: Record<string, any>, result: 'not_assessed' | 'not_applicable') {
+		ra.result = result;
+		ra.not_applicable = result === 'not_applicable';
+		update(ra, 'result');
+	}
 	const canEditObservation = $derived(isFieldEditable('observation'));
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
 	const canEditTaskTemplates = $derived(isFieldEditable('task_templates'));
@@ -1530,6 +1548,17 @@
 										</div>
 									{/if}
 
+									<!-- Applicability (score-only audits) -->
+									{#if applicabilityToggle}
+										<div class="flex justify-center w-full my-2">
+											<ApplicabilityToggle
+												applicable={!isNotApplicable(requirementAssessment)}
+												disabled={!canEditScore}
+												onChange={(result) => setApplicability(requirementAssessment, result)}
+											/>
+										</div>
+									{/if}
+
 									<!-- Extended result -->
 									{#if showExtendedResult}
 										<div class="flex flex-col items-center w-full my-2">
@@ -1593,7 +1622,7 @@
 														</Progress>
 													</div>
 												</div>
-											{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
+											{:else if complianceAssessment.scoring_enabled && !isNotApplicable(requirementAssessment)}
 												{@const raMin =
 													requirementAssessment.effective_min_score ??
 													complianceAssessment.min_score}
@@ -1644,6 +1673,22 @@
 														{/if}
 													{/snippet}
 												</ScorePair>
+											{:else if complianceAssessment.scoring_enabled}
+												<!-- Not applicable: what it counts for, greyed. -->
+												<NotApplicableScores
+													value={requirementAssessment.anchored_score}
+													min={requirementAssessment.effective_min_score ??
+														complianceAssessment.min_score}
+													max={requirementAssessment.effective_max_score ??
+														complianceAssessment.max_score}
+													scoresDefinition={requirementAssessment.effective_scores_definition ??
+														complianceAssessment.scores_definition}
+													showImplementation
+													showDocumentation={showDocumentationScore}
+													implementationLabel={complianceAssessment.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+												/>
 											{/if}
 										</div>
 									{/if}

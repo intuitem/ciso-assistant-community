@@ -2044,6 +2044,26 @@ def is_field_read_only_for(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "read"
 
 
+# What the applicability toggle of score-only audits writes to `result`.
+APPLICABILITY_RESULTS = frozenset({"not_applicable", "not_assessed"})
+
+
+def is_applicability_write(compliance_assessment, field_name, value, role):
+    """Whether writing `value` to `field_name` only switches a requirement's
+    applicability in a score-only audit, which a role that edits scores may do
+    even though compliance is not editable for it.
+
+    Score-only: compliance is hidden from the auditor too, so no visible verdict
+    can be overwritten; only "not applicable" and "not assessed" pass.
+    """
+    return (
+        field_name == "result"
+        and value in APPLICABILITY_RESULTS
+        and not is_field_visible_to(compliance_assessment, "result", "auditor")
+        and is_field_editable_by(compliance_assessment, "score", role)
+    )
+
+
 def is_open_assignee(user, requirement_assessment):
     """Whether the user answers this requirement through an assignment that is still
     open (not submitted or closed): the assignment page shows them the respondent

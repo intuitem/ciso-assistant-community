@@ -5616,6 +5616,7 @@
 	"soaNoComplianceAssessments": "No audits found",
 	"soaNoRiskAssessments": "No risk assessments found",
 	"applicable": "Applicable",
+	"notApplicableCountsAsScore": "Not applicable: counts as {score}",
 	"backToSelection": "Back to selection",
 	"soaGeneratedFrom": "Generated from: {assessment}",
 	"soaFramework": "Framework: {framework}",

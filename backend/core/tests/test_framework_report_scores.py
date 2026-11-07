@@ -195,6 +195,11 @@ def test_report_scores_match_the_audit(admin_client, framework):
     # Average of averages over the categories (C1, C2), N/A at 3, a missing
     # documentation score at 1: implementation (0.625 + 1) / 2 -> 4.25,
     # documentation (0.375 + 0) / 2 -> 1.75, maturity their average.
+    assert entry["score_scale"] == {
+        "min": 1,
+        "max": 5,
+        "calculation_method": "average_of_averages",
+    }
     assert entry["documentation_score_visible"] is True
     assert entry["scores"]["total"] == _layers(4.25, 1.75, 3.0)
     global_score = audit.get_global_score()
@@ -218,6 +223,34 @@ def test_report_scores_match_the_audit(admin_client, framework):
     assert rows["R211"]["scores"] == _layers(5, 1, 3.0)
     assert all(row["combined_scores"] is None for row in rows.values())
     assert entry["combined_scores"] is None
+    assert entry["result_visible"] is True
+    assert {ref: row["not_applicable"] for ref, row in rows.items()} == {
+        "R111": False,
+        "R112": True,
+        "R211": False,
+    }
+
+
+@pytest.mark.django_db
+def test_score_only_audit_keeps_its_scores(admin_client, framework):
+    """Compliance hidden (score-only, CyFun): the scores stay, N/A included,
+    and the page is told to leave compliance out."""
+    root = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    _audit(
+        "Audit",
+        root,
+        framework,
+        ANSWERS,
+        field_visibility={**SCORES_SHOWN, "result": HIDDEN},
+    )
+    report = _report(admin_client, framework)
+    entry = _audit_entry(report, "Audit")
+    assert entry["result_visible"] is False
+    assert entry["scores"]["total"] == _layers(4.25, 1.75, 3.0)
+    rows = _row_scores(report, "Audit")
+    assert rows["R112"]["result"] is None
+    assert rows["R112"]["not_applicable"] is True
+    assert rows["R112"]["scores"] == _layers(3.0, 3.0, 3.0)
 
 
 @pytest.mark.django_db
@@ -268,6 +301,9 @@ def test_hidden_scores_stay_hidden(admin_client, framework):
     assert entry["scores"]["total"] == empty
     assert all(scores == empty for scores in entry["scores"]["sections"].values())
     assert all(row["scores"] == empty for row in _row_scores(report, "Audit").values())
+    assert all(
+        row["not_applicable"] is None for row in _row_scores(report, "Audit").values()
+    )
 
 
 @pytest.mark.parametrize(
@@ -282,8 +318,9 @@ def test_hidden_scores_stay_hidden(admin_client, framework):
             "respondent",
             {"implementation_score"},
         ),
-        # Anchored N/A requirements would tell which ones are N/A.
-        ({**SCORES_SHOWN, "result": HIDDEN}, True, "auditor", set()),
+        # Score-only audits hide compliance: whether a requirement is N/A is
+        # part of its score, whichever way the audit counts N/A.
+        ({**SCORES_SHOWN, "result": HIDDEN}, True, "auditor", set(LAYERS)),
         ({**SCORES_SHOWN, "result": HIDDEN}, False, "auditor", set(LAYERS)),
     ],
 )
@@ -295,16 +332,7 @@ def test_visible_layers(field_visibility, anchor, role, expected):
     assert visible_layers(audit, role) == expected
 
 
-@pytest.mark.django_db
-def test_combined_view_scores(admin_client, framework):
-    """The combined view reads inherited answers: their compliance and
-    implementation score come from the winning audit. Inheritance carries no
-    documentation score, so whatever an inherited answer feeds has none."""
-    root = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-    child_folder = Folder.objects.create(name="Child", parent_folder=root)
-    _audit("Parent", root, framework, {"R111": ("non_compliant", 2, 1)})
-    _audit("Child", child_folder, framework, ANSWERS)
-
+def _enable_inheritance(strategy):
     GlobalSettings.objects.update_or_create(
         name=GlobalSettings.Names.FEATURE_FLAGS,
         defaults={"value": {"audit_tree_inheritance": True}},
@@ -314,9 +342,21 @@ def test_combined_view_scores(admin_client, framework):
     )
     general.value = {
         **(general.value or {}),
-        "audit_tree_aggregation_strategy": "parent_wins",
+        "audit_tree_aggregation_strategy": strategy,
     }
     general.save()
+
+
+@pytest.mark.django_db
+def test_combined_view_scores(admin_client, framework):
+    """The combined view reads inherited answers: their compliance and
+    implementation score come from the winning audit. Inheritance carries no
+    documentation score, so whatever an inherited answer feeds has none."""
+    root = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    child_folder = Folder.objects.create(name="Child", parent_folder=root)
+    _audit("Parent", root, framework, {"R111": ("non_compliant", 2, 1)})
+    _audit("Child", child_folder, framework, ANSWERS)
+    _enable_inheritance("parent_wins")
 
     report = _report(admin_client, framework)
     rows = _row_scores(report, "Child")
@@ -333,4 +373,28 @@ def test_combined_view_scores(admin_client, framework):
     assert combined["total"] == _layers(3.75, None, None)
     assert combined["sections"][f"{URN}:s11"] == _layers(2.5, None, None)
     # A section with no inherited answer keeps all its scores.
+    assert combined["sections"][f"{URN}:s21"] == _layers(5.0, 1.0, 3.0)
+
+
+@pytest.mark.django_db
+def test_combined_view_leaves_out_other_scales(admin_client, framework):
+    """Scores on different scales are never combined: an answer inherited from
+    an audit on another scale leaves out every combined score it would feed."""
+    root = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    child_folder = Folder.objects.create(name="Child", parent_folder=root)
+    parent = _audit("Parent", root, framework, {"R111": ("non_compliant", 50, 1)})
+    ComplianceAssessment.objects.filter(pk=parent.pk).update(min_score=0, max_score=100)
+    _audit("Child", child_folder, framework, ANSWERS)
+    _enable_inheritance("parent_wins")
+
+    report = _report(admin_client, framework)
+    rows = _row_scores(report, "Child")
+    assert rows["R111"]["inheritance"]["inherited"] is True
+    assert rows["R111"]["combined_scores"] == _layers(None, None, None)
+
+    entry = _audit_entry(report, "Child")
+    assert entry["scores"]["total"] == _layers(4.25, 1.75, 3.0)
+    combined = entry["combined_scores"]
+    assert combined["total"] == _layers(None, None, None)
+    assert combined["sections"][f"{URN}:s11"] == _layers(None, None, None)
     assert combined["sections"][f"{URN}:s21"] == _layers(5.0, 1.0, 3.0)

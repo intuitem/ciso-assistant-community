@@ -5527,6 +5527,7 @@
 	"soaNoComplianceAssessments": "Aucun audit de conformité trouvé",
 	"soaNoRiskAssessments": "Aucune analyse de risques trouvée",
 	"applicable": "Applicable",
+	"notApplicableCountsAsScore": "Non applicable : compte pour {score}",
 	"backToSelection": "Retour à la sélection",
 	"soaGeneratedFrom": "Généré à partir de : {assessment}",
 	"soaFramework": "Référentiel : {framework}",

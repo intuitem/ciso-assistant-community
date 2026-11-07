@@ -11252,6 +11252,12 @@ class FrameworkViewSet(BaseModelViewSet):
                     )
                     if inherited_ra is not None
                     else None,
+                    # Part of what the scores mean, so readable with them even
+                    # when compliance is hidden (score-only audits).
+                    "not_applicable": ra.result
+                    == RequirementAssessment.Result.NOT_APPLICABLE
+                    if visible
+                    else None,
                     "compliance_assessment_id": str(ca.id),
                     "compliance_assessment_name": ca.name,
                     "folder_id": str(ca.folder_id) if ca.folder_id else None,
@@ -11274,6 +11280,18 @@ class FrameworkViewSet(BaseModelViewSet):
             in_scope = in_scope_by_ca[ca.id]
             inherited = inherited_by_ca[ca.id]
             return {
+                # What the scores are on: the page only averages audits that
+                # share a scale, and never combines several audits' sums.
+                "score_scale": {
+                    "min": ca.min_score,
+                    "max": ca.max_score,
+                    "calculation_method": ca.score_calculation_method,
+                },
+                # Score-only audits hide compliance: the page then leaves out
+                # the compliance distribution and percentage.
+                "result_visible": is_field_visible_to(
+                    ca, "result", ca_viewer_roles[ca.id]
+                ),
                 "documentation_score_visible": ca.show_documentation_score
                 and "documentation_score" in visible,
                 "scores": audit_scores(
@@ -11310,6 +11328,8 @@ class FrameworkViewSet(BaseModelViewSet):
                     scores_of(audits_by_id[ca.id])
                     if ca.id in audits_by_id
                     else {
+                        "score_scale": None,
+                        "result_visible": False,
                         "documentation_score_visible": False,
                         "scores": None,
                         "combined_scores": None,

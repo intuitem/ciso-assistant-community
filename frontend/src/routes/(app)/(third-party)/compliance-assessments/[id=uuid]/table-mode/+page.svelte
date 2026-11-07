@@ -30,6 +30,7 @@
 	import {
 		getFieldVisibility,
 		isFieldEditable,
+		showApplicabilityToggle,
 		hasComputedResult,
 		hasComputedScore,
 		shouldShowAutoQuestion,
@@ -43,6 +44,8 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import ApplicabilityToggle from '#lib/components/ComplianceAssessment/ApplicabilityToggle.svelte';
+	import NotApplicableScores from '#lib/components/ComplianceAssessment/NotApplicableScores.svelte';
 	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
@@ -152,6 +155,24 @@
 		isFieldEditable(complianceAssessment, 'documentation_score', viewerRole)
 	);
 	const canEditAnswers = $derived(isFieldEditable(complianceAssessment, 'answers', viewerRole));
+	// Score-only audits mark N/A through the applicability toggle.
+	const applicabilityToggle = $derived(
+		Boolean(complianceAssessment.scoring_enabled) &&
+			showApplicabilityToggle(complianceAssessment, viewerRole)
+	);
+	// Applicability whether compliance is shown or not: a score-only audit hides
+	// `result` and reads `not_applicable`; the toggle keeps both in step.
+	function isNotApplicable(ra: Record<string, any>): boolean {
+		return 'result' in ra ? ra.result === 'not_applicable' : Boolean(ra.not_applicable);
+	}
+	async function setApplicability(
+		ra: Record<string, any>,
+		result: 'not_assessed' | 'not_applicable'
+	) {
+		ra.result = result;
+		ra.not_applicable = result === 'not_applicable';
+		await update(ra, 'result');
+	}
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -732,7 +753,7 @@
 					scoresDefinition={raScoresDef}
 				/>
 			</div>
-		{:else if ra.result !== 'not_applicable'}
+		{:else if !isNotApplicable(ra)}
 			<div class="flex flex-row flex-wrap items-start gap-x-6 gap-y-2">
 				<ScorePair>
 					{#snippet implementation()}
@@ -786,6 +807,19 @@
 					{/snippet}
 				</ScorePair>
 			</div>
+		{:else}
+			<!-- Not applicable: what it counts for, greyed. -->
+			<NotApplicableScores
+				value={ra.anchored_score}
+				min={raMin}
+				max={raMax}
+				scoresDefinition={raScoresDef}
+				showImplementation={showScore}
+				showDocumentation={complianceAssessment.show_documentation_score && showDocumentationScore}
+				implementationLabel={complianceAssessment.show_documentation_score
+					? m.implementationScore()
+					: m.score()}
+			/>
 		{/if}
 	{:else if showScore && showDocumentationScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
@@ -1314,6 +1348,13 @@
 																}}
 															/>
 														</div>
+													{/if}
+													{#if applicabilityToggle && !shallow}
+														<ApplicabilityToggle
+															applicable={!isNotApplicable(requirementAssessment)}
+															disabled={isReadOnly || !canEditScore}
+															onChange={(result) => setApplicability(requirementAssessment, result)}
+														/>
 													{/if}
 													{@render scoreSlot(requirementAssessment)}
 												</div>

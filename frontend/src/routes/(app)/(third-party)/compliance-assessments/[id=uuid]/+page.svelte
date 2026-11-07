@@ -55,6 +55,7 @@
 		darkenColor,
 		getScoreHexColor,
 		getFieldVisibility,
+		isFieldVisible,
 		roundScore
 	} from '#lib/utils/helpers.js';
 	import { auditFiltersStore, expandedNodesState } from '#lib/utils/stores.js';
@@ -126,7 +127,10 @@
 	const outcomeRules = $derived(
 		(compliance_assessment.outcome_rules ?? []) as Record<string, any>[]
 	);
-	// Verdicts follow the result's visibility, computed numbers the score's.
+	// Verdicts follow the result's visibility, computed numbers the score's. A
+	// score-only audit (compliance hidden from the auditor too, as in CyFun) has
+	// no compliance to hide: its verdicts judge scores and N/A counts.
+	const scoreOnlyAudit = $derived(!isFieldVisible(compliance_assessment, 'result', 'auditor'));
 	const shownRules = $derived(
 		outcomeRules.filter((rule) =>
 			rule.kind === 'staircase' || rule.kind === 'weakest_link'
@@ -135,7 +139,7 @@
 					? showScore &&
 						(rule.annotation || rule.label) &&
 						compliance_assessment.computed_values?.[rule.ref_id] != null
-					: showResult
+					: showResult || (scoreOnlyAudit && showScore)
 		)
 	);
 	const outcomeMet = (rule: Record<string, any>) =>
