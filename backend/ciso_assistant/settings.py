@@ -603,6 +603,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "iam.authentication.KnoxTokenAuthentication",
         "iam.authentication.OIDCServiceAccountAuthentication",
+        "iam.authentication.FederatedServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",

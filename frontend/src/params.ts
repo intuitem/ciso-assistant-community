@@ -19,6 +19,8 @@ const matchFields = (param: string) => FIELD_KEYS.has(normalize(param));
 
 const matchFilters = (param: string) => FILTER_KEYS.has(normalize(param));
 
+const matchInteger = (param: string) => /^[1-9]\d*$/.test(param);
+
 const matchIntegration_field = (param: string) => {
 	const fields = ['configs', 'remote_objects'];
 
@@ -52,6 +54,7 @@ export const matchUuid = (param: string) => {
 export const params = defineParams({
 	fields: (param) => (matchFields(param) ? param : undefined),
 	filters: (param) => (matchFilters(param) ? param : undefined),
+	integer: (param) => (matchInteger(param) ? param : undefined),
 	integration_field: (param) => (matchIntegration_field(param) ? param : undefined),
 	lang: (param) => (matchLang(param) ? param : undefined),
 	thirdparty_urlmodels: (param) => (matchThirdparty_urlmodels(param) ? param : undefined),

@@ -1,3 +1,4 @@
+import json
 from typing import Any, Optional
 
 import structlog
@@ -50,3 +51,22 @@ def redact_audited_secret(value: str) -> str:
     only masks the first half of the value, which would still publish most of a
     password hash to anyone holding `view_central_auditlog`."""
     return "**********" if value else value
+
+
+AUDITED_SOCIAL_APP_SETTINGS = ("server_url",)
+
+
+def mask_social_app_settings(value: str) -> str:
+    """auditlog mask for `SocialApp.settings`: an allowlist, because allauth
+    lets settings carry credentials (e.g. `certificate_key`) under
+    provider-specific names. Anything unparseable is fully redacted."""
+    try:
+        app_settings = json.loads(value)
+    except TypeError, ValueError:
+        return redact_audited_secret(value)
+    if not isinstance(app_settings, dict):
+        return redact_audited_secret(value)
+    return json.dumps(
+        {k: app_settings[k] for k in AUDITED_SOCIAL_APP_SETTINGS if k in app_settings},
+        sort_keys=True,
+    )
