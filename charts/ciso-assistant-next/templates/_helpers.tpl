@@ -118,6 +118,17 @@ Uses the Qdrant REST port (6333, fixed by the subchart's service).
 {{- end -}}
 
 {{/*
+Backend / Huey env var pointing Django's cache at the memcached container of the same pod.
+MEMCACHED_LOCATION is left to its backend default (127.0.0.1:11211).
+*/}}
+{{- define "ciso-assistant.memcachedEnv" -}}
+{{- if .Values.memcached.enabled -}}
+- name: ENABLE_MEMCACHED
+  value: "True"
+{{- end -}}
+{{- end -}}
+
+{{/*
 Path of the merged CA bundle produced by the init container (system roots + extra CA).
 */}}
 {{- define "ciso-assistant.extraCerts.bundlePath" -}}

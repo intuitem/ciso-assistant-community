@@ -798,6 +798,25 @@ else:
     }
     logger.info("SQLITE_FILE: %s", SQLITE_FILE)
 
+ENABLE_MEMCACHED = os.environ.get("ENABLE_MEMCACHED", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+"""
+This setting is REQUIRED for ciso-assistant to have consistent caching.
+(otherwise each gunicorn worker will have its own internal(non-shared) cache).
+"""
+
+MEMCACHED_LOCATION = os.environ.get("MEMCACHED_LOCATION", "127.0.0.1:11211")
+if ENABLE_MEMCACHED:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+            "LOCATION": MEMCACHED_LOCATION,
+        }
+    }
+
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
 PASSWORD_HASHERS = [

@@ -9,6 +9,8 @@ services:
       args:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     restart: always
+    depends_on:
+      - memcached
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
@@ -20,6 +22,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
 
     read_only: true
     cap_drop:
@@ -31,6 +35,9 @@ services:
     volumes:
       - ./db:/code/db
     user: "1001:1001"
+    networks:
+      - default
+      - cache
 
   huey:
     container_name: huey
@@ -42,6 +49,8 @@ services:
       args:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     restart: always
+    depends_on:
+      - memcached
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - DJANGO_DEBUG=True
@@ -51,6 +60,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
 
     read_only: true
     cap_drop:
@@ -67,6 +78,23 @@ services:
       - -c
       - |
         python manage.py run_huey
+    networks:
+      - default
+      - cache
+
+  memcached:
+    container_name: memcached
+    image: ${MEMCACHED_IMAGE:-memcached:1.6-alpine}
+    restart: unless-stopped
+    command: ["memcached", "-m", "16"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+    networks:
+      - cache
 
   frontend:
     container_name: frontend
@@ -75,6 +103,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
     read_only: true
     cap_drop:
       - ALL
@@ -111,3 +141,8 @@ services:
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'
+
+networks:
+  default:
+  cache:
+    internal: true

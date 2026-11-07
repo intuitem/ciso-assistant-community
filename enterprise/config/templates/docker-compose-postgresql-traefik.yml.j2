@@ -27,6 +27,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      memcached:
+        condition: service_started
     environment:
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
@@ -38,6 +40,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -75,6 +79,9 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"{% if can_do_tls %}
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"{% endif %}
+    networks:
+      - default
+      - cache
 
   huey:
     container_name: huey
@@ -83,6 +90,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      memcached:
+        condition: service_started
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -95,6 +104,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -125,6 +136,23 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
+    networks:
+      - default
+      - cache
+
+  memcached:
+    container_name: memcached
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+    command: ["memcached", "-m", "16"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+    networks:
+      - cache
 
   frontend:
     container_name: frontend
@@ -133,6 +161,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -178,6 +208,7 @@ services:
     command:
       {% if enable_debug %}- "--api.insecure=true"{% endif %}
       - "--providers.docker=true"
+      - "--providers.docker.network=ciso-assistant-default"
       - "--providers.docker.exposedbydefault=false"{% if can_do_tls %}
       - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
       - "--entrypoints.web.address=:80"
@@ -192,3 +223,9 @@ services:
       - "--providers.file.directory=/etc/traefik"
       - "--providers.file.watch=true"{% else %}
       - "--experimental.localPlugins.selfsigned.moduleName=traefik.tls"{% endif %}
+
+networks:
+  default:
+    name: ciso-assistant-default
+  cache:
+    internal: true

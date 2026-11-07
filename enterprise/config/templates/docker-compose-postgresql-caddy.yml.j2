@@ -27,6 +27,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      memcached:
+        condition: service_started
     environment:
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
@@ -38,6 +40,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -68,6 +72,9 @@ services:
       timeout: 10s
       retries: 30
       start_period: 150s
+    networks:
+      - default
+      - cache
 
   huey:
     container_name: huey
@@ -76,6 +83,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      memcached:
+        condition: service_started
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -88,6 +97,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -117,6 +128,23 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
+    networks:
+      - default
+      - cache
+
+  memcached:
+    container_name: memcached
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+    command: ["memcached", "-m", "16"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+    networks:
+      - cache
 
   frontend:
     container_name: frontend
@@ -125,6 +153,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -166,3 +196,8 @@ services:
         tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
         tls internal{% endif %}{% endif %}
       }" > Caddyfile && caddy run'
+
+networks:
+  default:
+  cache:
+    internal: true

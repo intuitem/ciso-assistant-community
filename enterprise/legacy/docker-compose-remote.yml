@@ -3,13 +3,20 @@ services:
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-enterprise/backend:latest
     restart: always
+    depends_on:
+      - memcached
     environment:
       - ALLOWED_HOSTS=backend,cool-vm
       - CISO_ASSISTANT_URL=https://cool-vm:8443
       - DJANGO_DEBUG=True
       - AUTH_TOKEN_TTL=7200
+      - ENABLE_MEMCACHED=True
+      - MEMCACHED_LOCATION=memcached:11211
     volumes:
       - ./db:/code/db
+    networks:
+      - default
+      - cache
 
   # huey:
   #   container_name: huey
@@ -26,6 +33,20 @@ services:
   #     - |
   #       poetry run python manage.py run_huey
 
+  memcached:
+    container_name: memcached
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+    command: ["memcached", "-m", "16"]
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+    networks:
+      - cache
+
   frontend:
     container_name: frontend
     environment:
@@ -33,6 +54,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://cool-vm:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
 
     image: ghcr.io/intuitem/ciso-assistant-enterprise/frontend:latest
     depends_on:
@@ -59,3 +82,8 @@ services:
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'
+
+networks:
+  default:
+  cache:
+    internal: true
