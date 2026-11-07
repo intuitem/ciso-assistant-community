@@ -71,6 +71,15 @@ def coerce_sample_value(value):
 
 # MetricDefinition serializers
 class MetricDefinitionWriteSerializer(BaseModelSerializer):
+    def validate_decimals(self, value):
+        from metrology.models import MAX_DECIMALS
+
+        if value is not None and value > MAX_DECIMALS:
+            raise serializers.ValidationError(
+                _("At most %(max)d decimals") % {"max": MAX_DECIMALS}
+            )
+        return value
+
     def validate_choices_definition(self, value):
         if value is None:
             return value
@@ -142,6 +151,28 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
         exclude = ["translations"]
 
 
+class InlineMetricDefinitionSerializer(MetricDefinitionWriteSerializer):
+    """The definition written with a metric made in one step: its own
+    columns only. The domain and, unless given, the name come from the
+    metric; a library, formula or labels are never set from the form."""
+
+    class Meta:
+        model = MetricDefinition
+        extra_kwargs = {"name": {"required": False, "allow_blank": True}}
+        fields = [
+            "name",
+            "description",
+            "ref_id",
+            "category",
+            "unit",
+            "choices_definition",
+            "higher_is_better",
+            "decimals",
+            "default_target",
+            "default_collection_frequency",
+        ]
+
+
 class MetricDefinitionReadSerializer(ReferentialSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
@@ -158,6 +189,14 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
 # MetricInstance serializers
 class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
     assignment_notifications = {"owner": "object_assignment"}
+
+    # A metric made in one step: the definition's fields, written with the
+    # metric instead of a `metric_definition` picked beforehand. The
+    # definition is created in the metric's domain, named after the metric.
+    # Null when a definition is picked instead: the form always sends both.
+    definition = InlineMetricDefinitionSerializer(
+        write_only=True, required=False, allow_null=True
+    )
 
     organisation_objectives = serializers.PrimaryKeyRelatedField(
         queryset=OrganisationObjective.objects.all(),
@@ -179,7 +218,53 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
             data["collection_frequency"] = current
         return super().to_internal_value(data)
 
+    def create(self, validated_data):
+        from rest_framework.exceptions import PermissionDenied
+
+        from metrology.definitions import create_metric
+
+        inline = validated_data.pop("definition", None)
+        if inline is None:
+            return self._create_with_defaults(validated_data)
+        fields = dict(inline)
+        name = fields.pop("name", None) or validated_data["name"]
+
+        def new_instance(definition):
+            return self._create_with_defaults(
+                {**validated_data, "metric_definition": definition}
+            )
+
+        try:
+            _definition, instance = create_metric(
+                self.context["request"].user,
+                validated_data["folder"],
+                name,
+                fields,
+                new_instance,
+            )
+        except PermissionError:
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add objects in this folder"}
+            )
+        return instance
+
+    def _create_with_defaults(self, validated_data):
+        definition = validated_data["metric_definition"]
+        # A metric from a definition starts with the definition's defaults
+        # unless the form says otherwise.
+        if validated_data.get("collection_frequency") is None:
+            validated_data["collection_frequency"] = (
+                definition.default_collection_frequency
+            )
+        if (
+            "target_value" not in validated_data
+            and definition.default_target is not None
+        ):
+            validated_data["target_value"] = definition.default_target
+        return super().create(validated_data)
+
     def update(self, instance, validated_data):
+        validated_data.pop("definition", None)
         # Check if folder is being changed
         new_folder = validated_data.get("folder")
         if new_folder and new_folder != instance.folder:
@@ -195,6 +280,24 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
 
         def current(name):
             return attrs.get(name, getattr(self.instance, name, None))
+
+        inline = attrs.get("definition")
+        if self.instance is None and not attrs.get("metric_definition") and not inline:
+            raise serializers.ValidationError(
+                {"metric_definition": [_("This field is required.")]}
+            )
+        if (
+            self.instance is not None
+            and "metric_definition" in attrs
+            and attrs["metric_definition"] is None
+        ):
+            raise serializers.ValidationError(
+                {"metric_definition": [_("This field may not be null.")]}
+            )
+        if inline and attrs.get("metric_definition") and self.instance is None:
+            raise serializers.ValidationError(
+                {"definition": [_("Pick a definition or define one, not both")]}
+            )
 
         # A pick names an instance whose values the formula will show: one
         # the author may not read must not be theirs to pick.
@@ -228,11 +331,15 @@ class MetricInstanceWriteSerializer(AssignmentNotificationMixin, BaseModelSerial
         fields = "__all__"
         # The sampler's own bookkeeping: a client stamping last_computed_at
         # in the future would stop the instance from ever being computed.
+        # The collection task is generated for the metric, never picked.
         read_only_fields = [
             "last_computed_at",
             "last_computation_error",
             "recompute_from",
+            "collection_task",
         ]
+        # Absent or null while an inline definition is written with the metric.
+        extra_kwargs = {"metric_definition": {"required": False, "allow_null": True}}
 
 
 class MetricInstanceReadSerializer(BaseModelSerializer):
@@ -248,8 +355,12 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
             {"unit": ["name", "id"]},
             "choices_definition",
             "higher_is_better",
+            "decimals",
+            "default_target",
+            "default_collection_frequency",
         ]
     )
+    collection_task = FieldsRelatedField(["id", "name"])
     owner = FieldsRelatedField(many=True)
     organisation_objectives = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -258,6 +369,11 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
+    )
+    # The label above is for reading; the value names the period a typed
+    # value answers for.
+    collection_frequency_value = serializers.CharField(
+        source="collection_frequency", read_only=True
     )
     current_value = serializers.SerializerMethodField()
     raw_value = serializers.SerializerMethodField()
@@ -304,7 +420,16 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
         timestamp = whole_second(validated_data.pop("timestamp"))
         folder = metric_instance.folder
         self._check_object_perm(validated_data, "add", folder=folder)
-        if self._taken(metric_instance, timestamp):
+        # A period write replaces the period's value, a plain write the
+        # second's: either takes the right to change. A period write landing
+        # on a taken second replaces nothing (record() makes room for it).
+        period = validated_data.get("period_start")
+        replaces = (
+            self._period_taken(metric_instance, period)
+            if period is not None
+            else self._taken(metric_instance, timestamp)
+        )
+        if replaces:
             self._check_object_perm(validated_data, "change", folder=folder)
         sample, _created = CustomMetricSample.record(
             metric_instance, timestamp, **validated_data
@@ -317,6 +442,14 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             CustomMetricSample.objects.exclude(source=CustomMetricSample.Source.DERIVED)
             .exclude(pk=other_than)
             .filter(metric_instance=metric_instance, timestamp=timestamp)
+            .exists()
+        )
+
+    @staticmethod
+    def _period_taken(metric_instance, period_start, other_than=None):
+        return (
+            CustomMetricSample.objects.exclude(pk=other_than)
+            .filter(metric_instance=metric_instance, period_start=period_start)
             .exists()
         )
 
@@ -360,6 +493,30 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
                 {"timestamp": _("Another sample of this metric holds this second")}
             )
 
+        if attrs.get("period_start") is not None and target is not None:
+            # The period a value answers for is a calendar period of the
+            # metric's frequency: any moment inside it names it.
+            from django.utils import timezone
+
+            from metrology.series import period_start
+
+            period = period_start(attrs["period_start"], target.collection_frequency)
+            if period > timezone.now():
+                raise serializers.ValidationError(
+                    {"period_start": [_("The period has not started yet")]}
+                )
+            attrs["period_start"] = period
+            if self.instance is not None and self._period_taken(
+                target, period, other_than=self.instance.pk
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "period_start": [
+                            _("Another value of this metric answers for this period")
+                        ]
+                    }
+                )
+
         if "value" in attrs:
             value = attrs["value"]
         elif self.instance is not None:
@@ -398,8 +555,8 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
         model = CustomMetricSample
         exclude = ["folder"]
         # What wrote the sample is a fact the server records: through this
-        # serializer, always a person.
-        read_only_fields = ["source", "period_start"]
+        # serializer, always a person. The period is the person's to say.
+        read_only_fields = ["source"]
         # The (instance, second) constraint is record()'s to apply: a sample
         # for a taken second replaces it instead of being refused.
         validators = []
@@ -646,6 +803,7 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
                     {"unit": ["name", "id"]},
                     "choices_definition",
                     "higher_is_better",
+                    "decimals",
                 ]
             },
         ]

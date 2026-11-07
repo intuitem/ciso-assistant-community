@@ -4205,7 +4205,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'unit', urlModel: 'terminologies' }
 		],
-		selectFields: [{ field: 'category' }],
+		selectFields: [{ field: 'category' }, { field: 'default_collection_frequency' }],
 		reverseForeignKeyFields: [
 			{
 				field: 'metric_definition',
