@@ -20,7 +20,11 @@ from core.models import (
     RequirementAssignment,
     RequirementNode,
 )
-from core.utils import is_applicability_write
+from core.utils import (
+    is_applicability_readable,
+    is_applicability_write,
+    respondent_progress_counts,
+)
 from iam.models import Folder, User, UserGroup
 
 EDIT = {"auditor": "edit", "respondent": "edit"}
@@ -134,6 +138,68 @@ def test_reads_carry_applicability_with_the_scores(setup):
     assert "anchored_score" not in data
 
 
+@pytest.mark.django_db
+def test_reads_keep_a_hidden_verdict_hidden(setup):
+    """Compliance the auditor reads but the respondent does not: N/A is part of
+    that verdict, so the respondent's read leaves out the applicability."""
+    client, audit = setup
+    ra = audit({**SCORE_ONLY, "result": {"auditor": "edit", "respondent": "hidden"}})
+    ra.result = "not_applicable"
+    ra.save()
+    assignment = ra.assignments.get()
+    response = client.get(
+        f"/api/requirement-assignments/{assignment.id}/requirements_list/"
+    )
+    assert response.status_code == 200, response.content
+    [data] = response.json()["requirement_assessments"]
+    assert data["score"] is None
+    assert "result" not in data
+    assert "not_applicable" not in data
+    assert "anchored_score" not in data
+
+
+@pytest.mark.django_db
+def test_malformed_applicability_is_dropped(setup):
+    """A non-string `result` is not an applicability switch: dropped like any
+    field the respondent cannot write, not a server error."""
+    client, audit = setup
+    ra = audit(SCORE_ONLY)
+    assert _patch(client, ra, {"result": ["not_applicable"]}).result == "not_assessed"
+    assert _patch(client, ra, {"result": {"a": 1}}).result == "not_assessed"
+
+
+@pytest.mark.django_db
+def test_respondent_progress_follows_the_audit_rule(setup):
+    """Without questions or alignment, a score-only requirement is done when N/A
+    or scored above the minimum (1 here), as in the audit's own progress."""
+    _, audit = setup
+    ra = audit(SCORE_ONLY)
+
+    def progress(**values):
+        for name, value in values.items():
+            setattr(ra, name, value)
+        ra.save()
+        return respondent_progress_counts(ra.compliance_assessment, [ra])
+
+    assert progress() == (1, 0, 0)
+    assert progress(score=1, is_scored=True) == (1, 0, 0)
+    assert progress(score=2) == (1, 1, 1)
+    assert progress(score=None, is_scored=False, result="not_applicable") == (1, 1, 1)
+
+
+@pytest.mark.django_db
+def test_respondent_progress_reads_compliance_where_shown(setup):
+    _, audit = setup
+    ra = audit({**SCORE_ONLY, "result": EDIT})
+    ra.score = 4
+    ra.is_scored = True
+    ra.save()
+    assert respondent_progress_counts(ra.compliance_assessment, [ra]) == (1, 0, 0)
+    ra.result = "compliant"
+    ra.save()
+    assert respondent_progress_counts(ra.compliance_assessment, [ra]) == (1, 1, 1)
+
+
 @pytest.mark.parametrize(
     "field_visibility, field, value, expected",
     [
@@ -143,9 +209,34 @@ def test_reads_carry_applicability_with_the_scores(setup):
         (SCORE_ONLY, "status", "done", False),
         ({**SCORE_ONLY, "result": EDIT}, "result", "not_applicable", False),
         ({**SCORE_ONLY, "score": HIDDEN}, "result", "not_applicable", False),
+        (SCORE_ONLY, "result", ["not_applicable"], False),
+        (SCORE_ONLY, "result", {"not_applicable": 1}, False),
     ],
 )
 @pytest.mark.django_db
 def test_is_applicability_write(field_visibility, field, value, expected):
     audit = ComplianceAssessment(field_visibility=field_visibility)
     assert is_applicability_write(audit, field, value, "respondent") is expected
+
+
+VERDICT_FOR_AUDITORS = {
+    **SCORE_ONLY,
+    "result": {"auditor": "edit", "respondent": "hidden"},
+}
+
+
+@pytest.mark.parametrize(
+    "field_visibility, role, expected",
+    [
+        (SCORE_ONLY, "respondent", True),
+        (SCORE_ONLY, "auditor", True),
+        ({**SCORE_ONLY, "result": EDIT}, "respondent", True),
+        (VERDICT_FOR_AUDITORS, "respondent", False),
+        (VERDICT_FOR_AUDITORS, "auditor", True),
+        ({**SCORE_ONLY, "score": HIDDEN}, "auditor", False),
+    ],
+)
+@pytest.mark.django_db
+def test_is_applicability_readable(field_visibility, role, expected):
+    audit = ComplianceAssessment(field_visibility=field_visibility)
+    assert is_applicability_readable(audit, role) is expected

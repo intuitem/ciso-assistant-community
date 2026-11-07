@@ -85,7 +85,9 @@ def test_new_audits_hide_compliance(library):
     """CyFun judges scores, not compliance: N/A goes through the applicability
     toggle of score-only audits."""
     visibility = build_initial_field_visibility(
-        SimpleNamespace(field_visibility=_library_framework(library)["field_visibility"])
+        SimpleNamespace(
+            field_visibility=_library_framework(library)["field_visibility"]
+        )
     )
     assert visibility["result"] == HIDDEN
 

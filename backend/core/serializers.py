@@ -4877,10 +4877,10 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         r = self._resolved(obj)
         return r["scores_definition"] if r else None
 
-    # Read with the scores, even where compliance is hidden (score-only audits,
-    # where the applicability toggle sets N/A): whether the requirement is N/A,
-    # and what an N/A answer counts for (shown greyed in place of the scores),
-    # None unless the audit counts N/A at its target.
+    # Read with the scores where compliance is readable, or hidden from everyone
+    # (score-only audits, where the applicability toggle sets N/A): whether the
+    # requirement is N/A, and what an N/A answer counts for (shown greyed in
+    # place of the scores), None unless the audit counts N/A at its target.
     not_applicable = serializers.SerializerMethodField()
     anchored_score = serializers.SerializerMethodField()
 
@@ -4919,12 +4919,12 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         # default-hidden keys like `score` are stripped even when the CA has
         # an empty/incomplete field_visibility map. Structural fields (id,
         # name, etc.) resolve to EVERYONE_EDIT and are never stripped.
-        from core.utils import is_field_visible_to
+        from core.utils import is_applicability_readable, is_field_visible_to
 
         for field_name in list(data.keys()):
             if not is_field_visible_to(ca, field_name, viewer_role):
                 data.pop(field_name, None)
-        if not is_field_visible_to(ca, "score", viewer_role):
+        if not is_applicability_readable(ca, viewer_role):
             data.pop("not_applicable", None)
             data.pop("anchored_score", None)
 

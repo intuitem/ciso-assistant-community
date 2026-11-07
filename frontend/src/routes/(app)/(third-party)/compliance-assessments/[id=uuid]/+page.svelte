@@ -401,7 +401,9 @@
 					showResult,
 					showStatus,
 					showScore,
-					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					// What this viewer may read: a respondent may not see documentation scores
+					// the audit uses (validation keeps the reverse impossible).
+					showDocumentationScore: fieldVis.showDocumentationScore,
 					showExtendedResult,
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,

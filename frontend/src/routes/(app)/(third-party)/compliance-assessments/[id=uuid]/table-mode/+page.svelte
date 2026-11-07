@@ -171,7 +171,8 @@
 	) {
 		ra.result = result;
 		ra.not_applicable = result === 'not_applicable';
-		await update(ra, 'result');
+		// N/A rows are excluded from (or anchored in) the global score
+		if (await update(ra, 'result')) await refreshScores();
 	}
 
 	const hasQuestions = $derived(

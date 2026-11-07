@@ -209,6 +209,7 @@ from core.utils import (
     format_report_timestamp,
     get_report_timezone,
     get_respondent_scoped_folder_ids,
+    is_applicability_readable,
     is_field_visible_to,
     render_answers_cell,
     respondent_progress_counts,
@@ -11177,6 +11178,9 @@ class FrameworkViewSet(BaseModelViewSet):
         visible_layers_by_ca = {
             ca.id: visible_layers(ca, ca_viewer_roles[ca.id]) for ca in cas
         }
+        applicability_readable_by_ca = {
+            ca.id: is_applicability_readable(ca, ca_viewer_roles[ca.id]) for ca in cas
+        }
         in_scope_by_ca: Dict[Any, list] = defaultdict(list)
         # Requirement assessments as the combined view reads them, by CA then RA id.
         inherited_by_ca: Dict[Any, Dict[Any, Any]] = defaultdict(dict)
@@ -11252,11 +11256,12 @@ class FrameworkViewSet(BaseModelViewSet):
                     )
                     if inherited_ra is not None
                     else None,
-                    # Part of what the scores mean, so readable with them even
-                    # when compliance is hidden (score-only audits).
+                    # Part of what the scores mean, so readable with them where
+                    # compliance is readable or hidden from everyone (score-only
+                    # audits); elsewhere it would disclose a hidden verdict.
                     "not_applicable": ra.result
                     == RequirementAssessment.Result.NOT_APPLICABLE
-                    if visible
+                    if applicability_readable_by_ca[ca.id]
                     else None,
                     "compliance_assessment_id": str(ca.id),
                     "compliance_assessment_name": ca.name,

@@ -515,11 +515,30 @@
 			return sum + visible;
 		}, 0)
 	);
+	// A requirement without questions is done as the backend's respondent_progress_counts
+	// counts it: through the respondent's alignment answer when that field is in use,
+	// else through the audit's own content rule (contentDone).
+	const alignmentInUse = $derived(
+		getFieldVisibility(complianceAssessment, 'respondent').showRespondentAlignment
+	);
+	const scoreOnlyAudit = $derived(!getFieldVisibility(complianceAssessment, 'auditor').showResult);
+	// Compliance when the audit shows it; in a score-only audit, N/A or a score
+	// above the minimum. A verdict hidden from this viewer never counts as done.
+	function contentDone(ra: Record<string, any>): boolean {
+		if (scoreOnlyAudit) {
+			const min = ra.effective_min_score ?? complianceAssessment.min_score ?? 0;
+			return Boolean(ra.not_applicable) || (ra.score != null && ra.score > min);
+		}
+		return ra.result != null && ra.result !== 'not_assessed';
+	}
+	function isUnitDone(ra: Record<string, any>): boolean {
+		return alignmentInUse ? Boolean(ra.respondent_alignment) : contentDone(ra);
+	}
 	const answeredQuestions = $derived(
 		assessableItems.reduce((sum, item) => {
 			const answered = item.data.answered_questions ?? 0;
 			if (isFrameworklessAssessableItem(item)) {
-				return sum + (item.data.respondent_alignment ? 1 : 0);
+				return sum + (isUnitDone(item.data) ? 1 : 0);
 			}
 			return sum + answered;
 		}, 0)
@@ -539,17 +558,16 @@
 
 	const totalAssessable = $derived(assessableItems.length);
 	// Per-item completion, mirroring the backend auditee-dashboard rules.
-	// This page is respondent-oriented ON PURPOSE: the audit-level progress
-	// mode (status-driven / score above minimum) does NOT apply here, since
-	// respondents can neither see nor edit those fields. A question-bearing
+	// This page is respondent-oriented ON PURPOSE: status never drives it,
+	// since respondents can neither see nor edit it. A question-bearing
 	// requirement completes through its answers (whether or not they compute
 	// a result), alignment-driven ones through the respondent's alignment
-	// answer, the rest through the result.
+	// answer, the rest through the audit's content rule (contentDone).
 	function isItemDone(item: { data: Record<string, any> }): boolean {
 		const visible = item.data.visible_questions ?? 0;
 		if (visible > 0) return (item.data.answered_questions ?? 0) >= visible;
 		if (useAlignmentProgress) return Boolean(item.data.respondent_alignment);
-		return item.data.result !== 'not_assessed';
+		return contentDone(item.data);
 	}
 	const assessedCount = $derived(assessableItems.filter(isItemDone).length);
 	const progressPercent = $derived(
@@ -580,10 +598,10 @@
 		const answered = item.data.answered_questions ?? 0;
 		// An owed evidence keeps the dot amber: submission would be refused.
 		const complete = owesEvidence(item.data) ? '#f59e0b' : '#22c55e';
-		// Framework-less assessable RA: reflect respondent_alignment state
+		// Framework-less assessable RA: the same unit rule as the progress (isUnitDone)
 		// for both respondent and auditor views so the ToC is accurate for everyone.
 		if (isFrameworklessAssessableItem(item)) {
-			return item.data.respondent_alignment ? complete : '#ef4444';
+			return isUnitDone(item.data) ? complete : '#ef4444';
 		}
 		if (visible === 0) return complete; // no questions = complete
 		if (answered >= visible) return complete; // all answered
@@ -649,6 +667,8 @@
 					score: score,
 					documentation_score: documentationScore
 				});
+				// Progress and maturity read the saved scores
+				await refreshAll();
 			}
 		}, 500);
 	}

@@ -1209,9 +1209,7 @@
 																{#snippet documentation()}
 																	{#if showDocumentation}
 																		<td class="py-1 text-right font-mono {naClass}" title={naTitle}
-																			>{row.not_applicable
-																				? formatScore(row.scores?.documentation_score ?? null)
-																				: (row.documentation_score ?? '—')}</td
+																			>{formatScore(row.scores?.documentation_score ?? null)}</td
 																		>
 																	{/if}
 																{/snippet}
