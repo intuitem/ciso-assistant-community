@@ -89,7 +89,7 @@ from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
 
 from django.utils import timezone, translation
-from django.utils.text import slugify
+from django.utils.text import capfirst, slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -136,7 +136,15 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from iam.models import (
+    Folder,
+    IdPGroup,
+    Permission,
+    Role,
+    RoleAssignment,
+    User,
+    UserGroup,
+)
 from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
@@ -9586,6 +9594,191 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
+    # Names returned per group; the count still covers every object in it.
+    MOVE_PREVIEW_NAMES_PER_GROUP = 50
+    # The object's own fields that may name it in the move preview. `__str__` is not
+    # used: on some models it embeds a related person (a comment's author, an
+    # answer's owner) the caller may not be allowed to see.
+    MOVE_PREVIEW_NAME_FIELDS = ("name", "email", "label", "title", "ref_id", "filename")
+    MOVE_PREVIEW_FOLDER_LABELS = {
+        Folder.ContentType.DOMAIN: _("Domain"),
+        Folder.ContentType.ENCLAVE: _("Enclave"),
+        Folder.ContentType.PERSONAL: _("Personal folder"),
+    }
+
+    @action(detail=False, methods=["post"], url_path="move-preview")
+    def move_preview(self, request: Request) -> Response:
+        """What moving the listed domains together carries along.
+
+        Covers the listed domains the caller may change; other folders are left out.
+        `subjects` says for each one whether it sits below another listed domain:
+        moved to a common target, it leaves that subtree. `carried` groups the
+        folders and everything filed under the moved subtrees, each group with its
+        `count` and at most `MOVE_PREVIEW_NAMES_PER_GROUP` names; what the caller may
+        not view is counted in `hidden_count`, never named. 400 if `ids` is empty or
+        longer than `BATCH_SIZE_LIMIT`, 403 if none is changeable.
+        """
+        ids = request.data.get("ids")
+        if not isinstance(ids, list) or not ids:
+            return Response(
+                {"error": "No ids provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        perm = Permission.objects.get(codename="change_folder")
+        subjects = sorted(
+            (
+                folder
+                for folder in self.get_queryset().filter(
+                    id__in=ids,
+                    builtin=False,
+                    content_type=Folder.ContentType.DOMAIN,
+                )
+                if RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=folder
+                )
+            ),
+            key=lambda folder: folder.name.lower(),
+        )
+        if not subjects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        subject_ids = {folder.id for folder in subjects}
+        subtree_ids = set(subject_ids)
+        below_selected = set()
+        for folder_id in Folder.descendants.through.objects.filter(
+            from_folder_id__in=subject_ids
+        ).values_list("to_folder_id", flat=True):
+            subtree_ids.add(folder_id)
+            if folder_id in subject_ids:
+                below_selected.add(folder_id)
+
+        # Per model, not per folder: view_folder alone does not let a role read what
+        # a domain holds.
+        granted = RoleAssignment.get_permissions_per_folder(
+            request.user, is_recursive=True
+        )
+
+        def viewable_folder_ids(model) -> set:
+            codename = f"view_{model._meta.model_name}"
+            return {
+                folder_id
+                for folder_id in subtree_ids
+                if codename in granted.get(str(folder_id), ())
+            }
+
+        viewable_ids_by_model = {}
+
+        def can_view(model, pk) -> bool:
+            if model not in viewable_ids_by_model:
+                viewable_ids_by_model[model] = {
+                    str(object_id)
+                    for object_id in RoleAssignment.get_viewable_object_ids(
+                        request.user, model
+                    )
+                }
+            return str(pk) in viewable_ids_by_model[model]
+
+        def display_name(obj) -> str:
+            if not isinstance(obj, RoleAssignment):
+                fields = {field.name for field in obj._meta.concrete_fields}
+                for field in self.MOVE_PREVIEW_NAME_FIELDS:
+                    if field in fields and (value := getattr(obj, field)):
+                        return str(value)
+                return f"{capfirst(obj._meta.verbose_name)} {str(obj.pk)[:8]}"
+            # The assignment is viewable, its role and principal not necessarily:
+            # name only what the caller could read on its own.
+            role = (
+                obj.role.name
+                if obj.role_id and can_view(Role, obj.role_id)
+                else str(_("Role assignment"))
+            )
+            if obj.user_id and can_view(User, obj.user_id):
+                return f"{role} → {obj.user.email}"
+            if obj.user_group_id and can_view(UserGroup, obj.user_group_id):
+                return f"{role} → {obj.user_group.name}"
+            return role
+
+        groups = []
+        hidden_count = 0
+
+        def add_group(key, verbose_name, queryset, viewable) -> None:
+            nonlocal hidden_count
+            if viewable != subtree_ids:
+                hidden_count += queryset.exclude(folder_id__in=viewable).count()
+            if not viewable:
+                return
+            named = queryset.filter(folder_id__in=viewable)
+            count = named.count()
+            if not count:
+                return
+            objects = [
+                {"id": str(obj.pk), "name": display_name(obj)}
+                for obj in named[: self.MOVE_PREVIEW_NAMES_PER_GROUP]
+            ]
+            objects.sort(key=lambda o: (o["name"] or "").lower())
+            groups.append(
+                {
+                    "model": key,
+                    "verbose_name": str(verbose_name),
+                    "count": count,
+                    "objects": objects,
+                }
+            )
+
+        # Every folder below a moved domain moves with it, enclaves included. A
+        # folder's own folder is itself, so view_folder is checked on that folder.
+        viewable_folders = viewable_folder_ids(Folder)
+        carried_folders = (
+            Folder.objects.filter(id__in=subtree_ids - subject_ids)
+            .annotate(folder_id=F("id"))
+            .order_by("name")
+        )
+        for content_type, label in self.MOVE_PREVIEW_FOLDER_LABELS.items():
+            add_group(
+                f"Folder.{content_type}",
+                label,
+                carried_folders.filter(content_type=content_type),
+                viewable_folders,
+            )
+        for model in self._folder_content_models(exempt=frozenset()):
+            # By name where there is one, so the capped names are the first ones.
+            has_name = any(field.name == "name" for field in model._meta.fields)
+            queryset = model._base_manager.filter(folder_id__in=subtree_ids).order_by(
+                "name" if has_name else "pk"
+            )
+            if model is RoleAssignment:
+                queryset = queryset.select_related("role", "user", "user_group")
+            add_group(
+                model.__name__,
+                model._meta.verbose_name,
+                queryset,
+                viewable_folder_ids(model),
+            )
+
+        groups.sort(key=lambda g: g["verbose_name"].lower())
+        return Response(
+            {
+                "subjects": [
+                    {
+                        "id": str(folder.id),
+                        "name": folder.name,
+                        "below_selected": folder.id in below_selected,
+                    }
+                    for folder in subjects
+                ],
+                "carried": {
+                    "count": sum(g["count"] for g in groups),
+                    "hidden_count": hidden_count,
+                    "grouped_objects": groups,
+                },
+            }
+        )
+
     def cascade_preclear(self, instance):
         # Rows of the domain tree that PROTECT other rows of the same tree.
         # References from outside the tree are not cleared and still block.
@@ -9772,24 +9965,27 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         )
 
     @staticmethod
-    def _folder_content_models() -> list:
-        """Every model that could hold a folder's content.
+    def _folder_content_models(
+        exempt: frozenset[str] = frozenset({"iam.UserGroup", "iam.RoleAssignment"}),
+    ) -> list:
+        """Every model that could hold a folder's content, except the `exempt` labels.
 
-        Exhaustive rather than curated: deletion cascades through every FK. The IAM
-        objects every domain auto-provisions are exempt, or nothing would be deletable.
-        Models whose table this edition never created are dropped up front: probing one
-        raises, and on PostgreSQL that aborts the surrounding transaction, so the error
-        cannot simply be caught and skipped.
+        Exhaustive rather than curated: deletion cascades through every FK. By default
+        the IAM objects every domain auto-provisions are exempt, or nothing would be
+        deletable. Proxies are left out: their concrete model already covers their
+        rows. Models whose table this edition never created are dropped up front:
+        probing one raises, and on PostgreSQL that aborts the surrounding transaction,
+        so the error cannot simply be caught and skipped.
         """
         from django.apps import apps
         from django.db import connection
 
         tables = set(connection.introspection.table_names())
-        exempt = {"iam.UserGroup", "iam.RoleAssignment"}
         return [
             model
             for model in apps.get_models()
             if model is not Folder
+            and not model._meta.proxy
             and model._meta.label not in exempt
             and model._meta.db_table in tables
             and any(
