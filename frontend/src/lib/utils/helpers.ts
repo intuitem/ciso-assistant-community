@@ -752,6 +752,37 @@ export function getFieldVisibility(
 }
 
 /**
+ * Whether the viewer gets the applicability toggle: in a score-only audit
+ * (compliance hidden from the auditor too) a requirement is marked not
+ * applicable through it, since compliance is the only place N/A lives.
+ * Editable for a role that edits scores (mirrors the backend's
+ * `is_applicability_write`).
+ */
+export function showApplicabilityToggle(
+	complianceAssessment: Record<string, any> | null | undefined,
+	viewerRole: 'respondent' | 'auditor'
+): boolean {
+	return (
+		isFieldVisible(complianceAssessment, 'score', viewerRole) &&
+		!isFieldVisible(complianceAssessment, 'result', 'auditor')
+	);
+}
+
+/**
+ * Maturity (the "overall" score of CyFun): the average of the implementation and
+ * documentation scores, a missing documentation score counting at the bottom of
+ * the scale, as the backend counts it (ComplianceAssessment.requirement_layer_scores
+ * for a requirement, the average of the two aggregates for a section).
+ */
+export function maturityScore(
+	implementation: number,
+	documentation: number | null | undefined,
+	minScore: number
+): number {
+	return (implementation + (documentation ?? minScore)) / 2;
+}
+
+/**
  * Check whether any question in a questions object has at least one choice with
  * a *resolvable* `compute_result`. Mirrors `resolveComputeResult`: empty strings,
  * whitespace, and unknown values are not treated as result-bearing, so a

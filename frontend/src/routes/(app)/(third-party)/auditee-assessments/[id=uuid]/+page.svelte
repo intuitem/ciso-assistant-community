@@ -6,6 +6,7 @@
 	import Question from '#lib/components/Forms/Question.svelte';
 	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
 	import Score from '#lib/components/Forms/Score.svelte';
+	import ScoreControl from '#lib/components/Forms/ScoreControl.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import SplashCard from '#lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
@@ -30,6 +31,9 @@
 		hasComputedScore,
 		resultBadgeStyle,
 		isFieldEditable as isFieldEditableHelper,
+		showApplicabilityToggle,
+		maturityScore,
+		roundScore,
 		shouldShowAutoQuestion,
 		buildAutoAlignmentQuestion,
 		alignmentValueFromChoiceUrn,
@@ -41,6 +45,8 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import ApplicabilityToggle from '#lib/components/ComplianceAssessment/ApplicabilityToggle.svelte';
+	import NotApplicableScores from '#lib/components/ComplianceAssessment/NotApplicableScores.svelte';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDate } from '#lib/utils/datetime.js';
 	import { Accordion, Popover, Progress } from '@skeletonlabs/skeleton-svelte';
@@ -137,6 +143,21 @@
 	const canEditResult = $derived(isFieldEditable('result'));
 	const canEditScore = $derived(isFieldEditable('score'));
 	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
+	// Score-only audits mark N/A through the applicability toggle.
+	const applicabilityToggle = $derived(
+		Boolean(complianceAssessment.scoring_enabled) &&
+			showApplicabilityToggle(complianceAssessment, viewerRole)
+	);
+	// Applicability whether compliance is shown or not: a score-only audit hides
+	// `result` and reads `not_applicable`; the toggle keeps both in step.
+	function isNotApplicable(ra: Record<string, any>): boolean {
+		return 'result' in ra ? ra.result === 'not_applicable' : Boolean(ra.not_applicable);
+	}
+	function setApplicability(ra: Record<string, any>, result: 'not_assessed' | 'not_applicable') {
+		ra.result = result;
+		ra.not_applicable = result === 'not_applicable';
+		update(ra, 'result');
+	}
 	const canEditObservation = $derived(isFieldEditable('observation'));
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
 	const canEditTaskTemplates = $derived(isFieldEditable('task_templates'));
@@ -1530,6 +1551,17 @@
 										</div>
 									{/if}
 
+									<!-- Applicability (score-only audits) -->
+									{#if applicabilityToggle}
+										<div class="flex justify-center w-full my-2">
+											<ApplicabilityToggle
+												applicable={!isNotApplicable(requirementAssessment)}
+												disabled={!canEditScore}
+												onChange={(result) => setApplicability(requirementAssessment, result)}
+											/>
+										</div>
+									{/if}
+
 									<!-- Extended result -->
 									{#if showExtendedResult}
 										<div class="flex flex-col items-center w-full my-2">
@@ -1556,7 +1588,23 @@
 									<!-- Score -->
 									{#if showScore}
 										<div class="flex flex-col w-full place-items-center">
-											{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
+											{#if complianceAssessment.scoring_enabled && isNotApplicable(requirementAssessment)}
+												<!-- Not applicable, computed score or not: what it counts for, greyed. -->
+												<NotApplicableScores
+													value={requirementAssessment.anchored_score}
+													min={requirementAssessment.effective_min_score ??
+														complianceAssessment.min_score}
+													max={requirementAssessment.effective_max_score ??
+														complianceAssessment.max_score}
+													scoresDefinition={requirementAssessment.effective_scores_definition ??
+														complianceAssessment.scores_definition}
+													showImplementation
+													showDocumentation={showDocumentationScore}
+													implementationLabel={complianceAssessment.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+												/>
+											{:else if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
 												{@const raMin =
 													requirementAssessment.effective_min_score ??
 													complianceAssessment.min_score}
@@ -1593,7 +1641,7 @@
 														</Progress>
 													</div>
 												</div>
-											{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
+											{:else if complianceAssessment.scoring_enabled}
 												{@const raMin =
 													requirementAssessment.effective_min_score ??
 													complianceAssessment.min_score}
@@ -1644,6 +1692,21 @@
 														{/if}
 													{/snippet}
 												</ScorePair>
+												{#if showDocumentationScore && requirementAssessment.is_scored && requirementAssessment.score != null}
+													<ScoreControl
+														editable={false}
+														value={roundScore(
+															maturityScore(
+																requirementAssessment.score,
+																requirementAssessment.documentation_score,
+																raMin
+															)
+														)}
+														min={raMin}
+														max={raMax}
+														label={m.maturity()}
+													/>
+												{/if}
 											{/if}
 										</div>
 									{/if}

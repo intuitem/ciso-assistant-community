@@ -5665,8 +5665,6 @@
 	"backToFramework": "Zurück zum Referenzwerk",
 	"compliancePercentage": "Konformität %",
 	"complianceFormulaShort": "konform + ½·teilweise, ohne N/A und unbewertete Anforderungen",
-	"averageImplementationScore": "Durchschnittliche Implementierungsbewertung",
-	"overScoredRequirementsOnly": "nur für Anforderungen mit Bewertungspunktzahl",
 	"visibleToCurrentUser": "für den aktuellen Benutzer sichtbar",
 	"inScopeAfterIGFilter": "im Scope nach IG-Filter",
 	"overallResultDistribution": "Gesamtergebnisverteilung",
