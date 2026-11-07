@@ -4,7 +4,7 @@ import uuid
 
 import pandas as pd
 
-from core.constants import COUNTRY_CHOICES
+from core.constants import COUNTRY_CHOICES, EU_COUNTRIES_SET
 from core.models import Actor, Terminology, ValidationFlow
 from core.serializers import ActorReadSerializer
 from core.views import (
@@ -50,36 +50,6 @@ from .models import (
 )
 
 DPIA_OVERVIEW_PAGE = 50
-
-EU_COUNTRIES_SET = {
-    "AT",
-    "BE",
-    "BG",
-    "HR",
-    "CY",
-    "CZ",
-    "DK",
-    "EE",
-    "FI",
-    "FR",
-    "DE",
-    "GR",
-    "HU",
-    "IE",
-    "IT",
-    "LV",
-    "LT",
-    "LU",
-    "MT",
-    "NL",
-    "PL",
-    "PT",
-    "RO",
-    "SK",
-    "SI",
-    "ES",
-    "SE",
-}
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):

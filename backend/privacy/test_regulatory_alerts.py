@@ -20,7 +20,14 @@ from core.tasks import (
 )
 from iam.models import Folder, User
 from notifications.models import Notification
-from privacy.models import DataBreach, PersonalData, Processing, Purpose, RightRequest
+from privacy.models import (
+    DataBreach,
+    DataTransfer,
+    PersonalData,
+    Processing,
+    Purpose,
+    RightRequest,
+)
 from privacy.test_data_breach import admin_client, domain  # noqa: F401
 from tprm.models import Contract
 
@@ -268,3 +275,22 @@ def test_dpia_recorded_as_a_reference_is_not_a_gap(folder, owner):
 
     check_processing_obligations.call_local()
     assert _rows("processing_obligation_gap").count() == 0
+
+
+def test_transfer_inside_the_eea_needs_no_mechanism(folder, owner):
+    """Chapter V mechanisms govern transfers out of the EEA only (Norway is EEA, not
+    EU); a transfer to the US still needs one."""
+    processing = Processing.objects.create(name="Hosting", folder=folder)
+    processing.assigned_to.set([owner.actor])
+    Purpose.objects.create(name="Run the service", processing=processing, folder=folder)
+    for country in ("FR", "NO"):
+        DataTransfer.objects.create(processing=processing, country=country)
+    assert processing_obligation_gaps(processing) == []
+    check_processing_obligations.call_local()
+    assert _rows("processing_obligation_gap").count() == 0
+
+    DataTransfer.objects.create(processing=processing, country="US")
+    assert processing_obligation_gaps(processing) == ["gapTransferMechanismMissing"]
+    check_processing_obligations.call_local()
+    (row,) = _rows("processing_obligation_gap")
+    assert str(row.context["gap_count"]) == "1"
