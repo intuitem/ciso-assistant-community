@@ -32,6 +32,7 @@ from ..resolvers import (
     resolve_in_folder_or_global,
     _is_uuid,
     resolve_vulnerability_id,
+    resolve_managed_document_id,
 )
 from .write_tools import (
     _normalize_applied_control_status,
@@ -43,6 +44,8 @@ from .write_tools import (
     _severity_value,
     MANUAL_TIMELINE_ENTRY_TYPES,
     INVALID_TIMELINE_ENTRY_TYPE_ERROR,
+    _build_schedule,
+    _get_latest_revision,
 )
 
 
@@ -324,6 +327,74 @@ async def update_team(
             return f"Error updating team: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_team: {str(e)}"
+
+
+async def update_document(
+    document_id: str,
+    name: str = None,
+    description: str = None,
+    content: str = None,
+    template_used: str = None,
+    locale: str = None,
+) -> str:
+    """Update a managed document's metadata and/or markdown content
+
+    Args:
+        document_id: Document ID or name
+        name: New name
+        description: New description
+        content: New markdown content for the latest revision. Only works while
+            that revision is a draft or has changes requested — once it has
+            been submitted for review or published it is locked; call
+            create_document_draft first to start a new editable revision
+        template_used: Reference ID of a document template
+        locale: Locale code, e.g. "en", "fr"
+    """
+    try:
+        resolved_id = resolve_managed_document_id(document_id)
+
+        payload = {}
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if template_used is not None:
+            payload["template_used"] = template_used
+        if locale is not None:
+            payload["locale"] = locale
+
+        results = []
+
+        if payload:
+            res = make_patch_request(f"/managed-documents/{resolved_id}/", payload)
+            if res.status_code != 200:
+                return f"Error updating document: {res.status_code} - {res.text}"
+            document = res.json()
+            label = document.get("display_name") or document.get("name")
+            results.append(f"Updated document: {label} (ID: {document.get('id')})")
+
+        if content is not None:
+            revision, error = _get_latest_revision(resolved_id)
+            if error:
+                return error
+            rev_res = make_patch_request(
+                f"/document-revisions/{revision['id']}/", {"content": content}
+            )
+            if rev_res.status_code != 200:
+                return (
+                    f"Error updating document content: {rev_res.status_code} - "
+                    f"{rev_res.text}"
+                )
+            results.append(
+                f"Updated content (revision {revision.get('version_number', '?')})"
+            )
+
+        if not results:
+            return "Error: No fields provided to update"
+
+        return "; ".join(results)
+    except Exception as e:
+        return f"Error in update_document: {str(e)}"
 
 
 async def update_folder(
@@ -1402,7 +1473,14 @@ async def update_task_template(
     task_date: str = None,
     is_recurrent: bool = None,
     ref_id: str = None,
-    schedule: str = None,
+    schedule_frequency: str = None,
+    schedule_interval: int = None,
+    schedule_days_of_week: list = None,
+    schedule_weeks_of_month: list = None,
+    schedule_months_of_year: list = None,
+    schedule_end_date: str = None,
+    schedule_occurrences: int = None,
+    schedule_overdue_behavior: str = None,
     enabled: bool = None,
     link: str = None,
     folder_id: str = None,
@@ -1416,6 +1494,10 @@ async def update_task_template(
 ) -> str:
     """Update task template properties
 
+    Setting any schedule_* field replaces the whole schedule (not a partial
+    merge) and makes the template recurrent automatically unless is_recurrent
+    is passed explicitly.
+
     Args:
         task_id: Task template ID/name (required)
         name: Task template name
@@ -1424,9 +1506,21 @@ async def update_task_template(
         observation: Observation text
         evidences: Array of evidence UUIDs
         task_date: Task date (YYYY-MM-DD)
-        is_recurrent: Recurrent flag
+        is_recurrent: Recurrent flag (defaults to True when a schedule is
+            given)
         ref_id: Reference ID
-        schedule: Schedule definition
+        schedule_frequency: DAILY | WEEKLY | MONTHLY | YEARLY (required to set
+            a schedule)
+        schedule_interval: Number of periods between occurrences, e.g. 2 for
+            "every 2 weeks" (required to set a schedule)
+        schedule_days_of_week: Days of the week the task repeats on (Monday=1
+            .. Sunday=7)
+        schedule_weeks_of_month: Which week(s) of the month, for a given
+            weekday (1=first .. 4=fourth, -1=last)
+        schedule_months_of_year: Months of the year (1=January .. 12=December)
+        schedule_end_date: Date the recurrence ends (YYYY-MM-DD)
+        schedule_occurrences: Number of occurrences before the recurrence stops
+        schedule_overdue_behavior: DELAY_NEXT | NO_IMPACT (default NO_IMPACT)
         enabled: Enabled flag
         link: Link to evidence (e.g. Jira ticket)
         folder_id: Folder ID/name
@@ -1439,6 +1533,22 @@ async def update_task_template(
         findings_assessment: Array of finding assessment UUIDs
     """
     try:
+        schedule, schedule_error = _build_schedule(
+            schedule_frequency,
+            schedule_interval,
+            schedule_days_of_week,
+            schedule_weeks_of_month,
+            schedule_months_of_year,
+            schedule_end_date,
+            schedule_occurrences,
+            schedule_overdue_behavior,
+        )
+        if schedule_error:
+            return schedule_error
+
+        if schedule is not None and is_recurrent is None:
+            is_recurrent = True
+
         # Build update payload with only provided fields
         payload = {}
 
@@ -1512,6 +1622,88 @@ async def update_task_template(
             return f"Error updating task template: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_task_template: {str(e)}"
+
+
+TASK_NODE_STATUSES = ["pending", "in_progress", "completed", "cancelled"]
+
+
+async def update_task_node(
+    task_node_id: str = None,
+    task_template: str = None,
+    due_date: str = None,
+    status: str = None,
+    observation: str = None,
+) -> str:
+    """Update one occurrence (TaskNode) of a recurring task template: its status
+    and/or observation. observation is a plain text field with no size limit
+    (backed by a TEXT column) - a full markdown review report fits fine.
+
+    Identify the occurrence either directly by task_node_id (from
+    get_task_nodes or list_objects("task_nodes")), or by task_template +
+    due_date - e.g. "the January occurrence" of a monthly control.
+
+    Args:
+        task_node_id: Task node UUID
+        task_template: Task template ID/name (used with due_date instead of task_node_id)
+        due_date: Due date of the occurrence: exact YYYY-MM-DD, or YYYY-MM to
+            match a whole month (must be unambiguous - exactly one occurrence)
+        status: pending | in_progress | completed | cancelled
+        observation: Observation text (markdown supported)
+    """
+    try:
+        if task_node_id:
+            resolved_id = task_node_id
+        elif task_template and due_date:
+            resolved_template_id = resolve_task_template_id(task_template)
+            params = {"task_template": resolved_template_id}
+            if len(due_date) == 7:
+                year, month = due_date.split("-")
+                params["due_date__year"] = year
+                params["due_date__month"] = month
+            else:
+                params["due_date"] = due_date
+
+            nodes, error = fetch_all_results("/task-nodes/", params=params)
+            if error:
+                return f"Error finding task occurrence: {error}"
+            if not nodes:
+                return (
+                    f"Error: No task occurrence found for template "
+                    f"'{task_template}' due {due_date}"
+                )
+            if len(nodes) > 1:
+                dates = [n.get("due_date") for n in nodes]
+                return (
+                    f"Error: Ambiguous occurrence, found {len(nodes)} for "
+                    f"{due_date}: {dates}. Pass an exact YYYY-MM-DD or task_node_id"
+                )
+            resolved_id = nodes[0]["id"]
+        else:
+            return "Error: Pass either task_node_id, or both task_template and due_date"
+
+        payload = {}
+        if status is not None:
+            if status not in TASK_NODE_STATUSES:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(TASK_NODE_STATUSES)}"
+            payload["status"] = status
+        if observation is not None:
+            payload["observation"] = observation
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/task-nodes/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            node = res.json()
+            return (
+                f"Updated task occurrence (ID: {node.get('id', resolved_id)}, "
+                f"due {node.get('due_date', 'N/A')}): status={node.get('status')}"
+            )
+        else:
+            return f"Error updating task occurrence: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_task_node: {str(e)}"
 
 
 async def delete_task_template(task_id: str) -> str:
