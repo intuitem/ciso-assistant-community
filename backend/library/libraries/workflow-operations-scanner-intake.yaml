@@ -5,10 +5,17 @@ name: Scanner intake — record vulnerabilities from a webhook
 description: 'Your scanner POSTs {"vulnerabilities": [{"id": "CVE-...", "summary": "..."}]} to this workflow''s
   URL. Each entry becomes a vulnerability, matched on its name so re-posting updates instead of duplicating.'
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Scanner-Webhook – Schwachstellen erfassen
+    description: |-
+      Ihr Scanner sendet per POST {"vulnerabilities": [{"id": "CVE-...", "summary": "..."}]} an die URL dieses Workflows. Jeder Eintrag wird als Schwachstelle erfasst. Der Abgleich erfolgt anhand des Namens, sodass erneutes Senden vorhandene Einträge aktualisiert, statt Duplikate anzulegen.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-scanner-intake:workflow:scanner-intake

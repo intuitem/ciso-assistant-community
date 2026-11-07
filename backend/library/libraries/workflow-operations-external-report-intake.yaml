@@ -6,10 +6,17 @@ description: 'A team posts a report reference to this workflow''s URL and the fi
   location you trust and filed as evidence. The download is checked against the same rules as an upload:
   public host only, no redirects, size cap and extension allowlist.'
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Externen Bericht als Nachweis ablegen
+    description: |-
+      Ein Team übermittelt eine Berichtsreferenz an die URL dieses Workflows. Die Datei wird vom festgelegten vertrauenswürdigen Speicherort abgerufen und als Nachweis abgelegt. Für den Download gelten dieselben Prüfungen wie beim Upload: nur öffentliche Hosts, keine Weiterleitungen, Größenbegrenzung und eine Positivliste zulässiger Dateiendungen.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-external-report-intake:workflow:external-report-intake
