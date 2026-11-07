@@ -5723,8 +5723,6 @@
 	"backToFramework": "العودة إلى الإطار",
 	"compliancePercentage": "نسبة الامتثال %",
 	"complianceFormulaShort": "ممتثل + ½·ممتثل جزئيًا، باستثناء غير المنطبق وغير المقيَّم",
-	"averageImplementationScore": "متوسط درجة التطبيق",
-	"overScoredRequirementsOnly": "على المتطلبات المقيَّمة بالدرجات فقط",
 	"visibleToCurrentUser": "ظاهر للمستخدم الحالي",
 	"inScopeAfterIGFilter": "ضمن النطاق بعد تصفية مجموعات التطبيق",
 	"overallResultDistribution": "التوزيع الإجمالي للنتائج",
