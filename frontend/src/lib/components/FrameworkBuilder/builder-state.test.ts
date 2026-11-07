@@ -20,7 +20,8 @@ import {
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
-	type Question
+	type Question,
+	scoringDefaultsProblem
 } from './builder-state';
 import { BuilderRequestError } from './builder-api';
 
@@ -982,6 +983,27 @@ describe('question and choice CRUD on top-level requirement nodes', () => {
 		const firstId = get(s.rootNodes)[0].questions[0].question.id;
 		s.reorderQuestions(id, 0, 1);
 		expect(get(s.rootNodes)[0].questions[1].question.id).toBe(firstId);
+	});
+});
+
+describe('scoringDefaultsProblem', () => {
+	const scale = { min_score: 1, max_score: 5 };
+	const groups = [{ ref_id: 'B', target_score: 2.5 }];
+
+	test.each([
+		[{ ...scale }, null],
+		[{ ...scale, target_score: 3 }, null],
+		[{ ...scale, target_score: 3, anchor_na_to_target: true }, null],
+		[{ ...scale, target_score: 3, implementation_groups_definition: groups }, null],
+		[{ ...scale, anchor_na_to_target: true }, 'targetScoreRequired'],
+		[{ ...scale, implementation_groups_definition: groups }, 'targetScoreRequired'],
+		[{ ...scale, target_score: 6 }, 'targetScoreOutOfRange'],
+		[
+			{ min_score: 3, max_score: 5, target_score: 3, implementation_groups_definition: groups },
+			'targetScoreOutOfRange'
+		]
+	])('%j', (fields, expected) => {
+		expect(scoringDefaultsProblem(makeFramework(fields as Partial<Framework>))).toBe(expected);
 	});
 });
 
