@@ -60,19 +60,19 @@ Open your **Server Manager**
 {% hint style="warning" %}
 You can skip this step if you're in a test environment, but please keep in mind that it's strongly recommended that you configure your **Access Control Policy** correctly on a production server.
 {% endhint %}
-1.  Click **Next >**
+19. Click **Next >**
 
     ![](../../../.gitbook/assets/sso/adfs_wizard_step_7.png)
 
-2.  Click **Next >**
+20.  Click **Next >**
 
     ![](../../../.gitbook/assets/sso/adfs_wizard_step_8.png)
 
-3.  Click **Close**
+21.  Click **Close**
 
     ![](../../../.gitbook/assets/sso/adfs_wizard_step_9.png)
 
-4.  A new window opens. Click **Add Rule**
+22.  A new window opens. Click **Add Rule**
 
     ![](../../../.gitbook/assets/sso/adfs_policy_rule_step_1.png)
 
