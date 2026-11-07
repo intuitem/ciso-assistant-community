@@ -193,8 +193,9 @@ _STAGE_LABEL_KEYS = {
 
 
 def _regulatory_deadlines():
-    """(recipients, target, deadline_key, due) for every open NIS2 stage and every
-    personal data breach not yet notified to the authority."""
+    """(recipients, target, deadline_key, due, in_inbox) for every open NIS2 stage and
+    every personal data breach not yet notified to the authority. Every deadline
+    emails on its own schedule; the inbox keeps one row per incident (in_inbox)."""
     from privacy.models import DataBreach
 
     incidents = (
@@ -205,14 +206,19 @@ def _regulatory_deadlines():
         else Incident.objects.none()
     )
     for incident in incidents:
-        # One inbox row per incident, on the stage the worksheet also points to
-        if stage := incident.nis2_next_stage():
-            yield (
-                _actor_emails(incident.owners.all()),
-                incident,
-                _STAGE_LABEL_KEYS[stage["stage"]],
-                stage["due"],
-            )
+        emails = _actor_emails(incident.owners.all())
+        # The inbox row is on the stage the worksheet also points to; the stages it
+        # moved past (a missed early warning) still get their emails
+        shown = incident.nis2_next_stage()
+        for stage in incident.nis2_deadlines():
+            if stage["done_at"] is None:
+                yield (
+                    emails,
+                    incident,
+                    _STAGE_LABEL_KEYS[stage["stage"]],
+                    stage["due"],
+                    stage["stage"] == shown["stage"],
+                )
 
     breaches = (
         DataBreach.objects.filter(authority_notified_on__isnull=True)
@@ -226,6 +232,7 @@ def _regulatory_deadlines():
             breach,
             "gdprBreachNotification",
             breach.authority_notification_due,
+            True,
         )
 
 
@@ -235,7 +242,7 @@ def check_regulatory_deadlines():
     notification. Hourly: these deadlines are counted in hours, not days."""
     current = now()
     items, escalating = [], defaultdict(list)
-    for emails, target, deadline_key, due in _regulatory_deadlines():
+    for emails, target, deadline_key, due, in_inbox in _regulatory_deadlines():
         if not emails or due is None:
             continue
         hours = math.floor((due - current).total_seconds() / 3600)
@@ -244,8 +251,10 @@ def check_regulatory_deadlines():
             "deadline_key": deadline_key,
             "due": due.strftime("%Y-%m-%d %H:%M UTC"),
         }
-        items.append((emails, target, context, hours in REGULATORY_NOTICE_HOURS))
-        if hours in REGULATORY_NOTICE_HOURS:
+        escalate = hours in REGULATORY_NOTICE_HOURS
+        if in_inbox:
+            items.append((emails, target, context, escalate))
+        if escalate:
             for email in emails:
                 escalating[email].append(context)
 
@@ -401,7 +410,12 @@ def processing_obligation_gaps(processing) -> list[str]:
     gaps = []
     if not flag("_has_purpose", processing.purposes.exists):
         gaps.append("gapNoPurpose")
-    if processing.dpia_applies and processing.dpia_required and not processing.dpia_id:
+    # dpia: an in-app DPIA (quick form); dpia_reference: one recorded elsewhere
+    if (
+        processing.dpia_applies
+        and processing.dpia_required
+        and not (processing.dpia_id or processing.dpia_reference)
+    ):
         gaps.append("gapDpiaMissing")
     if flag(
         "_retention_missing",

@@ -6325,7 +6325,7 @@
 	"templateRightRequestDueSoonDescription": "Verzonden wanneer verzoeken van betrokkenen binnenkort vervallen",
 	"templateContractExpiringSoonName": "Contract verloopt binnenkort",
 	"templateContractExpiringSoonDescription": "Verzonden wanneer contracten binnenkort verlopen",
-	"templateProcessingObligationGapsName": "Tekortkomingen in het AVG-register",
-	"templateProcessingObligationGapsDescription": "Wekelijks overzicht van tekortkomingen in het register van verwerkingsactiviteiten",
+	"templateProcessingObligationGapName": "Tekortkomingen in het AVG-register",
+	"templateProcessingObligationGapDescription": "Wekelijks overzicht van tekortkomingen in het register van verwerkingsactiviteiten",
 	"lowestScore": "Laagste"
 }

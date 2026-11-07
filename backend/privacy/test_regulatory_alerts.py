@@ -4,7 +4,7 @@ and gaps in the record of processing activities.
 Sweeps run with `.call_local()`: HUEY is not immediate in tests.
 """
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -99,6 +99,59 @@ def test_missed_early_warning_does_not_hide_the_72h_notification(folder, owner):
     check_regulatory_deadlines.call_local()
     (row,) = _rows("regulatory_deadline")
     assert row.context["deadline_key"] == "incidentNotification"
+
+
+def _emailed_keys(send) -> list[str]:
+    return [d["deadline_key"] for d in send.call_args.args[1]]
+
+
+def test_missed_early_warning_still_gets_its_just_missed_email(folder, owner):
+    incident = Incident.objects.create(
+        name="Wiper",
+        folder=folder,
+        nis2_significant=True,
+        reported_at=timezone.now() - timedelta(hours=24, minutes=30),
+    )
+    incident.owners.set([owner.actor])
+    with patch("core.tasks.send_regulatory_deadline_notification") as send:
+        check_regulatory_deadlines.call_local()
+    # the inbox row has moved on to the 72h notification, the email has not
+    (row,) = _rows("regulatory_deadline")
+    assert row.context["deadline_key"] == "incidentNotification"
+    send.assert_called_once()
+    assert _emailed_keys(send) == ["earlyWarning"]
+
+    # one email per missed stage: an hour later there is nothing new to say
+    incident.reported_at -= timedelta(hours=1)
+    incident.save()
+    with patch("core.tasks.send_regulatory_deadline_notification") as send:
+        check_regulatory_deadlines.call_local()
+    send.assert_not_called()
+
+
+def test_final_report_warns_while_the_72h_notification_is_overdue(folder, owner):
+    # 72h notification never sent: the inbox row stays on it. Fixed clock, since
+    # "one month" depends on the date: 72h due 10 Feb 18:30, final report 10 Mar 18:30
+    current = datetime(2026, 3, 10, 12, 0, tzinfo=UTC)  # final report 6h30 away
+    reported_at = datetime(2026, 2, 7, 18, 30, tzinfo=UTC)
+    incident = Incident.objects.create(
+        name="Supply chain",
+        folder=folder,
+        nis2_significant=True,
+        reported_at=reported_at,
+        nis2_early_warning_at=reported_at + timedelta(hours=6),
+    )
+    incident.owners.set([owner.actor])
+    with (
+        patch("core.models.now", return_value=current),
+        patch("core.tasks.now", return_value=current),
+        patch("core.tasks.send_regulatory_deadline_notification") as send,
+    ):
+        check_regulatory_deadlines.call_local()
+    (row,) = _rows("regulatory_deadline")
+    assert row.context["deadline_key"] == "incidentNotification"
+    send.assert_called_once()
+    assert _emailed_keys(send) == ["finalReport"]
 
 
 def test_breach_in_notified_status_without_date_is_not_alerted(folder, owner):
@@ -198,3 +251,20 @@ def test_processing_gaps(folder, owner):
     check_processing_obligations.call_local()
     (row,) = _rows("processing_obligation_gap")
     assert str(row.context["gap_count"]) == "2"
+
+
+def test_dpia_recorded_as_a_reference_is_not_a_gap(folder, owner):
+    """A DPIA run outside the app is recorded in dpia_reference; the dpia link is
+    read-only, so it could never clear the gap."""
+    processing = Processing.objects.create(
+        name="Recruitment",
+        folder=folder,
+        dpia_required=True,
+        dpia_reference="DPIA-2025-02",
+    )
+    processing.assigned_to.set([owner.actor])
+    Purpose.objects.create(name="Hire staff", processing=processing, folder=folder)
+    assert processing_obligation_gaps(processing) == []
+
+    check_processing_obligations.call_local()
+    assert _rows("processing_obligation_gap").count() == 0

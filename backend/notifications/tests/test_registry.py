@@ -102,6 +102,23 @@ def test_every_in_app_type_has_a_title_message(locale):
 
 
 @pytest.mark.parametrize("locale", LOCALES)
+def test_every_type_has_a_settings_label(locale):
+    """The notification and email template settings pages build
+    `template<Type>Name` from the type key: a near miss shows the raw key."""
+    catalog = _catalog(locale)
+    if catalog is None:
+        pytest.skip("frontend messages not present in this checkout")
+
+    missing = [
+        key
+        for key in NOTIFICATION_REGISTRY
+        if f"template{''.join(w.capitalize() for w in key.split('_'))}Name"
+        not in catalog
+    ]
+    assert not missing, f"{locale}: no settings label for {missing}"
+
+
+@pytest.mark.parametrize("locale", LOCALES)
 def test_title_messages_only_use_declared_context(locale):
     """A message referencing a variable the producer never sends would render the
     parameter name to the user."""
