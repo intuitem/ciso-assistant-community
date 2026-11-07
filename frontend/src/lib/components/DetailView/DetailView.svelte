@@ -159,6 +159,7 @@
 	let visibleDetailViewFields = $derived(
 		data.model?.detailViewFields?.filter((fieldConfig) => {
 			const flag = data.model?.flaggedFields?.[fieldConfig.field];
+			if (fieldConfig.visibleWhen && !data.data?.[fieldConfig.visibleWhen]) return false;
 			return isFieldFlagEnabled(flag, page.data?.featureflags ?? {});
 		})
 	);
@@ -1007,6 +1008,16 @@
 				</button>
 			{/if}
 			{@render actions?.()}
+			{#if data.urlModel === 'data-breaches'}
+				<a
+					class="btn preset-filled-primary-500 h-fit"
+					href={`/data-breaches/notification/${data.data?.id}`}
+					data-testid="breach-notification-button"
+					download
+				>
+					<i class="fa-solid fa-file-pdf mr-2"></i>{m.breachNotificationWorksheet()}
+				</a>
+			{/if}
 			{#if data.urlModel === 'quick-forms' && hasPermissionAnywhere(user, 'change_quickform')}
 				<label
 					class="flex h-fit items-center gap-2 text-sm"

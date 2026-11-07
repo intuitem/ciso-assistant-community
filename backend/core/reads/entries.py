@@ -13,6 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import (
     BooleanField,
     Count,
@@ -25,6 +26,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 
 from core.models import (
+    Actor,
     AppliedControl,
     Asset,
     ComplianceAssessment,
@@ -32,19 +34,23 @@ from core.models import (
     EvidenceRevision,
     Finding,
     FindingsAssessment,
+    Framework,
     Incident,
     QuickFormResponse,
     RequirementAssessment,
+    RequirementAssignment,
     RiskAcceptance,
     RiskAssessment,
     RiskScenario,
     SecurityException,
     TaskNode,
+    Team,
     ValidationFlow,
     Vulnerability,
 )
 from doc_management.models import DocumentContainer, DocumentRevision, ManagedDocument
-from tprm.models import Entity, EntityAssessment
+from iam.models import User
+from tprm.models import Entity, EntityAssessment, Representative
 
 from .filters import get_model_field
 
@@ -245,6 +251,58 @@ def _requirements_breakdown(assessment):
         by_result[result] = count
         total += count
     return {"total": total, **by_result}
+
+
+def _scoped_related(obj, name):
+    """A required relation the scoped prefetch cut reads as None, not DoesNotExist."""
+    try:
+        return getattr(obj, name)
+    except ObjectDoesNotExist:
+        return None
+
+
+def _assignment_audit(assignment):
+    audit = _scoped_related(assignment, "compliance_assessment")
+    if audit is None:
+        return None
+    return {"str": str(audit), "id": str(audit.id), "name": audit.name}
+
+
+def _assignment_audit_folder(assignment):
+    audit = _scoped_related(assignment, "compliance_assessment")
+    return str(audit.folder_id) if audit else None
+
+
+def _assignment_framework(assignment):
+    audit = _scoped_related(assignment, "compliance_assessment")
+    framework = _scoped_related(audit, "framework") if audit else None
+    if framework is None:
+        return None
+    return {
+        "id": str(framework.id),
+        "urn": framework.urn,
+        "ref_id": framework.ref_id,
+        "name": framework.name,
+    }
+
+
+def _assignment_users(assignment):
+    """Users behind the assigned actors: the user, team people, entity representatives."""
+    users = {}
+    for actor in assignment.actor.all():
+        people = [actor.user]
+        if actor.team:
+            team = actor.team
+            people += [team.leader, *team.deputies.all(), *team.members.all()]
+        if actor.entity:
+            people += [rep.user for rep in actor.entity.representatives.all()]
+        for user in people:
+            if user is not None and user.is_active:
+                users[user.id] = user
+    return [
+        {"id": str(user.id), "email": user.email, "is_third_party": user.is_third_party}
+        for user in users.values()
+    ]
 
 
 READABLE_MODELS: dict[str, ReadEntry] = {
@@ -536,6 +594,39 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "evidences": {
                 "evidences": Evidence,
                 "evidences__revisions": EvidenceRevision,
+            },
+        },
+    ),
+    "requirement_assignment": ReadEntry(
+        model=RequirementAssignment,
+        fields=["status", "compliance_assessment", "folder"],
+        # The audit and its framework are scoped too: None when out of reach.
+        computed={
+            # Not str(): it walks the actors, which the scope may have cut.
+            "name": lambda a: str(_scoped_related(a, "compliance_assessment") or ""),
+            "compliance_assessment": _assignment_audit,
+            "framework": _assignment_framework,
+            "audit_folder": _assignment_audit_folder,
+            "actors": lambda a: [str(actor.id) for actor in a.actor.all()],
+        },
+        optional_computed={"users": _assignment_users},
+        select_related=["folder"],
+        prefetch_scoped={
+            "compliance_assessment": {
+                "compliance_assessment": ComplianceAssessment,
+                "compliance_assessment__framework": Framework,
+            },
+            "actors": {"actor": Actor},
+            "users": {
+                "actor": Actor,
+                "actor__user": User,
+                "actor__team": Team,
+                "actor__team__leader": User,
+                "actor__team__deputies": User,
+                "actor__team__members": User,
+                "actor__entity": Entity,
+                "actor__entity__representatives": Representative,
+                "actor__entity__representatives__user": User,
             },
         },
     ),
