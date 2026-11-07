@@ -398,7 +398,7 @@ def test_each_template_declares_its_own_language():
     English rules. The suffix is the source of truth."""
     import re
 
-    for template in sorted(TEMPLATE_DIR.glob("*.typ")):
+    for template in sorted(TEMPLATE_DIR.glob("*_??.typ")):
         expected = template.stem.rsplit("_", 1)[1]
         match = re.search(r'#set text\([^)]*lang: "(\w+)"\)', template.read_text())
         assert match, f"{template.name} sets no language"

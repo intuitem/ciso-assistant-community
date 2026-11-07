@@ -1,0 +1,11 @@
+subject: "CISO Assistant : ${contract_count} contrat(s) arrivant à échéance dans ${days_remaining} jour(s)"
+body: |
+  Bonjour,
+
+  Les contrats suivants arrivent à échéance dans ${days_remaining} jour(s) :
+
+  ${contract_list}
+
+  Veuillez examiner leur renouvellement et la conformité du fournisseur : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.
