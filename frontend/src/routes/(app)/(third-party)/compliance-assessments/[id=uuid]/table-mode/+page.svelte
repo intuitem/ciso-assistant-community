@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { roundScore } from '#lib/utils/helpers.js';
+	import { maturityScore, roundScore } from '#lib/utils/helpers.js';
 	import { page } from '$app/state';
 	import Question from '#lib/components/Forms/Question.svelte';
 	import SegmentedControl from '#lib/components/Forms/SegmentedControl.svelte';
@@ -819,6 +819,17 @@
 						{/if}
 					{/snippet}
 				</ScorePair>
+				{#if complianceAssessment.show_documentation_score && showDocumentationScore && ra.is_scored && ra.score != null}
+					<div class="flex flex-col gap-1">
+						<span class="text-xs font-semibold text-surface-500 italic">{m.maturity()}</span>
+						<ScoreControl
+							editable={false}
+							value={roundScore(maturityScore(ra.score, ra.documentation_score, raMin))}
+							min={raMin}
+							max={raMax}
+						/>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	{:else if showScore && showDocumentationScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
@@ -845,6 +856,15 @@
 					/>
 				{/snippet}
 			</ScorePair>
+			{#if ra.score != null}
+				<ScoreControl
+					editable={false}
+					value={roundScore(maturityScore(ra.score, ra.documentation_score, raMin))}
+					min={raMin}
+					max={raMax}
+					label={m.maturity()}
+				/>
+			{/if}
 		</div>
 	{:else if showScore && complianceAssessment.scoring_enabled && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}

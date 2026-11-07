@@ -6,6 +6,7 @@
 	import Question from '#lib/components/Forms/Question.svelte';
 	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
 	import Score from '#lib/components/Forms/Score.svelte';
+	import ScoreControl from '#lib/components/Forms/ScoreControl.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import SplashCard from '#lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
@@ -31,6 +32,8 @@
 		resultBadgeStyle,
 		isFieldEditable as isFieldEditableHelper,
 		showApplicabilityToggle,
+		maturityScore,
+		roundScore,
 		shouldShowAutoQuestion,
 		buildAutoAlignmentQuestion,
 		alignmentValueFromChoiceUrn,
@@ -1689,6 +1692,21 @@
 														{/if}
 													{/snippet}
 												</ScorePair>
+												{#if showDocumentationScore && requirementAssessment.is_scored && requirementAssessment.score != null}
+													<ScoreControl
+														editable={false}
+														value={roundScore(
+															maturityScore(
+																requirementAssessment.score,
+																requirementAssessment.documentation_score,
+																raMin
+															)
+														)}
+														min={raMin}
+														max={raMax}
+														label={m.maturity()}
+													/>
+												{/if}
 											{/if}
 										</div>
 									{/if}

@@ -57,7 +57,9 @@
 		displayScoreColor,
 		hasComputedScore,
 		resultBadgeStyle,
-		filterResultChoices
+		filterResultChoices,
+		maturityScore,
+		roundScore
 	} from '#lib/utils/helpers.js';
 
 	interface Props {
@@ -1079,7 +1081,7 @@
 						{#if formNotApplicable}
 							<!-- Not applicable, computed score or not: what it counts for, greyed. -->
 							<NotApplicableScores
-								value={data.requirementAssessment.anchored_score}
+								value={ra.anchored_score}
 								min={resolvedMin}
 								max={resolvedMax}
 								scoresDefinition={resolvedScoresDef}
@@ -1221,6 +1223,17 @@
 									{/if}
 								{/snippet}
 							</ScorePair>
+							{#if docScoreShown && showScore && $formStore.is_scored && $formStore.score != null}
+								<ScoreControl
+									editable={false}
+									value={roundScore(
+										maturityScore($formStore.score, $formStore.documentation_score, resolvedMin)
+									)}
+									min={resolvedMin}
+									max={resolvedMax}
+									label={m.maturity()}
+								/>
+							{/if}
 						{/if}
 					{/if}
 

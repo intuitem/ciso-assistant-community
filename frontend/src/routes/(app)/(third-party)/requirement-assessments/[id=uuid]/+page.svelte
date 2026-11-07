@@ -9,13 +9,15 @@
 		getFieldVisibility,
 		getRequirementTitle,
 		getSecureRedirect,
-		alignmentColorMap
+		alignmentColorMap,
+		maturityScore
 	} from '#lib/utils/helpers.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	import { hideSuggestions } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import MaturityRing from '#lib/components/ComplianceAssessment/MaturityRing.svelte';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
@@ -212,6 +214,14 @@
 					{/if}
 				{/snippet}
 			</ScorePair>
+			{#if showScore && showDocumentationScore && score != null && !data.requirementAssessment.not_applicable}
+				<MaturityRing
+					small
+					value={maturityScore(score, documentationScore, min_score)}
+					min={min_score}
+					max={max_score}
+				/>
+			{/if}
 		{/if}
 		<div class="ml-auto shrink-0 self-center flex flex-col gap-2">
 			<ObjectValidationFlows

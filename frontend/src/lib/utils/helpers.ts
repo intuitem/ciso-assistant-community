@@ -769,6 +769,20 @@ export function showApplicabilityToggle(
 }
 
 /**
+ * Maturity (the "overall" score of CyFun): the average of the implementation and
+ * documentation scores, a missing documentation score counting at the bottom of
+ * the scale, as the backend counts it (ComplianceAssessment.requirement_layer_scores
+ * for a requirement, the average of the two aggregates for a section).
+ */
+export function maturityScore(
+	implementation: number,
+	documentation: number | null | undefined,
+	minScore: number
+): number {
+	return (implementation + (documentation ?? minScore)) / 2;
+}
+
+/**
  * Check whether any question in a questions object has at least one choice with
  * a *resolvable* `compute_result`. Mirrors `resolveComputeResult`: empty strings,
  * whitespace, and unknown values are not treated as result-bearing, so a
