@@ -576,6 +576,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.findings_from_requirements", required=False, default=False
     )
     dora = serializers.BooleanField(source="value.dora", required=False, default=True)
+    nis2 = serializers.BooleanField(source="value.nis2", required=False, default=False)
     external_ratings = serializers.BooleanField(
         source="value.external_ratings", required=False, default=False
     )

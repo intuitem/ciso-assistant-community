@@ -17,6 +17,7 @@
 	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 	import RiskAcceptancesSection from '#lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
+	import ObjectValidationFlows from '#lib/components/ValidationFlows/ObjectValidationFlows.svelte';
 
 	import { goto } from '$app/navigation';
 	import { openRiskAcceptanceModal } from '#lib/utils/riskAcceptance.js';
@@ -241,6 +242,11 @@
 					{m.requestRiskAcceptance()}
 				</button>
 			{/if}
+			<ObjectValidationFlows
+				form={data.validationFlowForm}
+				model={data.validationFlowModel}
+				flows={data.validationFlows}
+			/>
 			<AuditTrailButton
 				model="risk-scenarios"
 				objectId={data.scenario.id}

@@ -18,7 +18,7 @@ import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import Dict, Any, List, Tuple, Final, Optional
 import time
 from django.db.models import (
@@ -74,6 +74,7 @@ from .generators import (
     action_plan_context,
     findings_assessment_context,
     incident_context,
+    nis2_notification_context,
     risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
@@ -172,6 +173,7 @@ from rest_framework.exceptions import (
 
 from core.helpers import *
 from core.validators import sanitize_file_name
+from core.markdown_utils import render_markdown_as_text
 from core.answer_attachments import (
     answer_for_upload,
     AttachmentError,
@@ -194,6 +196,7 @@ from core.models import (
     AssetClass,
     Terminology,
     Team,
+    rescale_score,
 )
 from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
@@ -8751,6 +8754,8 @@ class ValidationFlowFilterSet(GenericFilterSet):
             "evidences",
             "security_exceptions",
             "policies",
+            "requirement_assessments",
+            "risk_scenarios",
             "validation_deadline",
         ]
 
@@ -8828,6 +8833,16 @@ class ValidationFlowViewSet(BaseModelViewSet):
                 "contracts",
                 queryset=contract_model.objects.select_related("folder"),
             ),
+            Prefetch(
+                "requirement_assessments",
+                queryset=RequirementAssessment.objects.select_related(
+                    "folder", "requirement"
+                ),
+            ),
+            Prefetch(
+                "risk_scenarios",
+                queryset=RiskScenario.objects.select_related("folder"),
+            ),
         )
 
         m2m_through_fields = {
@@ -8844,6 +8859,8 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "has_processings": ValidationFlow.processings.through,
             "has_accreditations": ValidationFlow.accreditations.through,
             "has_contracts": ValidationFlow.contracts.through,
+            "has_requirement_assessments": ValidationFlow.requirement_assessments.through,
+            "has_risk_scenarios": ValidationFlow.risk_scenarios.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(validationflow_id=OuterRef("pk")))
@@ -8875,6 +8892,8 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "processings": "Processings",
             "accreditations": "Accreditations",
             "contracts": "Contracts",
+            "requirement_assessments": "Requirement Assessments",
+            "risk_scenarios": "Risk Scenarios",
         }
         return Response(model_types)
 
@@ -14950,6 +14969,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             additional_controls = sorted(controls_map.values(), key=_sort_key)
 
+        if request.query_params.get("export") == "xlsx":
+            lang = request.user.preferences.get("lang") or "en"
+            rows = soa_rows(tree, lang)
+            return create_xlsx_response(
+                rows,
+                f"soa_{slugify(compliance_assessment.name) or 'audit'}.xlsx",
+                wrap_columns=list(rows[0])[1:] if rows else [],
+            )
+
         return Response(
             {
                 "tree": tree,
@@ -15089,14 +15117,18 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         revision = evidence.last_revision
                         if not entry_name or not revision or not revision.attachment:
                             continue
-                        if not default_storage.exists(revision.attachment.name):
-                            continue
-                        with default_storage.open(
-                            revision.attachment.name
-                        ) as attachment_file:
-                            zipf.writestr(
-                                f"evidences/{entry_name}", attachment_file.read()
+                        try:
+                            with default_storage.open(
+                                revision.attachment.name
+                            ) as attachment_file:
+                                content = attachment_file.read()
+                        except Exception:
+                            logger.warning(
+                                "evidence file unreadable, omitted from archive",
+                                evidence_id=evidence.id,
                             )
+                            continue
+                        zipf.writestr(f"evidences/{entry_name}", content)
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
@@ -16450,7 +16482,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
+        is_respondent = bool(
+            respondent_folders and compliance_assessment.folder_id in respondent_folders
+        )
+        if is_respondent:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -16465,6 +16500,55 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             if ra_ids is not None and ra.id not in ra_ids:
                 continue
             filtered_ras.append(ra)
+
+        selected = set(compliance_assessment.selected_implementation_groups or [])
+        rows = {}
+        viewer_role = "respondent" if is_respondent else "auditor"
+        # row key -> field governed by the audit's field visibility map
+        row_fields = {
+            "result": "result",
+            "implementation_score": "score",
+            "maturity_score": "score",
+            "documentation_score": "documentation_score",
+        }
+        hidden = [
+            key
+            for key, field in row_fields.items()
+            if not is_field_visible_to(compliance_assessment, field, viewer_role)
+        ]
+        if "documentation_score" in hidden and "maturity_score" not in hidden:
+            hidden.append("maturity_score")
+        framework_range = (framework.min_score, framework.max_score)
+        audit_range = (compliance_assessment.min_score, compliance_assessment.max_score)
+
+        def group_target(group_def):
+            # group targets are on the framework scale, the audit's own on its scale
+            target = group_def.get("target_score")
+            if target is None:
+                return compliance_assessment.target_score
+            if (
+                None in (*framework_range, *audit_range)
+                or audit_range == framework_range
+            ):
+                return target
+            return rescale_score(target, framework_range, audit_range, integer=False)
+
+        def requirement_row(ra):
+            # nested groups (B within I within E) share requirements: build each once
+            if ra.id not in rows:
+                rows[ra.id] = {
+                    "id": str(ra.id),
+                    "name": ra.requirement.display_short,
+                    "description": get_referential_translation(
+                        ra.requirement, "description"
+                    )
+                    or "",
+                    "result": ra.result,
+                    **compliance_assessment.get_scores_for([ra]),
+                }
+                rows[ra.id].update(dict.fromkeys(hidden))
+                del rows[ra.id]["scored_count"], rows[ra.id]["total_weight"]
+            return rows[ra.id]
 
         groups = []
         for group_def in ig_definition:
@@ -16489,6 +16573,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         "documentation_score": None,
                         "maturity_score": None,
                         "scored_count": 0,
+                        "min_maturity_score": None,
+                        "target_score": None,
+                        "selected": group_ref_id in selected,
+                        "requirements": [],
                     }
                 )
                 continue
@@ -16501,6 +16589,19 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     assessed += 1
             total = len(matching_ras)
             scores = compliance_assessment.get_scores_for(matching_ras)
+            requirements = [
+                requirement_row(ra)
+                for ra in sorted(
+                    matching_ras, key=lambda ra: ra.requirement.order_id or 0
+                )
+            ]
+            maturities = [
+                r["maturity_score"]
+                for r in requirements
+                if r["maturity_score"] is not None
+            ]
+            if selected and group_ref_id not in selected:
+                requirements = []  # the page lists the audit's groups only
 
             groups.append(
                 {
@@ -16515,6 +16616,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "documentation_score": scores["documentation_score"],
                     "maturity_score": scores["maturity_score"],
                     "scored_count": scores["scored_count"],
+                    "min_maturity_score": min(maturities, default=None),
+                    "target_score": group_target(group_def),
+                    "selected": group_ref_id in selected,
+                    "requirements": requirements,
                 }
             )
 
@@ -17410,8 +17515,27 @@ def generate_html(
         if qd:
             questions_dict_by_urn[node.urn] = qd
 
-    def generate_data_rec(requirement_node: RequirementNode):
+    def sorted_by_name[T: NameDescriptionMixin](objects: Iterable[T]) -> list[T]:
+        """Return `objects` sorted by name, so two exports of the same audit match.
+
+        Sorted in Python rather than with `order_by` to keep the prefetch.
+        """
+        return sorted(objects, key=lambda obj: obj.name.casefold())
+
+    toc = []
+
+    def generate_data_rec(requirement_node: RequirementNode, depth: int = 0):
         selected_evidences = []
+        toc_entry = {
+            "node": requirement_node,
+            "label": requirement_node.display_short
+            or render_markdown_as_text(requirement_node.get_description_translated),
+            "depth": depth,
+            "assessment": None,
+            "controls_count": 0,
+            "evidences_count": 0,
+        }
+        toc.append(toc_entry)
         children_nodes = [
             req for req in requirement_nodes if req.parent_urn == requirement_node.urn
         ]
@@ -17425,15 +17549,17 @@ def generate_html(
             "applied_controls": [],
             "result": "",
             "status": "",
-            "color_class": "",
+            "heading_level": min(depth + 2, 4),
+            "title": toc_entry["label"],
         }
 
-        node_data["bar_graph"] = True if children_nodes else False
+        node_data["bar_graph"] = bool(children_nodes) and depth < 2
 
         if requirement_node.assessable:
             assessment = assessment_by_urn.get(requirement_node.urn)
 
             if assessment:
+                toc_entry["assessment"] = assessment
                 node_data["assessments"] = assessment
                 node_data["answers_dict"] = answers_dict_by_urn.get(
                     requirement_node.urn, {}
@@ -17443,18 +17569,16 @@ def generate_html(
                 )
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
-                node_data["result_color_class"] = color_css_class(assessment.result)
-                node_data["status_color_class"] = color_css_class(assessment.status)
-                direct_evidences = assessment.evidences.all()
+                direct_evidences = sorted_by_name(assessment.evidences.all())
                 if direct_evidences:
                     selected_evidences += direct_evidences
                     node_data["direct_evidences"] = direct_evidences
 
-                measures = assessment.applied_controls.all()
+                measures = sorted_by_name(assessment.applied_controls.all())
                 if measures:
                     applied_controls = []
                     for measure in measures:
-                        evidences = measure.evidences.all()
+                        evidences = sorted_by_name(measure.evidences.all())
                         applied_controls.append(
                             {
                                 "measure": measure,
@@ -17464,8 +17588,18 @@ def generate_html(
                         selected_evidences += evidences
                     node_data["applied_controls"] = applied_controls
 
+                toc_entry["controls_count"] = len(measures)
+                toc_entry["evidences_count"] = len(
+                    set(direct_evidences).union(
+                        *(
+                            control["evidences"]
+                            for control in node_data["applied_controls"]
+                        )
+                    )
+                )
+
         for child_node in children_nodes:
-            child_data, child_evidences = generate_data_rec(child_node)
+            child_data, child_evidences = generate_data_rec(child_node, depth + 1)
             node_data["children"].append(child_data)
             selected_evidences += child_evidences
 
@@ -17481,10 +17615,16 @@ def generate_html(
 
     evidences = list(set(selected_evidences))
     archive_names = build_evidence_archive_names(evidences)
+    for evidence in evidences:
+        if evidence.id in archive_names and not default_storage.exists(
+            evidence.last_revision.attachment.name
+        ):
+            del archive_names[evidence.id]
 
     data = {
         "compliance_assessment": compliance_assessment,
         "top_level_nodes": top_level_nodes_data,
+        "toc": toc,
         "assessments": assessments,
         "ancestors": ancestors,
         "archive_names": archive_names,
@@ -18384,6 +18524,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
         "reported_at": ["exact"],
+        "nis2_significant": ["exact"],
     }
 
     def get_queryset(self):
@@ -18524,6 +18665,14 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
     def detection(self, request):
         return Response(dict(Incident.Detection.choices))
 
+    @action(detail=False, name="Get malicious intent choices")
+    def nis2_malicious_intent(self, request):
+        return Response(dict(Incident.Answer.choices))
+
+    @action(detail=False, name="Get cross-border impact choices")
+    def nis2_cross_border_impact(self, request):
+        return Response(dict(Incident.Answer.choices))
+
     def perform_update(self, serializer):
         previous_instance = self.get_object()
         previous_status = previous_instance.status
@@ -18590,6 +18739,51 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         safe_name = slugify(incident.name) or "incident"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_report.pdf"'
+        )
+        return response
+
+    @action(detail=True, methods=["get"], name="NIS2 notification worksheet")
+    def nis2_notification(self, request, pk):
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Incident, UUID(pk)
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        incident = (
+            Incident.objects.select_related("folder")
+            .prefetch_related(
+                actor_prefetch("owners"),
+                "entities",
+                "assets",
+                "threats",
+                "qualifications",
+                "applied_controls",
+            )
+            .get(id=pk)
+        )
+        breaches = [
+            b
+            for b in incident.data_breaches.all()
+            if RoleAssignment.is_object_readable(request.user, DataBreach, b.id)
+        ]
+        lang = request.user.preferences.get("lang") or "en"
+        payload = nis2_notification_context(
+            incident,
+            breaches,
+            lang,
+            tz=get_report_timezone(),
+            readable=lambda obj: RoleAssignment.is_object_readable(
+                request.user, type(obj), obj.id
+            ),
+        )
+        response = HttpResponse(
+            render_pdf("nis2_notification.typ", payload),
+            content_type="application/pdf",
+        )
+        safe_name = slugify(incident.name) or "incident"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_nis2_notification.pdf"'
         )
         return response
 
