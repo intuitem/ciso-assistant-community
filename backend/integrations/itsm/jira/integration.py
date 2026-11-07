@@ -38,12 +38,13 @@ JIRA_CONFIG_SCHEMA = {
     "settings": {
         "required": ["table_name"],
         "properties": {
-            # Composite "<PROJECT_KEY>:<Issue Type Name>" string the
-            # FieldMapper UI writes back. Falls back to the legacy split
+            # Composite "<PROJECT_KEY>:<issue type id>" string the
+            # FieldMapper UI writes back (older configs hold the issue type
+            # name instead). Falls back to the legacy split
             # ``project_key`` / ``issue_type`` settings for backward compat.
             "table_name": {
                 "type": "string",
-                "description": "Composite project key and issue type, e.g. 'PROJ:Task'",
+                "description": "Composite project key and issue type id, e.g. 'PROJ:10001'",
             },
             "project_key": {"type": "string", "description": "Jira project key"},
             "issue_type": {"type": "string", "default": "Task"},
