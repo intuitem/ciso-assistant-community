@@ -4,7 +4,7 @@ from pathlib import Path
 import openpyxl
 import pytest
 
-from core.cyfun import CYFUN_2025_URN
+from core.cyfun import CYFUN_2023_URN, CYFUN_2025_URN, TEMPLATE_2023
 from core.models import (
     ComplianceAssessment,
     LoadedLibrary,
@@ -13,12 +13,29 @@ from core.models import (
 )
 from core.utils import EVERYONE_EDIT
 from data_wizard.cyfun_helpers import (
+    CYFUN_2023_LIBRARY_URN,
     CYFUN_LIBRARY_URN,
     FUNCTION_SHEETS,
     process_cyfun_file,
 )
 
 URL = "/api/data-wizard/load-file/"
+
+TOOL_2023 = (
+    Path(__file__).resolve().parents[2] / "core" / "templates" / "core" / TEMPLATE_2023
+)
+
+
+def filled_2023_tool() -> bytes:
+    """The official 2023 tool, its IMPORTANT sheet filled on two requirements."""
+    wb = openpyxl.load_workbook(TOOL_2023)
+    ws = wb["IMPORTANT Details"]
+    ws["G3"], ws["H3"], ws["M3"] = 3, 4, "inventory in CMDB"  # BASIC_ID.AM-1.1
+    ws["G4"], ws["H4"] = "N/A", "N/A"  # ID.AM-1.2
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
 
 HEADERS = [
     "Category",
@@ -203,14 +220,29 @@ class TestProcessCyfunFile:
         with pytest.raises(ValueError, match="UnrecognizedCyfunWorkbook"):
             process_cyfun_file(buf.getvalue())
 
-    def test_rejects_2023_workbook(self):
+    def test_rejects_empty_2023_workbook(self):
         wb = openpyxl.Workbook()
         wb.active.title = "BASIC Details"
         wb.create_sheet("Introduction")
         buf = io.BytesIO()
         wb.save(buf)
-        with pytest.raises(ValueError, match="CyFun2023WorkbookNotSupported"):
+        with pytest.raises(ValueError, match="EmptyCyfunWorkbook"):
             process_cyfun_file(buf.getvalue())
+
+    def test_untouched_2023_tool_is_empty(self):
+        with pytest.raises(ValueError, match="EmptyCyfunWorkbook"):
+            process_cyfun_file(TOOL_2023.read_bytes())
+
+    def test_parses_the_2023_tool_at_the_level_filled_in(self):
+        parsed = process_cyfun_file(filled_2023_tool())
+        assert parsed["framework_urn"] == CYFUN_2023_URN
+        assert parsed["assurance_level"] == "important"
+        records = {r["ref_id"]: r for r in parsed["records"]}
+        # carried over from BASIC, and the sheet's own (prefixed like the library)
+        assert records["BASIC_ID.AM-1.1"]["documentation_score"] == 3
+        assert records["BASIC_ID.AM-1.1"]["implementation_score"] == 4
+        assert records["BASIC_ID.AM-1.1"]["observations"] == "inventory in CMDB"
+        assert records["IMPORTANT_ID.AM-1.2"]["compliance_result"] == "not_applicable"
 
     def test_rejects_unknown_workbook(self):
         wb = openpyxl.Workbook()
@@ -444,3 +476,42 @@ def test_controls_of_a_rolled_back_row_are_not_counted(
     assert results["details"]["applied_controls_created"] == 1
     assert AppliedControl.objects.filter(name="Kept").exists()
     assert not AppliedControl.objects.filter(name="Dropped").exists()
+
+
+@pytest.mark.django_db
+def test_import_of_a_2023_self_assessment(knox_admin_client, domain_folder):
+    if not StoredLibrary.objects.filter(urn=CYFUN_2023_LIBRARY_URN).exists():
+        path = (
+            Path(__file__).resolve().parents[2]
+            / "library"
+            / "libraries"
+            / "ccb-cff-2023-03-01.yaml"
+        )
+        _, error = StoredLibrary.store_library_content(path.read_bytes())
+        assert error is None
+    resp = TestCyfunEndpoint()._post(
+        knox_admin_client, filled_2023_tool(), domain_folder.id, name="CyFun 2023"
+    )
+    assert resp.status_code == 200, resp.json()
+    assert resp.json()["results"]["failed"] == 0
+    ca = ComplianceAssessment.objects.get(name="CyFun 2023")
+    assert ca.framework.urn == CYFUN_2023_URN
+    assert ca.selected_implementation_groups == ["I"]
+    ra = RequirementAssessment.objects.get(
+        compliance_assessment=ca, requirement__ref_id="BASIC_ID.AM-1.1"
+    )
+    assert (ra.documentation_score, ra.score) == (3, 4)
+    na = RequirementAssessment.objects.get(
+        compliance_assessment=ca, requirement__ref_id="IMPORTANT_ID.AM-1.2"
+    )
+    assert na.result == "not_applicable"
+
+
+def test_only_level_details_sheets_route_to_the_2023_parser():
+    """A 2025 workbook with an unrelated '... Details' sheet is not a 2023 tool."""
+    wb = openpyxl.Workbook()
+    wb.active.title = "Audit Details"
+    buf = io.BytesIO()
+    wb.save(buf)
+    with pytest.raises(ValueError, match="UnrecognizedCyfunWorkbook"):
+        process_cyfun_file(buf.getvalue())

@@ -4167,6 +4167,25 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return []
         return evaluate_staircases(obj, rules)[1]
 
+    weakest_links = serializers.SerializerMethodField()
+
+    def get_weakest_links(self, obj):
+        from core.utils import get_respondent_scoped_folder_ids, is_field_visible_to
+        from core.weakest_link import evaluate_weakest_links, weakest_link_rules
+
+        view = self.context.get("view")
+        request = self.context.get("request")
+        if getattr(view, "action", None) != "retrieve" or request is None:
+            return []
+        rules = weakest_link_rules(obj.outcome_rules)
+        if not rules:
+            return []
+        if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return []
+        if not is_field_visible_to(obj, "result", "auditor"):
+            return []
+        return evaluate_weakest_links(obj, rules)[1]
+
     scores_definition = serializers.SerializerMethodField()
 
     def get_scores_definition(self, obj):
@@ -6058,6 +6077,14 @@ class IncidentImportExportSerializer(BaseModelSerializer):
             "resolved_at",
             "resolution",
             "is_bcp_activated",
+            "root_cause",
+            "nis2_significant",
+            "nis2_early_warning_at",
+            "nis2_notification_at",
+            "nis2_final_report_at",
+            "nis2_reference",
+            "nis2_malicious_intent",
+            "nis2_cross_border_impact",
             "folder",
             "threats",
             "assets",
@@ -7047,6 +7074,39 @@ class IncidentWriteSerializer(BaseModelSerializer):
                 {"resolved_at": "Resolution date cannot be before reported date."}
             )
 
+        # NIS2 deadlines are clocked from awareness (reported_at)
+        aware = (
+            reported_at
+            if self.instance is not None or "reported_at" in attrs
+            else timezone.now()
+        )
+        if (
+            attrs.get(
+                "nis2_significant", getattr(self.instance, "nis2_significant", None)
+            )
+            and not aware
+        ):
+            raise serializers.ValidationError(
+                {"reported_at": "Reported date is required for a significant incident."}
+            )
+        # a sent date marks its stage done and silences its reminders
+        for field in (
+            "nis2_early_warning_at",
+            "nis2_notification_at",
+            "nis2_final_report_at",
+        ):
+            sent = attrs.get(field, getattr(self.instance, field, None))
+            if not sent:
+                continue
+            if sent > timezone.now():
+                raise serializers.ValidationError(
+                    {field: "Sent date cannot be in the future."}
+                )
+            if aware and sent < aware:
+                raise serializers.ValidationError(
+                    {field: "Sent date cannot be before reported date."}
+                )
+
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -7118,6 +7178,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     detection = serializers.CharField(source="get_detection_display", read_only=True)
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    nis2_deadlines = serializers.ListField(read_only=True)
 
     class Meta:
         model = Incident
@@ -7910,6 +7971,8 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     processings = FieldsRelatedField(many=True)
     accreditations = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    requirement_assessments = FieldsRelatedField(many=True)
+    risk_scenarios = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
@@ -7936,6 +7999,8 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
             ("processings", "has_processings"),
             ("accreditations", "has_accreditations"),
             ("contracts", "has_contracts"),
+            ("requirement_assessments", "has_requirement_assessments"),
+            ("risk_scenarios", "has_risk_scenarios"),
         ]
         prefetched = getattr(obj, "_prefetched_objects_cache", {})
         for field_name, flag_name in field_map:

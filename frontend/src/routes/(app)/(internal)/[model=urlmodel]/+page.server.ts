@@ -72,7 +72,9 @@ export const actions: Actions = {
 			event.params.model === 'quantitative-risk-studies' ||
 			event.params.model === 'quantitative-risk-scenarios' ||
 			event.params.model === 'risk-assessments' ||
-			event.params.model === 'document-containers'
+			event.params.model === 'document-containers' ||
+			// A metric made in one step lands on its page, ready for its first value.
+			event.params.model === 'metric-instances'
 		);
 		return defaultWriteFormAction({
 			event,

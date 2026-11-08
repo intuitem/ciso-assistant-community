@@ -237,6 +237,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'dora',
 					label: m.dora(),
 					description: m.doraFlagDescription()
+				},
+				{
+					field: 'nis2',
+					label: m.nis2Notification(),
+					description: m.nis2FlagDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
