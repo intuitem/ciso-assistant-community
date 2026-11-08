@@ -32,7 +32,6 @@ from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
-from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
     AppliedControl,
@@ -91,11 +90,7 @@ from core.utils import (
     unescape_excel_formula,
 )
 from data_wizard.arm_helpers import process_arm_file
-from data_wizard.cyfun_helpers import (
-    CYFUN_LIBRARY_URN,
-    LEVEL_TO_GROUP,
-    process_cyfun_file,
-)
+from data_wizard.cyfun_helpers import LEVEL_TO_GROUP, process_cyfun_file
 from ebios_rm.models import (
     AttackPath,
     EbiosRMStudy,
@@ -5118,17 +5113,18 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        library_urn = parsed["library_urn"]
+        loaded_library = LoadedLibrary.objects.filter(urn=library_urn).first()
         if loaded_library is not None and (
             StoredLibrary.objects.filter(
-                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+                urn=library_urn, version__gt=loaded_library.version
             ).exists()
         ):
             # The import relies on the scoring settings of the current library
             # (calculation method, visibility...): update the library first.
             return fail("CyfunLibraryOutdated")
         if loaded_library is None:
-            stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+            stored_library = StoredLibrary.objects.filter(urn=library_urn).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
             error = stored_library.load()
@@ -5136,7 +5132,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_2025_URN)
+            framework = Framework.objects.get(urn=parsed["framework_urn"])
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 
