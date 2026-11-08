@@ -205,6 +205,17 @@ export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const ASSET_LIFECYCLE_STAGE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=asset.lifecycle_stage',
+		optionsLabelField: 'translated_name',
+		label: 'lifecycleStage',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2283,14 +2294,15 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['assetClass', 'referenceLink', 'createdAt', 'updatedAt'],
-			body: ['asset_class', 'reference_link', 'created_at', 'updated_at']
+			head: ['assetClass', 'lifecycleStage', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['asset_class', 'lifecycle_stage', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER,
 			asset_class: ASSET_CLASS_FILTER,
+			lifecycle_stage: ASSET_LIFECYCLE_STAGE_FILTER,
 			is_business_function: ASSET_IS_BUSINESS_FUNCTION_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
@@ -3893,9 +3905,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'metric_definition',
-			'rawValue',
+			'currentValue',
 			'target_value',
-			'unit',
 			'status',
 			'lastRefresh',
 			'folder'
@@ -3904,9 +3915,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'metric_definition',
-			'raw_value',
+			'current_value',
 			'target_value',
-			'unit',
 			'status',
 			'last_refresh',
 			'folder'
@@ -4585,6 +4595,14 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	assets: [
+		{
+			type: 'change_field',
+			label: 'changeLifecycleStage',
+			icon: 'fa-solid fa-arrows-rotate',
+			field: 'lifecycle_stage',
+			optionsEndpoint: 'terminologies?field_path=asset.lifecycle_stage&is_visible=true',
+			enableDoubleDash: true
+		},
 		{
 			type: 'change_m2m',
 			label: 'changeOwner',

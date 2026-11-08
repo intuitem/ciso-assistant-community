@@ -1,0 +1,11 @@
+subject: "CISO Assistant : ${deadline_count} échéance(s) de notification réglementaire"
+body: |
+  Bonjour,
+
+  Les échéances de notification réglementaire suivantes requièrent votre attention :
+
+  ${deadline_list}
+
+  Une fois la notification envoyée à l'autorité, enregistrez sa date sur l'incident ou la violation de données : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

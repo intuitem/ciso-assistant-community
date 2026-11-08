@@ -257,7 +257,8 @@ class SuggestControlsWorkflow(Workflow):
 
         if folder_id:
             domain_qs = (
-                AppliedControl.objects.filter(folder_id=folder_id)
+                ctx.scope.queryset(AppliedControl)
+                .filter(folder_id=folder_id)
                 .filter(keyword_filter)
                 .order_by("name")[:20]
             )

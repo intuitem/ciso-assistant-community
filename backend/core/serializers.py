@@ -218,12 +218,27 @@ class BaseModelSerializer(serializers.ModelSerializer):
             self._check_object_perm(instance, "change")
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
-        try:
-            object_updated = super().update(instance, validated_data)
-            return object_updated
-        except Exception as e:
-            logger.error(e)
-            raise serializers.ValidationError(e.args[0])
+        folder_before = Folder.get_folder(instance)
+        derived = self._derived_folder(validated_data)
+        if derived is not None and derived != folder_before:
+            self._check_object_perm(instance, "add", folder=derived)
+        with transaction.atomic():
+            try:
+                object_updated = super().update(instance, validated_data)
+            except Exception as e:
+                logger.error(e)
+                raise serializers.ValidationError(e.args[0])
+            self._check_saved_folder(object_updated, folder_before)
+        return object_updated
+
+    def _derived_folder(self, validated_data: dict) -> Folder | None:
+        parent = validated_data.get(getattr(self.Meta.model, "folder_from", None))
+        return Folder.get_folder(parent) if parent is not None else None
+
+    def _check_saved_folder(self, obj, checked_folder) -> None:
+        saved_folder = Folder.get_folder(obj)
+        if saved_folder is not None and saved_folder != checked_folder:
+            self._check_object_perm(obj, "add", folder=saved_folder)
 
     def _check_m2m_visibility(self, validated_data: dict) -> None:
         """Verify that all M2M linked objects are visible to the requesting user."""
@@ -333,11 +348,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
-        folder = Folder.get_folder(validated_data)
-        folder = folder if folder else Folder.get_root_folder()
+        folder = (
+            self._derived_folder(validated_data)
+            or Folder.get_folder(validated_data)
+            or Folder.get_root_folder()
+        )
         self._check_object_perm(validated_data, "add", folder=folder)
         try:
-            object_created = super().create(validated_data)
+            with transaction.atomic():
+                object_created = super().create(validated_data)
+                self._check_saved_folder(object_created, folder)
             return object_created
         except ValidationError as e:
             logger.error(e)
@@ -856,6 +876,8 @@ class RiskAssessmentWriteSerializer(
         return super().validate(attrs)
 
     def update(self, instance, validated_data):
+        # Track old folder before update
+        old_folder_id = instance.folder_id
         # Check if status is changing to deprecated
         old_status = instance.status
         new_status = validated_data.get("status", old_status)
@@ -870,13 +892,15 @@ class RiskAssessmentWriteSerializer(
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
 
-        # Check if folder is being changed (either directly or via perimeter)
-        new_folder = validated_data.get("folder")
-        if new_folder and new_folder != instance.folder:
-            # Cascade folder change to all child RiskScenarios
-            instance.risk_scenarios.update(folder=new_folder)
+        # Cascade only after the folder move has passed the permission checks
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
 
-        return super().update(instance, validated_data)
+            # Cascade folder change (direct or via perimeter) to risk scenarios
+            if old_folder_id != updated_instance.folder_id:
+                updated_instance.risk_scenarios.update(folder=updated_instance.folder)
+
+        return updated_instance
 
     class Meta:
         model = RiskAssessment
@@ -1049,6 +1073,13 @@ class AssetWriteSerializer(
         allow_null=True,
         write_only=True,
     )
+    lifecycle_stage = serializers.PrimaryKeyRelatedField(
+        queryset=Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE
+        ),
+        required=False,
+        allow_null=True,
+    )
     parent_assets = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Asset.objects.all(),
@@ -1138,6 +1169,13 @@ class AssetWriteSerializer(
             }
             extend_schema_field(schema)(fields[name])
         return fields
+
+    def validate_lifecycle_stage(self, stage):
+        # A hidden stage stays valid on assets that already carry it.
+        current = getattr(self.instance, "lifecycle_stage_id", None)
+        if stage and not stage.is_visible and stage.id != current:
+            raise serializers.ValidationError("This lifecycle stage is hidden.")
+        return stage
 
     def validate(self, data):
         self._check_linked_assets_changeable(data)
@@ -1253,6 +1291,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
     asset_class = FieldsRelatedField(["id", "name"])
+    lifecycle_stage = FieldsRelatedField(["id", "name"])
     overridden_children_capabilities = FieldsRelatedField(["id", "name"], many=True)
     solutions = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -1356,6 +1395,7 @@ class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
 
     folder = FieldsRelatedField()
     asset_class = FieldsRelatedField(["id", "name"])
+    lifecycle_stage = FieldsRelatedField(["id", "name"])
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     parent_assets = FieldsRelatedField(many=True)
@@ -1375,6 +1415,7 @@ class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
             "is_business_function",
             "folder",
             "asset_class",
+            "lifecycle_stage",
             "owner",
             "filtering_labels",
             "parent_assets",
@@ -1465,6 +1506,8 @@ class AssetImportExportSerializer(BaseModelSerializer):
     def get_asset_class(self, obj) -> str | None:
         return obj.asset_class.full_path if obj.asset_class else None
 
+    lifecycle_stage = serializers.SlugRelatedField(slug_field="name", read_only=True)
+
     class Meta:
         model = Asset
         fields = [
@@ -1476,6 +1519,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "disaster_recovery_objectives",
             "parent_assets",
             "asset_class",
+            "lifecycle_stage",
             "folder",
             "created_at",
             "updated_at",
@@ -4171,6 +4215,25 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return []
         return evaluate_staircases(obj, rules)[1]
 
+    weakest_links = serializers.SerializerMethodField()
+
+    def get_weakest_links(self, obj):
+        from core.utils import get_respondent_scoped_folder_ids, is_field_visible_to
+        from core.weakest_link import evaluate_weakest_links, weakest_link_rules
+
+        view = self.context.get("view")
+        request = self.context.get("request")
+        if getattr(view, "action", None) != "retrieve" or request is None:
+            return []
+        rules = weakest_link_rules(obj.outcome_rules)
+        if not rules:
+            return []
+        if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return []
+        if not is_field_visible_to(obj, "result", "auditor"):
+            return []
+        return evaluate_weakest_links(obj, rules)[1]
+
     scores_definition = serializers.SerializerMethodField()
 
     def get_scores_definition(self, obj):
@@ -6062,6 +6125,14 @@ class IncidentImportExportSerializer(BaseModelSerializer):
             "resolved_at",
             "resolution",
             "is_bcp_activated",
+            "root_cause",
+            "nis2_significant",
+            "nis2_early_warning_at",
+            "nis2_notification_at",
+            "nis2_final_report_at",
+            "nis2_reference",
+            "nis2_malicious_intent",
+            "nis2_cross_border_impact",
             "folder",
             "threats",
             "assets",
@@ -7051,6 +7122,39 @@ class IncidentWriteSerializer(BaseModelSerializer):
                 {"resolved_at": "Resolution date cannot be before reported date."}
             )
 
+        # NIS2 deadlines are clocked from awareness (reported_at)
+        aware = (
+            reported_at
+            if self.instance is not None or "reported_at" in attrs
+            else timezone.now()
+        )
+        if (
+            attrs.get(
+                "nis2_significant", getattr(self.instance, "nis2_significant", None)
+            )
+            and not aware
+        ):
+            raise serializers.ValidationError(
+                {"reported_at": "Reported date is required for a significant incident."}
+            )
+        # a sent date marks its stage done and silences its reminders
+        for field in (
+            "nis2_early_warning_at",
+            "nis2_notification_at",
+            "nis2_final_report_at",
+        ):
+            sent = attrs.get(field, getattr(self.instance, field, None))
+            if not sent:
+                continue
+            if sent > timezone.now():
+                raise serializers.ValidationError(
+                    {field: "Sent date cannot be in the future."}
+                )
+            if aware and sent < aware:
+                raise serializers.ValidationError(
+                    {field: "Sent date cannot be before reported date."}
+                )
+
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -7122,6 +7226,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     detection = serializers.CharField(source="get_detection_display", read_only=True)
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    nis2_deadlines = serializers.ListField(read_only=True)
 
     class Meta:
         model = Incident
@@ -7494,6 +7599,24 @@ class TerminologyWriteSerializer(BaseModelSerializer):
     # visibility, not rename or otherwise modify them.
     BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
+
+    def validate_field_path(self, value):
+        # Objects keep pointing at the term; under another path they fail limit_choices_to on save.
+        term = self.instance
+        if (
+            term
+            and value != term.field_path
+            and any(
+                rel.related_model._base_manager.filter(
+                    **{rel.field.name: term}
+                ).exists()
+                for rel in term._meta.related_objects
+            )
+        ):
+            raise serializers.ValidationError(
+                "This term is in use and cannot move to another field."
+            )
+        return value
 
     class Meta:
         model = Terminology
@@ -7896,6 +8019,8 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     processings = FieldsRelatedField(many=True)
     accreditations = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    requirement_assessments = FieldsRelatedField(many=True)
+    risk_scenarios = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
@@ -7922,6 +8047,8 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
             ("processings", "has_processings"),
             ("accreditations", "has_accreditations"),
             ("contracts", "has_contracts"),
+            ("requirement_assessments", "has_requirement_assessments"),
+            ("risk_scenarios", "has_risk_scenarios"),
         ]
         prefetched = getattr(obj, "_prefetched_objects_cache", {})
         for field_name, flag_name in field_map:

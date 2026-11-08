@@ -7,7 +7,8 @@ import re
 import uuid
 import hashlib
 import operator
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from functools import reduce
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -687,8 +688,9 @@ def _translate_questions(owner) -> dict | None:
             choice_data["select_implementation_groups"] = (
                 choice.select_implementation_groups
             )
-        if choice.annotation:
-            choice_data["annotation"] = choice.annotation
+        annotation = tr.get("annotation", choice.annotation)
+        if annotation:
+            choice_data["annotation"] = annotation
         return choice_data
 
     result = {}
@@ -701,8 +703,12 @@ def _translate_questions(owner) -> dict | None:
         }
         if not question.required:
             q_data["required"] = False
-        if question.annotation:
-            q_data["annotation"] = question.annotation
+        annotation = q_tr.get("annotation")
+        # sync copies the text into an empty annotation; that copy is no help text
+        if not annotation and question.annotation != question.text:
+            annotation = question.annotation
+        if annotation:
+            q_data["annotation"] = annotation
         if question.config is not None:
             q_data["config"] = question.config
         choices = [_translate_choice(c) for c in question.choices.all()]
@@ -3057,6 +3063,8 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         verbose_name = _("Classification level")
         verbose_name_plural = _("Classification levels")
 
+    folder_from = "object_classification"
+
     def save(self, *args, **kwargs):
         if self.object_classification_id:
             self.folder = self.object_classification.folder
@@ -3092,6 +3100,7 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         PROCESSING_NATURE = "processing.nature", "processingNature"
         PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
         ENTITY_SCORE_PROVIDER = "entity_score.provider", "entityScoreProvider"
+        ASSET_LIFECYCLE_STAGE = "asset.lifecycle_stage", "assetLifecycleStage"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -3497,6 +3506,45 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         },
     ]
 
+    DEFAULT_ASSET_LIFECYCLE_STAGES = [
+        {
+            "name": "planned",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "implementing",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "active",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "phasing_out",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "retired",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "archived",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+    ]
+
     DEFAULT_ENTITY_SCORE_PROVIDERS = [
         {
             "name": "SecurityScorecard",
@@ -3653,6 +3701,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
     @classmethod
     def create_default_entity_score_providers(cls):
         cls._seed_defaults(cls.DEFAULT_ENTITY_SCORE_PROVIDERS)
+
+    @classmethod
+    def create_default_asset_lifecycle_stages(cls):
+        cls._seed_defaults(cls.DEFAULT_ASSET_LIFECYCLE_STAGES)
 
     @classmethod
     def create_default_metric_units(cls):
@@ -5252,6 +5304,15 @@ class Asset(
         blank=True,
         null=True,
     )
+    lifecycle_stage = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="assets_lifecycle_stage",
+        limit_choices_to={"field_path": Terminology.FieldPath.ASSET_LIFECYCLE_STAGE},
+        verbose_name=_("Lifecycle stage"),
+    )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     is_business_function = models.BooleanField("is_business_function", default=False)
@@ -6636,6 +6697,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
 
+    folder_from = "evidence"
+
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
@@ -6750,6 +6813,11 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         INTERNAL = "internally_detected", "Internal"
         EXTERNAL = "externally_detected", "External"
 
+    class Answer(models.TextChoices):
+        YES = "yes", "Yes"
+        NO = "no", "No"
+        UNCERTAIN = "uncertain", "Uncertain"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -6845,12 +6913,84 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Task templates"),
         related_name="incidents",
     )
+    root_cause = models.TextField(null=True, blank=True, verbose_name=_("Root cause"))
+    # NIS2 art. 23: significant incidents go to the CSIRT/competent authority
+    nis2_significant = models.BooleanField(
+        null=True, blank=True, verbose_name=_("Significant incident (NIS2)")
+    )
+    nis2_early_warning_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 early warning sent at")
+    )
+    nis2_notification_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 incident notification sent at")
+    )
+    nis2_final_report_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 final report sent at")
+    )
+    nis2_reference = models.CharField(
+        max_length=255, blank=True, verbose_name=_("NIS2 notification reference")
+    )
+    # asked from the 24h early warning on (CCB form: Malicious_Intent, Cross_Border_Impact)
+    nis2_malicious_intent = models.CharField(
+        max_length=20,
+        choices=Answer.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Suspected malicious intent"),
+    )
+    nis2_cross_border_impact = models.CharField(
+        max_length=20,
+        choices=Answer.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Cross-border impact"),
+    )
 
     fields_to_check = ["ref_id"]
 
     class Meta:
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
+
+    def nis2_deadlines(self) -> list[dict]:
+        """NIS2 art. 23(4) stages, clocked from awareness (reported_at)."""
+        aware = self.reported_at or self.created_at
+        if not self.nis2_significant or not aware:
+            return []
+        notification_due = aware + timedelta(hours=72)
+        stages = [
+            ("early_warning", aware + timedelta(hours=24), self.nis2_early_warning_at),
+            ("incident_notification", notification_due, self.nis2_notification_at),
+            (
+                "final_report",
+                (self.nis2_notification_at or notification_due)
+                + relativedelta(months=1),
+                self.nis2_final_report_at,
+            ),
+        ]
+        current = now()
+        return [
+            {
+                "stage": stage,
+                "due": due,
+                "done_at": done,
+                "overdue": done is None and current > due,
+            }
+            for stage, due, done in stages
+        ]
+
+    def nis2_next_stage(self) -> dict | None:
+        """The stage to act on: an overdue 72h notification first (a missed early
+        warning must not hide it, nor the upcoming final report), else the next
+        stage ahead, else the last one still open."""
+        pending = [s for s in self.nis2_deadlines() if s["done_at"] is None]
+        for s in pending:
+            if s["stage"] == "incident_notification" and s["overdue"]:
+                return s
+        upcoming = [s for s in pending if not s["overdue"]]
+        if upcoming:
+            return upcoming[0]
+        return pending[-1] if pending else None
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -6913,6 +7053,8 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.entry}"
+
+    folder_from = "incident"
 
     def save(self, *args, **kwargs):
         if self.timestamp > now():
@@ -9051,6 +9193,8 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         )
         return result
 
+    folder_from = "risk_assessment"
+
     def save(self, *args, **kwargs):
         self.folder = self.risk_assessment.folder
 
@@ -10513,7 +10657,7 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Result.COMPLIANT: "#86efac",
-            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#475569",
             RequirementAssessment.Status.TODO: "#9ca3af",
             RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
             RequirementAssessment.Status.IN_REVIEW: "#3b82f6",
@@ -12519,6 +12663,8 @@ class QuickFormApplication(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Quick form applications")
         ordering = ["-created_at"]
 
+    folder_from = "response"
+
     def save(self, *args, **kwargs):
         # As visible as the response that made it.
         if self.response_id:
@@ -13477,6 +13623,15 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         "tprm.Contract",
         blank=True,
     )
+    # per-requirement and per-risk sign-off, not only per assessment
+    requirement_assessments = models.ManyToManyField(
+        "core.RequirementAssessment",
+        blank=True,
+    )
+    risk_scenarios = models.ManyToManyField(
+        "core.RiskScenario",
+        blank=True,
+    )
     request_notes = models.TextField(null=True, blank=True)
     requester = models.ForeignKey(
         User,
@@ -13564,6 +13719,8 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             "processings",
             "accreditations",
             "contracts",
+            "requirement_assessments",
+            "risk_scenarios",
         ]
         for field in model_fields:
             if getattr(self, field).exists():
@@ -14157,6 +14314,8 @@ auditlog.register(
         "security_exceptions",
         "policies",
         "processings",
+        "requirement_assessments",
+        "risk_scenarios",
     },
     exclude_fields=common_exclude,
 )

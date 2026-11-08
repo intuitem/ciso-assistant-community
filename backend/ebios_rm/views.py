@@ -12,14 +12,21 @@ from core.views import (
     GenericFilterSet,
     SmartOrderingFilter,
     actor_prefetch,
+    check_folder_add_permission,
+    check_folder_view_permission,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from core.models import Asset, Terminology
+from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
 from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
-from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
+from .helpers import (
+    ecosystem_radar_chart_data,
+    ebios_rm_visual_analysis,
+    duplicate_ebios_rm_study,
+)
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -32,7 +39,10 @@ from .models import (
     OperatingMode,
     KillChain,
 )
-from .serializers import EbiosRMStudyReadSerializer
+from .serializers import (
+    EbiosRMStudyReadSerializer,
+    EbiosRMStudyDuplicateSerializer,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -141,6 +151,60 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         with transaction.atomic():
             self._process_responsibility_matrix(request)
             return super().update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Duplicate EBIOS RM study",
+        serializer_class=EbiosRMStudyDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        source = self.get_object()  # 404s when the study is not viewable
+        serializer = EbiosRMStudyDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # the user picks the destination domain; default to the source's folder
+        target_folder = data.get("folder") or source.folder
+        # Objects are created in the target folder, so add permission is checked
+        # there. Only require the permission for the owned types the source
+        # actually has records of (an empty study must stay duplicable), like
+        # RiskAssessment duplication does.
+        owned = [
+            (FearedEvent, {"ebios_rm_study": source}),
+            (RoTo, {"ebios_rm_study": source}),
+            (Stakeholder, {"ebios_rm_study": source}),
+            (StrategicScenario, {"ebios_rm_study": source}),
+            (AttackPath, {"ebios_rm_study": source}),
+            (OperationalScenario, {"ebios_rm_study": source}),
+            (OperatingMode, {"operational_scenario__ebios_rm_study": source}),
+            (
+                KillChain,
+                {"operating_mode__operational_scenario__ebios_rm_study": source},
+            ),
+        ]
+        present = [
+            model for model, flt in owned if model.objects.filter(**flt).exists()
+        ]
+        # clone copies source children -> require view on each in the source folder
+        check_folder_view_permission(request.user, source.folder, *present)
+        check_folder_add_permission(request.user, target_folder, EbiosRMStudy, *present)
+
+        clone = duplicate_ebios_rm_study(
+            source,
+            name=data["name"],
+            description=data.get("description", source.description),
+            ref_id=data.get("ref_id", source.ref_id),
+            version=data.get("version", source.version),
+            folder=target_folder,
+            # a cross-domain clone copies the shared objects (assets, threats,
+            # controls, elementary actions, entities) the target cannot see into
+            # it: check the add permission for each type it actually creates
+            before_copy=lambda model: check_folder_add_permission(
+                request.user, target_folder, model
+            ),
+        )
+        return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -560,6 +624,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         buffer = io.BytesIO()
 
+        def esc(value):
+            return escape_excel_formula(value) if isinstance(value, str) else value
+
         # Sheet names prefixed with workshop.activity for i18n and organization
         SHEET_NAMES = {
             "study": "1.1 Study",
@@ -601,7 +668,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 }
             ]
             df_study = pd.DataFrame(study_data)
-            df_study.to_excel(writer, sheet_name=SHEET_NAMES["study"], index=False)
+            df_study.map(esc).to_excel(
+                writer, sheet_name=SHEET_NAMES["study"], index=False
+            )
 
             # 1.2 Assets sheet
             assets_data = []
@@ -620,7 +689,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if assets_data:
                 df_assets = pd.DataFrame(assets_data)
-                df_assets.to_excel(
+                df_assets.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["assets"], index=False
                 )
 
@@ -642,7 +711,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if fe_data:
                 df_fe = pd.DataFrame(fe_data)
-                df_fe.to_excel(
+                df_fe.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["feared_events"], index=False
                 )
 
@@ -684,7 +753,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         :31
                     ]
                     df_ca = pd.DataFrame(ca_data)
-                    df_ca.to_excel(writer, sheet_name=sheet_name, index=False)
+                    df_ca.map(esc).to_excel(writer, sheet_name=sheet_name, index=False)
 
             # 2.1 RO/TO Couples sheet
             roto_data = []
@@ -711,7 +780,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if roto_data:
                 df_roto = pd.DataFrame(roto_data)
-                df_roto.to_excel(writer, sheet_name=SHEET_NAMES["ro_to"], index=False)
+                df_roto.map(esc).to_excel(
+                    writer, sheet_name=SHEET_NAMES["ro_to"], index=False
+                )
 
             # 3.1 Stakeholders sheet
             sh_data = []
@@ -738,7 +809,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if sh_data:
                 df_sh = pd.DataFrame(sh_data)
-                df_sh.to_excel(
+                df_sh.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["stakeholders"], index=False
                 )
 
@@ -760,7 +831,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ss_data:
                 df_ss = pd.DataFrame(ss_data)
-                df_ss.to_excel(
+                df_ss.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["strategic_scenarios"], index=False
                 )
 
@@ -784,7 +855,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ap_data:
                 df_ap = pd.DataFrame(ap_data)
-                df_ap.to_excel(
+                df_ap.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["attack_paths"], index=False
                 )
 
@@ -810,7 +881,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if sc_data:
                 df_sc = pd.DataFrame(sc_data)
-                df_sc.to_excel(
+                df_sc.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["stakeholder_controls"], index=False
                 )
 
@@ -832,7 +903,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ea_data:
                 df_ea = pd.DataFrame(ea_data)
-                df_ea.to_excel(
+                df_ea.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["elementary_actions"], index=False
                 )
 
@@ -869,7 +940,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if os_data:
                 df_os = pd.DataFrame(os_data)
-                df_os.to_excel(
+                df_os.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["operational_scenarios"], index=False
                 )
 
@@ -903,7 +974,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if om_data:
                 df_om = pd.DataFrame(om_data)
-                df_om.to_excel(
+                df_om.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["operating_modes"], index=False
                 )
 
@@ -923,7 +994,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                             "description": risk_assessment.description or "",
                         }
                     ]
-                ).to_excel(
+                ).map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["risk_assessment"], index=False
                 )
 
@@ -974,7 +1045,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         }
                     )
                 if rs_data:
-                    pd.DataFrame(rs_data).to_excel(
+                    pd.DataFrame(rs_data).map(esc).to_excel(
                         writer, sheet_name=SHEET_NAMES["risk_scenarios"], index=False
                     )
 
@@ -999,7 +1070,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     for ac in measures
                 ]
                 if measures_data:
-                    pd.DataFrame(measures_data).to_excel(
+                    pd.DataFrame(measures_data).map(esc).to_excel(
                         writer, sheet_name=SHEET_NAMES["security_measures"], index=False
                     )
 

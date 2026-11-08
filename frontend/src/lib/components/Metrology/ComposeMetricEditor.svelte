@@ -29,7 +29,7 @@
 		category: 'quantitative' | 'qualitative';
 		choices_definition: { ref_id: string | null; name: string | null }[];
 		unit: string | null;
-		higher_is_better: boolean;
+		higher_is_better: boolean | null;
 		inputs: { key: string; instance: Candidate | null }[];
 	}
 	// The save's answer: the instance, and when editing what its edit form
@@ -45,6 +45,8 @@
 </script>
 
 <script lang="ts">
+	import SegmentedControl from '#lib/components/Forms/SegmentedControl.svelte';
+	import { directionOf, higherIsBetterFor, type Direction } from '#lib/utils/metrics.js';
 	import { onMount, tick, untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { m } from '#paraglide/messages.js';
@@ -152,7 +154,7 @@
 	let units = $state<{ id: string; label: string }[]>([]);
 	let unit = $state('');
 	let target = $state('');
-	let higherIsBetter = $state(true);
+	let higherIsBetter = $state<boolean | null>(null);
 
 	// The result: a number, or one of an ordered list of levels (a qualitative
 	// metric). The levels follow the texts the formula returns until the
@@ -713,7 +715,7 @@
 			unit = c.unit ?? '';
 			target =
 				c.target_value === null || c.target_value === undefined ? '' : String(c.target_value);
-			higherIsBetter = c.higher_is_better;
+			higherIsBetter = c.higher_is_better ?? null;
 			await tick();
 			initialDefinition = definitionState;
 			initialEdit = editState;
@@ -1329,10 +1331,20 @@
 						</label>
 					{/if}
 				{/if}
-				<label class="flex items-center gap-2 cursor-pointer self-end pb-2">
-					<input type="checkbox" class="checkbox" bind:checked={higherIsBetter} />
-					<span class="text-sm">{m.higherIsBetter()}</span>
-				</label>
+				<div class="flex flex-col gap-1 self-end pb-2">
+					<span class="text-sm font-semibold">{m.direction()}</span>
+					<SegmentedControl
+						size="sm"
+						options={[
+							{ value: 'none', label: m.noDirection() },
+							{ value: 'higher', label: m.higherIsBetter() },
+							{ value: 'lower', label: m.lowerIsBetter() }
+						]}
+						value={directionOf({ higher_is_better: higherIsBetter })}
+						onChange={(value) => (higherIsBetter = higherIsBetterFor(value as Direction))}
+						ariaLabel={m.direction()}
+					/>
+				</div>
 			</div>
 			{#each [...(errors.folder ?? []), ...(errors.collection_frequency ?? []), ...(errors.unit ?? []), ...(errors.category ?? []), ...(errors.form ?? [])] as message (message)}
 				<p class="text-xs text-error-500">{message}</p>

@@ -21,6 +21,7 @@
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import ObjectValidationFlows from '#lib/components/ValidationFlows/ObjectValidationFlows.svelte';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 	import Question from '#lib/components/Forms/Question.svelte';
 	import { countMasked } from '#lib/utils/related-visibility.js';
@@ -69,7 +70,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[data.requirementAssessment.result] === '#000000'
+		complianceResultColorMap[data.requirementAssessment.result] === '#475569'
 			? 'text-white'
 			: 'text-gray-900'
 	);
@@ -212,7 +213,12 @@
 				{/snippet}
 			</ScorePair>
 		{/if}
-		<div class="ml-auto shrink-0 self-center">
+		<div class="ml-auto shrink-0 self-center flex flex-col gap-2">
+			<ObjectValidationFlows
+				form={data.validationFlowForm}
+				model={data.validationFlowModel}
+				flows={data.validationFlows ?? []}
+			/>
 			<AuditTrailButton
 				model="requirement-assessments"
 				objectId={data.requirementAssessment.id}

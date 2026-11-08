@@ -2501,6 +2501,11 @@ def startup(sender=None, **kwargs):
         logger.error("Error creating default Metric Units", exc_info=True)
 
     try:
+        Terminology.create_default_asset_lifecycle_stages()
+    except Exception as e:
+        logger.error("Error creating default Asset Lifecycle Stages", exc_info=True)
+
+    try:
         Terminology.create_default_project_statuses()
     except Exception as e:
         logger.error("Error creating default Project Statuses", exc_info=True)

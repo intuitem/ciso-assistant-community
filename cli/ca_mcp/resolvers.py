@@ -528,6 +528,55 @@ def resolve_evidence_id(evidence_name_or_id: str) -> str:
     return str(evidences[0]["id"])
 
 
+def _resolve_unique_by_name(endpoint: str, label: str, name_or_id: str) -> str:
+    """Resolve an exact name to a UUID via a `name` filter, refusing ambiguity."""
+    if _is_uuid(name_or_id):
+        return name_or_id
+
+    ref = str(name_or_id or "").strip()
+    if not ref:
+        raise ValueError(f"{label} reference is empty")
+
+    # No item cap: a truncated list could hide a duplicate name and make an
+    # ambiguous reference look unique.
+    results, error = fetch_all_results(endpoint, params={"name": ref}, max_items=None)
+
+    if error:
+        raise ValueError(f"{label} '{ref}' API error: {error}")
+
+    if not results:
+        raise ValueError(f"{label} '{ref}' not found")
+
+    if len(results) > 1:
+        labels = [
+            f"{r.get('name')} ({(r.get('folder') or {}).get('str')}, {r.get('id')})"
+            for r in results[:5]
+        ]
+        raise ValueError(
+            f"Ambiguous {label.lower()} name '{ref}', found {len(results)}: {labels}"
+        )
+
+    return str(results[0]["id"])
+
+
+def resolve_findings_assessment_id(findings_assessment_name_or_id: str) -> str:
+    """Resolve a findings assessment (binder) name or UUID to its UUID."""
+    return _resolve_unique_by_name(
+        "/findings-assessments/",
+        "Findings assessment",
+        findings_assessment_name_or_id,
+    )
+
+
+def resolve_finding_id(finding_name_or_id: str) -> str:
+    """Resolve a finding name or UUID to its UUID.
+
+    Finding names are not unique (even within one binder): an ambiguous name
+    is refused, pass the UUID instead.
+    """
+    return _resolve_unique_by_name("/findings/", "Finding", finding_name_or_id)
+
+
 def resolve_incident_id(incident_name_or_id: str) -> str:
     """Resolve an incident name or UUID to its UUID.
 
