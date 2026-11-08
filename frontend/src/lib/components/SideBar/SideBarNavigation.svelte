@@ -28,14 +28,21 @@
 
 	// Open the section holding the current page, e.g. after jumping there from the command palette.
 	$effect(() => {
-		const path = page.url.pathname;
+		const { pathname, searchParams } = page.url;
 		let best: { section: string; length: number } | undefined;
 		for (const item of items) {
+			if (sideBarVisibleItems?.[item.name] === false) continue;
 			for (const subItem of item.items) {
-				const href = subItem.href?.split('?')[0];
-				if (!href || href === '/') continue;
-				if ((path === href || path.startsWith(href + '/')) && href.length > (best?.length ?? 0)) {
-					best = { section: item.name, length: href.length };
+				if (!subItem.href || subItem.href === '/') continue;
+				if (sideBarVisibleItems?.[subItem.name] === false) continue;
+				const [href, query] = subItem.href.split('?');
+				const pathMatches = pathname === href || pathname.startsWith(href + '/');
+				// Links like /campaigns?kind=third_party only match their own query.
+				const queryMatches = [...new URLSearchParams(query)].every(
+					([k, v]) => searchParams.get(k) === v
+				);
+				if (pathMatches && queryMatches && subItem.href.length > (best?.length ?? 0)) {
+					best = { section: item.name, length: subItem.href.length };
 				}
 			}
 		}

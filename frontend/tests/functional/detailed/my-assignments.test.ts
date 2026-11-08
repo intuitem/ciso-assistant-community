@@ -130,7 +130,8 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 			folder: vars.folderName
 		});
 
-		// await page.getByTestId('accordion-item-overview').click();
+		// Visiting applied controls opens Operations, so reopen Overview.
+		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
 		await expect(page.getByText('control-without-owner')).toHaveCount(0);
 	});

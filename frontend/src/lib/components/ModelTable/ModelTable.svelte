@@ -1052,6 +1052,12 @@
 	});
 
 	let tableWrapEl: HTMLElement | undefined = $state();
+
+	// Findings list applied controls as "REF - name", unless the name already starts with REF.
+	const refPrefix = (key: string, val: { ref_id?: string; str?: string }) =>
+		key === 'applied_controls' && val.ref_id && !(val.str ?? '').startsWith(val.ref_id)
+			? `${val.ref_id} - `
+			: '';
 </script>
 
 <div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
@@ -1308,14 +1314,10 @@
 																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{key === 'applied_controls' && val.ref_id
-																						? `${val.ref_id} - `
-																						: ''}{safeTranslate(val.str)}</Anchor
+																					>{refPrefix(key, val)}{safeTranslate(val.str)}</Anchor
 																				>
 																			{:else}
-																				{key === 'applied_controls' && val.ref_id
-																					? `${val.ref_id} - `
-																					: ''}{safeTranslate(val.str)}
+																				{refPrefix(key, val)}{safeTranslate(val.str)}
 																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}

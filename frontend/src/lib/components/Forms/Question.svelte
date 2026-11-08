@@ -406,7 +406,7 @@
 						{#if form}
 							<textarea
 								placeholder=""
-								class="input w-full min-h-20 resize-y [field-sizing:content] {_class}"
+								class="input w-full min-h-20 max-h-96 resize-y [field-sizing:content] {_class}"
 								{disabled}
 								autocomplete="off"
 								bind:value={internalAnswers[urn]}
@@ -415,7 +415,7 @@
 							<div>
 								<textarea
 									placeholder=""
-									class="input w-full min-h-20 resize-y [field-sizing:content] {_class}"
+									class="input w-full min-h-20 max-h-96 resize-y [field-sizing:content] {_class}"
 									{disabled}
 									autocomplete="off"
 									bind:value={questionBuffers[urn]}

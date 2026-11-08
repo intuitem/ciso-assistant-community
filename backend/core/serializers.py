@@ -7662,8 +7662,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
         return instance
 
-    @staticmethod
-    def _sync_security_exception_status(flow, current_status, new_status):
+    def _sync_security_exception_status(self, flow, current_status, new_status):
         """Carry the validation outcome onto the linked exceptions.
 
         A decision settles exceptions still under review; a revocation sends
@@ -7693,6 +7692,10 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         for exception in flow.security_exceptions.filter(status__in=from_statuses):
             exception.status = to_status
             exception.save(update_fields=["status", "updated_at"])
+            # Owners outside the flow would otherwise miss the decision.
+            SecurityExceptionWriteSerializer(
+                context=self.context
+            )._send_status_notification(exception)
 
     def update(self, instance: ValidationFlow, validated_data: dict) -> ValidationFlow:
         """

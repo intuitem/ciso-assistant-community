@@ -92,7 +92,7 @@ When the **Validations** feature is enabled, an exception's page shows a **Reque
 
 You can also bundle exceptions with other objects in one request from the **Validations** list, for example an audit together with the exceptions raised against it. See [Validation flows](validation-flows.md) for how approvers, deadlines, and decisions work.
 
-A validation records the decision. It doesn't change the exception's **Status**, so update that too once the decision is made.
+The decision updates the exception's **Status**: accepting the flow moves a _Draft_ or _In review_ exception to _Approved_, rejecting it moves it to _Rejected_, and revoking an accepted flow sends an _Approved_ exception back to _In review_. The exception's owners are notified of the change.
 
 ## Reminders and notifications
 

@@ -3,10 +3,13 @@
 import pytest
 
 from core.models import SecurityException, ValidationFlow
-from core.serializers import ValidationFlowWriteSerializer
+from core.serializers import (
+    SecurityExceptionWriteSerializer,
+    ValidationFlowWriteSerializer,
+)
 from iam.models import Folder, User
 
-sync = ValidationFlowWriteSerializer._sync_security_exception_status
+sync = ValidationFlowWriteSerializer()._sync_security_exception_status
 
 
 @pytest.mark.django_db
@@ -39,3 +42,27 @@ def test_outcome_updates_linked_exceptions(start, decision, expected):
     resolved.refresh_from_db()
     assert linked.status == expected
     assert resolved.status == "resolved"
+
+
+@pytest.mark.django_db
+def test_changed_exceptions_notify_owners(monkeypatch):
+    notified = []
+    monkeypatch.setattr(
+        SecurityExceptionWriteSerializer,
+        "_send_status_notification",
+        lambda self, exception: notified.append(exception.name),
+    )
+    folder = Folder.get_root_folder()
+    flow = ValidationFlow.objects.create(
+        folder=folder, approver=User.objects.create(email="approver@test.local")
+    )
+    flow.security_exceptions.add(
+        SecurityException.objects.create(name="linked", folder=folder),
+        SecurityException.objects.create(
+            name="resolved", folder=folder, status="resolved"
+        ),
+    )
+
+    sync(flow, "submitted", "accepted")
+
+    assert notified == ["linked"]

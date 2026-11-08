@@ -1044,8 +1044,9 @@ def gen_audit_context(
                 "item_count": scores["item_count"],
                 "scored_count": scores["scored_count"],
                 "average_score": round(average_score, 1),
-                "all_not_applicable": scores["assessable_count"] > 0
-                and scores["not_applicable_count"] == scores["assessable_count"],
+                # Also true when filters (e.g. implementation groups) leave nothing assessable.
+                "nothing_applicable": scores["not_applicable_count"]
+                == scores["assessable_count"],
             }
 
         return category_scores
@@ -1264,7 +1265,7 @@ def gen_audit_context(
     radar_scores = {
         urn: score
         for urn, score in category_scores.items()
-        if not score["all_not_applicable"]
+        if not score["nothing_applicable"]
     }
     category_radar_buffer = (
         plot_category_radar(radar_scores, max_score=max_score, colors=custom_colors)
