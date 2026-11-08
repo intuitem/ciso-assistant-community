@@ -81,7 +81,7 @@
 										style="
 										width: {sp.percentage}%;
 										background-color: {sp.itemStyle.color};
-										color: {sp.itemStyle.color === '#000000' ? 'white' : 'black'};
+										color: {sp.itemStyle.color === '#475569' ? 'white' : 'black'};
 										box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
 									"
 									>

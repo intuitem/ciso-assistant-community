@@ -74,11 +74,15 @@
 						{
 							name: m.csfFunction(),
 							type: 'pie',
-							radius: [20, 100],
+							// Relative radius leaves room for side labels in narrow cards; long labels wrap.
+							radius: ['8%', '55%'],
 							roseType: 'area',
 							label: {
-								formatter: (params: { name: string }) => translateName(params.name)
+								formatter: (params: { name: string }) => translateName(params.name),
+								overflow: 'break',
+								width: 80
 							},
+							labelLine: { length: 8, length2: 6 },
 							data: dataWithColors
 						}
 					]

@@ -37,5 +37,5 @@
 		'not applicable',
 		'not assessed'
 	]}
-	colors={['#86EFAC', '#FDE047', '#F87171', '#000000', '#D1D5DB']}
+	colors={['#86EFAC', '#FDE047', '#F87171', '#475569', '#D1D5DB']}
 />

@@ -114,7 +114,7 @@ def compile_perimeter_for_composer(user: User, perimeters_list: list):
         "non_compliant": "#f87171",
         "to_do": "#d1d5db",
         "partially_compliant": "#fde047",
-        "not_applicable": "#000000",
+        "not_applicable": "#475569",
         "compliant": "#86efac",
     }
     for st in RequirementAssessment.Status:

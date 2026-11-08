@@ -73,11 +73,7 @@
 					};
 				}}
 			>
-				<button
-					type="submit"
-					class="btn bg-pink-500 dark:bg-pink-600 text-white h-fit"
-					disabled={simulationIsLoading}
-				>
+				<button type="submit" class="btn btn-quiet h-fit" disabled={simulationIsLoading}>
 					<span class="mr-2">
 						{#if simulationIsLoading}
 							<Progress value={null}>

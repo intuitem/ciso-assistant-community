@@ -407,11 +407,11 @@
 			<div class="flex flex-col space-y-2">
 				<button
 					type="button"
-					class="btn preset-filled-primary-500 w-full"
+					class="btn btn-quiet"
 					data-testid="export-button"
 					onclick={modalExport}
 				>
-					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
 				</button>
 			</div>
 		{/snippet}
