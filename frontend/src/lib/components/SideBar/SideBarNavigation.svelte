@@ -37,7 +37,6 @@
 				if (sideBarVisibleItems?.[subItem.name] === false) continue;
 				const [href, query] = subItem.href.split('?');
 				const pathMatches = pathname === href || pathname.startsWith(href + '/');
-				// Links like /campaigns?kind=third_party only match their own query.
 				const queryMatches = [...new URLSearchParams(query)].every(
 					([k, v]) => searchParams.get(k) === v
 				);

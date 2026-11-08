@@ -7692,7 +7692,6 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         for exception in flow.security_exceptions.filter(status__in=from_statuses):
             exception.status = to_status
             exception.save(update_fields=["status", "updated_at"])
-            # Owners outside the flow would otherwise miss the decision.
             SecurityExceptionWriteSerializer(
                 context=self.context
             )._send_status_notification(exception)

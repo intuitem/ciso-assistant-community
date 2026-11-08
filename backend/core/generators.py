@@ -1044,7 +1044,6 @@ def gen_audit_context(
                 "item_count": scores["item_count"],
                 "scored_count": scores["scored_count"],
                 "average_score": round(average_score, 1),
-                # Also true when filters (e.g. implementation groups) leave nothing assessable.
                 "nothing_applicable": scores["not_applicable_count"]
                 == scores["assessable_count"],
             }

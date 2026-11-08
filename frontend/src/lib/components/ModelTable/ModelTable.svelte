@@ -453,7 +453,6 @@
 			totalRows: source?.meta?.count
 		}
 	);
-	const topPageCount = handler.getPageCount();
 
 	const rows = handler.getRows();
 	const relatedFieldNames = $derived(
@@ -1053,7 +1052,6 @@
 
 	let tableWrapEl: HTMLElement | undefined = $state();
 
-	// Findings list applied controls as "REF - name", unless the name already starts with REF.
 	const refPrefix = (key: string, val: { ref_id?: string; str?: string }) =>
 		key === 'applied_controls' && val.ref_id && !(val.str ?? '').startsWith(val.ref_id)
 			? `${val.ref_id} - `
@@ -1148,9 +1146,6 @@
 			{/if}
 			{#if pagination && rowsPerPage}
 				<RowsPerPage {handler} />
-				{#if $topPageCount > 1}
-					<Pagination {handler} {URLModel} syncToUrl={syncFiltersToUrl} followUrl={false} />
-				{/if}
 			{/if}
 			{#if showColumnSelector}
 				<ColumnSelector
