@@ -219,6 +219,22 @@ class TestLosingAccess:
         user.save(update_fields=["last_login"])
         assert Token.objects.filter(user=user).exists()
 
+    def test_an_expired_connection_needs_consent_again(self, client):
+        # the idle limit passed: every token of the app expired, its grant stayed
+        user, expired = _user("u@example.com"), _client(name="Expired")
+        _token(expired, user, type=Token.Type.REFRESH_TOKEN)
+        Token.objects.filter(client=expired).update(
+            expires_at=timezone.now() - timedelta(days=1)
+        )
+        # a live connection to another app, which allauth alone would accept
+        _token(_client(name="Other"), user, scopes=("openid", "mcp:read"))
+
+        response = _authorize(client, expired, user, prompt="none")
+
+        query = parse_qs(urlsplit(response["Location"]).query)
+        assert "code" not in query
+        assert query["error"] == ["consent_required"]
+
     def test_only_an_admin_may_change_the_flag(self):
         target = _user("target@example.com", False)
         request = SimpleNamespace(user=_user("manager@example.com"))

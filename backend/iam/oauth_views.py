@@ -6,7 +6,7 @@ from allauth.idp.oidc.forms import AuthorizationForm
 from allauth.idp.oidc.internal.oauthlib.server import get_server
 from allauth.idp.oidc.internal.oauthlib.utils import extract_params
 from allauth.idp.oidc.internal.resources import get_resources
-from allauth.idp.oidc.models import Client
+from allauth.idp.oidc.models import Client, Token
 from allauth.idp.oidc.views import AuthorizationView
 from django import forms
 from django.conf import settings
@@ -149,9 +149,20 @@ def _silent_without_consent(request, info, mcp_request) -> bool:
         if mcp_request
         else ConnectedAppUse.objects.filter(authorized_at__isnull=False)
     )
-    return not approvals.filter(
-        user=request.user, client_id=info.get("client_id")
-    ).exists()
+    user, client_id = request.user, info.get("client_id")
+    if not approvals.filter(user=user, client_id=client_id).exists():
+        return True
+    # once all its tokens have expired (OAUTH_REFRESH_TOKEN_IDLE_DAYS), the
+    # connection has ended: its grant row stays, but the user approves it again
+    return not (
+        Token.objects.valid()
+        .filter(
+            user=user,
+            client_id=client_id,
+            type__in=(Token.Type.ACCESS_TOKEN, Token.Type.REFRESH_TOKEN),
+        )
+        .exists()
+    )
 
 
 # Overriding dispatch drops the decorators allauth puts on it, so restate them.
