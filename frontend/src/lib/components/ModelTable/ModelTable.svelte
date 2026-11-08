@@ -1391,12 +1391,15 @@
 																	)[1]}</Anchor
 																>
 															{:else}
-																<Anchor
-																	breadcrumbAction="push"
-																	href={itemHref}
-																	class="anchor line-clamp-2"
-																	title={safeTranslate(value.str)}
-																	stopPropagation>{safeTranslate(value.str)}</Anchor
+																<!-- Clamp a wrapper, not the link: a block-level link would fill the
+																     cell and steal clicks meant for the row. -->
+																<span class="line-clamp-2" title={safeTranslate(value.str)}
+																	><Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation>{safeTranslate(value.str)}</Anchor
+																	></span
 																>
 															{/if}
 														{:else}
@@ -1676,9 +1679,9 @@
 		{/if}
 	</table>
 	<!-- Outside the table: an empty tbody stays empty (tests count rows) and no context menu targets it. -->
-	{#if !loading && !isFetching && $rows.length === 0}
+	{#if !loading && !isFetching && inFlight === 0 && $rows.length === 0}
 		<p data-testid="table-empty" class="py-8 text-center text-sm text-surface-500">
-			{m.noEntriesFound()}
+			{loadFailed && !hasLoadedOnce ? m.errorLoadingData() : m.noEntriesFound()}
 		</p>
 	{/if}
 

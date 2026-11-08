@@ -1100,7 +1100,7 @@
 			{#each relatedModels as [urlmodel, model]}
 				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
 					{#if visitedTabs.has(urlmodel)}
-						{#key urlmodel}
+						{#key `${data?.data?.id}:${urlmodel}`}
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
