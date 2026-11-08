@@ -1980,7 +1980,7 @@ class TestUserFullView:
     def test_viewer_order_reveals_no_full_view_field(self, env, viewer):
         client = env.clients[viewer]
 
-        def emails(query=""):
+        def emails(query):
             return [
                 row["email"]
                 for row in self._rows(client.get(f"{reverse(API_ENDPOINT)}?{query}"))
@@ -2094,7 +2094,7 @@ class TestUserFullView:
         assert env.target.email in {row["email"] for row in found}
 
     def test_full_viewer_order_keeps_full_view_fields(self, env):
-        def emails(query=""):
+        def emails(query):
             return [
                 row["email"]
                 for row in self._rows(
@@ -2102,7 +2102,7 @@ class TestUserFullView:
                 )
             ]
 
-        assert emails()[0] == "admin@tests.com"
+        assert emails("")[0] == "admin@tests.com"
         assert emails("ordering=is_superuser")[-1] == "admin@tests.com"
 
 

@@ -1431,7 +1431,7 @@ class ObjectAuditTrailView(APIView):
         return label_cache[key]
 
     @staticmethod
-    def _mask(model_name, changes, hidden=()):
+    def _mask(model_name, changes, hidden):
         if not isinstance(changes, dict):
             return changes
         changes = {
