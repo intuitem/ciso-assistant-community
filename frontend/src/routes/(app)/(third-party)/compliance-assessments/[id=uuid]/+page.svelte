@@ -857,8 +857,8 @@
 	{/if}
 
 	<div class="flex flex-col card px-6 py-4 bg-surface-50-950 shadow-lg w-full">
-		<div class="flex flex-row justify-between">
-			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
+		<div class="flex flex-col lg:flex-row justify-between gap-4 lg:gap-0">
+			<div class="flex flex-col space-y-2 whitespace-pre-line lg:w-1/5 pr-1">
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
 					const fieldsToShow = ['ref_id', 'name', 'description', 'observation', 'version', 'folder', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
 					if (!fieldsToShow.includes(key)) return false;
@@ -1049,7 +1049,7 @@
 					</div>
 				{/if}
 			</div>
-			<div class="flex flex-col space-y-2 ml-4 w-80 xl:w-96 shrink-0">
+			<div class="flex flex-col space-y-2 lg:ml-4 w-full lg:w-80 xl:w-96 shrink-0">
 				<!-- One even grid: the filled primary first, every other action quiet. -->
 				<div class="action-grid">
 					{#if canEditObject}

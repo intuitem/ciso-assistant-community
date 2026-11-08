@@ -296,8 +296,8 @@
 				</div>
 			</div>
 		{/if}
-		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex space-x-2 relative">
-			<div class="container w-1/3">
+		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex flex-col lg:flex-row gap-4 relative">
+			<div class="container lg:w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{#if risk_assessment.perimeter}
 						{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
@@ -349,7 +349,7 @@
 					{/key}
 				{/if}
 			</div>
-			<div class="container w-2/3">
+			<div class="container lg:w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="risk-matrix-field-title">{m.riskMatrix()}:</span>
 					<Anchor
@@ -379,7 +379,7 @@
 					<MarkdownRenderer content={risk_assessment.description} />
 				</div>
 			</div>
-			<div class="flex flex-col space-y-2 ml-4 w-80 xl:w-96 shrink-0">
+			<div class="flex flex-col space-y-2 w-full lg:w-80 xl:w-96 shrink-0">
 				<!-- Same pattern as the audit header: filled primary first, the rest quiet. -->
 				<div class="action-grid">
 					{#if canEditObject}
@@ -452,7 +452,7 @@
 									<Progress value={null}>
 										<Progress.Circle class="[--size:--spacing(6)] -ml-2">
 											<Progress.CircleTrack />
-											<Progress.CircleRange class="stroke-white" />
+											<Progress.CircleRange class="stroke-current" />
 										</Progress.Circle>
 									</Progress>
 								{:else}

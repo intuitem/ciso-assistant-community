@@ -79,7 +79,7 @@
 							<Progress value={null}>
 								<Progress.Circle class="[--size:--spacing(6)] -ml-2">
 									<Progress.CircleTrack />
-									<Progress.CircleRange class="stroke-white" />
+									<Progress.CircleRange class="stroke-current" />
 								</Progress.Circle>
 							</Progress>
 						{:else}

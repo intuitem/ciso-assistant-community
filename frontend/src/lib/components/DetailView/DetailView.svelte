@@ -481,6 +481,9 @@
 	$effect(() => {
 		if (group && !visitedTabs.has(group)) visitedTabs = new Set(visitedTabs).add(group);
 	});
+	// Plain (non-reactive) marker: navigating to another record of the same model keeps the same
+	// tab names but different counts, so the default tab must be recomputed then too.
+	let shownRecordId = data?.data?.id;
 	$effect(() => {
 		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
 
@@ -488,8 +491,10 @@
 		const setsAreDifferent =
 			relatedModelsNames.size !== newRelatedModelsNames.size ||
 			[...newRelatedModelsNames].some((name) => !relatedModelsNames.has(name));
+		const recordChanged = data?.data?.id !== shownRecordId;
 
-		if (setsAreDifferent) {
+		if (setsAreDifferent || recordChanged) {
+			shownRecordId = data?.data?.id;
 			relatedModelsNames = newRelatedModelsNames;
 			const firstTab = firstTabKey(relatedModels);
 			group = firstTab;

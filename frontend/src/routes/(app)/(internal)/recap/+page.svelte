@@ -81,7 +81,7 @@
 										style="
 										width: {sp.percentage}%;
 										background-color: {sp.itemStyle.color};
-										color: {sp.itemStyle.color === '#475569' ? 'white' : 'black'};
+										color: {['#475569', '#000000'].includes(sp.itemStyle.color) ? 'white' : 'black'};
 										box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
 									"
 									>

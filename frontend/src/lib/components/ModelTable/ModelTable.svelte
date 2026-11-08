@@ -487,8 +487,9 @@
 	let hasLoadedOnce = $state(false);
 	let loadFailed = $state(false);
 	// A remote table is "fetching" until its first page lands (not only while a request is
-	// in flight): otherwise it flashes empty headers before the first request starts.
-	const isFetching = $derived(hasRemoteSource && !hasLoadedOnce && !loadFailed);
+	// in flight): otherwise it flashes empty headers before the first request starts. A failed
+	// first request only ends the skeleton once no retry is still pending.
+	const isFetching = $derived(hasRemoteSource && !hasLoadedOnce && (!loadFailed || inFlight > 0));
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
 
 	if (hasRemoteSource) {
@@ -1299,7 +1300,8 @@
 													data-testid="model-table-td-array-elem"
 													class="font-typo-base whitespace-pre-line break-words"
 												>
-													{#if isEmptyCell(value)}
+													<!-- last_assessment_status: null means "never assessed", rendered by its own branch. -->
+													{#if key !== 'last_assessment_status' && isEmptyCell(value)}
 														<span class="text-surface-400-600">--</span>
 													{:else if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
@@ -1414,7 +1416,7 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'status' && typeof value === 'string'}
+													{:else if key === 'status' && typeof value === 'string' && !(URLModel == 'document-containers' && row.meta?.pending_revision)}
 														<span
 															class="badge text-xs {STATUS_PRESETS[value] ??
 																'preset-tonal-surface'}">{safeTranslate(value)}</span
@@ -1598,16 +1600,6 @@
 									{/if}
 								</tr>
 							{/each}
-						{:else if $rows.length === 0}
-							<tr data-testid="table-empty">
-								<td
-									colspan={renderColumnKeys.length +
-										(hasBatchActions ? 1 : 0) +
-										(displayActions ? 1 : 0)}
-								>
-									<p class="py-8 text-center text-sm text-surface-500">{m.noEntriesFound()}</p>
-								</td>
-							</tr>
 						{/if}
 					</tbody>
 				{/snippet}
@@ -1683,6 +1675,12 @@
 			</tfoot>
 		{/if}
 	</table>
+	<!-- Outside the table: an empty tbody stays empty (tests count rows) and no context menu targets it. -->
+	{#if !loading && !isFetching && $rows.length === 0}
+		<p data-testid="table-empty" class="py-8 text-center text-sm text-surface-500">
+			{m.noEntriesFound()}
+		</p>
+	{/if}
 
 	<footer class="flex justify-between items-center space-x-8 p-2">
 		{#if rowCount && pagination}
