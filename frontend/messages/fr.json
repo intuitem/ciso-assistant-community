@@ -7747,7 +7747,7 @@
 	"backup": "Sauvegarder",
 	"restore": "Restaurer",
 	"viewComplianceAssessmentFull": "Voir toutes les exigences (vue auditeur)",
-	"viewUserRestricted": "Consulter, sans les détails des comptes",
+	"viewUserFull": "Consulter la fiche utilisateur complète",
 	"viewCentralAuditlog": "Consulter le journal d'audit central",
 	"viewObjectAudittrail": "Consulter l'historique des objets",
 	"customDocHtmlTemplate": "Modèle de document (HTML)",

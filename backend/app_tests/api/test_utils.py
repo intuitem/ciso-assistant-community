@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import StoredLibrary
 from library.builder import normalize_objects
-from iam.models import Folder, User, UserGroup, row_view_codenames
+from iam.models import Folder, User, UserGroup
 
 from test_vars import *
 
@@ -104,10 +104,8 @@ class EndpointTestsUtils:
     ):
         """Get the expected request response for a specific action on an object for a specific user group"""
         perm_name = f"{action}_{get_singular_name(object).lower().replace(' ', '')}"
-        # A restricted view grants the same rows as the full one.
-        granting = row_view_codenames(perm_name) if action == "view" else [perm_name]
 
-        if any(perm in GROUPS_PERMISSIONS[user_group]["perms"] for perm in granting):
+        if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
             # User has permission to perform the action
             if (
                 (GROUPS_PERMISSIONS[user_group]["folder"] == "Global")

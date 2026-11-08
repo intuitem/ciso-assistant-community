@@ -1,7 +1,9 @@
+from importlib import import_module
 from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from django.apps import apps as django_apps
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 from knox.models import AuthToken
@@ -11,7 +13,7 @@ from core.serializers import UserReadSerializer, UserWriteSerializer
 from core.startup import ensure_user_creator_group
 from core.models import Actor
 from core.views import UserFilter
-from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+from iam.models import Folder, IdPGroup, Role, RoleAssignment, User, UserGroup
 
 
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
@@ -1758,16 +1760,16 @@ class TestGlobalUserCreatorGroup:
 
 
 @pytest.mark.django_db
-class TestUserAccountFieldsVisibility:
-    """Every domain member sees users through `view_user_restricted`, ambient on
-    the root folder. Account and security fields stay with the user themself and
-    with holders of `view_user` or `change_user` on the user's folder; everyone
-    else gets the directory fields."""
+class TestUserFullView:
+    """Every domain member sees users through `view_user`, ambient on the root
+    folder. Sign-in and administration fields need the full view of the user: being
+    them, or holding `view_user_full` or `change_user` on their folder (see the
+    full-view-permissions ADR)."""
 
     TARGET_EXPIRY = "2030-01-01"
     # Spelled out rather than imported, so dropping a field from the serializer's
     # list fails here.
-    ACCOUNT_FIELDS = {
+    FULL_VIEW_FIELDS = {
         "is_superuser",
         "has_mfa_enabled",
         "expiry_date",
@@ -1776,24 +1778,30 @@ class TestUserAccountFieldsVisibility:
         "is_jit_provisioned",
         "observation",
     }
-    # Directory only: the ambient baseline role, a domain Reader, the Global
-    # analyst and approver groups and a custom role holding only the restricted
-    # view on Global.
-    VIEWERS = ["ambient", "reader", "global_analyst", "global_approver", "restricted"]
-    # Account fields through `view_user` or `change_user` on Global.
-    ACCOUNT_VIEWERS = [
+    # Base view only: the ambient baseline role, a domain Reader, the Global
+    # analyst, approver and user creator groups, and a custom role holding only
+    # `view_user` on Global.
+    VIEWERS = [
+        "ambient",
+        "reader",
+        "global_analyst",
+        "global_approver",
+        "creator",
+        "base_only",
+    ]
+    # Full view through `view_user_full` or `change_user` on Global.
+    FULL_VIEWERS = [
         "superuser",
         "manager",
         "full_viewer",
         "change_only",
         "global_reader",
-        "creator",
     ]
 
     @pytest.fixture
     def env(self, authenticated_client):
         domain = Folder.objects.create(
-            name="account fields domain",
+            name="full view domain",
             parent_folder=Folder.get_root_folder(),
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
@@ -1806,6 +1814,8 @@ class TestUserAccountFieldsVisibility:
         target.keep_local_login = True
         target.observation = "contractor, leaves in January"
         target.save()
+        idp_group = IdPGroup.objects.create(name="sg-contractors")
+        target.idp_groups.add(idp_group)
         # Users live in Global, which is where a custom user manager role applies.
         assert target.folder_id == Folder.get_root_folder().id
         # Sorts first by email, so an order that drops `-is_active` shows.
@@ -1817,7 +1827,7 @@ class TestUserAccountFieldsVisibility:
         ambient = User.objects.create_user("ambient@tests.com")
         auditees = UserGroup.objects.get(name="BI-UG-ADE", folder=domain)
         assert not auditees.roleassignment_set.filter(
-            role__permissions__codename__in=["view_user", "view_user_restricted"]
+            role__permissions__codename__in=["view_user", "view_user_full"]
         ).exists()
         auditees.user_set.add(ambient)
 
@@ -1832,20 +1842,22 @@ class TestUserAccountFieldsVisibility:
         UserGroup.objects.get(name="BI-UG-GAP", folder=root).user_set.add(
             global_approver
         )
-        restricted = _make_user_manager(
-            "restricted@tests.com", ["view_user_restricted"]
-        )
-
-        global_reader = User.objects.create_user("global.reader@tests.com")
-        UserGroup.objects.get(name="BI-UG-GAD", folder=root).user_set.add(global_reader)
         ensure_user_creator_group()
         creator = User.objects.create_user("creator@tests.com")
         UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
-        # Not superusers: account access from view_user, change_user, or both.
-        manager = _make_user_manager("manager@tests.com", ["view_user", "change_user"])
-        full_viewer = _make_user_manager("full.viewer@tests.com", ["view_user"])
+        base_only = _make_user_manager("base.only@tests.com", ["view_user"])
+
+        global_reader = User.objects.create_user("global.reader@tests.com")
+        UserGroup.objects.get(name="BI-UG-GAD", folder=root).user_set.add(global_reader)
+        # Not superusers: the full view from view_user_full, change_user, or both.
+        manager = _make_user_manager(
+            "manager@tests.com", ["view_user", "view_user_full", "change_user"]
+        )
+        full_viewer = _make_user_manager(
+            "full.viewer@tests.com", ["view_user", "view_user_full"]
+        )
         change_only = _make_user_manager(
-            "change.only@tests.com", ["view_user_restricted", "change_user"]
+            "change.only@tests.com", ["view_user", "change_user"]
         )
 
         users = {
@@ -1853,21 +1865,23 @@ class TestUserAccountFieldsVisibility:
             "reader": reader,
             "global_analyst": global_analyst,
             "global_approver": global_approver,
-            "restricted": restricted,
+            "creator": creator,
+            "base_only": base_only,
         }
-        account_viewers = {
+        full_viewers = {
             "manager": manager,
             "full_viewer": full_viewer,
             "change_only": change_only,
             "global_reader": global_reader,
-            "creator": creator,
         }
         return SimpleNamespace(
+            domain=domain,
             target=target,
+            idp_group=idp_group,
             admin_client=authenticated_client,
-            admins={
+            full_viewers={
                 "superuser": authenticated_client,
-                **{name: _client_for(user) for name, user in account_viewers.items()},
+                **{name: _client_for(user) for name, user in full_viewers.items()},
             },
             clients={name: _client_for(user) for name, user in users.items()},
             users=users,
@@ -1891,33 +1905,45 @@ class TestUserAccountFieldsVisibility:
         return [listed[user.email], detail.data, write.data]
 
     @pytest.mark.parametrize("viewer", VIEWERS)
-    def test_viewer_gets_directory_fields_only(self, env, viewer):
+    def test_viewer_gets_base_fields_only(self, env, viewer):
         for payload in self._payloads(env.clients[viewer], env.target):
             assert payload["email"] == env.target.email
             assert payload["is_active"] is True
-            assert not self.ACCOUNT_FIELDS & set(payload)
+            assert not self.FULL_VIEW_FIELDS & set(payload)
 
         write = self._payloads(env.clients[viewer], env.target)[2]
         assert "user_groups" not in write and "is_local" not in write
 
-    @pytest.mark.parametrize("admin", ACCOUNT_VIEWERS)
-    def test_admin_gets_account_fields(self, env, admin):
-        payloads = self._payloads(env.admins[admin], env.target)
+    @pytest.mark.parametrize("full_viewer", FULL_VIEWERS)
+    def test_full_viewer_gets_full_record(self, env, full_viewer):
+        payloads = self._payloads(env.full_viewers[full_viewer], env.target)
         assert "is_local" in payloads[2] and "user_groups" in payloads[2]
         for payload in payloads:
-            assert self.ACCOUNT_FIELDS <= set(payload)
+            assert self.FULL_VIEW_FIELDS <= set(payload)
             assert payload["expiry_date"] == self.TARGET_EXPIRY
             assert payload["keep_local_login"] is True
             assert payload["observation"] == "contractor, leaves in January"
             assert payload["is_superuser"] is False
 
+    @pytest.mark.parametrize("viewer", [*VIEWERS, "global_reader"])
+    def test_idp_groups_follow_their_own_permission(self, env, viewer):
+        """IdP groups are not a full-view field: like any related object, each one
+        is masked for whoever can't read it (`view_idpgroup`, administrators only)."""
+        client = env.clients.get(viewer) or env.full_viewers[viewer]
+        for payload in self._payloads(client, env.target)[:2]:
+            assert payload["idp_groups"] == [{}]
+        for payload in self._payloads(env.admin_client, env.target)[:2]:
+            assert [group["str"] for group in payload["idp_groups"]] == [
+                env.idp_group.name
+            ]
+
     @pytest.mark.parametrize("viewer", VIEWERS)
-    def test_self_gets_own_account_fields(self, env, viewer):
+    def test_self_gets_own_full_record(self, env, viewer):
         user = env.users[viewer]
         payloads = self._payloads(env.clients[viewer], user)
         assert "is_local" in payloads[2] and "user_groups" in payloads[2]
         for payload in payloads:
-            assert self.ACCOUNT_FIELDS <= set(payload)
+            assert self.FULL_VIEW_FIELDS <= set(payload)
 
     @pytest.mark.parametrize("viewer", VIEWERS)
     @pytest.mark.parametrize(
@@ -1930,18 +1956,18 @@ class TestUserAccountFieldsVisibility:
             "expiry_date__isnull=false",
         ],
     )
-    def test_account_filters_match_administered_users_only(self, env, viewer, query):
+    def test_full_view_filters_match_fully_viewed_users_only(self, env, viewer, query):
         url = f"{reverse(API_ENDPOINT)}?{query}"
         assert env.target.email not in {
             row["email"] for row in self._rows(env.clients[viewer].get(url))
         }
-        for admin_client in env.admins.values():
+        for client in env.full_viewers.values():
             assert env.target.email in {
-                row["email"] for row in self._rows(admin_client.get(url))
+                row["email"] for row in self._rows(client.get(url))
             }
 
     @pytest.mark.parametrize("viewer", VIEWERS)
-    def test_account_filter_matches_own_record(self, env, viewer):
+    def test_full_view_filter_matches_own_record(self, env, viewer):
         user = env.users[viewer]
         user.keep_local_login = True
         user.save()
@@ -1951,7 +1977,7 @@ class TestUserAccountFieldsVisibility:
         }
 
     @pytest.mark.parametrize("viewer", VIEWERS)
-    def test_viewer_order_reveals_no_account_field(self, env, viewer):
+    def test_viewer_order_reveals_no_full_view_field(self, env, viewer):
         client = env.clients[viewer]
 
         def emails(query=""):
@@ -1971,8 +1997,33 @@ class TestUserAccountFieldsVisibility:
             assert emails(f"ordering={field}") == default
             assert emails(f"ordering=-{field}") == default
 
-    def test_restricted_view_grants_rows(self, env):
-        client = env.clients["restricted"]
+    def test_folder_members_order_reveals_no_full_view_field(self, env):
+        """`/api/folders/<id>/users/` lists a domain's members to its managers,
+        who don't have the full view of users."""
+        manager = User.objects.create_user("domain.manager@tests.com")
+        UserGroup.objects.get(name="BI-UG-DMA", folder=env.domain).user_set.add(manager)
+        analysts = UserGroup.objects.get(name="BI-UG-ANA", folder=env.domain)
+        analysts.user_set.add(User.objects.create_user("a.plain@tests.com"))
+        secret = User.objects.create_user("c.secret@tests.com")
+        secret.is_superuser = True
+        secret.keep_local_login = True
+        secret.save()
+        analysts.user_set.add(secret)
+
+        client = _client_for(manager)
+        url = reverse("user-perms-on-folder-list", args=[env.domain.id])
+
+        def emails(query):
+            return [row["email"] for row in self._rows(client.get(f"{url}?{query}"))]
+
+        by_email = emails("ordering=email")
+        # Out of alphabetical order if the superuser flag were sorted on.
+        assert by_email.index(secret.email) > by_email.index("a.plain@tests.com")
+        for field in ("is_superuser", "keep_local_login", "expiry_date"):
+            assert emails(f"ordering=-{field},email") == by_email
+
+    def test_rows_follow_view_user(self, env):
+        client = env.clients["base_only"]
         listed = self._rows(client.get(reverse(API_ENDPOINT)))
         assert env.target.email in {row["email"] for row in listed}
         detail = client.get(reverse("users-detail", args=[env.target.id]))
@@ -1994,49 +2045,55 @@ class TestUserAccountFieldsVisibility:
             status.HTTP_404_NOT_FOUND,
         )
 
-    def test_kernel_counts_restricted_view_for_rows_only(self, env):
-        user = env.users["restricted"]
-        root = Folder.get_root_folder()
-        view_user = Permission.objects.get(codename="view_user")
-
-        assert env.target.id in set(RoleAssignment.get_viewable_object_ids(user, User))
-        assert RoleAssignment.is_object_readable(user, User, env.target.id)
-        # Asked for by permission, `view_user` means the full view.
-        assert root.id not in set(
-            RoleAssignment.get_allowed_folder_ids(user, view_user)
+    def test_full_view_alone_grants_no_rows(self, env):
+        user = _make_user_manager("full.only@tests.com", ["view_user_full"])
+        assert env.target.id not in set(
+            RoleAssignment.get_viewable_object_ids(user, User)
         )
-        assert not RoleAssignment.is_access_allowed(user, view_user, root)
+        client = _client_for(user)
+        listed = self._rows(client.get(reverse(API_ENDPOINT)))
+        assert {row["email"] for row in listed} == {user.email}
+        detail = client.get(reverse("users-detail", args=[env.target.id]))
+        assert detail.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        )
 
-    def test_baseline_role_holds_the_restricted_view(self):
-        codenames = set(
-            Role.objects.get(name="BI-RL-BSL").permissions.values_list(
-                "codename", flat=True
+    def test_builtin_role_grants(self, env):
+        def codenames(role):
+            return set(
+                Role.objects.get(name=role).permissions.values_list(
+                    "codename", flat=True
+                )
             )
-        )
-        assert "view_user_restricted" in codenames
-        assert "view_user" not in codenames
+
+        for role in ("BI-RL-ADM", "BI-RL-AUD"):
+            assert {"view_user", "view_user_full"} <= codenames(role)
+        for role in ("BI-RL-BSL", "BI-RL-ANA", "BI-RL-APP", "BI-RL-DMA", "BI-RL-UCR"):
+            assert "view_user" in codenames(role)
+            assert "view_user_full" not in codenames(role)
 
     @pytest.mark.parametrize(
         "serializer_class", [UserReadSerializer, UserWriteSerializer]
     )
     def test_hidden_without_request(self, env, serializer_class):
-        assert not self.ACCOUNT_FIELDS & set(serializer_class(env.target).data)
+        assert not self.FULL_VIEW_FIELDS & set(serializer_class(env.target).data)
 
-    def test_account_filter_without_request_matches_nothing(self, env):
+    def test_full_view_filter_without_request_matches_nothing(self, env):
         filterset = UserFilter(
             data={"keep_local_login": True}, queryset=User.objects.all()
         )
         assert not filterset.qs.exists()
 
-    def test_picker_skips_account_lookup(self, env):
-        # Pickers query on every keystroke and don't order on account fields.
-        with patch("core.views.user_account_folder_ids", side_effect=AssertionError):
+    def test_picker_skips_full_view_lookup(self, env):
+        # Pickers query on every keystroke and don't order on full-view fields.
+        with patch("core.views.full_user_view_folder_ids", side_effect=AssertionError):
             found = self._rows(
                 env.admin_client.get(f"{reverse('users-autocomplete')}?search=aaron")
             )
         assert env.target.email in {row["email"] for row in found}
 
-    def test_admin_order_keeps_account_fields(self, env):
+    def test_full_viewer_order_keeps_full_view_fields(self, env):
         def emails(query=""):
             return [
                 row["email"]
@@ -2047,3 +2104,46 @@ class TestUserAccountFieldsVisibility:
 
         assert emails()[0] == "admin@tests.com"
         assert emails("ordering=is_superuser")[-1] == "admin@tests.com"
+
+
+@pytest.mark.django_db
+class TestViewUserFullMigration:
+    """The upgrade keeps what custom roles serve, except through Global's default
+    role, which every member holds."""
+
+    @staticmethod
+    def _grant():
+        import_module(
+            "iam.migrations.0033_user_view_full_permission"
+        ).grant_view_user_full(django_apps, None)
+
+    def test_custom_roles_with_view_user_keep_the_full_record(self):
+        root = Folder.get_root_folder()
+        view_user = Permission.objects.get(codename="view_user")
+        full = Permission.objects.get(codename="view_user_full")
+
+        custom = Role.objects.create(name="access reviewers", folder=root)
+        custom.permissions.add(view_user)
+        unrelated = Role.objects.create(name="asset readers", folder=root)
+        default = Role.objects.create(name="custom default", folder=root)
+        default.permissions.add(view_user)
+        Folder.objects.filter(pk=root.pk).update(default_role=default)
+        baseline = Role.objects.get(name="BI-RL-BSL")
+        baseline.permissions.add(view_user)
+
+        self._grant()
+
+        assert custom.permissions.filter(pk=full.pk).exists()
+        assert not unrelated.permissions.filter(pk=full.pk).exists()
+        assert not default.permissions.filter(pk=full.pk).exists()
+        # Builtin roles are startup's business.
+        assert not baseline.permissions.filter(pk=full.pk).exists()
+
+    def test_rerun_is_harmless(self):
+        custom = Role.objects.create(
+            name="access reviewers", folder=Folder.get_root_folder()
+        )
+        custom.permissions.add(Permission.objects.get(codename="view_user"))
+        self._grant()
+        self._grant()
+        assert custom.permissions.filter(codename="view_user_full").count() == 1

@@ -36,9 +36,9 @@ from core.views import (
     SmartOrderingFilter,
 )
 from core.serializers import (
-    USER_ACCOUNT_FIELDS,
-    can_see_user_account,
-    user_account_folder_ids,
+    USER_FULL_VIEW_FIELDS,
+    full_user_view_folder_ids,
+    has_full_user_view,
 )
 from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_respondent_scoped_folder_ids
 from iam.models import User, Role, UserGroup, RoleAssignment
@@ -1300,10 +1300,10 @@ class ObjectAuditTrailView(APIView):
     permission_classes = [IsAuthenticated]
 
     MAX_ENTRIES = 200
-    # Logged on a user but only for who may see the account (see
-    # USER_ACCOUNT_FIELDS): its account fields, and login activity that no
+    # Logged on a user but only for who has the full view of the user (see
+    # USER_FULL_VIEW_FIELDS): its full-view fields, and login activity that no
     # serializer shows at all.
-    USER_ACCOUNT_LOG_FIELDS = (*USER_ACCOUNT_FIELDS, "last_login", "first_login")
+    USER_FULL_VIEW_LOG_FIELDS = (*USER_FULL_VIEW_FIELDS, "last_login", "first_login")
 
     def get(self, request, format=None):
         from uuid import UUID
@@ -1352,8 +1352,8 @@ class ObjectAuditTrailView(APIView):
             if getattr(f, "many_to_one", False) and f.related_model
         }
         hidden = ()
-        if model_class is User and not self._sees_user_account(request, obj):
-            hidden = self.USER_ACCOUNT_LOG_FIELDS
+        if model_class is User and not self._has_full_user_view(request, obj):
+            hidden = self.USER_FULL_VIEW_LOG_FIELDS
         label_cache = {}
         results = []
         for entry in entries:
@@ -1379,12 +1379,12 @@ class ObjectAuditTrailView(APIView):
         return Response(results)
 
     @staticmethod
-    def _sees_user_account(request, user) -> bool:
+    def _has_full_user_view(request, user) -> bool:
         if user is not None:
-            return can_see_user_account(request, user)
+            return has_full_user_view(request, user)
         # A deleted user has no row left to place, and users live in Global.
         return (
-            user_account_folder_ids(request)
+            full_user_view_folder_ids(request)
             .filter(id=Folder.get_root_folder_id())
             .exists()
         )

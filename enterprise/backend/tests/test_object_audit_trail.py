@@ -5,8 +5,8 @@ from rest_framework.test import APIClient
 
 from iam.models import Folder, User, UserGroup
 
-# Logged on users, served only to who may see the account.
-ACCOUNT_LOG_FIELDS = {
+# Logged on users, served only to who has the full view of the user.
+FULL_VIEW_LOG_FIELDS = {
     "is_superuser",
     "expiry_date",
     "keep_local_login",
@@ -27,10 +27,10 @@ def _client(user):
 
 
 @pytest.mark.django_db
-class TestUserAuditTrailAccountFields:
-    """A user's audit trail shows account fields to whoever the users API shows
+class TestUserAuditTrailFullViewFields:
+    """A user's audit trail shows full-view fields to whoever the users API shows
     them to. A Global analyst holds the audit trail permission on Global but only
-    the restricted view of users."""
+    the base view of users."""
 
     @pytest.fixture
     def target(self, app_config):
@@ -64,19 +64,19 @@ class TestUserAuditTrailAccountFields:
     def _fields(trail):
         return {field for entry in trail for field in entry["changes"] or {}}
 
-    def test_directory_viewer_gets_directory_changes_only(self, target, analyst):
+    def test_base_viewer_gets_base_changes_only(self, target, analyst):
         trail = self._trail(_client(analyst), target.id)
-        assert not ACCOUNT_LOG_FIELDS & self._fields(trail)
+        assert not FULL_VIEW_LOG_FIELDS & self._fields(trail)
         assert {"email", "first_name"} <= self._fields(trail)
-        # The update that only touched account fields is left out, not shown empty.
+        # The update that only touched full-view fields is left out, not shown empty.
         assert [entry["action"] for entry in trail] == ["update", "create"]
 
-    def test_account_viewer_gets_account_changes(self, target, admin_client):
+    def test_full_viewer_gets_full_view_changes(self, target, admin_client):
         trail = self._trail(admin_client, target.id)
         assert {"expiry_date", "keep_local_login", "observation"} <= self._fields(trail)
         assert [entry["action"] for entry in trail] == ["update", "update", "create"]
 
-    def test_self_gets_own_account_changes(self, analyst):
+    def test_self_gets_own_full_view_changes(self, analyst):
         analyst.keep_local_login = True
         analyst.save()
         assert "keep_local_login" in self._fields(
@@ -86,7 +86,7 @@ class TestUserAuditTrailAccountFields:
     def test_deleted_user_stays_masked(self, target, analyst, admin_client):
         target_id = target.id
         target.delete()
-        assert not ACCOUNT_LOG_FIELDS & self._fields(
+        assert not FULL_VIEW_LOG_FIELDS & self._fields(
             self._trail(_client(analyst), target_id)
         )
         assert "expiry_date" in self._fields(self._trail(admin_client, target_id))

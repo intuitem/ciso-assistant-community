@@ -2545,11 +2545,11 @@ class TeamReadSerializer(BaseModelSerializer):
         ]
 
 
-# Account and security state of a user. Every domain member lists users through
-# `view_user_restricted`, ambient on the root folder; these fields are for the user
-# themself and for whoever holds `view_user` or `change_user` on the user's folder
-# (see the restricted-view-permissions ADR).
-USER_ACCOUNT_FIELDS = (
+# A user's sign-in and administration details. Every domain member lists users
+# through `view_user`, ambient on the root folder; these fields need the full view of
+# the user: being them, or holding `view_user_full` or `change_user` on their folder
+# (see the full-view-permissions ADR).
+USER_FULL_VIEW_FIELDS = (
     "is_superuser",
     "has_mfa_enabled",
     "expiry_date",
@@ -2560,51 +2560,52 @@ USER_ACCOUNT_FIELDS = (
 )
 
 
-def user_account_folder_ids(request) -> models.QuerySet:
-    """Folders where the requester may see users' account fields, as a subquery
-    looked up once per request. `view_user` is passed as a permission, not as a
-    `("view", User)` pair, so that its restricted counterpart doesn't count."""
-    folder_ids = getattr(request, "_user_account_folder_ids", None)
+def full_user_view_folder_ids(request) -> models.QuerySet:
+    """Folders where the requester has the full view of users, as a subquery looked
+    up once per request."""
+    folder_ids = getattr(request, "_full_user_view_folder_ids", None)
     if folder_ids is None:
-        folder_ids = RoleAssignment.get_allowed_folder_ids(
-            request.user,
-            list(
-                Permission.objects.filter(
-                    codename__in=("view_user", "change_user"),
-                    content_type__app_label=User._meta.app_label,
-                    content_type__model=User._meta.model_name,
+        folder_ids = Folder.objects.filter(
+            Q(
+                id__in=RoleAssignment.get_allowed_folder_ids(
+                    request.user, Permission.objects.get(codename="view_user_full")
                 )
-            ),
-        )
-        request._user_account_folder_ids = folder_ids
+            )
+            | Q(
+                id__in=RoleAssignment.get_allowed_folder_ids(
+                    request.user, ("change", User)
+                )
+            )
+        ).values_list("id", flat=True)
+        request._full_user_view_folder_ids = folder_ids
     return folder_ids
 
 
-def can_see_user_account(request, user: User) -> bool:
+def has_full_user_view(request, user: User) -> bool:
     if user.pk == request.user.pk:
         return True
     # Asked once per serialized row, so tested in memory.
-    folder_ids = getattr(request, "_user_account_folder_id_set", None)
+    folder_ids = getattr(request, "_full_user_view_folder_id_set", None)
     if folder_ids is None:
-        folder_ids = set(user_account_folder_ids(request))
-        request._user_account_folder_id_set = folder_ids
+        folder_ids = set(full_user_view_folder_ids(request))
+        request._full_user_view_folder_id_set = folder_ids
     return user.folder_id in folder_ids
 
 
-class UserAccountFieldsMixin:
-    account_fields = USER_ACCOUNT_FIELDS
+class UserFullViewMixin:
+    full_view_fields = USER_FULL_VIEW_FIELDS
 
-    def hide_account_fields(self, instance, data: dict) -> dict:
-        """Drop the account fields unless the requester may see them. Without a
-        request, nobody may."""
+    def hide_full_view_fields(self, instance, data: dict) -> dict:
+        """Drop the full-view fields unless the requester has the full view of the
+        user. Without a request, nobody has."""
         request = self.context.get("request")
-        if request is None or not can_see_user_account(request, instance):
-            for field in self.account_fields:
+        if request is None or not has_full_user_view(request, instance):
+            for field in self.full_view_fields:
                 data.pop(field, None)
         return data
 
 
-class UserReadSerializer(UserAccountFieldsMixin, BaseModelSerializer):
+class UserReadSerializer(UserFullViewMixin, BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
@@ -2618,7 +2619,7 @@ class UserReadSerializer(UserAccountFieldsMixin, BaseModelSerializer):
         return dict(settings.LANGUAGES).get(code, code)
 
     def to_representation(self, instance):
-        return self.hide_account_fields(instance, super().to_representation(instance))
+        return self.hide_full_view_fields(instance, super().to_representation(instance))
 
     class Meta:
         model = User
@@ -2658,11 +2659,11 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
         ]
 
 
-class UserWriteSerializer(UserAccountFieldsMixin, BaseModelSerializer):
-    # The edit form's state. `user_groups` is not the directory field here: the
+class UserWriteSerializer(UserFullViewMixin, BaseModelSerializer):
+    # The edit form's state. `user_groups` is not the base-view field here: the
     # `object` action reads it through the viewset's visibility-filtered prefetch,
     # but a write drops that prefetch and returns the raw membership.
-    account_fields = (*USER_ACCOUNT_FIELDS, "is_local", "user_groups")
+    full_view_fields = (*USER_FULL_VIEW_FIELDS, "is_local", "user_groups")
 
     is_local = serializers.BooleanField(required=False)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
@@ -3067,7 +3068,7 @@ class UserWriteSerializer(UserAccountFieldsMixin, BaseModelSerializer):
         # and admin-account guards will refuse before the user hits a 403.
         data["is_scim_managed"] = instance.is_scim_managed
         data["is_jit_provisioned"] = instance.is_jit_provisioned
-        return self.hide_account_fields(instance, data)
+        return self.hide_full_view_fields(instance, data)
 
     def create(self, validated_data):
         send_mail = mailer.mailing_enabled()
