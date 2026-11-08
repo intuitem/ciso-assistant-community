@@ -1000,7 +1000,7 @@ def gen_audit_context(
                 "not_applicable_count": 0,
             }
 
-            if node_data.get("assessable", False):
+            if node_data.get("assessable", False) and node_data.get("ra_id"):
                 scores["assessable_count"] = 1
                 if node_data.get("result") == "not_applicable":
                     scores["not_applicable_count"] = 1
@@ -1419,6 +1419,7 @@ def inline_charts_for_docx(context, doc, width=Cm(15)):
     for key in AUDIT_CHART_KEYS:
         buffer = wrapped.get(key)
         if buffer is None:
+            wrapped[key] = ""
             continue
         buffer.seek(0)
         wrapped[key] = InlineImage(doc, buffer, width=width)

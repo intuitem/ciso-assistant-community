@@ -2,14 +2,38 @@
 
 import pytest
 
+from core.apps import startup
 from core.models import SecurityException, ValidationFlow
 from core.serializers import (
     SecurityExceptionWriteSerializer,
     ValidationFlowWriteSerializer,
 )
-from iam.models import Folder, User
+from iam.models import Folder, User, UserGroup
 
 sync = ValidationFlowWriteSerializer()._sync_security_exception_status
+
+
+@pytest.fixture
+def requester(db):
+    startup(sender=None, **{})
+    user = User.objects.create_user(email="requester@test.local")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
+    return user
+
+
+def make_flow(requester, status="submitted"):
+    return ValidationFlow.objects.create(
+        folder=Folder.get_root_folder(),
+        requester=requester,
+        approver=User.objects.create(email=f"approver-{status}@test.local"),
+        status=status,
+    )
+
+
+def make_exception(name, status="in_review"):
+    return SecurityException.objects.create(
+        name=name, folder=Folder.get_root_folder(), status=status
+    )
 
 
 @pytest.mark.django_db
@@ -23,17 +47,10 @@ sync = ValidationFlowWriteSerializer()._sync_security_exception_status
         ("in_review", "change_requested", "in_review"),
     ],
 )
-def test_outcome_updates_linked_exceptions(start, decision, expected):
-    folder = Folder.get_root_folder()
-    flow = ValidationFlow.objects.create(
-        folder=folder, approver=User.objects.create(email="approver@test.local")
-    )
-    linked = SecurityException.objects.create(
-        name="linked", folder=folder, status=start
-    )
-    resolved = SecurityException.objects.create(
-        name="resolved", folder=folder, status="resolved"
-    )
+def test_outcome_updates_linked_exceptions(requester, start, decision, expected):
+    flow = make_flow(requester)
+    linked = make_exception("linked", start)
+    resolved = make_exception("resolved", "resolved")
     flow.security_exceptions.add(linked, resolved)
 
     sync(flow, "submitted", decision)
@@ -45,22 +62,41 @@ def test_outcome_updates_linked_exceptions(start, decision, expected):
 
 
 @pytest.mark.django_db
-def test_changed_exceptions_notify_owners(monkeypatch):
+def test_requester_without_change_right_leaves_exception(requester):
+    flow = make_flow(User.objects.create_user(email="viewer@test.local"))
+    linked = make_exception("linked")
+    flow.security_exceptions.add(linked)
+
+    sync(flow, "submitted", "accepted")
+
+    linked.refresh_from_db()
+    assert linked.status == "in_review"
+
+
+@pytest.mark.django_db
+def test_revoke_keeps_exception_approved_by_another_flow(requester):
+    shared = make_exception("shared", "approved")
+    revoked = make_flow(requester, "revoked")
+    make_flow(requester, "accepted").security_exceptions.add(shared)
+    revoked.security_exceptions.add(shared)
+
+    sync(revoked, "accepted", "revoked")
+
+    shared.refresh_from_db()
+    assert shared.status == "approved"
+
+
+@pytest.mark.django_db
+def test_changed_exceptions_notify_owners(requester, monkeypatch):
     notified = []
     monkeypatch.setattr(
         SecurityExceptionWriteSerializer,
         "_send_status_notification",
         lambda self, exception: notified.append(exception.name),
     )
-    folder = Folder.get_root_folder()
-    flow = ValidationFlow.objects.create(
-        folder=folder, approver=User.objects.create(email="approver@test.local")
-    )
+    flow = make_flow(requester)
     flow.security_exceptions.add(
-        SecurityException.objects.create(name="linked", folder=folder),
-        SecurityException.objects.create(
-            name="resolved", folder=folder, status="resolved"
-        ),
+        make_exception("linked"), make_exception("resolved", "resolved")
     )
 
     sync(flow, "submitted", "accepted")

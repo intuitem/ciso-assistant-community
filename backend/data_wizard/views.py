@@ -3609,16 +3609,18 @@ class ProcessingRecordConsumer(RecordConsumer):
     @cached_property
     def nature_index(self) -> dict[str, UUID]:
         # Exports write the display label, so match the internal name or any translation.
-        index: dict[str, UUID] = {}
-        for term in Terminology.objects.filter(
+        terms = Terminology.objects.filter(
             field_path=Terminology.FieldPath.PROCESSING_NATURE
-        ):
-            names = {term.name, str(term)}
+        )
+        index: dict[str, UUID] = {}
+        for term in terms:
+            names = {str(term)}
             for value in (term.translations or {}).values():
                 names.add(value.get("name") if isinstance(value, dict) else value)
             for name in names:
                 if isinstance(name, str) and name.strip():
                     index.setdefault(name.strip().lower(), term.id)
+        index.update({term.name.strip().lower(): term.id for term in terms})
         return index
 
     def create_context(self):

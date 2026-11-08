@@ -21,7 +21,7 @@ graph LR
   ST -.->|change requested| CR[Change requested]
 ```
 
-A **requester** submits a validation flow for one or more objects in their domain. The flow carries optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. Apart from security exceptions (see below), the original objects remain unchanged — what's recorded is the validation flow itself, with the link back to whatever was up for approval.
+A **requester** submits a validation flow for one or more objects in their domain. The flow carries optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. The decision is recorded on the validation flow itself, with the link back to whatever was up for approval. Two things also change on the linked objects: accepting a flow locks its audits, risk assessments, business impact analyses and findings binders, and security exceptions follow the decision (see below).
 
 | User-facing | Internal | Notes |
 |---|---|---|

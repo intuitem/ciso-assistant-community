@@ -1052,10 +1052,12 @@
 
 	let tableWrapEl: HTMLElement | undefined = $state();
 
-	const refPrefix = (key: string, val: { ref_id?: string; str?: string }) =>
-		key === 'applied_controls' && val.ref_id && !(val.str ?? '').startsWith(val.ref_id)
-			? `${val.ref_id} - `
-			: '';
+	const refPrefix = (key: string, val: { ref_id?: string; str?: string }) => {
+		const name = val.str ?? '';
+		const named =
+			!!val.ref_id && name.startsWith(val.ref_id) && !/[\w-]/.test(name.charAt(val.ref_id.length));
+		return key === 'applied_controls' && val.ref_id && !named ? `${val.ref_id} - ` : '';
+	};
 </script>
 
 <div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>

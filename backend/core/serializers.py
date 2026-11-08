@@ -7689,7 +7689,17 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         if transition is None or new_status == current_status:
             return
         from_statuses, to_status = transition
-        for exception in flow.security_exceptions.filter(status__in=from_statuses):
+        exceptions = flow.security_exceptions.filter(status__in=from_statuses)
+        if new_status == ValidationFlow.Status.REVOKED:
+            exceptions = exceptions.exclude(
+                validationflow__status=ValidationFlow.Status.ACCEPTED
+            )
+        change_perm = Permission.objects.get(codename="change_securityexception")
+        for exception in exceptions.distinct():
+            if not flow.requester or not RoleAssignment.is_access_allowed(
+                flow.requester, change_perm, exception.folder
+            ):
+                continue
             exception.status = to_status
             exception.save(update_fields=["status", "updated_at"])
             SecurityExceptionWriteSerializer(
