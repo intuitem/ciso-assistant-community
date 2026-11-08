@@ -37,7 +37,7 @@
 	}
 	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
 	import { toCamelCase } from '#lib/utils/locales.js';
-	import { onMount, tick, untrack } from 'svelte';
+	import { onDestroy, onMount, tick, untrack } from 'svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { applyUnreadCount } from '#lib/utils/stores.js';
 
@@ -475,6 +475,13 @@
 	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
 
 	if (hasRemoteSource) $tableHandlers[baseEndpoint] = handler;
+	onDestroy(() => {
+		// A newer table may already own this endpoint.
+		tableHandlers.update((h) => {
+			if (h[baseEndpoint] === handler) delete h[baseEndpoint];
+			return h;
+		});
+	});
 
 	const toastStore = getToastStore();
 
@@ -535,7 +542,8 @@
 			}).finally(() => {
 				inFlight -= 1;
 				if (!failed) hasLoadedOnce = true;
-				else if (!hasLoadedOnce) loadFailed = true;
+				// The latest request decides: a failed search must not read as an empty result.
+				loadFailed = failed;
 			});
 			return currentLoad;
 		});
@@ -1681,7 +1689,7 @@
 	<!-- Outside the table: an empty tbody stays empty (tests count rows) and no context menu targets it. -->
 	{#if !loading && !isFetching && inFlight === 0 && $rows.length === 0}
 		<p data-testid="table-empty" class="py-8 text-center text-sm text-surface-500">
-			{loadFailed && !hasLoadedOnce ? m.errorLoadingData() : m.noEntriesFound()}
+			{loadFailed ? m.errorLoadingData() : m.noEntriesFound()}
 		</p>
 	{/if}
 
