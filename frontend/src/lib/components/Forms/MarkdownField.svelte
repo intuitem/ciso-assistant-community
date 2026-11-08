@@ -170,7 +170,7 @@
 					onclick={() => (showPreview = false)}
 				>
 					<i class="fas fa-edit mr-1"></i>
-					Edit
+					{m.edit()}
 				</button>
 				<button
 					type="button"
@@ -178,7 +178,7 @@
 					onclick={() => (showPreview = true)}
 				>
 					<i class="fas fa-eye mr-1"></i>
-					Preview
+					{m.preview()}
 				</button>
 			</div>
 		</div>

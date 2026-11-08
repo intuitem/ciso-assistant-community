@@ -6,6 +6,7 @@
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDate } from '#lib/utils/datetime.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
 
 	// -----------------------------------------------------------------------------
 	// Types — match the backend response shape from GET /api/frameworks/{id}/report/
@@ -206,13 +207,7 @@
 		goto(url, { refreshAll: true, reset: false });
 	}
 
-	const RESULT_COLORS: Record<Result, string> = {
-		compliant: '#91CC75',
-		partially_compliant: '#74C0DE',
-		non_compliant: '#E66',
-		not_applicable: '#EAE2D7',
-		not_assessed: '#d7dfea'
-	};
+	const RESULT_COLORS = complianceResultColorMap as Record<Result, string>;
 
 	const resultLabel = (r: Result): string => safeTranslate(r);
 
@@ -609,7 +604,9 @@
 							distTotal(overallDist) === 0 ? 0 : (overallDist[r] / distTotal(overallDist)) * 100}
 						{#if w > 0}
 							<div
-								class="h-full flex items-center justify-center text-[10px] text-gray-800"
+								class="h-full flex items-center justify-center text-[10px] {r === 'not_applicable'
+									? 'text-white'
+									: 'text-gray-800'}"
 								style="width:{w}%; background:{RESULT_COLORS[r]};"
 								title="{resultLabel(r)}: {overallDist[r]}"
 							>

@@ -218,7 +218,11 @@
 							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
 								<!-- Controls Section (3/5 of width) -->
 								<div class="xl:col-span-3">
-									<CardGroup title={m.sumpageSectionControls()} icon="fa-solid fa-shield-halved">
+									<CardGroup
+										title={m.sumpageSectionControls()}
+										icon="fa-solid fa-shield-halved"
+										maxColumns={3}
+									>
 										<SimpleCard
 											count={metrics.controls?.total}
 											label={m.sumpageTotal()}

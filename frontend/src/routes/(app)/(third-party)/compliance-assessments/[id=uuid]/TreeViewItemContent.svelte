@@ -101,7 +101,7 @@
 	const rawNode = rest as Record<string, any>;
 	const statusColor = complianceStatusColorMap[rawNode.status];
 	const resultColor = complianceResultColorMap[rawNode.result];
-	const resultTextClass = resultColor === '#000000' ? 'text-surface-100' : 'text-surface-900';
+	const resultTextClass = resultColor === '#475569' ? 'text-surface-100' : 'text-surface-900';
 	const extendedResultColor = rawNode.extended_result
 		? extendedResultColorMap[rawNode.extended_result]
 		: null;
@@ -255,7 +255,7 @@
 	// the light/dark theme (the default would flip to light in dark mode and vanish on
 	// light segments). Force white on the black bg, a fixed-dark surface token otherwise.
 	let classesPercentText = $derived((resultColor: string) =>
-		resultColor === '#000000' ? 'text-white' : 'text-surface-950'
+		resultColor === '#475569' ? 'text-white' : 'text-surface-950'
 	);
 	export const getBadgeStyles = (answers: any, questions: any) => {
 		const questionMap = (questions || {}) as Record<string, any>;
@@ -416,14 +416,14 @@
 					{/if}
 				</div>
 				{#if showResult && !assessable}
-					<div class="flex flex-row items-end items-middle text-xs mr-2" style="width:6rem">
+					<div class="flex flex-row items-end text-xs mr-2 shrink-0">
 						{#each orderedResultPercentages as rp}
 							{#if resultCounts && resultCounts[rp.result] !== undefined}
 								<div
 									class="rounded-md px-1 mx-1 leading-4"
 									style="background-color: {complianceResultColorMap[
 										rp.result
-									]}; color: {complianceResultColorMap[rp.result] === '#000000'
+									]}; color: {complianceResultColorMap[rp.result] === '#475569'
 										? '#ffffff'
 										: '#111827'}"
 								>
@@ -436,7 +436,7 @@
 								class="rounded-md px-1 mx-1 leading-4"
 								style="background-color: {complianceResultColorMap[
 									'not_assessed'
-								]}; color: {complianceResultColorMap['not_assessed'] === '#000000'
+								]}; color: {complianceResultColorMap['not_assessed'] === '#475569'
 									? '#ffffff'
 									: '#111827'}"
 							>

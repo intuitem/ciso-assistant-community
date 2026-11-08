@@ -206,7 +206,7 @@
 			</button>
 			<button
 				type="button"
-				class="btn preset-filled-primary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				onclick={refreshNow}
 				disabled={refreshState === 'refreshing'}
 				aria-busy={refreshState === 'refreshing'}

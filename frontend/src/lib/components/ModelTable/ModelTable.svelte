@@ -37,7 +37,7 @@
 	}
 	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
 	import { toCamelCase } from '#lib/utils/locales.js';
-	import { onMount, tick, untrack } from 'svelte';
+	import { onDestroy, onMount, tick, untrack } from 'svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { applyUnreadCount } from '#lib/utils/stores.js';
 
@@ -235,6 +235,15 @@
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+	// Null, blank, empty lists, the "--" (Undefined) choice and the not-rated risk level
+	// ({name: "--", hexcolor}) all render the same muted placeholder.
+	const isEmptyCell = (v: any) =>
+		v == null ||
+		v === '' ||
+		v === '-' ||
+		v === '--' ||
+		(Array.isArray(v) && v.length === 0) ||
+		(typeof v === 'object' && v.hexcolor && (v.name ?? v.str) === '--');
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
@@ -466,6 +475,13 @@
 	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
 
 	if (hasRemoteSource) $tableHandlers[baseEndpoint] = handler;
+	onDestroy(() => {
+		// A newer table may already own this endpoint.
+		tableHandlers.update((h) => {
+			if (h[baseEndpoint] === handler) delete h[baseEndpoint];
+			return h;
+		});
+	});
 
 	const toastStore = getToastStore();
 
@@ -476,7 +492,11 @@
 	// refetch keeps the previous rows on screen.
 	let inFlight = $state(0);
 	let hasLoadedOnce = $state(false);
-	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let loadFailed = $state(false);
+	// A remote table is "fetching" until its first page lands (not only while a request is
+	// in flight): otherwise it flashes empty headers before the first request starts. A failed
+	// first request only ends the skeleton once no retry is still pending.
+	const isFetching = $derived(hasRemoteSource && !hasLoadedOnce && (!loadFailed || inFlight > 0));
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
 
 	if (hasRemoteSource) {
@@ -522,6 +542,8 @@
 			}).finally(() => {
 				inFlight -= 1;
 				if (!failed) hasLoadedOnce = true;
+				// The latest request decides: a failed search must not read as an empty result.
+				loadFailed = failed;
 			});
 			return currentLoad;
 		});
@@ -916,6 +938,20 @@
 		degraded: 'preset-tonal-error',
 		deprecated: 'preset-tonal-surface'
 	};
+	// Status column badges: the applied-control tones plus the shared assessment statuses.
+	const STATUS_PRESETS: Record<string, string> = {
+		...APPLIED_CONTROL_STATUS_PRESETS,
+		planned: 'preset-tonal-primary',
+		in_review: 'preset-tonal-secondary',
+		done: 'preset-tonal-success'
+	};
+	// Same flag tones as the detail view.
+	const PRIORITY_FLAGS: Record<string, string> = {
+		'1': 'text-red-500',
+		'2': 'text-orange-500',
+		'3': 'text-blue-500',
+		'4': 'text-surface-600-400'
+	};
 
 	const tail_render = $derived(tail);
 
@@ -1279,7 +1315,10 @@
 													data-testid="model-table-td-array-elem"
 													class="font-typo-base whitespace-pre-line break-words"
 												>
-													{#if Array.isArray(value)}
+													<!-- last_assessment_status: null means "never assessed", rendered by its own branch. -->
+													{#if key !== 'last_assessment_status' && isEmptyCell(value)}
+														<span class="text-surface-400-600">--</span>
+													{:else if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
 														{@const visibleValues = isRelatedField(key)
 															? value.filter((item) => !isMaskedPlaceholder(item))
@@ -1367,11 +1406,15 @@
 																	)[1]}</Anchor
 																>
 															{:else}
-																<Anchor
-																	breadcrumbAction="push"
-																	href={itemHref}
-																	class="anchor"
-																	stopPropagation>{safeTranslate(value.str)}</Anchor
+																<!-- Clamp a wrapper, not the link: a block-level link would fill the
+																     cell and steal clicks meant for the row. -->
+																<span class="line-clamp-2" title={safeTranslate(value.str)}
+																	><Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation>{safeTranslate(value.str)}</Anchor
+																	></span
 																>
 															{/if}
 														{:else}
@@ -1391,12 +1434,33 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
-														<span class="ml-9"
-															>{value != null
-																? safeTranslate('percentageDisplay', { number: value })
-																: '--'}</span
+													{:else if key === 'status' && typeof value === 'string' && !(URLModel == 'document-containers' && row.meta?.pending_revision)}
+														<span
+															class="badge text-xs {STATUS_PRESETS[value] ??
+																'preset-tonal-surface'}">{safeTranslate(value)}</span
 														>
+													{:else if key === 'priority' && PRIORITY_FLAGS[String(value).replace('P', '')]}
+														<span class="whitespace-nowrap"
+															><i
+																class="fa-solid fa-flag mr-1 {PRIORITY_FLAGS[
+																	String(value).replace('P', '')
+																]}"
+															></i>{safeTranslate(value)}</span
+														>
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
+														<div class="flex items-center gap-2 min-w-24">
+															<div
+																class="h-1.5 flex-1 rounded-full bg-surface-200-800 overflow-hidden"
+															>
+																<div
+																	class="h-full rounded-full bg-primary-500"
+																	style="width: {Math.min(100, Math.max(0, Number(value)))}%"
+																></div>
+															</div>
+															<span class="text-xs tabular-nums whitespace-nowrap w-10 text-end"
+																>{safeTranslate('percentageDisplay', { number: value })}</span
+															>
+														</div>
 													{:else if key === 'last_assessment_status'}
 														<!-- The status is nullable: only a missing round is "never assessed". -->
 														{#if !meta?.last_assessment_date}
@@ -1627,6 +1691,12 @@
 			</tfoot>
 		{/if}
 	</table>
+	<!-- Outside the table: an empty tbody stays empty (tests count rows) and no context menu targets it. -->
+	{#if !loading && !isFetching && inFlight === 0 && $rows.length === 0}
+		<p data-testid="table-empty" class="py-8 text-center text-sm text-surface-500">
+			{loadFailed ? m.errorLoadingData() : m.noEntriesFound()}
+		</p>
+	{/if}
 
 	<footer class="flex justify-between items-center space-x-8 p-2">
 		{#if rowCount && pagination}

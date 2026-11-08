@@ -6,6 +6,7 @@
 
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate, setUseRiskCategoryLabel } from '#lib/utils/i18n.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 
 	import SideBar from '#lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '#lib/components/Breadcrumbs/Breadcrumbs.svelte';
@@ -71,7 +72,11 @@
 	});
 
 	// Display title, model name, and description from either page data or manual store setting
-	const displayTitle = $derived(page.data?.title || $pageTitle);
+	// List pages take their title from the URL synchronously: $pageTitle is set in a client
+	// effect, so relying on it alone renders a blank (or the previous page's) title first.
+	const displayTitle = $derived(
+		page.data?.title || URL_MODEL_MAP[urlModel() ?? '']?.localNamePlural || $pageTitle
+	);
 
 	// Auto-detect model from URL for list pages
 	// Match pattern: /model-name or /model-name/ (but not /model-name/uuid or /model-name/something)
