@@ -156,6 +156,7 @@ interface Field {
 	field: string;
 	type?: 'date' | 'datetime';
 	tooltip?: string;
+	visibleWhen?: string;
 }
 
 export interface SelectField {
@@ -403,6 +404,17 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Risk assessment',
 		verboseNamePlural: 'Risk assessments',
 		foreignKeyFields: [{ field: 'perimeter', urlModel: 'perimeters' }]
+	},
+	'ebios-rm_duplicate': {
+		endpointUrl: 'ebios-rm/studies',
+		name: 'ebiosrmstudy',
+		localName: 'ebiosRmStudy',
+		localNamePlural: 'ebiosRmStudies',
+		verboseName: 'Ebios RM study',
+		verboseNamePlural: 'Ebios RM study',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
 	},
 	threats: {
 		name: 'threat',
@@ -1076,6 +1088,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processings', urlModel: 'processings' },
 			{ field: 'accreditations', urlModel: 'accreditations' },
 			{ field: 'contracts', urlModel: 'contracts' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
+			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
 			{ field: 'requester', urlModel: 'users' }
 		],
 		selectFields: [{ field: 'status' }],
@@ -3223,7 +3237,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'incidents',
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
-		markdownFields: ['resolution'],
+		flaggedFields: {
+			nis2_significant: 'nis2',
+			nis2_malicious_intent: 'nis2',
+			nis2_cross_border_impact: 'nis2',
+			nis2_early_warning_at: 'nis2',
+			nis2_notification_at: 'nis2',
+			nis2_final_report_at: 'nis2',
+			nis2_reference: 'nis2'
+		},
+		markdownFields: ['resolution', 'root_cause'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -3240,6 +3263,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'incident', urlModel: 'timeline-entries' },
 			{ field: 'incident', urlModel: 'dora-incident-reports' },
+			{ field: 'incident', urlModel: 'data-breaches', disableDelete: true },
 			{
 				field: 'incidents',
 				urlModel: 'applied-controls',
@@ -3281,7 +3305,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [
 			{ field: 'severity', valueType: 'number' },
 			{ field: 'status' },
-			{ field: 'detection' }
+			{ field: 'detection' },
+			{ field: 'nis2_malicious_intent' },
+			{ field: 'nis2_cross_border_impact' }
 		],
 		detailViewFields: [
 			{ field: 'id' },
@@ -3300,7 +3326,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'occurred_at' },
 			{ field: 'resolved_at' },
 			{ field: 'resolution' },
+			{ field: 'root_cause' },
 			{ field: 'is_bcp_activated' },
+			{ field: 'nis2_significant' },
+			{ field: 'nis2_malicious_intent', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_cross_border_impact', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_early_warning_at', type: 'datetime', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_notification_at', type: 'datetime', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_final_report_at', type: 'datetime', visibleWhen: 'nis2_significant' },
+			{ field: 'nis2_reference', visibleWhen: 'nis2_significant' },
 			{ field: 'applied_controls' },
 			{ field: 'task_templates' },
 			{ field: 'risk_scenarios' },
@@ -4182,7 +4216,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'unit', urlModel: 'terminologies' }
 		],
-		selectFields: [{ field: 'category' }],
+		selectFields: [{ field: 'category' }, { field: 'default_collection_frequency' }],
 		reverseForeignKeyFields: [
 			{
 				field: 'metric_definition',
