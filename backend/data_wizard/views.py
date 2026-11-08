@@ -3671,6 +3671,7 @@ class ProcessingRecordConsumer(RecordConsumer):
         }
 
         # Resolve M2M: nature (by name or translated label)
+        missing_natures = []
         record_processing_nature = record.get("processing_nature")
         if record_processing_nature:
             nature_names = [
@@ -3681,13 +3682,12 @@ class ProcessingRecordConsumer(RecordConsumer):
             missing_natures = [
                 n for n in nature_names if n.lower() not in self.nature_index
             ]
-            if missing_natures:
-                return {}, Error(
-                    record=record,
-                    error=f"Unknown processing nature: {', '.join(missing_natures)}",
-                )
             data["nature"] = list(
-                dict.fromkeys(self.nature_index[n.lower()] for n in nature_names)
+                dict.fromkeys(
+                    self.nature_index[n.lower()]
+                    for n in nature_names
+                    if n.lower() in self.nature_index
+                )
             )
 
         # Resolve M2M: controllers (by entity name)
@@ -3729,6 +3729,12 @@ class ProcessingRecordConsumer(RecordConsumer):
         if label_ids:
             data["filtering_labels"] = label_ids
 
+        if missing_natures:
+            return data, Error(
+                record=record,
+                error=f"Unknown processing nature: {', '.join(missing_natures)}",
+                is_warning=True,
+            )
         return data, None
 
 

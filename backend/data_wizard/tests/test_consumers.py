@@ -1091,10 +1091,11 @@ class TestProcessingConsumer:
             )
             assert error is None
             assert record_data["nature"] == [nature_id]
-        _, error = consumer.prepare_create(
+        record_data, error = consumer.prepare_create(
             {"name": "HR", "processing_nature": "Collection, Teleportation"}, None
         )
-        assert "Teleportation" in error.error
+        assert error.is_warning and "Teleportation" in error.error
+        assert record_data["nature"] == [nature_id]
 
     def test_role_is_trimmed_and_unknown_role_rejected(self, base_context):
         consumer = ProcessingRecordConsumer(base_context)
