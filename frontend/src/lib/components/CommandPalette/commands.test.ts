@@ -284,3 +284,34 @@ describe('buildNavigationCommands', () => {
 		expect(hrefs).toContain('/service-accounts');
 	});
 });
+
+// Users live in Global, so the Users entry follows permissions held there (see the
+// full-view-permissions ADR).
+describe('the Users destination', () => {
+	const DOMAIN = '11111111-1111-1111-1111-111111111111';
+	const holding = (codenames: string[], folder = ROOT) =>
+		({
+			root_folder_id: ROOT,
+			permission_sets: [codenames],
+			domain_permissions: { [folder]: 0 }
+		}) as unknown as User;
+	const offersUsers = (user: User) =>
+		buildNavigationCommands(user, allFlags).some((command) => command.href === '/users');
+
+	it('is offered with the full view, or the change or add permission, on Global', () => {
+		expect(offersUsers(holding(['view_user', 'view_user_full']))).toBe(true);
+		expect(offersUsers(holding(['view_user', 'change_user']))).toBe(true);
+		expect(offersUsers(holding(['view_user', 'add_user']))).toBe(true);
+	});
+
+	it('is not offered with the base view alone, or with the full view on a domain', () => {
+		expect(offersUsers(holding(['view_user']))).toBe(false);
+		expect(offersUsers(holding(['view_user', 'view_user_full'], DOMAIN))).toBe(false);
+	});
+
+	it('lets a user creator create users from the palette', () => {
+		const creator = holding(['view_user', 'add_user']);
+		const hrefs = buildCreateCommands(creator, allFlags).map((command) => command.href);
+		expect(hrefs.some((href) => href?.split('?')[0] === '/users')).toBe(true);
+	});
+});

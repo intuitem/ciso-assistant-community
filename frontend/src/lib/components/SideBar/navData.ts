@@ -100,9 +100,10 @@ export const navData = {
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
 					href: '/users',
-					// Listed with the full view of users, held on Global where users live (see the
-					// full-view-permissions ADR); other members reach users through pickers.
-					globalPermissions: ['view_user_full', 'change_user']
+					// Listed to who may see users' full record, change users or create them, on Global
+					// where users live (see the full-view-permissions ADR); other members reach users
+					// through pickers.
+					globalPermissions: ['view_user_full', 'change_user', 'add_user']
 				},
 				{
 					name: 'teams',

@@ -1,8 +1,10 @@
 import pytest
+from django.test import Client
 from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
+from enterprise_core.views import ObjectAuditTrailView
 from iam.models import Folder, User, UserGroup
 
 # Logged on users, served only to who has the full view of the user.
@@ -70,6 +72,16 @@ class TestUserAuditTrailFullViewFields:
         assert {"email", "first_name"} <= self._fields(trail)
         # The update that only touched full-view fields is left out, not shown empty.
         assert [entry["action"] for entry in trail] == ["update", "create"]
+
+    def test_sign_ins_do_not_crowd_out_base_changes(self, target, analyst, monkeypatch):
+        # Every sign-in logs an update of last_login alone. Past the entry limit, they
+        # must not push the changes a base viewer may see out of the trail.
+        monkeypatch.setattr(ObjectAuditTrailView, "MAX_ENTRIES", 3)
+        for _ in range(4):
+            Client().force_login(target)
+        trail = self._trail(_client(analyst), target.id)
+        assert [entry["action"] for entry in trail] == ["update", "create"]
+        assert "first_name" in self._fields(trail)
 
     def test_full_viewer_gets_full_view_changes(self, target, admin_client):
         trail = self._trail(admin_client, target.id)

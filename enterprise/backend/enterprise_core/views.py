@@ -5,7 +5,7 @@ from django.utils.formats import date_format
 import magic
 import structlog
 from django.db import models, transaction
-from django.db.models import CharField, Value, Case, When
+from django.db.models import CharField, Value, Case, When, Q
 from django.db.models.functions import Coalesce, Lower, Cast, NullIf
 import django_filters as df
 from django.contrib.auth.models import Permission
@@ -1341,19 +1341,30 @@ class ObjectAuditTrailView(APIView):
         ):
             raise PermissionDenied
 
-        entries = (
-            LogEntry.objects.filter(content_type=content_type, object_pk=str(object_id))
-            .select_related("actor")
-            .order_by("-timestamp")[: self.MAX_ENTRIES]
+        hidden = ()
+        if model_class is User and not self._has_full_user_view(request, obj):
+            hidden = self.USER_FULL_VIEW_LOG_FIELDS
+        entries = LogEntry.objects.filter(
+            content_type=content_type, object_pk=str(object_id)
         )
+        if hidden:
+            # Leave out, in the query, updates that touch hidden fields only: every
+            # sign-in logs one (last_login), so filtering after the limit could leave
+            # nothing of an active user's trail. auditlog keys changes by field name.
+            visible = [
+                f.name for f in model_class._meta.get_fields() if f.name not in hidden
+            ]
+            entries = entries.filter(
+                ~Q(action=LogEntry.Action.UPDATE) | Q(changes__has_any_keys=visible)
+            )
+        entries = entries.select_related("actor").order_by("-timestamp")[
+            : self.MAX_ENTRIES
+        ]
         fk_models = {
             f.name: f.related_model
             for f in model_class._meta.get_fields()
             if getattr(f, "many_to_one", False) and f.related_model
         }
-        hidden = ()
-        if model_class is User and not self._has_full_user_view(request, obj):
-            hidden = self.USER_FULL_VIEW_LOG_FIELDS
         label_cache = {}
         results = []
         for entry in entries:
@@ -1363,6 +1374,7 @@ class ObjectAuditTrailView(APIView):
                 hidden,
             )
             # An update touching only hidden fields would still tell when they changed.
+            # The query already leaves them out; this is the backstop.
             if hidden and entry.action == LogEntry.Action.UPDATE and not changes:
                 continue
             results.append(

@@ -35,7 +35,7 @@ First application beyond compliance assessments: `view_user_full`, listed in the
 
 - **Row visibility is unchanged.** `view_user` means what it meant: pickers, owner fields and every check that uses it behave as before, for every model.
 - **Only Global assignments make a difference.** Users live in Global, so a Global reader sees full records and a reader on a domain doesn't.
-- **The Users page is listed for holders of the full view on Global.** Other members reach users through pickers and references.
+- **The Users page is listed for holders of the full view on Global, and for those who may change or create users there.** Other members reach users through pickers and references.
 - **Custom roles keep what they serve today**, through the migration. The exception is a custom role used as Global's default role: it stops serving these details to every member. Where that role is also assigned to a group that needs the full view, an administrator adds `view_user_full` to that group's role.
 - **User creator stays exactly `add_user` and `view_user`**, as its own decision requires. Creators don't read back the details they set at creation, and can't change them afterwards anyway.
 - **Existing API clients:**
