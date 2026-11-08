@@ -2370,6 +2370,75 @@ def handle(exc, context):
     return drf_exception_handler(exc, context)
 
 
+def is_visible_from_folder(
+    obj: models.Model,
+    target_folder: Folder,
+    target_parent_folders: list[Folder],
+    sub_folders: list[Folder],
+    model_class: type[models.Model] | None = None,
+) -> bool:
+    """
+    Whether the users of `target_folder` can see `obj`: it lives in that folder or
+    one of its sub-folders, or in a parent folder whose `default_role` grants the
+    view permission on its model.
+    """
+    model_class = model_class or type(obj)
+    folder = obj.folder
+    if folder == target_folder or folder in sub_folders:
+        return True
+    return (
+        folder in target_parent_folders
+        and folder.default_role is not None
+        and folder.default_role.permissions.filter(
+            codename=f"view_{model_class._meta.model_name}"
+        ).exists()
+    )
+
+
+def resolve_related_object(
+    obj: models.Model,
+    target_folder: Folder,
+    target_parent_folders: list[Folder],
+    sub_folders: list[Folder],
+    model_class: type[models.Model] | None = None,
+    before_copy=None,
+) -> tuple[models.Model, bool]:
+    """
+    What a copy placed in `target_folder` should point at instead of `obj`.
+
+    An object with the same name already in the target folder is reused, `obj`
+    itself is kept when the target folder can see it or is built-in (code-managed,
+    never duplicated), and otherwise `obj` is copied into the target folder
+    (`before_copy(model)` runs first, e.g. to check the add permission).
+    Returns `(object, created)`.
+    """
+    model_class = model_class or type(obj)
+    if getattr(obj, "builtin", False):
+        return obj, False
+
+    existing_obj = model_class.objects.filter(
+        name=obj.name, folder=target_folder
+    ).first()
+    if existing_obj:
+        return existing_obj, False
+
+    if is_visible_from_folder(
+        obj, target_folder, target_parent_folders, sub_folders, model_class
+    ):
+        return obj, False
+
+    if before_copy is not None:
+        before_copy(type(obj))
+    # Copy every concrete field except the primary key, into the target folder
+    field_values = {
+        field.name: getattr(obj, field.name)
+        for field in obj._meta.fields
+        if not field.primary_key and not field.auto_created
+    }
+    field_values["folder"] = target_folder
+    return type(obj).objects.create(**field_values), True
+
+
 def duplicate_related_objects(
     source_object: models.Model,
     duplicate_object: models.Model,
@@ -2385,97 +2454,17 @@ def duplicate_related_objects(
     - target_folder (Folder): The folder where duplicated objects will be stored.
     - field_name (str): The field name representing the related objects in the source
     """
-
-    def process_related_object(
-        obj,
-        duplicate_object,
-        target_folder,
-        target_parent_folders,
-        sub_folders,
-        field_name,
-        model_class,
-    ):
-        """
-        Process a single related object: add, link, or duplicate it based on folder and existence checks.
-        """
-
-        # Check if the object already exists in the target folder
-        existing_obj = get_existing_object(obj, target_folder, model_class)
-
-        if existing_obj:
-            # If the object exists in the target folder, link it to the duplicate object
-            link_existing_object(duplicate_object, existing_obj, field_name)
-
-        elif (
-            obj.folder in target_parent_folders
-            and obj.folder.default_role is not None
-            and obj.folder.default_role.permissions.filter(
-                codename=f"view_{model_class._meta.model_name}"
-            ).exists()
-        ):
-            # Link the object if the user can see it thanks to the `obj.folder.default_role`.
-            link_existing_object(duplicate_object, obj, field_name)
-
-        elif obj.folder in sub_folders:
-            # If the object's folder is a subfolder of the target folder, link it
-            link_existing_object(duplicate_object, obj, field_name)
-
-        else:
-            # Otherwise, duplicate the object and link it
-            duplicate_and_link_object(obj, duplicate_object, target_folder, field_name)
-
-    def get_existing_object(obj, target_folder, model_class):
-        """
-        Check if an object with the same name already exists in the target folder.
-        """
-        return model_class.objects.filter(name=obj.name, folder=target_folder).first()
-
-    def link_existing_object(duplicate_object, existing_obj, field_name):
-        """
-        Link an existing object to the duplicate object by adding it to the related field.
-        """
-        getattr(duplicate_object, field_name).add(existing_obj)
-
-    def duplicate_and_link_object(new_obj, duplicate_object, target_folder, field_name):
-        """
-        Duplicate an object and link it to the duplicate object.
-        """
-        # Get the model of the object
-        model_class = new_obj.__class__
-
-        # Extract all fields except the primary key
-        field_values = {}
-        for field in new_obj._meta.fields:
-            if not field.primary_key and not field.auto_created:
-                field_values[field.name] = getattr(new_obj, field.name)
-
-        # Apply changes
-        field_values["folder"] = target_folder
-
-        # Create the new object
-        new_obj = model_class.objects.create(**field_values)
-        link_existing_object(duplicate_object, new_obj, field_name)
-
     model_class = getattr(type(source_object), field_name).field.related_model
 
     # Get parent and sub-folders of the target folder
     target_parent_folders = list(target_folder.get_parent_folders())
     sub_folders = list(target_folder.get_sub_folders())
 
-    # Get all related objects for the specified field
-    related_objects = getattr(source_object, field_name).all()
-
-    # Process each related object
-    for obj in related_objects:
-        process_related_object(
-            obj,
-            duplicate_object,
-            target_folder,
-            target_parent_folders,
-            sub_folders,
-            field_name,
-            model_class,
+    for obj in getattr(source_object, field_name).all():
+        target_obj, _ = resolve_related_object(
+            obj, target_folder, target_parent_folders, sub_folders, model_class
         )
+        getattr(duplicate_object, field_name).add(target_obj)
 
 
 def scoped_requirement_assessments(
