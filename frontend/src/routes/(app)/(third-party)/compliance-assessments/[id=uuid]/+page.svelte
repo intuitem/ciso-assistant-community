@@ -857,8 +857,8 @@
 	{/if}
 
 	<div class="flex flex-col card px-6 py-4 bg-surface-50-950 shadow-lg w-full">
-		<div class="flex flex-row justify-between">
-			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
+		<div class="flex flex-col lg:flex-row justify-between gap-4 lg:gap-0">
+			<div class="flex flex-col space-y-2 whitespace-pre-line lg:w-1/5 pr-1">
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
 					const fieldsToShow = ['ref_id', 'name', 'description', 'observation', 'version', 'folder', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
 					if (!fieldsToShow.includes(key)) return false;
@@ -1049,55 +1049,56 @@
 					</div>
 				{/if}
 			</div>
-			<div class="flex flex-col space-y-2 ml-4 w-80 xl:w-96 shrink-0">
-				<div class="flex flex-row space-x-2">
-					<button
-						type="button"
-						class="btn preset-filled-primary-500 w-full"
-						onclick={modalExport}
-						data-testid="export-button"
-					>
-						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-					</button>
+			<div class="flex flex-col space-y-2 lg:ml-4 w-full lg:w-80 xl:w-96 shrink-0">
+				<!-- One even grid: the filled primary first, every other action quiet. -->
+				<div class="action-grid">
 					{#if canEditObject}
 						<Anchor
 							breadcrumbAction="push"
 							href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
-							class="btn preset-filled-primary-500 h-fit"
+							class="btn preset-filled-primary-500"
 							data-testid="edit-button"
 							><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 						>
 					{/if}
-				</div>
-				{#if !page.data.user.is_third_party}
-					{#each page.data?.featureflags?.findings_from_requirements ? (data.compliance_assessment.findings_assessments ?? []) : [] as binder}
+					<button
+						type="button"
+						class="btn btn-quiet"
+						onclick={modalExport}
+						data-testid="export-button"
+					>
+						<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
+					</button>
+					{#if !page.data.user.is_third_party}
+						{#each page.data?.featureflags?.findings_from_requirements ? (data.compliance_assessment.findings_assessments ?? []) : [] as binder}
+							<Anchor
+								href={`/findings-assessments/${binder.id}`}
+								class="btn btn-quiet h-fit"
+								breadcrumbAction="push"
+								data-testid="go-to-findings-binder-button"
+								><i class="fa-solid fa-bug mr-2 text-rose-500"></i>{m.findings()}</Anchor
+							>
+						{/each}
 						<Anchor
-							href={`/findings-assessments/${binder.id}`}
-							class="btn preset-filled-secondary-500 h-fit"
+							href={`${page.url.pathname}/action-plan`}
+							class="btn btn-quiet h-fit"
 							breadcrumbAction="push"
-							data-testid="go-to-findings-binder-button"
-							><i class="fa-solid fa-bug mr-2"></i>{m.findings()}</Anchor
+							data-testid="action-plan-button"
+							><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}</Anchor
 						>
-					{/each}
-					<Anchor
-						href={`${page.url.pathname}/action-plan`}
-						class="btn preset-filled-primary-500 h-fit"
-						breadcrumbAction="push"
-						data-testid="action-plan-button"
-						><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
-					>
-					<Anchor
-						href={`${page.url.pathname}/evidences-list`}
-						class="btn preset-filled-secondary-500 h-fit"
-						breadcrumbAction="push"
-						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
-					>
-					<AuditTrailButton
-						model="compliance-assessments"
-						objectId={data.compliance_assessment.id}
-						folderId={data.compliance_assessment.folder?.id ?? user.root_folder_id}
-					/>
-				{/if}
+						<Anchor
+							href={`${page.url.pathname}/evidences-list`}
+							class="btn btn-quiet h-fit"
+							breadcrumbAction="push"
+							><i class="fa-solid fa-file-lines mr-2 text-blue-500"></i>{m.evidences()}</Anchor
+						>
+						<AuditTrailButton
+							model="compliance-assessments"
+							objectId={data.compliance_assessment.id}
+							folderId={data.compliance_assessment.folder?.id ?? user.root_folder_id}
+						/>
+					{/if}
+				</div>
 				<!-- Power-ups Command Palette Grid -->
 				<div class="pt-3 border-t border-surface-200-800 mt-2 space-y-3">
 					<span
@@ -1116,11 +1117,11 @@
 								<Anchor
 									breadcrumbAction="push"
 									href={`${page.url.pathname}/flash-mode`}
-									class="flex items-center gap-2 px-2.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 dark:bg-surface-800 dark:border-surface-700 dark:text-indigo-300 dark:hover:bg-surface-700 dark:hover:border-surface-600 transition-colors cursor-pointer"
+									class="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 dark:bg-surface-800 dark:border-surface-700 dark:text-indigo-300 dark:hover:bg-surface-700 dark:hover:border-surface-600 transition-colors cursor-pointer"
 									data-testid="flash-mode-button"
 								>
 									<div
-										class="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-500 dark:bg-indigo-600 text-white shrink-0"
+										class="flex items-center justify-center w-6 h-6 rounded-md bg-indigo-500 dark:bg-indigo-600 text-white shrink-0"
 									>
 										<i class="fa-solid fa-bolt text-sm"></i>
 									</div>
@@ -1130,11 +1131,11 @@
 							<Anchor
 								breadcrumbAction="push"
 								href={`${page.url.pathname}/table-mode`}
-								class="flex items-center gap-2 px-2.5 py-3 rounded-xl bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
+								class="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
 								data-testid="table-mode-button"
 							>
 								<div
-									class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-500 text-white shrink-0"
+									class="flex items-center justify-center w-6 h-6 rounded-md bg-slate-500 text-white shrink-0"
 								>
 									<i class="fa-solid fa-table-list text-sm"></i>
 								</div>
@@ -1152,7 +1153,7 @@
 							>
 							<div class="grid grid-cols-2 gap-2">
 								<button
-									class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 									onclick={() => modalApplyMapping()}
 									data-testid="apply-mapping-button"
 								>
@@ -1160,7 +1161,7 @@
 									<span class="text-sm font-medium leading-tight">{m.applyMapping()}</span>
 								</button>
 								<button
-									class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 									onclick={() => modalCreateCloneForm()}
 									data-testid="clone-audit-button"
 								>
@@ -1168,7 +1169,7 @@
 									<span class="text-sm font-medium leading-tight">{m.cloneAudit()}</span>
 								</button>
 								<button
-									class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 									onclick={() => modalCompareAudit()}
 									data-testid="compare-audit-button"
 								>
@@ -1177,7 +1178,7 @@
 								</button>
 								{#if page.data?.featureflags?.validation_flows}
 									<button
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 										onclick={() => modalRequestValidation()}
 										data-testid="request-validation-button"
 									>
@@ -1187,7 +1188,7 @@
 								{/if}
 								{#if !data.compliance_assessment.is_locked}
 									<button
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 										data-testid="sync-to-actions-button"
 										onclick={async () => {
 											await modalConfirmSyncToActions(
@@ -1213,7 +1214,7 @@
 									</button>
 									{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'appliedcontrol', object: data.compliance_assessment } ) && data.compliance_assessment.framework.reference_controls.length > 0}
 										<button
-											class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+											class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 											onclick={() => {
 												modalConfirmCreateSuggestedControls(
 													data.compliance_assessment.id,
@@ -1240,7 +1241,7 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/assignments`}
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 										data-testid="assignments-button"
 									>
 										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
@@ -1254,7 +1255,7 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={reviewResponsesHref}
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
 										data-testid="review-responses-button"
 									>
 										<i class="fa-solid fa-clipboard-check text-blue-500 text-base"></i>
@@ -1276,12 +1277,12 @@
 								{#each staircases as staircase (staircase.ref_id)}
 									<button
 										type="button"
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer text-left"
 										onclick={() => openStaircaseDialog(staircase)}
 										data-testid="staircase-tile"
 									>
 										<div
-											class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-500 text-white font-bold tabular-nums shrink-0"
+											class="flex items-center justify-center w-6 h-6 rounded-md bg-primary-500 text-white font-bold tabular-nums shrink-0"
 										>
 											{staircase.level ?? '—'}
 										</div>
@@ -1298,7 +1299,7 @@
 								{#each weakestLinks as weakestLink (weakestLink.ref_id)}
 									<button
 										type="button"
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer text-left"
 										onclick={() => openWeakestLinkDialog(weakestLink)}
 										data-testid="weakest-link-tile"
 									>
@@ -1316,14 +1317,14 @@
 									{@const allMet = verdictCount > 0 && verdictsMet === verdictCount}
 									<button
 										type="button"
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border transition-colors cursor-pointer text-left {allMet
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer text-left {allMet
 											? 'bg-success-50-950 border-success-200-800 text-success-800-200 hover:bg-success-100-900'
 											: 'bg-surface-50-950 border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900'}"
 										onclick={openVerdictsDialog}
 										data-testid="verdicts-tile"
 									>
 										<div
-											class="flex items-center justify-center w-7 h-7 rounded-lg text-white shrink-0 {allMet
+											class="flex items-center justify-center w-6 h-6 rounded-md text-white shrink-0 {allMet
 												? 'bg-success-500 dark:bg-success-600'
 												: 'bg-violet-500 dark:bg-violet-600'}"
 										>
@@ -1348,11 +1349,11 @@
 								{/if}
 								{#if has_threats && !page.data.user.is_third_party}
 									<button
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
 										onclick={openThreatsDialog}
 									>
 										<div
-											class="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500 dark:bg-amber-600 text-white shrink-0"
+											class="flex items-center justify-center w-6 h-6 rounded-md bg-amber-500 dark:bg-amber-600 text-white shrink-0"
 										>
 											<i class="fa-solid fa-triangle-exclamation text-sm"></i>
 										</div>
@@ -1368,11 +1369,11 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/advanced-analytics`}
-										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer"
 										data-testid="advanced-analytics-button"
 									>
 										<div
-											class="flex items-center justify-center w-7 h-7 rounded-lg bg-orange-500 dark:bg-orange-600 text-white shrink-0"
+											class="flex items-center justify-center w-6 h-6 rounded-md bg-orange-500 dark:bg-orange-600 text-white shrink-0"
 										>
 											<i class="fa-solid fa-chart-line text-sm"></i>
 										</div>

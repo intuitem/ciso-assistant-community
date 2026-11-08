@@ -84,11 +84,11 @@
 {#if enabled}
 	<button
 		type="button"
-		class="btn h-fit text-gray-100 bg-linear-to-l from-slate-500 to-slate-700"
+		class="btn btn-quiet h-fit"
 		data-testid="audit-trail-button"
 		onclick={openAuditTrail}
 	>
-		<i class="fa-solid fa-clock-rotate-left mr-2"></i>
+		<i class="fa-solid fa-clock-rotate-left mr-2 text-slate-500"></i>
 		{m.auditTrail()}
 	</button>
 {/if}

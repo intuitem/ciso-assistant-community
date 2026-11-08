@@ -10657,7 +10657,7 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Result.COMPLIANT: "#86efac",
-            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#475569",
             RequirementAssessment.Status.TODO: "#9ca3af",
             RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
             RequirementAssessment.Status.IN_REVIEW: "#3b82f6",

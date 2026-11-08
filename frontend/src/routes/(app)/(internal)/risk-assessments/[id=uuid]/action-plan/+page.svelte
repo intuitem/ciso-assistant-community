@@ -88,17 +88,19 @@
 					breadcrumbAction="push"
 					href={`/risk-assessments/${page.params.id}/action-plan/analytics`}
 					label={m.analytics()}
-					class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+					class="btn btn-quiet h-fit"
 					title={m.appliedControlsAnalytics()}
 					aria-label={m.appliedControlsAnalytics()}
 					data-testid="analytics-button"
-					><i class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></i>{m.analytics()}</Anchor
+					><i class="fa-solid fa-chart-pie mr-2 text-indigo-500" aria-hidden="true"
+					></i>{m.analytics()}</Anchor
 				>
 				<Anchor
 					breadcrumbAction="push"
 					href={`/applied-controls/flash-mode?risk_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2" aria-hidden="true"></i> {m.flashMode()}</Anchor
+					class="btn btn-quiet h-fit"
+					><i class="fa-solid fa-bolt mr-2 text-orange-500" aria-hidden="true"></i>
+					{m.flashMode()}</Anchor
 				>
 			</div>
 		{/if}
