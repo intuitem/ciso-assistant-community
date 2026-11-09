@@ -10328,6 +10328,48 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
+    def requirement_layer_scores(
+        self, *, result, is_scored, score, documentation_score, min_score, max_score
+    ) -> dict:
+        """One requirement's implementation, documentation and maturity scores
+        on its own scale, counted as get_scores_for counts it: N/A at the target
+        when the audit anchors N/A, a missing documentation score at the bottom
+        of the scale, maturity the average of the two (the implementation score
+        when the audit has no documentation score). Layers that do not count
+        are None. min_score / max_score are the requirement's own bounds; None
+        falls back to the audit's."""
+        low = self.min_score if min_score is None else min_score
+        high = self.max_score if max_score is None else max_score
+        if result == RequirementAssessment.Result.NOT_APPLICABLE:
+            if not self.anchor_na_to_target or low is None or high is None:
+                implementation = None
+            else:
+                implementation = documentation = self.na_anchor_score(low, high)
+        elif is_scored and score is not None:
+            implementation = score
+            documentation = (
+                documentation_score if documentation_score is not None else low or 0
+            )
+        else:
+            implementation = None
+        if implementation is None:
+            return {
+                "implementation_score": None,
+                "documentation_score": None,
+                "maturity_score": None,
+            }
+        if not self.show_documentation_score:
+            return {
+                "implementation_score": implementation,
+                "documentation_score": None,
+                "maturity_score": implementation,
+            }
+        return {
+            "implementation_score": implementation,
+            "documentation_score": documentation,
+            "maturity_score": (implementation + documentation) / 2,
+        }
+
     def get_total_max_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
     ):
@@ -11512,7 +11554,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     #      needs a persisted completion flag (rejected) or write-time answer
     #      cleanup (out of scope).
     #   2. result visible on the audit: result set
-    #   3. score-only audit: score strictly above the resolved minimum
+    #   3. score-only audit: not applicable (the applicability toggle sets it
+    #      and no score follows), or score strictly above the resolved minimum
     #      (requirement override, then audit, then framework). The scoring
     #      toggle pre-fills scores at that minimum, so a score left at min is
     #      indistinguishable from an untouched one and must not count.
@@ -11559,7 +11602,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 Value(0),
             )
         )
-        content = result_assessed if result_visible else score_progressed
+        content = (
+            result_assessed
+            if result_visible
+            else Q(result=cls.Result.NOT_APPLICABLE) | score_progressed
+        )
         if has_questions_annotation:
             # A question counts whether or not it computes anything: fully
             # answered seeded rows complete the carriers for informational
@@ -11613,6 +11660,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             return result_assessed or score_assessed or questionnaire_fully_answered
         if result_visible:
             return result_assessed
+        if result == RequirementAssessment.Result.NOT_APPLICABLE:
+            return True
         resolved_min = (
             requirement_min_score
             if requirement_min_score is not None
