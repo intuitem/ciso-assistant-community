@@ -18,9 +18,8 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 
 ## Where to find it
 
-1. Open the **Frameworks** list (`/frameworks`).
-2. Click into a framework's detail page.
-3. Click the **Insights** button at the top.
+- From the main menu: **Compliance > Summary**, tab **By framework**, lists every framework used by an audit you can read. Click one to open its report.
+- From a framework: open its detail page and click the **Insights** button at the top.
 
 ## What it shows
 
@@ -33,13 +32,27 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 | **Detected audits drawer** | Per-audit list with status, folder path, and `counted vs excluded` marker — so you can see what the live-status filter left out |
 | **Per-section breakdown** | Requirement rows grouped by their immediate parent section |
 | **Implementation-group filter** | Narrow the report to a single IG via the **Implementation group** dropdown |
+| **Verdicts** | For frameworks with outcome rules, how many of the filtered audits meet each verdict, and the average of each computed number |
+| **Excel export** | **Export (Excel)** downloads what the filters show: audits (with dates, scores and verdicts met), requirements, domains with their requirements, and one row per requirement per audit |
+
+## Filters and display
+
+- **Domains**: tick one or more domains, at any depth. An audit is kept when one of the ticked domains is on its path, so you can combine branches of the tree (for example two regional nodes under different parents).
+- **Deadline**: pick **ETA** or **Due date**, then a window in months from today. `0 → 6` keeps audits due in the next six months, `3 → 6` those due between three and six months from now, and a negative bound reaches back into overdue audits. Audits without that date are left out while the filter is on.
+- **Display**: show or hide the key indicators, the result distribution, the verdicts and the detail table. The choice is remembered in your browser.
+
+The detected audits drawer greys out the audits the filters leave out.
 
 ## Two ways to read it
 
 The **View** toggle in the filter bar switches the body of the report between two lenses on the same numbers:
 
 - **Requirements tree** — the default. Sections roll up their requirements; click a section to expand it, then click a requirement row to drill into its **Per-assessment breakdown** (one row per audit, with domain, result, score, controls and evidence counts, and a link straight to that requirement assessment). **Expand all** / **Collapse all** act on every section at once.
-- **Per domain** — pivots the same rows by the domain (Folder) they live in. **Group by domain depth** controls how far down the tree the grouping cuts (`root` … `leaf domain`), and **Sort by** orders the rows by domain name (alphabetical), compliance %, or average score, ascending or descending.
+- **Per domain** — pivots the same rows by the domain (Folder) they live in. **Group by domain depth** controls how far down the tree the grouping cuts (`root` … `leaf domain`), and **Sort by** orders the rows by domain name (alphabetical), compliance %, or average score, ascending or descending. Click a domain to filter the report on it and switch to the **Requirements tree**, which then shows that domain's sections and requirements with their compliance and average scores.
+
+## Exporting a requirement's evidences
+
+In the **Per-assessment breakdown** of a requirement, **Export evidences** downloads a zip of that requirement's evidences across the audits listed, one folder per domain and audit. It includes evidences attached to the requirement and those attached to its applied controls, limited to the evidences you can read. Untick an audit to leave it out. An `index.csv` in the zip lists every evidence with its audit, and its link when it has no file.
 
 ## What gets counted
 

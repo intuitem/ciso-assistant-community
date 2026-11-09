@@ -11133,16 +11133,17 @@ class FrameworkViewSet(BaseModelViewSet):
         )
 
         # Cache folder paths so we don't walk ancestry twice for the same folder.
-        folder_path_cache: Dict[Any, List[str]] = {}
+        folder_path_cache: Dict[Any, List[Any]] = {}
 
-        def folder_path_for(folder) -> List[str]:
+        def folder_chain_for(folder) -> List[Any]:
             if folder is None:
                 return []
-            if folder.id in folder_path_cache:
-                return folder_path_cache[folder.id]
-            path = [f.name for f in folder.get_folder_full_path()]
-            folder_path_cache[folder.id] = path
-            return path
+            if folder.id not in folder_path_cache:
+                folder_path_cache[folder.id] = list(folder.get_folder_full_path())
+            return folder_path_cache[folder.id]
+
+        def folder_path_for(folder) -> List[str]:
+            return [f.name for f in folder_chain_for(folder)]
 
         # Non-assessable nodes that act as sections (the immediate parents of
         # assessable requirements). The frontend uses this to render the
@@ -11332,6 +11333,30 @@ class FrameworkViewSet(BaseModelViewSet):
                 else None,
             }
 
+        from core.cel_service import applicable_rules, is_numeric_rule
+
+        def outcomes_of(ca) -> List[Dict[str, Any]] | None:
+            """The audit's outcome verdicts and numbers the viewer may read."""
+            role = ca_viewer_roles[ca.id]
+            score_visible = is_field_visible_to(ca, "score", role)
+            score_only = not is_field_visible_to(ca, "result", "auditor")
+            verdict_visible = is_field_visible_to(ca, "result", role) or (
+                score_only and score_visible
+            )
+            fired = ca.computed_outcome or {}
+            values = ca.computed_values or {}
+            out = []
+            for rule in applicable_rules(framework, ca.selected_implementation_groups):
+                if rule.get("kind") in ("staircase", "weakest_link"):
+                    continue
+                ref_id = rule.get("ref_id")
+                if is_numeric_rule(rule):
+                    if score_visible and values.get(ref_id) is not None:
+                        out.append({"ref_id": ref_id, "value": values[ref_id]})
+                elif verdict_visible:
+                    out.append({"ref_id": ref_id, "met": ref_id in fired})
+            return out or None
+
         # Per-CA summary used by the frontend "detected assessments" drawer.
         # Includes every visible CA, counted or not, so users can see what
         # the live-status filter excluded. Only counted CAs carry scores.
@@ -11343,6 +11368,10 @@ class FrameworkViewSet(BaseModelViewSet):
                 "folder_id": str(ca.folder_id) if ca.folder_id else None,
                 "folder_path": folder_path_for(ca.folder),
                 "folder_path_str": " / ".join(folder_path_for(ca.folder)),
+                "folder_path_ids": [str(f.id) for f in folder_chain_for(ca.folder)],
+                "eta": ca.eta,
+                "due_date": ca.due_date,
+                "outcomes": outcomes_of(ca) if ca.id in audits_by_id else None,
                 "is_counted": ca.status in LIVE_STATUSES,
                 **(
                     scores_of(audits_by_id[ca.id])
@@ -11368,6 +11397,24 @@ class FrameworkViewSet(BaseModelViewSet):
                     "max_score": framework.max_score,
                     "scores_definition": framework.scores_definition,
                     "implementation_groups_definition": framework.get_implementation_groups_definition_translated(),
+                    "outcomes_definition": [
+                        {
+                            key: rule.get(key)
+                            for key in ("ref_id", "kind", "annotation", "label")
+                        }
+                        | {
+                            "translations": {
+                                lang: {
+                                    k: v
+                                    for k, v in (t or {}).items()
+                                    if k in ("annotation", "label")
+                                }
+                                for lang, t in (rule.get("translations") or {}).items()
+                            }
+                        }
+                        for rule in framework.outcomes_definition or []
+                        if rule.get("kind") not in ("staircase", "weakest_link")
+                    ],
                     "sections": sections,
                 },
                 "rows": rows,
@@ -11379,6 +11426,135 @@ class FrameworkViewSet(BaseModelViewSet):
                 "generated_at": timezone.now().isoformat(),
             }
         )
+
+    @action(detail=True, methods=["get"], url_path="requirement_evidences")
+    def requirement_evidences(self, request, pk):
+        """Zip of one requirement's evidences across this framework's audits.
+
+        Query params:
+          - requirement (urn, required)
+          - compliance_assessments (comma-separated uuids): defaults to every readable audit.
+        """
+        framework = self.get_object()
+        requirement_urn = request.query_params.get("requirement")
+        if not requirement_urn:
+            return Response(
+                {"error": "requirement is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        audits = ComplianceAssessment.objects.filter(
+            framework=framework,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                request.user, ComplianceAssessment
+            ),
+        )
+        audit_ids = request.query_params.get("compliance_assessments")
+        if audit_ids:
+            try:
+                ids = [UUID(i) for i in audit_ids.split(",") if i]
+            except ValueError:
+                return Response(
+                    {"error": "invalid compliance_assessments"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            audits = audits.filter(id__in=ids)
+
+        viewable_evidences = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Evidence)
+        )
+        ras = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment__in=audits,
+                requirement__urn=requirement_urn,
+            )
+            .select_related("compliance_assessment__folder", "requirement")
+            .prefetch_related("evidences", "applied_controls__evidences")
+            .order_by(
+                "compliance_assessment__folder__name", "compliance_assessment__name"
+            )
+        )
+
+        def sanitize(name: str) -> str:
+            return sanitize_file_name(name or "") or "_"
+
+        index = io.StringIO()
+        writer = csv.writer(index)
+        writer.writerow(["domain", "audit", "requirement", "evidence", "link", "file"])
+        temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
+        try:
+            with zipfile.ZipFile(temp_file, "w") as zipf:
+                taken_dirs: set = set()
+                for ra in ras:
+                    ca = ra.compliance_assessment
+                    direct = {e.id: e for e in ra.evidences.all()}
+                    indirect = {
+                        e.id: e
+                        for ac in ra.applied_controls.all()
+                        for e in ac.evidences.all()
+                        if e.id not in direct
+                    }
+                    evidences = {
+                        k: v
+                        for k, v in {**direct, **indirect}.items()
+                        if k in viewable_evidences
+                    }
+                    if not evidences:
+                        continue
+                    base_dir = f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
+                    directory, counter = base_dir, 1
+                    while directory.lower() in taken_dirs:
+                        counter += 1
+                        directory = f"{base_dir} ({counter})"
+                    taken_dirs.add(directory.lower())
+                    names = build_evidence_archive_names(list(evidences.values()))
+                    for evidence in evidences.values():
+                        entry = names.get(evidence.id)
+                        written = ""
+                        revision = evidence.last_revision if entry else None
+                        if revision and revision.attachment:
+                            try:
+                                with default_storage.open(
+                                    revision.attachment.name
+                                ) as attachment_file:
+                                    zipf.writestr(
+                                        f"{directory}/{entry}", attachment_file.read()
+                                    )
+                                written = f"{directory}/{entry}"
+                            except Exception:
+                                logger.warning(
+                                    "evidence file unreadable, omitted from archive",
+                                    evidence_id=evidence.id,
+                                )
+                        writer.writerow(
+                            [
+                                " / ".join(
+                                    f.name for f in ca.folder.get_folder_full_path()
+                                )
+                                if ca.folder
+                                else "",
+                                ca.name,
+                                ra.requirement.ref_id or ra.requirement.urn,
+                                evidence.name,
+                                "direct"
+                                if evidence.id in direct
+                                else "applied_control",
+                                written or (revision.link if revision else "") or "",
+                            ]
+                        )
+                zipf.writestr("index.csv", index.getvalue())
+            temp_file.seek(0)
+            requirement = RequirementNode.objects.filter(
+                framework=framework, urn=requirement_urn
+            ).first()
+            label = (requirement.ref_id if requirement else None) or "requirement"
+            return FileResponse(
+                temp_file,
+                as_attachment=True,
+                filename=f"{sanitize(framework.name)}-{sanitize(label)}-evidences.zip",
+            )
+        except Exception:
+            temp_file.close()
+            raise
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):

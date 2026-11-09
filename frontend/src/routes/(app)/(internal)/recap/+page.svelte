@@ -7,6 +7,8 @@
 	import type { PageData } from './$types';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '#lib/utils/access-control.js';
+	import { goto } from '$app/navigation';
+	import FrameworkReportsList from './FrameworkReportsList.svelte';
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
@@ -29,6 +31,16 @@
 		data.folderRecaps.filter((folderRecap) => folderRecap.compliance_assessments.length > 0)
 	);
 
+	const TABS = ['domains', 'frameworks'] as const;
+	let tab = $derived(page.url.searchParams.get('tab') === 'frameworks' ? 'frameworks' : 'domains');
+	const tabLabel = { domains: () => m.byDomain(), frameworks: () => m.byFramework() };
+	function selectTab(next: (typeof TABS)[number]) {
+		const url = new URL(page.url.href);
+		if (next === 'domains') url.searchParams.delete('tab');
+		else url.searchParams.set('tab', next);
+		goto(url, { replace: true });
+	}
+
 	const model = URL_MODEL_MAP['folders'];
 	const canEditObject = (folder): boolean =>
 		canPerformAction({
@@ -42,146 +54,170 @@
 <div class="p-4 space-y-6 bg-surface-50-950 min-h-screen card">
 	<h2 class="text-2xl font-extrabold text-surface-950-50 mb-4">{m.overallCompliance()}</h2>
 
-	<div class="space-y-6">
-		{#if foldersWithAssessments.length === 0}
-			<div class="flex items-center justify-center min-h-[60vh]">
-				<div class="text-center max-w-lg">
-					<p class="text-xl font-bold text-surface-950-50">
-						{m.createYourFirstAuditToSeeRecapPage()}
-					</p>
-					<p class="mt-2 text-sm text-surface-600-400">
-						{m.AuditExistsYoullSeeOverallCompliance()}
-					</p>
-				</div>
-			</div>
-		{:else}
-			{#each foldersWithAssessments as folder}
-				<div
-					class="bg-surface-50-950 shadow-lg rounded-xl border border-surface-200-800 overflow-hidden transition hover:shadow-xl transform w-full"
-				>
-					<div
-						class="p-4 bg-gradient-to-r from-primary-400 to-primary-500 text-white flex justify-between items-center"
-					>
-						<a class="text-lg font-bold hover:underline" href="/folders/{folder.id}">
-							{folder.name}
-						</a>
-					</div>
+	<div class="flex gap-1 border-b border-surface-200-800" role="tablist">
+		{#each TABS as t}
+			<button
+				type="button"
+				role="tab"
+				id="recap-tab-{t}"
+				aria-selected={tab === t}
+				aria-controls="recap-panel"
+				class="px-4 py-2 text-sm font-medium -mb-px border-b-2 {tab === t
+					? 'border-primary-500 text-primary-700 dark:text-primary-300'
+					: 'border-transparent text-surface-600-400 hover:text-surface-950-50'}"
+				onclick={() => selectTab(t)}
+			>
+				{tabLabel[t]()}
+			</button>
+		{/each}
+	</div>
 
-					{#if folder.overallCompliance?.values?.length > 0}
-						<div
-							class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-surface-800 dark:to-surface-900 rounded-b-lg"
-						>
-							<p class="text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">
-								{m.globalOverall()}
+	<div id="recap-panel" role="tabpanel" aria-labelledby="recap-tab-{tab}">
+		{#if tab === 'frameworks'}
+			<FrameworkReportsList frameworks={data.usedFrameworks} />
+		{:else}
+			<div class="space-y-6">
+				{#if foldersWithAssessments.length === 0}
+					<div class="flex items-center justify-center min-h-[60vh]">
+						<div class="text-center max-w-lg">
+							<p class="text-xl font-bold text-surface-950-50">
+								{m.createYourFirstAuditToSeeRecapPage()}
 							</p>
-							<div class="flex h-6 rounded-lg overflow-hidden shadow-inner">
-								{#each folder.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
-									<div
-										class="flex justify-center items-center text-xs font-semibold"
-										style="
+							<p class="mt-2 text-sm text-surface-600-400">
+								{m.AuditExistsYoullSeeOverallCompliance()}
+							</p>
+						</div>
+					</div>
+				{:else}
+					{#each foldersWithAssessments as folder}
+						<div
+							class="bg-surface-50-950 shadow-lg rounded-xl border border-surface-200-800 overflow-hidden transition hover:shadow-xl transform w-full"
+						>
+							<div
+								class="p-4 bg-gradient-to-r from-primary-400 to-primary-500 text-white flex justify-between items-center"
+							>
+								<a class="text-lg font-bold hover:underline" href="/folders/{folder.id}">
+									{folder.name}
+								</a>
+							</div>
+
+							{#if folder.overallCompliance?.values?.length > 0}
+								<div
+									class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-surface-800 dark:to-surface-900 rounded-b-lg"
+								>
+									<p class="text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">
+										{m.globalOverall()}
+									</p>
+									<div class="flex h-6 rounded-lg overflow-hidden shadow-inner">
+										{#each folder.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
+											<div
+												class="flex justify-center items-center text-xs font-semibold"
+												style="
 										width: {sp.percentage}%;
 										background-color: {sp.itemStyle.color};
 										color: {['#475569', '#000000'].includes(sp.itemStyle.color) ? 'white' : 'black'};
 										box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
 									"
-									>
-										{Number(sp.percentage) > 5 ? `${sp.percentage}%` : ''}
-									</div>
-								{/each}
-							</div>
-						</div>
-					{/if}
-
-					<div class="p-4 space-y-4">
-						{#each folder.compliance_assessments as assessment}
-							<div
-								class="bg-surface-50-950 rounded-lg p-4 shadow-inner transition hover:bg-surface-100-900"
-							>
-								<div class="flex justify-between items-center mb-4">
-									<div>
-										<p class="text-sm font-semibold">{m.name()}</p>
-										<a
-											class="text-blue-600 dark:text-blue-400 hover:underline text-lg font-bold"
-											href="/compliance-assessments/{assessment.id}"
-										>
-											{assessment.name}
-										</a>
-									</div>
-									<div>
-										<p class="text-sm font-semibold">{m.framework()}</p>
-										<p>{assessment.framework.str}</p>
+											>
+												{Number(sp.percentage) > 5 ? `${sp.percentage}%` : ''}
+											</div>
+										{/each}
 									</div>
 								</div>
+							{/if}
 
-								<div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-									{#if assessment.global_score.maturity_score >= 0}
-										<div class="flex justify-center items-center lg:order-1">
-											<div class="relative">
-												<Progress
-													value={formatScoreValue(
-														assessment.global_score.maturity_score,
-														assessment.global_score.max_score,
-														false,
-														assessment.global_score.min_score
-													)}
-													min={0}
-													max={100}
+							<div class="p-4 space-y-4">
+								{#each folder.compliance_assessments as assessment}
+									<div
+										class="bg-surface-50-950 rounded-lg p-4 shadow-inner transition hover:bg-surface-100-900"
+									>
+										<div class="flex justify-between items-center mb-4">
+											<div>
+												<p class="text-sm font-semibold">{m.name()}</p>
+												<a
+													class="text-blue-600 dark:text-blue-400 hover:underline text-lg font-bold"
+													href="/compliance-assessments/{assessment.id}"
 												>
-													<Progress.Circle class="[--size:--spacing(24)]">
-														<Progress.CircleTrack />
-														<Progress.CircleRange
-															class={displayScoreColor(
+													{assessment.name}
+												</a>
+											</div>
+											<div>
+												<p class="text-sm font-semibold">{m.framework()}</p>
+												<p>{assessment.framework.str}</p>
+											</div>
+										</div>
+
+										<div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+											{#if assessment.global_score.maturity_score >= 0}
+												<div class="flex justify-center items-center lg:order-1">
+													<div class="relative">
+														<Progress
+															value={formatScoreValue(
 																assessment.global_score.maturity_score,
 																assessment.global_score.max_score,
 																false,
 																assessment.global_score.min_score
 															)}
-														/>
-													</Progress.Circle>
-													<div class="absolute inset-0 flex items-center justify-center">
-														<p class="font-semibold text-2xl">
-															{roundScore(assessment.global_score.maturity_score)}
-														</p>
+															min={0}
+															max={100}
+														>
+															<Progress.Circle class="[--size:--spacing(24)]">
+																<Progress.CircleTrack />
+																<Progress.CircleRange
+																	class={displayScoreColor(
+																		assessment.global_score.maturity_score,
+																		assessment.global_score.max_score,
+																		false,
+																		assessment.global_score.min_score
+																	)}
+																/>
+															</Progress.Circle>
+															<div class="absolute inset-0 flex items-center justify-center">
+																<p class="font-semibold text-2xl">
+																	{roundScore(assessment.global_score.maturity_score)}
+																</p>
+															</div>
+														</Progress>
 													</div>
-												</Progress>
+												</div>
+											{/if}
+
+											<div class="w-full lg:w-3/5 h-40 lg:h-32">
+												<DonutChart
+													s_label={m.complianceAssessments()}
+													name={assessment.name + '_donut'}
+													values={assessment.donut.result.values}
+												/>
+											</div>
+
+											<div
+												class="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:order-3"
+											>
+												{#if canEditObject(folder)}
+													<Anchor
+														href="/compliance-assessments/{assessment.id}/edit?next=/recap"
+														class="btn preset-filled-primary-500 w-1/2 lg:w-full"
+													>
+														<i class="fa-solid fa-edit mr-2"></i>
+														{m.edit()}
+													</Anchor>
+												{/if}
+												<a
+													href="/compliance-assessments/{assessment.id}/export"
+													class="btn preset-filled-primary-500 w-1/2 lg:w-full"
+												>
+													<i class="fa-solid fa-download mr-2"></i>
+													{m.exportButton()}
+												</a>
 											</div>
 										</div>
-									{/if}
-
-									<div class="w-full lg:w-3/5 h-40 lg:h-32">
-										<DonutChart
-											s_label={m.complianceAssessments()}
-											name={assessment.name + '_donut'}
-											values={assessment.donut.result.values}
-										/>
 									</div>
-
-									<div
-										class="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:order-3"
-									>
-										{#if canEditObject(folder)}
-											<Anchor
-												href="/compliance-assessments/{assessment.id}/edit?next=/recap"
-												class="btn preset-filled-primary-500 w-1/2 lg:w-full"
-											>
-												<i class="fa-solid fa-edit mr-2"></i>
-												{m.edit()}
-											</Anchor>
-										{/if}
-										<a
-											href="/compliance-assessments/{assessment.id}/export"
-											class="btn preset-filled-primary-500 w-1/2 lg:w-full"
-										>
-											<i class="fa-solid fa-download mr-2"></i>
-											{m.exportButton()}
-										</a>
-									</div>
-								</div>
+								{/each}
 							</div>
-						{/each}
-					</div>
-				</div>
-			{/each}
+						</div>
+					{/each}
+				{/if}
+			</div>
 		{/if}
 	</div>
 </div>

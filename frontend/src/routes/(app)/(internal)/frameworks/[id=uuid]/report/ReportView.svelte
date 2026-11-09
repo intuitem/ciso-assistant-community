@@ -9,6 +9,7 @@
 	import { roundScore } from '#lib/utils/helpers.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import { downloadWorkbook, type Cell } from './reportExport';
 
 	// -----------------------------------------------------------------------------
 	// Types — match the backend response shape from GET /api/frameworks/{id}/report/
@@ -106,6 +107,11 @@
 		folder_id: string | null;
 		folder_path: string[];
 		folder_path_str: string;
+		folder_path_ids: string[];
+		eta: string | null;
+		due_date: string | null;
+		// Verdicts (met) and numbers (value) the viewer may read; null when none.
+		outcomes: { ref_id: string; met?: boolean; value?: number }[] | null;
 		is_counted: boolean;
 		// Only counted audits carry scores.
 		score_scale: { min: number | null; max: number | null; calculation_method: string } | null;
@@ -126,6 +132,14 @@
 
 	type IGDef = { id?: string; ref_id?: string; name: string };
 
+	type OutcomeDef = {
+		ref_id: string;
+		kind: string | null;
+		annotation: string | null;
+		label: string | null;
+		translations: Record<string, { annotation?: string; label?: string }>;
+	};
+
 	type Framework = {
 		id: string;
 		name: string;
@@ -133,6 +147,7 @@
 		max_score: number | null;
 		scores_definition: { scale?: { value: number; name: string }[] } | null;
 		implementation_groups_definition: IGDef[] | null;
+		outcomes_definition: OutcomeDef[];
 		sections: Section[];
 	};
 
@@ -203,6 +218,44 @@
 	let expandedRow = $state<string | null>(null);
 	let expandedSections = $state<Set<string>>(new Set());
 	let showCAList = $state<boolean>(false);
+
+	// Domain nodes picked in the filter; an audit matches when one is on its folder path.
+	let selectedFolders = $state<Set<string>>(new Set());
+	// Deadline window, in months from today on the chosen date; null bounds are open.
+	let dateField = $state<'none' | 'eta' | 'due_date'>('none');
+	let dateFromMonths = $state<number | null>(null);
+	let dateToMonths = $state<number | null>(null);
+
+	const PANELS = ['kpis', 'distribution', 'outcomes', 'table'] as const;
+	type Panel = (typeof PANELS)[number];
+	const PANELS_KEY = 'frameworkReport.panels';
+	function loadPanels(): Set<Panel> {
+		try {
+			const saved = JSON.parse(localStorage.getItem(PANELS_KEY) ?? 'null');
+			if (Array.isArray(saved)) return new Set(saved.filter((p) => PANELS.includes(p)));
+		} catch {
+			// Storage unavailable: show everything.
+		}
+		return new Set(PANELS);
+	}
+	let shownPanels = $state<Set<Panel>>(loadPanels());
+	function togglePanel(panel: Panel) {
+		const next = new Set(shownPanels);
+		if (next.has(panel)) next.delete(panel);
+		else next.add(panel);
+		shownPanels = next;
+		try {
+			localStorage.setItem(PANELS_KEY, JSON.stringify([...next]));
+		} catch {
+			// Not persisted.
+		}
+	}
+	const panelLabel: Record<Panel, () => string> = {
+		kpis: () => m.keyIndicators(),
+		distribution: () => m.overallResultDistribution(),
+		outcomes: () => m.computedOutcomes(),
+		table: () => m.detailTable()
+	};
 	type DomainSortKey = 'name' | 'compliance' | 'score' | 'documentation' | 'maturity';
 	let domainSortKey = $state<DomainSortKey>('name');
 	let domainSortDir = $state<'asc' | 'desc'>('asc');
@@ -430,10 +483,79 @@
 		);
 	}
 
+	type FolderNode = { id: string; name: string; depth: number; path: string };
+	// Every domain on a visible audit's path, in tree order.
+	let folderNodes = $derived.by(() => {
+		const nodes = new Map<string, FolderNode>();
+		for (const ca of complianceAssessments) {
+			(ca.folder_path_ids ?? []).forEach((id, i) => {
+				if (!nodes.has(id))
+					nodes.set(id, {
+						id,
+						name: ca.folder_path[i] ?? '—',
+						depth: i,
+						path: ca.folder_path.slice(0, i + 1).join(' / ')
+					});
+			});
+		}
+		return [...nodes.values()].sort((a, b) => a.path.localeCompare(b.path));
+	});
+
+	function toggleFolder(id: string) {
+		const next = new Set(selectedFolders);
+		if (next.has(id)) next.delete(id);
+		else next.add(id);
+		selectedFolders = next;
+	}
+
+	function addMonths(months: number): Date {
+		const d = new Date();
+		d.setHours(0, 0, 0, 0);
+		d.setMonth(d.getMonth() + months);
+		return d;
+	}
+
+	function inDateWindow(ca: ComplianceAssessmentSummary): boolean {
+		if (dateField === 'none' || (dateFromMonths === null && dateToMonths === null)) return true;
+		const raw = ca[dateField];
+		if (!raw) return false;
+		const date = new Date(`${raw}T00:00:00`);
+		if (dateFromMonths !== null && date < addMonths(dateFromMonths)) return false;
+		if (dateToMonths !== null && date > addMonths(dateToMonths)) return false;
+		return true;
+	}
+
+	let filtersActive = $derived(
+		selectedFolders.size > 0 ||
+			(dateField !== 'none' && (dateFromMonths !== null || dateToMonths !== null))
+	);
+
+	function resetFilters() {
+		selectedFolders = new Set();
+		dateField = 'none';
+		dateFromMonths = null;
+		dateToMonths = null;
+	}
+
+	let allowedAuditIds = $derived(
+		new Set(
+			complianceAssessments
+				.filter(
+					(ca) =>
+						(selectedFolders.size === 0 ||
+							(ca.folder_path_ids ?? []).some((id) => selectedFolders.has(id))) &&
+						inDateWindow(ca)
+				)
+				.map((ca) => ca.id)
+		)
+	);
+
 	let filteredRows = $derived(
-		igFilter === 'all'
-			? displayRows
-			: displayRows.filter((r) => (r.implementation_groups ?? []).includes(igFilter))
+		displayRows.filter(
+			(r) =>
+				allowedAuditIds.has(r.compliance_assessment_id) &&
+				(igFilter === 'all' || (r.implementation_groups ?? []).includes(igFilter))
+		)
 	);
 
 	// Hierarchical rollup: sections at the top, each carrying its child requirement rollups.
@@ -441,10 +563,30 @@
 	// non-assessable. If the parent_urn isn't in the framework's non-assessable nodes (e.g.
 	// requirement points directly to the framework root), we bucket those into a synthetic
 	// "Top level" section.
-	let hierarchical = $derived.by(() => {
+	type SectionRollup = {
+		urn: string;
+		ref: string;
+		name: string;
+		ca_count: number;
+		row_count: number;
+		requirement_count: number;
+		dist: Record<Result, number>;
+		scores: ScoreLayers;
+		requirements: {
+			urn: string;
+			ref_id: string;
+			name: string;
+			ca_count: number;
+			dist: Record<Result, number>;
+			scores: ScoreLayers;
+			rows: ReportRow[];
+		}[];
+	};
+
+	function buildHierarchy(sourceRows: ReportRow[]): SectionRollup[] {
 		// group rows by parent urn
 		const byParent = new Map<string, ReportRow[]>();
-		for (const r of filteredRows) {
+		for (const r of sourceRows) {
 			const key = r.requirement_parent_urn ?? '__root__';
 			if (!byParent.has(key)) byParent.set(key, []);
 			byParent.get(key)!.push(r);
@@ -452,25 +594,7 @@
 
 		// Build section descriptors in section order, falling back to "Top level"
 		// for orphan parents (rows whose parent_urn isn't a known non-assessable node).
-		const result: {
-			urn: string;
-			ref: string;
-			name: string;
-			ca_count: number;
-			row_count: number;
-			requirement_count: number;
-			dist: Record<Result, number>;
-			scores: ScoreLayers;
-			requirements: {
-				urn: string;
-				ref_id: string;
-				name: string;
-				ca_count: number;
-				dist: Record<Result, number>;
-				scores: ScoreLayers;
-				rows: ReportRow[];
-			}[];
-		}[] = [];
+		const result: SectionRollup[] = [];
 
 		const seen = new Set<string>();
 
@@ -537,7 +661,9 @@
 		}
 
 		return result;
-	});
+	}
+
+	let hierarchical = $derived(buildHierarchy(filteredRows));
 
 	// True when the framework has no real (non-assessable) section nodes, so
 	// every requirement lands in the synthetic "__top__" bucket. We then skip
@@ -546,6 +672,13 @@
 	let isFlat = $derived(hierarchical.length === 1 && hierarchical[0]?.urn === '__top__');
 
 	// Per-domain rollup at chosen ancestry depth
+	function domainFolderId(row: ReportRow): string | null {
+		const ids =
+			complianceAssessments.find((ca) => ca.id === row.compliance_assessment_id)?.folder_path_ids ??
+			[];
+		return ids.length ? ids[Math.min(domainDepth, ids.length) - 1] : null;
+	}
+
 	let perDomain = $derived.by(() => {
 		const map = new Map<string, ReportRow[]>();
 		for (const r of filteredRows) {
@@ -566,7 +699,9 @@
 					rs.map((r) => r.compliance_assessment_id),
 					(s) => s.total
 				),
-				compliance: compliancePct(dist)
+				compliance: compliancePct(dist),
+				rows: rs,
+				folderId: domainFolderId(rs[0])
 			};
 		});
 
@@ -613,6 +748,210 @@
 		for (const r of filteredRows) m = Math.max(m, r.folder_path?.length ?? 0);
 		return Math.max(m, 1);
 	});
+
+	// Counted audits left by the domain and deadline filters.
+	let filteredAudits = $derived(
+		complianceAssessments.filter((ca) => ca.is_counted && allowedAuditIds.has(ca.id))
+	);
+
+	function outcomeLabel(def: OutcomeDef): string {
+		const t = def.translations?.[getLocale()];
+		return t?.annotation || t?.label || def.annotation || def.label || def.ref_id;
+	}
+
+	let outcomeDefs = $derived<OutcomeDef[]>(framework.outcomes_definition ?? []);
+	let outcomeRollup = $derived(
+		outcomeDefs
+			.map((def) => {
+				const entries = filteredAudits.flatMap((ca) =>
+					(ca.outcomes ?? []).filter((o) => o.ref_id === def.ref_id)
+				);
+				const values = entries
+					.map((o) => o.value)
+					.filter((v): v is number => typeof v === 'number');
+				return {
+					def,
+					label: outcomeLabel(def),
+					evaluated: entries.length,
+					met: entries.filter((o) => o.met).length,
+					numeric: def.kind === 'number',
+					mean: values.length ? values.reduce((a, v) => a + v, 0) / values.length : null
+				};
+			})
+			.filter((o) => o.evaluated > 0)
+	);
+
+	function metOutcomes(ca: ComplianceAssessmentSummary): string[] {
+		const met = new Set((ca.outcomes ?? []).filter((o) => o.met).map((o) => o.ref_id));
+		return outcomeDefs.filter((d) => met.has(d.ref_id)).map(outcomeLabel);
+	}
+
+	let showDates = $derived(complianceAssessments.some((ca) => ca.eta || ca.due_date));
+
+	function focusDomain(folderId: string | null) {
+		if (!folderId) return;
+		selectedFolders = new Set([folderId]);
+		view = 'requirement';
+	}
+
+	// Requirement assessments left out of a requirement's evidence export.
+	let evidenceExcluded = $state<Set<string>>(new Set());
+	function toggleEvidenceRow(id: string) {
+		const next = new Set(evidenceExcluded);
+		if (next.has(id)) next.delete(id);
+		else next.add(id);
+		evidenceExcluded = next;
+	}
+	function evidenceAuditIds(rs: ReportRow[]): string[] {
+		return [
+			...new Set(
+				rs
+					.filter((r) => !evidenceExcluded.has(r.requirement_assessment_id))
+					.map((r) => r.compliance_assessment_id)
+			)
+		];
+	}
+	function evidenceExportUrl(urn: string, rs: ReportRow[]): string {
+		const params = new URLSearchParams({
+			requirement: urn,
+			compliance_assessments: evidenceAuditIds(rs).join(',')
+		});
+		return `/frameworks/${framework.id}/report/requirement-evidences?${params}`;
+	}
+
+	let exporting = $state(false);
+
+	function onActivate(event: KeyboardEvent, action: () => void) {
+		if (event.key !== 'Enter' && event.key !== ' ') return;
+		event.preventDefault();
+		action();
+	}
+
+	function scoreColumns(): string[] {
+		return showDocumentation
+			? [implementationLabel, m.documentationScore(), m.maturity()]
+			: [implementationLabel];
+	}
+	function scoreValues(s: ScoreLayers | null | undefined): Cell[] {
+		const round = (v: number | null | undefined) =>
+			v === null || v === undefined ? null : roundScore(v);
+		return showDocumentation
+			? [round(s?.implementation_score), round(s?.documentation_score), round(s?.maturity_score)]
+			: [round(s?.implementation_score)];
+	}
+	function complianceColumns(): string[] {
+		return showCompliance
+			? [m.compliancePercentage(), ...RESULT_ORDER.map((r) => resultLabel(r))]
+			: [];
+	}
+	function complianceValues(d: Record<Result, number>): Cell[] {
+		if (!showCompliance) return [];
+		const pct = compliancePct(d);
+		return [pct === null ? null : Math.round(pct * 10) / 10, ...RESULT_ORDER.map((r) => d[r])];
+	}
+
+	async function exportXlsx() {
+		exporting = true;
+		try {
+			const auditColumns = [
+				m.assessment(),
+				m.domain(),
+				m.status(),
+				...(showDates ? [m.eta(), m.dueDate()] : []),
+				...scoreColumns(),
+				...(outcomeDefs.length ? [m.computedOutcomes()] : [])
+			];
+			const audits = filteredAudits.map((ca) => [
+				ca.name,
+				ca.folder_path_str,
+				safeTranslate(ca.status ?? 'unknown'),
+				...(showDates ? [ca.eta, ca.due_date] : []),
+				...scoreValues(auditScoresById.get(ca.id)?.total),
+				...(outcomeDefs.length ? [metOutcomes(ca).join('\n')] : [])
+			]);
+			const requirements = hierarchical.flatMap((section) => [
+				[
+					section.ref,
+					section.name,
+					section.ca_count,
+					...complianceValues(section.dist),
+					...scoreValues(section.scores)
+				],
+				...section.requirements.map((req) => [
+					req.ref_id,
+					req.name,
+					req.ca_count,
+					...complianceValues(req.dist),
+					...scoreValues(req.scores)
+				])
+			]);
+			const domains = perDomain.flatMap((d) => [
+				[d.key, '', '', d.ca_count, ...complianceValues(d.dist), ...scoreValues(d.scores)],
+				...buildHierarchy(d.rows).flatMap((section) =>
+					section.requirements.map((req) => [
+						d.key,
+						req.ref_id,
+						req.name,
+						req.ca_count,
+						...complianceValues(req.dist),
+						...scoreValues(req.scores)
+					])
+				)
+			]);
+			const detail = filteredRows.map((r) => [
+				r.folder_path_str,
+				r.compliance_assessment_name,
+				r.requirement_ref_id,
+				r.requirement_name || r.requirement_description,
+				...(showCompliance ? [r.result ? resultLabel(r.result) : null] : []),
+				...scoreValues(r.scores),
+				r.applied_controls_count,
+				r.evidences_count
+			]);
+			await downloadWorkbook(`${framework.name} - ${m.frameworkReport()}.xlsx`, [
+				{ name: m.complianceAssessments(), columns: auditColumns, rows: audits },
+				{
+					name: m.requirements(),
+					columns: [
+						m.refLabel(),
+						m.sectionOrRequirement(),
+						m.coverage(),
+						...complianceColumns(),
+						...scoreColumns()
+					],
+					rows: requirements
+				},
+				{
+					name: m.perDomainView(),
+					columns: [
+						`${m.domain()} (${m.depthLabel()} ${domainDepth})`,
+						m.refLabel(),
+						m.requirement(),
+						m.complianceAssessments(),
+						...complianceColumns(),
+						...scoreColumns()
+					],
+					rows: domains
+				},
+				{
+					name: m.perAssessmentBreakdown(),
+					columns: [
+						m.domain(),
+						m.assessment(),
+						m.refLabel(),
+						m.requirement(),
+						...(showCompliance ? [m.result()] : []),
+						...scoreColumns(),
+						m.controls(),
+						m.evidences()
+					],
+					rows: detail
+				}
+			]);
+		} finally {
+			exporting = false;
+		}
+	}
 </script>
 
 <!-- Score columns: implementation and documentation in the order of the general
@@ -722,12 +1061,19 @@
 										<th class="px-3 py-1.5">{m.assessment()}</th>
 										<th class="px-3 py-1.5 w-32">{m.status()}</th>
 										<th class="px-3 py-1.5">{m.domain()}</th>
+										{#if showDates}
+											<th class="px-3 py-1.5 w-28">{m.eta()}</th>
+											<th class="px-3 py-1.5 w-28">{m.dueDate()}</th>
+										{/if}
+										{#if outcomeDefs.length}
+											<th class="px-3 py-1.5">{m.computedOutcomes()}</th>
+										{/if}
 									</tr>
 								</thead>
 								<tbody>
 									{#each complianceAssessments as ca}
 										<tr
-											class="border-t {ca.is_counted
+											class="border-t {ca.is_counted && allowedAuditIds.has(ca.id)
 												? ''
 												: 'bg-surface-100-900/60 text-surface-600-400'}"
 										>
@@ -744,6 +1090,27 @@
 											</td>
 											<td class="px-3 py-1 text-[11px]">{safeTranslate(ca.status ?? 'unknown')}</td>
 											<td class="px-3 py-1 font-mono text-[11px]">{ca.folder_path_str || '—'}</td>
+											{#if showDates}
+												<td class="px-3 py-1 text-[11px]"
+													>{ca.eta
+														? formatDate(new Date(`${ca.eta}T00:00:00`), false, getLocale())
+														: '—'}</td
+												>
+												<td class="px-3 py-1 text-[11px]"
+													>{ca.due_date
+														? formatDate(new Date(`${ca.due_date}T00:00:00`), false, getLocale())
+														: '—'}</td
+												>
+											{/if}
+											{#if outcomeDefs.length}
+												<td class="px-3 py-1 text-[11px]">
+													{#each metOutcomes(ca) as label}
+														<span class="badge preset-tonal-success text-[10px] mr-1">{label}</span>
+													{:else}
+														—
+													{/each}
+												</td>
+											{/if}
 										</tr>
 									{/each}
 								</tbody>
@@ -761,6 +1128,15 @@
 				</div>
 			</div>
 			<div class="flex gap-2 items-center">
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 text-sm"
+					onclick={exportXlsx}
+					disabled={exporting || filteredRows.length === 0}
+				>
+					<i class="fa-solid {exporting ? 'fa-spinner fa-spin' : 'fa-file-excel'} mr-2"
+					></i>{m.exportReportXlsx()}
+				</button>
 				<a class="btn preset-outlined-surface-500 text-sm" href="/frameworks/{framework.id}"
 					>{m.backToFramework()}</a
 				>
@@ -775,43 +1151,45 @@
 				<div class="text-xs text-surface-600-400">{m.frameworkReportScoreCaption()}</div>
 			</div>
 		{/snippet}
-		<div class="grid grid-cols-2 gap-3 mt-4 {kpiGridClass}">
-			{#if showCompliance}
-				<div class="rounded border p-3">
-					<div class="text-xs text-surface-600-400">{m.compliancePercentage()}</div>
-					<div class="text-2xl font-semibold">
-						{overallCompliance === null ? '—' : `${overallCompliance.toFixed(1)}%`}
+		{#if shownPanels.has('kpis')}
+			<div class="grid grid-cols-2 gap-3 mt-4 {kpiGridClass}">
+				{#if showCompliance}
+					<div class="rounded border p-3">
+						<div class="text-xs text-surface-600-400">{m.compliancePercentage()}</div>
+						<div class="text-2xl font-semibold">
+							{overallCompliance === null ? '—' : `${overallCompliance.toFixed(1)}%`}
+						</div>
+						<div class="text-xs text-surface-600-400">{m.complianceFormulaShort()}</div>
 					</div>
-					<div class="text-xs text-surface-600-400">{m.complianceFormulaShort()}</div>
+				{/if}
+				<ScorePair>
+					{#snippet implementation()}
+						{@render scoreTile(implementationLabel, overallScores.implementation_score)}
+					{/snippet}
+					{#snippet documentation()}
+						{#if showDocumentation}
+							{@render scoreTile(m.documentationScore(), overallScores.documentation_score)}
+						{/if}
+					{/snippet}
+				</ScorePair>
+				{#if showDocumentation}
+					{@render scoreTile(m.maturity(), overallScores.maturity_score)}
+				{/if}
+				<div class="rounded border p-3">
+					<div class="text-xs text-surface-600-400">{m.complianceAssessments()}</div>
+					<div class="text-2xl font-semibold">{totalCAs}</div>
+					<div class="text-xs text-surface-600-400">{m.visibleToCurrentUser()}</div>
 				</div>
-			{/if}
-			<ScorePair>
-				{#snippet implementation()}
-					{@render scoreTile(implementationLabel, overallScores.implementation_score)}
-				{/snippet}
-				{#snippet documentation()}
-					{#if showDocumentation}
-						{@render scoreTile(m.documentationScore(), overallScores.documentation_score)}
-					{/if}
-				{/snippet}
-			</ScorePair>
-			{#if showDocumentation}
-				{@render scoreTile(m.maturity(), overallScores.maturity_score)}
-			{/if}
-			<div class="rounded border p-3">
-				<div class="text-xs text-surface-600-400">{m.complianceAssessments()}</div>
-				<div class="text-2xl font-semibold">{totalCAs}</div>
-				<div class="text-xs text-surface-600-400">{m.visibleToCurrentUser()}</div>
+				<div class="rounded border p-3">
+					<div class="text-xs text-surface-600-400">{m.requirementAssessments()}</div>
+					<div class="text-2xl font-semibold">{totalAssessments}</div>
+					<div class="text-xs text-surface-600-400">{m.inScopeAfterIGFilter()}</div>
+				</div>
 			</div>
-			<div class="rounded border p-3">
-				<div class="text-xs text-surface-600-400">{m.requirementAssessments()}</div>
-				<div class="text-2xl font-semibold">{totalAssessments}</div>
-				<div class="text-xs text-surface-600-400">{m.inScopeAfterIGFilter()}</div>
-			</div>
-		</div>
+		{/if}
 
 		<!-- Overall distribution -->
-		{#if totalAssessments > 0 && showCompliance}
+		{#if totalAssessments > 0 && showCompliance && shownPanels.has('distribution')}
 			<div class="mt-4">
 				<div class="text-xs text-surface-600-400 mb-1">{m.overallResultDistribution()}</div>
 				<div class="flex h-6 w-full rounded overflow-hidden border">
@@ -850,451 +1228,649 @@
 		{/if}
 	</div>
 
-	<!-- Filter + view bar -->
+	{#if shownPanels.has('outcomes') && outcomeRollup.length > 0}
+		<div class="card p-4 bg-surface-50-950">
+			<h2 class="text-sm font-semibold mb-2">{m.computedOutcomes()}</h2>
+			<ul class="space-y-2">
+				{#each outcomeRollup as o (o.def.ref_id)}
+					<li
+						class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_16rem] gap-1 md:gap-4 items-center"
+					>
+						<span class="text-sm">{o.label}</span>
+						{#if o.numeric}
+							<span class="text-sm font-mono text-right">
+								{o.mean === null ? '—' : roundScore(o.mean)}
+								<span class="text-xs text-surface-600-400"
+									>({m.averageOverAudits({ count: o.evaluated })})</span
+								>
+							</span>
+						{:else}
+							<div class="flex items-center gap-2">
+								<div
+									class="flex-1 h-3 rounded overflow-hidden border bg-surface-100-900"
+									role="img"
+									aria-label={m.outcomeMetCount({ met: o.met, total: o.evaluated })}
+								>
+									<div
+										class="h-full bg-success-500"
+										style="width:{(o.met / o.evaluated) * 100}%"
+									></div>
+								</div>
+								<span class="text-xs font-mono w-16 text-right">{o.met} / {o.evaluated}</span>
+							</div>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</div>
+	{/if}
+
+	<!-- Domain and deadline filters, shown panels -->
 	<div class="card p-3 bg-surface-50-950 flex flex-wrap items-end gap-4">
-		<div>
-			<label class="text-xs text-surface-600-400 block" for="ig-filter"
-				>{m.implementationGroup()}</label
+		<details class="relative">
+			<summary
+				class="cursor-pointer list-none rounded-lg border border-surface-300-700 px-3 py-1.5 text-sm"
 			>
+				<i class="fa-solid fa-sitemap mr-1"></i>{m.domains()}
+				{#if selectedFolders.size > 0}
+					<span class="badge preset-filled-primary-500 ml-1">{selectedFolders.size}</span>
+				{/if}
+			</summary>
+			<fieldset
+				class="absolute z-20 mt-1 w-96 max-w-[90vw] max-h-80 overflow-auto rounded border bg-surface-50-950 p-2 shadow-lg"
+			>
+				<legend class="sr-only">{m.domains()}</legend>
+				{#each folderNodes as node (node.id)}
+					<label
+						class="flex items-center gap-2 py-0.5 text-sm cursor-pointer"
+						style="padding-left:{node.depth}rem"
+					>
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={selectedFolders.has(node.id)}
+							onchange={() => toggleFolder(node.id)}
+						/>
+						<span class="truncate" title={node.path}>{node.name}</span>
+					</label>
+				{/each}
+			</fieldset>
+		</details>
+
+		<div>
+			<label class="text-xs text-surface-600-400 block" for="date-field">{m.deadline()}</label>
 			<select
-				id="ig-filter"
-				value={igFilter}
-				onchange={onIGChange}
+				id="date-field"
+				bind:value={dateField}
 				class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 			>
-				<option value="all">{m.allGroupsHonorCASelection()}</option>
-				{#each igDefs as ig}
-					{@const key = igKey(ig)}
-					{#if key}
-						<option value={key}>{ig.name} ({key})</option>
-					{/if}
-				{/each}
+				<option value="none">{m.noDeadlineFilter()}</option>
+				<option value="eta">{m.eta()}</option>
+				<option value="due_date">{m.dueDate()}</option>
 			</select>
 		</div>
-
-		<div>
-			<label class="text-xs text-surface-600-400 block">{m.view()}</label>
-			<div class="inline-flex rounded border overflow-hidden">
-				{#each [['requirement', m.requirementsTree()], ['domain', m.perDomainView()]] as [k, label]}
-					<button
-						type="button"
-						class="px-3 py-1 text-sm {view === k
-							? 'bg-primary-500 text-white'
-							: 'bg-surface-50-950 hover:bg-surface-50-950'}"
-						onclick={() => (view = k as typeof view)}
-					>
-						{label}
-					</button>
-				{/each}
-			</div>
-		</div>
-
-		{#if inheritanceAvailable}
+		{#if dateField !== 'none'}
 			<div>
-				<label class="text-xs text-surface-600-400 block" for="apply-inheritance"
-					>{m.combinedView()}</label
+				<span class="text-xs text-surface-600-400 block" id="date-window-label"
+					>{m.deadlineWindowMonths()}</span
 				>
-				<label class="inline-flex items-center gap-2 text-sm cursor-pointer h-[34px]">
+				<div
+					class="inline-flex items-center gap-1 text-sm"
+					role="group"
+					aria-labelledby="date-window-label"
+				>
+					<label class="sr-only" for="date-from">{m.fromMonths()}</label>
 					<input
-						id="apply-inheritance"
-						type="checkbox"
-						class="checkbox"
-						bind:checked={applyInheritance}
+						id="date-from"
+						type="number"
+						class="input w-20 py-1"
+						placeholder={m.fromMonths()}
+						value={dateFromMonths ?? ''}
+						oninput={(e) => {
+							const v = (e.currentTarget as HTMLInputElement).value;
+							dateFromMonths = v === '' ? null : Number(v);
+						}}
 					/>
-					{m.applyDomainInheritance()}
-				</label>
-			</div>
-		{/if}
-
-		{#if view === 'requirement' && !isFlat}
-			<div>
-				<div class="text-xs text-surface-600-400 block">{m.sections()}</div>
-				<div class="inline-flex gap-2">
-					<button
-						type="button"
-						class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
-						onclick={() => expandAllSections(hierarchical.map((s) => s.urn))}
-					>
-						{m.expandAll()}
-					</button>
-					<button
-						type="button"
-						class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
-						onclick={collapseAllSections}
-					>
-						{m.collapseAll()}
-					</button>
+					<span aria-hidden="true">→</span>
+					<label class="sr-only" for="date-to">{m.toMonths()}</label>
+					<input
+						id="date-to"
+						type="number"
+						class="input w-20 py-1"
+						placeholder={m.toMonths()}
+						value={dateToMonths ?? ''}
+						oninput={(e) => {
+							const v = (e.currentTarget as HTMLInputElement).value;
+							dateToMonths = v === '' ? null : Number(v);
+						}}
+					/>
+					<span class="text-xs text-surface-600-400">{m.monthsFromToday()}</span>
 				</div>
 			</div>
 		{/if}
 
-		{#if view === 'domain'}
+		{#if filtersActive}
+			<button type="button" class="btn preset-outlined-surface-500 text-xs" onclick={resetFilters}>
+				<i class="fa-solid fa-xmark mr-1"></i>{m.resetFilters()}
+			</button>
+		{/if}
+
+		<fieldset class="ml-auto">
+			<legend class="text-xs text-surface-600-400">{m.display()}</legend>
+			<div class="flex flex-wrap gap-3">
+				{#each PANELS as panel}
+					<label class="inline-flex items-center gap-1 text-sm cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={shownPanels.has(panel)}
+							onchange={() => togglePanel(panel)}
+						/>
+						{panelLabel[panel]()}
+					</label>
+				{/each}
+			</div>
+		</fieldset>
+	</div>
+
+	{#if shownPanels.has('table')}
+		<!-- Filter + view bar -->
+		<div class="card p-3 bg-surface-50-950 flex flex-wrap items-end gap-4">
 			<div>
-				<label class="text-xs text-surface-600-400 block" for="depth"
-					>{m.groupByFolderDepth()}</label
+				<label class="text-xs text-surface-600-400 block" for="ig-filter"
+					>{m.implementationGroup()}</label
 				>
 				<select
-					id="depth"
-					bind:value={domainDepth}
+					id="ig-filter"
+					value={igFilter}
+					onchange={onIGChange}
 					class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 				>
-					{#each Array(maxFolderDepth) as _, i}
-						<option value={i + 1}
-							>{i + 1}
-							{i === 0
-								? '— ' + m.rootDomain()
-								: i === maxFolderDepth - 1
-									? '— ' + m.leafFolder()
-									: ''}</option
-						>
+					<option value="all">{m.allGroupsHonorCASelection()}</option>
+					{#each igDefs as ig}
+						{@const key = igKey(ig)}
+						{#if key}
+							<option value={key}>{ig.name} ({key})</option>
+						{/if}
 					{/each}
 				</select>
 			</div>
 
 			<div>
-				<label class="text-xs text-surface-600-400 block" for="domain-sort">{m.sortBy()}</label>
-				<div class="inline-flex items-center gap-1">
-					<select
-						id="domain-sort"
-						value={domainSortKey}
-						onchange={(e) =>
-							setDomainSortKey(
-								(e.currentTarget as HTMLSelectElement).value as typeof domainSortKey
-							)}
-						class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
-					>
-						<option value="name">{m.domainAlphabetical()}</option>
-						{#if showCompliance}
-							<option value="compliance">{m.compliancePercentage()}</option>
-						{/if}
-						<ScorePair>
-							{#snippet implementation()}
-								<option value="score">{implementationLabel}</option>
-							{/snippet}
-							{#snippet documentation()}
-								{#if showDocumentation}
-									<option value="documentation">{m.documentationScore()}</option>
-								{/if}
-							{/snippet}
-						</ScorePair>
-						{#if showDocumentation}
-							<option value="maturity">{m.maturity()}</option>
-						{/if}
-					</select>
-					<button
-						type="button"
-						class="border rounded px-2 py-1 text-xs hover:bg-surface-50-950"
-						onclick={toggleDomainSortDir}
-						title={domainSortDir === 'asc' ? m.sortAscending() : m.sortDescending()}
-						aria-label={m.toggleSortDirection()}
-					>
-						{domainSortDir === 'asc' ? '▲' : '▼'}
-					</button>
+				<span class="text-xs text-surface-600-400 block" id="view-label">{m.view()}</span>
+				<div
+					class="inline-flex rounded border overflow-hidden"
+					role="group"
+					aria-labelledby="view-label"
+				>
+					{#each [['requirement', m.requirementsTree()], ['domain', m.perDomainView()]] as [k, label]}
+						<button
+							type="button"
+							class="px-3 py-1 text-sm {view === k
+								? 'bg-primary-500 text-white'
+								: 'bg-surface-50-950 hover:bg-surface-50-950'}"
+							aria-pressed={view === k}
+							onclick={() => (view = k as typeof view)}
+						>
+							{label}
+						</button>
+					{/each}
 				</div>
 			</div>
-		{/if}
 
-		<div class="ml-auto text-xs text-surface-600-400">
-			{filteredRows.length}
-			{m.rowsLabel()}{#if view === 'requirement'}
-				· {m.clickRowToDrillDown()}{/if}
-		</div>
-	</div>
+			{#if inheritanceAvailable}
+				<div>
+					<label class="text-xs text-surface-600-400 block" for="apply-inheritance"
+						>{m.combinedView()}</label
+					>
+					<label class="inline-flex items-center gap-2 text-sm cursor-pointer h-[34px]">
+						<input
+							id="apply-inheritance"
+							type="checkbox"
+							class="checkbox"
+							bind:checked={applyInheritance}
+						/>
+						{m.applyDomainInheritance()}
+					</label>
+				</div>
+			{/if}
 
-	<!-- Main view -->
-	<div class="card bg-surface-50-950 overflow-x-auto">
-		{#if filteredRows.length === 0}
-			<div class="p-6 text-sm text-surface-600-400 italic">
-				{m.noRequirementAssessmentsInScope()}
-			</div>
-		{:else if view === 'requirement'}
-			<table class="w-full text-sm">
-				<thead class="bg-surface-50-950 text-left">
-					<tr>
-						<th class="px-3 py-2 w-32">{m.refLabel()}</th>
-						<th class="px-3 py-2">{m.sectionOrRequirement()}</th>
-						<th class="px-3 py-2 w-24 text-center">{m.coverage()}</th>
-						{#if showCompliance}
-							<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
-							<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
-								>{m.compliancePercentage()}</th
-							>
-						{/if}
-						{@render scoreHeaders('px-3 py-2 w-24 text-right')}
-					</tr>
-				</thead>
-				<tbody>
-					{#each hierarchical as section}
-						{@const sectionCompliance = compliancePct(section.dist)}
-						{#if !isFlat}
-							<tr
-								class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
-								onclick={() => toggleSection(section.urn)}
-							>
-								<td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
-									<span class="inline-block w-3 text-surface-600-400"
-										>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
-									>
-									{section.ref}
-								</td>
-								<td class="px-3 py-2 w-full max-w-0">
-									<div class="flex items-baseline gap-2 min-w-0">
-										<span class="truncate" title={section.name}>{section.name}</span>
-										<span class="shrink-0 text-xs text-surface-600-400 font-normal"
-											>({section.requirement_count}
-											{m.reqsAbbr()}{#if section.row_count !== section.requirement_count}
-												· {section.row_count} {m.rowsLabel()}{/if})</span
-										>
-									</div>
-								</td>
-								<td class="px-3 py-2 text-center">{section.ca_count}</td>
-								{#if showCompliance}
-									<td class="px-3 py-2">
-										{#if section.row_count > 0}
-											<div class="flex h-5 w-full rounded overflow-hidden border">
-												{#each RESULT_ORDER as r}
-													{@const w =
-														distTotal(section.dist) === 0
-															? 0
-															: (section.dist[r] / distTotal(section.dist)) * 100}
-													{#if w > 0}
-														<div
-															style="width:{w}%; background:{RESULT_COLORS[r]};"
-															title="{resultLabel(r)}: {section.dist[r]}"
-														></div>
-													{/if}
-												{/each}
-											</div>
-										{:else}
-											<span class="text-xs text-surface-500">{m.noRowsInScope()}</span>
-										{/if}
-									</td>
-									<td class="px-3 py-2 text-right font-mono"
-										>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
-									>
-								{/if}
-								{@render scoreCells(section.scores, 'px-3 py-2 text-right font-mono')}
-							</tr>
-						{/if}
+			{#if view === 'requirement' && !isFlat}
+				<div>
+					<div class="text-xs text-surface-600-400 block">{m.sections()}</div>
+					<div class="inline-flex gap-2">
+						<button
+							type="button"
+							class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
+							onclick={() => expandAllSections(hierarchical.map((s) => s.urn))}
+						>
+							{m.expandAll()}
+						</button>
+						<button
+							type="button"
+							class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
+							onclick={collapseAllSections}
+						>
+							{m.collapseAll()}
+						</button>
+					</div>
+				</div>
+			{/if}
 
-						{#if isFlat || expandedSections.has(section.urn)}
-							{#each section.requirements as req}
-								{@const reqCompliance = compliancePct(req.dist)}
-								<tr
-									class="border-t hover:bg-surface-50-950 cursor-pointer"
-									onclick={() => (expandedRow = expandedRow === req.urn ? null : req.urn)}
-								>
-									<td class="px-3 py-2 font-mono text-xs whitespace-nowrap {isFlat ? '' : 'pl-8'}">
-										<span class="inline-block w-3 text-surface-500"
-											>{expandedRow === req.urn ? '▾' : '▸'}</span
-										>
-										{req.ref_id}
-									</td>
-									<td class="px-3 py-2 max-w-0 {isFlat ? '' : 'pl-6'}">
-										<span class="line-clamp-2" title={req.name}>{req.name}</span>
-									</td>
-									<td class="px-3 py-2 text-center">{req.ca_count}</td>
-									{#if showCompliance}
-										<td class="px-3 py-2">
-											<div class="flex h-4 w-full rounded overflow-hidden border">
-												{#each RESULT_ORDER as r}
-													{@const w =
-														distTotal(req.dist) === 0
-															? 0
-															: (req.dist[r] / distTotal(req.dist)) * 100}
-													{#if w > 0}
-														<div
-															style="width:{w}%; background:{RESULT_COLORS[r]};"
-															title="{resultLabel(r)}: {req.dist[r]}"
-														></div>
-													{/if}
-												{/each}
-											</div>
-										</td>
-										<td class="px-3 py-2 text-right font-mono"
-											>{reqCompliance === null ? '—' : `${reqCompliance.toFixed(0)}%`}</td
-										>
-									{/if}
-									{@render scoreCells(req.scores, 'px-3 py-2 text-right font-mono')}
-								</tr>
-								{#if expandedRow === req.urn}
-									<tr class="bg-surface-50-950 border-t">
-										<td></td>
-										<td colspan={requirementColumns - 1} class="px-3 py-2">
-											<div class="text-xs text-surface-600-400 mb-2">
-												{m.perAssessmentBreakdown()}
-											</div>
-											<table class="w-full text-xs">
-												<thead>
-													<tr class="text-left text-surface-600-400">
-														<th class="py-1">{m.domain()}</th>
-														<th class="py-1">{m.assessment()}</th>
-														{#if showCompliance}
-															<th class="py-1">{m.result()}</th>
-														{/if}
-														{@render scoreHeaders('py-1 text-right')}
-														<th class="py-1 text-center">{m.controls()}</th>
-														<th class="py-1 text-center">{m.evidences()}</th>
-													</tr>
-												</thead>
-												<tbody>
-													{#each req.rows as row}
-														{@const returnUrl = page.url.pathname + page.url.search}
-														{@const inh = row.inheritance}
-														{@const showInh = applyInheritance && !!inh?.inherited}
-														{@const evidencesTitle =
-															row.indirect_evidences_count > 0
-																? m.directPlusIndirectEvidences({
-																		direct: row.direct_evidences_count,
-																		indirect: row.indirect_evidences_count
-																	})
-																: m.directEvidencesOnly({ direct: row.direct_evidences_count })}
-														<!-- An N/A row shows, greyed, what it counts for: the
-														     target when the audit counts N/A at it, else nothing. -->
-														{@const naClass = row.not_applicable ? 'text-surface-400-600' : ''}
-														{@const naTitle = row.not_applicable ? m.notApplicable() : undefined}
-														<tr class="border-t border-surface-200-800">
-															<td class="py-1 font-mono">{row.folder_path_str}</td>
-															<td class="py-1">
-																<a
-																	class="anchor"
-																	href="/requirement-assessments/{row.requirement_assessment_id}/edit?next={encodeURIComponent(
-																		returnUrl
-																	)}"
-																	title={m.openRequirementAssessmentIn({
-																		name: row.compliance_assessment_name
-																	})}
-																>
-																	{row.compliance_assessment_name}
-																</a>
-															</td>
-															{#if showCompliance}
-																<td class="py-1">
-																	<span class="inline-flex items-center gap-1">
-																		<span
-																			class="inline-block w-2 h-2 rounded-full"
-																			style="background:{RESULT_COLORS[
-																				(row.result as Result | null) ?? 'not_assessed'
-																			]}"
-																		></span>
-																		{row.result ? resultLabel(row.result) : '—'}
-																		{#if showInh && inh}
-																			<a
-																				class="anchor inline-flex items-center gap-0.5 text-xs text-surface-600-400"
-																				href="/compliance-assessments/{inh.source?.ca_id}"
-																				title="{m.inheritedFrom()}: {inh.source?.folder_name ??
-																					'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
-																			>
-																				<i class="fa-solid fa-code-branch text-[10px]"></i>
-																				{inh.source?.ca_name}
-																			</a>
-																		{/if}
-																	</span>
-																</td>
-															{/if}
-															<ScorePair>
-																{#snippet implementation()}
-																	<td class="py-1 text-right font-mono {naClass}" title={naTitle}>
-																		{row.not_applicable
-																			? formatScore(row.scores?.implementation_score ?? null)
-																			: (row.score ?? '—')}
-																		{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
-																			<span
-																				class="text-[10px] text-surface-500"
-																				title="{m.ownResult()}: {inh.own.result
-																					? resultLabel(inh.own.result)
-																					: '—'}{inh.own.score !== null
-																					? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
-																					: ''}"
-																			>
-																				<i class="fa-solid fa-circle-info"></i>
-																			</span>
-																		{/if}
-																	</td>
-																{/snippet}
-																{#snippet documentation()}
-																	{#if showDocumentation}
-																		<td class="py-1 text-right font-mono {naClass}" title={naTitle}
-																			>{formatScore(row.scores?.documentation_score ?? null)}</td
-																		>
-																	{/if}
-																{/snippet}
-															</ScorePair>
-															{#if showDocumentation}
-																<td class="py-1 text-right font-mono {naClass}" title={naTitle}
-																	>{formatScore(row.scores?.maturity_score ?? null)}</td
-																>
-															{/if}
-															<td class="py-1 text-center">{row.applied_controls_count}</td>
-															<td class="py-1 text-center" title={evidencesTitle}>
-																{row.evidences_count}
-																{#if row.indirect_evidences_count > 0}
-																	<span class="text-[10px] text-surface-500"
-																		>({row.direct_evidences_count}+{row.indirect_evidences_count})</span
-																	>
-																{/if}
-															</td>
-														</tr>
-													{/each}
-												</tbody>
-											</table>
-										</td>
-									</tr>
-								{/if}
-							{/each}
-						{/if}
-					{/each}
-				</tbody>
-			</table>
-		{:else if view === 'domain'}
-			<table class="w-full text-sm">
-				<thead class="bg-surface-50-950 text-left">
-					<tr>
-						<th class="px-3 py-2">{m.domain()} ({m.depthLabel()} {domainDepth})</th>
-						<th class="px-3 py-2 w-32 text-center">{m.complianceAssessments()}</th>
-						<th class="px-3 py-2 w-24 text-center capitalize-first">{m.rowsLabel()}</th>
-						{#if showCompliance}
-							<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
-							<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
-								>{m.compliancePercentage()}</th
+			{#if view === 'domain'}
+				<div>
+					<label class="text-xs text-surface-600-400 block" for="depth"
+						>{m.groupByFolderDepth()}</label
+					>
+					<select
+						id="depth"
+						bind:value={domainDepth}
+						class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
+					>
+						{#each Array(maxFolderDepth) as _, i}
+							<option value={i + 1}
+								>{i + 1}
+								{i === 0
+									? '— ' + m.rootDomain()
+									: i === maxFolderDepth - 1
+										? '— ' + m.leafFolder()
+										: ''}</option
 							>
-						{/if}
-						{@render scoreHeaders('px-3 py-2 w-24 text-right')}
-					</tr>
-				</thead>
-				<tbody>
-					{#each perDomain as d}
-						{@const dCompliance = compliancePct(d.dist)}
-						<tr class="border-t hover:bg-surface-50-950">
-							<td class="px-3 py-2 font-mono">{d.key}</td>
-							<td class="px-3 py-2 text-center">{d.ca_count}</td>
-							<td class="px-3 py-2 text-center">{d.row_count}</td>
+						{/each}
+					</select>
+				</div>
+
+				<div>
+					<label class="text-xs text-surface-600-400 block" for="domain-sort">{m.sortBy()}</label>
+					<div class="inline-flex items-center gap-1">
+						<select
+							id="domain-sort"
+							value={domainSortKey}
+							onchange={(e) =>
+								setDomainSortKey(
+									(e.currentTarget as HTMLSelectElement).value as typeof domainSortKey
+								)}
+							class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
+						>
+							<option value="name">{m.domainAlphabetical()}</option>
 							{#if showCompliance}
-								<td class="px-3 py-2">
-									<div class="flex h-4 w-full rounded overflow-hidden border">
-										{#each RESULT_ORDER as r}
-											{@const w =
-												distTotal(d.dist) === 0 ? 0 : (d.dist[r] / distTotal(d.dist)) * 100}
-											{#if w > 0}
-												<div
-													style="width:{w}%; background:{RESULT_COLORS[r]};"
-													title="{resultLabel(r)}: {d.dist[r]}"
-												></div>
-											{/if}
-										{/each}
-									</div>
-								</td>
-								<td class="px-3 py-2 text-right font-mono"
-									>{dCompliance === null ? '—' : `${dCompliance.toFixed(0)}%`}</td
+								<option value="compliance">{m.compliancePercentage()}</option>
+							{/if}
+							<ScorePair>
+								{#snippet implementation()}
+									<option value="score">{implementationLabel}</option>
+								{/snippet}
+								{#snippet documentation()}
+									{#if showDocumentation}
+										<option value="documentation">{m.documentationScore()}</option>
+									{/if}
+								{/snippet}
+							</ScorePair>
+							{#if showDocumentation}
+								<option value="maturity">{m.maturity()}</option>
+							{/if}
+						</select>
+						<button
+							type="button"
+							class="border rounded px-2 py-1 text-xs hover:bg-surface-50-950"
+							onclick={toggleDomainSortDir}
+							title={domainSortDir === 'asc' ? m.sortAscending() : m.sortDescending()}
+							aria-label={m.toggleSortDirection()}
+						>
+							{domainSortDir === 'asc' ? '▲' : '▼'}
+						</button>
+					</div>
+				</div>
+			{/if}
+
+			<div class="ml-auto text-xs text-surface-600-400">
+				{filteredRows.length}
+				{m.rowsLabel()}{#if view === 'requirement'}
+					· {m.clickRowToDrillDown()}{/if}
+			</div>
+		</div>
+
+		<!-- Main view -->
+		<div class="card bg-surface-50-950 overflow-x-auto">
+			{#if filteredRows.length === 0}
+				<div class="p-6 text-sm text-surface-600-400 italic">
+					{m.noRequirementAssessmentsInScope()}
+				</div>
+			{:else if view === 'requirement'}
+				<table class="w-full text-sm">
+					<thead class="bg-surface-50-950 text-left">
+						<tr>
+							<th class="px-3 py-2 w-32">{m.refLabel()}</th>
+							<th class="px-3 py-2">{m.sectionOrRequirement()}</th>
+							<th class="px-3 py-2 w-24 text-center">{m.coverage()}</th>
+							{#if showCompliance}
+								<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
+								<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
+									>{m.compliancePercentage()}</th
 								>
 							{/if}
-							{@render scoreCells(d.scores, 'px-3 py-2 text-right font-mono')}
+							{@render scoreHeaders('px-3 py-2 w-24 text-right')}
 						</tr>
-					{/each}
-				</tbody>
-			</table>
-		{/if}
-	</div>
+					</thead>
+					<tbody>
+						{#each hierarchical as section}
+							{@const sectionCompliance = compliancePct(section.dist)}
+							{#if !isFlat}
+								<tr
+									class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
+									tabindex="0"
+									aria-expanded={expandedSections.has(section.urn)}
+									onclick={() => toggleSection(section.urn)}
+									onkeydown={(e) => onActivate(e, () => toggleSection(section.urn))}
+								>
+									<td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
+										<span class="inline-block w-3 text-surface-600-400"
+											>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
+										>
+										{section.ref}
+									</td>
+									<td class="px-3 py-2 w-full max-w-0">
+										<div class="flex items-baseline gap-2 min-w-0">
+											<span class="truncate" title={section.name}>{section.name}</span>
+											<span class="shrink-0 text-xs text-surface-600-400 font-normal"
+												>({section.requirement_count}
+												{m.reqsAbbr()}{#if section.row_count !== section.requirement_count}
+													· {section.row_count} {m.rowsLabel()}{/if})</span
+											>
+										</div>
+									</td>
+									<td class="px-3 py-2 text-center">{section.ca_count}</td>
+									{#if showCompliance}
+										<td class="px-3 py-2">
+											{#if section.row_count > 0}
+												<div class="flex h-5 w-full rounded overflow-hidden border">
+													{#each RESULT_ORDER as r}
+														{@const w =
+															distTotal(section.dist) === 0
+																? 0
+																: (section.dist[r] / distTotal(section.dist)) * 100}
+														{#if w > 0}
+															<div
+																style="width:{w}%; background:{RESULT_COLORS[r]};"
+																title="{resultLabel(r)}: {section.dist[r]}"
+															></div>
+														{/if}
+													{/each}
+												</div>
+											{:else}
+												<span class="text-xs text-surface-500">{m.noRowsInScope()}</span>
+											{/if}
+										</td>
+										<td class="px-3 py-2 text-right font-mono"
+											>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
+										>
+									{/if}
+									{@render scoreCells(section.scores, 'px-3 py-2 text-right font-mono')}
+								</tr>
+							{/if}
+
+							{#if isFlat || expandedSections.has(section.urn)}
+								{#each section.requirements as req}
+									{@const reqCompliance = compliancePct(req.dist)}
+									<tr
+										class="border-t hover:bg-surface-50-950 cursor-pointer"
+										tabindex="0"
+										aria-expanded={expandedRow === req.urn}
+										onclick={() => (expandedRow = expandedRow === req.urn ? null : req.urn)}
+										onkeydown={(e) =>
+											onActivate(e, () => (expandedRow = expandedRow === req.urn ? null : req.urn))}
+									>
+										<td
+											class="px-3 py-2 font-mono text-xs whitespace-nowrap {isFlat ? '' : 'pl-8'}"
+										>
+											<span class="inline-block w-3 text-surface-500"
+												>{expandedRow === req.urn ? '▾' : '▸'}</span
+											>
+											{req.ref_id}
+										</td>
+										<td class="px-3 py-2 max-w-0 {isFlat ? '' : 'pl-6'}">
+											<span class="line-clamp-2" title={req.name}>{req.name}</span>
+										</td>
+										<td class="px-3 py-2 text-center">{req.ca_count}</td>
+										{#if showCompliance}
+											<td class="px-3 py-2">
+												<div class="flex h-4 w-full rounded overflow-hidden border">
+													{#each RESULT_ORDER as r}
+														{@const w =
+															distTotal(req.dist) === 0
+																? 0
+																: (req.dist[r] / distTotal(req.dist)) * 100}
+														{#if w > 0}
+															<div
+																style="width:{w}%; background:{RESULT_COLORS[r]};"
+																title="{resultLabel(r)}: {req.dist[r]}"
+															></div>
+														{/if}
+													{/each}
+												</div>
+											</td>
+											<td class="px-3 py-2 text-right font-mono"
+												>{reqCompliance === null ? '—' : `${reqCompliance.toFixed(0)}%`}</td
+											>
+										{/if}
+										{@render scoreCells(req.scores, 'px-3 py-2 text-right font-mono')}
+									</tr>
+									{#if expandedRow === req.urn}
+										{@const exportIds = evidenceAuditIds(req.rows)}
+										<tr class="bg-surface-50-950 border-t">
+											<td></td>
+											<td colspan={requirementColumns - 1} class="px-3 py-2">
+												<div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+													<span class="text-xs text-surface-600-400"
+														>{m.perAssessmentBreakdown()}</span
+													>
+													<a
+														class="btn btn-sm preset-outlined-primary-500 text-xs {exportIds.length ===
+														0
+															? 'pointer-events-none opacity-50'
+															: ''}"
+														href={evidenceExportUrl(req.urn, req.rows)}
+														aria-disabled={exportIds.length === 0}
+														data-sveltekit-reload
+														download
+													>
+														<i class="fa-solid fa-file-zipper mr-1"></i>
+														{m.exportRequirementEvidences({ count: exportIds.length })}
+													</a>
+												</div>
+												<table class="w-full text-xs">
+													<thead>
+														<tr class="text-left text-surface-600-400">
+															<th class="py-1 w-6"
+																><span class="sr-only">{m.includeInEvidenceExport()}</span></th
+															>
+															<th class="py-1">{m.domain()}</th>
+															<th class="py-1">{m.assessment()}</th>
+															{#if showCompliance}
+																<th class="py-1">{m.result()}</th>
+															{/if}
+															{@render scoreHeaders('py-1 text-right')}
+															<th class="py-1 text-center">{m.controls()}</th>
+															<th class="py-1 text-center">{m.evidences()}</th>
+														</tr>
+													</thead>
+													<tbody>
+														{#each req.rows as row}
+															{@const returnUrl = page.url.pathname + page.url.search}
+															{@const inh = row.inheritance}
+															{@const showInh = applyInheritance && !!inh?.inherited}
+															{@const evidencesTitle =
+																row.indirect_evidences_count > 0
+																	? m.directPlusIndirectEvidences({
+																			direct: row.direct_evidences_count,
+																			indirect: row.indirect_evidences_count
+																		})
+																	: m.directEvidencesOnly({ direct: row.direct_evidences_count })}
+															<!-- An N/A row shows, greyed, what it counts for: the
+														     target when the audit counts N/A at it, else nothing. -->
+															{@const naClass = row.not_applicable ? 'text-surface-400-600' : ''}
+															{@const naTitle = row.not_applicable ? m.notApplicable() : undefined}
+															<tr class="border-t border-surface-200-800">
+																<td class="py-1">
+																	<input
+																		type="checkbox"
+																		class="checkbox"
+																		checked={!evidenceExcluded.has(row.requirement_assessment_id)}
+																		onchange={() =>
+																			toggleEvidenceRow(row.requirement_assessment_id)}
+																		aria-label="{m.includeInEvidenceExport()}: {row.compliance_assessment_name}"
+																	/>
+																</td>
+																<td class="py-1 font-mono">{row.folder_path_str}</td>
+																<td class="py-1">
+																	<a
+																		class="anchor"
+																		href="/requirement-assessments/{row.requirement_assessment_id}/edit?next={encodeURIComponent(
+																			returnUrl
+																		)}"
+																		title={m.openRequirementAssessmentIn({
+																			name: row.compliance_assessment_name
+																		})}
+																	>
+																		{row.compliance_assessment_name}
+																	</a>
+																</td>
+																{#if showCompliance}
+																	<td class="py-1">
+																		<span class="inline-flex items-center gap-1">
+																			<span
+																				class="inline-block w-2 h-2 rounded-full"
+																				style="background:{RESULT_COLORS[
+																					(row.result as Result | null) ?? 'not_assessed'
+																				]}"
+																			></span>
+																			{row.result ? resultLabel(row.result) : '—'}
+																			{#if showInh && inh}
+																				<a
+																					class="anchor inline-flex items-center gap-0.5 text-xs text-surface-600-400"
+																					href="/compliance-assessments/{inh.source?.ca_id}"
+																					title="{m.inheritedFrom()}: {inh.source?.folder_name ??
+																						'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
+																				>
+																					<i class="fa-solid fa-code-branch text-[10px]"></i>
+																					{inh.source?.ca_name}
+																				</a>
+																			{/if}
+																		</span>
+																	</td>
+																{/if}
+																<ScorePair>
+																	{#snippet implementation()}
+																		<td class="py-1 text-right font-mono {naClass}" title={naTitle}>
+																			{row.not_applicable
+																				? formatScore(row.scores?.implementation_score ?? null)
+																				: (row.score ?? '—')}
+																			{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
+																				<span
+																					class="text-[10px] text-surface-500"
+																					title="{m.ownResult()}: {inh.own.result
+																						? resultLabel(inh.own.result)
+																						: '—'}{inh.own.score !== null
+																						? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
+																						: ''}"
+																				>
+																					<i class="fa-solid fa-circle-info"></i>
+																				</span>
+																			{/if}
+																		</td>
+																	{/snippet}
+																	{#snippet documentation()}
+																		{#if showDocumentation}
+																			<td
+																				class="py-1 text-right font-mono {naClass}"
+																				title={naTitle}
+																				>{formatScore(row.scores?.documentation_score ?? null)}</td
+																			>
+																		{/if}
+																	{/snippet}
+																</ScorePair>
+																{#if showDocumentation}
+																	<td class="py-1 text-right font-mono {naClass}" title={naTitle}
+																		>{formatScore(row.scores?.maturity_score ?? null)}</td
+																	>
+																{/if}
+																<td class="py-1 text-center">{row.applied_controls_count}</td>
+																<td class="py-1 text-center" title={evidencesTitle}>
+																	{row.evidences_count}
+																	{#if row.indirect_evidences_count > 0}
+																		<span class="text-[10px] text-surface-500"
+																			>({row.direct_evidences_count}+{row.indirect_evidences_count})</span
+																		>
+																	{/if}
+																</td>
+															</tr>
+														{/each}
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									{/if}
+								{/each}
+							{/if}
+						{/each}
+					</tbody>
+				</table>
+			{:else if view === 'domain'}
+				<table class="w-full text-sm">
+					<thead class="bg-surface-50-950 text-left">
+						<tr>
+							<th class="px-3 py-2">{m.domain()} ({m.depthLabel()} {domainDepth})</th>
+							<th class="px-3 py-2 w-32 text-center">{m.complianceAssessments()}</th>
+							<th class="px-3 py-2 w-24 text-center capitalize-first">{m.rowsLabel()}</th>
+							{#if showCompliance}
+								<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
+								<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
+									>{m.compliancePercentage()}</th
+								>
+							{/if}
+							{@render scoreHeaders('px-3 py-2 w-24 text-right')}
+						</tr>
+					</thead>
+					<tbody>
+						{#each perDomain as d (d.key)}
+							{@const dCompliance = compliancePct(d.dist)}
+							<tr
+								class="border-t {d.folderId ? 'hover:bg-surface-100-900 cursor-pointer' : ''}"
+								tabindex={d.folderId ? 0 : undefined}
+								title={d.folderId ? m.showDomainRequirements() : undefined}
+								onclick={() => focusDomain(d.folderId)}
+								onkeydown={(e) => onActivate(e, () => focusDomain(d.folderId))}
+							>
+								<td class="px-3 py-2 font-mono">{d.key}</td>
+								<td class="px-3 py-2 text-center">{d.ca_count}</td>
+								<td class="px-3 py-2 text-center">{d.row_count}</td>
+								{#if showCompliance}
+									<td class="px-3 py-2">
+										<div class="flex h-4 w-full rounded overflow-hidden border">
+											{#each RESULT_ORDER as r}
+												{@const w =
+													distTotal(d.dist) === 0 ? 0 : (d.dist[r] / distTotal(d.dist)) * 100}
+												{#if w > 0}
+													<div
+														style="width:{w}%; background:{RESULT_COLORS[r]};"
+														title="{resultLabel(r)}: {d.dist[r]}"
+													></div>
+												{/if}
+											{/each}
+										</div>
+									</td>
+									<td class="px-3 py-2 text-right font-mono"
+										>{dCompliance === null ? '—' : `${dCompliance.toFixed(0)}%`}</td
+									>
+								{/if}
+								{@render scoreCells(d.scores, 'px-3 py-2 text-right font-mono')}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <style>

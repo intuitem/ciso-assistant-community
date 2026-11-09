@@ -114,7 +114,12 @@ function setFolderOverallCompliance(folder: FolderAnalytics) {
 }
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-	const res = await fetch(`${BASE_API_URL}/compliance-assessments/recap/`);
+	const [res, usedRes] = await Promise.all([
+		fetch(`${BASE_API_URL}/compliance-assessments/recap/`),
+		fetch(`${BASE_API_URL}/frameworks/used/`)
+	]);
+	const usedFrameworks: { id: string; name: string; compliance_assessments_count: number }[] =
+		usedRes.ok ? ((await usedRes.json()).results ?? []) : [];
 	let folderRecaps: FolderAnalytics[] = [];
 
 	if (res.ok) {
@@ -146,6 +151,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	return {
 		folderRecaps,
+		usedFrameworks,
 		user: await locals.getUser(),
 		title: m.recap()
 	};
