@@ -15,7 +15,7 @@ description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.7.
   control identifiers are stable: never renamed, renumbered or reused. Generated from
   spec/lyss-spec.yaml by tools/build_ciso_library.py in the LYSS repository (https://github.com/lyss-project/lyss).'
 copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
-version: 70000
+version: 1
 publication_date: 2026-11-09
 provider: Mouad Lyaazale
 packager: LYSS project
