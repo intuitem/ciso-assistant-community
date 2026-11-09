@@ -4945,6 +4945,29 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         r = self._resolved(obj)
         return r["scores_definition"] if r else None
 
+    # Read with the scores where compliance is readable, or hidden from everyone
+    # (score-only audits, where the applicability toggle sets N/A): whether the
+    # requirement is N/A, and what an N/A answer counts for (shown greyed in
+    # place of the scores), None unless the audit counts N/A at its target.
+    not_applicable = serializers.SerializerMethodField()
+    anchored_score = serializers.SerializerMethodField()
+
+    def get_not_applicable(self, obj):
+        return obj.result == RequirementAssessment.Result.NOT_APPLICABLE
+
+    def get_anchored_score(self, obj):
+        ca = obj.compliance_assessment
+        if not ca.anchor_na_to_target:
+            return None
+        requirement = obj.requirement
+        low = requirement.min_score
+        low = ca.min_score if low is None else low
+        high = requirement.max_score
+        high = ca.max_score if high is None else high
+        if low is None or high is None:
+            return None
+        return ca.na_anchor_score(low, high)
+
     def get_answers(self, obj):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
         from core.utils import build_answers_dict
@@ -4964,11 +4987,14 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         # default-hidden keys like `score` are stripped even when the CA has
         # an empty/incomplete field_visibility map. Structural fields (id,
         # name, etc.) resolve to EVERYONE_EDIT and are never stripped.
-        from core.utils import is_field_visible_to
+        from core.utils import is_applicability_readable, is_field_visible_to
 
         for field_name in list(data.keys()):
             if not is_field_visible_to(ca, field_name, viewer_role):
                 data.pop(field_name, None)
+        if not is_applicability_readable(ca, viewer_role):
+            data.pop("not_applicable", None)
+            data.pop("anchored_score", None)
 
         return data
 
@@ -5014,6 +5040,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         if request and self.instance:
             from core.utils import (
                 get_respondent_scoped_folder_ids,
+                is_applicability_write,
                 is_field_editable_by,
                 is_field_read_only_for,
             )
@@ -5025,10 +5052,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 # stripped from a respondent's payload even when the CA has an
                 # empty field_visibility. Structural fields (id, requirement,
                 # etc.) resolve to EVERYONE_EDIT and pass through unchanged.
+                # The applicability toggle of score-only audits writes `result`.
                 data = {
                     k: v
                     for k, v in data.items()
                     if is_field_editable_by(ca, k, "respondent")
+                    or is_applicability_write(ca, k, v, "respondent")
                 }
             else:
                 # Only fields explicitly read-only for the auditor: the defaults hide
@@ -5133,11 +5162,13 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 # turn unrelated edits into 400s. The fields stay unchanged.
                 # Cascade through DEFAULT_VISIBILITY so a CA with an empty
                 # field_visibility still gates the respondent.
-                from core.utils import is_field_editable_by
+                from core.utils import is_applicability_write, is_field_editable_by
 
                 for name in list(attrs.keys()):
                     if not is_field_editable_by(
                         compliance_assessment, name, "respondent"
+                    ) and not is_applicability_write(
+                        compliance_assessment, name, attrs[name], "respondent"
                     ):
                         attrs.pop(name)
 

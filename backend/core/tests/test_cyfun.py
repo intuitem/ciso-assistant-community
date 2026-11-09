@@ -72,12 +72,24 @@ def test_new_audits_show_scores_to_auditors_and_respondents(library):
 
 
 def test_new_cyfun_2025_audits_hide_extended_result_and_progress_status():
-    """The CCB tools have neither; progress then follows compliance."""
+    """The CCB tools have neither; progress then follows the scores."""
     visibility = build_initial_field_visibility(
         SimpleNamespace(field_visibility=_framework()["field_visibility"])
     )
     assert visibility["extended_result"] == HIDDEN
     assert visibility["status"] == HIDDEN
+
+
+@pytest.mark.parametrize("library", ["cyfun2025", "ccb-cff-2023-03-01"])
+def test_new_audits_hide_compliance(library):
+    """CyFun judges scores, not compliance: N/A goes through the applicability
+    toggle of score-only audits."""
+    visibility = build_initial_field_visibility(
+        SimpleNamespace(
+            field_visibility=_library_framework(library)["field_visibility"]
+        )
+    )
+    assert visibility["result"] == HIDDEN
 
 
 @pytest.mark.parametrize(

@@ -5317,8 +5317,6 @@
 	"backToFramework": "Nazaj na okvir",
 	"compliancePercentage": "% skladnosti",
 	"complianceFormulaShort": "skladno + ½·delno, izklj. ni uporabno & neocenjeno",
-	"averageImplementationScore": "Povprečna ocena izvedbe",
-	"overScoredRequirementsOnly": "samo pri točkovanih zahtevah",
 	"visibleToCurrentUser": "vidno trenutnemu uporabniku",
 	"inScopeAfterIGFilter": "v obsegu po filtru izvedbenih skupin",
 	"overallResultDistribution": "Splošna porazdelitev rezultatov",

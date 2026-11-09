@@ -214,6 +214,7 @@ from core.utils import (
     format_report_timestamp,
     get_report_timezone,
     get_respondent_scoped_folder_ids,
+    is_applicability_readable,
     is_field_visible_to,
     render_answers_cell,
     respondent_progress_counts,
@@ -11251,6 +11252,61 @@ class FrameworkViewSet(BaseModelViewSet):
             folder_path_cache[folder.id] = path
             return path
 
+        # Non-assessable nodes that act as sections (the immediate parents of
+        # assessable requirements). The frontend uses this to render the
+        # section-then-requirement hierarchy without a second roundtrip.
+        sections = [
+            {
+                "urn": node.urn,
+                "ref_id": node.ref_id,
+                "name": node.name,
+                "description": node.get_description_translated,
+                "parent_urn": node.parent_urn,
+            }
+            for node in RequirementNode.objects.filter(
+                framework=framework, assessable=False
+            ).order_by(F("order_id").asc(nulls_last=True))
+        ]
+        section_urns = {section["urn"] for section in sections}
+
+        # Each audit's scores, computed as on its own page (calculation method,
+        # N/A anchoring, weights) over its in-scope requirements.
+        from core.framework_report import (
+            TOP_SECTION,
+            audit_scores,
+            inherited_requirement,
+            requirement_scores,
+            visible_layers,
+        )
+
+        def section_of(ra) -> str:
+            """The report section of a requirement assessment, as the page groups them."""
+            parent_urn = ra.requirement.parent_urn
+            return parent_urn if parent_urn in section_urns else TOP_SECTION
+
+        if any(
+            ca.score_calculation_method
+            == ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+            for ca in cas
+        ):
+            # Build the framework tree AVG_OF_AVG walks once, not once per audit.
+            tree = ComplianceAssessment.framework_node_trees([framework.id]).get(
+                framework.id
+            )
+            if tree is not None:
+                for ca in cas:
+                    ca.__dict__["framework_node_tree"] = tree
+        audits_by_id = {ca.id: ca for ca in cas}
+        visible_layers_by_ca = {
+            ca.id: visible_layers(ca, ca_viewer_roles[ca.id]) for ca in cas
+        }
+        applicability_readable_by_ca = {
+            ca.id: is_applicability_readable(ca, ca_viewer_roles[ca.id]) for ca in cas
+        }
+        in_scope_by_ca: Dict[Any, list] = defaultdict(list)
+        # Requirement assessments as the combined view reads them, by CA then RA id.
+        inherited_by_ca: Dict[Any, Dict[Any, Any]] = defaultdict(dict)
+
         rows: List[Dict[str, Any]] = []
         for ra in ras:
             ca = ra.compliance_assessment
@@ -11281,6 +11337,20 @@ class FrameworkViewSet(BaseModelViewSet):
                     indirect_evidence_ids.add(e.id)
             total_evidence_ids = direct_evidence_ids | indirect_evidence_ids
 
+            # Inheritance overlay for this (audit, requirement); None when
+            # no ancestor audit covers it or the feature is off.
+            overlay = redact_overlay(
+                overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                str(ca.id),
+                hidden_for_ca,
+            )
+            audit = audits_by_id[ca.id]
+            visible = visible_layers_by_ca[ca.id]
+            in_scope_by_ca[ca.id].append(ra)
+            inherited_ra = inherited_requirement(audit, ra, overlay)
+            if inherited_ra is not None:
+                inherited_by_ca[ca.id][ra.id] = inherited_ra
+
             rows.append(
                 {
                     "requirement_assessment_id": str(ra.id),
@@ -11288,6 +11358,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "requirement_parent_urn": req.parent_urn,
                     "requirement_ref_id": req.ref_id,
                     "requirement_name": req.name,
+                    "requirement_description": req.get_description_translated,
                     "assessable": req.assessable,
                     "implementation_groups": ig_list,
                     "result": field("result", ra.result),
@@ -11298,6 +11369,23 @@ class FrameworkViewSet(BaseModelViewSet):
                         "documentation_score", ra.documentation_score
                     ),
                     "is_scored": field("is_scored", ra.is_scored),
+                    # Implementation, documentation and maturity scores as the
+                    # audit counts this requirement (N/A at the target when it
+                    # anchors N/A); combined_scores is the combined view's
+                    # reading, None when the row inherits nothing.
+                    "scores": requirement_scores(audit, ra, visible, inherited=False),
+                    "combined_scores": requirement_scores(
+                        audit, inherited_ra, visible, inherited=True
+                    )
+                    if inherited_ra is not None
+                    else None,
+                    # Part of what the scores mean, so readable with them where
+                    # compliance is readable or hidden from everyone (score-only
+                    # audits); elsewhere it would disclose a hidden verdict.
+                    "not_applicable": ra.result
+                    == RequirementAssessment.Result.NOT_APPLICABLE
+                    if applicability_readable_by_ca[ca.id]
+                    else None,
                     "compliance_assessment_id": str(ca.id),
                     "compliance_assessment_name": ca.name,
                     "folder_id": str(ca.folder_id) if ca.folder_id else None,
@@ -11309,19 +11397,52 @@ class FrameworkViewSet(BaseModelViewSet):
                     "indirect_evidences_count": len(
                         indirect_evidence_ids - direct_evidence_ids
                     ),
-                    # Inheritance overlay for this (audit, requirement); None when
-                    # no ancestor audit covers it or the feature is off.
-                    "inheritance": redact_overlay(
-                        overlays_by_ca.get(ca.id, {}).get(str(req.id)),
-                        str(ca.id),
-                        hidden_for_ca,
-                    ),
+                    "inheritance": overlay,
                 }
             )
 
+        def scores_of(ca) -> Dict[str, Any]:
+            """A counted audit's scores (total and per section) and their
+            combined-view reading, None when it inherits nothing."""
+            visible = visible_layers_by_ca[ca.id]
+            in_scope = in_scope_by_ca[ca.id]
+            inherited = inherited_by_ca[ca.id]
+            return {
+                # What the scores are on: the page only averages audits that
+                # share a scale, and never combines several audits' sums.
+                "score_scale": {
+                    "min": ca.min_score,
+                    "max": ca.max_score,
+                    "calculation_method": ca.score_calculation_method,
+                },
+                # Score-only audits hide compliance: the page then leaves out
+                # the compliance distribution and percentage.
+                "result_visible": is_field_visible_to(
+                    ca, "result", ca_viewer_roles[ca.id]
+                ),
+                "documentation_score_visible": ca.show_documentation_score
+                and "documentation_score" in visible,
+                "scores": audit_scores(
+                    ca,
+                    in_scope,
+                    section_of=section_of,
+                    visible=visible,
+                    inherited_ids=frozenset(),
+                ),
+                "combined_scores": audit_scores(
+                    ca,
+                    [inherited.get(ra.id, ra) for ra in in_scope],
+                    section_of=section_of,
+                    visible=visible,
+                    inherited_ids=inherited.keys(),
+                )
+                if inherited
+                else None,
+            }
+
         # Per-CA summary used by the frontend "detected assessments" drawer.
         # Includes every visible CA, counted or not, so users can see what
-        # the live-status filter excluded.
+        # the live-status filter excluded. Only counted CAs carry scores.
         compliance_assessments = [
             {
                 "id": str(ca.id),
@@ -11331,23 +11452,19 @@ class FrameworkViewSet(BaseModelViewSet):
                 "folder_path": folder_path_for(ca.folder),
                 "folder_path_str": " / ".join(folder_path_for(ca.folder)),
                 "is_counted": ca.status in LIVE_STATUSES,
+                **(
+                    scores_of(audits_by_id[ca.id])
+                    if ca.id in audits_by_id
+                    else {
+                        "score_scale": None,
+                        "result_visible": False,
+                        "documentation_score_visible": False,
+                        "scores": None,
+                        "combined_scores": None,
+                    }
+                ),
             }
             for ca in sorted(all_visible_cas, key=lambda c: (c.name or "").lower())
-        ]
-
-        # Non-assessable nodes that act as sections (the immediate parents of
-        # assessable requirements). The frontend uses this to render the
-        # section-then-requirement hierarchy without a second roundtrip.
-        sections = [
-            {
-                "urn": node.urn,
-                "ref_id": node.ref_id,
-                "name": node.name,
-                "parent_urn": node.parent_urn,
-            }
-            for node in RequirementNode.objects.filter(
-                framework=framework, assessable=False
-            ).order_by(F("order_id").asc(nulls_last=True))
         ]
 
         return Response(

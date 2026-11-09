@@ -8,11 +8,17 @@
 	import { darkenColor } from '#lib/utils/helpers.js';
 	import type { ReferenceControlSchema, ThreatSchema } from '#lib/utils/schemas.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import { displayScoreColor, formatScoreValue, roundScore } from '#lib/utils/helpers.js';
+	import {
+		displayScoreColor,
+		formatScoreValue,
+		maturityScore,
+		roundScore
+	} from '#lib/utils/helpers.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { z } from 'zod';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import MaturityRing from '#lib/components/ComplianceAssessment/MaturityRing.svelte';
 	import { auditFiltersStore } from '#lib/utils/stores.js';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
@@ -284,6 +290,17 @@
 	};
 </script>
 
+<!-- A section's maturity: the average of its two aggregates, like the audit's own. -->
+{#snippet sectionMaturity()}
+	{#if showDocumentationScore && nodeScore() !== null}
+		<MaturityRing
+			value={maturityScore(nodeScore()!, nodeDocumentationScore(), nodeTotalMinScore())}
+			min={nodeTotalMinScore()}
+			max={nodeTotalMaxScore()}
+		/>
+	{/if}
+{/snippet}
+
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
 		<div class="flex flex-1 justify-center flex-col">
@@ -401,6 +418,13 @@
 											{/if}
 										{/snippet}
 									</ScorePair>
+									{#if showDocumentationScore && rawNode.score != null}
+										<MaturityRing
+											value={maturityScore(rawNode.score, rawNode.documentation_score, scoreMin)}
+											min={scoreMin}
+											max={max_score}
+										/>
+									{/if}
 								{/if}
 							</div>
 						</Anchor>
@@ -637,6 +661,7 @@
 										{/if}
 									{/snippet}
 								</ScorePair>
+								{@render sectionMaturity()}
 							{/if}
 						{:else if nodeScore() !== null}
 							<ScorePair>
@@ -704,6 +729,7 @@
 									{/if}
 								{/snippet}
 							</ScorePair>
+							{@render sectionMaturity()}
 						{/if}
 					{/if}
 				</div>
