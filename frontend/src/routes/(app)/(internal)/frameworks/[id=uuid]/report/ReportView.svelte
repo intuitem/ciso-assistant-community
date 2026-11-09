@@ -68,6 +68,7 @@
 		requirement_parent_urn: string | null;
 		requirement_ref_id: string | null;
 		requirement_name: string | null;
+		requirement_description: string | null;
 		assessable: boolean;
 		implementation_groups: string[] | null;
 
@@ -119,6 +120,7 @@
 		urn: string;
 		ref_id: string | null;
 		name: string | null;
+		description: string | null;
 		parent_urn: string | null;
 	};
 
@@ -454,6 +456,7 @@
 			urn: string;
 			ref: string;
 			name: string;
+			ca_count: number;
 			row_count: number;
 			requirement_count: number;
 			dist: Record<Result, number>;
@@ -481,7 +484,7 @@
 				.map(([reqUrn, rs2]) => ({
 					urn: reqUrn,
 					ref_id: rs2[0].requirement_ref_id ?? '',
-					name: rs2[0].requirement_name ?? '',
+					name: rs2[0].requirement_name || rs2[0].requirement_description || '',
 					ca_count: rs2.length,
 					dist: distribution(rs2),
 					// Each audit's requirement scores, N/A at the target when it anchors N/A.
@@ -498,6 +501,7 @@
 				urn,
 				ref,
 				name,
+				ca_count: new Set(rs.map((r) => r.compliance_assessment_id)).size,
 				row_count: rs.length,
 				requirement_count: requirements.length,
 				dist: distribution(rs),
@@ -513,7 +517,8 @@
 		for (const s of sectionList) {
 			const rs = byParent.get(s.urn);
 			if (!rs || rs.length === 0) continue;
-			pushSection(s.urn, s.ref_id ?? '', s.name ?? s.urn, rs);
+			// The ref column already identifies the section: no URN fallback.
+			pushSection(s.urn, s.ref_id ?? '', s.name || s.description || '', rs);
 			seen.add(s.urn);
 		}
 
@@ -1026,21 +1031,23 @@
 								class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
 								onclick={() => toggleSection(section.urn)}
 							>
-								<td class="px-3 py-2 font-mono text-xs">
+								<td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
 									<span class="inline-block w-3 text-surface-600-400"
 										>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
 									>
 									{section.ref}
 								</td>
-								<td class="px-3 py-2">
-									{section.name}
-									<span class="text-xs text-surface-600-400 ml-2 font-normal"
-										>({section.requirement_count}
-										{m.reqsAbbr()} · {section.row_count}
-										{m.rowsLabel()})</span
-									>
+								<td class="px-3 py-2 w-full max-w-0">
+									<div class="flex items-baseline gap-2 min-w-0">
+										<span class="truncate" title={section.name}>{section.name}</span>
+										<span class="shrink-0 text-xs text-surface-600-400 font-normal"
+											>({section.requirement_count}
+											{m.reqsAbbr()}{#if section.row_count !== section.requirement_count}
+												· {section.row_count} {m.rowsLabel()}{/if})</span
+										>
+									</div>
 								</td>
-								<td class="px-3 py-2 text-center text-xs text-surface-600-400">—</td>
+								<td class="px-3 py-2 text-center">{section.ca_count}</td>
 								{#if showCompliance}
 									<td class="px-3 py-2">
 										{#if section.row_count > 0}
@@ -1077,13 +1084,15 @@
 									class="border-t hover:bg-surface-50-950 cursor-pointer"
 									onclick={() => (expandedRow = expandedRow === req.urn ? null : req.urn)}
 								>
-									<td class="px-3 py-2 font-mono text-xs {isFlat ? '' : 'pl-8'}">
+									<td class="px-3 py-2 font-mono text-xs whitespace-nowrap {isFlat ? '' : 'pl-8'}">
 										<span class="inline-block w-3 text-surface-500"
 											>{expandedRow === req.urn ? '▾' : '▸'}</span
 										>
 										{req.ref_id}
 									</td>
-									<td class="px-3 py-2 {isFlat ? '' : 'pl-6'}">{req.name}</td>
+									<td class="px-3 py-2 max-w-0 {isFlat ? '' : 'pl-6'}">
+										<span class="line-clamp-2" title={req.name}>{req.name}</span>
+									</td>
 									<td class="px-3 py-2 text-center">{req.ca_count}</td>
 									{#if showCompliance}
 										<td class="px-3 py-2">

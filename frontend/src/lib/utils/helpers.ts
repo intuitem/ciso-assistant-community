@@ -736,7 +736,11 @@ export function getFieldVisibility(
 		showResult: isFieldVisible(complianceAssessment, 'result', viewerRole),
 		showStatus: isFieldVisible(complianceAssessment, 'status', viewerRole),
 		showScore: isFieldVisible(complianceAssessment, 'score', viewerRole),
-		showDocumentationScore: isFieldVisible(complianceAssessment, 'documentation_score', viewerRole),
+		// Hidden from the auditor means documentation scoring is off (show_documentation_score),
+		// whatever a map saved before the auditor >= respondent rule says for the respondent.
+		showDocumentationScore:
+			isFieldVisible(complianceAssessment, 'documentation_score', viewerRole) &&
+			isFieldVisible(complianceAssessment, 'documentation_score', 'auditor'),
 		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
 		showTaskTemplates: isFieldVisible(complianceAssessment, 'task_templates', viewerRole),

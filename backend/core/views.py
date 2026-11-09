@@ -11152,6 +11152,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "urn": node.urn,
                 "ref_id": node.ref_id,
                 "name": node.name,
+                "description": node.get_description_translated,
                 "parent_urn": node.parent_urn,
             }
             for node in RequirementNode.objects.filter(
@@ -11249,6 +11250,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "requirement_parent_urn": req.parent_urn,
                     "requirement_ref_id": req.ref_id,
                     "requirement_name": req.name,
+                    "requirement_description": req.get_description_translated,
                     "assessable": req.assessable,
                     "implementation_groups": ig_list,
                     "result": field("result", ra.result),
