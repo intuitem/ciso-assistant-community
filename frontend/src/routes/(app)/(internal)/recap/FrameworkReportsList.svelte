@@ -2,7 +2,7 @@
 	import { m } from '#paraglide/messages.js';
 
 	type UsedFramework = { id: string; name: string; compliance_assessments_count: number };
-	let { frameworks }: { frameworks: UsedFramework[] } = $props();
+	let { frameworks, error = false }: { frameworks: UsedFramework[]; error?: boolean } = $props();
 
 	let search = $state('');
 	let shown = $derived(
@@ -24,7 +24,9 @@
 			bind:value={search}
 		/>
 	</div>
-	{#if shown.length === 0}
+	{#if error}
+		<p class="text-sm text-error-600-400">{m.errorLoadingData()}</p>
+	{:else if shown.length === 0}
 		<p class="text-sm text-surface-600-400 italic">{m.noUsedFrameworks()}</p>
 	{:else}
 		<ul class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">

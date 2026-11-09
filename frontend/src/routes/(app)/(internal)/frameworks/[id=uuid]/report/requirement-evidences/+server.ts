@@ -6,18 +6,19 @@ import {
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
+const FORWARDED = ['requirement', 'compliance_assessments', 'exclude', 'implementation_group'];
+
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const endpoint = new URL(`${BASE_API_URL}/frameworks/${params.id}/requirement_evidences/`);
-	for (const key of ['requirement', 'compliance_assessments', 'exclude']) {
-		const value = url.searchParams.get(key);
-		if (value) endpoint.searchParams.set(key, value);
+	for (const key of FORWARDED) {
+		for (const value of url.searchParams.getAll(key)) endpoint.searchParams.append(key, value);
 	}
 	const res = await fetch(endpoint.toString());
-	if (!res.ok) throw error(res.status, 'Error fetching the ZIP file');
+	if (!res.ok || !res.body) throw error(res.status, 'Error fetching the ZIP file');
 	const fileName =
 		parseContentDispositionFilename(res.headers.get('Content-Disposition') ?? '') ??
 		'evidences.zip';
-	return new Response(await res.blob(), {
+	return new Response(res.body, {
 		headers: {
 			'Content-Type': 'application/zip',
 			'Content-Disposition': contentDispositionHeader(fileName)

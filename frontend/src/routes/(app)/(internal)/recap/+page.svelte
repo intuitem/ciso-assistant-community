@@ -7,7 +7,7 @@
 	import type { PageData } from './$types';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '#lib/utils/access-control.js';
-	import { goto } from '$app/navigation';
+	import { replaceState } from '$app/navigation';
 	import FrameworkReportsList from './FrameworkReportsList.svelte';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
@@ -33,13 +33,23 @@
 	);
 
 	const TABS = ['frameworks', 'domains'] as const;
-	let tab = $derived(page.url.searchParams.get('tab') === 'domains' ? 'domains' : 'frameworks');
+	type Tab = (typeof TABS)[number];
+	let tab = $state<Tab>(page.url.searchParams.get('tab') === 'domains' ? 'domains' : 'frameworks');
 	const tabLabel = { domains: () => m.byDomain(), frameworks: () => m.byFramework() };
-	function selectTab(next: (typeof TABS)[number]) {
+	function selectTab(next: Tab) {
+		tab = next;
 		const url = new URL(page.url.href);
 		if (next === 'frameworks') url.searchParams.delete('tab');
 		else url.searchParams.set('tab', next);
-		goto(url, { replace: true });
+		replaceState(url, page.state);
+	}
+	function onTabKeydown(event: KeyboardEvent) {
+		const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+		if (!step) return;
+		event.preventDefault();
+		const next = TABS[(TABS.indexOf(tab) + step + TABS.length) % TABS.length];
+		selectTab(next);
+		document.getElementById(`recap-tab-${next}`)?.focus();
 	}
 
 	const model = URL_MODEL_MAP['folders'];
@@ -63,6 +73,8 @@
 				id="recap-tab-{t}"
 				aria-selected={tab === t}
 				aria-controls="recap-panel"
+				tabindex={tab === t ? 0 : -1}
+				onkeydown={onTabKeydown}
 				class="px-4 py-2 text-sm font-medium -mb-px border-b-2 {tab === t
 					? 'border-primary-500 text-primary-700 dark:text-primary-300'
 					: 'border-transparent text-surface-600-400 hover:text-surface-950-50'}"
@@ -75,7 +87,7 @@
 
 	<div id="recap-panel" role="tabpanel" aria-labelledby="recap-tab-{tab}">
 		{#if tab === 'frameworks'}
-			<FrameworkReportsList frameworks={data.usedFrameworks} />
+			<FrameworkReportsList frameworks={data.usedFrameworks} error={data.usedFrameworksError} />
 		{:else}
 			<div class="space-y-6">
 				{#if foldersWithAssessments.length === 0}

@@ -108,6 +108,8 @@
 		folder_path: string[];
 		folder_path_str: string;
 		folder_path_ids: string[];
+		labels?: { id: string; name: string }[];
+		authors?: { id: string; name: string }[];
 		eta: string | null;
 		due_date: string | null;
 		// Verdicts (met) and numbers (value) the viewer may read; null when none.
@@ -135,6 +137,7 @@
 	type OutcomeDef = {
 		ref_id: string;
 		kind: string | null;
+		implementation_groups?: string[] | null;
 		annotation: string | null;
 		label: string | null;
 		translations: Record<string, { annotation?: string; label?: string }>;
@@ -232,9 +235,10 @@
 	let dateFromMonths = $state<number | null>(null);
 	let dateToMonths = $state<number | null>(null);
 	let customWindow = $state(false);
-	let domainMenuOpen = $state(false);
+	let openMenu = $state<'domains' | 'labels' | 'authors' | null>(null);
+	let selectedLabels = $state<Set<string>>(new Set());
+	let selectedAuthors = $state<Set<string>>(new Set());
 	let domainQuery = $state('');
-	let domainMenuEl = $state<HTMLElement>();
 
 	type DomainSortKey = 'name' | 'compliance' | 'score' | 'documentation' | 'maturity';
 	let domainSortKey = $state<DomainSortKey>('name');
@@ -493,11 +497,12 @@
 		selectedFolders = next;
 	}
 
+	// Same day N months away, clamped to that month's last day.
 	function addMonths(months: number): Date {
-		const d = new Date();
-		d.setHours(0, 0, 0, 0);
-		d.setMonth(d.getMonth() + months);
-		return d;
+		const now = new Date();
+		const month = now.getMonth() + months;
+		const lastDay = new Date(now.getFullYear(), month + 1, 0).getDate();
+		return new Date(now.getFullYear(), month, Math.min(now.getDate(), lastDay));
 	}
 
 	function inDateWindow(ca: ComplianceAssessmentSummary): boolean {
@@ -506,12 +511,41 @@
 		if (!raw) return false;
 		const date = new Date(`${raw}T00:00:00`);
 		if (dateFromMonths !== null && date < addMonths(dateFromMonths)) return false;
-		if (dateToMonths !== null && date > addMonths(dateToMonths)) return false;
+		if (dateToMonths !== null) {
+			const end = addMonths(dateToMonths);
+			if (activePreset === 'overdue' ? date >= end : date > end) return false;
+		}
 		return true;
 	}
 
 	let dateWindowActive = $derived(dateFromMonths !== null || dateToMonths !== null);
-	let filtersActive = $derived(selectedFolders.size > 0 || dateWindowActive || igFilter !== 'all');
+	let filtersActive = $derived(
+		selectedFolders.size > 0 ||
+			selectedLabels.size > 0 ||
+			selectedAuthors.size > 0 ||
+			dateWindowActive ||
+			igFilter !== 'all'
+	);
+
+	type FilterOption = { id: string; name: string };
+	function optionsOf(pick: (ca: ComplianceAssessmentSummary) => FilterOption[] | undefined) {
+		const seen = new Map<string, FilterOption>();
+		for (const ca of complianceAssessments) for (const o of pick(ca) ?? []) seen.set(o.id, o);
+		return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+	}
+	let labelOptions = $derived(optionsOf((ca) => ca.labels));
+	let authorOptions = $derived(optionsOf((ca) => ca.authors));
+	let optionName = $derived(
+		new Map([...labelOptions, ...authorOptions].map((o) => [o.id, o.name]))
+	);
+	function toggleIn(set: Set<string>, id: string): Set<string> {
+		const next = new Set(set);
+		if (next.has(id)) next.delete(id);
+		else next.add(id);
+		return next;
+	}
+	const matchesAny = (items: FilterOption[] | undefined, selected: Set<string>) =>
+		selected.size === 0 || (items ?? []).some((o) => selected.has(o.id));
 
 	const DEADLINE_PRESETS: { key: string; from: number | null; to: number | null }[] = [
 		{ key: 'overdue', from: null, to: 0 },
@@ -559,12 +593,14 @@
 		node.ancestors.some((id) => selectedFolders.has(id));
 
 	function onWindowClick(event: MouseEvent) {
-		if (domainMenuOpen && domainMenuEl && !domainMenuEl.contains(event.target as Node))
-			domainMenuOpen = false;
+		const menu = (event.target as Element | null)?.closest?.('[data-filter-menu]');
+		if (openMenu && menu?.getAttribute('data-filter-menu') !== openMenu) openMenu = null;
 	}
 
 	function resetFilters() {
 		selectedFolders = new Set();
+		selectedLabels = new Set();
+		selectedAuthors = new Set();
 		clearDateWindow();
 		if (igFilter !== 'all') setIG('all');
 	}
@@ -576,6 +612,8 @@
 					(ca) =>
 						(selectedFolders.size === 0 ||
 							(ca.folder_path_ids ?? []).some((id) => selectedFolders.has(id))) &&
+						matchesAny(ca.labels, selectedLabels) &&
+						matchesAny(ca.authors, selectedAuthors) &&
 						inDateWindow(ca)
 				)
 				.map((ca) => ca.id)
@@ -714,13 +752,13 @@
 	let perDomain = $derived.by(() => {
 		const map = new Map<string, ReportRow[]>();
 		for (const r of filteredRows) {
-			const path = r.folder_path ?? [];
-			const key = path.slice(0, domainDepth).join(' / ') || '(no folder)';
-			if (!map.has(key)) map.set(key, []);
-			map.get(key)!.push(r);
+			const id = domainFolderId(r) ?? '(no folder)';
+			if (!map.has(id)) map.set(id, []);
+			map.get(id)!.push(r);
 		}
 
-		const entries = [...map.entries()].map(([key, rs]) => {
+		const entries = [...map.entries()].map(([id, rs]) => {
+			const key = (rs[0].folder_path ?? []).slice(0, domainDepth).join(' / ') || '(no folder)';
 			const dist = distribution(rs);
 			return {
 				key,
@@ -733,7 +771,8 @@
 				),
 				compliance: compliancePct(dist),
 				rows: rs,
-				folderId: domainFolderId(rs[0])
+				id,
+				folderId: id === '(no folder)' ? null : id
 			};
 		});
 
@@ -782,8 +821,14 @@
 	});
 
 	// Counted audits left by the domain and deadline filters.
+	let auditsWithRows = $derived(new Set(filteredRows.map((r) => r.compliance_assessment_id)));
 	let filteredAudits = $derived(
-		complianceAssessments.filter((ca) => ca.is_counted && allowedAuditIds.has(ca.id))
+		complianceAssessments.filter(
+			(ca) =>
+				ca.is_counted &&
+				allowedAuditIds.has(ca.id) &&
+				(igFilter === 'all' || auditsWithRows.has(ca.id))
+		)
 	);
 
 	function outcomeLabel(def: OutcomeDef): string {
@@ -791,7 +836,14 @@
 		return t?.annotation || t?.label || def.annotation || def.label || def.ref_id;
 	}
 
-	let outcomeDefs = $derived<OutcomeDef[]>(framework.outcomes_definition ?? []);
+	let outcomeDefs = $derived<OutcomeDef[]>(
+		(framework.outcomes_definition ?? []).filter(
+			(def) =>
+				igFilter === 'all' ||
+				!def.implementation_groups?.length ||
+				def.implementation_groups.includes(igFilter)
+		)
+	);
 	const outcomeOf = (ca: ComplianceAssessmentSummary, def: OutcomeDef) =>
 		ca.outcomes?.find((o) => o.ref_id === def.ref_id);
 
@@ -821,16 +873,18 @@
 	let outcomeDomains = $derived.by(() => {
 		const groups = new Map<string, ComplianceAssessmentSummary[]>();
 		for (const ca of outcomeAudits) {
-			const key = ca.folder_path.slice(0, domainDepth).join(' / ') || '(no folder)';
-			groups.set(key, [...(groups.get(key) ?? []), ca]);
+			const ids = ca.folder_path_ids ?? [];
+			const id = ids.length ? ids[Math.min(domainDepth, ids.length) - 1] : '(no folder)';
+			groups.set(id, [...(groups.get(id) ?? []), ca]);
 		}
 		return [...groups.entries()]
-			.sort(([a], [b]) => a.localeCompare(b))
-			.map(([key, audits]) => ({
-				key,
+			.map(([id, audits]) => ({
+				id,
+				key: audits[0].folder_path.slice(0, domainDepth).join(' / ') || '(no folder)',
 				audits,
 				cells: outcomeRollup.map((o) => rollOutcome(audits, o.def))
-			}));
+			}))
+			.sort((a, b) => a.key.localeCompare(b.key));
 	});
 
 	function outcomeExportValue(ca: ComplianceAssessmentSummary, def: OutcomeDef): Cell {
@@ -853,47 +907,86 @@
 		view = 'requirement';
 	}
 
-	// Requirement assessments left out of a requirement's evidence export.
+	// Evidence export selection: ticked requirements, minus their unticked audits.
+	let selectedReqs = $state<Set<string>>(new Set());
 	let evidenceExcluded = $state<Set<string>>(new Set());
-	function toggleEvidenceRow(id: string) {
-		const next = new Set(evidenceExcluded);
-		if (next.has(id)) next.delete(id);
-		else next.add(id);
-		evidenceExcluded = next;
+	let rowsByReq = $derived.by(() => {
+		const map = new Map<string, ReportRow[]>();
+		for (const r of filteredRows) {
+			if (!map.has(r.requirement_urn)) map.set(r.requirement_urn, []);
+			map.get(r.requirement_urn)!.push(r);
+		}
+		return map;
+	});
+	function reqSelection(urn: string): 'none' | 'some' | 'all' {
+		if (!selectedReqs.has(urn)) return 'none';
+		return (rowsByReq.get(urn) ?? []).some((r) => evidenceExcluded.has(r.requirement_assessment_id))
+			? 'some'
+			: 'all';
 	}
-	function evidenceAuditIds(rs: ReportRow[]): string[] {
-		return [
-			...new Set(
-				rs
-					.filter((r) => !evidenceExcluded.has(r.requirement_assessment_id))
-					.map((r) => r.compliance_assessment_id)
-			)
-		];
+	function toggleReqs(urns: string[], on: boolean) {
+		const selected = new Set(selectedReqs);
+		const excluded = new Set(evidenceExcluded);
+		for (const urn of urns) {
+			if (on) selected.add(urn);
+			else selected.delete(urn);
+			for (const r of rowsByReq.get(urn) ?? []) excluded.delete(r.requirement_assessment_id);
+		}
+		selectedReqs = selected;
+		evidenceExcluded = excluded;
 	}
-	function evidenceExportUrl(urn: string, rs: ReportRow[]): string {
-		const params = new URLSearchParams({
-			requirement: urn,
-			compliance_assessments: evidenceAuditIds(rs).join(',')
-		});
-		return `/frameworks/${framework.id}/report/requirement-evidences?${params}`;
+	function setAuditRows(urn: string, ids: string[], on: boolean) {
+		const all = (rowsByReq.get(urn) ?? []).map((r) => r.requirement_assessment_id);
+		const included = new Set(
+			selectedReqs.has(urn) ? all.filter((i) => !evidenceExcluded.has(i)) : []
+		);
+		for (const id of ids) {
+			if (on) included.add(id);
+			else included.delete(id);
+		}
+		const selected = new Set(selectedReqs);
+		const excluded = new Set(evidenceExcluded);
+		for (const id of all) excluded.delete(id);
+		if (included.size === 0) selected.delete(urn);
+		else {
+			selected.add(urn);
+			for (const id of all) if (!included.has(id)) excluded.add(id);
+		}
+		selectedReqs = selected;
+		evidenceExcluded = excluded;
 	}
 
-	// Requirements ticked for a grouped evidence export.
-	let selectedReqs = $state<Set<string>>(new Set());
-	function toggleReqs(urns: string[], on: boolean) {
-		const next = new Set(selectedReqs);
-		for (const urn of urns) {
-			if (on) next.add(urn);
-			else next.delete(urn);
-		}
-		selectedReqs = next;
+	let flatReqUrns = $derived(hierarchical.flatMap((s) => s.requirements.map((r) => r.urn)));
+	let allReqSelection = $derived.by(() => {
+		const states = flatReqUrns.map(reqSelection);
+		if (states.length && states.every((st) => st === 'all')) return 'all';
+		return states.some((st) => st !== 'none') ? 'some' : 'none';
+	});
+
+	function onReqCheck(event: MouseEvent, urn: string) {
+		event.stopPropagation();
+		toggleReqs([urn], (event.currentTarget as HTMLInputElement).checked);
 	}
+	function clearEvidenceSelection() {
+		selectedReqs = new Set();
+		evidenceExcluded = new Set();
+	}
+	let exportRows = $derived(
+		filteredRows.filter(
+			(r) =>
+				selectedReqs.has(r.requirement_urn) && !evidenceExcluded.has(r.requirement_assessment_id)
+		)
+	);
+	let exportReqCount = $derived(new Set(exportRows.map((r) => r.requirement_urn)).size);
 	let bulkEvidenceUrl = $derived.by(() => {
 		const rows = filteredRows.filter((r) => selectedReqs.has(r.requirement_urn));
 		const params = new URLSearchParams({
-			requirement: [...selectedReqs].join(','),
-			compliance_assessments: [...new Set(rows.map((r) => r.compliance_assessment_id))].join(',')
+			requirement: [...new Set(exportRows.map((r) => r.requirement_urn))].join(','),
+			compliance_assessments: [...new Set(exportRows.map((r) => r.compliance_assessment_id))].join(
+				','
+			)
 		});
+		if (igFilter !== 'all') params.set('implementation_group', igFilter);
 		const excluded = rows
 			.filter((r) => evidenceExcluded.has(r.requirement_assessment_id))
 			.map((r) => r.requirement_assessment_id);
@@ -939,6 +1032,8 @@
 				m.assessment(),
 				m.domain(),
 				m.status(),
+				m.authors(),
+				m.labels(),
 				...(showDates ? [m.eta(), m.dueDate()] : []),
 				...scoreColumns(),
 				...outcomeRollup.map((o) => o.label)
@@ -947,6 +1042,8 @@
 				ca.name,
 				ca.folder_path_str,
 				safeTranslate(ca.status ?? 'unknown'),
+				(ca.authors ?? []).map((a) => a.name).join(', '),
+				(ca.labels ?? []).map((l) => l.name).join(', '),
 				...(showDates ? [ca.eta, ca.due_date] : []),
 				...scoreValues(auditScoresById.get(ca.id)?.total),
 				...outcomeRollup.map((o) => outcomeExportValue(ca, o.def))
@@ -1093,6 +1190,78 @@
 	{#if showDocumentation}
 		<td class={cls}>{formatScore(scores.maturity_score)}</td>
 	{/if}
+{/snippet}
+
+{#snippet optionFilter(
+	key: 'labels' | 'authors',
+	label: string,
+	icon: string,
+	options: FilterOption[],
+	selected: Set<string>,
+	toggle: (id: string) => void,
+	clear: () => void
+)}
+	<div class="relative" data-filter-menu={key}>
+		<span class="text-xs font-medium text-surface-600-400 block mb-1" id="{key}-filter-label"
+			><i class="{icon} mr-1" aria-hidden="true"></i>{label}</span
+		>
+		<button
+			type="button"
+			class="w-full flex items-center justify-between gap-2 rounded-lg border border-surface-300-700 bg-surface-50-950 px-3 py-1.5 text-sm text-left hover:border-primary-500 disabled:opacity-50 disabled:hover:border-surface-300-700"
+			aria-haspopup="true"
+			aria-expanded={openMenu === key}
+			aria-labelledby="{key}-filter-label"
+			disabled={options.length === 0}
+			onclick={() => (openMenu = openMenu === key ? null : key)}
+		>
+			<span class="truncate">
+				{options.length === 0
+					? m.none()
+					: selected.size === 0
+						? m.all()
+						: selected.size === 1
+							? optionName.get([...selected][0])
+							: m.itemsSelected({ count: selected.size })}
+			</span>
+			<i class="fa-solid fa-chevron-down text-xs text-surface-500" aria-hidden="true"></i>
+		</button>
+		{#if openMenu === key}
+			<div
+				class="absolute z-30 mt-1 w-full min-w-56 rounded-lg border border-surface-300-700 bg-surface-50-950 shadow-xl"
+				role="dialog"
+				aria-labelledby="{key}-filter-label"
+				tabindex="-1"
+				onkeydown={(e) => e.key === 'Escape' && (openMenu = null)}
+			>
+				<ul class="max-h-64 overflow-auto p-1">
+					{#each options as option (option.id)}
+						<li>
+							<label
+								class="flex items-center gap-2 rounded px-2 py-1 text-sm cursor-pointer hover:bg-surface-100-900"
+							>
+								<input
+									type="checkbox"
+									class="checkbox"
+									checked={selected.has(option.id)}
+									onchange={() => toggle(option.id)}
+								/>
+								<span class="truncate" title={option.name}>{option.name}</span>
+							</label>
+						</li>
+					{/each}
+				</ul>
+				{#if selected.size > 0}
+					<div class="p-2 border-t border-surface-200-800 text-right">
+						<button
+							type="button"
+							class="text-xs text-primary-600-400 hover:underline"
+							onclick={clear}>{m.clearSelection()}</button
+						>
+					</div>
+				{/if}
+			</div>
+		{/if}
+	</div>
 {/snippet}
 
 <svelte:window onclick={onWindowClick} />
@@ -1270,11 +1439,9 @@
 				{/if}
 			</div>
 
-			<div
-				class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.6fr)] gap-3"
-			>
+			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
 				<!-- Domains -->
-				<div class="relative" bind:this={domainMenuEl}>
+				<div class="relative" data-filter-menu="domains">
 					<span class="text-xs font-medium text-surface-600-400 block mb-1" id="domain-filter-label"
 						><i class="fa-solid fa-sitemap mr-1" aria-hidden="true"></i>{m.domains()}</span
 					>
@@ -1282,9 +1449,9 @@
 						type="button"
 						class="w-full flex items-center justify-between gap-2 rounded-lg border border-surface-300-700 bg-surface-50-950 px-3 py-1.5 text-sm text-left hover:border-primary-500"
 						aria-haspopup="true"
-						aria-expanded={domainMenuOpen}
+						aria-expanded={openMenu === 'domains'}
 						aria-labelledby="domain-filter-label"
-						onclick={() => (domainMenuOpen = !domainMenuOpen)}
+						onclick={() => (openMenu = openMenu === 'domains' ? null : 'domains')}
 					>
 						<span class="truncate">
 							{selectedFolders.size === 0
@@ -1295,13 +1462,13 @@
 						</span>
 						<i class="fa-solid fa-chevron-down text-xs text-surface-500" aria-hidden="true"></i>
 					</button>
-					{#if domainMenuOpen}
+					{#if openMenu === 'domains'}
 						<div
 							class="absolute z-30 mt-1 w-full min-w-72 rounded-lg border border-surface-300-700 bg-surface-50-950 shadow-xl"
 							role="dialog"
 							aria-labelledby="domain-filter-label"
 							tabindex="-1"
-							onkeydown={(e) => e.key === 'Escape' && (domainMenuOpen = false)}
+							onkeydown={(e) => e.key === 'Escape' && (openMenu = null)}
 						>
 							<div class="p-2 border-b border-surface-200-800">
 								<input
@@ -1349,6 +1516,25 @@
 					{/if}
 				</div>
 
+				{@render optionFilter(
+					'labels',
+					m.labels(),
+					'fa-solid fa-tag',
+					labelOptions,
+					selectedLabels,
+					(id) => (selectedLabels = toggleIn(selectedLabels, id)),
+					() => (selectedLabels = new Set())
+				)}
+				{@render optionFilter(
+					'authors',
+					m.authors(),
+					'fa-solid fa-user',
+					authorOptions,
+					selectedAuthors,
+					(id) => (selectedAuthors = toggleIn(selectedAuthors, id)),
+					() => (selectedAuthors = new Set())
+				)}
+
 				<!-- Implementation group -->
 				<div>
 					<label class="text-xs font-medium text-surface-600-400 block mb-1" for="ig-filter"
@@ -1373,7 +1559,7 @@
 				</div>
 
 				<!-- Deadline window -->
-				<div>
+				<div class="md:col-span-2 xl:col-span-4">
 					<div class="flex items-center gap-2 mb-1">
 						<span class="text-xs font-medium text-surface-600-400" id="deadline-label"
 							><i class="fa-regular fa-calendar mr-1" aria-hidden="true"></i>{m.deadline()}</span
@@ -1465,6 +1651,21 @@
 								type="button"
 								aria-label="{m.remove()} {folderName.get(id)}"
 								onclick={() => toggleFolder(id)}><i class="fa-solid fa-xmark"></i></button
+							>
+						</span>
+					{/each}
+					{#each [...selectedLabels, ...selectedAuthors] as id (id)}
+						<span class="chip preset-tonal-primary text-xs">
+							<i class="fa-solid {selectedLabels.has(id) ? 'fa-tag' : 'fa-user'}" aria-hidden="true"
+							></i>{optionName.get(id)}
+							<button
+								type="button"
+								aria-label="{m.remove()} {optionName.get(id)}"
+								onclick={() =>
+									selectedLabels.has(id)
+										? (selectedLabels = toggleIn(selectedLabels, id))
+										: (selectedAuthors = toggleIn(selectedAuthors, id))}
+								><i class="fa-solid fa-xmark"></i></button
 							>
 						</span>
 					{/each}
@@ -1705,7 +1906,7 @@
 									</tr>
 								{/each}
 							{:else}
-								{#each outcomeDomains as d (d.key)}
+								{#each outcomeDomains as d (d.id)}
 									<tr class="border-t">
 										<td class="px-2 py-1.5 font-mono text-xs">{d.key}</td>
 										<td class="px-2 py-1.5 text-center">{d.audits.length}</td>
@@ -1861,22 +2062,38 @@
 			</div>
 		{/if}
 
-		{#if view === 'requirement' && selectedReqs.size > 0}
-			<div class="flex items-center gap-2">
-				<a
-					class="btn btn-sm preset-filled-primary-500 text-xs"
-					href={bulkEvidenceUrl}
-					data-sveltekit-reload
-					download
-				>
-					<i class="fa-solid fa-file-zipper mr-1" aria-hidden="true"></i>
-					{m.exportSelectedRequirementsEvidences({ count: selectedReqs.size })}
-				</a>
-				<button
-					type="button"
-					class="text-xs text-primary-600-400 hover:underline"
-					onclick={() => (selectedReqs = new Set())}>{m.clearSelection()}</button
-				>
+		{#if view === 'requirement'}
+			<div class="flex flex-wrap items-center gap-2">
+				{#if exportReqCount > 0}
+					<a
+						class="btn btn-sm preset-filled-primary-500 text-xs"
+						href={bulkEvidenceUrl}
+						data-sveltekit-reload
+						download
+					>
+						<i class="fa-solid fa-file-zipper mr-1" aria-hidden="true"></i>
+						{m.exportSelectedRequirementsEvidences({ count: exportReqCount })}
+					</a>
+					<button
+						type="button"
+						class="text-xs text-primary-600-400 hover:underline"
+						onclick={clearEvidenceSelection}>{m.clearSelection()}</button
+					>
+				{:else}
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-primary-500 text-xs"
+						disabled
+						aria-describedby="evidence-export-hint"
+					>
+						<i class="fa-solid fa-file-zipper mr-1" aria-hidden="true"></i>
+						{m.exportEvidences()}
+					</button>
+					<span id="evidence-export-hint" class="text-xs text-surface-600-400">
+						<i class="fa-regular fa-square-check mr-1" aria-hidden="true"
+						></i>{m.evidenceExportHint()}
+					</span>
+				{/if}
 			</div>
 		{/if}
 		<div class="ml-auto text-xs text-surface-600-400">
@@ -1896,7 +2113,19 @@
 			<table class="w-full text-sm">
 				<thead class="bg-surface-50-950 text-left">
 					<tr>
-						<th class="px-3 py-2 w-32">{m.refLabel()}</th>
+						<th class="px-3 py-2 w-32 whitespace-nowrap">
+							<input
+								type="checkbox"
+								class="checkbox mr-1"
+								checked={allReqSelection === 'all'}
+								indeterminate={allReqSelection === 'some'}
+								disabled={flatReqUrns.length === 0}
+								aria-label={m.selectAll()}
+								title={m.selectAll()}
+								onchange={(e) => toggleReqs(flatReqUrns, e.currentTarget.checked)}
+							/>
+							{m.refLabel()}
+						</th>
 						<th class="px-3 py-2">{m.sectionOrRequirement()}</th>
 						<th class="px-3 py-2 w-24 text-center">{m.coverage()}</th>
 						{#if showCompliance}
@@ -1925,9 +2154,9 @@
 										type="checkbox"
 										class="checkbox mr-1"
 										checked={sectionUrns.length > 0 &&
-											sectionUrns.every((u) => selectedReqs.has(u))}
-										indeterminate={sectionUrns.some((u) => selectedReqs.has(u)) &&
-											!sectionUrns.every((u) => selectedReqs.has(u))}
+											sectionUrns.every((u) => reqSelection(u) === 'all')}
+										indeterminate={sectionUrns.some((u) => reqSelection(u) !== 'none') &&
+											!sectionUrns.every((u) => reqSelection(u) === 'all')}
 										disabled={sectionUrns.length === 0}
 										aria-label="{m.selectForEvidenceExport()}: {section.ref}"
 										onclick={(e) => e.stopPropagation()}
@@ -1993,11 +2222,11 @@
 										<input
 											type="checkbox"
 											class="checkbox mr-1"
-											checked={selectedReqs.has(req.urn)}
+											checked={reqSelection(req.urn) === 'all'}
+											indeterminate={reqSelection(req.urn) === 'some'}
 											aria-label="{m.selectForEvidenceExport()}: {req.ref_id}"
-											onclick={(e) => e.stopPropagation()}
+											onclick={(e) => onReqCheck(e, req.urn)}
 											onkeydown={(e) => e.stopPropagation()}
-											onchange={(e) => toggleReqs([req.urn], e.currentTarget.checked)}
 										/>
 										<span class="inline-block w-3 text-surface-500"
 											>{expandedRows.has(req.urn) ? '▾' : '▸'}</span
@@ -2032,33 +2261,17 @@
 									{@render scoreCells(req.scores, 'px-3 py-2 text-right font-mono')}
 								</tr>
 								{#if expandedRows.has(req.urn)}
-									{@const exportIds = evidenceAuditIds(req.rows)}
 									<tr class="bg-surface-50-950 border-t">
 										<td></td>
 										<td colspan={requirementColumns - 1} class="px-3 py-2">
-											<div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-												<span class="text-xs text-surface-600-400"
-													>{m.perAssessmentBreakdown()}</span
-												>
-												<a
-													class="btn btn-sm preset-outlined-primary-500 text-xs {exportIds.length ===
-													0
-														? 'pointer-events-none opacity-50'
-														: ''}"
-													href={evidenceExportUrl(req.urn, req.rows)}
-													aria-disabled={exportIds.length === 0}
-													data-sveltekit-reload
-													download
-												>
-													<i class="fa-solid fa-file-zipper mr-1"></i>
-													{m.exportRequirementEvidences({ count: exportIds.length })}
-												</a>
+											<div class="text-xs text-surface-600-400 mb-2">
+												{m.perAssessmentBreakdown()}
 											</div>
 											<table class="w-full text-xs">
 												<thead>
 													<tr class="text-left text-surface-600-400 whitespace-nowrap">
 														<th class="px-2 py-1.5 w-6"
-															><span class="sr-only">{m.includeInEvidenceExport()}</span></th
+															><span class="sr-only">{m.selectForEvidenceExport()}</span></th
 														>
 														<th class="px-2 py-1.5">{m.assessment()}</th>
 														{#if showCompliance}
@@ -2090,9 +2303,15 @@
 																<input
 																	type="checkbox"
 																	class="checkbox"
-																	checked={!evidenceExcluded.has(row.requirement_assessment_id)}
-																	onchange={() => toggleEvidenceRow(row.requirement_assessment_id)}
-																	aria-label="{m.includeInEvidenceExport()}: {row.compliance_assessment_name}"
+																	checked={selectedReqs.has(req.urn) &&
+																		!evidenceExcluded.has(row.requirement_assessment_id)}
+																	onchange={(e) =>
+																		setAuditRows(
+																			req.urn,
+																			[row.requirement_assessment_id],
+																			e.currentTarget.checked
+																		)}
+																	aria-label="{m.selectForEvidenceExport()}: {row.compliance_assessment_name}"
 																/>
 															</td>
 															<td class="px-2 py-1.5 min-w-64">
@@ -2216,7 +2435,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each perDomain as d (d.key)}
+					{#each perDomain as d (d.id)}
 						{@const dCompliance = compliancePct(d.dist)}
 						<tr
 							class="border-t {d.folderId ? 'hover:bg-surface-100-900 cursor-pointer' : ''}"

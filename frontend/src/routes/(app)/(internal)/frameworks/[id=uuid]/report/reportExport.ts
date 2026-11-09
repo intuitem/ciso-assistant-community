@@ -15,10 +15,8 @@ export async function downloadWorkbook(fileName: string, sheets: Sheet[]): Promi
 		ws.getRow(1).font = { bold: true };
 		for (const row of sheet.rows) ws.addRow(row.map((c) => c ?? ''));
 		ws.columns.forEach((column, i) => {
-			const longest = Math.max(
-				sheet.columns[i]?.length ?? 0,
-				...sheet.rows.map((r) => String(r[i] ?? '').length)
-			);
+			let longest = sheet.columns[i]?.length ?? 0;
+			for (const r of sheet.rows) longest = Math.max(longest, String(r[i] ?? '').length);
 			column.width = Math.min(Math.max(longest + 2, 8), 60);
 		});
 		ws.views = [{ state: 'frozen', ySplit: 1 }];

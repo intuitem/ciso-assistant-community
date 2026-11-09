@@ -7923,8 +7923,6 @@
 	"monthsFromToday": "months from today",
 	"averageOverAudits": "average over {count} audits",
 	"outcomeMetCount": "{met} of {total} audits",
-	"exportRequirementEvidences": "Export evidences ({count} audits)",
-	"includeInEvidenceExport": "Include in evidence export",
 	"noUsedFrameworks": "No framework is used by an audit you can view.",
 	"auditsCount": "{count} audits",
 	"byDomain": "By domain",
@@ -7936,5 +7934,7 @@
 	"searchDomains": "Search domains",
 	"byAudit": "By audit",
 	"selectForEvidenceExport": "Select for the evidence export",
-	"exportSelectedRequirementsEvidences": "Export evidences ({count} requirements)"
+	"exportSelectedRequirementsEvidences": "Export evidences ({count} requirements)",
+	"exportEvidences": "Export evidences",
+	"evidenceExportHint": "Tick requirements, or audits within a requirement, to export their evidences"
 }

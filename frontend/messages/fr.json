@@ -7923,8 +7923,6 @@
 	"monthsFromToday": "mois à partir d'aujourd'hui",
 	"averageOverAudits": "moyenne sur {count} audits",
 	"outcomeMetCount": "{met} audits sur {total}",
-	"exportRequirementEvidences": "Exporter les preuves ({count} audits)",
-	"includeInEvidenceExport": "Inclure dans l'export des preuves",
 	"noUsedFrameworks": "Aucun référentiel n'est utilisé par un audit visible.",
 	"auditsCount": "{count} audits",
 	"byDomain": "Par domaine",
@@ -7936,5 +7934,7 @@
 	"searchDomains": "Rechercher un domaine",
 	"byAudit": "Par audit",
 	"selectForEvidenceExport": "Sélectionner pour l'export des preuves",
-	"exportSelectedRequirementsEvidences": "Exporter les preuves ({count} exigences)"
+	"exportSelectedRequirementsEvidences": "Exporter les preuves ({count} exigences)",
+	"exportEvidences": "Exporter les preuves",
+	"evidenceExportHint": "Cochez des exigences, ou des audits dans une exigence, pour exporter leurs preuves"
 }

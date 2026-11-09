@@ -11183,10 +11183,19 @@ class FrameworkViewSet(BaseModelViewSet):
         if campaign_id:
             LIVE_STATUSES = LIVE_STATUSES + ("planned",)
 
-        visible_cas_qs = ComplianceAssessment.objects.filter(
-            framework=framework,
-            id__in=viewable_ca_ids,
-        ).select_related("folder")
+        visible_cas_qs = (
+            ComplianceAssessment.objects.filter(
+                framework=framework,
+                id__in=viewable_ca_ids,
+            )
+            .select_related("folder")
+            .prefetch_related(
+                "filtering_labels",
+                "authors__user",
+                "authors__team",
+                "authors__entity",
+            )
+        )
         campaign_scope = None
         if campaign_id:
             visible_cas_qs = visible_cas_qs.filter(campaign_id=campaign_id)
@@ -11508,6 +11517,14 @@ class FrameworkViewSet(BaseModelViewSet):
                 "folder_path_ids": [str(f.id) for f in folder_chain_for(ca.folder)],
                 "eta": ca.eta,
                 "due_date": ca.due_date,
+                "labels": [
+                    {"id": str(label.id), "name": label.label}
+                    for label in ca.filtering_labels.all()
+                ],
+                "authors": [
+                    {"id": str(actor.id), "name": str(actor)}
+                    for actor in ca.authors.all()
+                ],
                 "outcomes": outcomes_of(ca) if ca.id in audits_by_id else None,
                 "is_counted": ca.status in LIVE_STATUSES,
                 **(
@@ -11537,7 +11554,13 @@ class FrameworkViewSet(BaseModelViewSet):
                     "outcomes_definition": [
                         {
                             key: rule.get(key)
-                            for key in ("ref_id", "kind", "annotation", "label")
+                            for key in (
+                                "ref_id",
+                                "kind",
+                                "annotation",
+                                "label",
+                                "implementation_groups",
+                            )
                         }
                         | {
                             "translations": {
@@ -11570,8 +11593,10 @@ class FrameworkViewSet(BaseModelViewSet):
 
         Query params:
           - requirement (urn, required): repeat it, or separate urns with commas.
-          - compliance_assessments (comma-separated uuids): defaults to every readable audit.
+          - compliance_assessments (comma-separated uuids): defaults to every
+            readable audit; present but empty selects none.
           - exclude (comma-separated requirement assessment uuids): left out.
+          - implementation_group (str): keep requirements of this group only.
         """
         framework = self.get_object()
         requirement_urns = list(
@@ -11593,8 +11618,8 @@ class FrameworkViewSet(BaseModelViewSet):
                 request.user, ComplianceAssessment
             ),
         )
-        audit_ids = request.query_params.get("compliance_assessments")
-        if audit_ids:
+        if "compliance_assessments" in request.query_params:
+            audit_ids = request.query_params.get("compliance_assessments", "")
             try:
                 ids = [UUID(i) for i in audit_ids.split(",") if i]
             except ValueError:
@@ -11616,14 +11641,40 @@ class FrameworkViewSet(BaseModelViewSet):
         viewable_evidences = set(
             RoleAssignment.get_viewable_object_ids(request.user, Evidence)
         )
-        ras = (
-            RequirementAssessment.objects.filter(
-                compliance_assessment__in=audits,
-                requirement__urn__in=requirement_urns,
+        viewable_controls = set(
+            RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+        )
+        ig_filter = request.query_params.get("implementation_group") or None
+        urn_set = set(requirement_urns)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        audit_roles = {}
+        allowed_ra_ids: set = set()
+        for audit in audits.select_related("folder"):
+            audit_roles[audit.id] = (
+                "respondent"
+                if respondent_folders and audit.folder_id in respondent_folders
+                else "auditor"
             )
+            scoped, _hidden = scoped_requirement_assessments(
+                audit, request.user, include_non_assessable=False
+            )
+            allowed_ra_ids.update(
+                ra.id
+                for ra in scoped
+                if ra.requirement.urn in urn_set
+                and (
+                    not ig_filter
+                    or ig_filter in (ra.requirement.implementation_groups or [])
+                )
+            )
+        ras = (
+            RequirementAssessment.objects.filter(id__in=allowed_ra_ids)
             .exclude(id__in=excluded)
             .select_related("compliance_assessment__folder", "requirement")
-            .prefetch_related("evidences", "applied_controls__evidences")
+            .prefetch_related(
+                "evidences__revisions",
+                "applied_controls__evidences__revisions",
+            )
             .order_by(
                 "compliance_assessment__folder__name",
                 "compliance_assessment__name",
@@ -11638,19 +11689,58 @@ class FrameworkViewSet(BaseModelViewSet):
                 or "_"
             )
 
-        index = io.StringIO()
-        writer = csv.writer(index)
-        writer.writerow(["domain", "audit", "requirement", "evidence", "link", "file"])
+        from django.utils.translation import gettext
+
+        index_wb = Workbook()
+        index_ws = index_wb.active
+        index_ws.title = gettext("Evidence")
+        index_ws.append(
+            [
+                gettext("Domain"),
+                gettext("Audit"),
+                gettext("Requirement"),
+                gettext("Evidence"),
+                gettext("Applied control"),
+                gettext("Link"),
+            ]
+        )
+        domain_paths: dict = {}
         temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
         try:
             with zipfile.ZipFile(temp_file, "w") as zipf:
                 taken_dirs: set = set()
                 for ra in ras:
                     ca = ra.compliance_assessment
-                    direct = {e.id: e for e in ra.evidences.all()}
+                    if ca.folder_id not in domain_paths:
+                        domain_paths[ca.folder_id] = (
+                            " / ".join(f.name for f in ca.folder.get_folder_full_path())
+                            if ca.folder
+                            else ""
+                        )
+                    role = audit_roles[ca.id]
+                    evidences_visible = is_field_visible_to(ca, "evidences", role)
+                    direct = (
+                        {e.id: e for e in ra.evidences.all()}
+                        if evidences_visible
+                        else {}
+                    )
+                    controls = (
+                        [
+                            ac
+                            for ac in ra.applied_controls.all()
+                            if ac.id in viewable_controls
+                        ]
+                        if evidences_visible
+                        and is_field_visible_to(ca, "applied_controls", role)
+                        else []
+                    )
+                    carriers: dict = {}
+                    for ac in controls:
+                        for e in ac.evidences.all():
+                            carriers.setdefault(e.id, []).append(ac.name)
                     indirect = {
                         e.id: e
-                        for ac in ra.applied_controls.all()
+                        for ac in controls
                         for e in ac.evidences.all()
                         if e.id not in direct
                     }
@@ -11675,7 +11765,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     for evidence in evidences.values():
                         entry = names.get(evidence.id)
                         written = ""
-                        revision = evidence.last_revision if entry else None
+                        revision = evidence.last_revision
                         if revision and revision.attachment:
                             try:
                                 with default_storage.open(
@@ -11690,23 +11780,34 @@ class FrameworkViewSet(BaseModelViewSet):
                                     "evidence file unreadable, omitted from archive",
                                     evidence_id=evidence.id,
                                 )
-                        writer.writerow(
+                        target = written or (revision.link if revision else "") or ""
+                        index_ws.append(
                             [
-                                " / ".join(
-                                    f.name for f in ca.folder.get_folder_full_path()
+                                sanitize_xlsx_value(value)
+                                for value in (
+                                    domain_paths[ca.folder_id],
+                                    ca.name,
+                                    ra.requirement.ref_id or ra.requirement.urn,
+                                    evidence.name,
+                                    ""
+                                    if evidence.id in direct
+                                    else ", ".join(carriers.get(evidence.id, [])),
+                                    target,
                                 )
-                                if ca.folder
-                                else "",
-                                ca.name,
-                                ra.requirement.ref_id or ra.requirement.urn,
-                                evidence.name,
-                                "direct"
-                                if evidence.id in direct
-                                else "applied_control",
-                                written or (revision.link if revision else "") or "",
                             ]
                         )
-                zipf.writestr("index.csv", index.getvalue())
+                        if written or target.startswith(("http://", "https://")):
+                            index_ws.cell(
+                                row=index_ws.max_row, column=6
+                            ).hyperlink = target
+                index_ws.freeze_panes = "A2"
+                for cell in index_ws[1]:
+                    cell.font = Font(bold=True)
+                for column, width in zip("ABCDEF", (30, 30, 14, 40, 30, 60)):
+                    index_ws.column_dimensions[column].width = width
+                index_buffer = io.BytesIO()
+                index_wb.save(index_buffer)
+                zipf.writestr("index.xlsx", index_buffer.getvalue())
             temp_file.seek(0)
             if several:
                 filename = f"{sanitize(framework.name)}-evidences.zip"

@@ -33,13 +33,14 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 | **Per-section breakdown** | Requirement rows grouped by their immediate parent section |
 | **Implementation-group filter** | Narrow the report to a single IG via the **Implementation group** dropdown |
 | **Verdicts** | For frameworks with outcome rules, how many of the filtered audits meet each verdict, and the average of each computed number. **By audit** shows each audit's verdicts and values; **By domain** counts them per domain at the chosen depth |
-| **Excel export** | **Export (Excel)** downloads what the filters show: audits (with dates, scores and one column per verdict), requirements, domains with their requirements, verdicts per domain, and one row per requirement per audit |
+| **Excel export** | **Export (Excel)** downloads what the filters show: audits (with authors, labels, dates, scores and one column per verdict), requirements, domains with their requirements, verdicts per domain, and one row per requirement per audit |
 
 ## Filters
 
 The **Filters** panel at the top of the report drives every figure below it: indicators, distribution, verdicts, tables and the Excel export.
 
 - **Domains**: tick one or more domains, at any depth, or search them by name. An audit is kept when one of the ticked domains is on its path, so you can combine branches of the tree (for example two regional nodes under different parents). Domains under a ticked one show as already included.
+- **Labels** and **Authors**: keep the audits carrying one of the ticked labels, or written by one of the ticked authors.
 - **Implementation group**: narrow the report to a single group.
 - **Deadline**: pick **ETA** or **Due date**, then **Overdue**, **Next 3 / 6 / 12 months**, or **Custom** for a window in months from today. In a custom window, `3 → 6` keeps audits due between three and six months from now, and a negative bound reaches back into overdue audits. Audits without that date are left out while the filter is on.
 
@@ -54,9 +55,7 @@ The **View** toggle in the filter bar switches the body of the report between tw
 
 ## Exporting evidences
 
-In the **Per-assessment breakdown** of a requirement, **Export evidences** downloads a zip of that requirement's evidences across the audits listed, one folder per domain and audit. It includes evidences attached to the requirement and those attached to its applied controls, limited to the evidences you can read. Untick an audit to leave it out. An `index.csv` in the zip lists every evidence with its audit, and its link when it has no file.
-
-To export several requirements at once, tick them in the **Requirements tree** (a section's box ticks all its requirements), then click **Export evidences (N requirements)** above the table. The zip covers the filtered audits, with one folder per domain, audit and requirement. Audits unticked in a requirement's breakdown stay out.
+Tick what to export in the **Requirements tree**: a requirement covers all its audits, a section ticks all its requirements, and in a requirement's **Per-assessment breakdown** each audit can be ticked on its own (the requirement then shows as partly ticked). The box in the **Ref.** header ticks every requirement shown. **Export evidences (N requirements)** above the table downloads one zip for the selection, over the filtered audits, with one folder per domain and audit, plus one per requirement when several are exported. It includes evidences attached to the requirements and those attached to their applied controls, limited to the evidences you can read. An `index.xlsx` at the root of the zip lists every evidence with its domain, audit and requirement, the applied control it comes from when it is not attached to the requirement directly, and a clickable link to its file in the zip, or to its URL when it has no file.
 
 ## What gets counted
 
