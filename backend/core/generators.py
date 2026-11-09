@@ -640,6 +640,159 @@ def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezon
     }
 
 
+def _all_readable(obj) -> bool:
+    return True
+
+
+def nis2_notification_context(
+    incident, breaches, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
+):
+    """Payload for the NIS2 notification worksheet, laid out like the CCB form.
+
+    Empty strings are the fields the user still has to supply on the authority's
+    form: the template flags them instead of hiding them. `readable(obj)` keeps
+    linked objects the requester cannot view out of the PDF.
+    """
+    stamp = lambda v: format_report_timestamp(v, tz, empty="")  # noqa: E731
+    seen = lambda objs: [o for o in objs if readable(o)]
+    controls = seen(incident.applied_controls.all())
+    next_stage = incident.nis2_next_stage()
+    return {
+        "lang": lang,
+        "id": str(incident.id),
+        **_report_time_context(tz),
+        "incident": {
+            "ref_id": incident.ref_id or "",
+            "name": incident.name or "",
+            "folder": str(incident.folder) if incident.folder else "",
+            "owners": ", ".join(str(o) for o in incident.owners.all()),
+            "description": incident.description or "",
+            "severity_key": str(incident.severity or ""),
+            "status_key": incident.status or "",
+            "malicious_intent": incident.nis2_malicious_intent or "",
+            "cross_border_impact": incident.nis2_cross_border_impact or "",
+            "incident_types": [q.name for q in seen(incident.qualifications.all())]
+            + [t.name for t in seen(incident.threats.all())],
+            "assets": [a.name for a in seen(incident.assets.all())],
+            "entities": [e.name for e in seen(incident.entities.all())],
+            "root_cause": incident.root_cause or "",
+            "resolution": incident.resolution or "",
+            "is_bcp_activated": incident.is_bcp_activated,
+            "resolved": incident.status in ("resolved", "closed"),
+            "occurred_at": stamp(incident.occurred_at),
+            "reported_at": stamp(incident.reported_at),
+            "reference": incident.nis2_reference or "",
+            "significant": incident.nis2_significant,
+            "detection_key": incident.detection or "",
+        },
+        # the CCB form asks for the chronology of all actions taken
+        "timeline": [
+            {"timestamp": stamp(e.timestamp), "entry": e.entry or ""}
+            for e in seen(incident.timeline_entries.order_by("timestamp"))
+        ],
+        "actions": [{"name": c.name, "status_key": c.status or ""} for c in controls],
+        "stages": [
+            {
+                "stage": s["stage"],
+                "due": stamp(s["due"]),
+                "done_at": stamp(s["done_at"]),
+                "overdue": s["overdue"],
+            }
+            for s in incident.nis2_deadlines()
+        ],
+        "next_stage": next_stage["stage"] if next_stage else "",
+        "breaches": [
+            {
+                "name": b.name,
+                "discovered_on": stamp(b.discovered_on),
+                "notified_on": stamp(b.authority_notified_on),
+                "due": stamp(b.authority_notification_due),
+            }
+            for b in breaches
+        ],
+    }
+
+
+def breach_notification_context(
+    breach, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
+):
+    """Payload for the GDPR art. 33 worksheet, laid out like the APD/GBA form (part 1).
+    `readable(obj)` keeps linked objects the requester cannot view out of the PDF."""
+    stamp = lambda v: format_report_timestamp(v, tz, empty="")  # noqa: E731
+    seen = lambda objs: [o for o in objs if readable(o)]
+    incident = (
+        breach.incident if breach.incident and readable(breach.incident) else None
+    )
+    processings = seen(breach.affected_processings.all())
+    late = breach.authority_notification_overdue or (
+        breach.authority_notified_on is not None
+        and breach.authority_notification_due is not None
+        and breach.authority_notified_on > breach.authority_notification_due
+    )
+    personal_data = seen(breach.affected_personal_data.select_related("category"))
+    return {
+        "lang": lang,
+        "id": str(breach.id),
+        **_report_time_context(tz),
+        "breach": {
+            "ref_id": breach.ref_id or "",
+            "name": breach.name or "",
+            "folder": str(breach.folder) if breach.folder else "",
+            "assigned_to": ", ".join(str(a) for a in breach.assigned_to.all()),
+            "description": breach.description or "",
+            "breach_type": breach.breach_type or "",
+            "risk_level": breach.risk_level or "",
+            "status": breach.status or "",
+            "occurred_at": stamp(incident.occurred_at) if incident else "",
+            "discovered_on": stamp(breach.discovered_on),
+            "due": stamp(breach.authority_notification_due),
+            "notified_on": stamp(breach.authority_notified_on),
+            "notification_ref": breach.authority_notification_ref or "",
+            "late": late,
+            "authorities": [a.name for a in seen(breach.authorities.all())],
+            "subjects_count": breach.affected_subjects_count,
+            "subjects_notified_on": stamp(breach.subjects_notified_on),
+            "processings": [p.name for p in processings],
+            # name is optional: str() falls back to the legal basis
+            "purposes": sorted(
+                {str(pu) for p in processings for pu in seen(p.purposes.all())}
+            ),
+            "personal_data": [
+                {
+                    "name": str(pd),
+                    "category": str(pd.category) if pd.category else "",
+                    "sensitive": pd.is_sensitive,
+                }
+                for pd in personal_data
+            ],
+            "personal_data_count": breach.affected_personal_data_count,
+            "consequences": breach.potential_consequences or "",
+            "measures": [
+                {"name": c.name, "status_key": c.status or ""}
+                for c in seen(breach.remediation_measures.all())
+            ],
+            "observation": breach.observation or "",
+            "incident": incident.name if incident else "",
+            "resolved": breach.status == "privacy_closed",
+            "processors": sorted(
+                {
+                    str(c.entity or c)
+                    for p in processings
+                    for c in seen(
+                        p.contractors_involved.filter(
+                            relationship_type__in=(
+                                "privacy_data_processor",
+                                "privacy_sub_processor",
+                            )
+                        ).select_related("entity")
+                    )
+                    if c.entity is None or readable(c.entity)
+                }
+            ),
+        },
+    }
+
+
 def risk_assessment_context(
     assessment,
     scenarios,
@@ -1035,6 +1188,31 @@ def gen_audit_context(
             "observation_sensitive_point": "Observatie / aandachtspunt",
             "opportunity_for_improvement": "Verbetermogelijkheid",
             "good_practice": "Goede praktijk",
+        },
+        "tr": {
+            "compliant": "Uyumlu",
+            "partially_compliant": "Kısmen uyumlu",
+            "non_compliant": "Uyumsuz",
+            "not_applicable": "Uygulanamaz",
+            "not_assessed": "Değerlendirilmedi",
+            "to_do": "Yapılacak",
+            "on_hold": "Beklemede",
+            "in_progress": "Devam ediyor",
+            "deprecated": "Kullanımdan kaldırıldı",
+            "active": "Aktif",
+            "degraded": "Kötüleşti",
+            "policy": "Politika",
+            "process": "Süreç",
+            "technical": "Teknik",
+            "physical": "Fiziksel",
+            "procedure": "Prosedür",
+            "in_review": "İncelemede",
+            "done": "Tamamlandı",
+            "major_nonconformity": "Büyük uygunsuzluk",
+            "minor_nonconformity": "Küçük uygunsuzluk",
+            "observation_sensitive_point": "Gözlem / hassas nokta",
+            "opportunity_for_improvement": "İyileştirme fırsatı",
+            "good_practice": "İyi uygulama",
         },
     }
 
@@ -1464,6 +1642,13 @@ _STATE_LABELS = {
         Commitment.State.COMMITTED: "Engagé",
         Commitment.State.DECLINED: "Refusé",
         Commitment.State.FULFILLED: "Réalisé",
+    },
+    "tr": {
+        Commitment.State.UNDEFINED: "Tanımsız",
+        Commitment.State.IN_NEGOTIATION: "Müzakerede",
+        Commitment.State.COMMITTED: "Taahhüt edildi",
+        Commitment.State.DECLINED: "Reddedildi",
+        Commitment.State.FULFILLED: "Yerine getirildi",
     },
 }
 

@@ -475,6 +475,7 @@
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.exportButton()}
+										aria-label={m.exportButton()}
 										data-testid="export-button"
 										onclick={modalExport}
 									>
@@ -552,7 +553,7 @@
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
@@ -566,7 +567,7 @@
 										{/if}
 									</button>
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncEuvd()}
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"
@@ -648,7 +649,7 @@
 								{/if}
 								{#if URLModel === 'folders'}
 									<button
-										class="text-white inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										data-testid="import-button"
 										title={safeTranslate('importFolder')}
 										aria-label={safeTranslate('importFolder')}

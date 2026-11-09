@@ -7,7 +7,8 @@ import re
 import uuid
 import hashlib
 import operator
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from functools import reduce
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -3099,6 +3100,7 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         PROCESSING_NATURE = "processing.nature", "processingNature"
         PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
         ENTITY_SCORE_PROVIDER = "entity_score.provider", "entityScoreProvider"
+        ASSET_LIFECYCLE_STAGE = "asset.lifecycle_stage", "assetLifecycleStage"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -3504,6 +3506,45 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         },
     ]
 
+    DEFAULT_ASSET_LIFECYCLE_STAGES = [
+        {
+            "name": "planned",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "implementing",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "active",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "phasing_out",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "retired",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "archived",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+    ]
+
     DEFAULT_ENTITY_SCORE_PROVIDERS = [
         {
             "name": "SecurityScorecard",
@@ -3660,6 +3701,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
     @classmethod
     def create_default_entity_score_providers(cls):
         cls._seed_defaults(cls.DEFAULT_ENTITY_SCORE_PROVIDERS)
+
+    @classmethod
+    def create_default_asset_lifecycle_stages(cls):
+        cls._seed_defaults(cls.DEFAULT_ASSET_LIFECYCLE_STAGES)
 
     @classmethod
     def create_default_metric_units(cls):
@@ -5259,6 +5304,15 @@ class Asset(
         blank=True,
         null=True,
     )
+    lifecycle_stage = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="assets_lifecycle_stage",
+        limit_choices_to={"field_path": Terminology.FieldPath.ASSET_LIFECYCLE_STAGE},
+        verbose_name=_("Lifecycle stage"),
+    )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     is_business_function = models.BooleanField("is_business_function", default=False)
@@ -6759,6 +6813,11 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         INTERNAL = "internally_detected", "Internal"
         EXTERNAL = "externally_detected", "External"
 
+    class Answer(models.TextChoices):
+        YES = "yes", "Yes"
+        NO = "no", "No"
+        UNCERTAIN = "uncertain", "Uncertain"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -6854,12 +6913,84 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Task templates"),
         related_name="incidents",
     )
+    root_cause = models.TextField(null=True, blank=True, verbose_name=_("Root cause"))
+    # NIS2 art. 23: significant incidents go to the CSIRT/competent authority
+    nis2_significant = models.BooleanField(
+        null=True, blank=True, verbose_name=_("Significant incident (NIS2)")
+    )
+    nis2_early_warning_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 early warning sent at")
+    )
+    nis2_notification_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 incident notification sent at")
+    )
+    nis2_final_report_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 final report sent at")
+    )
+    nis2_reference = models.CharField(
+        max_length=255, blank=True, verbose_name=_("NIS2 notification reference")
+    )
+    # asked from the 24h early warning on (CCB form: Malicious_Intent, Cross_Border_Impact)
+    nis2_malicious_intent = models.CharField(
+        max_length=20,
+        choices=Answer.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Suspected malicious intent"),
+    )
+    nis2_cross_border_impact = models.CharField(
+        max_length=20,
+        choices=Answer.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Cross-border impact"),
+    )
 
     fields_to_check = ["ref_id"]
 
     class Meta:
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
+
+    def nis2_deadlines(self) -> list[dict]:
+        """NIS2 art. 23(4) stages, clocked from awareness (reported_at)."""
+        aware = self.reported_at or self.created_at
+        if not self.nis2_significant or not aware:
+            return []
+        notification_due = aware + timedelta(hours=72)
+        stages = [
+            ("early_warning", aware + timedelta(hours=24), self.nis2_early_warning_at),
+            ("incident_notification", notification_due, self.nis2_notification_at),
+            (
+                "final_report",
+                (self.nis2_notification_at or notification_due)
+                + relativedelta(months=1),
+                self.nis2_final_report_at,
+            ),
+        ]
+        current = now()
+        return [
+            {
+                "stage": stage,
+                "due": due,
+                "done_at": done,
+                "overdue": done is None and current > due,
+            }
+            for stage, due, done in stages
+        ]
+
+    def nis2_next_stage(self) -> dict | None:
+        """The stage to act on: an overdue 72h notification first (a missed early
+        warning must not hide it, nor the upcoming final report), else the next
+        stage ahead, else the last one still open."""
+        pending = [s for s in self.nis2_deadlines() if s["done_at"] is None]
+        for s in pending:
+            if s["stage"] == "incident_notification" and s["overdue"]:
+                return s
+        upcoming = [s for s in pending if not s["overdue"]]
+        if upcoming:
+            return upcoming[0]
+        return pending[-1] if pending else None
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -10197,6 +10328,48 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
+    def requirement_layer_scores(
+        self, *, result, is_scored, score, documentation_score, min_score, max_score
+    ) -> dict:
+        """One requirement's implementation, documentation and maturity scores
+        on its own scale, counted as get_scores_for counts it: N/A at the target
+        when the audit anchors N/A, a missing documentation score at the bottom
+        of the scale, maturity the average of the two (the implementation score
+        when the audit has no documentation score). Layers that do not count
+        are None. min_score / max_score are the requirement's own bounds; None
+        falls back to the audit's."""
+        low = self.min_score if min_score is None else min_score
+        high = self.max_score if max_score is None else max_score
+        if result == RequirementAssessment.Result.NOT_APPLICABLE:
+            if not self.anchor_na_to_target or low is None or high is None:
+                implementation = None
+            else:
+                implementation = documentation = self.na_anchor_score(low, high)
+        elif is_scored and score is not None:
+            implementation = score
+            documentation = (
+                documentation_score if documentation_score is not None else low or 0
+            )
+        else:
+            implementation = None
+        if implementation is None:
+            return {
+                "implementation_score": None,
+                "documentation_score": None,
+                "maturity_score": None,
+            }
+        if not self.show_documentation_score:
+            return {
+                "implementation_score": implementation,
+                "documentation_score": None,
+                "maturity_score": implementation,
+            }
+        return {
+            "implementation_score": implementation,
+            "documentation_score": documentation,
+            "maturity_score": (implementation + documentation) / 2,
+        }
+
     def get_total_max_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
     ):
@@ -10526,7 +10699,7 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Result.COMPLIANT: "#86efac",
-            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#475569",
             RequirementAssessment.Status.TODO: "#9ca3af",
             RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
             RequirementAssessment.Status.IN_REVIEW: "#3b82f6",
@@ -11381,7 +11554,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     #      needs a persisted completion flag (rejected) or write-time answer
     #      cleanup (out of scope).
     #   2. result visible on the audit: result set
-    #   3. score-only audit: score strictly above the resolved minimum
+    #   3. score-only audit: not applicable (the applicability toggle sets it
+    #      and no score follows), or score strictly above the resolved minimum
     #      (requirement override, then audit, then framework). The scoring
     #      toggle pre-fills scores at that minimum, so a score left at min is
     #      indistinguishable from an untouched one and must not count.
@@ -11428,7 +11602,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 Value(0),
             )
         )
-        content = result_assessed if result_visible else score_progressed
+        content = (
+            result_assessed
+            if result_visible
+            else Q(result=cls.Result.NOT_APPLICABLE) | score_progressed
+        )
         if has_questions_annotation:
             # A question counts whether or not it computes anything: fully
             # answered seeded rows complete the carriers for informational
@@ -11482,6 +11660,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             return result_assessed or score_assessed or questionnaire_fully_answered
         if result_visible:
             return result_assessed
+        if result == RequirementAssessment.Result.NOT_APPLICABLE:
+            return True
         resolved_min = (
             requirement_min_score
             if requirement_min_score is not None
@@ -13492,6 +13672,15 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         "tprm.Contract",
         blank=True,
     )
+    # per-requirement and per-risk sign-off, not only per assessment
+    requirement_assessments = models.ManyToManyField(
+        "core.RequirementAssessment",
+        blank=True,
+    )
+    risk_scenarios = models.ManyToManyField(
+        "core.RiskScenario",
+        blank=True,
+    )
     request_notes = models.TextField(null=True, blank=True)
     requester = models.ForeignKey(
         User,
@@ -13579,6 +13768,8 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             "processings",
             "accreditations",
             "contracts",
+            "requirement_assessments",
+            "risk_scenarios",
         ]
         for field in model_fields:
             if getattr(self, field).exists():
@@ -14172,6 +14363,8 @@ auditlog.register(
         "security_exceptions",
         "policies",
         "processings",
+        "requirement_assessments",
+        "risk_scenarios",
     },
     exclude_fields=common_exclude,
 )

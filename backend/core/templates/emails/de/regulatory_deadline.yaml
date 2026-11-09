@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${deadline_count} regulatorische Meldefrist(en)"
+body: |
+  Hallo,
+
+  Die folgenden regulatorischen Meldefristen erfordern Ihre Aufmerksamkeit:
+
+  ${deadline_list}
+
+  Sobald eine Meldung an die Behörde gesendet wurde, erfassen Sie das Datum am Vorfall oder an der Datenpanne: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

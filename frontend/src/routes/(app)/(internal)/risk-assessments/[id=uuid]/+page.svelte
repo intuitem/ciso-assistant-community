@@ -314,8 +314,8 @@
 				</div>
 			</div>
 		{/if}
-		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex space-x-2 relative">
-			<div class="container w-1/3">
+		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex flex-col lg:flex-row gap-4 relative">
+			<div class="container lg:w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{#if risk_assessment.perimeter}
 						{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
@@ -367,7 +367,7 @@
 					{/key}
 				{/if}
 			</div>
-			<div class="container w-2/3">
+			<div class="container lg:w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="risk-matrix-field-title">{m.riskMatrix()}:</span>
 					<Anchor
@@ -397,106 +397,114 @@
 					<MarkdownRenderer content={risk_assessment.description} />
 				</div>
 			</div>
-			<div class="flex flex-col space-y-2 ml-4">
-				<div class="flex flex-row space-x-2">
-					<button
-						type="button"
-						class="btn preset-filled-primary-500 w-full"
-						onclick={modalExport}
-						data-testid="export-button"
-					>
-						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-					</button>
+			<div class="flex flex-col space-y-2 w-full lg:w-80 xl:w-96 shrink-0">
+				<!-- Same pattern as the audit header: filled primary first, the rest quiet. -->
+				<div class="action-grid">
 					{#if canEditObject}
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
 							label={m.edit()}
-							class="btn preset-filled-primary-500 w-full"
+							class="btn preset-filled-primary-500"
 							data-testid="edit-button"
 						>
 							<i class="fa-solid fa-edit mr-2"></i>
 							{m.edit()}</Anchor
 						>
 					{/if}
+					<button
+						type="button"
+						class="btn btn-quiet"
+						onclick={modalExport}
+						data-testid="export-button"
+					>
+						<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
+					</button>
+					<Anchor
+						label={m.actionPlan()}
+						href={withParams(`/risk-assessments/${risk_assessment.id}/action-plan`, selectionQuery)}
+						class="btn btn-quiet"
+						data-testid="action-plan-button"
+						><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}
+						{#if scoped && selection}
+							<span class="badge preset-tonal-primary ml-2 text-xs">
+								{m.scenarioCount({ count: selection.count })}
+							</span>
+						{/if}</Anchor
+					>
+					<Anchor
+						label={m.analytics()}
+						href="/risk-assessments/{risk_assessment.id}/analytics"
+						class="btn btn-quiet"
+						><i class="fa-solid fa-chart-line mr-2 text-indigo-500"></i>{m.analytics()}</Anchor
+					>
+					<Anchor
+						label={m.riskTrajectory()}
+						href="/risk-assessments/{risk_assessment.id}/trajectory"
+						class="btn btn-quiet"
+						><i class="fa-solid fa-route mr-2 text-teal-500"></i>{m.riskTrajectory()}</Anchor
+					>
+					<AuditTrailButton
+						model="risk-assessments"
+						objectId={risk_assessment.id}
+						folderId={risk_assessment.folder?.id ?? user.root_folder_id}
+					/>
 				</div>
-				<AuditTrailButton
-					model="risk-assessments"
-					objectId={risk_assessment.id}
-					folderId={risk_assessment.folder?.id ?? user.root_folder_id}
-				/>
-				<Anchor
-					label={m.actionPlan()}
-					href={withParams(`/risk-assessments/${risk_assessment.id}/action-plan`, selectionQuery)}
-					class="btn preset-filled-primary-500"
-					data-testid="action-plan-button"
-					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}
-					{#if scoped && selection}
-						<span class="badge preset-tonal ml-2 text-xs">
-							{m.scenarioCount({ count: selection.count })}
-						</span>
-					{/if}</Anchor
-				>
-				<Anchor
-					label={m.analytics()}
-					href="/risk-assessments/{risk_assessment.id}/analytics"
-					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
-				>
-				<Anchor
-					label={m.riskTrajectory()}
-					href="/risk-assessments/{risk_assessment.id}/trajectory"
-					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-route mr-2"></i>{m.riskTrajectory()}</Anchor
-				>
-				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
-				<button
-					class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
-					onclick={(_) => modalDuplicateForm()}
-					data-testid="duplicate-button"
-				>
-					<i class="fa-solid fa-copy mr-2"></i>
-					{m.duplicate()}</button
-				>
-				{#if !risk_assessment?.is_locked}
-					<button
-						class="btn text-white bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-						onclick={async () => {
-							await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
-						}}
+				<div class="pt-3 mt-1 border-t border-surface-200-800 space-y-1.5">
+					<span
+						class="text-xs font-semibold text-surface-400-600 uppercase tracking-widest select-none"
+						>{m.powerUps()}</span
 					>
-						<span class="mr-2">
-							{#if syncingToActionsIsLoading}
-								<Progress value={null}>
-									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
-										<Progress.CircleTrack />
-										<Progress.CircleRange class="stroke-white" />
-									</Progress.Circle>
-								</Progress>
-							{:else}
-								<i class="fa-solid fa-arrows-rotate mr-2"></i>
-							{/if}
-						</span>
-						{m.syncToAppliedControls()}
-					</button>
-				{/if}
-				<Anchor
-					href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
-					label={m.convertToQuantitative()}
-					class="btn text-white bg-linear-to-r from-purple-500 to-pink-500"
-				>
-					<i class="fa-solid fa-calculator mr-2"></i>
-					{m.convertToQuantitative()}
-				</Anchor>
-				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
+				</div>
+				<div class="grid grid-cols-2 gap-2">
 					<button
-						class="btn text-white bg-linear-to-r from-orange-500 to-amber-500"
-						onclick={() => modalRequestValidation()}
-						data-testid="request-validation-button"
+						class="action-tile"
+						onclick={(_) => modalDuplicateForm()}
+						data-testid="duplicate-button"
 					>
-						<i class="fa-solid fa-check-circle mr-2"></i>
-						{m.requestValidation()}
-					</button>
-				{/if}
+						<i class="fa-solid fa-copy text-fuchsia-500"></i>
+						{m.duplicate()}</button
+					>
+					{#if !risk_assessment?.is_locked}
+						<button
+							class="action-tile"
+							onclick={async () => {
+								await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
+							}}
+						>
+							<span>
+								{#if syncingToActionsIsLoading}
+									<Progress value={null}>
+										<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+											<Progress.CircleTrack />
+											<Progress.CircleRange class="stroke-current" />
+										</Progress.Circle>
+									</Progress>
+								{:else}
+									<i class="fa-solid fa-arrows-rotate text-cyan-500"></i>
+								{/if}
+							</span>
+							{m.syncToAppliedControls()}
+						</button>
+					{/if}
+					<Anchor
+						href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
+						label={m.convertToQuantitative()}
+						class="action-tile"
+					>
+						<i class="fa-solid fa-calculator text-yellow-600"></i>
+						{m.convertToQuantitative()}
+					</Anchor>
+					{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
+						<button
+							class="action-tile"
+							onclick={() => modalRequestValidation()}
+							data-testid="request-validation-button"
+						>
+							<i class="fa-solid fa-check-circle text-amber-500"></i>
+							{m.requestValidation()}
+						</button>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>

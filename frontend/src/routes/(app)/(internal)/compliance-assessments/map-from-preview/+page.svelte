@@ -32,7 +32,7 @@
 		compliant: '#86efac',
 		non_compliant: '#f87171',
 		partially_compliant: '#fde047',
-		not_applicable: '#000000',
+		not_applicable: '#475569',
 		not_assessed: '#d1d5db'
 	};
 

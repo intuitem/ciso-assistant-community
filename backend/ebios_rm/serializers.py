@@ -44,6 +44,13 @@ class EbiosRMStudyWriteSerializer(
         return value
 
 
+class EbiosRMStudyDuplicateSerializer(BaseModelSerializer):
+    # `folder` is the destination domain; it defaults to the source's folder
+    class Meta:
+        model = EbiosRMStudy
+        fields = ["name", "ref_id", "version", "description", "folder"]
+
+
 class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
