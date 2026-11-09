@@ -19,6 +19,7 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
+from core.startup import BASELINE_READER_PERMISSIONS_LIST
 from core.utils import get_global_currency, time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
@@ -241,45 +242,79 @@ class BaseModelSerializer(serializers.ModelSerializer):
             self._check_object_perm(obj, "add", folder=saved_folder)
 
     def _check_m2m_visibility(self, validated_data: dict) -> None:
-        """Verify that all M2M linked objects are visible to the requesting user."""
+        """A new link needs view on its target, or change for fields in
+        Meta.link_requires_change, whose save alters the target."""
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return
         user = request.user
-        accessible_cache: dict = {}
+        requires_change = getattr(self.Meta, "link_requires_change", ())
+        has_instance = self.instance is not None and not isinstance(self.instance, list)
         for field_name, value in validated_data.items():
-            if not isinstance(value, list) or not value:
+            items = [value] if isinstance(value, models.Model) else value
+            if not isinstance(items, list) or not items:
                 continue
-            if not all(isinstance(item, models.Model) for item in value):
+            if not all(isinstance(item, models.Model) for item in items):
                 continue
-            related_model = type(value[0])
-            if related_model not in accessible_cache:
-                try:
-                    ids = RoleAssignment.get_viewable_object_ids(user, related_model)
-                    accessible_cache[related_model] = {str(i) for i in ids}
-                except NotImplementedError, Permission.DoesNotExist:
-                    accessible_cache[related_model] = None
-            accessible_ids = accessible_cache[related_model]
-            if accessible_ids is None:
+            related_model = type(items[0])
+            if related_model is Folder:
                 continue
-            # keeping an already-linked object is not linking a new one
             current_ids: set = set()
-            if self.instance is not None and not isinstance(self.instance, list):
+            if has_instance and items is not value:
+                current_ids = {str(getattr(self.instance, f"{field_name}_id", None))}
+            elif has_instance:
                 manager = getattr(self.instance, field_name, None)
                 if manager is not None and hasattr(manager, "values_list"):
                     current_ids = {
                         str(pk) for pk in manager.values_list("pk", flat=True)
                     }
-            for item in value:
-                if (
-                    str(item.id) not in accessible_ids
-                    and str(item.id) not in current_ids
-                ):
+            new_ids = {str(item.pk) for item in items} - current_ids
+            if not new_ids:
+                continue
+            try:
+                visible = {str(pk) for pk in self._viewable_ids(related_model)}
+            except NotImplementedError, Permission.DoesNotExist:
+                continue
+            hidden = new_ids - visible
+            if hidden and (
+                f"view_{related_model._meta.model_name}"
+                in BASELINE_READER_PERMISSIONS_LIST
+            ):
+                hidden -= self._global_ids(related_model, hidden)
+            if hidden:
+                raise PermissionDenied(
+                    {
+                        field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
+                    }
+                )
+            if field_name in requires_change:
+                changeable = {
+                    str(pk)
+                    for pk in RoleAssignment.get_changeable_object_ids(
+                        user, related_model
+                    )
+                }
+                if new_ids - changeable:
                     raise PermissionDenied(
                         {
-                            field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
+                            field_name: f"You do not have permission to change this {related_model._meta.model_name}"
                         }
                     )
+
+    @staticmethod
+    def _global_ids(model: type[models.Model], ids: set) -> set:
+        """Baseline-readable objects in Global are shared, even with users
+        outside builtin groups."""
+        try:
+            field = RoleAssignment.get_iam_folder_field(model)
+        except NotImplementedError:
+            return set()
+        return {
+            str(pk)
+            for pk in model.objects.filter(
+                pk__in=ids, **{field: Folder.get_root_folder().id}
+            ).values_list("pk", flat=True)
+        }
 
     def _check_reverse_m2m_change(self, validated_data: dict) -> None:
         """A reverse many-to-many (declared on the other model) edits the objects
@@ -905,6 +940,7 @@ class RiskAssessmentWriteSerializer(
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
+        link_requires_change = ("ebios_rm_study",)
 
 
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):

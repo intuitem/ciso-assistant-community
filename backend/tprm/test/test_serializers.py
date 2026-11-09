@@ -1,5 +1,7 @@
 from unittest.mock import patch, MagicMock, PropertyMock
 
+import pytest
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
@@ -20,6 +22,12 @@ from tprm.serializers import (
 )
 
 User = get_user_model()
+
+
+@pytest.fixture(autouse=True)
+def skip_link_visibility():
+    with patch("core.serializers.BaseModelSerializer._check_m2m_visibility"):
+        yield
 
 
 class EntitySerializersTestCase(TestCase):

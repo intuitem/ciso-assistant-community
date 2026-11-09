@@ -784,6 +784,7 @@ class EntityAssessmentWriteSerializer(
     class Meta:
         model = EntityAssessment
         exclude = []
+        read_only_fields = ["compliance_assessment"]
 
 
 class EntityScoreReadSerializer(BaseModelSerializer):

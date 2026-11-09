@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
@@ -74,9 +75,10 @@
 									return params.treeAncestors
 										.map((node: any) => node.name)
 										.filter((name: string) => name)
+										.map(escapeHtml)
 										.join('/');
 								}
-								return params.name;
+								return escapeHtml(params.name);
 							}
 						},
 						title: { text: title },
