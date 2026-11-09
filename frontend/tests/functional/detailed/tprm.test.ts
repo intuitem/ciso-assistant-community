@@ -297,6 +297,32 @@ test('third-party representative can fill their assigned audit', async ({
 		);
 		await page.getByTestId('cancel-button').click();
 	});
+
+	await test.step('third party respondent can track a task from my tasks', async () => {
+		await page.getByTestId('task-templates-accordion-trigger').click();
+		await page.getByTestId('add-task-template-button').click();
+		await page.getByTestId('form-input-name').fill('tp-task');
+		const taskCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
+			'The task object has been successfully created' + /.+/.source
+		);
+		await page.getByTestId('save-button').click();
+		await taskCreatedToast;
+
+		await page.getByTestId('respondent-tasks').click();
+		await page.waitForURL('/my-tasks');
+		await expect(page.getByTestId('respondent-tasks')).toHaveAttribute('aria-current', 'page');
+		const row = page.getByTestId('my-tasks-table').getByRole('row', { name: /tp-task/ });
+		const statusSaved = page.waitForResponse((r) => r.url().includes('updateStatus'));
+		await row.getByTestId('task-status').selectOption('in_progress');
+		await statusSaved;
+		await page.reload();
+		await expect(row.getByTestId('task-status')).toHaveValue('in_progress');
+
+		await row.getByRole('link', { name: 'tp-task' }).click();
+		await page.waitForURL(/\/auditee-assessments\/.+task=/);
+		await expect(page.getByRole('cell', { name: 'tp-task' })).toBeVisible();
+		await expect(page.getByTestId('respondent-home')).toHaveAttribute('aria-current', 'page');
+	});
 });
 
 test.afterAll('cleanup', async ({ browser }) => {
