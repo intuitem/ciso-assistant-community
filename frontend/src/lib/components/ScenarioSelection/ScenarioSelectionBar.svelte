@@ -208,19 +208,19 @@
 			</button>
 		</div>
 	{/if}
-	<div class="flex flex-wrap items-center gap-3 px-4 py-3">
-		<div class="flex items-center gap-2 font-semibold text-primary-700 dark:text-primary-300">
+	<div class="flex flex-wrap items-start gap-x-4 gap-y-2 px-4 py-3">
+		<div class="flex items-center gap-2 h-8 font-semibold text-primary-700 dark:text-primary-300">
 			<i class="fa-solid fa-filter" aria-hidden="true"></i>
 			{m.scenarioSelection()}
 		</div>
-		<div class="flex flex-wrap items-center gap-2 flex-1 basis-xl min-w-0">
+		<div class="flex flex-wrap items-center gap-1.5 flex-1 basis-xl min-w-0">
 			{#each buttonFilters as name (name)}
 				{@const isActive = applied[name].length > 0}
 				{@const locked = name === 'within_tolerance' && !toleranceSet}
 				<span
-					class="inline-flex items-stretch rounded-full border overflow-hidden {isActive
-						? 'border-primary-300 bg-primary-50 dark:bg-primary-900/40'
-						: 'border-surface-300-700 bg-surface-50-950'}"
+					class="inline-flex items-center h-8 rounded-full text-sm {isActive
+						? 'bg-primary-100 dark:bg-primary-900/50 ring-1 ring-inset ring-primary-300 dark:ring-primary-700'
+						: 'hover:bg-surface-200-800'}"
 					data-testid="selection-filter-{name}"
 				>
 					<Popover
@@ -231,27 +231,31 @@
 						closeOnInteractOutside={true}
 					>
 						<Popover.Trigger
-							class="inline-flex items-center gap-1.5 min-h-8 pl-3 pr-2.5 text-sm whitespace-nowrap hover:bg-primary-100/60 dark:hover:bg-primary-900/60"
+							class="inline-flex items-center gap-1.5 h-8 pl-3 {isActive
+								? 'pr-1.5'
+								: 'pr-2.5'} rounded-full whitespace-nowrap"
 							title={isActive
 								? applied[name].map((v) => optionLabel(name, v)).join(', ')
 								: undefined}
 						>
 							{#if isActive}
-								<span class="text-surface-600-400"
+								<span class="text-primary-800/80 dark:text-primary-200/80"
 									>{m.selectionFilterLabel({ filter: FILTER_LABELS[name]() })}</span
 								>
-								<strong>{summary(name)}</strong>
+								<span class="font-semibold text-primary-900 dark:text-primary-50"
+									>{summary(name)}</span
+								>
 							{:else}
-								<span class="font-medium {locked ? 'text-surface-500' : ''}"
+								<span class={locked ? 'text-surface-500' : 'text-surface-800-200'}
 									>{FILTER_LABELS[name]()}</span
 								>
+								<i
+									class="fa-solid {locked
+										? 'fa-lock'
+										: 'fa-chevron-down'} text-[10px] text-surface-500"
+									aria-hidden="true"
+								></i>
 							{/if}
-							<i
-								class="fa-solid {locked
-									? 'fa-lock'
-									: 'fa-chevron-down'} text-[10px] text-surface-500"
-								aria-hidden="true"
-							></i>
 						</Popover.Trigger>
 						<Popover.Positioner class="z-50!">
 							<Popover.Content
@@ -324,7 +328,7 @@
 					{#if isActive}
 						<button
 							type="button"
-							class="px-2.5 border-l border-primary-300 text-surface-500 hover:text-error-600"
+							class="size-6 mr-1 rounded-full inline-flex items-center justify-center text-xs text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800"
 							aria-label={m.removeSelectionFilter({ filter: FILTER_LABELS[name]() })}
 							onclick={() => remove(name)}
 						>
@@ -342,11 +346,11 @@
 					closeOnInteractOutside={true}
 				>
 					<Popover.Trigger
-						class="inline-flex items-center gap-1.5 min-h-8 px-3 rounded-full border border-dashed border-primary-400 text-primary-700 dark:text-primary-300 font-semibold text-sm whitespace-nowrap"
+						class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-primary-700 dark:text-primary-300 font-medium text-sm whitespace-nowrap hover:bg-primary-100 dark:hover:bg-primary-900/50"
 						data-testid="selection-more-filters"
 					>
+						<i class="fa-solid fa-plus text-[10px]" aria-hidden="true"></i>
 						{m.moreFilters()}
-						<i class="fa-solid fa-chevron-down text-[10px]" aria-hidden="true"></i>
 					</Popover.Trigger>
 					<Popover.Positioner class="z-50!">
 						<Popover.Content
@@ -377,7 +381,7 @@
 			{/if}
 			{#each ignored as stale (`${stale.filter}:${stale.value}`)}
 				<span
-					class="inline-flex items-center gap-2 rounded-full border border-warning-500 bg-warning-50 text-warning-900 dark:bg-warning-950/40 dark:text-warning-200 pl-3 pr-1 py-1 text-sm"
+					class="inline-flex items-center gap-2 h-8 rounded-full ring-1 ring-inset ring-warning-500 bg-warning-50 text-warning-900 dark:bg-warning-950/40 dark:text-warning-200 pl-3 pr-1 text-sm"
 					data-testid="selection-ignored"
 				>
 					<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
@@ -394,7 +398,7 @@
 				</span>
 			{/each}
 		</div>
-		<div class="flex items-center gap-1 ml-auto shrink-0">
+		<div class="flex items-center gap-1 h-8 ml-auto shrink-0">
 			{#if selection}
 				<span class="text-sm whitespace-nowrap tabular-nums pr-2" data-testid="selection-count">
 					{scoped
@@ -428,15 +432,5 @@
 		</p>
 	{:else if note && scoped}
 		<p class="px-4 pb-3 -mt-1 text-sm text-surface-600-400">{note}</p>
-	{/if}
-	{#if scoped && selection}
-		<div class="h-0.5 bg-primary-100 dark:bg-primary-900/50" aria-hidden="true">
-			<div
-				class="h-0.5 bg-primary-500 transition-[width]"
-				style="width: {selection.total
-					? Math.round((selection.count / selection.total) * 100)
-					: 0}%"
-			></div>
-		</div>
 	{/if}
 </section>
