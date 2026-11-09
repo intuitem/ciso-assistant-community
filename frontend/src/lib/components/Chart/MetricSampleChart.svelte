@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatMetricNumber } from '#lib/utils/metrics.js';
 	import { sampleMoment } from '#lib/utils/derived-metrics.js';
 	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
@@ -74,12 +75,15 @@
 						formatter: function (params) {
 							const date = new Date(params[0].value[0]).toLocaleString();
 							const value = params[0].value[1];
-							let displayValue = value;
+							let displayValue = isQualitative
+								? value
+								: formatMetricNumber(value, metricDefinition);
 
 							if (isQualitative && choiceNames && choiceNames[value - 1]) {
 								displayValue = `${value}. ${choiceNames[value - 1]}`;
 							} else if (!isQualitative && unitSymbol) {
-								displayValue = unitName === 'percentage' ? `${value}%` : `${value} ${unitSymbol}`;
+								displayValue =
+									unitName === 'percentage' ? `${displayValue}%` : `${displayValue} ${unitSymbol}`;
 							}
 
 							// ECharts renders the tooltip as HTML: level names and units

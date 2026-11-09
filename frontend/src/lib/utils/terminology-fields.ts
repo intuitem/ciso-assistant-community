@@ -11,7 +11,8 @@ export const TERMINOLOGY_FIELDS = {
 	'project.health': 'projectHealth',
 	'processing.nature': 'processingNature',
 	'personal_data.category': 'personalDataCategory',
-	'entity_score.provider': 'entityScoreProvider'
+	'entity_score.provider': 'entityScoreProvider',
+	'asset.lifecycle_stage': 'assetLifecycleStage'
 } as const;
 
 export type TerminologyField = keyof typeof TERMINOLOGY_FIELDS;

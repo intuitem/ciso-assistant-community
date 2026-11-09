@@ -309,6 +309,7 @@ export const RiskScenarioSchema = z.object({
 
 export const AppliedControlSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	commitment_state: z.string().optional(),
 	commitment_notes: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
@@ -373,9 +374,7 @@ export const AppliedControlDuplicateSchema = z.object({
 	duplicate_evidences: z.boolean().optional()
 });
 
-export const PolicySchema = AppliedControlSchema.omit({ category: true }).extend({
-	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional()
-});
+export const PolicySchema = AppliedControlSchema.omit({ category: true });
 
 export const RiskAcceptanceSchema = z.object({
 	...NameDescriptionMixin,
@@ -407,7 +406,9 @@ export const ValidationFlowSchema = z.object({
 	policies: z.array(z.string()).optional(),
 	processings: z.array(z.string()).optional(),
 	accreditations: z.array(z.string()).optional(),
-	contracts: z.array(z.string()).optional()
+	contracts: z.array(z.string()).optional(),
+	requirement_assessments: z.array(z.string()).optional(),
+	risk_scenarios: z.array(z.string()).optional()
 });
 
 export const ReferenceControlSchema = z.object({
@@ -427,6 +428,7 @@ export const AssetSchema = z.object({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	asset_class: z.string().optional(),
+	lifecycle_stage: z.string().uuid().optional().nullable(),
 	parent_assets: z.string().optional().array().optional(),
 	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
@@ -743,6 +745,7 @@ export const GeneralSettingsSchema = z.object({
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
 	default_date_format: z.string().default('auto').optional(),
+	report_timezone: z.string().default('UTC').optional(),
 	default_packager: z
 		.string()
 		// eslint-disable-next-line no-useless-escape
@@ -844,6 +847,7 @@ export const FeatureFlagsSchema = z.object({
 	commitment_management: z.boolean().optional(),
 	findings_from_requirements: z.boolean().optional(),
 	dora: z.boolean().optional(),
+	nis2: z.boolean().optional(),
 	external_ratings: z.boolean().optional(),
 	jit_provisioning: z.boolean().optional()
 });
@@ -1147,6 +1151,7 @@ export const vulnerabilitySchema = z.object({
 export const BusinessImpactAnalysisSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -1457,6 +1462,14 @@ export const ebiosRMSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
+// the user picks the destination domain (folder); it defaults to the source's
+export const ebiosRMDuplicateSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	version: z.string().optional(),
+	folder: z.string().optional()
+});
+
 export const fearedEventsSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
@@ -1694,7 +1707,15 @@ export const IncidentSchema = z.object({
 		})
 		.optional(),
 	resolution: z.string().optional().default(''),
-	is_bcp_activated: z.boolean().optional().nullable()
+	is_bcp_activated: z.boolean().optional().nullable(),
+	root_cause: z.string().optional().nullable(),
+	nis2_significant: z.boolean().optional().nullable(),
+	nis2_malicious_intent: z.string().optional().nullable(),
+	nis2_cross_border_impact: z.string().optional().nullable(),
+	nis2_early_warning_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_notification_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_final_report_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_reference: z.string().max(255).optional().default('')
 });
 
 export const DoraIncidentReportSchema = z.object({
@@ -1989,6 +2010,9 @@ export const GenericCollectionSchema = z.object({
 	documents: z.array(z.string().uuid().optional()).optional(),
 	security_exceptions: z.array(z.string().uuid().optional()).optional(),
 	policies: z.array(z.string().uuid().optional()).optional(),
+	applied_controls: z.array(z.string().uuid().optional()).optional(),
+	document_containers: z.array(z.string().uuid().optional()).optional(),
+	business_impact_analyses: z.array(z.string().uuid().optional()).optional(),
 	dependencies: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
@@ -2107,19 +2131,34 @@ export const MetricDefinitionSchema = z.object({
 	unit: z.string().optional().nullable(),
 	choices_definition: jsonSchema.optional().nullable(),
 	provider: z.string().optional().nullable(),
-	higher_is_better: z.boolean().default(true),
+	higher_is_better: z.boolean().nullable().default(null),
+	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
 	default_target: z.number().optional().nullable(),
+	default_collection_frequency: z.string().max(20).optional().nullable(),
 	datasets: jsonSchema.optional().nullable(),
 	inputs: jsonSchema.optional().nullable(),
 	expression: z.string().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
+// A metric made in one step: the definition's fields, created with it.
+export const InlineMetricDefinitionSchema = z.object({
+	category: z.string().default('quantitative'),
+	unit: z.string().optional().nullable(),
+	choices_definition: jsonSchema.optional().nullable(),
+	higher_is_better: z.boolean().nullable().default(null),
+	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
+	default_target: z.coerce.number().optional().nullable(),
+	default_collection_frequency: z.string().max(20).optional().nullable()
+});
+
 export const MetricInstanceSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	metric_definition: z.string().uuid(),
+	metric_definition: z.string().uuid().optional().nullable(),
+	definition: InlineMetricDefinitionSchema.optional().nullable(),
+	collection_grace_days: z.coerce.number().int().min(0).max(28).optional().nullable(),
 	status: z.string().default('draft'),
 	owner: z.array(z.string().uuid().optional()).optional(),
 	target_value: z.coerce.number().optional().nullable(),
@@ -2133,6 +2172,7 @@ export const MetricInstanceSchema = z.object({
 
 export const CustomMetricSampleSchema = z.object({
 	metric_instance: z.string().uuid(),
+	period_start: z.string().optional().nullable(),
 	timestamp: z.iso.datetime(),
 	value: jsonSchema,
 	observation: z.string().optional().nullable(),
@@ -2182,6 +2222,7 @@ export const teamSchema = z.object({
 });
 
 export const DocumentContainerSchema = z.object({
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().max(100).optional().default(''),
 	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
@@ -2301,6 +2342,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'data-contractors': dataContractorSchema,
 	'data-transfers': dataTransferSchema,
 	'ebios-rm': ebiosRMSchema,
+	'ebios-rm_duplicate': ebiosRMDuplicateSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
 	stakeholders: StakeholderSchema,

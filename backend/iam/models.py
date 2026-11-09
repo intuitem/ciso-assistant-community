@@ -676,6 +676,7 @@ class Folder(NameDescriptionMixin):
             ["journey", "folder"],
             ["questionnaire_run", "folder"],
             ["agent_run", "folder"],
+            ["collection", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -1108,7 +1109,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name = _("user")
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
-        permissions = (("backup", "backup"), ("restore", "restore"))
+        permissions = (
+            ("backup", "backup"),
+            ("restore", "restore"),
+            # See the full-view-permissions ADR.
+            ("view_user_full", "Can view users' full record"),
+        )
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)

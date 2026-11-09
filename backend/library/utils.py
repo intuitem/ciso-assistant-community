@@ -158,6 +158,8 @@ class RequirementNodeImporter:
                 ref_id=self.requirement_data.get("ref_id"),
                 annotation=self.requirement_data.get("annotation"),
                 typical_evidence=self.requirement_data.get("typical_evidence"),
+                evidence_required=self.requirement_data.get("evidence_required")
+                is True,
                 provider=framework_object.provider,
                 order_id=self.index,
                 name=self.requirement_data.get("name"),
@@ -615,6 +617,11 @@ class QuickFormImporter:
             return f"[QUICK_FORM_ERROR] {error}"
         if error := outcome_rule_id_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
+        if any(
+            isinstance(rule, dict) and rule.get("kind") == "weakest_link"
+            for rule in self.quick_form_data.get("outcomes_definition") or []
+        ):
+            return "[QUICK_FORM_ERROR] A weakest-link rule applies to frameworks, not quick forms"
         from core.quick_form_apply import validate_on_accept_document
 
         if errors := validate_on_accept_document(self.quick_form_data):
@@ -908,7 +915,7 @@ class MetricDefinitionImporter:
             category=self.metric_definition_data.get("category", "quantitative"),
             unit=unit,
             choices_definition=self.metric_definition_data.get("choices_definition"),
-            higher_is_better=self.metric_definition_data.get("higher_is_better", True),
+            higher_is_better=self.metric_definition_data.get("higher_is_better"),
             default_target=self.metric_definition_data.get("default_target"),
             # A formula ships with its definition. Inputs name other
             # definitions by URN, resolved when an instance computes.

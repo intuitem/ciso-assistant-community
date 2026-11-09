@@ -94,6 +94,14 @@ SEED_ORDER = {
         "hours",
         "events per second",
     ],
+    "asset.lifecycle_stage": [
+        "planned",
+        "implementing",
+        "active",
+        "phasing_out",
+        "retired",
+        "archived",
+    ],
     "processing.nature": [
         "privacy_collection",
         "privacy_recording",
@@ -232,7 +240,7 @@ def set_colors_and_order(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0202_custom_word_template_typst"),
+        ("core", "0205_cyfun_enablers"),
     ]
 
     operations = [

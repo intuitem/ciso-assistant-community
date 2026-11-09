@@ -5279,8 +5279,6 @@
 	"skip": "Preskoči",
 	"fieldVisibility": "Vidnost polja",
 	"fieldVisibilityHelpText": "Nadzorujte, katera polja ocenjevanja lahko vidi in ureja posamezna vloga ocenjevalca.",
-	"visibilityAuditorRespondent": "Revizor + Anketiranec",
-	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skrito",
 	"answers": "Odgovori",
 	"respondentAlignment": "Usklajenost anketiranca",
@@ -5319,8 +5317,6 @@
 	"backToFramework": "Nazaj na okvir",
 	"compliancePercentage": "% skladnosti",
 	"complianceFormulaShort": "skladno + ½·delno, izklj. ni uporabno & neocenjeno",
-	"averageImplementationScore": "Povprečna ocena izvedbe",
-	"overScoredRequirementsOnly": "samo pri točkovanih zahtevah",
 	"visibleToCurrentUser": "vidno trenutnemu uporabniku",
 	"inScopeAfterIGFilter": "v obsegu po filtru izvedbenih skupin",
 	"overallResultDistribution": "Splošna porazdelitev rezultatov",
@@ -5802,5 +5798,7 @@
 	"dpiaRequirementChanges": "Zgodovina zahtev za DPIA",
 	"previously": "Prej",
 	"vulnerabilityOpenWithRemediationDate": "Odprta ranljivost ima datum odprave",
-	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave"
+	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave",
+	"reportTimezone": "Časovni pas poročil",
+	"reportTimezoneHelpText": "Regija, uporabljena za čase, izpisane v poročilih in izvozih. Vsak čas prikazuje svoj zamik glede na UTC. Časi na zaslonu se ne spremenijo."
 }

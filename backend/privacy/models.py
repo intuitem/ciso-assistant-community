@@ -12,6 +12,7 @@ from auditlog.registry import auditlog
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import uuid
+from datetime import timedelta
 
 
 class DpiaRequirementSource(models.TextChoices):
@@ -231,6 +232,8 @@ class Purpose(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.legal_basis
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -287,6 +290,8 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else str(self.category)
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -352,6 +357,8 @@ class DataSubject(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.category
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -411,6 +418,8 @@ class DataRecipient(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.category
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -451,6 +460,8 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.relationship_type
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -483,6 +494,8 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.country
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -634,6 +647,30 @@ class DataBreach(NameDescriptionFolderMixin):
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
 
+    # Past the authority notification, whether or not its date was entered
+    NOTIFIED_OR_CLOSED_STATUSES = (
+        "privacy_authority_notified",
+        "privacy_subjects_notified",
+        "privacy_closed",
+    )
+
+    @property
+    def authority_notification_due(self):
+        # GDPR art. 33(1): 72h from awareness, unless unlikely to result in a risk
+        if self.risk_level == "privacy_no_risk" or not self.discovered_on:
+            return None
+        return self.discovered_on + timedelta(hours=72)
+
+    @property
+    def authority_notification_overdue(self) -> bool:
+        due = self.authority_notification_due
+        return bool(
+            due
+            and not self.authority_notified_on
+            and self.status not in self.NOTIFIED_OR_CLOSED_STATUSES
+            and timezone.now() > due
+        )
+
 
 class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
     """One change of a processing's `dpia_required`, whatever the path (form,
@@ -677,6 +714,8 @@ class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
         verbose_name = _("DPIA requirement change")
         verbose_name_plural = _("DPIA requirement changes")
         ordering = ["-created_at"]
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

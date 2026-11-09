@@ -78,7 +78,7 @@ CISO Assistant supports two modes for getting the actual answers back from the v
 
 ### Online mode — the representative logs in
 
-This is the default workflow. You create a **representative** on the entity side, the platform issues credentials, and the representative logs into CISO Assistant directly to fill in the questionnaire. Their access is scoped: they only see the entity assessment(s) attached to their entity, and they land in a dedicated **third-party / auditee surface** — a separate route group with its own auditee dashboard, not the rest of your workspace.
+This is the default workflow. You create a **representative** on the entity side, the platform issues credentials, and the representative logs into CISO Assistant directly to fill in the questionnaire. Their access is scoped: they only see the entity assessment(s) attached to their entity, and they land on the respondent dashboard inside a simplified layout: a header with your logo, their questionnaires, a language picker and their profile. There is no sidebar, search, command palette or chat assistant, so they never see the rest of your workspace.
 
 This surface is gated by the **`auditee_mode`** [feature flag](../configuration/settings/feature-flags.md), which has to be on for the third-party login flow to be available.
 

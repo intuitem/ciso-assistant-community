@@ -17,6 +17,12 @@ from core.quick_form_ratings import (
     scales_error,
     value_names,
 )
+from core.staircase import evaluate_staircases, staircase_errors, staircase_rules
+from core.weakest_link import (
+    evaluate_weakest_links,
+    weakest_link_errors,
+    weakest_link_rules,
+)
 
 from core.quick_form_scoring import (
     aggregate_form,
@@ -97,29 +103,19 @@ def _requirement_layers(ca, node, ra) -> dict:
     counted as the audit's aggregates count it: -1 when it does not count (or
     the audit has no documentation score), N/A at the target when the audit
     anchors N/A, a missing documentation score at the bottom of the scale."""
-    none = {"documentation_score": -1.0, "maturity_score": -1.0}
     if ca is None or not ra:
-        return none
-    low = node.get("min_score")
-    low = ca.min_score if low is None else low
-    high = node.get("max_score")
-    high = ca.max_score if high is None else high
-    if ra["result"] == "not_applicable":
-        if not ca.anchor_na_to_target or low is None or high is None:
-            return none
-        implementation = documentation = ca.na_anchor_score(low, high)
-    elif ra["is_scored"] and ra["score"] is not None:
-        implementation = ra["score"]
-        documentation = ra.get("documentation_score")
-        if documentation is None:
-            documentation = low or 0
-    else:
-        return none
-    if not ca.show_documentation_score:
-        return {"documentation_score": -1.0, "maturity_score": float(implementation)}
+        return {"documentation_score": -1.0, "maturity_score": -1.0}
+    layers = ca.requirement_layer_scores(
+        result=ra["result"],
+        is_scored=ra["is_scored"],
+        score=ra["score"],
+        documentation_score=ra.get("documentation_score"),
+        min_score=node.get("min_score"),
+        max_score=node.get("max_score"),
+    )
     return {
-        "documentation_score": float(documentation),
-        "maturity_score": (implementation + documentation) / 2,
+        layer: -1.0 if layers[layer] is None else float(layers[layer])
+        for layer in ("documentation_score", "maturity_score")
     }
 
 
@@ -530,15 +526,18 @@ def evaluate_outcomes(compliance_assessment) -> None:
 
     computed = values = None
     if rules:
-        context, _hidden = build_cel_context(ca)
+        context, hidden_urns = build_cel_context(ca)
         _add_scores(context, ca, framework, rules)
+        staircase_values, _details = evaluate_staircases(ca, rules)
+        staircase_values.update(evaluate_weakest_links(ca, rules, hidden_urns)[0])
         computed, values = _evaluate_rules(
             celpy.Environment(),
             rules,
             context,
+            seed_values=staircase_values,
             compliance_assessment_id=str(ca.pk),
         )
-        if not any(is_numeric_rule(rule) for rule in rules):
+        if not staircase_values and not any(is_numeric_rule(r) for r in rules):
             values = None
 
     if ca.computed_outcome != computed or ca.computed_values != values:
@@ -843,7 +842,13 @@ def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
     """
     values: dict[str, float] = dict(seed_values or {})
     fired: dict[str, dict] = {}
-    rules = [r for r in rules or [] if r.get("expression") and r.get("ref_id")]
+    rules = [
+        r
+        for r in rules or []
+        if r.get("expression")
+        and r.get("ref_id")
+        and r.get("kind") not in ("staircase", "weakest_link")
+    ]
     base = {
         k: _python_to_cel(v)
         for k, v in context.items()
@@ -1122,15 +1127,27 @@ def _check_rules(rules, probe: dict, check, error, rating_values=()) -> None:
     rules above it."""
     for rule in rules:
         kind = rule.get("kind")
-        if kind not in (None, "", "boolean", "number", "rating"):
+        if kind not in (
+            None,
+            "",
+            "boolean",
+            "number",
+            "rating",
+            "staircase",
+            "weakest_link",
+        ):
             error(
                 str(rule.get("ref_id") or ""),
                 str(rule.get("expression") or ""),
-                f"Unknown rule kind '{kind}': use 'number', 'rating' or leave it empty",
+                f"Unknown rule kind '{kind}': use 'number', 'rating', 'staircase', "
+                "'weakest_link' "
+                "or leave it empty",
             )
     # Rating outcomes are computed before any rule, from their scales.
     values: dict[str, float] = {name: 1.0 for name in rating_values}
-    rules = [r for r in rules if r.get("kind") != "rating"]
+    rules = [
+        r for r in rules if r.get("kind") not in ("rating", "staircase", "weakest_link")
+    ]
     for rule in [r for r in rules if is_numeric_rule(r)]:
         ref_id = str(rule.get("ref_id") or "")
         expression = str(rule.get("expression") or "")
@@ -1232,6 +1249,14 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
             unknown,
         )
 
+    for rule in rules:
+        if rule.get("kind") == "staircase":
+            for message in staircase_errors(rule, known_groups):
+                _error("outcome", str(rule.get("ref_id") or ""), "", message)
+        if rule.get("kind") == "weakest_link":
+            for message in weakest_link_errors(rule):
+                _error("outcome", str(rule.get("ref_id") or ""), "", message)
+
     _check_rules(
         rules,
         probe,
@@ -1241,6 +1266,11 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
         lambda ref_id, expression, message: _error(
             "outcome", ref_id, expression, message
         ),
+        # Staircase levels are computed before any rule, as ratings are.
+        rating_values=[
+            rule["ref_id"]
+            for rule in [*staircase_rules(rules), *weakest_link_rules(rules)]
+        ],
     )
     return errors
 
@@ -1306,6 +1336,14 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
             str(page.get("visibility_expression") or ""),
             visibility_probe,
         )
+    for rule in quick_form.get("outcomes_definition") or []:
+        if rule.get("kind") == "weakest_link":
+            _error(
+                "outcome",
+                str(rule.get("ref_id") or ""),
+                "",
+                "A weakest-link rule applies to frameworks, not quick forms",
+            )
     _check_rules(
         quick_form.get("outcomes_definition") or [],
         raw_probe,

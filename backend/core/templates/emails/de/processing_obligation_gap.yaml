@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${processing_count} Verarbeitung(en) mit Lücken im DSGVO-Verzeichnis"
+body: |
+  Hallo,
+
+  Die folgenden Ihnen zugewiesenen Verarbeitungen weisen Lücken im Verzeichnis der Verarbeitungstätigkeiten auf:
+
+  ${gap_list}
+
+  [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

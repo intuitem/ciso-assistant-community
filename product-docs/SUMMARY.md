@@ -141,6 +141,7 @@
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
 * [Date format](configuration/date-format.md)
+* [Report time zone](configuration/report-time-zone.md)
 
 ## Guides
 
@@ -201,6 +202,8 @@
 * [Personal module visibility](features/personal-module-visibility.md)
 * [Sync to actions](features/sync-to-actions.md)
 * [Dashboards](features/dashboards.md)
+* [Create a metric](features/metrics/creating-a-metric.md)
+* [Record a value](features/metrics/recording-values.md)
 * [Computed metrics](features/metrics/README.md)
   * [Create a computed metric](features/metrics/creating.md)
   * [Edit a formula](features/metrics/editing.md)

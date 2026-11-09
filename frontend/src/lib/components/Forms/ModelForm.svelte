@@ -298,6 +298,7 @@
 		createModalCache.garbageCollect();
 	});
 
+	let isLoading = $state(false);
 	const _form = superForm(form, {
 		dataType: shape?.attachment ? 'form' : 'json',
 		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
@@ -308,6 +309,7 @@
 		taintedMessage,
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
+			isLoading = false;
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
@@ -317,10 +319,15 @@
 				}
 				createModalCache.deleteCache(model.urlModel);
 			}
+		},
+		onError: ({ result }) => {
+			// a transport-level failure never fires onUpdated; clear the busy state so
+			// the form doesn't stay stuck on "loading" until the modal is closed
+			isLoading = false;
+			console.error(result.error);
 		}
 	});
 
-	let isLoading = $state(false);
 	let previousFormErrors = $derived('');
 	const { form: formData, errors } = _form;
 
@@ -466,7 +473,8 @@
 					cacheLock={cacheLocks['folder']}
 					bind:cachedValue={formDataCache['folder']}
 					label={m.domain()}
-					hidden={HIDDEN_FOLDER_MODELS.has(URLModel)}
+					hidden={HIDDEN_FOLDER_MODELS.has(URLModel) ||
+						(['evidences', 'task-templates'].includes(URLModel) && page.data?.user?.is_third_party)}
 					disabled={(URLModel === 'entities' && object?.builtin) ||
 						(URLModel === 'perimeters' && !!initialData?.folder)}
 					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)
@@ -823,7 +831,16 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
+			<EbiosRmForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{object}
+				{duplicate}
+				{...rest}
+			/>
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}
@@ -1195,6 +1212,22 @@
 					data-testid="save-button"
 					type="submit"
 					onclick={(e) => {
+						// a full-graph duplicate is a long request: show a busy state and block re-clicks
+						if (duplicate) {
+							if (isLoading) {
+								e.preventDefault();
+								e.stopPropagation();
+								return;
+							}
+							// only enter the busy state once the form is valid; otherwise the browser
+							// blocks the submit (e.g. empty required name), superForm never runs and
+							// isLoading would stay stuck on "loading" until the modal is closed.
+							// Validate against `schema` (the duplicate schema), not the full study
+							// schema modelSchema(URLModel) returns, which requires risk_matrix.
+							if (!schema.safeParse($formData).success) return;
+							isLoading = true;
+							return;
+						}
 						if (URLModel !== 'folders-import') return;
 						if (isLoading) {
 							e.preventDefault();
@@ -1202,8 +1235,8 @@
 							return;
 						}
 
-						const schema = modelSchema(URLModel);
-						const result = schema.safeParse($formData);
+						const importSchema = modelSchema(URLModel);
+						const result = importSchema.safeParse($formData);
 						if (!result.success) return;
 
 						isLoading = true;

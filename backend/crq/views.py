@@ -42,7 +42,6 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "status",
-        "genericcollection",
         "filtering_labels",
     ]
     search_fields = ["name", "description", "ref_id"]
