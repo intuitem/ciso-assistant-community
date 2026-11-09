@@ -920,7 +920,9 @@
 						)}
 				>
 					<i class="fas fa-paper-plane mr-2"></i>
-					{m.sendQuestionnaire()}
+					{data.data.assignment_status && data.data.assignment_status !== 'draft'
+						? m.resendQuestionnaire()
+						: m.sendQuestionnaire()}
 				</button>
 			{/if}
 

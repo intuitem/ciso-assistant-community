@@ -6763,7 +6763,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     reference_controls = FieldsRelatedField(many=True)
-    applied_controls = FieldsRelatedField(["id", "status"], many=True)
+    applied_controls = FieldsRelatedField(["id", "status", "ref_id"], many=True)
     filtering_labels = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)
@@ -7761,6 +7761,50 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
         return instance
 
+    def _sync_security_exception_status(self, flow, current_status, new_status):
+        """Carry the validation outcome onto the linked exceptions.
+
+        A decision settles exceptions still under review; a revocation sends
+        approved ones back to review. Resolved/expired/deprecated are left alone.
+        """
+        under_review = [
+            SecurityException.Status.DRAFT,
+            SecurityException.Status.IN_REVIEW,
+        ]
+        transition = {
+            ValidationFlow.Status.ACCEPTED: (
+                under_review,
+                SecurityException.Status.APPROVED,
+            ),
+            ValidationFlow.Status.REJECTED: (
+                under_review,
+                SecurityException.Status.REJECTED,
+            ),
+            ValidationFlow.Status.REVOKED: (
+                [SecurityException.Status.APPROVED],
+                SecurityException.Status.IN_REVIEW,
+            ),
+        }.get(new_status)
+        if transition is None or new_status == current_status:
+            return
+        from_statuses, to_status = transition
+        exceptions = flow.security_exceptions.filter(status__in=from_statuses)
+        if new_status == ValidationFlow.Status.REVOKED:
+            exceptions = exceptions.exclude(
+                validationflow__status=ValidationFlow.Status.ACCEPTED
+            )
+        change_perm = Permission.objects.get(codename="change_securityexception")
+        for exception in exceptions.distinct():
+            if not flow.requester or not RoleAssignment.is_access_allowed(
+                flow.requester, change_perm, exception.folder
+            ):
+                continue
+            exception.status = to_status
+            exception.save(update_fields=["status", "updated_at"])
+            SecurityExceptionWriteSerializer(
+                context=self.context
+            )._send_status_notification(exception)
+
     def update(self, instance: ValidationFlow, validated_data: dict) -> ValidationFlow:
         """
         Override update to ensure proper permissions for status transitions:
@@ -7844,6 +7888,10 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
                 # Auto-lock/unlock associated objects based on status transitions
                 self._manage_associated_objects_lock(
+                    updated_instance, current_status, new_status
+                )
+
+                self._sync_security_exception_status(
                     updated_instance, current_status, new_status
                 )
 

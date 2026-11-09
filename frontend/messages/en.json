@@ -1708,6 +1708,7 @@
 	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "The third party users who are responsible for questionnaire completion",
 	"sendQuestionnaire": "Send questionnaire",
+	"resendQuestionnaire": "Resend questionnaire",
 	"sureToSendQuestionnaire": "Are you sure you want to send the questionnaire: {questionnaire}?",
 	"theFollowingRepresentativesWillReceiveTheQuestionnaireColon": "The following representatives will receive the questionnaire:",
 	"mailSuccessfullySent": "The mail has been successfully sent",

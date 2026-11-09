@@ -206,6 +206,7 @@ from core.serializers import (
     full_user_view_folder_ids,
 )
 from core.utils import (
+    duration_day_unit,
     build_answers_dict,
     escape_excel_formula,
     sanitize_xlsx_value,
@@ -3055,15 +3056,18 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         def format_seconds(s: int) -> str:
             if not isinstance(s, int) or s < 0:
                 return "0s"
-            h, r = divmod(s, 3600)
+            d, r = divmod(s, 86400)
+            h, r = divmod(r, 3600)
             m, s_rem = divmod(r, 60)
             parts = []
+            if d > 0:
+                parts.append(f"{d}{duration_day_unit()}")
             if h > 0:
                 parts.append(f"{h}h")
             if m > 0:
-                parts.append(f"{m:02d}m")
+                parts.append(f"{m:02d}m" if parts else f"{m}m")
             if s_rem > 0 or not parts:
-                parts.append(f"{s_rem:02d}s")
+                parts.append(f"{s_rem:02d}s" if parts else f"{s_rem}s")
             return "".join(parts)
 
         return [
