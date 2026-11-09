@@ -23,7 +23,7 @@
 <main class="bg-surface-50-950 p-2">
 	{#await data.stream.metrics}
 		<div class="col-span-3 lg:col-span-1">
-			<div>Refreshing data ..</div>
+			<div>{m.refreshing()}</div>
 			<LoadingSpinner />
 		</div>
 	{:then metrics}

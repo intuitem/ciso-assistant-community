@@ -1,0 +1,11 @@
+subject: "CISO Assistant : ${processing_count} traitement(s) présentant des manquements au registre RGPD"
+body: |
+  Bonjour,
+
+  Les traitements suivants dont vous avez la charge présentent des manquements au registre des activités de traitement :
+
+  ${gap_list}
+
+  [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

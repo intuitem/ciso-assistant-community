@@ -12,6 +12,7 @@ from auditlog.registry import auditlog
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import uuid
+from datetime import timedelta
 
 
 class DpiaRequirementSource(models.TextChoices):
@@ -645,6 +646,30 @@ class DataBreach(NameDescriptionFolderMixin):
         ordering = ["-discovered_on"]
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
+
+    # Past the authority notification, whether or not its date was entered
+    NOTIFIED_OR_CLOSED_STATUSES = (
+        "privacy_authority_notified",
+        "privacy_subjects_notified",
+        "privacy_closed",
+    )
+
+    @property
+    def authority_notification_due(self):
+        # GDPR art. 33(1): 72h from awareness, unless unlikely to result in a risk
+        if self.risk_level == "privacy_no_risk" or not self.discovered_on:
+            return None
+        return self.discovered_on + timedelta(hours=72)
+
+    @property
+    def authority_notification_overdue(self) -> bool:
+        due = self.authority_notification_due
+        return bool(
+            due
+            and not self.authority_notified_on
+            and self.status not in self.NOTIFIED_OR_CLOSED_STATUSES
+            and timezone.now() > due
+        )
 
 
 class DpiaRequirementChange(AbstractBaseModel, FolderMixin):

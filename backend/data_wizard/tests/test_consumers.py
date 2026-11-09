@@ -1068,6 +1068,35 @@ class TestProcessingConsumer:
         assert record_data["role"] == "privacy_data_processor"
         assert record_data["controllers"] == [client.id]
 
+    def test_nature_matches_name_or_exported_label(self, base_context):
+        from core.models import Terminology
+
+        Terminology.objects.update_or_create(
+            name="privacy_collection",
+            field_path=Terminology.FieldPath.PROCESSING_NATURE,
+            defaults={
+                "builtin": True,
+                "is_visible": True,
+                "translations": {"en": "Collection", "fr": "Collecte"},
+            },
+        )
+        nature_id = Terminology.objects.get(
+            name="privacy_collection",
+            field_path=Terminology.FieldPath.PROCESSING_NATURE,
+        ).id
+        consumer = ProcessingRecordConsumer(base_context)
+        for cell in ("privacy_collection", "Collection", "collecte, COLLECTION"):
+            record_data, error = consumer.prepare_create(
+                {"name": "HR", "processing_nature": cell}, None
+            )
+            assert error is None
+            assert record_data["nature"] == [nature_id]
+        record_data, error = consumer.prepare_create(
+            {"name": "HR", "processing_nature": "Collection, Teleportation"}, None
+        )
+        assert error.is_warning and "Teleportation" in error.error
+        assert record_data["nature"] == [nature_id]
+
     def test_role_is_trimmed_and_unknown_role_rejected(self, base_context):
         consumer = ProcessingRecordConsumer(base_context)
         record_data, error = consumer.prepare_create(
