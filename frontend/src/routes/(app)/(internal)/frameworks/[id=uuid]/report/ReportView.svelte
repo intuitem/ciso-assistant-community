@@ -878,6 +878,29 @@
 		return `/frameworks/${framework.id}/report/requirement-evidences?${params}`;
 	}
 
+	// Requirements ticked for a grouped evidence export.
+	let selectedReqs = $state<Set<string>>(new Set());
+	function toggleReqs(urns: string[], on: boolean) {
+		const next = new Set(selectedReqs);
+		for (const urn of urns) {
+			if (on) next.add(urn);
+			else next.delete(urn);
+		}
+		selectedReqs = next;
+	}
+	let bulkEvidenceUrl = $derived.by(() => {
+		const rows = filteredRows.filter((r) => selectedReqs.has(r.requirement_urn));
+		const params = new URLSearchParams({
+			requirement: [...selectedReqs].join(','),
+			compliance_assessments: [...new Set(rows.map((r) => r.compliance_assessment_id))].join(',')
+		});
+		const excluded = rows
+			.filter((r) => evidenceExcluded.has(r.requirement_assessment_id))
+			.map((r) => r.requirement_assessment_id);
+		if (excluded.length) params.set('exclude', excluded.join(','));
+		return `/frameworks/${framework.id}/report/requirement-evidences?${params}`;
+	});
+
 	let exporting = $state(false);
 
 	function onActivate(event: KeyboardEvent, action: () => void) {
@@ -1838,6 +1861,24 @@
 			</div>
 		{/if}
 
+		{#if view === 'requirement' && selectedReqs.size > 0}
+			<div class="flex items-center gap-2">
+				<a
+					class="btn btn-sm preset-filled-primary-500 text-xs"
+					href={bulkEvidenceUrl}
+					data-sveltekit-reload
+					download
+				>
+					<i class="fa-solid fa-file-zipper mr-1" aria-hidden="true"></i>
+					{m.exportSelectedRequirementsEvidences({ count: selectedReqs.size })}
+				</a>
+				<button
+					type="button"
+					class="text-xs text-primary-600-400 hover:underline"
+					onclick={() => (selectedReqs = new Set())}>{m.clearSelection()}</button
+				>
+			</div>
+		{/if}
 		<div class="ml-auto text-xs text-surface-600-400">
 			{filteredRows.length}
 			{m.rowsLabel()}{#if view === 'requirement'}
@@ -1870,6 +1911,7 @@
 				<tbody>
 					{#each hierarchical as section}
 						{@const sectionCompliance = compliancePct(section.dist)}
+						{@const sectionUrns = section.requirements.map((r) => r.urn)}
 						{#if !isFlat}
 							<tr
 								class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
@@ -1879,6 +1921,19 @@
 								onkeydown={(e) => onActivate(e, () => toggleSection(section.urn))}
 							>
 								<td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
+									<input
+										type="checkbox"
+										class="checkbox mr-1"
+										checked={sectionUrns.length > 0 &&
+											sectionUrns.every((u) => selectedReqs.has(u))}
+										indeterminate={sectionUrns.some((u) => selectedReqs.has(u)) &&
+											!sectionUrns.every((u) => selectedReqs.has(u))}
+										disabled={sectionUrns.length === 0}
+										aria-label="{m.selectForEvidenceExport()}: {section.ref}"
+										onclick={(e) => e.stopPropagation()}
+										onkeydown={(e) => e.stopPropagation()}
+										onchange={(e) => toggleReqs(sectionUrns, e.currentTarget.checked)}
+									/>
 									<span class="inline-block w-3 text-surface-600-400"
 										>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
 									>
@@ -1935,6 +1990,15 @@
 									onkeydown={(e) => onActivate(e, () => toggleRow(req.urn))}
 								>
 									<td class="px-3 py-2 font-mono text-xs whitespace-nowrap {isFlat ? '' : 'pl-8'}">
+										<input
+											type="checkbox"
+											class="checkbox mr-1"
+											checked={selectedReqs.has(req.urn)}
+											aria-label="{m.selectForEvidenceExport()}: {req.ref_id}"
+											onclick={(e) => e.stopPropagation()}
+											onkeydown={(e) => e.stopPropagation()}
+											onchange={(e) => toggleReqs([req.urn], e.currentTarget.checked)}
+										/>
 										<span class="inline-block w-3 text-surface-500"
 											>{expandedRows.has(req.urn) ? '▾' : '▸'}</span
 										>

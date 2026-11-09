@@ -7929,5 +7929,7 @@
 	"nextMonths": "{count} prochains mois",
 	"domainsSelected": "{count} domaines",
 	"searchDomains": "Rechercher un domaine",
-	"byAudit": "Par audit"
+	"byAudit": "Par audit",
+	"selectForEvidenceExport": "Sélectionner pour l'export des preuves",
+	"exportSelectedRequirementsEvidences": "Exporter les preuves ({count} exigences)"
 }

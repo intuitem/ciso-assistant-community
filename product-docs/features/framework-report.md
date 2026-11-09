@@ -52,9 +52,11 @@ The **View** toggle in the filter bar switches the body of the report between tw
 - **Requirements tree** — the default. Sections roll up their requirements; click a section to expand it, then click a requirement row to drill into its **Per-assessment breakdown** (one row per audit, with domain, result, score, controls and evidence counts, and a link straight to that requirement assessment). Several requirements can be open at once. **Expand all** / **Collapse all** act on every section at once; **Collapse all** also closes open requirements.
 - **Per domain** — pivots the same rows by the domain (Folder) they live in. **Group by domain depth** controls how far down the tree the grouping cuts (`root` … `leaf domain`), and **Sort by** orders the rows by domain name (alphabetical), compliance %, or average score, ascending or descending. Click a domain to filter the report on it and switch to the **Requirements tree**, which then shows that domain's sections and requirements with their compliance and average scores.
 
-## Exporting a requirement's evidences
+## Exporting evidences
 
 In the **Per-assessment breakdown** of a requirement, **Export evidences** downloads a zip of that requirement's evidences across the audits listed, one folder per domain and audit. It includes evidences attached to the requirement and those attached to its applied controls, limited to the evidences you can read. Untick an audit to leave it out. An `index.csv` in the zip lists every evidence with its audit, and its link when it has no file.
+
+To export several requirements at once, tick them in the **Requirements tree** (a section's box ticks all its requirements), then click **Export evidences (N requirements)** above the table. The zip covers the filtered audits, with one folder per domain, audit and requirement. Audits unticked in a requirement's breakdown stay out.
 
 ## What gets counted
 

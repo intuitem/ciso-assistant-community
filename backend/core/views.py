@@ -11429,15 +11429,23 @@ class FrameworkViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="requirement_evidences")
     def requirement_evidences(self, request, pk):
-        """Zip of one requirement's evidences across this framework's audits.
+        """Zip of requirements' evidences across this framework's audits.
 
         Query params:
-          - requirement (urn, required)
+          - requirement (urn, required): repeat it, or separate urns with commas.
           - compliance_assessments (comma-separated uuids): defaults to every readable audit.
+          - exclude (comma-separated requirement assessment uuids): left out.
         """
         framework = self.get_object()
-        requirement_urn = request.query_params.get("requirement")
-        if not requirement_urn:
+        requirement_urns = list(
+            dict.fromkeys(
+                urn
+                for value in request.query_params.getlist("requirement")
+                for urn in value.split(",")
+                if urn
+            )
+        )
+        if not requirement_urns:
             return Response(
                 {"error": "requirement is required"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -11458,6 +11466,15 @@ class FrameworkViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             audits = audits.filter(id__in=ids)
+        try:
+            excluded = [
+                UUID(i) for i in request.query_params.get("exclude", "").split(",") if i
+            ]
+        except ValueError:
+            return Response(
+                {"error": "invalid exclude"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         viewable_evidences = set(
             RoleAssignment.get_viewable_object_ids(request.user, Evidence)
@@ -11465,17 +11482,24 @@ class FrameworkViewSet(BaseModelViewSet):
         ras = (
             RequirementAssessment.objects.filter(
                 compliance_assessment__in=audits,
-                requirement__urn=requirement_urn,
+                requirement__urn__in=requirement_urns,
             )
+            .exclude(id__in=excluded)
             .select_related("compliance_assessment__folder", "requirement")
             .prefetch_related("evidences", "applied_controls__evidences")
             .order_by(
-                "compliance_assessment__folder__name", "compliance_assessment__name"
+                "compliance_assessment__folder__name",
+                "compliance_assessment__name",
+                "requirement__urn",
             )
         )
+        several = len(requirement_urns) > 1
 
         def sanitize(name: str) -> str:
-            return sanitize_file_name(name or "") or "_"
+            return (
+                sanitize_file_name((name or "").replace("/", "-").replace("\\", "-"))
+                or "_"
+            )
 
         index = io.StringIO()
         writer = csv.writer(index)
@@ -11501,6 +11525,10 @@ class FrameworkViewSet(BaseModelViewSet):
                     if not evidences:
                         continue
                     base_dir = f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
+                    if several:
+                        base_dir += (
+                            f"/{sanitize(ra.requirement.ref_id or ra.requirement.name)}"
+                        )
                     directory, counter = base_dir, 1
                     while directory.lower() in taken_dirs:
                         counter += 1
@@ -11543,15 +11571,15 @@ class FrameworkViewSet(BaseModelViewSet):
                         )
                 zipf.writestr("index.csv", index.getvalue())
             temp_file.seek(0)
-            requirement = RequirementNode.objects.filter(
-                framework=framework, urn=requirement_urn
-            ).first()
-            label = (requirement.ref_id if requirement else None) or "requirement"
-            return FileResponse(
-                temp_file,
-                as_attachment=True,
-                filename=f"{sanitize(framework.name)}-{sanitize(label)}-evidences.zip",
-            )
+            if several:
+                filename = f"{sanitize(framework.name)}-evidences.zip"
+            else:
+                requirement = RequirementNode.objects.filter(
+                    framework=framework, urn=requirement_urns[0]
+                ).first()
+                label = (requirement.ref_id if requirement else None) or "requirement"
+                filename = f"{sanitize(framework.name)}-{sanitize(label)}-evidences.zip"
+            return FileResponse(temp_file, as_attachment=True, filename=filename)
         except Exception:
             temp_file.close()
             raise

@@ -8,7 +8,7 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const endpoint = new URL(`${BASE_API_URL}/frameworks/${params.id}/requirement_evidences/`);
-	for (const key of ['requirement', 'compliance_assessments']) {
+	for (const key of ['requirement', 'compliance_assessments', 'exclude']) {
 		const value = url.searchParams.get(key);
 		if (value) endpoint.searchParams.set(key, value);
 	}
