@@ -2147,3 +2147,155 @@ class TestViewUserFullMigration:
         self._grant()
         self._grant()
         assert custom.permissions.filter(codename="view_user_full").count() == 1
+
+
+@pytest.fixture
+def third_party_env(app_config, authenticated_client):
+    """A vendor entity in domain A with one third-party representative, an
+    analyst on A, and an analyst on an unrelated domain B (who still reaches
+    Global's baseline role, which carries `view_user`)."""
+    from tprm.models import Entity, Representative
+
+    domains = {}
+    for name in ("vendor domain", "other domain"):
+        domains[name] = Folder.objects.create(
+            name=name,
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domains[name])
+    vendor_domain, other_domain = domains["vendor domain"], domains["other domain"]
+
+    entity = Entity.objects.create(name="Vendor Co", folder=vendor_domain)
+    third_party = User.objects.create_user("rep@vendor.test", is_third_party=True)
+    Representative.objects.create(
+        entity=entity, email=third_party.email, user=third_party
+    )
+
+    def analyst_on(domain, email):
+        user = User.objects.create_user(email)
+        UserGroup.objects.get(name="BI-UG-ANA", folder=domain).user_set.add(user)
+        return user
+
+    analyst = analyst_on(vendor_domain, "analyst.vendor@tests.com")
+    outsider = analyst_on(other_domain, "analyst.other@tests.com")
+    return SimpleNamespace(
+        vendor_domain=vendor_domain,
+        other_domain=other_domain,
+        entity=entity,
+        third_party=third_party,
+        analyst=analyst,
+        outsider=outsider,
+        admin_client=authenticated_client,
+    )
+
+
+def _emails(response) -> set[str]:
+    assert response.status_code == status.HTTP_200_OK, response.content
+    rows = (
+        response.data["results"] if isinstance(response.data, dict) else response.data
+    )
+    return {row["email"] for row in rows}
+
+
+@pytest.mark.django_db
+class TestThirdPartyUserVisibility:
+    """A third-party user sits in Global, where the baseline role grants
+    `view_user` to every member. It must show only to those who can view one of
+    its representatives or change users where it sits, and to itself."""
+
+    def test_member_elsewhere_does_not_see_third_party(self, third_party_env):
+        env = third_party_env
+        client = _client_for(env.outsider)
+
+        listed = _emails(client.get(reverse("users-list")))
+        assert env.third_party.email not in listed
+        # Internal users are listed as before.
+        assert env.analyst.email in listed
+
+        assert env.third_party.email not in _emails(
+            client.get(reverse("users-autocomplete"))
+        )
+        retrieved = client.get(reverse("users-detail", args=[env.third_party.id]))
+        assert retrieved.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_analyst_on_entity_domain_sees_third_party(self, third_party_env):
+        env = third_party_env
+        client = _client_for(env.analyst)
+
+        assert env.third_party.email in _emails(client.get(reverse("users-list")))
+        assert env.third_party.email in _emails(
+            client.get(reverse("users-autocomplete"))
+        )
+        retrieved = client.get(reverse("users-detail", args=[env.third_party.id]))
+        assert retrieved.status_code == status.HTTP_200_OK
+
+    def test_admin_sees_third_party(self, third_party_env):
+        env = third_party_env
+        assert env.third_party.email in _emails(
+            env.admin_client.get(reverse("users-list"))
+        )
+
+    def test_user_manager_sees_third_party_without_representative_access(
+        self, third_party_env
+    ):
+        """`change_user` where the user sits is enough, even with no
+        `view_representative` anywhere."""
+        env = third_party_env
+        manager = _make_user_manager(
+            "user.manager@tests.com", ["view_user", "change_user"]
+        )
+        listed = _emails(_client_for(manager).get(reverse("users-list")))
+        assert env.third_party.email in listed
+
+    def test_third_party_with_no_representative_is_hidden_from_members(
+        self, third_party_env
+    ):
+        env = third_party_env
+        orphan = User.objects.create_user("orphan@vendor.test", is_third_party=True)
+        assert orphan.email not in _emails(
+            _client_for(env.analyst).get(reverse("users-list"))
+        )
+        assert orphan.email in _emails(env.admin_client.get(reverse("users-list")))
+
+    def test_third_party_sees_themself(self, third_party_env):
+        env = third_party_env
+        client = _client_for(env.third_party)
+
+        assert env.third_party.email in _emails(client.get(reverse("users-list")))
+        retrieved = client.get(reverse("users-detail", args=[env.third_party.id]))
+        assert retrieved.status_code == status.HTTP_200_OK
+
+    def test_entity_assessment_picker_query(self, third_party_env):
+        """EntityAssessmentForm loads representatives from
+        users?is_third_party=true&representative__entity=<entity>."""
+        env = third_party_env
+        params = {"is_third_party": "true", "representative__entity": env.entity.id}
+
+        assert _emails(_client_for(env.analyst).get(reverse("users-list"), params)) == {
+            env.third_party.email
+        }
+        assert (
+            _emails(_client_for(env.outsider).get(reverse("users-list"), params))
+            == set()
+        )
+
+    def test_names_on_readable_objects_still_render(self, third_party_env):
+        """Masking of related users reads IAM on its own, not this queryset:
+        a readable assessment still names its representative."""
+        from tprm.models import EntityAssessment
+
+        env = third_party_env
+        assessment = EntityAssessment.objects.create(
+            name="Vendor review", folder=env.other_domain, entity=env.entity
+        )
+        assessment.representatives.add(env.third_party)
+
+        response = _client_for(env.outsider).get(
+            reverse("entity-assessments-detail", args=[assessment.id])
+        )
+        assert response.status_code == status.HTTP_200_OK, response.content
+        assert response.json()["representatives"] == [
+            {"id": str(env.third_party.id), "str": str(env.third_party)}
+        ]

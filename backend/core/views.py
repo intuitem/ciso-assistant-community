@@ -230,7 +230,7 @@ from ebios_rm.models import (
     Stakeholder,
 )
 
-from tprm.models import Entity, SolutionSubcontractor
+from tprm.models import Entity, Representative, SolutionSubcontractor
 from privacy.models import Processing, DataBreach
 from resilience.models import AssetAssessment, DoraIncidentReport
 
@@ -9154,13 +9154,41 @@ class UserViewSet(BaseModelViewSet):
             )
         return Response(sorted(rows, key=lambda r: r["str"].lower()))
 
+    def _third_party_visibility(self) -> Q:
+        """Third-party users are created in Global, where the baseline role lets
+        every member view users, but what makes one relevant is the entity it
+        represents. So it shows only to those who can view one of its
+        `Representative` rows, or who can change users where it sits, and to
+        itself. Internal users are unaffected.
+
+        This scopes the users endpoint only. Their names on objects the requester
+        can read still render: `_filter_related_fields` checks User viewability
+        on its own, not through this queryset."""
+        user = self.request.user
+        representative_user_ids = Representative.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, Representative),
+            user__isnull=False,
+        ).values("user_id")
+        return (
+            Q(is_third_party=False)
+            | Q(pk=user.pk)
+            | Q(pk__in=representative_user_ids)
+            | Q(
+                folder_id__in=RoleAssignment.get_allowed_folder_ids(
+                    user, ("change", User)
+                )
+            )
+        )
+
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
         # Service account users are managed via /api/iam/service-accounts/.
         queryset = (
-            super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
-        ).exclude(service_account__isnull=False)
+            (super().get_queryset() | User.objects.filter(pk=self.request.user.pk))
+            .exclude(service_account__isnull=False)
+            .filter(self._third_party_visibility())
+        )
 
         # The autocomplete path serializes only id/name/email — skip the
         # user_groups prefetch so it stays lightweight at scale.
