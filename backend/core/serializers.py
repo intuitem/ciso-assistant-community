@@ -286,6 +286,8 @@ class BaseModelSerializer(serializers.ModelSerializer):
             except NotImplementedError, Permission.DoesNotExist:
                 continue
             hidden = new_ids - visible
+            if related_model is User:
+                hidden.discard(str(user.pk))
             if hidden and issubclass(related_model, GLOBAL_CATALOG_MODELS):
                 hidden -= self._global_ids(related_model, hidden)
             if hidden:
@@ -310,16 +312,17 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def _global_ids(model: type[models.Model], ids: set) -> set:
-        """Catalog objects in Global are shared, even with users outside
+        """Library content in Global is shared, even with users outside
         builtin groups."""
         try:
             field = RoleAssignment.get_iam_folder_field(model)
         except NotImplementedError:
             return set()
+        shared = {"urn__gt": ""} if hasattr(model, "urn") else {"builtin": True}
         return {
             str(pk)
             for pk in model.objects.filter(
-                pk__in=ids, **{field: Folder.get_root_folder().id}
+                pk__in=ids, **{field: Folder.get_root_folder().id}, **shared
             ).values_list("pk", flat=True)
         }
 
@@ -1261,7 +1264,9 @@ class AssetWriteSerializer(
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return super().validate(data)
+        data = super().validate(data)
+        self._check_reverse_m2m_change(data)
+        return data
 
     def _check_linked_assets_changeable(self, data):
         request = self.context.get("request")

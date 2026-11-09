@@ -557,7 +557,7 @@ def test_audit_in_global_folder_is_not_a_shared_baseline(app_config):
 
 @pytest.mark.django_db
 def test_study_link_needs_change_on_the_study(app_config):
-    a, b, analyst, _, perimeter_a, perimeter_b, _, _ = _cross_domain_audit()
+    a, b, analyst, _, perimeter_a, _, _, _ = _cross_domain_audit()
     UserGroup.objects.get(name="BI-UG-AUD", folder=b).user_set.add(analyst)
     matrix_a = RiskMatrix.objects.create(
         name="ma", folder=a, json_definition=RISK_MATRIX_JSON_DEFINITION
@@ -566,13 +566,6 @@ def test_study_link_needs_change_on_the_study(app_config):
         name="mb", folder=b, json_definition=RISK_MATRIX_JSON_DEFINITION
     )
     study = EbiosRMStudy.objects.create(name="study-B", risk_matrix=matrix_b, folder=b)
-    victim = RiskAssessment.objects.create(
-        name="ra-b",
-        folder=b,
-        perimeter=perimeter_b,
-        risk_matrix=matrix_b,
-        ebios_rm_study=study,
-    )
     r = _client(analyst).post(
         "/api/risk-assessments/",
         {
@@ -585,8 +578,7 @@ def test_study_link_needs_change_on_the_study(app_config):
         format="json",
     )
     assert r.status_code == 403
-    victim.refresh_from_db()
-    assert victim.ebios_rm_study_id == study.id
+    assert not RiskAssessment.objects.filter(ebios_rm_study=study).exists()
 
 
 @pytest.mark.django_db

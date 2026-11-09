@@ -1226,6 +1226,7 @@ class SolutionWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
             only then do we have the bound Solution).
         """
         subs = [entry["subcontractor"] for entry in value]
+        self._check_m2m_visibility({"subcontracting_chain": subs})
         sub_ids = {s.id for s in subs}
         if len(subs) != len(sub_ids):
             raise serializers.ValidationError(
