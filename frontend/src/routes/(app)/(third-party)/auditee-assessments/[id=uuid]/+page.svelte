@@ -60,7 +60,12 @@
 		form: ActionData;
 	}
 
-	let { data, form }: Props = $props();
+	let { data: incoming, form }: Props = $props();
+	// SvelteKit hands the next page's data to this page before unmounting it.
+	let lastData = incoming;
+	const data = $derived.by(() =>
+		incoming.compliance_assessment ? (lastData = incoming) : lastData
+	);
 
 	// Full list, used for the ToC result counts; the input radio filters per-row.
 	const result_options = requirementResultOptions();
@@ -483,7 +488,16 @@
 		navItems.filter((item): item is NavItem & { type: 'assessment' } => item.type === 'assessment')
 	);
 
-	let currentIndex = $state(0);
+	const focusRa = page.url.searchParams.get('ra');
+	const focusTask = page.url.searchParams.get('task');
+	let currentIndex = $state(
+		untrack(() =>
+			Math.max(
+				0,
+				navItems.findIndex((item) => item.data?.id === focusRa)
+			)
+		)
+	);
 	const currentNavItem = $derived(navItems[currentIndex]);
 	const currentItem = $derived(currentNavItem?.type === 'assessment' ? currentNavItem.data : null);
 	const currentSplashNode = $derived(
@@ -697,7 +711,7 @@
 
 	// Which task's commitment panel is open: the table stays scannable and the
 	// promise is one click away.
-	let expandedTask = $state<string | null>(null);
+	let expandedTask = $state<string | null>(focusTask);
 
 	const REVIEW_STATES = [
 		{ id: 'changes_requested', label: m.reviewChangesRequested(), color: '#ef4444' },
@@ -850,7 +864,11 @@
 		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce(
 			(acc, requirementAssessment) => {
-				return { ...acc, [requirementAssessment.id]: [] };
+				return {
+					...acc,
+					[requirementAssessment.id]:
+						focusTask && requirementAssessment.id === focusRa ? ['taskTemplates'] : []
+				};
 			},
 			{} as Record<string, string[]>
 		)
@@ -968,13 +986,18 @@
 	import { page } from '$app/state';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 	import CommitmentPanel from '#lib/components/CommitmentPanel/CommitmentPanel.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	// Where the sticky header parks, and how tall it is: the ToC column hangs below it.
 	let stickyTop = $state(0);
 	let headerHeight = $state(0);
 
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);
+		if (focusTask) {
+			setTimeout(() =>
+				document.getElementById(`task-${focusTask}`)?.scrollIntoView({ block: 'center' })
+			);
+		}
 		const appbar = document.querySelector('.sticky.top-0.z-50') as HTMLElement | null;
 		let cleanupAppbar: (() => void) | undefined;
 		if (appbar) {
@@ -1871,7 +1894,11 @@
 															</thead>
 															<tbody>
 																{#each requirementAssessment.task_templates ?? [] as task}
-																	<tr class="border-b border-surface-100-900">
+																	<tr
+																		id="task-{task.id}"
+																		class="border-b border-surface-100-900"
+																		class:bg-primary-100-900={task.id === focusTask}
+																	>
 																		<td class="py-2">
 																			<i class="fa-solid fa-list-check mr-2 text-surface-500"
 																			></i>{task.str}
