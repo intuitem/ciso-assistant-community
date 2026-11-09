@@ -42,7 +42,12 @@ from integrations.models import IntegrationConfiguration, SyncMapping
 logger = structlog.get_logger(__name__)
 
 # library content any principal may link, even without view on Global
-GLOBAL_CATALOG_MODELS = (ReferentialObjectMixin, Question, QuestionChoice)
+GLOBAL_CATALOG_MODELS = (
+    ReferentialObjectMixin,
+    Question,
+    QuestionChoice,
+    Terminology,
+)
 
 
 class SerializerFactory:
@@ -274,10 +279,10 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not new_ids:
                 continue
             try:
-                visible = {
-                    str(pk)
-                    for pk in self._viewable_ids(related_model).filter(pk__in=new_ids)
-                }
+                viewable = self._viewable_ids(related_model)
+                if isinstance(viewable, models.QuerySet):
+                    viewable = viewable.filter(pk__in=new_ids)
+                visible = {str(pk) for pk in viewable}
             except NotImplementedError, Permission.DoesNotExist:
                 continue
             hidden = new_ids - visible
