@@ -20951,10 +20951,9 @@ class TerminologyViewSet(BaseModelViewSet):
     def reorder(self, request):
         """Takes every id of one field path, first first, and renumbers their
         order. Partial lists are refused."""
+        perm = Permission.objects.get(codename="change_terminology")
         if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="change_terminology"),
-            folder=Folder.get_root_folder(),
+            user=request.user, perm=perm, folder=Folder.get_root_folder()
         ):
             raise PermissionDenied()
         field_path = request.data.get("field_path")
@@ -20979,9 +20978,15 @@ class TerminologyViewSet(BaseModelViewSet):
                     {"error": "idsMustListEveryTerminology"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            folder_ids = {t.folder_id for t in terminologies.values()}
+            for folder in Folder.objects.filter(id__in=folder_ids):
+                if not RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=folder
+                ):
+                    raise PermissionDenied()
             for position, terminology_id in enumerate(ids, start=1):
                 terminologies[terminology_id].order = position
-            Terminology.objects.bulk_update(terminologies.values(), ["order"])
+            bulk_update_with_log(Terminology, terminologies.values(), ["order"])
         return Response(
             TerminologyReadSerializer(
                 self.get_queryset().filter(field_path=field_path),

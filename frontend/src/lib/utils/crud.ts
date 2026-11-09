@@ -237,7 +237,9 @@ export const NON_CREATABLE_URL_MODELS = [
 	'quick-forms',
 	// Own a list route with no create affordance on it.
 	'presets',
-	'ttp-catalogs'
+	'ttp-catalogs',
+	// Values are added from each field's page.
+	'terminologies'
 ];
 
 // Models whose creation is a page, not a modal on the list.

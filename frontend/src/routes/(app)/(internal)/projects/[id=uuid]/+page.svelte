@@ -307,7 +307,7 @@
 		snapshots.length > 0 ? snapshots[snapshots.length - 1].metrics : null
 	);
 	let healthStripeColor = $derived(
-		/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(data.healthColors?.[latestSnapshot?.health] ?? '')
+		/^#[0-9a-fA-F]{6}$/.test(data.healthColors?.[latestSnapshot?.health] ?? '')
 			? data.healthColors[latestSnapshot.health]
 			: ''
 	);

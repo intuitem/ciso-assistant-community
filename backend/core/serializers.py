@@ -7726,13 +7726,6 @@ class TerminologyWriteSerializer(BaseModelSerializer):
         model = Terminology
         exclude = ["folder"]
 
-    def create(self, validated_data):
-        if "order" not in validated_data:
-            validated_data["order"] = Terminology.next_order(
-                validated_data["field_path"]
-            )
-        return super().create(validated_data)
-
 
 class ClassificationLevelReadSerializer(BaseModelSerializer):
     object_classification = FieldsRelatedField()

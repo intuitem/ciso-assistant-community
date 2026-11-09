@@ -56,7 +56,7 @@
 	let dragIndex: number | null = $state(null);
 
 	// Colours come from the database and reach inline styles: only bare hex gets through.
-	const HEX = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
+	const HEX = /^#[0-9a-fA-F]{6}$/;
 	const FALLBACK = '#94a3b8';
 	const colorOf = (t: Terminology) => (HEX.test(t.hexcolor ?? '') ? t.hexcolor : FALLBACK);
 	const labelOf = (t: Terminology) =>

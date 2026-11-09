@@ -3656,7 +3656,11 @@ class Terminology(NameDescriptionMixin, FolderMixin):
     # Vocabularies that are only listed get one neutral tint.
     NEUTRAL_HEXCOLOR = "#f3f4f6"
     hexcolor = models.CharField(
-        max_length=9, blank=True, default=NEUTRAL_HEXCOLOR, verbose_name=_("Color")
+        max_length=9,
+        blank=True,
+        default=NEUTRAL_HEXCOLOR,
+        validators=[RegexValidator(r"^#[0-9a-fA-F]{6}$")],
+        verbose_name=_("Color"),
     )
     order = models.PositiveIntegerField(default=0, verbose_name=_("Order"))
 
@@ -3792,6 +3796,12 @@ class Terminology(NameDescriptionMixin, FolderMixin):
 
     def __str__(self) -> str:
         return self._display(self.get_name_translated or self.name)
+
+    def save(self, *args, **kwargs):
+        # New values without an explicit rank go last in their field.
+        if self._state.adding and not self.order:
+            self.order = self.next_order(self.field_path)
+        super().save(*args, **kwargs)
 
 
 class Threat(

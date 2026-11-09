@@ -18,7 +18,7 @@
 
 	let { data }: Props = $props();
 
-	const HEX = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
+	const HEX = /^#[0-9a-fA-F]{6}$/;
 	const FALLBACK = '#94a3b8';
 	const PREVIEW_SIZE = 8;
 
