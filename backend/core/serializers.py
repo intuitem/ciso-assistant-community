@@ -7451,9 +7451,12 @@ class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer
         return self.validate_commitment(super().validate(attrs))
 
     def create(self, validated_data):
+        assigned_to_data = validated_data.get("assigned_to", [])
+        user = self.context["request"].user
+        if user.is_third_party and not assigned_to_data:
+            validated_data["assigned_to"] = [user.actor]
         commitment_data = dict(validated_data)
         self.pop_commitment(validated_data)
-        assigned_to_data = validated_data.get("assigned_to", [])
         incidents = validated_data.pop("incidents", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
         with transaction.atomic():
