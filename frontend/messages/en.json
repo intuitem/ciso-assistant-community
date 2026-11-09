@@ -7790,6 +7790,7 @@
 	"backup": "Back up",
 	"restore": "Restore",
 	"viewComplianceAssessmentFull": "See all requirements (auditor view)",
+	"viewUserFull": "View full user record",
 	"viewCentralAuditlog": "View central audit log",
 	"viewObjectAudittrail": "View object audit trail",
 	"viewPublishedDocumentcontainer": "View published version only",
