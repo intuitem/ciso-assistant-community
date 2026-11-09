@@ -124,7 +124,7 @@ docker inspect --format '{{json .State.Health}}' backend
 
 ### Login fails with an internal error, or all users are locked out
 
-Login rate limiting relies on the `memcached` container and on your reverse proxy passing the client IP address. If memcached is stopped, every login fails with an internal error until it is back:
+Login rate limiting relies on your reverse proxy passing the client IP address. If you enabled the optional `memcached` container and it is stopped, every request that uses the cache fails with an internal error, logins included, until it is back:
 
 ```
 docker compose up -d memcached

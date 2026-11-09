@@ -16,11 +16,7 @@ services:
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
-      - ENABLE_MEMCACHED=True
-      - MEMCACHED_LOCATION=memcached:11211
 
-    depends_on:
-      - memcached
     read_only: true
     cap_drop:
       - ALL
@@ -31,9 +27,6 @@ services:
     volumes:
       - ./db:/code/db
     user: "1001:1001"
-    networks:
-      - default
-      - cache
 
   huey:
     container_name: huey
@@ -44,7 +37,6 @@ services:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     depends_on:
       - backend
-      - memcached
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -55,8 +47,6 @@ services:
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
-      - ENABLE_MEMCACHED=True
-      - MEMCACHED_LOCATION=memcached:11211
 
     read_only: true
     cap_drop:
@@ -73,9 +63,6 @@ services:
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
     user: "1001:1001"
-    networks:
-      - default
-      - cache
 
   frontend:
     container_name: frontend
@@ -103,20 +90,6 @@ services:
     depends_on:
       - backend
     restart: always
-
-  memcached:
-    container_name: memcached
-    image: ${MEMCACHED_IMAGE:-memcached:1.6-alpine}
-    restart: unless-stopped
-    command: ["memcached", "-m", "16"]
-    read_only: true
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
-    user: "1001:1001"
-    networks:
-      - cache
 
   qdrant:
     container_name: qdrant
@@ -183,8 +156,3 @@ services:
 
 volumes:
   qdrant_data:
-
-networks:
-  default:
-  cache:
-    internal: true

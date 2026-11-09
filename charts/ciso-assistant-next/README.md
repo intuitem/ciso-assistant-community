@@ -225,7 +225,7 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | ingress.tls.enabled | bool | `false` | Enable TLS for the ingress |
 | ingress.tls.existingSecret | string | `""` | Use existing TLS secret |
 | memcached.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001}` | Container-level security context for memcached |
-| memcached.enabled | bool | `true` | Run a memcached container in the backend pod and point the backend and Huey at it (sets ENABLE_MEMCACHED) |
+| memcached.enabled | bool | `false` | Run a memcached container in the backend pod, reached by the backend and Huey through a unix socket (sets ENABLE_MEMCACHED). Optional: whoever enables it runs it |
 | memcached.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for memcached |
 | memcached.image.registry | string | `"docker.io"` | Registry to use for memcached |
 | memcached.image.repository | string | `"library/memcached"` | Repository to use for memcached |

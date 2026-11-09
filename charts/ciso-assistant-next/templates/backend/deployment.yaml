@@ -179,6 +179,10 @@ spec:
         volumeMounts:
           - name: tmp-data
             mountPath: /tmp
+          {{- if .Values.memcached.enabled }}
+          - name: memcached-socket
+            mountPath: /run/memcached
+          {{- end }}
           {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
           - name: sqlite-data
             mountPath: /ciso/db
@@ -338,6 +342,10 @@ spec:
         volumeMounts:
           - name: tmp-data
             mountPath: /tmp
+          {{- if .Values.memcached.enabled }}
+          - name: memcached-socket
+            mountPath: /run/memcached
+          {{- end }}
           {{- if .Values.backend.persistence.sqlite.enabled }}
           - name: sqlite-data
             mountPath: /ciso/db
@@ -362,11 +370,17 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
       {{- if .Values.memcached.enabled }}
-      # Shared cache for the backend and Huey containers of this pod.
+      # Shared cache for the backend and Huey containers of this pod, on a unix
+      # socket only (no TCP listener). Socket mode 0777: the backend image runs as
+      # root unless backend.containerSecurityContext sets a user; only the
+      # containers of this pod that mount memcached-socket can reach it.
       - name: memcached
         image: {{ .Values.memcached.image.registry }}/{{ .Values.memcached.image.repository }}:{{ .Values.memcached.image.tag }}
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.memcached.image.imagePullPolicy }}
-        args: ["memcached", "-l", "127.0.0.1", "-p", "11211", "-m", {{ .Values.memcached.memoryLimit | quote }}]
+        args: ["memcached", "-s", "/run/memcached/memcached.sock", "-a", "0777", "-m", {{ .Values.memcached.memoryLimit | quote }}]
+        volumeMounts:
+          - name: memcached-socket
+            mountPath: /run/memcached
         {{- if .Values.memcached.resources }}
         resources:
           {{- toYaml .Values.memcached.resources | nindent 10 }}
@@ -392,6 +406,13 @@ spec:
         - name: tmp-data
           emptyDir:
             sizeLimit: 256Mi
+        {{- if .Values.memcached.enabled }}
+        # Holds only memcached's socket.
+        - name: memcached-socket
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
+        {{- end }}
         {{- if .Values.backend.persistence.sqlite.enabled }}
         - name: sqlite-data
           persistentVolumeClaim:

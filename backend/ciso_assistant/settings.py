@@ -798,17 +798,22 @@ else:
     }
     logger.info("SQLITE_FILE: %s", SQLITE_FILE)
 
+# Optional shared cache. Without it, each gunicorn worker keeps its own
+# in-memory cache: rate limits count per worker and cached values (feature
+# flags) reach the other workers only when they expire.
 ENABLE_MEMCACHED = os.environ.get("ENABLE_MEMCACHED", "False").lower() in (
     "true",
     "1",
     "yes",
 )
-"""
-This setting is REQUIRED for ciso-assistant to have consistent caching.
-(otherwise each gunicorn worker will have its own internal(non-shared) cache).
-"""
 
-MEMCACHED_LOCATION = os.environ.get("MEMCACHED_LOCATION", "127.0.0.1:11211")
+# A unix socket by default: memcached then has no network listener at all, so
+# no outbound request of the backend (webhook, SIEM, LLM URL...) can reach it.
+# Anything that can write to memcached can run code in the backend (values are
+# pickled). The path must be absolute: pymemcache reads a relative one as a host.
+MEMCACHED_LOCATION = os.environ.get(
+    "MEMCACHED_LOCATION", "unix:/run/memcached/memcached.sock"
+)
 if ENABLE_MEMCACHED:
     CACHES = {
         "default": {

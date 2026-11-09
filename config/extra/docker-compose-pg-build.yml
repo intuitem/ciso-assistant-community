@@ -7,7 +7,6 @@ services:
     restart: always
     depends_on:
       - postgres
-      - memcached
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
@@ -16,13 +15,8 @@ services:
       - POSTGRES_USER=ciso_assistant
       - POSTGRES_PASSWORD=ciso_assistant
       - DB_HOST=postgres
-      - ENABLE_MEMCACHED=True
-      - MEMCACHED_LOCATION=memcached:11211
     volumes:
       - ./db:/code/db
-    networks:
-      - default
-      - cache
 
   huey:
     container_name: huey
@@ -31,7 +25,6 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - backend
-      - memcached
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -41,8 +34,6 @@ services:
       - POSTGRES_USER=ciso_assistant
       - POSTGRES_PASSWORD=ciso_assistant
       - DB_HOST=postgres
-      - ENABLE_MEMCACHED=True
-      - MEMCACHED_LOCATION=memcached:11211
     volumes:
       - ./db:/code/db
     entrypoint:
@@ -50,23 +41,6 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
-    networks:
-      - default
-      - cache
-
-  memcached:
-    container_name: memcached
-    image: ${MEMCACHED_IMAGE:-memcached:1.6-alpine}
-    restart: unless-stopped
-    command: ["memcached", "-m", "16"]
-    read_only: true
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
-    user: "1001:1001"
-    networks:
-      - cache
 
   frontend:
     container_name: frontend
@@ -110,8 +84,3 @@ services:
       - frontend:3000
     volumes:
       - ./db:/data
-
-networks:
-  default:
-  cache:
-    internal: true

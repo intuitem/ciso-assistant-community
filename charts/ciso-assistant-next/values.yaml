@@ -470,8 +470,8 @@ networkPolicy:
 ## Cache (shared by the backend gunicorn workers and the huey workers)
 ## Note: pod-level settings (imagePullSecrets, nodeSelector, tolerations, affinity) come from `backend`.
 memcached:
-  # -- Run a memcached container in the backend pod and point the backend and Huey at it (sets ENABLE_MEMCACHED)
-  enabled: true
+  # -- Run a memcached container in the backend pod, reached by the backend and Huey through a unix socket (sets ENABLE_MEMCACHED). Optional: whoever enables it runs it
+  enabled: false
 
   # -- Memory memcached may use for items, in megabytes
   memoryLimit: 16 # @schema minimum: 1

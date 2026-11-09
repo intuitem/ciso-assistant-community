@@ -25,11 +25,16 @@ services:
     pull_policy: always
     restart: always
     depends_on:
-      postgres:
-        condition: service_healthy
+      {% if memcached.enabled %}
       memcached:
         condition: service_started
+      {% endif %}
+      postgres:
+        condition: service_healthy
     environment:
+      {% if memcached.enabled %}
+      - ENABLE_MEMCACHED=True
+      {% endif %}
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG={{ enable_debug }}
@@ -38,8 +43,6 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
-      - ENABLE_MEMCACHED=True
-      - MEMCACHED_LOCATION=memcached:11211
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -62,6 +65,9 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
+      {% if memcached.enabled %}
+      - memcached_socket:/run/memcached
+      {% endif %}
       - ./db:/code/db
     user: "1001:1001"
     healthcheck:
@@ -77,21 +83,23 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"{% if can_do_tls %}
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"{% endif %}
-    networks:
-      - default
-      - cache
 
   huey:
     container_name: huey
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
     depends_on:
-      backend:
-        condition: service_healthy
+      {% if memcached.enabled %}
       memcached:
         condition: service_started
+      {% endif %}
+      backend:
+        condition: service_healthy
     restart: always
     environment:
+      {% if memcached.enabled %}
+      - ENABLE_MEMCACHED=True
+      {% endif %}
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG=False
@@ -100,8 +108,6 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
-      - ENABLE_MEMCACHED=True
-      - MEMCACHED_LOCATION=memcached:11211
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -124,6 +130,9 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
+      {% if memcached.enabled %}
+      - memcached_socket:/run/memcached
+      {% endif %}
       - ./db:/code/db
     user: "1001:1001"
     entrypoint:
@@ -131,23 +140,24 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
-    networks:
-      - default
-      - cache
 
+  {% if memcached.enabled %}
   memcached:
     container_name: memcached
     image: memcached:1.6-alpine
     restart: unless-stopped
-    command: ["memcached", "-m", "16"]
+    # Unix socket only: no network listener, and no network at all.
+    command: ["memcached", "-s", "/run/memcached/memcached.sock", "-a", "0700", "-m", "16"]
+    network_mode: none
     read_only: true
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     user: "1001:1001"
-    networks:
-      - cache
+    volumes:
+      - memcached_socket:/run/memcached
+  {% endif %}
 
   frontend:
     container_name: frontend
@@ -241,7 +251,6 @@ services:
     command:
       {% if enable_debug %}- "--api.insecure=true"{% endif %}
       - "--providers.docker=true"
-      - "--providers.docker.network=ciso-assistant-default"
       - "--providers.docker.exposedbydefault=false"{% if can_do_tls %}
       - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
       - "--entrypoints.web.address=:80"
@@ -292,8 +301,13 @@ services:
         condition: service_healthy
   {% endif %}
 
-networks:
-  default:
-    name: ciso-assistant-default
-  cache:
-    internal: true
+{% if memcached.enabled %}
+volumes:
+  memcached_socket:
+    # RAM-backed, owned by the uid the backend, huey and memcached run as;
+    # it only holds the socket.
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "uid=1001,gid=1001,mode=0700,size=64k"
+{% endif %}
