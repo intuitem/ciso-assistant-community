@@ -97,8 +97,9 @@ class JiraClient(BaseIntegrationClient):
         into the API user's language ("Task" -> "Tâche") while its filters
         (createmeta ``issuetypeNames``) only accept the untranslated name.
         Configs saved before that hold the name: look it up among the
-        project's issue types, which carry the same translation as the name
-        the picker saved.
+        project's issue types, matching the translated name the picker saved
+        as well as the untranslated one (the legacy ``issue_type`` default is
+        "Task" whatever the API user's language).
         """
         if not project_key or not issue_type:
             return ""
@@ -107,10 +108,14 @@ class JiraClient(BaseIntegrationClient):
 
         cache_key = (project_key, issue_type)
         if cache_key not in self._issue_type_ids:
+            wanted = issue_type.casefold()
             project = self.jira.project(project_key)
             for it in getattr(project, "issueTypes", []) or []:
-                name = getattr(it, "name", None)
-                if name and name.casefold() == issue_type.casefold():
+                names = (
+                    getattr(it, "name", None),
+                    getattr(it, "untranslatedName", None),
+                )
+                if any(name and name.casefold() == wanted for name in names):
                     self._issue_type_ids[cache_key] = str(it.id)
                     break
             else:

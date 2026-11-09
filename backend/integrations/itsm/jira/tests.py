@@ -988,3 +988,22 @@ def test_unknown_legacy_issue_type_raises(mock_jira, configuration):
 
     with pytest.raises(ValueError, match="not found"):
         client.get_table_columns("KAN:Task")
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_legacy_issue_type_matches_untranslated_name(mock_jira, configuration):
+    """The legacy "Task" default resolves even when the API user sees "Tâche"."""
+    configuration.settings = {"project_key": "PROJ", "issue_type": "task"}
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[
+            SimpleNamespace(id="10000", name="Epic", untranslatedName="Epic"),
+            SimpleNamespace(id="10001", name="Tâche", untranslatedName="Task"),
+        ]
+    )
+    mock_jira.return_value.create_issue.return_value = MagicMock(key="PROJ-1")
+
+    client = JiraClient(configuration)
+    client.create_remote_object(AppliedControl(folder_id=None, name="Control"))
+
+    fields = mock_jira.return_value.create_issue.call_args.kwargs["fields"]
+    assert fields["issuetype"] == {"id": "10001"}
