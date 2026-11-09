@@ -3,6 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
 import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchTasks, isOpenTask } from '#lib/utils/vendorTasks.js';
 import {
 	PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS,
 	PUBLIC_LICENSE_EXPIRATION_MESSAGE
@@ -83,8 +84,14 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 	const LICENSE_EXPIRATION_NOTIFY_DAYS = PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS ?? 7;
 	const LICENSE_EXPIRATION_MESSAGE = PUBLIC_LICENSE_EXPIRATION_MESSAGE ?? '';
 
+	const openTasks =
+		user?.is_third_party && featureflags?.tasks !== false
+			? (await fetchTasks(fetch)).filter(isOpenTask).length
+			: 0;
+
 	return {
 		user,
+		openTasks,
 		settings,
 		featureflags,
 		licenseStatus,

@@ -9,6 +9,15 @@
 	let { title, children }: { title: string; children?: import('svelte').Snippet } = $props();
 
 	const user = $derived(page.data.user);
+	const path = $derived(page.url.pathname);
+	const onTasks = $derived(path.startsWith('/my-tasks'));
+	const onQuestionnaires = $derived(
+		path.startsWith('/auditee-dashboard') || path.startsWith('/auditee-assessments')
+	);
+	const navClass = (active: boolean) =>
+		`flex items-center gap-1 border-b-2 py-1 text-sm font-semibold hover:text-primary-500 ${
+			active ? 'border-primary-500 text-primary-500' : 'border-transparent text-surface-700-300'
+		}`;
 	let menuOpen = $state(false);
 	let menu: HTMLDivElement | undefined = $state();
 
@@ -45,11 +54,25 @@
 			</a>
 			<a
 				href="/auditee-dashboard"
-				class="text-sm font-semibold text-surface-700-300 hover:text-primary-500"
+				class={navClass(onQuestionnaires)}
+				aria-current={onQuestionnaires ? 'page' : undefined}
 				data-testid="respondent-home"
 			>
 				{m.myQuestionnaires()}
 			</a>
+			{#if page.data.featureflags?.tasks !== false}
+				<a
+					href="/my-tasks"
+					class={navClass(onTasks)}
+					aria-current={onTasks ? 'page' : undefined}
+					data-testid="respondent-tasks"
+				>
+					{m.myTasks()}
+					{#if page.data.openTasks}
+						<span class="badge preset-filled-primary-500 text-xs">{page.data.openTasks}</span>
+					{/if}
+				</a>
+			{/if}
 		</div>
 		<div class="flex items-center gap-2">
 			<select

@@ -1988,6 +1988,8 @@
 	"assignments": "Assignments",
 	"auditDashboard": "Respondent View",
 	"myQuestionnaires": "My questionnaires",
+	"myTasks": "My tasks",
+	"assignedToMe": "Assigned to me",
 	"auditee": "Respondent",
 	"auditeeMode": "Assignment/Respondent mode",
 	"fullAudit": "Full audit",

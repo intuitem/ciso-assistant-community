@@ -1,10 +1,11 @@
 import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
+import { fetchTasks, isOpenTask } from '#lib/utils/vendorTasks.js';
 
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
-export const load = loadFlash(async ({ locals, url, cookies, request }) => {
+export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) => {
 	const user = await locals.getUser();
 	if (!user && !url.pathname.includes('/login')) {
 		redirect(302, `/login?next=${url.pathname}`);
@@ -40,5 +41,9 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 			});
 		}
 	}
-	return { user, settings, featureflags };
+	const openTasks =
+		user?.is_third_party && featureflags?.tasks !== false
+			? (await fetchTasks(fetch)).filter(isOpenTask).length
+			: 0;
+	return { user, settings, featureflags, openTasks };
 }) satisfies LayoutServerLoad;

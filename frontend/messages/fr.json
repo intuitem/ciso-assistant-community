@@ -1995,6 +1995,8 @@
 	"assignments": "Affectations",
 	"auditDashboard": "Vue répondant",
 	"myQuestionnaires": "Mes questionnaires",
+	"myTasks": "Mes tâches",
+	"assignedToMe": "Qui me sont assignées",
 	"auditee": "Répondant",
 	"auditeeMode": "Mode assignation/répondant",
 	"fullAudit": "Audit complet",
