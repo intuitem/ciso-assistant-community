@@ -109,7 +109,7 @@ Each backend pod has its own memcached. If you set `backend.replicas` above 1, t
 
 ## Login rate limiting
 
-CISO Assistant limits login attempts to slow down password-guessing attacks. The limits apply to local (email and password) logins:
+CISO Assistant limits login attempts to slow down password-guessing attacks. The limits apply to local (email and password) logins. By default:
 
 | Limit | What happens |
 |---|---|
@@ -127,6 +127,43 @@ The block lifts by itself when the time window ends. To clear all limits at once
 
 ```bash
 docker compose restart memcached
+```
+
+### Changing the limits
+
+Set these variables on the **backend** container:
+
+| Variable | Default | What it limits |
+|---|---|---|
+| `LOGIN_FAILED_RATE_LIMIT` | `10/m/ip,5/5m/key` | Failed logins, per IP address (`ip`) and per email (`key`) |
+| `LOGIN_RATE_LIMIT` | `30/m/ip` | All login attempts, per IP address |
+
+A value is a comma-separated list of rules written `amount/period/per`:
+
+* `amount` is the number of attempts allowed in the period.
+* `period` is `s`, `m`, `h` or `d`, optionally preceded by a number: `5m` means 5 minutes.
+* `per` is `ip`, or `key` for the email (failed logins only). It defaults to `ip`.
+
+An empty value turns that limit off. If a value is malformed, the backend does not start, and its logs name the variable.
+
+For example, to keep the per-IP limit but remove the per-email lockout, so that knowing an email is not enough to lock its account:
+
+```yaml
+services:
+  backend:
+    environment:
+      - LOGIN_FAILED_RATE_LIMIT=10/m/ip
+```
+
+The account is then no longer protected against password guessing spread over many IP addresses.
+
+With the Helm chart, set the variables through `backend.env`:
+
+```yaml
+backend:
+  env:
+    - name: LOGIN_FAILED_RATE_LIMIT
+      value: "10/m/ip"
 ```
 
 ## Reverse proxy and client IP address
@@ -181,6 +218,8 @@ docker compose logs backend | grep auth/login
 ```
 
 If every line shows the same internal address (for example `172.x.x.x`), check the [reverse proxy setup](#reverse-proxy-and-client-ip-address): `ADDRESS_HEADER` and `XFF_DEPTH` on the frontend, and `X-Forwarded-For` on your proxy.
+
+Until the setup is fixed, you can turn the per-IP limits off and keep only the per-email one: set `LOGIN_FAILED_RATE_LIMIT=5/5m/key` and leave `LOGIN_RATE_LIMIT` empty (see [Changing the limits](#changing-the-limits)).
 
 ### Limits seem higher than documented
 

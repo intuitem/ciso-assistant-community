@@ -11,6 +11,7 @@ else it is sqlite, and no env variable is required
 
 from pathlib import Path
 import os
+import re
 from dotenv import load_dotenv
 from datetime import timedelta
 import logging.config
@@ -864,6 +865,51 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
 ACCOUNT_REAUTHENTICATION_TIMEOUT = 2 * 60 * 60  # 2 hours
+
+# Login rate limits, adjustable on the backend container. A value is a
+# comma-separated list of "amount/period/per" rules: period is s, m, h or d,
+# optionally preceded by a number (5m = 5 minutes), and per is "ip" (the
+# default) or, for failed logins only, "key" (the email being logged in to).
+# An empty value turns that limit off. A malformed one stops the backend here
+# instead of failing every login.
+_LOGIN_RATE_RULE = re.compile(
+    r"[1-9][0-9]*/(?:[0-9]+(?:\.[0-9]+)?)?[smhd](?:/([a-z]+))?"
+)
+
+
+def _login_rate_limit(*, variable: str, default: str, allowed_per: set[str]) -> str:
+    value = os.environ.get(variable, default).strip()
+    if not value:
+        return value
+    for rule in value.split(","):
+        match = _LOGIN_RATE_RULE.fullmatch(rule.strip())
+        if not match or (match.group(1) or "ip") not in allowed_per:
+            raise ImproperlyConfigured(
+                f"{variable}: invalid rule {rule.strip()!r}. Use amount/period/per, "
+                f"for example 10/m/ip, with per one of: {', '.join(sorted(allowed_per))}. "
+                "Leave the value empty to turn the limit off."
+            )
+    return value
+
+
+def _login_rate_limits() -> dict[str, str]:
+    return {
+        # Every login attempt. Above it, allauth answers a bare 429.
+        "login": _login_rate_limit(
+            variable="LOGIN_RATE_LIMIT", default="30/m/ip", allowed_per={"ip"}
+        ),
+        # Failed logins, per IP and per email ("key"). The per-email rule locks
+        # the account, even for the right password, until the period ends.
+        "login_failed": _login_rate_limit(
+            variable="LOGIN_FAILED_RATE_LIMIT",
+            default="10/m/ip,5/5m/key",
+            allowed_per={"ip", "key"},
+        ),
+    }
+
+
+# allauth keeps its own defaults for the other actions (password reset...).
+ACCOUNT_RATE_LIMITS = _login_rate_limits()
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 

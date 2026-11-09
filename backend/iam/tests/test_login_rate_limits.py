@@ -1,17 +1,20 @@
-"""Login brute-force limits (allauth's default ACCOUNT_RATE_LIMITS) through the
+"""Login brute-force limits (allauth's ACCOUNT_RATE_LIMITS) through the
 headless endpoint the frontend uses.
 
 AccountAdapter.authenticate replaces allauth's, so it must consume and roll
 back the "login_failed" limit itself; before it did, failed logins were never
 limited. Per-IP limits key on the client IP resolved from X-Forwarded-For
-(core.custom_middleware.resolve_client_ip)."""
+(core.custom_middleware.resolve_client_ip). LOGIN_RATE_LIMIT and
+LOGIN_FAILED_RATE_LIMIT set the two login limits."""
 
 import json
 
 import pytest
 from django.core.cache import cache
-from django.test import Client
+from django.core.exceptions import ImproperlyConfigured
+from django.test import Client, override_settings
 
+from ciso_assistant import settings as project_settings
 from iam.models import User
 
 pytestmark = pytest.mark.django_db
@@ -102,3 +105,76 @@ def test_too_many_attempts_from_one_ip_answer_a_bare_429(user):
     assert response.status_code == 429
     # No "errors": the login page maps the bare 429 itself.
     assert "errors" not in response.json()
+
+
+@pytest.fixture
+def login_rate_env(monkeypatch):
+    monkeypatch.delenv("LOGIN_RATE_LIMIT", raising=False)
+    monkeypatch.delenv("LOGIN_FAILED_RATE_LIMIT", raising=False)
+    return monkeypatch
+
+
+def test_default_limits_are_allauths(login_rate_env):
+    assert project_settings._login_rate_limits() == {
+        "login": "30/m/ip",
+        "login_failed": "10/m/ip,5/5m/key",
+    }
+
+
+@pytest.mark.parametrize(
+    "variable, action, value, expected",
+    [
+        # No per-email lockout:
+        ("LOGIN_FAILED_RATE_LIMIT", "login_failed", "10/m/ip", "10/m/ip"),
+        (
+            "LOGIN_FAILED_RATE_LIMIT",
+            "login_failed",
+            " 20/m, 3/1h/key ",
+            "20/m, 3/1h/key",
+        ),
+        ("LOGIN_FAILED_RATE_LIMIT", "login_failed", "", ""),  # off
+        ("LOGIN_RATE_LIMIT", "login", "60/1.5m/ip", "60/1.5m/ip"),
+        ("LOGIN_RATE_LIMIT", "login", "  ", ""),  # off
+    ],
+)
+def test_limits_are_read_from_the_environment(
+    login_rate_env, variable, action, value, expected
+):
+    login_rate_env.setenv(variable, value)
+
+    assert project_settings._login_rate_limits()[action] == expected
+
+
+@pytest.mark.parametrize(
+    "variable, value",
+    [
+        ("LOGIN_FAILED_RATE_LIMIT", "5/5min/key"),  # unknown period unit
+        ("LOGIN_FAILED_RATE_LIMIT", "10/m/ip,"),  # empty rule
+        ("LOGIN_FAILED_RATE_LIMIT", "0/m/ip"),  # would block every login
+        ("LOGIN_FAILED_RATE_LIMIT", "5/m/user"),  # nobody is logged in yet
+        ("LOGIN_RATE_LIMIT", "5/m/key"),  # allauth passes no key for "login"
+        ("LOGIN_RATE_LIMIT", "ten/m"),
+    ],
+)
+def test_malformed_limits_stop_the_backend(login_rate_env, variable, value):
+    login_rate_env.setenv(variable, value)
+
+    with pytest.raises(ImproperlyConfigured, match=variable):
+        project_settings._login_rate_limits()
+
+
+@override_settings(ACCOUNT_RATE_LIMITS={"login_failed": "10/m/ip"})
+def test_without_a_key_rule_failures_do_not_lock_the_account(user):
+    for i in range(6):
+        login(EMAIL, "wrong", f"203.0.113.{i}")
+
+    assert login(EMAIL, PASSWORD, "198.51.100.1").status_code == 200
+
+
+@override_settings(ACCOUNT_RATE_LIMITS={"login": "", "login_failed": ""})
+def test_empty_limits_turn_login_limiting_off(user):
+    for _ in range(31):
+        response = login(EMAIL, "wrong", "203.0.113.9")
+        assert error_codes(response) == ["email_password_mismatch"]
+
+    assert login(EMAIL, PASSWORD, "203.0.113.9").status_code == 200
