@@ -44,12 +44,20 @@
 			])
 		) as Record<SelectionFilter, string[]>
 	);
-	const active = $derived(SELECTION_FILTERS.filter((name) => applied[name].length > 0));
 	const scoped = $derived(SELECTION_FILTERS.some((name) => (values[name]?.length ?? 0) > 0));
 	const toleranceSet = $derived((selection?.risk_tolerance ?? -1) >= 0);
 
-	let open = $state(false);
-	let field: SelectionFilter | null = $state(null);
+	// Always shown as buttons; the others sit behind "More filters" until used.
+	const PRIMARY_FILTERS: SelectionFilter[] = [
+		'within_tolerance',
+		'treatment',
+		'current_level',
+		'residual_level'
+	];
+	const SEARCH_THRESHOLD = 8;
+
+	let openFilter: SelectionFilter | 'more' | null = $state(null);
+	let query = $state('');
 	let restored = $state(false);
 	let copied = $state(false);
 	// Off until the remembered selection (if any) is back in the URL, so the
@@ -64,13 +72,44 @@
 		return selection?.facets?.[name] ?? [];
 	}
 
-	// Filters with nothing to pick in this assessment stay out of the menu,
-	// except tolerance, which explains why it is unavailable.
-	const menuFilters = $derived(
+	// Filters with nothing to pick in this assessment are left out, except
+	// tolerance, which explains why it is unavailable.
+	function available(name: SelectionFilter): boolean {
+		return name === 'within_tolerance' || applied[name].length > 0 || options(name).length > 0;
+	}
+
+	const buttonFilters = $derived(
 		SELECTION_FILTERS.filter(
-			(name) => name === 'within_tolerance' || applied[name].length > 0 || options(name).length > 0
+			(name) =>
+				available(name) &&
+				(PRIMARY_FILTERS.includes(name) || applied[name].length > 0 || openFilter === name)
 		)
 	);
+	const moreFilters = $derived(
+		SELECTION_FILTERS.filter((name) => available(name) && !buttonFilters.includes(name))
+	);
+
+	function setOpen(name: SelectionFilter | 'more', isOpen: boolean) {
+		if (isOpen) {
+			openFilter = name;
+			query = '';
+		} else if (openFilter === name) {
+			openFilter = null;
+		}
+	}
+
+	function summary(name: SelectionFilter): string {
+		const labels = applied[name].map((v) => optionLabel(name, v));
+		return labels.length <= 2 ? labels.join(', ') : `${labels[0]} +${labels.length - 1}`;
+	}
+
+	function matchingOptions(name: SelectionFilter): FacetOption[] {
+		const q = query.trim().toLowerCase();
+		if (!q) return options(name);
+		return options(name).filter((o) =>
+			(o.label ?? optionLabel(name, o.value)).toLowerCase().includes(q)
+		);
+	}
 
 	function apply(next: SelectionValues) {
 		const url = new URL(page.url.href);
@@ -90,6 +129,7 @@
 	}
 
 	function remove(name: SelectionFilter) {
+		setOpen(name, false);
 		apply({ ...values, [name]: [] });
 	}
 
@@ -99,13 +139,8 @@
 	}
 
 	function clear() {
-		open = false;
+		openFilter = null;
 		apply({});
-	}
-
-	function edit(name: SelectionFilter) {
-		field = name;
-		open = true;
 	}
 
 	async function copyLink() {
@@ -178,35 +213,168 @@
 			<i class="fa-solid fa-filter" aria-hidden="true"></i>
 			{m.scenarioSelection()}
 		</div>
-		<div class="flex flex-wrap items-center gap-2 flex-1 basis-72 min-w-0">
-			{#if !scoped}
-				<span class="text-surface-600-400">{m.allScenarios()}</span>
-			{/if}
-			{#each active as name (name)}
+		<div class="flex flex-wrap items-center gap-2 flex-1 basis-xl min-w-0">
+			{#each buttonFilters as name (name)}
+				{@const isActive = applied[name].length > 0}
+				{@const locked = name === 'within_tolerance' && !toleranceSet}
 				<span
-					class="inline-flex items-stretch rounded-full border border-primary-200 bg-surface-50-950 overflow-hidden"
-					data-testid="selection-chip-{name}"
+					class="inline-flex items-stretch rounded-full border overflow-hidden {isActive
+						? 'border-primary-300 bg-primary-50 dark:bg-primary-900/40'
+						: 'border-surface-300-700 bg-surface-50-950'}"
+					data-testid="selection-filter-{name}"
 				>
-					<button
-						type="button"
-						class="pl-3 pr-1 py-1 min-h-8 text-sm hover:bg-primary-50 dark:hover:bg-primary-900/40"
-						onclick={() => edit(name)}
+					<Popover
+						open={openFilter === name}
+						onOpenChange={(e) => setOpen(name, e.open)}
+						positioning={{ placement: 'bottom-start' }}
+						autoFocus={false}
+						closeOnInteractOutside={true}
 					>
-						<span class="text-surface-600-400"
-							>{m.selectionFilterLabel({ filter: FILTER_LABELS[name]() })}</span
+						<Popover.Trigger
+							class="inline-flex items-center gap-1.5 min-h-8 pl-3 pr-2.5 text-sm whitespace-nowrap hover:bg-primary-100/60 dark:hover:bg-primary-900/60"
+							title={isActive
+								? applied[name].map((v) => optionLabel(name, v)).join(', ')
+								: undefined}
 						>
-						<strong>{applied[name].map((v) => optionLabel(name, v)).join(', ')}</strong>
-					</button>
-					<button
-						type="button"
-						class="px-2 text-surface-500 hover:text-error-600"
-						aria-label={m.removeSelectionFilter({ filter: FILTER_LABELS[name]() })}
-						onclick={() => remove(name)}
-					>
-						<i class="fa-solid fa-xmark" aria-hidden="true"></i>
-					</button>
+							{#if isActive}
+								<span class="text-surface-600-400"
+									>{m.selectionFilterLabel({ filter: FILTER_LABELS[name]() })}</span
+								>
+								<strong>{summary(name)}</strong>
+							{:else}
+								<span class="font-medium {locked ? 'text-surface-500' : ''}"
+									>{FILTER_LABELS[name]()}</span
+								>
+							{/if}
+							<i
+								class="fa-solid {locked
+									? 'fa-lock'
+									: 'fa-chevron-down'} text-[10px] text-surface-500"
+								aria-hidden="true"
+							></i>
+						</Popover.Trigger>
+						<Popover.Positioner class="z-50!">
+							<Popover.Content
+								class="card p-1.5 bg-surface-50-950 w-72 shadow-lg border border-surface-200-800"
+							>
+								{#if openFilter === name}
+									{#if locked}
+										<p class="px-2.5 py-2 text-sm text-surface-600-400">
+											{m.noRiskToleranceDefined()}
+											<a class="anchor" href="/risk-assessments/{riskAssessmentId}/edit"
+												>{m.setRiskTolerance()}</a
+											>
+										</p>
+									{:else}
+										{#if options(name).length > SEARCH_THRESHOLD}
+											<label class="block px-1 pt-1 pb-1.5">
+												<span class="sr-only">{m.search()}</span>
+												<input
+													type="search"
+													class="input text-sm"
+													placeholder={m.searchPlaceholder()}
+													bind:value={query}
+													{@attach (el) => el.focus()}
+												/>
+											</label>
+										{/if}
+										<ul class="max-h-72 overflow-y-auto">
+											{#each matchingOptions(name) as option (option.value)}
+												{@const checked = (values[name] ?? []).includes(option.value)}
+												<li>
+													<label
+														class="flex items-center gap-2.5 min-h-10 px-2.5 rounded-md text-sm cursor-pointer hover:bg-surface-100-900 {option.count ===
+															0 && !checked
+															? 'text-surface-500'
+															: ''}"
+														data-testid="selection-option"
+													>
+														<input
+															type="checkbox"
+															class="checkbox"
+															{checked}
+															onchange={() => toggle(name, option.value)}
+														/>
+														<span class="grow"
+															>{option.label ?? optionLabel(name, option.value)}</span
+														>
+														<span class="tabular-nums text-surface-500">{option.count}</span>
+													</label>
+												</li>
+											{:else}
+												<li class="px-2.5 py-2 text-sm text-surface-500">{m.noResults()}</li>
+											{/each}
+										</ul>
+										{#if isActive}
+											<div class="flex justify-end pt-1.5 mt-1 border-t border-surface-200-800">
+												<button
+													type="button"
+													class="btn btn-sm underline underline-offset-4"
+													onclick={() => remove(name)}
+												>
+													{m.clearFilterValues()}
+												</button>
+											</div>
+										{/if}
+									{/if}
+								{/if}
+							</Popover.Content>
+						</Popover.Positioner>
+					</Popover>
+					{#if isActive}
+						<button
+							type="button"
+							class="px-2.5 border-l border-primary-300 text-surface-500 hover:text-error-600"
+							aria-label={m.removeSelectionFilter({ filter: FILTER_LABELS[name]() })}
+							onclick={() => remove(name)}
+						>
+							<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+						</button>
+					{/if}
 				</span>
 			{/each}
+			{#if moreFilters.length > 0}
+				<Popover
+					open={openFilter === 'more'}
+					onOpenChange={(e) => setOpen('more', e.open)}
+					positioning={{ placement: 'bottom-start' }}
+					autoFocus={false}
+					closeOnInteractOutside={true}
+				>
+					<Popover.Trigger
+						class="inline-flex items-center gap-1.5 min-h-8 px-3 rounded-full border border-dashed border-primary-400 text-primary-700 dark:text-primary-300 font-semibold text-sm whitespace-nowrap"
+						data-testid="selection-more-filters"
+					>
+						{m.moreFilters()}
+						<i class="fa-solid fa-chevron-down text-[10px]" aria-hidden="true"></i>
+					</Popover.Trigger>
+					<Popover.Positioner class="z-50!">
+						<Popover.Content
+							class="card p-1.5 bg-surface-50-950 w-60 shadow-lg border border-surface-200-800"
+						>
+							{#if openFilter === 'more'}
+								<ul>
+									{#each moreFilters as name (name)}
+										<li>
+											<button
+												type="button"
+												class="w-full flex items-center justify-between gap-2 min-h-10 px-2.5 rounded-md text-sm text-left hover:bg-surface-100-900"
+												onclick={() => setOpen(name, true)}
+												data-testid="selection-more-{name}"
+											>
+												<span>{FILTER_LABELS[name]()}</span>
+												<span class="text-xs text-surface-500 tabular-nums"
+													>{options(name).length}</span
+												>
+											</button>
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						</Popover.Content>
+					</Popover.Positioner>
+				</Popover>
+			{/if}
 			{#each ignored as stale (`${stale.filter}:${stale.value}`)}
 				<span
 					class="inline-flex items-center gap-2 rounded-full border border-warning-500 bg-warning-50 text-warning-900 dark:bg-warning-950/40 dark:text-warning-200 pl-3 pr-1 py-1 text-sm"
@@ -225,131 +393,6 @@
 					</button>
 				</span>
 			{/each}
-			<Popover
-				{open}
-				onOpenChange={(e) => {
-					open = e.open;
-					if (!e.open) field = null;
-				}}
-				positioning={{ placement: 'bottom-start' }}
-				autoFocus={false}
-				closeOnInteractOutside={true}
-			>
-				<Popover.Trigger
-					class="inline-flex items-center gap-1 min-h-8 px-3 rounded-full border border-dashed border-primary-400 text-primary-700 dark:text-primary-300 font-semibold text-sm"
-					data-testid="selection-add-filter"
-				>
-					<i class="fa-solid fa-plus" aria-hidden="true"></i>
-					{m.addSelectionFilter()}
-				</Popover.Trigger>
-				<Popover.Positioner class="z-50!">
-					<Popover.Content
-						class="card p-1.5 bg-surface-50-950 w-80 shadow-lg border border-surface-200-800"
-					>
-						{#if open && field === null}
-							<p
-								class="px-2.5 pt-2 pb-1.5 text-xs font-semibold uppercase tracking-wide text-surface-500"
-							>
-								{m.filterScenariosBy()}
-							</p>
-							<ul>
-								{#each menuFilters as name (name)}
-									{@const disabled = name === 'within_tolerance' && !toleranceSet}
-									<li>
-										{#if disabled}
-											<div class="px-2.5 py-2 rounded-md bg-surface-100-900 text-sm">
-												<div class="flex justify-between text-surface-500">
-													<span>{FILTER_LABELS[name]()}</span>
-													<i class="fa-solid fa-lock text-xs" aria-hidden="true"></i>
-												</div>
-												<p class="text-xs text-surface-600-400 mt-1">
-													{m.noRiskToleranceDefined()}
-													<a class="anchor" href="/risk-assessments/{riskAssessmentId}/edit"
-														>{m.setRiskTolerance()}</a
-													>
-												</p>
-											</div>
-										{:else}
-											<button
-												type="button"
-												class="w-full flex items-center justify-between gap-2 min-h-10 px-2.5 rounded-md text-sm text-left hover:bg-surface-100-900"
-												onclick={() => (field = name)}
-												data-testid="selection-field-{name}"
-											>
-												<span>{FILTER_LABELS[name]()}</span>
-												<span
-													class="flex items-center gap-1.5 text-xs font-semibold text-primary-600 truncate"
-												>
-													{applied[name].map((v) => optionLabel(name, v)).join(', ')}
-													<i class="fa-solid fa-chevron-right text-surface-400" aria-hidden="true"
-													></i>
-												</span>
-											</button>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						{:else if open && field !== null}
-							{@const current = field}
-							<div class="flex items-center gap-1 pb-1.5 mb-1 border-b border-surface-200-800">
-								<button
-									type="button"
-									class="btn-icon btn-icon-sm"
-									aria-label={m.back()}
-									onclick={() => (field = null)}
-								>
-									<i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
-								</button>
-								<strong class="grow text-sm">{FILTER_LABELS[current]()}</strong>
-								<span class="text-xs text-surface-500 pr-2">{m.riskScenarios()}</span>
-							</div>
-							<ul class="max-h-72 overflow-y-auto">
-								{#each options(current) as option (option.value)}
-									{@const checked = (values[current] ?? []).includes(option.value)}
-									<li>
-										<button
-											type="button"
-											role="checkbox"
-											aria-checked={checked}
-											class="w-full flex items-center gap-2.5 min-h-10 px-2.5 rounded-md text-sm text-left hover:bg-surface-100-900 {option.count ===
-												0 && !checked
-												? 'text-surface-500'
-												: ''}"
-											onclick={() => toggle(current, option.value)}
-											data-testid="selection-option"
-										>
-											<span
-												class="size-4.5 shrink-0 rounded border-[1.5px] flex items-center justify-center {checked
-													? 'bg-primary-500 border-primary-500 text-white'
-													: 'border-surface-400'}"
-											>
-												{#if checked}<i class="fa-solid fa-check text-[10px]" aria-hidden="true"
-													></i>{/if}
-											</span>
-											<span class="grow">{option.label ?? optionLabel(current, option.value)}</span>
-											<span class="tabular-nums text-surface-500">{option.count}</span>
-										</button>
-									</li>
-								{:else}
-									<li class="px-2.5 py-2 text-sm text-surface-500">--</li>
-								{/each}
-							</ul>
-							<div class="flex justify-end pt-1.5 mt-1 border-t border-surface-200-800">
-								<button
-									type="button"
-									class="btn btn-sm preset-filled-primary-500"
-									onclick={() => {
-										open = false;
-										field = null;
-									}}
-								>
-									{m.done()}
-								</button>
-							</div>
-						{/if}
-					</Popover.Content>
-				</Popover.Positioner>
-			</Popover>
 		</div>
 		<div class="flex items-center gap-1 ml-auto shrink-0">
 			{#if selection}
