@@ -3,18 +3,19 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:lyss:risk:library:mapping-lyss-and-iso27001-2022
 locale: en
 ref_id: mapping-lyss-and-iso27001-2022
-name: LYSS (draft 0.6.1) -> ISO/IEC 27001:2022
-description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.6.1-draft
+name: LYSS (draft 0.7.0) -> ISO/IEC 27001:2022
+description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.7.0-draft
   and ISO/IEC 27001:2022 Annex A, from the informative references of the specification.
   Each LYSS control is a specific, testable part (subset) of the ISO control it maps
-  to: a compliant LYSS requirement gives at most partial coverage of the ISO control,
-  a non-compliant one makes it non-compliant. One direction only: an ISO control judged
-  compliant proves nothing about a given switch. DRAFT: controls and mappings may
-  still change before LYSS 1.0, but control identifiers are stable: never renamed,
-  renumbered or reused. Generated from spec/lyss-spec.yaml by tools/build_ciso_library.py
-  in the LYSS repository (https://github.com/lyss-project/lyss).'
+  to. Compliant LYSS requirements give at most partial coverage of the ISO control.
+  Non-compliant ones make it non-compliant when no other mapped LYSS requirement is
+  compliant; if some are compliant and some are not, the ISO control is partially
+  compliant. One direction only: an ISO control judged compliant proves nothing about
+  a given switch. DRAFT: controls and mappings may still change before LYSS 1.0, but
+  control identifiers are stable: never renamed, renumbered or reused. Generated from
+  spec/lyss-spec.yaml by tools/build_ciso_library.py in the LYSS repository (https://github.com/lyss-project/lyss).'
 copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
-version: 60010
+version: 70000
 publication_date: 2026-11-09
 provider: Mouad Lyaazale
 packager: LYSS project
@@ -25,16 +26,18 @@ objects:
   requirement_mapping_sets:
   - urn: urn:lyss:risk:req_mapping_set:mapping-lyss-and-iso27001-2022
     ref_id: mapping-lyss-and-iso27001-2022
-    name: LYSS (draft 0.6.1) -> ISO/IEC 27001:2022
-    description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.6.1-draft
+    name: LYSS (draft 0.7.0) -> ISO/IEC 27001:2022
+    description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.7.0-draft
       and ISO/IEC 27001:2022 Annex A, from the informative references of the specification.
       Each LYSS control is a specific, testable part (subset) of the ISO control it
-      maps to: a compliant LYSS requirement gives at most partial coverage of the
-      ISO control, a non-compliant one makes it non-compliant. One direction only:
-      an ISO control judged compliant proves nothing about a given switch. DRAFT:
-      controls and mappings may still change before LYSS 1.0, but control identifiers
-      are stable: never renamed, renumbered or reused. Generated from spec/lyss-spec.yaml
-      by tools/build_ciso_library.py in the LYSS repository (https://github.com/lyss-project/lyss).'
+      maps to. Compliant LYSS requirements give at most partial coverage of the ISO
+      control. Non-compliant ones make it non-compliant when no other mapped LYSS
+      requirement is compliant; if some are compliant and some are not, the ISO control
+      is partially compliant. One direction only: an ISO control judged compliant
+      proves nothing about a given switch. DRAFT: controls and mappings may still
+      change before LYSS 1.0, but control identifiers are stable: never renamed, renumbered
+      or reused. Generated from spec/lyss-spec.yaml by tools/build_ciso_library.py
+      in the LYSS repository (https://github.com/lyss-project/lyss).'
     source_framework_urn: urn:lyss:risk:framework:lyss
     target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     requirement_mappings:

@@ -3,8 +3,8 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:lyss:risk:library:lyss
 locale: en
 ref_id: LYSS
-name: "LYSS \u2014 Lyaazale Switch Security (draft 0.6.1)"
-description: 'LYSS (Lyaazale Switch Security) specification 0.6.1-draft (draft): vendor-neutral
+name: "LYSS \u2014 Lyaazale Switch Security (draft 0.7.0)"
+description: 'LYSS (Lyaazale Switch Security) specification 0.7.0-draft (draft): vendor-neutral
   security controls for managed network switches, in three cumulative conformance
   levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is one control (LYSS-<DOMAIN>-<NNN>);
   its annotation gives the rationale, vendor-neutral test procedure and informative
@@ -14,7 +14,7 @@ description: 'LYSS (Lyaazale Switch Security) specification 0.6.1-draft (draft):
   Author: Mouad Lyaazale. Generated from spec/lyss-spec.yaml by tools/build_ciso_library.py
   in the LYSS repository (https://github.com/lyss-project/lyss).'
 copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
-version: 60010
+version: 70000
 publication_date: 2026-11-09
 provider: Mouad Lyaazale
 packager: LYSS project
@@ -22,8 +22,8 @@ objects:
   frameworks:
   - urn: urn:lyss:risk:framework:lyss
     ref_id: LYSS
-    name: "LYSS \u2014 Lyaazale Switch Security (draft 0.6.1)"
-    description: 'LYSS (Lyaazale Switch Security) specification 0.6.1-draft (draft):
+    name: "LYSS \u2014 Lyaazale Switch Security (draft 0.7.0)"
+    description: 'LYSS (Lyaazale Switch Security) specification 0.7.0-draft (draft):
       vendor-neutral security controls for managed network switches, in three cumulative
       conformance levels (1 Baseline, 2 Hardened, 3 Advanced). Each requirement is
       one control (LYSS-<DOMAIN>-<NNN>); its annotation gives the rationale, vendor-neutral
@@ -222,10 +222,10 @@ objects:
       parent_urn: urn:lyss:risk:req_node:lyss:l1.auth
       ref_id: LYSS-AUTH-002
       name: Privileged-mode password is stored as a strong hash
-      description: The privileged (enable) credential is stored with a one-way hash
-        based on SHA-256 or a stronger algorithm (e.g. scrypt, PBKDF2-SHA-256, SHA-256/SHA-512
-        crypt). Cleartext, reversible encodings, MD5- and SHA-1-based hashes and Cisco
-        type 4 are not accepted.
+      description: The privileged (enable) credential is stored with a salted one-way
+        hash based on SHA-256 or a stronger algorithm (e.g. scrypt, PBKDF2-SHA-256,
+        SHA-256/SHA-512 crypt). Cleartext, reversible encodings, MD5- and SHA-1-based
+        hashes and unsalted SHA-256 (Cisco type 4) are not accepted.
       annotation: 'Rationale: Reversible encodings (e.g. Cisco type 7) are decoded
         instantly by public tools from any configuration backup, and MD5- or SHA-1-based
         hashes (e.g. Cisco type 5) are cracked quickly on commodity hardware.
@@ -233,10 +233,11 @@ objects:
 
         Test procedure: Fail if the privileged credential, or a local account with
         full privileges, is stored in cleartext, a reversible form, or with MD5, SHA-1
-        or Cisco type 4 (e.g. Cisco "enable password", type 4 or 5, a 40-hex-digit
-        SHA-1 value, HPE "sha1"). Pass if it uses an accepted algorithm, or if there
-        is no privileged credential and privileged access is only granted through
-        central AAA. Unknown if the algorithm cannot be identified.
+        or unsalted SHA-256 (e.g. Cisco "enable password", type 4 or 5, a 40-hex-digit
+        SHA-1 value, HPE "sha1"). Pass if it uses an accepted salted algorithm (e.g.
+        Cisco type 8 or 9), or if there is no privileged credential and privileged
+        access is only granted through central AAA. Unknown if the algorithm cannot
+        be identified.
 
 
         Informative references: ISO/IEC 27001:2022 A.5.17, A.8.5; NIST SP 800-53 r5
@@ -280,14 +281,17 @@ objects:
       name: AAA shared secrets (RADIUS/TACACS+) are not stored in cleartext
       description: Keys shared with RADIUS or TACACS+ servers are never stored in
         cleartext in the configuration.
-      annotation: 'Rationale: A cleartext RADIUS key in a backup lets an attacker
-        impersonate the AAA server or decrypt authentication traffic.
+      annotation: 'Rationale: A cleartext RADIUS key in a backup can be read by anyone
+        who sees the file, and lets an attacker impersonate the AAA server or decrypt
+        authentication traffic. Level 1 only removes the cleartext key: many switches
+        can only store these keys in a reversible form, which is weaker protection
+        and is addressed separately.
 
 
         Test procedure: Fail if a RADIUS or TACACS+ shared key appears in cleartext.
-        A reversible encoding is not cleartext and passes this control; storing keys
-        irreversibly or with a device-specific encryption key is planned as a separate
-        Level 2 control.
+        A reversible encoding (e.g. Cisco type 7) is not cleartext and passes this
+        Level 1 control; it gives only weak protection, and storing keys with a device-specific
+        encryption key is planned as a separate Level 2 control.
 
 
         Informative references: ISO/IEC 27001:2022 A.5.17, A.8.24; NIST SP 800-53
@@ -366,8 +370,9 @@ objects:
 
 
         Test procedure: Pass if the most recent automatic (scheduled) collection of
-        the running configuration is at most the parameter old at the time of assessment;
-        a schedule less frequent than the parameter therefore fails between runs.
+        the running configuration is at most the parameter old at the time of assessment,
+        and the gap between the last two automatic collections is not longer than
+        the parameter; a schedule less frequent than the parameter therefore fails.
         Otherwise pass on an external backup system only with evidence of its last
         successful backup for this device, at most the parameter old (for example
         from the backup system''s records), or with an administrator attestation,
@@ -522,16 +527,20 @@ objects:
       ref_id: LYSS-AUTH-010
       name: Administrative logins use central AAA (RADIUS/TACACS+) with local fallback
         only
-      description: Administrator logins are authenticated by a RADIUS or TACACS+ server
-        first; local accounts are only a fallback.
+      description: 'Remote administrator logins (SSH, Telnet, web, API) are authenticated
+        by a RADIUS or TACACS+ server first; local accounts are the only fallback.
+        Logins on the local serial console are out of scope: the console is the recovery
+        path when the AAA server cannot be reached.'
       annotation: 'Rationale: Central AAA gives individual accounts, immediate revocation
         and an audit trail; shared local passwords do not.
 
 
         Test procedure: Pass if an AAA server is defined and every login method list
-        used for remote administrative access starts with the AAA server, local accounts
-        coming only after it. Fail if any such list starts with a local account, a
-        line password or no authentication.
+        used for remote administrative access starts with the AAA server, with local
+        accounts as the only fallback after it. Fail if any such list starts with
+        a local account, a line password or no authentication, or falls back to anything
+        other than local accounts (e.g. "none", a line or enable password). Console
+        login lists are not assessed.
 
 
         Informative references: ISO/IEC 27001:2022 A.5.16, A.8.5; NIST SP 800-53 r5
@@ -588,9 +597,10 @@ objects:
         intruder; remote logs support detection and investigation.
 
 
-        Test procedure: Fail if logging is disabled globally (e.g. "no logging on").
-        Pass if at least one remote syslog destination is configured and logging is
-        enabled.
+        Test procedure: Fail if logging is disabled globally (e.g. "no logging on"),
+        or if forwarding to remote servers is turned off (e.g. Cisco IOS "no logging
+        trap"). Pass if at least one remote syslog destination is configured and logging
+        to it is enabled.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.15, A.8.16; NIST SP 800-53
@@ -615,8 +625,9 @@ objects:
 
         Test procedure: Fail if no NTP or SNTP server is configured, or if the device
         state reports the clock as not synchronized. Pass if a time server is configured
-        and the clock is reported synchronized; without device state, a configured
-        time server passes and the report says that synchronization was not verified.
+        and the device state does not report the clock as unsynchronized. Unknown
+        without device state: a configured server alone does not show that the clock
+        is synchronized.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.17; NIST SP 800-53 r5 AU-8,
@@ -681,9 +692,11 @@ objects:
 
         Test procedure: Edge ports are all ports minus uplinks, and uplinks are only
         the ports configured as trunks or link-aggregation members (tagged on HPE
-        AOS-S). Neighbour discovery never exempts a port: a rogue device can advertise
-        bridge capability. Fail if an edge port lacks BPDU protection, unless a global
-        default protects all edge ports.
+        AOS-S). A link aggregation that is not a trunk (for example towards a server)
+        is itself an edge port: it is checked on its logical interface, while its
+        member ports are not checked one by one. Neighbour discovery never exempts
+        a port: a rogue device can advertise bridge capability. Fail if an edge port
+        lacks BPDU protection, unless a global default protects all edge ports.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.20; NIST SP 800-53 r5 SC-5,
@@ -727,11 +740,12 @@ objects:
         and IP source guard rely on.
 
 
-        Test procedure: Fail if DHCP snooping is not enabled globally, or if a VLAN
-        used by an access port is not in the snooping VLAN list. Pass if it is enabled
-        and every such VLAN is covered (on platforms where snooping applies to the
-        whole bridge, the bridge setting covers every access port). Not applicable
-        without access ports.
+        Test procedure: Fail if DHCP snooping is not enabled globally, if a VLAN used
+        by an access port is not in the snooping VLAN list, or if an access port is
+        trusted for DHCP (it would accept server messages). Pass if it is enabled,
+        every such VLAN is covered (on platforms where snooping applies to the whole
+        bridge, the bridge setting covers every access port) and no access port is
+        trusted. Not applicable without access ports.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.20, A.8.22; NIST SP 800-53
@@ -756,9 +770,10 @@ objects:
 
 
         Test procedure: Fail if a VLAN used by an access port is not covered by dynamic
-        ARP inspection, or if the platform offers no ARP inspection (the report names
-        the platform limit). Pass if every such VLAN is covered. Not applicable without
-        access ports.
+        ARP inspection, if an access port is trusted for ARP inspection (its ARP packets
+        would not be checked), or if the platform offers no ARP inspection (the report
+        names the platform limit). Pass if every such VLAN is covered and no access
+        port is trusted. Not applicable without access ports.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.20, A.8.22; NIST SP 800-53
@@ -782,9 +797,10 @@ objects:
 
 
         Test procedure: Fail if port authentication is not enabled globally where
-        the platform requires it, or if an access port has no 802.1X / MAC authentication
-        setting. Pass if every access port has one. Not applicable without access
-        ports.
+        the platform requires it, if an access port has no 802.1X / MAC authentication
+        setting, or if an access port forwards traffic before authentication succeeds
+        (open mode, e.g. Cisco "authentication open"). Pass if every access port enforces
+        one. Not applicable without access ports.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.20, A.5.15; NIST SP 800-53
@@ -807,9 +823,10 @@ objects:
         a rate limit contains it on the offending port.
 
 
-        Test procedure: Fail if an access port has no broadcast rate limit. Pass if
-        every access port has one. Unknown when the platform sets it on the switch
-        chip and the setting cannot be read. Not applicable without access ports.
+        Test procedure: Fail if an access port has no broadcast rate limit, or a limit
+        of 100 % (which limits nothing). Pass if every access port has an effective
+        one. Unknown when the platform sets it on the switch chip and the setting
+        cannot be read. Not applicable without access ports.
 
 
         Informative references: ISO/IEC 27001:2022 A.8.20, A.8.6; NIST SP 800-53 r5
