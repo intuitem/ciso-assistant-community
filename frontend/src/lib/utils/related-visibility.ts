@@ -1,3 +1,5 @@
+import { fetchAllByIds } from './pagination';
+
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 	typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -20,3 +22,23 @@ export const countMasked = (value: unknown): number => {
 	}
 	return isMaskedPlaceholder(value) ? 1 : 0;
 };
+
+/**
+ * The ids among `ids` that the user cannot see, looked up on `endpoint` without
+ * its query string: a picker's filters must not pass an object it merely leaves
+ * out for a hidden one. When the lookup fails, nothing is reported hidden.
+ */
+export async function findHiddenIds(
+	fetchFn: typeof fetch,
+	endpoint: string,
+	ids: string[]
+): Promise<string[]> {
+	if (ids.length === 0) return [];
+	try {
+		const visible = await fetchAllByIds(fetchFn, `/${endpoint.split('?')[0]}`, ids);
+		const seen = new Set(visible.map((row) => String(row.id)));
+		return ids.filter((id) => !seen.has(id));
+	} catch {
+		return [];
+	}
+}

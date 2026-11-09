@@ -3399,6 +3399,17 @@
 			}
 		}
 	],
+	"hiddenLinksCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} lien non visible",
+				"countPlural=other": "{count} liens non visibles"
+			}
+		}
+	],
+	"removeHiddenLinks": "Retirer les liens vers les objets non visibles",
 	"matchingScenarios": "Scénarios correspondants",
 	"select": "Sélectionner",
 	"deselect": "Désélectionner",

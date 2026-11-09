@@ -3427,6 +3427,17 @@
 			}
 		}
 	],
+	"hiddenLinksCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} hidden link",
+				"countPlural=other": "{count} hidden links"
+			}
+		}
+	],
+	"removeHiddenLinks": "Remove the links to objects you cannot see",
 	"serverURL": "Server URL",
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Token auth method",

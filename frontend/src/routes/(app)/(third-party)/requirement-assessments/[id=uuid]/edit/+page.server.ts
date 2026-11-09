@@ -60,13 +60,23 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const schema = modelSchema(URLModel);
-	object.evidences = object.evidences?.map((evidence) => evidence.id) ?? [];
-	object.applied_controls =
-		object.applied_controls?.map((applied_control) => applied_control.id) ?? [];
-	object.security_exceptions =
-		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
-	object.task_templates = object.task_templates?.map((task_template) => task_template.id) ?? [];
-	object.findings = object.findings?.map((finding) => finding.id) ?? [];
+	// Linked ids from the raw object: the read data masks the objects the user cannot
+	// see, and the form must send those links back untouched. Only for fields the read
+	// data shows: it leaves out those hidden from respondents.
+	const rawObject = await fetchJson(`${endpoint}object/`);
+	const linkedIds = (field: string): string[] =>
+		field in requirementAssessment && Array.isArray(rawObject?.[field])
+			? rawObject[field].map(String)
+			: (object[field] ?? []).map((item: any) => item?.id).filter(Boolean);
+	for (const field of [
+		'evidences',
+		'applied_controls',
+		'security_exceptions',
+		'task_templates',
+		'findings'
+	]) {
+		object[field] = linkedIds(field);
+	}
 	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
 	// Compliance hidden but applicability readable (score-only audits): start the
 	// form from it, so the applicability toggle only writes when it is switched.

@@ -41,14 +41,6 @@ from integrations.models import IntegrationConfiguration, SyncMapping
 
 logger = structlog.get_logger(__name__)
 
-# library content any principal may link, even without view on Global
-GLOBAL_CATALOG_MODELS = (
-    ReferentialObjectMixin,
-    Question,
-    QuestionChoice,
-    Terminology,
-)
-
 
 class SerializerFactory:
     """Factory to get a serializer class from a list of modules.
@@ -250,7 +242,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     def _check_m2m_visibility(self, validated_data: dict) -> None:
         """A new link needs view on its target, or change for fields in
-        Meta.link_requires_change, whose save alters the target."""
+        Meta.link_requires_change, whose save alters the target.
+
+        For many-to-many links this is the whole rule, whichever model declares
+        the field: change on the edited object (update/create), view on each
+        object linked, nothing on an object unlinked."""
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return
@@ -288,8 +284,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
             hidden = new_ids - visible
             if related_model is User:
                 hidden.discard(str(user.pk))
-            if hidden and issubclass(related_model, GLOBAL_CATALOG_MODELS):
-                hidden -= self._global_ids(related_model, hidden)
             if hidden:
                 raise PermissionDenied(
                     {
@@ -309,67 +303,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
                             field_name: f"You do not have permission to change this {related_model._meta.model_name}"
                         }
                     )
-
-    @staticmethod
-    def _global_ids(model: type[models.Model], ids: set) -> set:
-        """Library content in Global is shared, even with users outside
-        builtin groups."""
-        try:
-            field = RoleAssignment.get_iam_folder_field(model)
-        except NotImplementedError:
-            return set()
-        shared = {"urn__gt": ""} if hasattr(model, "urn") else {"builtin": True}
-        return {
-            str(pk)
-            for pk in model.objects.filter(
-                pk__in=ids, **{field: Folder.get_root_folder().id}, **shared
-            ).values_list("pk", flat=True)
-        }
-
-    def _check_reverse_m2m_change(self, validated_data: dict) -> None:
-        """A reverse many-to-many (declared on the other model) edits the objects
-        on that side: adding or removing one needs change permission on it, not
-        just the visibility _check_m2m_visibility asks for."""
-        request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            return
-        model = self.Meta.model
-        for field_name, value in validated_data.items():
-            if not isinstance(value, list):
-                continue
-            try:
-                field = model._meta.get_field(field_name)
-            except FieldDoesNotExist:
-                continue
-            if not (field.many_to_many and field.auto_created and not field.concrete):
-                continue
-            current_ids: set = set()
-            if self.instance is not None and not isinstance(self.instance, list):
-                current_ids = {
-                    str(pk)
-                    for pk in getattr(self.instance, field_name).values_list(
-                        "pk", flat=True
-                    )
-                }
-            touched = {str(item.pk) for item in value} ^ current_ids
-            if not touched:
-                continue
-            related_model = field.related_model
-            try:
-                changeable = {
-                    str(pk)
-                    for pk in RoleAssignment.get_changeable_object_ids(
-                        request.user, related_model
-                    )
-                }
-            except NotImplementedError, Permission.DoesNotExist:
-                continue
-            if touched - changeable:
-                raise PermissionDenied(
-                    {
-                        field_name: f"You do not have permission to change this {related_model._meta.model_name}"
-                    }
-                )
 
     def _viewable_ids(self, model: type[models.Model]) -> models.QuerySet:
         cache = self.context.setdefault("viewable_ids", {})
@@ -680,11 +613,6 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
     )
-
-    def validate(self, data):
-        data = super().validate(data)
-        self._check_reverse_m2m_change(data)
-        return data
 
     def create(self, validated_data):
         owner_data = validated_data.get("owner", [])
@@ -1247,7 +1175,9 @@ class AssetWriteSerializer(
         return stage
 
     def validate(self, data):
-        self._check_linked_assets_changeable(data)
+        # Link checks first: the cycle walk below follows hidden assets, and its
+        # answer must not tell where a hidden asset sits in the graph.
+        data = super().validate(data)
         parent_assets = data.get("parent_assets", [])
         support_assets = data.get("child_assets", [])
         """
@@ -1264,47 +1194,7 @@ class AssetWriteSerializer(
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        data = super().validate(data)
-        self._check_reverse_m2m_change(data)
         return data
-
-    def _check_linked_assets_changeable(self, data):
-        request = self.context.get("request")
-        if request is None:
-            return
-        perm = Permission.objects.get(codename="change_asset")
-        for field, error_key in (
-            ("parent_assets", "parent_assets"),
-            ("child_assets", "support_assets"),
-        ):
-            if field not in data:
-                continue
-            proposed = {a.id: a for a in data[field] or []}
-            current = (
-                {a.id: a for a in getattr(self.instance, field).all()}
-                if self.instance is not None
-                else {}
-            )
-            removed = [current[i] for i in current.keys() - proposed.keys()]
-            unseen = [
-                a
-                for a in removed
-                if not RoleAssignment.is_object_readable(request.user, Asset, a.id)
-            ]
-            if unseen:
-                data[field] = [*proposed.values(), *unseen]
-            touched = [proposed[i] for i in proposed.keys() - current.keys()] + [
-                a for a in removed if a not in unseen
-            ]
-            for asset in touched:
-                if not RoleAssignment.is_access_allowed(
-                    user=request.user, perm=perm, folder=asset.folder
-                ):
-                    raise PermissionDenied(
-                        {
-                            error_key: "You do not have permission to change the linked asset"
-                        }
-                    )
 
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)

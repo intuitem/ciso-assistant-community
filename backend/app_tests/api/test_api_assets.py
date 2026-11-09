@@ -510,39 +510,44 @@ class TestCrossDomainAssetLinkPermissions:
             f"/api/assets/{asset.id}/", payload, format="json"
         )
 
-    def test_view_only_parent_cannot_be_linked(self):
-        user = _make_scoped_user(self.folder_a, self.folder_b)
-        r = self._patch(user, self.local, {"parent_assets": [str(self.remote.id)]})
-        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
-        assert not self.local.parent_assets.exists()
+    # Asset links follow the generic M2M rule: change on the edited asset, view on
+    # each asset linked, nothing on an asset unlinked.
 
-    def test_changeable_parent_can_be_linked(self):
-        user = _make_scoped_user(self.folder_a)
-        extra = RoleAssignment.objects.create(
-            user=user,
-            role=Role.objects.get(name=RoleCodename.ANALYST.value),
-            folder=Folder.get_root_folder(),
-            is_recursive=True,
-        )
-        extra.perimeter_folders.add(self.folder_b)
+    def test_view_only_parent_can_be_linked(self):
+        user = _make_scoped_user(self.folder_a, self.folder_b)
         r = self._patch(user, self.local, {"parent_assets": [str(self.remote.id)]})
         assert r.status_code == status.HTTP_200_OK, r.content
         assert list(self.local.parent_assets.all()) == [self.remote]
 
-    def test_view_only_asset_cannot_be_linked_as_support(self):
+    def test_invisible_parent_cannot_be_linked(self):
+        user = _make_scoped_user(self.folder_a)
+        r = self._patch(user, self.local, {"parent_assets": [str(self.remote.id)]})
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert not self.local.parent_assets.exists()
+
+    def test_invisible_parent_is_refused_before_the_cycle_check(self):
+        # remote supports local, so linking it as local's parent would be a cycle;
+        # the answer must not tell a user who cannot see remote where it sits.
+        self.remote.parent_assets.add(self.local)
+        user = _make_scoped_user(self.folder_a)
+        r = self._patch(user, self.local, {"parent_assets": [str(self.remote.id)]})
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert not self.local.parent_assets.exists()
+
+    def test_view_only_asset_can_be_linked_as_support(self):
         user = _make_scoped_user(self.folder_a, self.folder_b)
         r = self._patch(user, self.sibling, {"support_assets": [str(self.remote.id)]})
-        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
-        assert not self.remote.parent_assets.exists()
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert list(self.remote.parent_assets.all()) == [self.sibling]
 
-    def test_view_only_parent_cannot_be_unlinked(self):
+    def test_view_only_parent_can_be_unlinked(self):
         self.local.parent_assets.add(self.remote)
         user = _make_scoped_user(self.folder_a, self.folder_b)
         r = self._patch(user, self.local, {"parent_assets": []})
-        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
-        assert list(self.local.parent_assets.all()) == [self.remote]
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert not self.local.parent_assets.exists()
 
-    def test_invisible_parent_survives_a_save_that_omits_it(self):
+    def test_invisible_parent_can_be_unlinked(self):
         self.local.parent_assets.add(self.remote)
         user = _make_scoped_user(self.folder_a)
         r = self._patch(
@@ -553,14 +558,14 @@ class TestCrossDomainAssetLinkPermissions:
         assert r.status_code == status.HTTP_200_OK, r.content
         self.local.refresh_from_db()
         assert self.local.name == "renamed"
-        assert set(self.local.parent_assets.all()) == {self.remote, self.sibling}
+        assert list(self.local.parent_assets.all()) == [self.sibling]
 
-    def test_invisible_support_asset_survives_a_save_that_omits_it(self):
+    def test_invisible_support_asset_can_be_unlinked(self):
         self.remote.parent_assets.add(self.sibling)
         user = _make_scoped_user(self.folder_a)
         r = self._patch(user, self.sibling, {"support_assets": [str(self.local.id)]})
         assert r.status_code == status.HTTP_200_OK, r.content
-        assert set(self.sibling.child_assets.all()) == {self.remote, self.local}
+        assert list(self.sibling.child_assets.all()) == [self.local]
 
     def test_existing_cross_domain_link_does_not_block_other_edits(self):
         self.local.parent_assets.add(self.remote)
@@ -578,8 +583,8 @@ class TestCrossDomainAssetLinkPermissions:
         assert self.local.name == "renamed"
         assert set(self.local.parent_assets.all()) == {self.remote, self.sibling}
 
-    def test_create_with_view_only_parent_is_refused(self):
-        user = _make_scoped_user(self.folder_a, self.folder_b)
+    def test_create_with_invisible_parent_is_refused(self):
+        user = _make_scoped_user(self.folder_a)
         r = _client_for(user).post(
             "/api/assets/",
             {
@@ -592,18 +597,6 @@ class TestCrossDomainAssetLinkPermissions:
         )
         assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
         assert not Asset.objects.filter(name="new", folder=self.folder_a).exists()
-
-    def test_restored_invisible_parent_is_part_of_cycle_check(self):
-        self.local.parent_assets.add(self.remote)
-        self.remote.parent_assets.add(self.sibling)
-        user = _make_scoped_user(self.folder_a)
-        r = self._patch(
-            user,
-            self.local,
-            {"parent_assets": [], "support_assets": [str(self.sibling.id)]},
-        )
-        assert r.status_code == status.HTTP_400_BAD_REQUEST, r.content
-        assert not self.local.child_assets.exists()
 
     def _batch_create(self, user, folder, text):
         return _client_for(user).post(

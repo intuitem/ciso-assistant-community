@@ -20823,6 +20823,8 @@ class TaskNodeViewSet(BaseModelViewSet):
     filterset_class = TaskNodeFilterSet
     search_fields = ["observation"]
     ordering = ["due_date"]
+    # POST maps to add_tasknode, which no builtin role holds; this edits the node
+    permission_overrides = {"remove_evidence": "change_tasknode"}
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -20839,17 +20841,34 @@ class TaskNodeViewSet(BaseModelViewSet):
         detail=True, name="Remove/Move evidence to expected evidence", methods=["post"]
     )
     def remove_evidence(self, request, pk):
+        """Unlink an evidence from this node: like any link, that needs nothing on
+        the evidence. Moving it to the task template links it there, which needs
+        change on the template and view on the evidence."""
         task_node = self.get_object()
-        evidence_id = request.data.get("evidence_id")
         to_move = request.data.get("move", False)
-        accessible_evidence_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, Evidence
-        )
-
-        evidence = Evidence.objects.get(id=evidence_id, id__in=accessible_evidence_ids)
-        task_node.evidences.remove(evidence)
-        if to_move:
-            task_node.task_template.evidences.add(evidence)
+        try:
+            evidence_id = uuid.UUID(str(request.data.get("evidence_id")))
+        except ValueError:
+            raise DRFValidationError({"evidence_id": "Invalid evidence id."})
+        evidence = task_node.evidences.filter(id=evidence_id).first()
+        if evidence is None:
+            raise NotFound("This evidence is not linked to the task.")
+        template = task_node.task_template
+        if to_move and not (
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_tasktemplate"),
+                folder=template.folder,
+            )
+            and RoleAssignment.is_object_readable(request.user, Evidence, evidence.id)
+        ):
+            raise PermissionDenied(
+                "You do not have permission to link this evidence to the task template."
+            )
+        with transaction.atomic():
+            task_node.evidences.remove(evidence)
+            if to_move:
+                template.evidences.add(evidence)
         return Response(status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):

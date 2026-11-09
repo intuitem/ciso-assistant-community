@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { safeTranslate, translateChoiceLabel } from '#lib/utils/i18n.js';
 	import { fetchAllByIds, fetchAllPages } from '#lib/utils/pagination.js';
+	import { findHiddenIds } from '#lib/utils/related-visibility.js';
 	import type { CacheLock } from '#lib/utils/types.js';
 	import { onMount, untrack } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
@@ -175,6 +176,8 @@
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	const initialValue = resetForm ? undefined : $value;
+	// Set by ModelForm when it edits an existing object; elsewhere hidden ids are dropped.
+	const formKeepsHiddenLinks = getContext<boolean | undefined>('formKeepsHiddenLinks') ?? false;
 
 	type SelectValue = string | number | undefined;
 
@@ -185,6 +188,9 @@
 			item != null && typeof item === 'object' ? (item.value ?? item.label) : item
 		)
 	);
+	// Ids of the initial value the user cannot see: no option carries them, so they
+	// stay in the value apart from `selected` until the user removes them.
+	let hiddenIds: string[] = $state([]);
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const default_value = nullable ? null : '';
@@ -330,6 +336,8 @@
 						updateMissingConstraint(field, isMissing);
 					}
 				}
+				// Before optionsLoaded: the value sync must see them from its first run.
+				hiddenIds = await detectHiddenIds();
 				optionsLoaded = true;
 			}
 			// Only seed the selection when the user hasn't picked anything yet:
@@ -353,6 +361,17 @@
 		} finally {
 			isLoading = false;
 		}
+	}
+
+	async function detectHiddenIds(): Promise<string[]> {
+		if (!formKeepsHiddenLinks || fieldContext !== 'form-input' || optionsValueField !== 'id')
+			return [];
+		if (initialValue === undefined || initialValue === null || initialValue === '') return [];
+		const known = new Set(options.map((o) => String(o.value)));
+		const missing = (Array.isArray(initialValue) ? initialValue : [initialValue])
+			.map(String)
+			.filter((id) => !known.has(id));
+		return findHiddenIds(cachedFetch, optionsEndpoint, missing);
 	}
 
 	// fetch with the component's cache mode, for the paging helpers.
@@ -583,6 +602,9 @@
 						: [$value]
 					: []
 			).map(String);
+			// An external change (reset, dependent field) decides the hidden ids too.
+			const keptHidden = untrack(() => hiddenIds).filter((id) => valueArray.includes(id));
+			if (keptHidden.length !== untrack(() => hiddenIds).length) hiddenIds = keptHidden;
 			if (valueArray.length === 0) {
 				selected = [];
 			} else {
@@ -659,19 +681,27 @@
 	});
 
 	run(() => {
+		// A single-value field links one object: picking one replaces the hidden one.
+		if (!multiple && selectedValues.length > 0 && untrack(() => hiddenIds.length > 0)) {
+			hiddenIds = [];
+		}
+	});
+
+	run(() => {
 		// Only update value after options are loaded.
 		// Read $value with untrack so this run() only fires on selected changes (user actions),
 		// not on external form resets — preventing fight-back against programmatic value clears.
+		const nextValues = [...selectedValues, ...hiddenIds];
 		if (
 			!isInternalUpdate &&
 			optionsLoaded &&
 			!arraysEqual(
-				selectedValues,
+				nextValues,
 				untrack(() => $value)
 			)
 		) {
 			isInternalUpdate = true;
-			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
+			$value = multiple ? nextValues : (nextValues[0] ?? default_value);
 			handleSelectChange();
 			isInternalUpdate = false;
 		}
@@ -891,6 +921,25 @@
 				{/if}
 			{/snippet}
 		</MultiSelect>
+		{#if hiddenIds.length > 0}
+			<span
+				class="chip shrink-0 gap-1 bg-surface-200-800 text-surface-700-300 text-xs italic"
+				data-testid="{fieldContext}-{field.replaceAll('_', '-')}-hidden-links"
+			>
+				<i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
+				{m.hiddenLinksCount({ count: hiddenIds.length })}
+				{#if !_disabled}
+					<button
+						type="button"
+						aria-label={m.removeHiddenLinks()}
+						title={m.removeHiddenLinks()}
+						onclick={() => (hiddenIds = [])}
+					>
+						<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+					</button>
+				{/if}
+			</span>
+		{/if}
 		{#if isLoading}
 			<svg
 				class="animate-spin h-5 w-5 text-primary-500 loading-spinner"
