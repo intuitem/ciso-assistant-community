@@ -5012,8 +5012,6 @@
 	"backToFramework": "Návrat do rámce (Framework)",
 	"compliancePercentage": "Procento shody",
 	"complianceFormulaShort": "Úplně vyhovující + ½×částečně vyhovující, (nebráno v potaz: 'Netýká se' a 'Nehodnocené')",
-	"averageImplementationScore": "Průměrné hodnocení implementace",
-	"overScoredRequirementsOnly": "Pouze nad rámec bodovaných požadavků",
 	"visibleToCurrentUser": "Lze vidět aktuálním uživatelem",
 	"inScopeAfterIGFilter": "Platný rozsah i po použití IG filtrování",
 	"overallResultDistribution": "Celkové rozdělení výsledků",

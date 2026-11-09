@@ -5965,8 +5965,6 @@
 	"backToFramework": "Powrót do standardu",
 	"compliancePercentage": "Zgodność %",
 	"complianceFormulaShort": "zgodne + ½·częściowo zgodne, bez N/D i nieocenionych",
-	"averageImplementationScore": "Średni wynik wdrożenia",
-	"overScoredRequirementsOnly": "tylko dla wymagań z punktacją",
 	"visibleToCurrentUser": "widoczne dla bieżącego użytkownika",
 	"inScopeAfterIGFilter": "w zakresie po filtrze grup wdrożeniowych",
 	"overallResultDistribution": "Ogólny rozkład wyników",

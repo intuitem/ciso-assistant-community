@@ -32,7 +32,6 @@ from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
-from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
     AppliedControl,
@@ -91,11 +90,7 @@ from core.utils import (
     unescape_excel_formula,
 )
 from data_wizard.arm_helpers import process_arm_file
-from data_wizard.cyfun_helpers import (
-    CYFUN_LIBRARY_URN,
-    LEVEL_TO_GROUP,
-    process_cyfun_file,
-)
+from data_wizard.cyfun_helpers import LEVEL_TO_GROUP, process_cyfun_file
 from ebios_rm.models import (
     AttackPath,
     EbiosRMStudy,
@@ -339,11 +334,11 @@ def _parse_time_to_seconds(s: str) -> int | None:
         return int(s)
     except ValueError:
         pass
-    m = re.fullmatch(r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", s)
+    m = re.fullmatch(r"(?:(\d+)[dj])?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", s)
     if not m or not any(m.groups()):
         return None
-    h, mn, sc = (int(x) if x else 0 for x in m.groups())
-    return h * 3600 + mn * 60 + sc
+    d, h, mn, sc = (int(x) if x else 0 for x in m.groups())
+    return d * 86400 + h * 3600 + mn * 60 + sc
 
 
 def _get_security_objective_scale() -> list:
@@ -421,6 +416,12 @@ def _parse_recovery_objectives(raw: str) -> dict:
         if secs is not None and secs >= 0:
             result[key] = {"value": secs}
     return result
+
+
+def _normalize_key(value: Any) -> str:
+    from .mapping import normalize  # mapping imports this module
+
+    return normalize(value)
 
 
 def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
@@ -1306,6 +1307,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
             "reference_link": ["reference_link", "link"],
             "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
             "asset_class": ["asset_class", "class", "classe"],
+            "lifecycle_stage": ["lifecycle_stage", "lifecycle"],
         }
     )
     TYPE_MAP: Final[dict[str, str]] = {
@@ -1318,6 +1320,17 @@ class AssetRecordConsumer(RecordConsumer[list]):
     @cached_property
     def asset_class_index(self) -> dict:
         return AssetClass.path_index()
+
+    @cached_property
+    def lifecycle_stage_index(self) -> dict:
+        # Keyed so "phasing_out" (as exported) and "Phasing out" both match.
+        index = {}
+        for pk, name in Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
+            is_visible=True,
+        ).values_list("id", "name"):
+            index.setdefault(_normalize_key(name), {})[name] = pk
+        return index
 
     def create_context(self):
         return _get_security_objective_scale(), None
@@ -1404,6 +1417,18 @@ class AssetRecordConsumer(RecordConsumer[list]):
                 data["asset_class"] = asset_class.id
             else:
                 parse_warning_msgs.append(f"Unknown asset_class: '{raw_asset_class}'")
+
+        raw_stage = record.get("lifecycle_stage") or record.get("lifecycle")
+        if raw_stage:
+            stages = self.lifecycle_stage_index.get(_normalize_key(raw_stage), {})
+            if raw_stage in stages:
+                data["lifecycle_stage"] = stages[raw_stage]
+            elif len(stages) == 1:
+                data["lifecycle_stage"] = next(iter(stages.values()))
+            elif stages:
+                parse_warning_msgs.append(f"Ambiguous lifecycle_stage: '{raw_stage}'")
+            else:
+                parse_warning_msgs.append(f"Unknown lifecycle_stage: '{raw_stage}'")
 
         if asset_type == "PR":
             if sec_objectives:
@@ -3581,6 +3606,23 @@ class ProcessingRecordConsumer(RecordConsumer):
                 update_data[field] = record_data.get(field, [])
         return update_data
 
+    @cached_property
+    def nature_index(self) -> dict[str, UUID]:
+        # Exports write the display label, so match the internal name or any translation.
+        terms = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.PROCESSING_NATURE
+        )
+        index: dict[str, UUID] = {}
+        for term in terms:
+            names = {str(term)}
+            for value in (term.translations or {}).values():
+                names.add(value.get("name") if isinstance(value, dict) else value)
+            for name in names:
+                if isinstance(name, str) and name.strip():
+                    index.setdefault(name.strip().lower(), term.id)
+        index.update({term.name.strip().lower(): term.id for term in terms})
+        return index
+
     def create_context(self):
         return None, None
 
@@ -3628,18 +3670,24 @@ class ProcessingRecordConsumer(RecordConsumer):
             "dpia_reference": record.get("dpia_reference", ""),
         }
 
-        # Resolve M2M: nature (by name)
+        # Resolve M2M: nature (by name or translated label)
+        missing_natures = []
         record_processing_nature = record.get("processing_nature")
         if record_processing_nature:
             nature_names = [
                 nature_name.strip()
                 for nature_name in str(record_processing_nature).split(",")
+                if nature_name.strip()
+            ]
+            missing_natures = [
+                n for n in nature_names if n.lower() not in self.nature_index
             ]
             data["nature"] = list(
-                Terminology.objects.filter(
-                    field_path=Terminology.FieldPath.PROCESSING_NATURE,
-                    name__in=nature_names,
-                ).values_list("id", flat=True)
+                dict.fromkeys(
+                    self.nature_index[n.lower()]
+                    for n in nature_names
+                    if n.lower() in self.nature_index
+                )
             )
 
         # Resolve M2M: controllers (by entity name)
@@ -3681,6 +3729,12 @@ class ProcessingRecordConsumer(RecordConsumer):
         if label_ids:
             data["filtering_labels"] = label_ids
 
+        if missing_natures:
+            return data, Error(
+                record=record,
+                error=f"Unknown processing nature: {', '.join(missing_natures)}",
+                is_warning=True,
+            )
         return data, None
 
 
@@ -5088,17 +5142,18 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        library_urn = parsed["library_urn"]
+        loaded_library = LoadedLibrary.objects.filter(urn=library_urn).first()
         if loaded_library is not None and (
             StoredLibrary.objects.filter(
-                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+                urn=library_urn, version__gt=loaded_library.version
             ).exists()
         ):
             # The import relies on the scoring settings of the current library
             # (calculation method, visibility...): update the library first.
             return fail("CyfunLibraryOutdated")
         if loaded_library is None:
-            stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+            stored_library = StoredLibrary.objects.filter(urn=library_urn).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
             error = stored_library.load()
@@ -5106,7 +5161,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_2025_URN)
+            framework = Framework.objects.get(urn=parsed["framework_urn"])
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 

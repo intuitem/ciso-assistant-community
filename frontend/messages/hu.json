@@ -5905,8 +5905,6 @@
 	"backToFramework": "Vissza a keretrendszerhez",
 	"compliancePercentage": "Megfelelőség %",
 	"complianceFormulaShort": "megfelelő + ½·részleges, N/A és nem értékelt nélkül",
-	"averageImplementationScore": "Átlagos megvalósítási pontszám",
-	"overScoredRequirementsOnly": "csak a pontozott követelményeken",
 	"visibleToCurrentUser": "a jelenlegi felhasználó számára látható",
 	"inScopeAfterIGFilter": "a megvalósítási csoport szerinti szűrés utáni terjedelemben",
 	"overallResultDistribution": "Eredmények összesített eloszlása",

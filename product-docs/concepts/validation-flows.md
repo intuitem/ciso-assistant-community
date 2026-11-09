@@ -21,7 +21,7 @@ graph LR
   ST -.->|change requested| CR[Change requested]
 ```
 
-A **requester** submits a validation flow for one or more objects in their domain. The flow carries optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. The original objects remain unchanged — what's recorded is the validation flow itself, with the link back to whatever was up for approval.
+A **requester** submits a validation flow for one or more objects in their domain. The flow carries optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. The decision is recorded on the validation flow itself, with the link back to whatever was up for approval. Two things also change on the linked objects: accepting a flow locks its audits, risk assessments, business impact analyses and findings binders, and security exceptions follow the decision (see below).
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -54,6 +54,8 @@ The flow moves through a small state machine:
 | **Revoked** | Approval was rescinded after the fact (e.g. underlying conditions changed) |
 | **Expired** | Validation deadline passed without a decision |
 | **Dropped** | Requester withdrew the flow before a decision was reached |
+
+The decision also carries onto linked **security exceptions**: _Accepted_ moves those in _Draft_ or _In review_ to _Approved_, _Rejected_ moves them to _Rejected_, and _Revoked_ sends _Approved_ ones back to _In review_. This only applies to exceptions the requester is allowed to edit, and an exception stays _Approved_ while another accepted flow still covers it. Exceptions in any other status are left alone, and their owners are notified of the change.
 
 The status is the audit-trail field that gets cited in evidence reports — "policy v3 was _Accepted_ by Jane Doe on 2026-03-12" is what makes the decision provable later.
 

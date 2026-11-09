@@ -165,13 +165,13 @@
 				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>{m.edit()}</Anchor
 			>
 			<button
-				class="btn preset-filled-secondary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				data-testid="toggle-active-button"
 				disabled={busy}
 				onclick={toggleActive}
 			>
 				{#if data.data.is_active}
-					<i class="fa-solid fa-ban mr-2"></i>{m.deactivate()}
+					<i class="fa-solid fa-ban mr-2 text-red-500"></i>{m.deactivate()}
 				{:else}
 					<i class="fa-solid fa-check mr-2"></i>{m.activate()}
 				{/if}
