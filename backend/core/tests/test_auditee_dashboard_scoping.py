@@ -7,6 +7,7 @@ access would see a card whose "continue assessment" click 404s.
 """
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth.models import Permission
@@ -150,12 +151,14 @@ def test_third_party_task_is_assigned_to_its_creator(audit_with_assignment):
 
     client = APIClient()
     client.force_authenticate(user=respondent)
-    res = client.post(
-        "/api/task-templates/",
-        {"name": "Vendor task", "folder": str(domain.id)},
-        format="json",
-    )
+    with patch("core.tasks.send_task_template_assignment_notification") as notify:
+        res = client.post(
+            "/api/task-templates/",
+            {"name": "Vendor task", "folder": str(domain.id)},
+            format="json",
+        )
     assert res.status_code == 201, res.content
+    notify.assert_not_called()
     assert (
         client.get(f"/api/task-templates/?assigned_to={respondent.actor.id}").json()[
             "count"
