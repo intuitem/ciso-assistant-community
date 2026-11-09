@@ -6087,8 +6087,6 @@
 	"backToFramework": "Çerçeveye geri dön",
 	"compliancePercentage": "Uyum %",
 	"complianceFormulaShort": "uyumlu + ½·kısmen, uygulanamaz ve değerlendirilmemişler hariç",
-	"averageImplementationScore": "Ortalama uygulama puanı",
-	"overScoredRequirementsOnly": "yalnızca puanlanan gereksinimler üzerinden",
 	"visibleToCurrentUser": "geçerli kullanıcıya görünür",
 	"inScopeAfterIGFilter": "IG filtresinden sonra kapsamda",
 	"overallResultDistribution": "Genel sonuç dağılımı",

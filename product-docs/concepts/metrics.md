@@ -2,9 +2,8 @@
 
 ### Expected outcome
 
-* define your metrics or import their definition
-* instantiate them on your domains
-* feed data to your metric instances, or compute them from other metrics
+* create your metrics in one form, from a library definition or from scratch
+* record their values for each period, or compute them from other metrics
 * create dashboards with builtin and custom metrics
 
 ## Mental model
@@ -19,13 +18,13 @@ graph LR
   W -.->|reads| BMS[Builtin sample]
 ```
 
-A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: assignee, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are timestamped data points against an instance. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
+A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: owner, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are the values recorded against an instance; a metric with a collection frequency records one value per period (month, quarter, week…), and a new value for a period replaces the previous one. The definition also holds how a value reads: its direction (higher is better, lower is better, or none) and the decimals it is shown with. You rarely create a definition by hand: the [metric form](../features/metrics/creating-a-metric.md) creates it with the metric. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
 
 | User-facing | Internal | Notes |
 |---|---|---|
 | Metric definition | `MetricDefinition` | Catalog template; optional `library` FK |
 | Metric instance | `MetricInstance` | One definition × one domain |
-| Sample | `CustomMetricSample` | Timestamped data point on an instance |
+| Sample | `CustomMetricSample` | A recorded value on an instance, for a period when the instance has a frequency |
 | Builtin sample | `BuiltinMetricSample` | System-computed; daily; `ContentType` GFK to any object |
 | Dashboard | `Dashboard` | Container |
 | Widget | `DashboardWidget` | KPI / donut / pie / bar / line / area / gauge / sparkline / table / text |

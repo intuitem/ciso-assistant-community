@@ -32,7 +32,6 @@ from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
-from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
     AppliedControl,
@@ -91,11 +90,7 @@ from core.utils import (
     unescape_excel_formula,
 )
 from data_wizard.arm_helpers import process_arm_file
-from data_wizard.cyfun_helpers import (
-    CYFUN_LIBRARY_URN,
-    LEVEL_TO_GROUP,
-    process_cyfun_file,
-)
+from data_wizard.cyfun_helpers import LEVEL_TO_GROUP, process_cyfun_file
 from ebios_rm.models import (
     AttackPath,
     EbiosRMStudy,
@@ -421,6 +416,12 @@ def _parse_recovery_objectives(raw: str) -> dict:
         if secs is not None and secs >= 0:
             result[key] = {"value": secs}
     return result
+
+
+def _normalize_key(value: Any) -> str:
+    from .mapping import normalize  # mapping imports this module
+
+    return normalize(value)
 
 
 def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
@@ -1306,6 +1307,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
             "reference_link": ["reference_link", "link"],
             "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
             "asset_class": ["asset_class", "class", "classe"],
+            "lifecycle_stage": ["lifecycle_stage", "lifecycle"],
         }
     )
     TYPE_MAP: Final[dict[str, str]] = {
@@ -1318,6 +1320,17 @@ class AssetRecordConsumer(RecordConsumer[list]):
     @cached_property
     def asset_class_index(self) -> dict:
         return AssetClass.path_index()
+
+    @cached_property
+    def lifecycle_stage_index(self) -> dict:
+        # Keyed so "phasing_out" (as exported) and "Phasing out" both match.
+        index = {}
+        for pk, name in Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
+            is_visible=True,
+        ).values_list("id", "name"):
+            index.setdefault(_normalize_key(name), {})[name] = pk
+        return index
 
     def create_context(self):
         return _get_security_objective_scale(), None
@@ -1404,6 +1417,18 @@ class AssetRecordConsumer(RecordConsumer[list]):
                 data["asset_class"] = asset_class.id
             else:
                 parse_warning_msgs.append(f"Unknown asset_class: '{raw_asset_class}'")
+
+        raw_stage = record.get("lifecycle_stage") or record.get("lifecycle")
+        if raw_stage:
+            stages = self.lifecycle_stage_index.get(_normalize_key(raw_stage), {})
+            if raw_stage in stages:
+                data["lifecycle_stage"] = stages[raw_stage]
+            elif len(stages) == 1:
+                data["lifecycle_stage"] = next(iter(stages.values()))
+            elif stages:
+                parse_warning_msgs.append(f"Ambiguous lifecycle_stage: '{raw_stage}'")
+            else:
+                parse_warning_msgs.append(f"Unknown lifecycle_stage: '{raw_stage}'")
 
         if asset_type == "PR":
             if sec_objectives:
@@ -5088,17 +5113,18 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        library_urn = parsed["library_urn"]
+        loaded_library = LoadedLibrary.objects.filter(urn=library_urn).first()
         if loaded_library is not None and (
             StoredLibrary.objects.filter(
-                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+                urn=library_urn, version__gt=loaded_library.version
             ).exists()
         ):
             # The import relies on the scoring settings of the current library
             # (calculation method, visibility...): update the library first.
             return fail("CyfunLibraryOutdated")
         if loaded_library is None:
-            stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+            stored_library = StoredLibrary.objects.filter(urn=library_urn).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
             error = stored_library.load()
@@ -5106,7 +5132,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_2025_URN)
+            framework = Framework.objects.get(urn=parsed["framework_urn"])
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 

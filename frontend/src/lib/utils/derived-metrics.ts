@@ -398,14 +398,16 @@ export function samplesOnPeriods(
 // is good news for this metric. Null without two numbers to compare.
 export function latestTrend(
 	periods: { value: unknown; skipped?: boolean }[],
-	higherIsBetter: boolean
+	higherIsBetter: boolean | null
 ): { delta: number; good: boolean | null } | null {
 	const values = periods
 		.filter((p) => !p.skipped && typeof p.value === 'number' && Number.isFinite(p.value))
 		.map((p) => p.value as number);
 	if (values.length < 2) return null;
 	const delta = values[values.length - 1] - values[values.length - 2];
-	return { delta, good: delta === 0 ? null : delta > 0 === higherIsBetter };
+	// No direction: a move is neither good nor bad.
+	const good = delta === 0 || higherIsBetter === null ? null : delta > 0 === higherIsBetter;
+	return { delta, good };
 }
 
 // ---------- a level (qualitative) result ----------
