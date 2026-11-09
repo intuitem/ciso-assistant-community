@@ -20381,7 +20381,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 {"error": "Invalid date format. Use YYYY-MM-DD"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if span.days > MAX_CALENDAR_RANGE_DAYS:
+        if not 0 <= span.days <= MAX_CALENDAR_RANGE_DAYS:
             return Response(
                 {"error": "calendarRangeTooLarge"},
                 status=status.HTTP_400_BAD_REQUEST,

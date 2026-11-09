@@ -257,7 +257,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not all(isinstance(item, models.Model) for item in items):
                 continue
             related_model = type(items[0])
-            if related_model is Folder:
+            if related_model is Folder and items is not value:
                 continue
             current_ids: set = set()
             if has_instance and items is not value:
@@ -908,7 +908,30 @@ class RiskAssessmentWriteSerializer(
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the risk assessment attributes when it is locked. Only the 'Locked' field can be modified."
                 )
-        return super().validate(attrs)
+        attrs = super().validate(attrs)
+        study = attrs.get("ebios_rm_study")
+        request = self.context.get("request")
+        if study and self.instance is None and request:
+            # creating unlinks the study's other risk assessments
+            linked = {
+                str(pk)
+                for pk in RiskAssessment.objects.filter(
+                    ebios_rm_study=study
+                ).values_list("pk", flat=True)
+            }
+            changeable = {
+                str(pk)
+                for pk in RoleAssignment.get_changeable_object_ids(
+                    request.user, RiskAssessment
+                )
+            }
+            if linked - changeable:
+                raise PermissionDenied(
+                    {
+                        "ebios_rm_study": "You do not have permission to change this riskassessment"
+                    }
+                )
+        return attrs
 
     def update(self, instance, validated_data):
         # Track old folder before update

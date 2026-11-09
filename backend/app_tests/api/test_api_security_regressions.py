@@ -29,6 +29,7 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     EvidenceRevision,
+    Finding,
     Framework,
     Incident,
     Perimeter,
@@ -589,6 +590,36 @@ def test_study_link_needs_change_on_the_study(app_config):
 
 
 @pytest.mark.django_db
+def test_study_link_cannot_unlink_a_foreign_assessment(app_config):
+    a, b, analyst, _, perimeter_a, perimeter_b, _, _ = _cross_domain_audit()
+    matrix_a = RiskMatrix.objects.create(
+        name="ma", folder=a, json_definition=RISK_MATRIX_JSON_DEFINITION
+    )
+    study = EbiosRMStudy.objects.create(name="study-A", risk_matrix=matrix_a, folder=a)
+    victim = RiskAssessment.objects.create(
+        name="ra-b",
+        folder=b,
+        perimeter=perimeter_b,
+        risk_matrix=matrix_a,
+        ebios_rm_study=study,
+    )
+    r = _client(analyst).post(
+        "/api/risk-assessments/",
+        {
+            "name": "x",
+            "folder": str(a.id),
+            "perimeter": str(perimeter_a.id),
+            "risk_matrix": str(matrix_a.id),
+            "ebios_rm_study": str(study.id),
+        },
+        format="json",
+    )
+    assert r.status_code == 403
+    victim.refresh_from_db()
+    assert victim.ebios_rm_study_id == study.id
+
+
+@pytest.mark.django_db
 def test_existing_foreign_link_survives_a_full_update(app_config):
     a, _, analyst, framework, perimeter_a, _, _, _ = _cross_domain_audit()
     audit = ComplianceAssessment.objects.create(
@@ -620,10 +651,11 @@ def test_shared_and_own_targets_can_be_linked(app_config):
     asset = Asset.objects.create(name="srv", folder=a)
     r = _client(tester).post(
         "/api/findings/",
-        {"name": "f", "folder": str(a.id), "assets": [str(asset.id)]},
+        {"name": "f", "folder": str(a.id), "asset": str(asset.id)},
         format="json",
     )
     assert r.status_code == 201
+    assert Finding.objects.get(id=r.json()["id"]).asset_id == asset.id
 
 
 def _serializer_classes():
@@ -642,7 +674,7 @@ def _serializer_classes():
 
 
 # system lookups with no domain to scope them by
-UNSCOPED_LINK_TARGETS = {ContentType, Folder, Permission, WebhookEventType}
+UNSCOPED_LINK_TARGETS = {ContentType, Permission, WebhookEventType}
 
 
 @pytest.mark.django_db
@@ -658,6 +690,9 @@ def test_every_link_field_refuses_an_invisible_target(app_config):
                 continue
             queryset = relation.get_queryset()
             if queryset is None or queryset.model in UNSCOPED_LINK_TARGETS:
+                continue
+            # a single folder is gated by the add/change check on it
+            if queryset.model is Folder and not many:
                 continue
             model = queryset.model
             target = model(pk=uuid.uuid4())
@@ -707,4 +742,7 @@ def test_calendar_range_is_capped(app_config):
     assert r.status_code == 400
     assert not TaskNode.objects.exists()
     assert c.get("/api/task-templates/calendar/nope/2036-01-01/").status_code == 400
+    assert (
+        c.get("/api/task-templates/calendar/2026-04-01/2026-03-01/").status_code == 400
+    )
     assert c.get("/api/task-templates/calendar/2026-3-01/2026-4-01/").status_code == 200
