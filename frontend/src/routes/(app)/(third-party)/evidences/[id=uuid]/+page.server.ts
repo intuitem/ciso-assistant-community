@@ -8,7 +8,7 @@ import { nestedDeleteFormAction } from '#lib/utils/actions.js';
 const VENDOR_FIELDS = ['name', 'description', 'status', 'link', 'expiry_date', 'updated_at'];
 
 export const load: PageServerLoad = async (event) => {
-	const { user } = await event.parent();
+	const user = await event.locals.getUser();
 	const model = getModelInfo('evidences');
 	const vendorModel = {
 		...model,

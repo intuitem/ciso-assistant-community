@@ -7312,6 +7312,9 @@ class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer
         return self.validate_commitment(super().validate(attrs))
 
     def create(self, validated_data):
+        user = self.context["request"].user
+        if user.is_third_party and not validated_data.get("assigned_to"):
+            validated_data["assigned_to"] = [user.actor]
         commitment_data = dict(validated_data)
         self.pop_commitment(validated_data)
         assigned_to_data = validated_data.get("assigned_to", [])

@@ -131,3 +131,34 @@ def test_dashboard_lists_assignments_for_builtin_auditee(audit_with_assignment):
         ).status_code
         == 200
     )
+
+
+@pytest.mark.django_db
+def test_third_party_task_is_assigned_to_its_creator(audit_with_assignment):
+    domain, ca, respondent, assignment = audit_with_assignment
+    respondent.is_third_party = True
+    respondent.save()
+    ug = UserGroup.objects.create(name="VendorUG", folder=domain)
+    ug.user_set.add(respondent)
+    ra = RoleAssignment.objects.create(
+        user_group=ug,
+        role=Role.objects.get(name="BI-RL-TPR"),
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    ra.perimeter_folders.add(domain)
+
+    client = APIClient()
+    client.force_authenticate(user=respondent)
+    res = client.post(
+        "/api/task-templates/",
+        {"name": "Vendor task", "folder": str(domain.id)},
+        format="json",
+    )
+    assert res.status_code == 201, res.content
+    assert (
+        client.get(f"/api/task-templates/?assigned_to={respondent.actor.id}").json()[
+            "count"
+        ]
+        == 1
+    )

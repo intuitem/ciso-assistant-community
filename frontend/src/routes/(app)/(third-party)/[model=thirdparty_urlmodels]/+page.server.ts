@@ -17,8 +17,8 @@ import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
 
-export const load: PageServerLoad = async ({ params, fetch, parent }) => {
-	const { user } = await parent();
+export const load: PageServerLoad = async ({ params, fetch, locals }) => {
+	const user = await locals.getUser();
 	if (user?.is_third_party) {
 		redirect(302, '/auditee-dashboard');
 	}
