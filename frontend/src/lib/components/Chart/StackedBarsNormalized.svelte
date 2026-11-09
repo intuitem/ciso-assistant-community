@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { complianceResultColorMap as c } from '#lib/utils/constants.js';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 	import { m } from '#paraglide/messages.js';
 	interface Props {
@@ -140,7 +141,7 @@
 						formatter: (params) => {
 							// Find the index of the hovered item and show full name
 							const index = params[0].dataIndex;
-							return names[index];
+							return escapeHtml(names[index]);
 						}
 					}
 				}),
