@@ -24,8 +24,7 @@ We will support memcached as an optional shared Django cache, disabled by defaul
 
 ## Security
 
-Memcached has no authentication, and Django stores cached values as pickles, so anyone who can write to memcached can run code in the backend. The risk is low because nothing but the backend and Huey can reach it:
-
+- **Force unix socket usage.** memcached defaults to a TCP server, the risk of it being accessed by a malicious actor is too big to let this option be (as anyone with access to cache can RCE into the backend), that's why the code MUST strictly forbid `MEMCACHED_LOCATION` from being set to a TCP socket.
 - **No network listener.** memcached started with `-s` opens no TCP or UDP port, and its container has no network (`network_mode: none`). No other container, host or pod can connect to it.
 - **No SSRF path.** Every outbound request the backend makes to a configured URL (webhooks, audit sinks, LLM, Jira, ServiceNow, mail server) targets a host and port. A unix socket cannot be named that way. This holds even where `ALLOW_PRIVATE_NETWORK_REQUESTS` turns off the SSRF guard (`core/net_safety.py`), and without relying on memcached's own refusal of HTTP request lines.
 - **Only the cache's own users mount the socket.** In Compose, the socket volume is owned by uid 1001 with mode 0700 and is mounted only into the backend, Huey and memcached. In the chart, it is an `emptyDir` private to the backend pod, mounted into the same three containers. The frontend never mounts it.
