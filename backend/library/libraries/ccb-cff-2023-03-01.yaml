@@ -11,7 +11,7 @@ description: 'Centre For Cybersecurity Belgium - CyberFundamentals Framework
   https://ccb.belgium.be'
 copyright: All texts, layouts, designs and other elements of any nature in this document
   are subject to copyright law.
-version: 8
+version: 9
 publication_date: 2026-10-04
 provider: CCB
 packager: intuitem
@@ -49,6 +49,9 @@ objects:
       documentation_score:
         auditor: edit
         respondent: edit
+      result:
+        auditor: hidden
+        respondent: hidden
     score_scale_locked: true
     score_calculation_method: average_of_averages
     scores_definition:

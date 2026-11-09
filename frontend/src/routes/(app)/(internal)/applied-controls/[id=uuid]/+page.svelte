@@ -68,13 +68,13 @@
 	{#snippet actions()}
 		{#if dryRunData.length > 0}
 			<button
-				class="btn preset-filled-primary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				data-testid="sync-to-actions-button"
 				onclick={async () => {
 					await modalConfirmSyncAppliedControls();
 				}}
 			>
-				<i class="fa-solid fa-arrows-rotate mr-2"></i>
+				<i class="fa-solid fa-arrows-rotate mr-2 text-cyan-500"></i>
 				{m.syncToReferenceControl()}
 			</button>
 		{/if}

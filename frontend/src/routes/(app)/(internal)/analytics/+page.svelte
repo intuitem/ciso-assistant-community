@@ -208,7 +208,7 @@
 			<Tabs.Content value="summary">
 				{#await data.stream.metrics}
 					<div class="col-span-3 lg:col-span-1">
-						<div>Refreshing data ..</div>
+						<div>{m.refreshing()}</div>
 						<LoadingSpinner />
 					</div>
 				{:then metrics}
@@ -218,7 +218,11 @@
 							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
 								<!-- Controls Section (3/5 of width) -->
 								<div class="xl:col-span-3">
-									<CardGroup title={m.sumpageSectionControls()} icon="fa-solid fa-shield-halved">
+									<CardGroup
+										title={m.sumpageSectionControls()}
+										icon="fa-solid fa-shield-halved"
+										maxColumns={3}
+									>
 										<SimpleCard
 											count={metrics.controls?.total}
 											label={m.sumpageTotal()}
@@ -462,7 +466,7 @@
 			<Tabs.Content value="governance">
 				{#await data.stream.counters}
 					<div class="col-span-3 lg:col-span-1">
-						<div>Refreshing data ..</div>
+						<div>{m.refreshing()}</div>
 						<LoadingSpinner />
 					</div>
 				{:then counters}
@@ -1045,7 +1049,7 @@
 			<Tabs.Content value="operations">
 				{#await data.stream.operationsAnalytics}
 					<div class="col-span-3 lg:col-span-1">
-						<div>Refreshing data ..</div>
+						<div>{m.refreshing()}</div>
 						<LoadingSpinner />
 					</div>
 				{:then operationsAnalytics}

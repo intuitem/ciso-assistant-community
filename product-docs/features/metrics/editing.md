@@ -15,7 +15,7 @@ The button is in two places:
 
 ## What the drawer shows
 
-The drawer shows the steps of the [New computed metric](creating.md) window you already know, **Metrics to combine** and **Formula**, and a third, **How to read it**, holding the unit and **Higher is better**.
+The drawer shows the steps of the [New computed metric](creating.md) window you already know, **Metrics to combine** and **Formula**, and a third, **How to read it**, holding the unit and the **Direction**.
 
 The metric's name, domain, collection frequency and target are not in the drawer: they stay on the metric's edit form, which is where you change them.
 
@@ -35,7 +35,7 @@ Hover a point to read both values for that period. When the two lines meet, the 
 - **Swap a metric** for another one, for example the same indicator in another country: remove the row, search, pick. The formula keeps its names.
 - **Add, remove, rename or reorder** metrics, as when creating.
 - **Rewrite the formula**, or switch its result between **Number** and **Level**.
-- **Change the unit or Higher is better.**
+- **Change the unit or the direction.**
 
 **Save** stays off until something changes.
 
