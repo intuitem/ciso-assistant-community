@@ -174,7 +174,11 @@
 	});
 
 	$effect(() => {
-		if (browser && !data?.featureflags?.focus_mode && $focusMode.id) {
+		if (
+			browser &&
+			(!data?.featureflags?.focus_mode || data?.user?.is_third_party) &&
+			$focusMode.id
+		) {
 			clearFocusMode();
 			refreshAll();
 		}

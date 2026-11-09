@@ -33,7 +33,7 @@
 
 <div class="min-h-dvh bg-linear-to-br from-surface-100-900 to-surface-200-800">
 	<header
-		class="sticky top-0 z-50 flex items-center justify-between gap-4 border-b border-surface-200-800 bg-surface-50-950 px-6 py-3"
+		class="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-4 border-b border-surface-200-800 bg-surface-50-950 px-4 py-3 sm:px-6"
 	>
 		<div class="flex items-center gap-6">
 			<a
@@ -56,7 +56,7 @@
 				value={getLocale()}
 				onchange={changeLocale}
 				aria-label={m.language()}
-				class="select w-auto py-1 text-xs"
+				class="select w-auto max-w-36 py-1 text-xs sm:max-w-none"
 				data-testid="language-select"
 			>
 				{#each locales as lang}
@@ -95,7 +95,7 @@
 			</div>
 		</div>
 	</header>
-	<main class="mx-auto max-w-7xl px-6 py-8">
+	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
 		<h1
 			class="pb-6 text-2xl font-bold bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 			id="page-title"
