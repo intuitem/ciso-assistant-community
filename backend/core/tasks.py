@@ -1098,6 +1098,8 @@ def send_security_exception_assignment_notification(exception_id, assigned_user_
         "folder_name": security_exception.folder.name
         if security_exception.folder
         else "Default",
+        "exception_url": f"{settings.CISO_ASSISTANT_URL}/security-exceptions/{security_exception.id}",
+        "exception_observation": security_exception.observation or "N/A",
     }
 
     notify(
@@ -1188,6 +1190,8 @@ def send_security_exception_status_notification(
         "folder_name": security_exception.folder.name
         if security_exception.folder
         else "Default",
+        "exception_url": f"{settings.CISO_ASSISTANT_URL}/security-exceptions/{security_exception.id}",
+        "exception_observation": security_exception.observation or "N/A",
     }
 
     notify(

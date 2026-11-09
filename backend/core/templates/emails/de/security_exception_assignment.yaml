@@ -11,6 +11,8 @@ body: |
   - Status: ${exception_status}
   - Ablaufdatum: ${expiration_date}
   - Bereich: ${folder_name}
+  - URL: <${exception_url}>
+  - Beobachtung: ${exception_observation}
 
   Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Ausnahme anzuzeigen und zu verwalten: [CISO Assistant öffnen](${ciso_assistant_url})
 

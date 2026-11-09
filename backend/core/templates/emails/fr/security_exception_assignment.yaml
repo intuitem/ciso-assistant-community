@@ -11,6 +11,8 @@ body: |
   - Statut : ${exception_status}
   - Date d'expiration : ${expiration_date}
   - Domaine : ${folder_name}
+  - URL : <${exception_url}>
+  - Observation : ${exception_observation}
 
   Connectez-vous à votre portail CISO Assistant pour consulter et gérer cette dérogation de sécurité : [Accéder à CISO Assistant](${ciso_assistant_url})
 

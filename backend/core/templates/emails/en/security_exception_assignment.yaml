@@ -11,6 +11,8 @@ body: |
   - Status: ${exception_status}
   - Expiration date: ${expiration_date}
   - Domain: ${folder_name}
+  - URL: <${exception_url}>
+  - Observation: ${exception_observation}
 
   Log in to your CISO Assistant portal to view and manage this security exception: [Go to CISO Assistant](${ciso_assistant_url})
 
