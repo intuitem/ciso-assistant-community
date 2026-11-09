@@ -1,6 +1,5 @@
 """Provisioning and update helpers for OAuth2 service accounts (see ServiceAccount model)."""
 
-from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
@@ -8,13 +7,12 @@ from allauth.idp.oidc.adapter import get_adapter as get_oidc_adapter
 from allauth.idp.oidc.models import Client
 
 from iam.models import (
-    ALLOWED_PERMISSION_APPS,
-    IGNORED_PERMISSIONS,
     Folder,
     Role,
     RoleAssignment,
     ServiceAccount,
     User,
+    get_permission_catalog,
 )
 
 SERVICE_ACCOUNT_EMAIL_DOMAIN = "service-accounts.local"
@@ -26,8 +24,7 @@ UNSET = object()
 def get_selectable_permissions():
     """Permissions a service account may be granted — same catalog RBAC uses."""
     return (
-        Permission.objects.filter(content_type__app_label__in=ALLOWED_PERMISSION_APPS)
-        .exclude(IGNORED_PERMISSIONS)
+        get_permission_catalog()
         .select_related("content_type")
         .order_by("content_type__app_label", "content_type__model", "codename")
     )
