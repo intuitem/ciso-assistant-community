@@ -177,7 +177,7 @@
 		if (
 			browser &&
 			(!data?.featureflags?.focus_mode || data?.user?.is_third_party) &&
-			$focusMode.id
+			($focusMode.id || getCookie('focus_folder_id'))
 		) {
 			clearFocusMode();
 			refreshAll();

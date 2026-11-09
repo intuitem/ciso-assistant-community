@@ -225,6 +225,7 @@ test('third-party representative can set their password', async ({ sideBar, mail
 		// logout to prevent sessions conflicts
 		await setPasswordPage.getByTestId('respondent-avatar').click();
 		await setPasswordPage.getByTestId('logout-button').click();
+		await expect(setPasswordPage).toHaveURL(/^.*\/login$/);
 	});
 });
 
