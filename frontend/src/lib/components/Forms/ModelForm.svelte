@@ -473,7 +473,8 @@
 					cacheLock={cacheLocks['folder']}
 					bind:cachedValue={formDataCache['folder']}
 					label={m.domain()}
-					hidden={HIDDEN_FOLDER_MODELS.has(URLModel)}
+					hidden={HIDDEN_FOLDER_MODELS.has(URLModel) ||
+						(URLModel === 'evidences' && page.data?.user?.is_third_party)}
 					disabled={(URLModel === 'entities' && object?.builtin) ||
 						(URLModel === 'perimeters' && !!initialData?.folder)}
 					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)

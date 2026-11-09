@@ -3,7 +3,6 @@ import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 import { m } from '#paraglide/messages.js';
-import { SideBar } from '../../utils/sidebar.js';
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -224,8 +223,8 @@ test('third-party representative can set their password', async ({ sideBar, mail
 		await expect(setLoginPage.page).toHaveURL('/auditee-dashboard');
 
 		// logout to prevent sessions conflicts
-		const passwordPageSideBar = new SideBar(setPasswordPage);
-		await passwordPageSideBar.logout();
+		await setPasswordPage.getByTestId('respondent-avatar').click();
+		await setPasswordPage.getByTestId('logout-button').click();
 	});
 });
 
