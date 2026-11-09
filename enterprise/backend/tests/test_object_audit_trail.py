@@ -1,4 +1,6 @@
 import pytest
+from auditlog.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.test import Client
 from django.urls import reverse
 from knox.models import AuthToken
@@ -72,6 +74,44 @@ class TestUserAuditTrailFullViewFields:
         assert {"email", "first_name"} <= self._fields(trail)
         # The update that only touched full-view fields is left out, not shown empty.
         assert [entry["action"] for entry in trail] == ["update", "create"]
+
+    def test_base_viewer_gets_no_field_outside_the_base_view(
+        self, target, analyst, admin_client
+    ):
+        # The users API shows none of these to a base viewer: SCIM ids, group
+        # membership (logged with group names), a field since removed from the model.
+        target.scim_external_id = "okta-00u1a2b3"
+        target.save()
+        target.user_groups.add(
+            UserGroup.objects.get(name="BI-UG-ANA", folder=Folder.get_root_folder())
+        )
+        LogEntry.objects.create(
+            content_type=ContentType.objects.get_for_model(User),
+            object_pk=str(target.id),
+            object_repr=str(target),
+            action=LogEntry.Action.UPDATE,
+            changes={"is_published": ["False", "True"]},
+        )
+        others = {"scim_external_id", "user_groups", "is_published"}
+        trail = self._trail(_client(analyst), target.id)
+        assert not others & self._fields(trail)
+        assert [entry["action"] for entry in trail] == ["update", "create"]
+        assert others <= self._fields(self._trail(admin_client, target.id))
+
+    def test_password_resets_do_not_date_full_view_changes(self, analyst, admin_client):
+        # A user without local login gets a new unusable password on every save, so
+        # changing a full-view field alone also logs a redacted password change.
+        sso_user = User.objects.create_user("sso.user@tests.com")
+        sso_user.is_jit_provisioned = True
+        sso_user.save()
+        sso_user.observation = "moved to the Lyon office"
+        sso_user.save()
+        trail = self._trail(_client(analyst), sso_user.id)
+        assert "password" not in self._fields(trail)
+        assert [entry["action"] for entry in trail] == ["create"]
+        assert {"observation", "password"} <= self._fields(
+            self._trail(admin_client, sso_user.id)
+        )
 
     def test_sign_ins_do_not_crowd_out_base_changes(self, target, analyst, monkeypatch):
         # Every sign-in logs an update of last_login alone. Past the entry limit, they

@@ -1779,8 +1779,8 @@ class TestUserFullView:
         "observation",
     }
     # Base view only: the ambient baseline role, a domain Reader, the Global
-    # analyst, approver and user creator groups, and a custom role holding only
-    # `view_user` on Global.
+    # analyst, approver and user creator groups, a custom role holding only
+    # `view_user` on Global, and one holding `change_user` on a domain only.
     VIEWERS = [
         "ambient",
         "reader",
@@ -1788,6 +1788,7 @@ class TestUserFullView:
         "global_approver",
         "creator",
         "base_only",
+        "domain_changer",
     ]
     # Full view through `view_user_full` or `change_user` on Global.
     FULL_VIEWERS = [
@@ -1846,6 +1847,21 @@ class TestUserFullView:
         creator = User.objects.create_user("creator@tests.com")
         UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
         base_only = _make_user_manager("base.only@tests.com", ["view_user"])
+        # `change_user` gives the full view of the users where it applies. Users live
+        # in Global, so on a domain it gives none. Auditee membership brings the
+        # ambient view of users.
+        domain_changer = User.objects.create_user("domain.changer@tests.com")
+        auditees.user_set.add(domain_changer)
+        changer_role = Role.objects.create(name="domain user changers", folder=root)
+        changer_role.permissions.set(
+            Permission.objects.filter(codename__in=["view_user", "change_user"])
+        )
+        changers = UserGroup.objects.create(name="domain user changers", folder=domain)
+        changers_ra = RoleAssignment.objects.create(
+            user_group=changers, role=changer_role, is_recursive=True, folder=domain
+        )
+        changers_ra.perimeter_folders.add(domain)
+        changers.user_set.add(domain_changer)
 
         global_reader = User.objects.create_user("global.reader@tests.com")
         UserGroup.objects.get(name="BI-UG-GAD", folder=root).user_set.add(global_reader)
@@ -1867,6 +1883,7 @@ class TestUserFullView:
             "global_approver": global_approver,
             "creator": creator,
             "base_only": base_only,
+            "domain_changer": domain_changer,
         }
         full_viewers = {
             "manager": manager,
@@ -2141,6 +2158,22 @@ class TestViewUserFullMigration:
         assert not default.permissions.filter(pk=full.pk).exists()
         # Builtin roles are startup's business.
         assert not baseline.permissions.filter(pk=full.pk).exists()
+
+    def test_creates_the_permission_when_missing(self):
+        # The migration runs before post_migrate creates Meta.permissions.
+        Permission.objects.filter(codename="view_user_full").delete()
+        custom = Role.objects.create(
+            name="access reviewers", folder=Folder.get_root_folder()
+        )
+        custom.permissions.add(Permission.objects.get(codename="view_user"))
+        self._grant()
+        full = Permission.objects.get(
+            codename="view_user_full",
+            content_type__app_label="iam",
+            content_type__model="user",
+        )
+        assert full.name == "Can view users' full record"
+        assert custom.permissions.filter(pk=full.pk).exists()
 
     def test_rerun_is_harmless(self):
         custom = Role.objects.create(

@@ -36,7 +36,6 @@ from core.views import (
     SmartOrderingFilter,
 )
 from core.serializers import (
-    USER_FULL_VIEW_FIELDS,
     full_user_view_folder_ids,
     has_full_user_view,
 )
@@ -1300,10 +1299,20 @@ class ObjectAuditTrailView(APIView):
     permission_classes = [IsAuthenticated]
 
     MAX_ENTRIES = 200
-    # Logged on a user but only for who has the full view of the user (see
-    # USER_FULL_VIEW_FIELDS): its full-view fields, and login activity that no
-    # serializer shows at all.
-    USER_FULL_VIEW_LOG_FIELDS = (*USER_FULL_VIEW_FIELDS, "last_login", "first_login")
+    # What a user's trail shows to who has only the base view of the user: the
+    # fields the users API shows them. The rest needs the full view: account details,
+    # sign-ins, password changes, SCIM ids, group membership (logged with group
+    # names), fields since removed from the model, and any field added later.
+    USER_BASE_VIEW_LOG_FIELDS = (
+        "id",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "date_joined",
+        "is_third_party",
+        "folder",
+    )
 
     def get(self, request, format=None):
         from uuid import UUID
@@ -1341,21 +1350,19 @@ class ObjectAuditTrailView(APIView):
         ):
             raise PermissionDenied
 
-        hidden = ()
+        # The fields whose changes are shown; None shows them all.
+        shown = None
         if model_class is User and not self._has_full_user_view(request, obj):
-            hidden = self.USER_FULL_VIEW_LOG_FIELDS
+            shown = self.USER_BASE_VIEW_LOG_FIELDS
         entries = LogEntry.objects.filter(
             content_type=content_type, object_pk=str(object_id)
         )
-        if hidden:
-            # Leave out, in the query, updates that touch hidden fields only: every
+        if shown is not None:
+            # Leave out, in the query, updates that touch no shown field: every
             # sign-in logs one (last_login), so filtering after the limit could leave
             # nothing of an active user's trail. auditlog keys changes by field name.
-            visible = [
-                f.name for f in model_class._meta.get_fields() if f.name not in hidden
-            ]
             entries = entries.filter(
-                ~Q(action=LogEntry.Action.UPDATE) | Q(changes__has_any_keys=visible)
+                ~Q(action=LogEntry.Action.UPDATE) | Q(changes__has_any_keys=list(shown))
             )
         entries = entries.select_related("actor").order_by("-timestamp")[
             : self.MAX_ENTRIES
@@ -1371,11 +1378,15 @@ class ObjectAuditTrailView(APIView):
             changes = self._mask(
                 model_name,
                 self._humanize(entry.changes, fk_models, label_cache),
-                hidden,
+                shown,
             )
-            # An update touching only hidden fields would still tell when they changed.
-            # The query already leaves them out; this is the backstop.
-            if hidden and entry.action == LogEntry.Action.UPDATE and not changes:
+            # An update touching no shown field would still tell when the others
+            # changed. The query already leaves them out; this is the backstop.
+            if (
+                shown is not None
+                and entry.action == LogEntry.Action.UPDATE
+                and not changes
+            ):
                 continue
             results.append(
                 {
@@ -1431,12 +1442,13 @@ class ObjectAuditTrailView(APIView):
         return label_cache[key]
 
     @staticmethod
-    def _mask(model_name, changes, hidden):
+    def _mask(model_name, changes, shown):
         if not isinstance(changes, dict):
             return changes
-        changes = {
-            field: value for field, value in changes.items() if field not in hidden
-        }
+        if shown is not None:
+            changes = {
+                field: value for field, value in changes.items() if field in shown
+            }
         # Backstop for rows logged before "password" was excluded at registration
         # (iam/models.py); current writes never include it.
         if model_name == "user" and "password" in changes:

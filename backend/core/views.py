@@ -8653,6 +8653,14 @@ class UserFilter(GenericFilterSet):
     )
     # Add-only member pickers: drop users already in the given group.
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
+    # Who belongs to a group is not for who can't read the group: such a group
+    # matches no user.
+    user_groups = df.ModelMultipleChoiceFilter(
+        queryset=UserGroup.objects.all(), method="filter_readable_groups"
+    )
+    idp_groups = df.ModelMultipleChoiceFilter(
+        queryset=IdPGroup.objects.all(), method="filter_readable_groups"
+    )
 
     def filter_queryset(self, queryset):
         # Full-view fields are only serialized to who has the full view (see
@@ -8681,6 +8689,19 @@ class UserFilter(GenericFilterSet):
         ):
             return queryset.exclude(user_groups__id=value)
         return queryset
+
+    def filter_readable_groups(self, queryset, name, value):
+        if not value:
+            return queryset
+        readable = [
+            group
+            for group in value
+            if self.request
+            and RoleAssignment.is_object_readable(
+                self.request.user, type(group), group.id
+            )
+        ]
+        return queryset.filter(**{f"{name}__in": readable}).distinct()
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""

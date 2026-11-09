@@ -27,13 +27,13 @@ First application beyond compliance assessments: `view_user_full`, listed in the
   - filters on these fields, which only match fully viewed users and the requester;
   - ordering on these fields, honoured only when the requester fully views every listed user;
   - the folder members list (`/api/folders/<id>/users/`), which orders on email, names and `is_active` only;
-  - the enterprise object audit trail of a user. The audit log records every field, so without the full view of that user, the trail leaves out these fields and login activity, and drops the updates that only touched them.
+  - the enterprise object audit trail of a user. The audit log records every field, so without the full view of that user, the trail shows only the fields the base view serializes (an allowlist), and drops the updates that touched none of them. Everything else stays with the full view: these fields, login activity, password changes, SCIM ids, group membership, and any field added later.
 - Built-in roles: Administrator and Reader hold `view_user_full`. Baseline reader, Analyst, Approver, Domain manager and User creator keep `view_user` only.
 - A data migration adds `view_user_full` to every custom role that holds `view_user`, except the role set as Global's default role.
 
 ## Consequences
 
-- **Row visibility is unchanged.** `view_user` means what it meant: pickers, owner fields and every check that uses it behave as before, for every model.
+- **Row visibility is unchanged, except for third-party users.** `view_user` means what it meant: owner fields and every check that uses it behave as before, for every model. The users endpoint (list, detail, pickers) shows a third-party user only to themself, to those who can see one of their representatives, and to holders of the full view where the user sits.
 - **Only Global assignments make a difference.** Users live in Global, so a Global reader sees full records and a reader on a domain doesn't.
 - **The Users page is listed for holders of the full view on Global, and for those who may change or create users there.** Other members reach users through pickers and references.
 - **Custom roles keep what they serve today**, through the migration. The exception is a custom role used as Global's default role: it stops serving these details to every member. Where that role is also assigned to a group that needs the full view, an administrator adds `view_user_full` to that group's role.
@@ -48,7 +48,7 @@ First application beyond compliance assessments: `view_user_full`, listed in the
 
 ## Security
 
-**Conclusion: the decision adds no significant risk; it removes an exposure.** Before it, every domain member could read every user's sign-in and administration details. After it, only explicit grants do. The decision adds one permission that only reveals fields, and leaves the IAM kernel and row visibility as they were.
+**Conclusion: the decision adds no significant risk; it removes an exposure.** Before it, every domain member could read every user's sign-in and administration details. After it, only explicit grants do. The decision adds one permission that only reveals fields, leaves the IAM kernel as it was, and narrows row visibility only, for third-party users.
 
 ### Why the details can't reach someone without the full view
 
