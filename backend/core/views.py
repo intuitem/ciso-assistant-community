@@ -9072,14 +9072,16 @@ class UserViewSet(BaseModelViewSet):
         # sort and pickers don't need superusers first, so both skip the query and
         # get the base-view ordering.
         if not self.detail and self.action != "autocomplete":
-            self._full_view_of_every_row = (
-                not queryset.exclude(
-                    folder_id__in=full_user_view_folder_ids(self.request)
-                )
-                .exclude(pk=self.request.user.pk)
-                .exists()
-            )
+            self._full_view_of_every_row = self._has_full_view_of(queryset)
         return super().filter_queryset(queryset)
+
+    def _has_full_view_of(self, queryset) -> bool:
+        """Whether the requester has the full view of every user in `queryset`."""
+        return (
+            not queryset.exclude(folder_id__in=full_user_view_folder_ids(self.request))
+            .exclude(pk=self.request.user.pk)
+            .exists()
+        )
 
     def _has_full_view_of_every_row(self) -> bool:
         if getattr(self, "request", None) is None:
@@ -9158,8 +9160,9 @@ class UserViewSet(BaseModelViewSet):
         """Third-party users are created in Global, where the baseline role lets
         every member view users, but what makes one relevant is the entity it
         represents. So it shows only to those who can view one of its
-        `Representative` rows, or who can change users where it sits, and to
-        itself. Internal users are unaffected.
+        `Representative` rows, or who have the full view of users where it sits
+        (`view_user_full` or `change_user`, see the full-view-permissions ADR), and
+        to itself. Internal users are unaffected.
 
         This scopes the users endpoint only. Their names on objects the requester
         can read still render: `_filter_related_fields` checks User viewability
@@ -9173,11 +9176,7 @@ class UserViewSet(BaseModelViewSet):
             Q(is_third_party=False)
             | Q(pk=user.pk)
             | Q(pk__in=representative_user_ids)
-            | Q(
-                folder_id__in=RoleAssignment.get_allowed_folder_ids(
-                    user, ("change", User)
-                )
-            )
+            | Q(folder_id__in=full_user_view_folder_ids(self.request))
         )
 
     def get_queryset(self):

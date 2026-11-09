@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 from core.serializers import UserReadSerializer, UserWriteSerializer
 from core.startup import ensure_user_creator_group
 from core.models import Actor
-from core.views import UserFilter
+from core.views import UserFilter, UserViewSet
 from iam.models import Folder, IdPGroup, Role, RoleAssignment, User, UserGroup
 
 
@@ -2085,12 +2085,15 @@ class TestUserFullView:
         )
         assert not filterset.qs.exists()
 
-    def test_picker_skips_full_view_lookup(self, env):
-        # Pickers query on every keystroke and don't order on full-view fields.
-        with patch("core.views.full_user_view_folder_ids", side_effect=AssertionError):
+    def test_picker_skips_the_check_on_every_row(self, env):
+        # Pickers query on every keystroke and don't order on full-view fields, so
+        # they skip checking the full view of every row; listings run it.
+        with patch.object(UserViewSet, "_has_full_view_of", side_effect=AssertionError):
             found = self._rows(
                 env.admin_client.get(f"{reverse('users-autocomplete')}?search=aaron")
             )
+            with pytest.raises(AssertionError):
+                env.admin_client.get(reverse(API_ENDPOINT))
         assert env.target.email in {row["email"] for row in found}
 
     def test_full_viewer_order_keeps_full_view_fields(self, env):
@@ -2203,7 +2206,8 @@ def _emails(response) -> set[str]:
 class TestThirdPartyUserVisibility:
     """A third-party user sits in Global, where the baseline role grants
     `view_user` to every member. It must show only to those who can view one of
-    its representatives or change users where it sits, and to itself."""
+    its representatives or have the full view of users where it sits, and to
+    itself."""
 
     def test_member_elsewhere_does_not_see_third_party(self, third_party_env):
         env = third_party_env
@@ -2248,6 +2252,17 @@ class TestThirdPartyUserVisibility:
         )
         listed = _emails(_client_for(manager).get(reverse("users-list")))
         assert env.third_party.email in listed
+
+    def test_full_viewer_sees_every_third_party(self, third_party_env):
+        """`view_user_full` where the users sit is enough: an access review lists
+        every account, those whose representative is gone included."""
+        env = third_party_env
+        viewer = _make_user_manager(
+            "full.viewer@tests.com", ["view_user", "view_user_full"]
+        )
+        orphan = User.objects.create_user("orphan@vendor.test", is_third_party=True)
+        listed = _emails(_client_for(viewer).get(reverse("users-list")))
+        assert {env.third_party.email, orphan.email} <= listed
 
     def test_third_party_with_no_representative_is_hidden_from_members(
         self, third_party_env
