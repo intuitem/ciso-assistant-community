@@ -1226,7 +1226,18 @@ class SolutionWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
             only then do we have the bound Solution).
         """
         subs = [entry["subcontractor"] for entry in value]
-        self._check_m2m_visibility({"subcontracting_chain": subs})
+        current = (
+            set(
+                self.instance.subcontracting_chain.values_list(
+                    "subcontractor_id", flat=True
+                )
+            )
+            if self.instance is not None
+            else set()
+        )
+        self._check_m2m_visibility(
+            {"subcontracting_chain": [s for s in subs if s.id not in current]}
+        )
         sub_ids = {s.id for s in subs}
         if len(subs) != len(sub_ids):
             raise serializers.ValidationError(
