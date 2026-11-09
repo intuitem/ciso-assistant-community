@@ -215,47 +215,27 @@
 	let igFilter = $derived(page.url.searchParams.get('implementation_group') ?? 'all');
 	let view = $state<'requirement' | 'domain'>('requirement');
 	let domainDepth = $state<number>(2);
-	let expandedRow = $state<string | null>(null);
+	let expandedRows = $state<Set<string>>(new Set());
+	function toggleRow(urn: string) {
+		const next = new Set(expandedRows);
+		if (next.has(urn)) next.delete(urn);
+		else next.add(urn);
+		expandedRows = next;
+	}
 	let expandedSections = $state<Set<string>>(new Set());
 	let showCAList = $state<boolean>(false);
 
 	// Domain nodes picked in the filter; an audit matches when one is on its folder path.
 	let selectedFolders = $state<Set<string>>(new Set());
 	// Deadline window, in months from today on the chosen date; null bounds are open.
-	let dateField = $state<'none' | 'eta' | 'due_date'>('none');
+	let dateField = $state<'eta' | 'due_date'>('eta');
 	let dateFromMonths = $state<number | null>(null);
 	let dateToMonths = $state<number | null>(null);
+	let customWindow = $state(false);
+	let domainMenuOpen = $state(false);
+	let domainQuery = $state('');
+	let domainMenuEl = $state<HTMLElement>();
 
-	const PANELS = ['kpis', 'distribution', 'outcomes', 'table'] as const;
-	type Panel = (typeof PANELS)[number];
-	const PANELS_KEY = 'frameworkReport.panels';
-	function loadPanels(): Set<Panel> {
-		try {
-			const saved = JSON.parse(localStorage.getItem(PANELS_KEY) ?? 'null');
-			if (Array.isArray(saved)) return new Set(saved.filter((p) => PANELS.includes(p)));
-		} catch {
-			// Storage unavailable: show everything.
-		}
-		return new Set(PANELS);
-	}
-	let shownPanels = $state<Set<Panel>>(loadPanels());
-	function togglePanel(panel: Panel) {
-		const next = new Set(shownPanels);
-		if (next.has(panel)) next.delete(panel);
-		else next.add(panel);
-		shownPanels = next;
-		try {
-			localStorage.setItem(PANELS_KEY, JSON.stringify([...next]));
-		} catch {
-			// Not persisted.
-		}
-	}
-	const panelLabel: Record<Panel, () => string> = {
-		kpis: () => m.keyIndicators(),
-		distribution: () => m.overallResultDistribution(),
-		outcomes: () => m.computedOutcomes(),
-		table: () => m.detailTable()
-	};
 	type DomainSortKey = 'name' | 'compliance' | 'score' | 'documentation' | 'maturity';
 	let domainSortKey = $state<DomainSortKey>('name');
 	let domainSortDir = $state<'asc' | 'desc'>('asc');
@@ -284,10 +264,14 @@
 
 	function collapseAllSections() {
 		expandedSections = new Set();
+		expandedRows = new Set();
 	}
 
 	function onIGChange(event: Event) {
-		const nextIG = (event.currentTarget as HTMLSelectElement).value;
+		setIG((event.currentTarget as HTMLSelectElement).value);
+	}
+
+	function setIG(nextIG: string) {
 		const url = new URL(page.url.href);
 		if (nextIG && nextIG !== 'all') url.searchParams.set('implementation_group', nextIG);
 		else url.searchParams.delete('implementation_group');
@@ -483,7 +467,7 @@
 		);
 	}
 
-	type FolderNode = { id: string; name: string; depth: number; path: string };
+	type FolderNode = { id: string; name: string; depth: number; path: string; ancestors: string[] };
 	// Every domain on a visible audit's path, in tree order.
 	let folderNodes = $derived.by(() => {
 		const nodes = new Map<string, FolderNode>();
@@ -494,7 +478,8 @@
 						id,
 						name: ca.folder_path[i] ?? '—',
 						depth: i,
-						path: ca.folder_path.slice(0, i + 1).join(' / ')
+						path: ca.folder_path.slice(0, i + 1).join(' / '),
+						ancestors: (ca.folder_path_ids ?? []).slice(0, i)
 					});
 			});
 		}
@@ -516,7 +501,7 @@
 	}
 
 	function inDateWindow(ca: ComplianceAssessmentSummary): boolean {
-		if (dateField === 'none' || (dateFromMonths === null && dateToMonths === null)) return true;
+		if (dateFromMonths === null && dateToMonths === null) return true;
 		const raw = ca[dateField];
 		if (!raw) return false;
 		const date = new Date(`${raw}T00:00:00`);
@@ -525,16 +510,63 @@
 		return true;
 	}
 
-	let filtersActive = $derived(
-		selectedFolders.size > 0 ||
-			(dateField !== 'none' && (dateFromMonths !== null || dateToMonths !== null))
+	let dateWindowActive = $derived(dateFromMonths !== null || dateToMonths !== null);
+	let filtersActive = $derived(selectedFolders.size > 0 || dateWindowActive || igFilter !== 'all');
+
+	const DEADLINE_PRESETS: { key: string; from: number | null; to: number | null }[] = [
+		{ key: 'overdue', from: null, to: 0 },
+		{ key: '3', from: 0, to: 3 },
+		{ key: '6', from: 0, to: 6 },
+		{ key: '12', from: 0, to: 12 }
+	];
+	const presetLabel = (key: string) =>
+		key === 'overdue' ? m.overdue() : m.nextMonths({ count: Number(key) });
+	let activePreset = $derived(
+		customWindow
+			? null
+			: DEADLINE_PRESETS.find((p) => p.from === dateFromMonths && p.to === dateToMonths)?.key
 	);
+	function applyPreset(key: string) {
+		const preset = DEADLINE_PRESETS.find((p) => p.key === key)!;
+		if (activePreset === key) {
+			clearDateWindow();
+			return;
+		}
+		customWindow = false;
+		dateFromMonths = preset.from;
+		dateToMonths = preset.to;
+	}
+	function clearDateWindow() {
+		customWindow = false;
+		dateFromMonths = null;
+		dateToMonths = null;
+	}
+	let dateWindowLabel = $derived.by(() => {
+		if (activePreset) return presetLabel(activePreset);
+		const from = dateFromMonths === null ? '…' : dateFromMonths;
+		const to = dateToMonths === null ? '…' : dateToMonths;
+		return `${from} → ${to} ${m.monthsFromToday()}`;
+	});
+
+	let visibleFolderNodes = $derived(
+		domainQuery.trim()
+			? folderNodes.filter((n) => n.path.toLowerCase().includes(domainQuery.trim().toLowerCase()))
+			: folderNodes
+	);
+	let folderName = $derived(new Map(folderNodes.map((n) => [n.id, n.path])));
+	// A domain under a ticked one is already in the filter.
+	const coveredByParent = (node: FolderNode) =>
+		node.ancestors.some((id) => selectedFolders.has(id));
+
+	function onWindowClick(event: MouseEvent) {
+		if (domainMenuOpen && domainMenuEl && !domainMenuEl.contains(event.target as Node))
+			domainMenuOpen = false;
+	}
 
 	function resetFilters() {
 		selectedFolders = new Set();
-		dateField = 'none';
-		dateFromMonths = null;
-		dateToMonths = null;
+		clearDateWindow();
+		if (igFilter !== 'all') setIG('all');
 	}
 
 	let allowedAuditIds = $derived(
@@ -760,26 +792,53 @@
 	}
 
 	let outcomeDefs = $derived<OutcomeDef[]>(framework.outcomes_definition ?? []);
+	const outcomeOf = (ca: ComplianceAssessmentSummary, def: OutcomeDef) =>
+		ca.outcomes?.find((o) => o.ref_id === def.ref_id);
+
+	function rollOutcome(audits: ComplianceAssessmentSummary[], def: OutcomeDef) {
+		const entries = audits.flatMap((ca) => outcomeOf(ca, def) ?? []);
+		const values = entries.map((o) => o.value).filter((v): v is number => typeof v === 'number');
+		return {
+			evaluated: entries.length,
+			met: entries.filter((o) => o.met).length,
+			mean: values.length ? values.reduce((a, v) => a + v, 0) / values.length : null
+		};
+	}
+
 	let outcomeRollup = $derived(
 		outcomeDefs
-			.map((def) => {
-				const entries = filteredAudits.flatMap((ca) =>
-					(ca.outcomes ?? []).filter((o) => o.ref_id === def.ref_id)
-				);
-				const values = entries
-					.map((o) => o.value)
-					.filter((v): v is number => typeof v === 'number');
-				return {
-					def,
-					label: outcomeLabel(def),
-					evaluated: entries.length,
-					met: entries.filter((o) => o.met).length,
-					numeric: def.kind === 'number',
-					mean: values.length ? values.reduce((a, v) => a + v, 0) / values.length : null
-				};
-			})
+			.map((def) => ({
+				def,
+				label: outcomeLabel(def),
+				numeric: def.kind === 'number',
+				...rollOutcome(filteredAudits, def)
+			}))
 			.filter((o) => o.evaluated > 0)
 	);
+
+	let outcomeView = $state<'summary' | 'audit' | 'domain'>('summary');
+	let outcomeAudits = $derived(filteredAudits.filter((ca) => ca.outcomes?.length));
+	let outcomeDomains = $derived.by(() => {
+		const groups = new Map<string, ComplianceAssessmentSummary[]>();
+		for (const ca of outcomeAudits) {
+			const key = ca.folder_path.slice(0, domainDepth).join(' / ') || '(no folder)';
+			groups.set(key, [...(groups.get(key) ?? []), ca]);
+		}
+		return [...groups.entries()]
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([key, audits]) => ({
+				key,
+				audits,
+				cells: outcomeRollup.map((o) => rollOutcome(audits, o.def))
+			}));
+	});
+
+	function outcomeExportValue(ca: ComplianceAssessmentSummary, def: OutcomeDef): Cell {
+		const o = outcomeOf(ca, def);
+		if (!o) return null;
+		if (def.kind === 'number') return typeof o.value === 'number' ? roundScore(o.value) : null;
+		return o.met ? m.yes() : m.no();
+	}
 
 	function metOutcomes(ca: ComplianceAssessmentSummary): string[] {
 		const met = new Set((ca.outcomes ?? []).filter((o) => o.met).map((o) => o.ref_id));
@@ -859,7 +918,7 @@
 				m.status(),
 				...(showDates ? [m.eta(), m.dueDate()] : []),
 				...scoreColumns(),
-				...(outcomeDefs.length ? [m.computedOutcomes()] : [])
+				...outcomeRollup.map((o) => o.label)
 			];
 			const audits = filteredAudits.map((ca) => [
 				ca.name,
@@ -867,7 +926,18 @@
 				safeTranslate(ca.status ?? 'unknown'),
 				...(showDates ? [ca.eta, ca.due_date] : []),
 				...scoreValues(auditScoresById.get(ca.id)?.total),
-				...(outcomeDefs.length ? [metOutcomes(ca).join('\n')] : [])
+				...outcomeRollup.map((o) => outcomeExportValue(ca, o.def))
+			]);
+			const verdictRows = outcomeDomains.map((d) => [
+				d.key,
+				d.audits.length,
+				...d.cells.map((c, i) =>
+					outcomeRollup[i].numeric
+						? c.mean === null
+							? null
+							: roundScore(c.mean)
+						: `${c.met} / ${c.evaluated}`
+				)
 			]);
 			const requirements = hierarchical.flatMap((section) => [
 				[
@@ -933,6 +1003,19 @@
 					],
 					rows: domains
 				},
+				...(outcomeRollup.length
+					? [
+							{
+								name: m.computedOutcomes(),
+								columns: [
+									`${m.domain()} (${m.depthLabel()} ${domainDepth})`,
+									m.complianceAssessments(),
+									...outcomeRollup.map((o) => o.label)
+								],
+								rows: verdictRows
+							}
+						]
+					: []),
 				{
 					name: m.perAssessmentBreakdown(),
 					columns: [
@@ -988,6 +1071,8 @@
 		<td class={cls}>{formatScore(scores.maturity_score)}</td>
 	{/if}
 {/snippet}
+
+<svelte:window onclick={onWindowClick} />
 
 <div class="space-y-4 p-2">
 	<!-- Header card -->
@@ -1143,6 +1228,247 @@
 			</div>
 		</div>
 
+		<!-- Filters -->
+		<section class="mt-4 rounded-lg border border-surface-200-800 bg-surface-100-900/40 p-3">
+			<div class="flex items-center gap-2 mb-3">
+				<i class="fa-solid fa-filter text-surface-600-400" aria-hidden="true"></i>
+				<h2 class="text-sm font-semibold">{m.filters()}</h2>
+				{#if filtersActive}
+					<span class="text-xs text-surface-600-400">
+						{m.auditsCount({ count: filteredAudits.length })}
+					</span>
+					<button
+						type="button"
+						class="ml-auto text-xs text-primary-600-400 hover:underline"
+						onclick={resetFilters}
+					>
+						<i class="fa-solid fa-rotate-left mr-1" aria-hidden="true"></i>{m.resetFilters()}
+					</button>
+				{/if}
+			</div>
+
+			<div
+				class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.6fr)] gap-3"
+			>
+				<!-- Domains -->
+				<div class="relative" bind:this={domainMenuEl}>
+					<span class="text-xs font-medium text-surface-600-400 block mb-1" id="domain-filter-label"
+						><i class="fa-solid fa-sitemap mr-1" aria-hidden="true"></i>{m.domains()}</span
+					>
+					<button
+						type="button"
+						class="w-full flex items-center justify-between gap-2 rounded-lg border border-surface-300-700 bg-surface-50-950 px-3 py-1.5 text-sm text-left hover:border-primary-500"
+						aria-haspopup="true"
+						aria-expanded={domainMenuOpen}
+						aria-labelledby="domain-filter-label"
+						onclick={() => (domainMenuOpen = !domainMenuOpen)}
+					>
+						<span class="truncate">
+							{selectedFolders.size === 0
+								? m.allDomains()
+								: selectedFolders.size === 1
+									? folderName.get([...selectedFolders][0])
+									: m.domainsSelected({ count: selectedFolders.size })}
+						</span>
+						<i class="fa-solid fa-chevron-down text-xs text-surface-500" aria-hidden="true"></i>
+					</button>
+					{#if domainMenuOpen}
+						<div
+							class="absolute z-30 mt-1 w-full min-w-72 rounded-lg border border-surface-300-700 bg-surface-50-950 shadow-xl"
+							role="dialog"
+							aria-labelledby="domain-filter-label"
+							tabindex="-1"
+							onkeydown={(e) => e.key === 'Escape' && (domainMenuOpen = false)}
+						>
+							<div class="p-2 border-b border-surface-200-800">
+								<input
+									type="search"
+									class="input w-full py-1 text-sm"
+									placeholder={m.searchDomains()}
+									aria-label={m.searchDomains()}
+									bind:value={domainQuery}
+								/>
+							</div>
+							<ul class="max-h-72 overflow-auto p-1">
+								{#each visibleFolderNodes as node (node.id)}
+									{@const covered = coveredByParent(node)}
+									<li>
+										<label
+											class="flex items-center gap-2 rounded px-2 py-1 text-sm cursor-pointer hover:bg-surface-100-900 {covered
+												? 'text-surface-500'
+												: ''}"
+											style="padding-left:{0.5 + node.depth * 1.1}rem"
+										>
+											<input
+												type="checkbox"
+												class="checkbox"
+												checked={selectedFolders.has(node.id) || covered}
+												disabled={covered}
+												onchange={() => toggleFolder(node.id)}
+											/>
+											<span class="truncate" title={node.path}>{node.name}</span>
+										</label>
+									</li>
+								{:else}
+									<li class="px-2 py-1 text-sm text-surface-500 italic">{m.noResultFound()}</li>
+								{/each}
+							</ul>
+							{#if selectedFolders.size > 0}
+								<div class="p-2 border-t border-surface-200-800 text-right">
+									<button
+										type="button"
+										class="text-xs text-primary-600-400 hover:underline"
+										onclick={() => (selectedFolders = new Set())}>{m.allDomains()}</button
+									>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+
+				<!-- Implementation group -->
+				<div>
+					<label class="text-xs font-medium text-surface-600-400 block mb-1" for="ig-filter"
+						><i class="fa-solid fa-layer-group mr-1" aria-hidden="true"
+						></i>{m.implementationGroup()}</label
+					>
+					<select
+						id="ig-filter"
+						value={igFilter}
+						onchange={onIGChange}
+						disabled={igDefs.length === 0}
+						class="w-full rounded-lg border-surface-300-700 text-sm bg-surface-50-950 py-1.5"
+					>
+						<option value="all">{m.allGroupsHonorCASelection()}</option>
+						{#each igDefs as ig}
+							{@const key = igKey(ig)}
+							{#if key}
+								<option value={key}>{ig.name} ({key})</option>
+							{/if}
+						{/each}
+					</select>
+				</div>
+
+				<!-- Deadline window -->
+				<div>
+					<div class="flex items-center gap-2 mb-1">
+						<span class="text-xs font-medium text-surface-600-400" id="deadline-label"
+							><i class="fa-regular fa-calendar mr-1" aria-hidden="true"></i>{m.deadline()}</span
+						>
+						<div
+							class="inline-flex rounded-md border border-surface-300-700 overflow-hidden text-[11px]"
+							role="group"
+							aria-label={m.deadline()}
+						>
+							{#each [['eta', m.eta()], ['due_date', m.dueDate()]] as [k, label]}
+								<button
+									type="button"
+									class="px-2 py-0.5 {dateField === k
+										? 'bg-primary-500 text-white'
+										: 'bg-surface-50-950 hover:bg-surface-100-900'}"
+									aria-pressed={dateField === k}
+									onclick={() => (dateField = k as typeof dateField)}>{label}</button
+								>
+							{/each}
+						</div>
+					</div>
+					<div class="flex flex-wrap gap-1.5" role="group" aria-labelledby="deadline-label">
+						{#each DEADLINE_PRESETS as p (p.key)}
+							<button
+								type="button"
+								class="chip text-xs {activePreset === p.key
+									? 'preset-filled-primary-500'
+									: 'preset-outlined-surface-500'}"
+								aria-pressed={activePreset === p.key}
+								onclick={() => applyPreset(p.key)}
+							>
+								{#if p.key === 'overdue'}<i
+										class="fa-solid fa-triangle-exclamation"
+										aria-hidden="true"
+									></i>{/if}
+								{presetLabel(p.key)}
+							</button>
+						{/each}
+						<button
+							type="button"
+							class="chip text-xs {customWindow
+								? 'preset-filled-primary-500'
+								: 'preset-outlined-surface-500'}"
+							aria-pressed={customWindow}
+							onclick={() => (customWindow ? clearDateWindow() : (customWindow = true))}
+						>
+							<i class="fa-solid fa-sliders" aria-hidden="true"></i>{m.custom()}
+						</button>
+					</div>
+					{#if customWindow}
+						<div class="mt-2 flex items-center gap-1.5 text-sm">
+							<label class="sr-only" for="date-from">{m.fromMonths()}</label>
+							<input
+								id="date-from"
+								type="number"
+								class="input w-20 py-1"
+								placeholder={m.fromMonths()}
+								value={dateFromMonths ?? ''}
+								oninput={(e) => {
+									const v = (e.currentTarget as HTMLInputElement).value;
+									dateFromMonths = v === '' ? null : Number(v);
+								}}
+							/>
+							<span aria-hidden="true">→</span>
+							<label class="sr-only" for="date-to">{m.toMonths()}</label>
+							<input
+								id="date-to"
+								type="number"
+								class="input w-20 py-1"
+								placeholder={m.toMonths()}
+								value={dateToMonths ?? ''}
+								oninput={(e) => {
+									const v = (e.currentTarget as HTMLInputElement).value;
+									dateToMonths = v === '' ? null : Number(v);
+								}}
+							/>
+							<span class="text-xs text-surface-600-400">{m.monthsFromToday()}</span>
+						</div>
+					{/if}
+				</div>
+			</div>
+
+			{#if filtersActive}
+				<div class="mt-3 pt-3 border-t border-surface-200-800 flex flex-wrap gap-1.5">
+					{#each [...selectedFolders] as id (id)}
+						<span class="chip preset-tonal-primary text-xs">
+							<i class="fa-solid fa-sitemap" aria-hidden="true"></i>{folderName.get(id)}
+							<button
+								type="button"
+								aria-label="{m.remove()} {folderName.get(id)}"
+								onclick={() => toggleFolder(id)}><i class="fa-solid fa-xmark"></i></button
+							>
+						</span>
+					{/each}
+					{#if igFilter !== 'all'}
+						<span class="chip preset-tonal-primary text-xs">
+							<i class="fa-solid fa-layer-group" aria-hidden="true"></i>{igDefs.find(
+								(ig) => igKey(ig) === igFilter
+							)?.name ?? igFilter}
+							<button type="button" aria-label={m.remove()} onclick={() => setIG('all')}
+								><i class="fa-solid fa-xmark"></i></button
+							>
+						</span>
+					{/if}
+					{#if dateWindowActive}
+						<span class="chip preset-tonal-primary text-xs">
+							<i class="fa-regular fa-calendar" aria-hidden="true"></i>{dateField === 'eta'
+								? m.eta()
+								: m.dueDate()} : {dateWindowLabel}
+							<button type="button" aria-label={m.remove()} onclick={clearDateWindow}
+								><i class="fa-solid fa-xmark"></i></button
+							>
+						</span>
+					{/if}
+				</div>
+			{/if}
+		</section>
+
 		<!-- KPI row -->
 		{#snippet scoreTile(label: string, value: number | null)}
 			<div class="rounded border p-3">
@@ -1151,45 +1477,43 @@
 				<div class="text-xs text-surface-600-400">{m.frameworkReportScoreCaption()}</div>
 			</div>
 		{/snippet}
-		{#if shownPanels.has('kpis')}
-			<div class="grid grid-cols-2 gap-3 mt-4 {kpiGridClass}">
-				{#if showCompliance}
-					<div class="rounded border p-3">
-						<div class="text-xs text-surface-600-400">{m.compliancePercentage()}</div>
-						<div class="text-2xl font-semibold">
-							{overallCompliance === null ? '—' : `${overallCompliance.toFixed(1)}%`}
-						</div>
-						<div class="text-xs text-surface-600-400">{m.complianceFormulaShort()}</div>
+		<div class="grid grid-cols-2 gap-3 mt-4 {kpiGridClass}">
+			{#if showCompliance}
+				<div class="rounded border p-3">
+					<div class="text-xs text-surface-600-400">{m.compliancePercentage()}</div>
+					<div class="text-2xl font-semibold">
+						{overallCompliance === null ? '—' : `${overallCompliance.toFixed(1)}%`}
 					</div>
-				{/if}
-				<ScorePair>
-					{#snippet implementation()}
-						{@render scoreTile(implementationLabel, overallScores.implementation_score)}
-					{/snippet}
-					{#snippet documentation()}
-						{#if showDocumentation}
-							{@render scoreTile(m.documentationScore(), overallScores.documentation_score)}
-						{/if}
-					{/snippet}
-				</ScorePair>
-				{#if showDocumentation}
-					{@render scoreTile(m.maturity(), overallScores.maturity_score)}
-				{/if}
-				<div class="rounded border p-3">
-					<div class="text-xs text-surface-600-400">{m.complianceAssessments()}</div>
-					<div class="text-2xl font-semibold">{totalCAs}</div>
-					<div class="text-xs text-surface-600-400">{m.visibleToCurrentUser()}</div>
+					<div class="text-xs text-surface-600-400">{m.complianceFormulaShort()}</div>
 				</div>
-				<div class="rounded border p-3">
-					<div class="text-xs text-surface-600-400">{m.requirementAssessments()}</div>
-					<div class="text-2xl font-semibold">{totalAssessments}</div>
-					<div class="text-xs text-surface-600-400">{m.inScopeAfterIGFilter()}</div>
-				</div>
+			{/if}
+			<ScorePair>
+				{#snippet implementation()}
+					{@render scoreTile(implementationLabel, overallScores.implementation_score)}
+				{/snippet}
+				{#snippet documentation()}
+					{#if showDocumentation}
+						{@render scoreTile(m.documentationScore(), overallScores.documentation_score)}
+					{/if}
+				{/snippet}
+			</ScorePair>
+			{#if showDocumentation}
+				{@render scoreTile(m.maturity(), overallScores.maturity_score)}
+			{/if}
+			<div class="rounded border p-3">
+				<div class="text-xs text-surface-600-400">{m.complianceAssessments()}</div>
+				<div class="text-2xl font-semibold">{totalCAs}</div>
+				<div class="text-xs text-surface-600-400">{m.visibleToCurrentUser()}</div>
 			</div>
-		{/if}
+			<div class="rounded border p-3">
+				<div class="text-xs text-surface-600-400">{m.requirementAssessments()}</div>
+				<div class="text-2xl font-semibold">{totalAssessments}</div>
+				<div class="text-xs text-surface-600-400">{m.inScopeAfterIGFilter()}</div>
+			</div>
+		</div>
 
 		<!-- Overall distribution -->
-		{#if totalAssessments > 0 && showCompliance && shownPanels.has('distribution')}
+		{#if totalAssessments > 0 && showCompliance}
 			<div class="mt-4">
 				<div class="text-xs text-surface-600-400 mb-1">{m.overallResultDistribution()}</div>
 				<div class="flex h-6 w-full rounded overflow-hidden border">
@@ -1228,649 +1552,644 @@
 		{/if}
 	</div>
 
-	{#if shownPanels.has('outcomes') && outcomeRollup.length > 0}
+	{#snippet verdictCell(met: number, evaluated: number)}
+		<div class="flex items-center gap-2 justify-end">
+			<div
+				class="w-16 h-2 rounded overflow-hidden border bg-surface-100-900"
+				role="img"
+				aria-label={m.outcomeMetCount({ met, total: evaluated })}
+			>
+				<div class="h-full bg-success-500" style="width:{(met / evaluated) * 100}%"></div>
+			</div>
+			<span class="text-xs font-mono w-12 text-right">{met} / {evaluated}</span>
+		</div>
+	{/snippet}
+
+	{#if outcomeRollup.length > 0}
 		<div class="card p-4 bg-surface-50-950">
-			<h2 class="text-sm font-semibold mb-2">{m.computedOutcomes()}</h2>
-			<ul class="space-y-2">
-				{#each outcomeRollup as o (o.def.ref_id)}
-					<li
-						class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_16rem] gap-1 md:gap-4 items-center"
-					>
-						<span class="text-sm">{o.label}</span>
-						{#if o.numeric}
-							<span class="text-sm font-mono text-right">
-								{o.mean === null ? '—' : roundScore(o.mean)}
-								<span class="text-xs text-surface-600-400"
-									>({m.averageOverAudits({ count: o.evaluated })})</span
-								>
-							</span>
-						{:else}
-							<div class="flex items-center gap-2">
-								<div
-									class="flex-1 h-3 rounded overflow-hidden border bg-surface-100-900"
-									role="img"
-									aria-label={m.outcomeMetCount({ met: o.met, total: o.evaluated })}
-								>
+			<div class="flex flex-wrap items-center gap-3 mb-3">
+				<h2 class="text-sm font-semibold">{m.computedOutcomes()}</h2>
+				<div
+					class="inline-flex rounded-md border border-surface-300-700 overflow-hidden text-xs"
+					role="group"
+					aria-label={m.computedOutcomes()}
+				>
+					{#each [['summary', m.summary()], ['audit', m.byAudit()], ['domain', m.byDomain()]] as [k, label]}
+						<button
+							type="button"
+							class="px-2.5 py-1 {outcomeView === k
+								? 'bg-primary-500 text-white'
+								: 'bg-surface-50-950 hover:bg-surface-100-900'}"
+							aria-pressed={outcomeView === k}
+							onclick={() => (outcomeView = k as typeof outcomeView)}>{label}</button
+						>
+					{/each}
+				</div>
+				{#if outcomeView === 'domain'}
+					<label class="text-xs text-surface-600-400 inline-flex items-center gap-1">
+						{m.groupByFolderDepth()}
+						<select
+							bind:value={domainDepth}
+							class="rounded-md border-surface-300-700 text-xs bg-surface-50-950 py-0.5"
+						>
+							{#each Array(maxFolderDepth) as _, i}
+								<option value={i + 1}>{i + 1}</option>
+							{/each}
+						</select>
+					</label>
+				{/if}
+			</div>
+
+			{#if outcomeView === 'summary'}
+				<ul class="space-y-2">
+					{#each outcomeRollup as o (o.def.ref_id)}
+						<li
+							class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_16rem] gap-1 md:gap-4 items-center"
+						>
+							<span class="text-sm">{o.label}</span>
+							{#if o.numeric}
+								<span class="text-sm font-mono text-right">
+									{o.mean === null ? '—' : roundScore(o.mean)}
+									<span class="text-xs text-surface-600-400"
+										>({m.averageOverAudits({ count: o.evaluated })})</span
+									>
+								</span>
+							{:else}
+								<div class="flex items-center gap-2">
 									<div
-										class="h-full bg-success-500"
-										style="width:{(o.met / o.evaluated) * 100}%"
-									></div>
+										class="flex-1 h-3 rounded overflow-hidden border bg-surface-100-900"
+										role="img"
+										aria-label={m.outcomeMetCount({ met: o.met, total: o.evaluated })}
+									>
+										<div
+											class="h-full bg-success-500"
+											style="width:{(o.met / o.evaluated) * 100}%"
+										></div>
+									</div>
+									<span class="text-xs font-mono w-16 text-right">{o.met} / {o.evaluated}</span>
 								</div>
-								<span class="text-xs font-mono w-16 text-right">{o.met} / {o.evaluated}</span>
-							</div>
-						{/if}
-					</li>
-				{/each}
-			</ul>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<div class="overflow-x-auto">
+					<table class="w-full text-sm">
+						<thead class="text-xs text-surface-600-400">
+							<tr>
+								<th class="px-2 py-1 text-left font-medium">
+									{outcomeView === 'audit' ? m.assessment() : m.domain()}
+								</th>
+								{#if outcomeView === 'domain'}
+									<th class="px-2 py-1 text-center font-medium">{m.complianceAssessments()}</th>
+								{/if}
+								{#each outcomeRollup as o (o.def.ref_id)}
+									<th class="px-2 py-1 text-right font-medium max-w-48" title={o.label}>
+										<span class="line-clamp-2">{o.label}</span>
+									</th>
+								{/each}
+							</tr>
+						</thead>
+						<tbody>
+							{#if outcomeView === 'audit'}
+								{#each outcomeAudits as ca (ca.id)}
+									<tr class="border-t">
+										<td class="px-2 py-1.5">
+											<a class="anchor" href="/compliance-assessments/{ca.id}">{ca.name}</a>
+											<div class="text-xs text-surface-600-400">{ca.folder_path_str}</div>
+										</td>
+										{#each outcomeRollup as o (o.def.ref_id)}
+											{@const r = outcomeOf(ca, o.def)}
+											<td class="px-2 py-1.5 text-right">
+												{#if !r}
+													<span class="text-surface-500">—</span>
+												{:else if o.numeric}
+													<span class="font-mono"
+														>{typeof r.value === 'number' ? roundScore(r.value) : '—'}</span
+													>
+												{:else if r.met}
+													<span class="badge preset-tonal-success text-xs"
+														><i class="fa-solid fa-check mr-1" aria-hidden="true"
+														></i>{m.yes()}</span
+													>
+												{:else}
+													<span class="badge preset-tonal-surface text-xs"
+														><i class="fa-solid fa-xmark mr-1" aria-hidden="true"></i>{m.no()}</span
+													>
+												{/if}
+											</td>
+										{/each}
+									</tr>
+								{/each}
+							{:else}
+								{#each outcomeDomains as d (d.key)}
+									<tr class="border-t">
+										<td class="px-2 py-1.5 font-mono text-xs">{d.key}</td>
+										<td class="px-2 py-1.5 text-center">{d.audits.length}</td>
+										{#each d.cells as c, i}
+											<td class="px-2 py-1.5">
+												{#if c.evaluated === 0}
+													<span class="block text-right text-surface-500">—</span>
+												{:else if outcomeRollup[i].numeric}
+													<span class="block text-right font-mono"
+														>{c.mean === null ? '—' : roundScore(c.mean)}</span
+													>
+												{:else}
+													{@render verdictCell(c.met, c.evaluated)}
+												{/if}
+											</td>
+										{/each}
+									</tr>
+								{/each}
+							{/if}
+						</tbody>
+					</table>
+				</div>
+			{/if}
 		</div>
 	{/if}
 
-	<!-- Domain and deadline filters, shown panels -->
+	<!-- View bar -->
 	<div class="card p-3 bg-surface-50-950 flex flex-wrap items-end gap-4">
-		<details class="relative">
-			<summary
-				class="cursor-pointer list-none rounded-lg border border-surface-300-700 px-3 py-1.5 text-sm"
-			>
-				<i class="fa-solid fa-sitemap mr-1"></i>{m.domains()}
-				{#if selectedFolders.size > 0}
-					<span class="badge preset-filled-primary-500 ml-1">{selectedFolders.size}</span>
-				{/if}
-			</summary>
-			<fieldset
-				class="absolute z-20 mt-1 w-96 max-w-[90vw] max-h-80 overflow-auto rounded border bg-surface-50-950 p-2 shadow-lg"
-			>
-				<legend class="sr-only">{m.domains()}</legend>
-				{#each folderNodes as node (node.id)}
-					<label
-						class="flex items-center gap-2 py-0.5 text-sm cursor-pointer"
-						style="padding-left:{node.depth}rem"
-					>
-						<input
-							type="checkbox"
-							class="checkbox"
-							checked={selectedFolders.has(node.id)}
-							onchange={() => toggleFolder(node.id)}
-						/>
-						<span class="truncate" title={node.path}>{node.name}</span>
-					</label>
-				{/each}
-			</fieldset>
-		</details>
-
 		<div>
-			<label class="text-xs text-surface-600-400 block" for="date-field">{m.deadline()}</label>
-			<select
-				id="date-field"
-				bind:value={dateField}
-				class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
+			<span class="text-xs text-surface-600-400 block" id="view-label">{m.view()}</span>
+			<div
+				class="inline-flex rounded border overflow-hidden"
+				role="group"
+				aria-labelledby="view-label"
 			>
-				<option value="none">{m.noDeadlineFilter()}</option>
-				<option value="eta">{m.eta()}</option>
-				<option value="due_date">{m.dueDate()}</option>
-			</select>
+				{#each [['requirement', m.requirementsTree()], ['domain', m.perDomainView()]] as [k, label]}
+					<button
+						type="button"
+						class="px-3 py-1 text-sm {view === k
+							? 'bg-primary-500 text-white'
+							: 'bg-surface-50-950 hover:bg-surface-50-950'}"
+						aria-pressed={view === k}
+						onclick={() => (view = k as typeof view)}
+					>
+						{label}
+					</button>
+				{/each}
+			</div>
 		</div>
-		{#if dateField !== 'none'}
+
+		{#if inheritanceAvailable}
 			<div>
-				<span class="text-xs text-surface-600-400 block" id="date-window-label"
-					>{m.deadlineWindowMonths()}</span
+				<label class="text-xs text-surface-600-400 block" for="apply-inheritance"
+					>{m.combinedView()}</label
 				>
-				<div
-					class="inline-flex items-center gap-1 text-sm"
-					role="group"
-					aria-labelledby="date-window-label"
-				>
-					<label class="sr-only" for="date-from">{m.fromMonths()}</label>
+				<label class="inline-flex items-center gap-2 text-sm cursor-pointer h-[34px]">
 					<input
-						id="date-from"
-						type="number"
-						class="input w-20 py-1"
-						placeholder={m.fromMonths()}
-						value={dateFromMonths ?? ''}
-						oninput={(e) => {
-							const v = (e.currentTarget as HTMLInputElement).value;
-							dateFromMonths = v === '' ? null : Number(v);
-						}}
+						id="apply-inheritance"
+						type="checkbox"
+						class="checkbox"
+						bind:checked={applyInheritance}
 					/>
-					<span aria-hidden="true">→</span>
-					<label class="sr-only" for="date-to">{m.toMonths()}</label>
-					<input
-						id="date-to"
-						type="number"
-						class="input w-20 py-1"
-						placeholder={m.toMonths()}
-						value={dateToMonths ?? ''}
-						oninput={(e) => {
-							const v = (e.currentTarget as HTMLInputElement).value;
-							dateToMonths = v === '' ? null : Number(v);
-						}}
-					/>
-					<span class="text-xs text-surface-600-400">{m.monthsFromToday()}</span>
+					{m.applyDomainInheritance()}
+				</label>
+			</div>
+		{/if}
+
+		{#if view === 'requirement' && !isFlat}
+			<div>
+				<div class="text-xs text-surface-600-400 block">{m.sections()}</div>
+				<div class="inline-flex gap-2">
+					<button
+						type="button"
+						class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
+						onclick={() => expandAllSections(hierarchical.map((s) => s.urn))}
+					>
+						{m.expandAll()}
+					</button>
+					<button
+						type="button"
+						class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
+						onclick={collapseAllSections}
+					>
+						{m.collapseAll()}
+					</button>
 				</div>
 			</div>
 		{/if}
 
-		{#if filtersActive}
-			<button type="button" class="btn preset-outlined-surface-500 text-xs" onclick={resetFilters}>
-				<i class="fa-solid fa-xmark mr-1"></i>{m.resetFilters()}
-			</button>
-		{/if}
-
-		<fieldset class="ml-auto">
-			<legend class="text-xs text-surface-600-400">{m.display()}</legend>
-			<div class="flex flex-wrap gap-3">
-				{#each PANELS as panel}
-					<label class="inline-flex items-center gap-1 text-sm cursor-pointer">
-						<input
-							type="checkbox"
-							class="checkbox"
-							checked={shownPanels.has(panel)}
-							onchange={() => togglePanel(panel)}
-						/>
-						{panelLabel[panel]()}
-					</label>
-				{/each}
-			</div>
-		</fieldset>
-	</div>
-
-	{#if shownPanels.has('table')}
-		<!-- Filter + view bar -->
-		<div class="card p-3 bg-surface-50-950 flex flex-wrap items-end gap-4">
+		{#if view === 'domain'}
 			<div>
-				<label class="text-xs text-surface-600-400 block" for="ig-filter"
-					>{m.implementationGroup()}</label
+				<label class="text-xs text-surface-600-400 block" for="depth"
+					>{m.groupByFolderDepth()}</label
 				>
 				<select
-					id="ig-filter"
-					value={igFilter}
-					onchange={onIGChange}
+					id="depth"
+					bind:value={domainDepth}
 					class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 				>
-					<option value="all">{m.allGroupsHonorCASelection()}</option>
-					{#each igDefs as ig}
-						{@const key = igKey(ig)}
-						{#if key}
-							<option value={key}>{ig.name} ({key})</option>
-						{/if}
+					{#each Array(maxFolderDepth) as _, i}
+						<option value={i + 1}
+							>{i + 1}
+							{i === 0
+								? '— ' + m.rootDomain()
+								: i === maxFolderDepth - 1
+									? '— ' + m.leafFolder()
+									: ''}</option
+						>
 					{/each}
 				</select>
 			</div>
 
 			<div>
-				<span class="text-xs text-surface-600-400 block" id="view-label">{m.view()}</span>
-				<div
-					class="inline-flex rounded border overflow-hidden"
-					role="group"
-					aria-labelledby="view-label"
-				>
-					{#each [['requirement', m.requirementsTree()], ['domain', m.perDomainView()]] as [k, label]}
-						<button
-							type="button"
-							class="px-3 py-1 text-sm {view === k
-								? 'bg-primary-500 text-white'
-								: 'bg-surface-50-950 hover:bg-surface-50-950'}"
-							aria-pressed={view === k}
-							onclick={() => (view = k as typeof view)}
-						>
-							{label}
-						</button>
-					{/each}
-				</div>
-			</div>
-
-			{#if inheritanceAvailable}
-				<div>
-					<label class="text-xs text-surface-600-400 block" for="apply-inheritance"
-						>{m.combinedView()}</label
-					>
-					<label class="inline-flex items-center gap-2 text-sm cursor-pointer h-[34px]">
-						<input
-							id="apply-inheritance"
-							type="checkbox"
-							class="checkbox"
-							bind:checked={applyInheritance}
-						/>
-						{m.applyDomainInheritance()}
-					</label>
-				</div>
-			{/if}
-
-			{#if view === 'requirement' && !isFlat}
-				<div>
-					<div class="text-xs text-surface-600-400 block">{m.sections()}</div>
-					<div class="inline-flex gap-2">
-						<button
-							type="button"
-							class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
-							onclick={() => expandAllSections(hierarchical.map((s) => s.urn))}
-						>
-							{m.expandAll()}
-						</button>
-						<button
-							type="button"
-							class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
-							onclick={collapseAllSections}
-						>
-							{m.collapseAll()}
-						</button>
-					</div>
-				</div>
-			{/if}
-
-			{#if view === 'domain'}
-				<div>
-					<label class="text-xs text-surface-600-400 block" for="depth"
-						>{m.groupByFolderDepth()}</label
-					>
+				<label class="text-xs text-surface-600-400 block" for="domain-sort">{m.sortBy()}</label>
+				<div class="inline-flex items-center gap-1">
 					<select
-						id="depth"
-						bind:value={domainDepth}
+						id="domain-sort"
+						value={domainSortKey}
+						onchange={(e) =>
+							setDomainSortKey(
+								(e.currentTarget as HTMLSelectElement).value as typeof domainSortKey
+							)}
 						class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 					>
-						{#each Array(maxFolderDepth) as _, i}
-							<option value={i + 1}
-								>{i + 1}
-								{i === 0
-									? '— ' + m.rootDomain()
-									: i === maxFolderDepth - 1
-										? '— ' + m.leafFolder()
-										: ''}</option
-							>
-						{/each}
+						<option value="name">{m.domainAlphabetical()}</option>
+						{#if showCompliance}
+							<option value="compliance">{m.compliancePercentage()}</option>
+						{/if}
+						<ScorePair>
+							{#snippet implementation()}
+								<option value="score">{implementationLabel}</option>
+							{/snippet}
+							{#snippet documentation()}
+								{#if showDocumentation}
+									<option value="documentation">{m.documentationScore()}</option>
+								{/if}
+							{/snippet}
+						</ScorePair>
+						{#if showDocumentation}
+							<option value="maturity">{m.maturity()}</option>
+						{/if}
 					</select>
+					<button
+						type="button"
+						class="border rounded px-2 py-1 text-xs hover:bg-surface-50-950"
+						onclick={toggleDomainSortDir}
+						title={domainSortDir === 'asc' ? m.sortAscending() : m.sortDescending()}
+						aria-label={m.toggleSortDirection()}
+					>
+						{domainSortDir === 'asc' ? '▲' : '▼'}
+					</button>
 				</div>
-
-				<div>
-					<label class="text-xs text-surface-600-400 block" for="domain-sort">{m.sortBy()}</label>
-					<div class="inline-flex items-center gap-1">
-						<select
-							id="domain-sort"
-							value={domainSortKey}
-							onchange={(e) =>
-								setDomainSortKey(
-									(e.currentTarget as HTMLSelectElement).value as typeof domainSortKey
-								)}
-							class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
-						>
-							<option value="name">{m.domainAlphabetical()}</option>
-							{#if showCompliance}
-								<option value="compliance">{m.compliancePercentage()}</option>
-							{/if}
-							<ScorePair>
-								{#snippet implementation()}
-									<option value="score">{implementationLabel}</option>
-								{/snippet}
-								{#snippet documentation()}
-									{#if showDocumentation}
-										<option value="documentation">{m.documentationScore()}</option>
-									{/if}
-								{/snippet}
-							</ScorePair>
-							{#if showDocumentation}
-								<option value="maturity">{m.maturity()}</option>
-							{/if}
-						</select>
-						<button
-							type="button"
-							class="border rounded px-2 py-1 text-xs hover:bg-surface-50-950"
-							onclick={toggleDomainSortDir}
-							title={domainSortDir === 'asc' ? m.sortAscending() : m.sortDescending()}
-							aria-label={m.toggleSortDirection()}
-						>
-							{domainSortDir === 'asc' ? '▲' : '▼'}
-						</button>
-					</div>
-				</div>
-			{/if}
-
-			<div class="ml-auto text-xs text-surface-600-400">
-				{filteredRows.length}
-				{m.rowsLabel()}{#if view === 'requirement'}
-					· {m.clickRowToDrillDown()}{/if}
 			</div>
+		{/if}
+
+		<div class="ml-auto text-xs text-surface-600-400">
+			{filteredRows.length}
+			{m.rowsLabel()}{#if view === 'requirement'}
+				· {m.clickRowToDrillDown()}{/if}
 		</div>
+	</div>
 
-		<!-- Main view -->
-		<div class="card bg-surface-50-950 overflow-x-auto">
-			{#if filteredRows.length === 0}
-				<div class="p-6 text-sm text-surface-600-400 italic">
-					{m.noRequirementAssessmentsInScope()}
-				</div>
-			{:else if view === 'requirement'}
-				<table class="w-full text-sm">
-					<thead class="bg-surface-50-950 text-left">
-						<tr>
-							<th class="px-3 py-2 w-32">{m.refLabel()}</th>
-							<th class="px-3 py-2">{m.sectionOrRequirement()}</th>
-							<th class="px-3 py-2 w-24 text-center">{m.coverage()}</th>
-							{#if showCompliance}
-								<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
-								<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
-									>{m.compliancePercentage()}</th
-								>
-							{/if}
-							{@render scoreHeaders('px-3 py-2 w-24 text-right')}
-						</tr>
-					</thead>
-					<tbody>
-						{#each hierarchical as section}
-							{@const sectionCompliance = compliancePct(section.dist)}
-							{#if !isFlat}
-								<tr
-									class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
-									tabindex="0"
-									aria-expanded={expandedSections.has(section.urn)}
-									onclick={() => toggleSection(section.urn)}
-									onkeydown={(e) => onActivate(e, () => toggleSection(section.urn))}
-								>
-									<td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
-										<span class="inline-block w-3 text-surface-600-400"
-											>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
-										>
-										{section.ref}
-									</td>
-									<td class="px-3 py-2 w-full max-w-0">
-										<div class="flex items-baseline gap-2 min-w-0">
-											<span class="truncate" title={section.name}>{section.name}</span>
-											<span class="shrink-0 text-xs text-surface-600-400 font-normal"
-												>({section.requirement_count}
-												{m.reqsAbbr()}{#if section.row_count !== section.requirement_count}
-													· {section.row_count} {m.rowsLabel()}{/if})</span
-											>
-										</div>
-									</td>
-									<td class="px-3 py-2 text-center">{section.ca_count}</td>
-									{#if showCompliance}
-										<td class="px-3 py-2">
-											{#if section.row_count > 0}
-												<div class="flex h-5 w-full rounded overflow-hidden border">
-													{#each RESULT_ORDER as r}
-														{@const w =
-															distTotal(section.dist) === 0
-																? 0
-																: (section.dist[r] / distTotal(section.dist)) * 100}
-														{#if w > 0}
-															<div
-																style="width:{w}%; background:{RESULT_COLORS[r]};"
-																title="{resultLabel(r)}: {section.dist[r]}"
-															></div>
-														{/if}
-													{/each}
-												</div>
-											{:else}
-												<span class="text-xs text-surface-500">{m.noRowsInScope()}</span>
-											{/if}
-										</td>
-										<td class="px-3 py-2 text-right font-mono"
-											>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
-										>
-									{/if}
-									{@render scoreCells(section.scores, 'px-3 py-2 text-right font-mono')}
-								</tr>
-							{/if}
-
-							{#if isFlat || expandedSections.has(section.urn)}
-								{#each section.requirements as req}
-									{@const reqCompliance = compliancePct(req.dist)}
-									<tr
-										class="border-t hover:bg-surface-50-950 cursor-pointer"
-										tabindex="0"
-										aria-expanded={expandedRow === req.urn}
-										onclick={() => (expandedRow = expandedRow === req.urn ? null : req.urn)}
-										onkeydown={(e) =>
-											onActivate(e, () => (expandedRow = expandedRow === req.urn ? null : req.urn))}
-									>
-										<td
-											class="px-3 py-2 font-mono text-xs whitespace-nowrap {isFlat ? '' : 'pl-8'}"
-										>
-											<span class="inline-block w-3 text-surface-500"
-												>{expandedRow === req.urn ? '▾' : '▸'}</span
-											>
-											{req.ref_id}
-										</td>
-										<td class="px-3 py-2 max-w-0 {isFlat ? '' : 'pl-6'}">
-											<span class="line-clamp-2" title={req.name}>{req.name}</span>
-										</td>
-										<td class="px-3 py-2 text-center">{req.ca_count}</td>
-										{#if showCompliance}
-											<td class="px-3 py-2">
-												<div class="flex h-4 w-full rounded overflow-hidden border">
-													{#each RESULT_ORDER as r}
-														{@const w =
-															distTotal(req.dist) === 0
-																? 0
-																: (req.dist[r] / distTotal(req.dist)) * 100}
-														{#if w > 0}
-															<div
-																style="width:{w}%; background:{RESULT_COLORS[r]};"
-																title="{resultLabel(r)}: {req.dist[r]}"
-															></div>
-														{/if}
-													{/each}
-												</div>
-											</td>
-											<td class="px-3 py-2 text-right font-mono"
-												>{reqCompliance === null ? '—' : `${reqCompliance.toFixed(0)}%`}</td
-											>
-										{/if}
-										{@render scoreCells(req.scores, 'px-3 py-2 text-right font-mono')}
-									</tr>
-									{#if expandedRow === req.urn}
-										{@const exportIds = evidenceAuditIds(req.rows)}
-										<tr class="bg-surface-50-950 border-t">
-											<td></td>
-											<td colspan={requirementColumns - 1} class="px-3 py-2">
-												<div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-													<span class="text-xs text-surface-600-400"
-														>{m.perAssessmentBreakdown()}</span
-													>
-													<a
-														class="btn btn-sm preset-outlined-primary-500 text-xs {exportIds.length ===
-														0
-															? 'pointer-events-none opacity-50'
-															: ''}"
-														href={evidenceExportUrl(req.urn, req.rows)}
-														aria-disabled={exportIds.length === 0}
-														data-sveltekit-reload
-														download
-													>
-														<i class="fa-solid fa-file-zipper mr-1"></i>
-														{m.exportRequirementEvidences({ count: exportIds.length })}
-													</a>
-												</div>
-												<table class="w-full text-xs">
-													<thead>
-														<tr class="text-left text-surface-600-400">
-															<th class="py-1 w-6"
-																><span class="sr-only">{m.includeInEvidenceExport()}</span></th
-															>
-															<th class="py-1">{m.domain()}</th>
-															<th class="py-1">{m.assessment()}</th>
-															{#if showCompliance}
-																<th class="py-1">{m.result()}</th>
-															{/if}
-															{@render scoreHeaders('py-1 text-right')}
-															<th class="py-1 text-center">{m.controls()}</th>
-															<th class="py-1 text-center">{m.evidences()}</th>
-														</tr>
-													</thead>
-													<tbody>
-														{#each req.rows as row}
-															{@const returnUrl = page.url.pathname + page.url.search}
-															{@const inh = row.inheritance}
-															{@const showInh = applyInheritance && !!inh?.inherited}
-															{@const evidencesTitle =
-																row.indirect_evidences_count > 0
-																	? m.directPlusIndirectEvidences({
-																			direct: row.direct_evidences_count,
-																			indirect: row.indirect_evidences_count
-																		})
-																	: m.directEvidencesOnly({ direct: row.direct_evidences_count })}
-															<!-- An N/A row shows, greyed, what it counts for: the
-														     target when the audit counts N/A at it, else nothing. -->
-															{@const naClass = row.not_applicable ? 'text-surface-400-600' : ''}
-															{@const naTitle = row.not_applicable ? m.notApplicable() : undefined}
-															<tr class="border-t border-surface-200-800">
-																<td class="py-1">
-																	<input
-																		type="checkbox"
-																		class="checkbox"
-																		checked={!evidenceExcluded.has(row.requirement_assessment_id)}
-																		onchange={() =>
-																			toggleEvidenceRow(row.requirement_assessment_id)}
-																		aria-label="{m.includeInEvidenceExport()}: {row.compliance_assessment_name}"
-																	/>
-																</td>
-																<td class="py-1 font-mono">{row.folder_path_str}</td>
-																<td class="py-1">
-																	<a
-																		class="anchor"
-																		href="/requirement-assessments/{row.requirement_assessment_id}/edit?next={encodeURIComponent(
-																			returnUrl
-																		)}"
-																		title={m.openRequirementAssessmentIn({
-																			name: row.compliance_assessment_name
-																		})}
-																	>
-																		{row.compliance_assessment_name}
-																	</a>
-																</td>
-																{#if showCompliance}
-																	<td class="py-1">
-																		<span class="inline-flex items-center gap-1">
-																			<span
-																				class="inline-block w-2 h-2 rounded-full"
-																				style="background:{RESULT_COLORS[
-																					(row.result as Result | null) ?? 'not_assessed'
-																				]}"
-																			></span>
-																			{row.result ? resultLabel(row.result) : '—'}
-																			{#if showInh && inh}
-																				<a
-																					class="anchor inline-flex items-center gap-0.5 text-xs text-surface-600-400"
-																					href="/compliance-assessments/{inh.source?.ca_id}"
-																					title="{m.inheritedFrom()}: {inh.source?.folder_name ??
-																						'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
-																				>
-																					<i class="fa-solid fa-code-branch text-[10px]"></i>
-																					{inh.source?.ca_name}
-																				</a>
-																			{/if}
-																		</span>
-																	</td>
-																{/if}
-																<ScorePair>
-																	{#snippet implementation()}
-																		<td class="py-1 text-right font-mono {naClass}" title={naTitle}>
-																			{row.not_applicable
-																				? formatScore(row.scores?.implementation_score ?? null)
-																				: (row.score ?? '—')}
-																			{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
-																				<span
-																					class="text-[10px] text-surface-500"
-																					title="{m.ownResult()}: {inh.own.result
-																						? resultLabel(inh.own.result)
-																						: '—'}{inh.own.score !== null
-																						? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
-																						: ''}"
-																				>
-																					<i class="fa-solid fa-circle-info"></i>
-																				</span>
-																			{/if}
-																		</td>
-																	{/snippet}
-																	{#snippet documentation()}
-																		{#if showDocumentation}
-																			<td
-																				class="py-1 text-right font-mono {naClass}"
-																				title={naTitle}
-																				>{formatScore(row.scores?.documentation_score ?? null)}</td
-																			>
-																		{/if}
-																	{/snippet}
-																</ScorePair>
-																{#if showDocumentation}
-																	<td class="py-1 text-right font-mono {naClass}" title={naTitle}
-																		>{formatScore(row.scores?.maturity_score ?? null)}</td
-																	>
-																{/if}
-																<td class="py-1 text-center">{row.applied_controls_count}</td>
-																<td class="py-1 text-center" title={evidencesTitle}>
-																	{row.evidences_count}
-																	{#if row.indirect_evidences_count > 0}
-																		<span class="text-[10px] text-surface-500"
-																			>({row.direct_evidences_count}+{row.indirect_evidences_count})</span
-																		>
-																	{/if}
-																</td>
-															</tr>
-														{/each}
-													</tbody>
-												</table>
-											</td>
-										</tr>
-									{/if}
-								{/each}
-							{/if}
-						{/each}
-					</tbody>
-				</table>
-			{:else if view === 'domain'}
-				<table class="w-full text-sm">
-					<thead class="bg-surface-50-950 text-left">
-						<tr>
-							<th class="px-3 py-2">{m.domain()} ({m.depthLabel()} {domainDepth})</th>
-							<th class="px-3 py-2 w-32 text-center">{m.complianceAssessments()}</th>
-							<th class="px-3 py-2 w-24 text-center capitalize-first">{m.rowsLabel()}</th>
-							{#if showCompliance}
-								<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
-								<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
-									>{m.compliancePercentage()}</th
-								>
-							{/if}
-							{@render scoreHeaders('px-3 py-2 w-24 text-right')}
-						</tr>
-					</thead>
-					<tbody>
-						{#each perDomain as d (d.key)}
-							{@const dCompliance = compliancePct(d.dist)}
-							<tr
-								class="border-t {d.folderId ? 'hover:bg-surface-100-900 cursor-pointer' : ''}"
-								tabindex={d.folderId ? 0 : undefined}
-								title={d.folderId ? m.showDomainRequirements() : undefined}
-								onclick={() => focusDomain(d.folderId)}
-								onkeydown={(e) => onActivate(e, () => focusDomain(d.folderId))}
+	<!-- Main view -->
+	<div class="card bg-surface-50-950 overflow-x-auto">
+		{#if filteredRows.length === 0}
+			<div class="p-6 text-sm text-surface-600-400 italic">
+				{m.noRequirementAssessmentsInScope()}
+			</div>
+		{:else if view === 'requirement'}
+			<table class="w-full text-sm">
+				<thead class="bg-surface-50-950 text-left">
+					<tr>
+						<th class="px-3 py-2 w-32">{m.refLabel()}</th>
+						<th class="px-3 py-2">{m.sectionOrRequirement()}</th>
+						<th class="px-3 py-2 w-24 text-center">{m.coverage()}</th>
+						{#if showCompliance}
+							<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
+							<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
+								>{m.compliancePercentage()}</th
 							>
-								<td class="px-3 py-2 font-mono">{d.key}</td>
-								<td class="px-3 py-2 text-center">{d.ca_count}</td>
-								<td class="px-3 py-2 text-center">{d.row_count}</td>
+						{/if}
+						{@render scoreHeaders('px-3 py-2 w-24 text-right')}
+					</tr>
+				</thead>
+				<tbody>
+					{#each hierarchical as section}
+						{@const sectionCompliance = compliancePct(section.dist)}
+						{#if !isFlat}
+							<tr
+								class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
+								tabindex="0"
+								aria-expanded={expandedSections.has(section.urn)}
+								onclick={() => toggleSection(section.urn)}
+								onkeydown={(e) => onActivate(e, () => toggleSection(section.urn))}
+							>
+								<td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
+									<span class="inline-block w-3 text-surface-600-400"
+										>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
+									>
+									{section.ref}
+								</td>
+								<td class="px-3 py-2 w-full max-w-0">
+									<div class="flex items-baseline gap-2 min-w-0">
+										<span class="truncate" title={section.name}>{section.name}</span>
+										<span class="shrink-0 text-xs text-surface-600-400 font-normal"
+											>({section.requirement_count}
+											{m.reqsAbbr()}{#if section.row_count !== section.requirement_count}
+												· {section.row_count} {m.rowsLabel()}{/if})</span
+										>
+									</div>
+								</td>
+								<td class="px-3 py-2 text-center">{section.ca_count}</td>
 								{#if showCompliance}
 									<td class="px-3 py-2">
-										<div class="flex h-4 w-full rounded overflow-hidden border">
-											{#each RESULT_ORDER as r}
-												{@const w =
-													distTotal(d.dist) === 0 ? 0 : (d.dist[r] / distTotal(d.dist)) * 100}
-												{#if w > 0}
-													<div
-														style="width:{w}%; background:{RESULT_COLORS[r]};"
-														title="{resultLabel(r)}: {d.dist[r]}"
-													></div>
-												{/if}
-											{/each}
-										</div>
+										{#if section.row_count > 0}
+											<div class="flex h-5 w-full rounded overflow-hidden border">
+												{#each RESULT_ORDER as r}
+													{@const w =
+														distTotal(section.dist) === 0
+															? 0
+															: (section.dist[r] / distTotal(section.dist)) * 100}
+													{#if w > 0}
+														<div
+															style="width:{w}%; background:{RESULT_COLORS[r]};"
+															title="{resultLabel(r)}: {section.dist[r]}"
+														></div>
+													{/if}
+												{/each}
+											</div>
+										{:else}
+											<span class="text-xs text-surface-500">{m.noRowsInScope()}</span>
+										{/if}
 									</td>
 									<td class="px-3 py-2 text-right font-mono"
-										>{dCompliance === null ? '—' : `${dCompliance.toFixed(0)}%`}</td
+										>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
 									>
 								{/if}
-								{@render scoreCells(d.scores, 'px-3 py-2 text-right font-mono')}
+								{@render scoreCells(section.scores, 'px-3 py-2 text-right font-mono')}
 							</tr>
-						{/each}
-					</tbody>
-				</table>
-			{/if}
-		</div>
-	{/if}
+						{/if}
+
+						{#if isFlat || expandedSections.has(section.urn)}
+							{#each section.requirements as req}
+								{@const reqCompliance = compliancePct(req.dist)}
+								<tr
+									class="border-t hover:bg-surface-50-950 cursor-pointer"
+									tabindex="0"
+									aria-expanded={expandedRows.has(req.urn)}
+									onclick={() => toggleRow(req.urn)}
+									onkeydown={(e) => onActivate(e, () => toggleRow(req.urn))}
+								>
+									<td class="px-3 py-2 font-mono text-xs whitespace-nowrap {isFlat ? '' : 'pl-8'}">
+										<span class="inline-block w-3 text-surface-500"
+											>{expandedRows.has(req.urn) ? '▾' : '▸'}</span
+										>
+										{req.ref_id}
+									</td>
+									<td class="px-3 py-2 max-w-0 {isFlat ? '' : 'pl-6'}">
+										<span class="line-clamp-2" title={req.name}>{req.name}</span>
+									</td>
+									<td class="px-3 py-2 text-center">{req.ca_count}</td>
+									{#if showCompliance}
+										<td class="px-3 py-2">
+											<div class="flex h-4 w-full rounded overflow-hidden border">
+												{#each RESULT_ORDER as r}
+													{@const w =
+														distTotal(req.dist) === 0
+															? 0
+															: (req.dist[r] / distTotal(req.dist)) * 100}
+													{#if w > 0}
+														<div
+															style="width:{w}%; background:{RESULT_COLORS[r]};"
+															title="{resultLabel(r)}: {req.dist[r]}"
+														></div>
+													{/if}
+												{/each}
+											</div>
+										</td>
+										<td class="px-3 py-2 text-right font-mono"
+											>{reqCompliance === null ? '—' : `${reqCompliance.toFixed(0)}%`}</td
+										>
+									{/if}
+									{@render scoreCells(req.scores, 'px-3 py-2 text-right font-mono')}
+								</tr>
+								{#if expandedRows.has(req.urn)}
+									{@const exportIds = evidenceAuditIds(req.rows)}
+									<tr class="bg-surface-50-950 border-t">
+										<td></td>
+										<td colspan={requirementColumns - 1} class="px-3 py-2">
+											<div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+												<span class="text-xs text-surface-600-400"
+													>{m.perAssessmentBreakdown()}</span
+												>
+												<a
+													class="btn btn-sm preset-outlined-primary-500 text-xs {exportIds.length ===
+													0
+														? 'pointer-events-none opacity-50'
+														: ''}"
+													href={evidenceExportUrl(req.urn, req.rows)}
+													aria-disabled={exportIds.length === 0}
+													data-sveltekit-reload
+													download
+												>
+													<i class="fa-solid fa-file-zipper mr-1"></i>
+													{m.exportRequirementEvidences({ count: exportIds.length })}
+												</a>
+											</div>
+											<table class="w-full text-xs">
+												<thead>
+													<tr class="text-left text-surface-600-400 whitespace-nowrap">
+														<th class="px-2 py-1.5 w-6"
+															><span class="sr-only">{m.includeInEvidenceExport()}</span></th
+														>
+														<th class="px-2 py-1.5">{m.assessment()}</th>
+														{#if showCompliance}
+															<th class="px-2 py-1.5">{m.result()}</th>
+														{/if}
+														{@render scoreHeaders('px-2 py-1.5 text-right')}
+														<th class="px-2 py-1.5 text-center">{m.controls()}</th>
+														<th class="px-2 py-1.5 text-center">{m.evidences()}</th>
+													</tr>
+												</thead>
+												<tbody>
+													{#each req.rows as row}
+														{@const returnUrl = page.url.pathname + page.url.search}
+														{@const inh = row.inheritance}
+														{@const showInh = applyInheritance && !!inh?.inherited}
+														{@const evidencesTitle =
+															row.indirect_evidences_count > 0
+																? m.directPlusIndirectEvidences({
+																		direct: row.direct_evidences_count,
+																		indirect: row.indirect_evidences_count
+																	})
+																: m.directEvidencesOnly({ direct: row.direct_evidences_count })}
+														<!-- An N/A row shows, greyed, what it counts for: the
+														     target when the audit counts N/A at it, else nothing. -->
+														{@const naClass = row.not_applicable ? 'text-surface-400-600' : ''}
+														{@const naTitle = row.not_applicable ? m.notApplicable() : undefined}
+														<tr class="border-t border-surface-200-800">
+															<td class="px-2 py-1.5">
+																<input
+																	type="checkbox"
+																	class="checkbox"
+																	checked={!evidenceExcluded.has(row.requirement_assessment_id)}
+																	onchange={() => toggleEvidenceRow(row.requirement_assessment_id)}
+																	aria-label="{m.includeInEvidenceExport()}: {row.compliance_assessment_name}"
+																/>
+															</td>
+															<td class="px-2 py-1.5 min-w-64">
+																<a
+																	class="anchor"
+																	href="/requirement-assessments/{row.requirement_assessment_id}/edit?next={encodeURIComponent(
+																		returnUrl
+																	)}"
+																	title={m.openRequirementAssessmentIn({
+																		name: row.compliance_assessment_name
+																	})}
+																>
+																	{row.compliance_assessment_name}
+																</a>
+																<div class="text-[11px] text-surface-600-400">
+																	{row.folder_path_str}
+																</div>
+															</td>
+															{#if showCompliance}
+																<td class="px-2 py-1.5 whitespace-nowrap">
+																	<span class="inline-flex items-center gap-1">
+																		<span
+																			class="inline-block w-2 h-2 rounded-full"
+																			style="background:{RESULT_COLORS[
+																				(row.result as Result | null) ?? 'not_assessed'
+																			]}"
+																		></span>
+																		{row.result ? resultLabel(row.result) : '—'}
+																		{#if showInh && inh}
+																			<a
+																				class="anchor inline-flex items-center gap-0.5 text-xs text-surface-600-400"
+																				href="/compliance-assessments/{inh.source?.ca_id}"
+																				title="{m.inheritedFrom()}: {inh.source?.folder_name ??
+																					'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
+																			>
+																				<i class="fa-solid fa-code-branch text-[10px]"></i>
+																				{inh.source?.ca_name}
+																			</a>
+																		{/if}
+																	</span>
+																</td>
+															{/if}
+															<ScorePair>
+																{#snippet implementation()}
+																	<td
+																		class="px-2 py-1.5 text-right font-mono whitespace-nowrap {naClass}"
+																		title={naTitle}
+																	>
+																		{row.not_applicable
+																			? formatScore(row.scores?.implementation_score ?? null)
+																			: (row.score ?? '—')}
+																		{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
+																			<span
+																				class="text-[10px] text-surface-500"
+																				title="{m.ownResult()}: {inh.own.result
+																					? resultLabel(inh.own.result)
+																					: '—'}{inh.own.score !== null
+																					? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
+																					: ''}"
+																			>
+																				<i class="fa-solid fa-circle-info"></i>
+																			</span>
+																		{/if}
+																	</td>
+																{/snippet}
+																{#snippet documentation()}
+																	{#if showDocumentation}
+																		<td
+																			class="px-2 py-1.5 text-right font-mono whitespace-nowrap {naClass}"
+																			title={naTitle}
+																			>{formatScore(row.scores?.documentation_score ?? null)}</td
+																		>
+																	{/if}
+																{/snippet}
+															</ScorePair>
+															{#if showDocumentation}
+																<td
+																	class="px-2 py-1.5 text-right font-mono whitespace-nowrap {naClass}"
+																	title={naTitle}
+																	>{formatScore(row.scores?.maturity_score ?? null)}</td
+																>
+															{/if}
+															<td class="px-2 py-1.5 text-center">{row.applied_controls_count}</td>
+															<td
+																class="px-2 py-1.5 text-center whitespace-nowrap"
+																title={evidencesTitle}
+															>
+																{row.evidences_count}
+																{#if row.indirect_evidences_count > 0}
+																	<span class="text-[10px] text-surface-500"
+																		>({row.direct_evidences_count}+{row.indirect_evidences_count})</span
+																	>
+																{/if}
+															</td>
+														</tr>
+													{/each}
+												</tbody>
+											</table>
+										</td>
+									</tr>
+								{/if}
+							{/each}
+						{/if}
+					{/each}
+				</tbody>
+			</table>
+		{:else if view === 'domain'}
+			<table class="w-full text-sm">
+				<thead class="bg-surface-50-950 text-left">
+					<tr>
+						<th class="px-3 py-2">{m.domain()} ({m.depthLabel()} {domainDepth})</th>
+						<th class="px-3 py-2 w-32 text-center">{m.complianceAssessments()}</th>
+						<th class="px-3 py-2 w-24 text-center capitalize-first">{m.rowsLabel()}</th>
+						{#if showCompliance}
+							<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
+							<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
+								>{m.compliancePercentage()}</th
+							>
+						{/if}
+						{@render scoreHeaders('px-3 py-2 w-24 text-right')}
+					</tr>
+				</thead>
+				<tbody>
+					{#each perDomain as d (d.key)}
+						{@const dCompliance = compliancePct(d.dist)}
+						<tr
+							class="border-t {d.folderId ? 'hover:bg-surface-100-900 cursor-pointer' : ''}"
+							tabindex={d.folderId ? 0 : undefined}
+							title={d.folderId ? m.showDomainRequirements() : undefined}
+							onclick={() => focusDomain(d.folderId)}
+							onkeydown={(e) => onActivate(e, () => focusDomain(d.folderId))}
+						>
+							<td class="px-3 py-2 font-mono">{d.key}</td>
+							<td class="px-3 py-2 text-center">{d.ca_count}</td>
+							<td class="px-3 py-2 text-center">{d.row_count}</td>
+							{#if showCompliance}
+								<td class="px-3 py-2">
+									<div class="flex h-4 w-full rounded overflow-hidden border">
+										{#each RESULT_ORDER as r}
+											{@const w =
+												distTotal(d.dist) === 0 ? 0 : (d.dist[r] / distTotal(d.dist)) * 100}
+											{#if w > 0}
+												<div
+													style="width:{w}%; background:{RESULT_COLORS[r]};"
+													title="{resultLabel(r)}: {d.dist[r]}"
+												></div>
+											{/if}
+										{/each}
+									</div>
+								</td>
+								<td class="px-3 py-2 text-right font-mono"
+									>{dCompliance === null ? '—' : `${dCompliance.toFixed(0)}%`}</td
+								>
+							{/if}
+							{@render scoreCells(d.scores, 'px-3 py-2 text-right font-mono')}
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{/if}
+	</div>
 </div>
 
 <style>

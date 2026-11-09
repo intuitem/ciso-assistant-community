@@ -1,6 +1,7 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { m } from '#paraglide/messages.js';
 
 export const load = (async ({ fetch, params, url }) => {
 	const ig = url.searchParams.get('implementation_group');
@@ -19,5 +20,11 @@ export const load = (async ({ fetch, params, url }) => {
 		return res.json();
 	});
 
-	return { stream: { report: reportPromise } };
+	const frameworkName = await fetch(`${BASE_API_URL}/frameworks/${params.id}/`)
+		.then((res) => (res.ok ? res.json() : null))
+		.then((fw) => fw?.name as string | undefined)
+		.catch(() => undefined);
+	const title = frameworkName ? `${frameworkName} · ${m.frameworkReport()}` : m.frameworkReport();
+
+	return { title, stream: { report: reportPromise } };
 }) satisfies PageServerLoad;

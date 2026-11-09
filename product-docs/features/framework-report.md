@@ -18,7 +18,7 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 
 ## Where to find it
 
-- From the main menu: **Compliance > Summary**, tab **By framework**, lists every framework used by an audit you can read. Click one to open its report.
+- From the main menu: **Compliance > Summary** opens on the **By framework** tab, which lists every framework used by an audit you can read. Click one to open its report. The **By domain** tab shows each domain's audits.
 - From a framework: open its detail page and click the **Insights** button at the top.
 
 ## What it shows
@@ -32,22 +32,24 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 | **Detected audits drawer** | Per-audit list with status, folder path, and `counted vs excluded` marker — so you can see what the live-status filter left out |
 | **Per-section breakdown** | Requirement rows grouped by their immediate parent section |
 | **Implementation-group filter** | Narrow the report to a single IG via the **Implementation group** dropdown |
-| **Verdicts** | For frameworks with outcome rules, how many of the filtered audits meet each verdict, and the average of each computed number |
-| **Excel export** | **Export (Excel)** downloads what the filters show: audits (with dates, scores and verdicts met), requirements, domains with their requirements, and one row per requirement per audit |
+| **Verdicts** | For frameworks with outcome rules, how many of the filtered audits meet each verdict, and the average of each computed number. **By audit** shows each audit's verdicts and values; **By domain** counts them per domain at the chosen depth |
+| **Excel export** | **Export (Excel)** downloads what the filters show: audits (with dates, scores and one column per verdict), requirements, domains with their requirements, verdicts per domain, and one row per requirement per audit |
 
-## Filters and display
+## Filters
 
-- **Domains**: tick one or more domains, at any depth. An audit is kept when one of the ticked domains is on its path, so you can combine branches of the tree (for example two regional nodes under different parents).
-- **Deadline**: pick **ETA** or **Due date**, then a window in months from today. `0 → 6` keeps audits due in the next six months, `3 → 6` those due between three and six months from now, and a negative bound reaches back into overdue audits. Audits without that date are left out while the filter is on.
-- **Display**: show or hide the key indicators, the result distribution, the verdicts and the detail table. The choice is remembered in your browser.
+The **Filters** panel at the top of the report drives every figure below it: indicators, distribution, verdicts, tables and the Excel export.
 
-The detected audits drawer greys out the audits the filters leave out.
+- **Domains**: tick one or more domains, at any depth, or search them by name. An audit is kept when one of the ticked domains is on its path, so you can combine branches of the tree (for example two regional nodes under different parents). Domains under a ticked one show as already included.
+- **Implementation group**: narrow the report to a single group.
+- **Deadline**: pick **ETA** or **Due date**, then **Overdue**, **Next 3 / 6 / 12 months**, or **Custom** for a window in months from today. In a custom window, `3 → 6` keeps audits due between three and six months from now, and a negative bound reaches back into overdue audits. Audits without that date are left out while the filter is on.
+
+Active filters show as chips under the panel; click a chip's cross to remove it, or **Reset filters** to clear them all. The detected audits drawer greys out the audits the filters leave out.
 
 ## Two ways to read it
 
 The **View** toggle in the filter bar switches the body of the report between two lenses on the same numbers:
 
-- **Requirements tree** — the default. Sections roll up their requirements; click a section to expand it, then click a requirement row to drill into its **Per-assessment breakdown** (one row per audit, with domain, result, score, controls and evidence counts, and a link straight to that requirement assessment). **Expand all** / **Collapse all** act on every section at once.
+- **Requirements tree** — the default. Sections roll up their requirements; click a section to expand it, then click a requirement row to drill into its **Per-assessment breakdown** (one row per audit, with domain, result, score, controls and evidence counts, and a link straight to that requirement assessment). Several requirements can be open at once. **Expand all** / **Collapse all** act on every section at once; **Collapse all** also closes open requirements.
 - **Per domain** — pivots the same rows by the domain (Folder) they live in. **Group by domain depth** controls how far down the tree the grouping cuts (`root` … `leaf domain`), and **Sort by** orders the rows by domain name (alphabetical), compliance %, or average score, ascending or descending. Click a domain to filter the report on it and switch to the **Requirements tree**, which then shows that domain's sections and requirements with their compliance and average scores.
 
 ## Exporting a requirement's evidences

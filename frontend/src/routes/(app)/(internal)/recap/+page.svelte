@@ -9,6 +9,7 @@
 	import { canPerformAction } from '#lib/utils/access-control.js';
 	import { goto } from '$app/navigation';
 	import FrameworkReportsList from './FrameworkReportsList.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
@@ -31,12 +32,12 @@
 		data.folderRecaps.filter((folderRecap) => folderRecap.compliance_assessments.length > 0)
 	);
 
-	const TABS = ['domains', 'frameworks'] as const;
-	let tab = $derived(page.url.searchParams.get('tab') === 'frameworks' ? 'frameworks' : 'domains');
+	const TABS = ['frameworks', 'domains'] as const;
+	let tab = $derived(page.url.searchParams.get('tab') === 'domains' ? 'domains' : 'frameworks');
 	const tabLabel = { domains: () => m.byDomain(), frameworks: () => m.byFramework() };
 	function selectTab(next: (typeof TABS)[number]) {
 		const url = new URL(page.url.href);
-		if (next === 'domains') url.searchParams.delete('tab');
+		if (next === 'frameworks') url.searchParams.delete('tab');
 		else url.searchParams.set('tab', next);
 		goto(url, { replace: true });
 	}
@@ -52,7 +53,7 @@
 </script>
 
 <div class="p-4 space-y-6 bg-surface-50-950 min-h-screen card">
-	<h2 class="text-2xl font-extrabold text-surface-950-50 mb-4">{m.overallCompliance()}</h2>
+	<h2 class="text-2xl font-extrabold text-surface-950-50">{m.recap()}</h2>
 
 	<div class="flex gap-1 border-b border-surface-200-800" role="tablist">
 		{#each TABS as t}
@@ -89,132 +90,131 @@
 						</div>
 					</div>
 				{:else}
-					{#each foldersWithAssessments as folder}
-						<div
-							class="bg-surface-50-950 shadow-lg rounded-xl border border-surface-200-800 overflow-hidden transition hover:shadow-xl transform w-full"
-						>
-							<div
-								class="p-4 bg-gradient-to-r from-primary-400 to-primary-500 text-white flex justify-between items-center"
+					{#each foldersWithAssessments as folder (folder.id)}
+						<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 shadow-sm">
+							<header
+								class="grid gap-3 p-4 border-b border-surface-200-800 md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)] md:items-center"
 							>
-								<a class="text-lg font-bold hover:underline" href="/folders/{folder.id}">
-									{folder.name}
-								</a>
-							</div>
-
-							{#if folder.overallCompliance?.values?.length > 0}
-								<div
-									class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-surface-800 dark:to-surface-900 rounded-b-lg"
-								>
-									<p class="text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">
-										{m.globalOverall()}
-									</p>
-									<div class="flex h-6 rounded-lg overflow-hidden shadow-inner">
-										{#each folder.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
-											<div
-												class="flex justify-center items-center text-xs font-semibold"
-												style="
-										width: {sp.percentage}%;
-										background-color: {sp.itemStyle.color};
-										color: {['#475569', '#000000'].includes(sp.itemStyle.color) ? 'white' : 'black'};
-										box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
-									"
-											>
-												{Number(sp.percentage) > 5 ? `${sp.percentage}%` : ''}
-											</div>
-										{/each}
-									</div>
+								<div class="flex items-center gap-2 min-w-0">
+									<i class="fa-solid fa-sitemap text-primary-500" aria-hidden="true"></i>
+									<a class="text-lg font-bold truncate hover:underline" href="/folders/{folder.id}">
+										{folder.name}
+									</a>
+									<span class="badge preset-tonal-primary shrink-0">
+										{m.auditsCount({ count: folder.compliance_assessments.length })}
+									</span>
 								</div>
-							{/if}
-
-							<div class="p-4 space-y-4">
-								{#each folder.compliance_assessments as assessment}
-									<div
-										class="bg-surface-50-950 rounded-lg p-4 shadow-inner transition hover:bg-surface-100-900"
-									>
-										<div class="flex justify-between items-center mb-4">
-											<div>
-												<p class="text-sm font-semibold">{m.name()}</p>
-												<a
-													class="text-blue-600 dark:text-blue-400 hover:underline text-lg font-bold"
-													href="/compliance-assessments/{assessment.id}"
+								{#if folder.overallCompliance?.values?.length > 0}
+									<div>
+										<p class="text-xs text-surface-600-400 mb-1">{m.globalOverall()}</p>
+										<div class="flex h-4 rounded-md overflow-hidden border border-surface-200-800">
+											{#each folder.overallCompliance.values.toSorted((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
+												<div
+													class="flex justify-center items-center text-[10px] font-semibold"
+													style="width: {sp.percentage}%; background-color: {sp.itemStyle
+														.color}; color: {['#475569', '#000000'].includes(sp.itemStyle.color)
+														? 'white'
+														: 'black'};"
+													title="{safeTranslate(sp.name)}: {sp.percentage}%"
 												>
-													{assessment.name}
-												</a>
-											</div>
-											<div>
-												<p class="text-sm font-semibold">{m.framework()}</p>
-												<p>{assessment.framework.str}</p>
-											</div>
+													{Number(sp.percentage) > 6 ? `${sp.percentage}%` : ''}
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/if}
+							</header>
+
+							<div class="grid gap-4 p-4 sm:grid-cols-2 2xl:grid-cols-3">
+								{#each folder.compliance_assessments as assessment (assessment.id)}
+									<article
+										class="flex flex-col gap-3 rounded-lg border border-surface-200-800 p-4 transition hover:shadow-md hover:border-primary-300"
+									>
+										<div class="min-w-0">
+											<a
+												class="block font-bold text-primary-700 dark:text-primary-300 hover:underline truncate"
+												href="/compliance-assessments/{assessment.id}"
+												title={assessment.name}
+											>
+												{assessment.name}
+											</a>
+											<p
+												class="text-xs text-surface-600-400 truncate"
+												title={assessment.framework.str}
+											>
+												{assessment.framework.str}
+											</p>
 										</div>
 
-										<div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+										<div
+											class="grid items-center gap-3 {assessment.global_score.maturity_score >= 0
+												? 'grid-cols-[auto_minmax(0,1fr)]'
+												: 'grid-cols-1'}"
+										>
 											{#if assessment.global_score.maturity_score >= 0}
-												<div class="flex justify-center items-center lg:order-1">
-													<div class="relative">
-														<Progress
-															value={formatScoreValue(
-																assessment.global_score.maturity_score,
-																assessment.global_score.max_score,
-																false,
-																assessment.global_score.min_score
-															)}
-															min={0}
-															max={100}
-														>
-															<Progress.Circle class="[--size:--spacing(24)]">
-																<Progress.CircleTrack />
-																<Progress.CircleRange
-																	class={displayScoreColor(
-																		assessment.global_score.maturity_score,
-																		assessment.global_score.max_score,
-																		false,
-																		assessment.global_score.min_score
-																	)}
-																/>
-															</Progress.Circle>
-															<div class="absolute inset-0 flex items-center justify-center">
-																<p class="font-semibold text-2xl">
-																	{roundScore(assessment.global_score.maturity_score)}
-																</p>
-															</div>
-														</Progress>
-													</div>
+												<div class="relative" title={m.maturity()}>
+													<Progress
+														value={formatScoreValue(
+															assessment.global_score.maturity_score,
+															assessment.global_score.max_score,
+															false,
+															assessment.global_score.min_score
+														)}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(20)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	assessment.global_score.maturity_score,
+																	assessment.global_score.max_score,
+																	false,
+																	assessment.global_score.min_score
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<p class="font-semibold text-lg">
+																{roundScore(assessment.global_score.maturity_score)}
+															</p>
+														</div>
+													</Progress>
 												</div>
 											{/if}
-
-											<div class="w-full lg:w-3/5 h-40 lg:h-32">
+											<div class="h-36">
 												<DonutChart
 													s_label={m.complianceAssessments()}
 													name={assessment.name + '_donut'}
 													values={assessment.donut.result.values}
 												/>
 											</div>
-
-											<div
-												class="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:order-3"
-											>
-												{#if canEditObject(folder)}
-													<Anchor
-														href="/compliance-assessments/{assessment.id}/edit?next=/recap"
-														class="btn preset-filled-primary-500 w-1/2 lg:w-full"
-													>
-														<i class="fa-solid fa-edit mr-2"></i>
-														{m.edit()}
-													</Anchor>
-												{/if}
-												<a
-													href="/compliance-assessments/{assessment.id}/export"
-													class="btn preset-filled-primary-500 w-1/2 lg:w-full"
-												>
-													<i class="fa-solid fa-download mr-2"></i>
-													{m.exportButton()}
-												</a>
-											</div>
 										</div>
-									</div>
+
+										<div class="mt-auto grid grid-cols-2 gap-2">
+											{#if canEditObject(folder)}
+												<Anchor
+													href="/compliance-assessments/{assessment.id}/edit?next=/recap?tab=domains"
+													class="btn btn-sm preset-outlined-primary-500"
+												>
+													<i class="fa-solid fa-edit mr-1"></i>
+													{m.edit()}
+												</Anchor>
+											{/if}
+											<a
+												href="/compliance-assessments/{assessment.id}/export"
+												class="btn btn-sm preset-filled-primary-500 {canEditObject(folder)
+													? ''
+													: 'col-span-2'}"
+											>
+												<i class="fa-solid fa-download mr-1"></i>
+												{m.exportButton()}
+											</a>
+										</div>
+									</article>
 								{/each}
 							</div>
-						</div>
+						</section>
 					{/each}
 				{/if}
 			</div>

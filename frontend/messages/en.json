@@ -7912,15 +7912,10 @@
 	"assetLifecycleStage": "Asset lifecycle",
 	"changeLifecycleStage": "Change lifecycle",
 	"exportReportXlsx": "Export (Excel)",
-	"keyIndicators": "Key indicators",
-	"detailTable": "Detail table",
 	"deadline": "Deadline",
-	"noDeadlineFilter": "Any date",
-	"deadlineWindowMonths": "Window (months)",
 	"fromMonths": "From",
 	"toMonths": "To",
 	"monthsFromToday": "months from today",
-	"display": "Display",
 	"averageOverAudits": "average over {count} audits",
 	"outcomeMetCount": "{met} of {total} audits",
 	"exportRequirementEvidences": "Export evidences ({count} audits)",
@@ -7930,5 +7925,9 @@
 	"byDomain": "By domain",
 	"byFramework": "By framework",
 	"frameworkReportsDescription": "Open a framework's report to see its audits consolidated across domains.",
-	"showDomainRequirements": "Show this domain's requirements"
+	"showDomainRequirements": "Show this domain's requirements",
+	"nextMonths": "Next {count} months",
+	"domainsSelected": "{count} domains",
+	"searchDomains": "Search domains",
+	"byAudit": "By audit"
 }
