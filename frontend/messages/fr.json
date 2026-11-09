@@ -7790,6 +7790,7 @@
 	"backup": "Sauvegarder",
 	"restore": "Restaurer",
 	"viewComplianceAssessmentFull": "Voir toutes les exigences (vue auditeur)",
+	"viewUserFull": "Consulter la fiche utilisateur complète",
 	"viewCentralAuditlog": "Consulter le journal d'audit central",
 	"viewObjectAudittrail": "Consulter l'historique des objets",
 	"viewPublishedDocumentcontainer": "Consulter la version publiée uniquement",
