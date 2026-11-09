@@ -7,7 +7,7 @@
 	import type { PageData } from './$types';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '#lib/utils/access-control.js';
-	import { replaceState } from '$app/navigation';
+	import { afterNavigate, replaceState } from '$app/navigation';
 	import FrameworkReportsList from './FrameworkReportsList.svelte';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
@@ -34,7 +34,12 @@
 
 	const TABS = ['frameworks', 'domains'] as const;
 	type Tab = (typeof TABS)[number];
-	let tab = $state<Tab>(page.url.searchParams.get('tab') === 'domains' ? 'domains' : 'frameworks');
+	const tabFromUrl = (): Tab =>
+		page.url.searchParams.get('tab') === 'domains' ? 'domains' : 'frameworks';
+	let tab = $state<Tab>(tabFromUrl());
+	afterNavigate(() => {
+		tab = tabFromUrl();
+	});
 	const tabLabel = { domains: () => m.byDomain(), frameworks: () => m.byFramework() };
 	function selectTab(next: Tab) {
 		tab = next;
@@ -44,7 +49,7 @@
 		replaceState(url, page.state);
 	}
 	function onTabKeydown(event: KeyboardEvent) {
-		const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+		const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
 		if (!step) return;
 		event.preventDefault();
 		const next = TABS[(TABS.indexOf(tab) + step + TABS.length) % TABS.length];

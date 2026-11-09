@@ -8,12 +8,7 @@ import type { RequestHandler } from './$types';
 
 const FORWARDED = ['requirement', 'compliance_assessments', 'exclude', 'implementation_group'];
 
-export const GET: RequestHandler = async ({ fetch, params, url }) => {
-	const endpoint = new URL(`${BASE_API_URL}/frameworks/${params.id}/requirement_evidences/`);
-	for (const key of FORWARDED) {
-		for (const value of url.searchParams.getAll(key)) endpoint.searchParams.append(key, value);
-	}
-	const res = await fetch(endpoint.toString());
+function zipResponse(res: Response): Response {
 	if (!res.ok || !res.body) throw error(res.status, 'Error fetching the ZIP file');
 	const fileName =
 		parseContentDispositionFilename(res.headers.get('Content-Disposition') ?? '') ??
@@ -24,4 +19,25 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 			'Content-Disposition': contentDispositionHeader(fileName)
 		}
 	});
+}
+
+export const GET: RequestHandler = async ({ fetch, params, url }) => {
+	const endpoint = new URL(`${BASE_API_URL}/frameworks/${params.id}/requirement_evidences/`);
+	for (const key of FORWARDED) {
+		for (const value of url.searchParams.getAll(key)) endpoint.searchParams.append(key, value);
+	}
+	return zipResponse(await fetch(endpoint.toString()));
+};
+
+export const POST: RequestHandler = async ({ fetch, params, request }) => {
+	const body = await request.json().catch(() => null);
+	if (!body || typeof body !== 'object') throw error(400, 'Invalid selection');
+	const selection = Object.fromEntries(FORWARDED.filter((k) => k in body).map((k) => [k, body[k]]));
+	return zipResponse(
+		await fetch(`${BASE_API_URL}/frameworks/${params.id}/requirement_evidences/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(selection)
+		})
+	);
 };

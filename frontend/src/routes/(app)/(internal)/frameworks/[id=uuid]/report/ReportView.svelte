@@ -10,6 +10,8 @@
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { complianceResultColorMap } from '#lib/utils/constants.js';
 	import { downloadWorkbook, type Cell } from './reportExport';
+	import { parseContentDispositionFilename } from '#lib/utils/contentDisposition.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	// -----------------------------------------------------------------------------
 	// Types — match the backend response shape from GET /api/frameworks/{id}/report/
@@ -978,21 +980,43 @@
 		)
 	);
 	let exportReqCount = $derived(new Set(exportRows.map((r) => r.requirement_urn)).size);
-	let bulkEvidenceUrl = $derived.by(() => {
-		const rows = filteredRows.filter((r) => selectedReqs.has(r.requirement_urn));
-		const params = new URLSearchParams({
-			requirement: [...new Set(exportRows.map((r) => r.requirement_urn))].join(','),
-			compliance_assessments: [...new Set(exportRows.map((r) => r.compliance_assessment_id))].join(
-				','
+	const toastStore = getToastStore();
+	let exportingEvidences = $state(false);
+	async function exportEvidences() {
+		const excluded = filteredRows
+			.filter(
+				(r) =>
+					selectedReqs.has(r.requirement_urn) && evidenceExcluded.has(r.requirement_assessment_id)
 			)
-		});
-		if (igFilter !== 'all') params.set('implementation_group', igFilter);
-		const excluded = rows
-			.filter((r) => evidenceExcluded.has(r.requirement_assessment_id))
 			.map((r) => r.requirement_assessment_id);
-		if (excluded.length) params.set('exclude', excluded.join(','));
-		return `/frameworks/${framework.id}/report/requirement-evidences?${params}`;
-	});
+		exportingEvidences = true;
+		try {
+			const res = await fetch(`/frameworks/${framework.id}/report/requirement-evidences`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					requirement: [...new Set(exportRows.map((r) => r.requirement_urn))],
+					compliance_assessments: [...new Set(exportRows.map((r) => r.compliance_assessment_id))],
+					exclude: excluded,
+					...(igFilter !== 'all' ? { implementation_group: igFilter } : {})
+				})
+			});
+			if (!res.ok) throw new Error(`${res.status}`);
+			const url = URL.createObjectURL(await res.blob());
+			const link = document.createElement('a');
+			link.href = url;
+			link.download =
+				parseContentDispositionFilename(res.headers.get('Content-Disposition') ?? '') ??
+				'evidences.zip';
+			link.click();
+			URL.revokeObjectURL(url);
+		} catch (err) {
+			console.error('Evidence export failed', err);
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+		} finally {
+			exportingEvidences = false;
+		}
+	}
 
 	let exporting = $state(false);
 
@@ -2065,15 +2089,18 @@
 		{#if view === 'requirement'}
 			<div class="flex flex-wrap items-center gap-2">
 				{#if exportReqCount > 0}
-					<a
+					<button
+						type="button"
 						class="btn btn-sm preset-filled-primary-500 text-xs"
-						href={bulkEvidenceUrl}
-						data-sveltekit-reload
-						download
+						onclick={exportEvidences}
+						disabled={exportingEvidences}
 					>
-						<i class="fa-solid fa-file-zipper mr-1" aria-hidden="true"></i>
+						<i
+							class="fa-solid {exportingEvidences ? 'fa-spinner fa-spin' : 'fa-file-zipper'} mr-1"
+							aria-hidden="true"
+						></i>
 						{m.exportSelectedRequirementsEvidences({ count: exportReqCount })}
-					</a>
+					</button>
 					<button
 						type="button"
 						class="text-xs text-primary-600-400 hover:underline"

@@ -11503,6 +11503,13 @@ class FrameworkViewSet(BaseModelViewSet):
                     out.append({"ref_id": ref_id, "met": ref_id in fired})
             return out or None
 
+        viewable_label_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, FilteringLabel)
+        )
+        viewable_actor_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Actor)
+        )
+
         # Per-CA summary used by the frontend "detected assessments" drawer.
         # Includes every visible CA, counted or not, so users can see what
         # the live-status filter excluded. Only counted CAs carry scores.
@@ -11520,10 +11527,12 @@ class FrameworkViewSet(BaseModelViewSet):
                 "labels": [
                     {"id": str(label.id), "name": label.label}
                     for label in ca.filtering_labels.all()
+                    if label.id in viewable_label_ids
                 ],
                 "authors": [
                     {"id": str(actor.id), "name": str(actor)}
                     for actor in ca.authors.all()
+                    if actor.id in viewable_actor_ids
                 ],
                 "outcomes": outcomes_of(ca) if ca.id in audits_by_id else None,
                 "is_counted": ca.status in LIVE_STATUSES,
@@ -11587,26 +11596,39 @@ class FrameworkViewSet(BaseModelViewSet):
             }
         )
 
-    @action(detail=True, methods=["get"], url_path="requirement_evidences")
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="requirement_evidences",
+        permission_classes=[permissions.IsAuthenticated],
+    )
     def requirement_evidences(self, request, pk):
         """Zip of requirements' evidences across this framework's audits.
 
-        Query params:
+        Parameters, in the query string or as JSON lists in a POST body:
           - requirement (urn, required): repeat it, or separate urns with commas.
-          - compliance_assessments (comma-separated uuids): defaults to every
-            readable audit; present but empty selects none.
-          - exclude (comma-separated requirement assessment uuids): left out.
+          - compliance_assessments (uuids): defaults to every readable audit;
+            present but empty selects none.
+          - exclude (requirement assessment uuids): left out.
           - implementation_group (str): keep requirements of this group only.
         """
         framework = self.get_object()
-        requirement_urns = list(
-            dict.fromkeys(
-                urn
-                for value in request.query_params.getlist("requirement")
-                for urn in value.split(",")
-                if urn
-            )
-        )
+        if not RoleAssignment.is_object_readable(request.user, Framework, framework.id):
+            raise NotFound()
+
+        def values(name: str) -> list[str] | None:
+            if request.method == "POST":
+                raw = request.data.get(name)
+                if raw is None:
+                    return None
+                items = raw if isinstance(raw, list) else [raw]
+            else:
+                if name not in request.query_params:
+                    return None
+                items = request.query_params.getlist(name)
+            return [v for item in items for v in str(item).split(",") if v]
+
+        requirement_urns = list(dict.fromkeys(values("requirement") or []))
         if not requirement_urns:
             return Response(
                 {"error": "requirement is required"},
@@ -11618,10 +11640,10 @@ class FrameworkViewSet(BaseModelViewSet):
                 request.user, ComplianceAssessment
             ),
         )
-        if "compliance_assessments" in request.query_params:
-            audit_ids = request.query_params.get("compliance_assessments", "")
+        audit_ids = values("compliance_assessments")
+        if audit_ids is not None:
             try:
-                ids = [UUID(i) for i in audit_ids.split(",") if i]
+                ids = [UUID(i) for i in audit_ids]
             except ValueError:
                 return Response(
                     {"error": "invalid compliance_assessments"},
@@ -11629,9 +11651,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 )
             audits = audits.filter(id__in=ids)
         try:
-            excluded = [
-                UUID(i) for i in request.query_params.get("exclude", "").split(",") if i
-            ]
+            excluded = [UUID(i) for i in values("exclude") or []]
         except ValueError:
             return Response(
                 {"error": "invalid exclude"},
@@ -11644,7 +11664,7 @@ class FrameworkViewSet(BaseModelViewSet):
         viewable_controls = set(
             RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
         )
-        ig_filter = request.query_params.get("implementation_group") or None
+        ig_filter = next(iter(values("implementation_group") or []), None)
         urn_set = set(requirement_urns)
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
         audit_roles = {}
