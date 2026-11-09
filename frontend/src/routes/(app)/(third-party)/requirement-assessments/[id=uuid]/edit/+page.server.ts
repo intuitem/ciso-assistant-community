@@ -68,6 +68,11 @@ export const load = (async ({ fetch, params }) => {
 	object.task_templates = object.task_templates?.map((task_template) => task_template.id) ?? [];
 	object.findings = object.findings?.map((finding) => finding.id) ?? [];
 	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
+	// Compliance hidden but applicability readable (score-only audits): start the
+	// form from it, so the applicability toggle only writes when it is switched.
+	if (!('result' in object) && 'not_applicable' in object) {
+		object.result = object.not_applicable ? 'not_applicable' : 'not_assessed';
+	}
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const selectOptions: Record<string, any> = {};
@@ -263,8 +268,14 @@ export const actions: Actions = {
 			'security_exceptions',
 			'findings'
 		];
+		// The applicability toggle of score-only audits writes the hidden result,
+		// only when switched: N/A or back to not assessed (the backend accepts nothing else).
+		const applicabilitySwitched =
+			!('result' in currentRa) &&
+			'not_applicable' in currentRa &&
+			(formData.result === 'not_applicable') !== currentRa.not_applicable;
 		for (const key of visibilityControlled) {
-			if (!(key in currentRa)) {
+			if (!(key in currentRa) && !(key === 'result' && applicabilitySwitched)) {
 				delete formData[key];
 			}
 		}

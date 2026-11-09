@@ -5693,8 +5693,6 @@
 	"detectedComplianceAssessments": "Виявлено аудитів: {total} (враховано: {counted}, виключено: {excluded}):",
 	"compliancePercentage": "% відповідності",
 	"complianceFormulaShort": "відповідні + ½·часткові, без урахування Н/З та неоцінених",
-	"averageImplementationScore": "Середній бал впровадження",
-	"overScoredRequirementsOnly": "лише за оціненими вимогами",
 	"visibleToCurrentUser": "видимі поточному користувачу",
 	"inScopeAfterIGFilter": "в області застосування після фільтра груп впровадження",
 	"overallResultDistribution": "Загальний розподіл результатів",

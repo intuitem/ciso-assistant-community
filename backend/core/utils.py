@@ -2049,6 +2049,41 @@ def is_field_read_only_for(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "read"
 
 
+# What the applicability toggle of score-only audits writes to `result`.
+APPLICABILITY_RESULTS = frozenset({"not_applicable", "not_assessed"})
+
+
+def is_applicability_readable(compliance_assessment, role):
+    """Whether `role` may read a requirement's applicability (`not_applicable`,
+    `anchored_score`) with its scores.
+
+    Yes where it reads compliance, or in a score-only audit, where compliance is
+    hidden from the auditor too and N/A comes from the applicability toggle.
+    Elsewhere N/A would disclose a verdict hidden from this role.
+    """
+    return is_field_visible_to(compliance_assessment, "score", role) and (
+        is_field_visible_to(compliance_assessment, "result", role)
+        or not is_field_visible_to(compliance_assessment, "result", "auditor")
+    )
+
+
+def is_applicability_write(compliance_assessment, field_name, value, role):
+    """Whether writing `value` to `field_name` only switches a requirement's
+    applicability in a score-only audit, which a role that edits scores may do
+    even though compliance is not editable for it.
+
+    Score-only: compliance is hidden from the auditor too, so no visible verdict
+    can be overwritten; only "not applicable" and "not assessed" pass.
+    """
+    return (
+        field_name == "result"
+        and isinstance(value, str)
+        and value in APPLICABILITY_RESULTS
+        and not is_field_visible_to(compliance_assessment, "result", "auditor")
+        and is_field_editable_by(compliance_assessment, "score", role)
+    )
+
+
 def is_open_assignee(user, requirement_assessment):
     """Whether the user answers this requirement through an assignment that is still
     open (not submitted or closed): the assignment page shows them the respondent
@@ -2129,17 +2164,27 @@ def respondent_progress_counts(
     Returns (units, answered units, requirements completed). Not the auditor's
     `ComplianceAssessment.progress`.
     """
-    from core.models import RequirementAssessment
-
     ca = compliance_assessment
+    overrides = ca.field_visibility or (
+        getattr(ca.framework, "field_visibility", None) if ca.framework_id else None
+    )
     alignment_pair = resolve_visibility_from_overrides(
-        ca.field_visibility
-        or (
-            getattr(ca.framework, "field_visibility", None) if ca.framework_id else None
-        ),
-        "respondent_alignment",
+        overrides, "respondent_alignment"
     )
     alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
+    # Otherwise a requirement without questions follows the audit's own content
+    # rule: compliance when the audit shows it; N/A or a score above the minimum
+    # when it is score-only.
+    result_visible = (
+        resolve_visibility_from_overrides(overrides, "result").get("auditor", "edit")
+        != "hidden"
+    )
+    min_score_fallback = 0
+    if not result_visible:
+        if ca.min_score is not None:
+            min_score_fallback = ca.min_score
+        elif ca.framework_id is not None:
+            min_score_fallback = ca.framework.min_score
 
     total_q = 0
     answered_q = 0
@@ -2156,7 +2201,12 @@ def respondent_progress_counts(
         unit_done = (
             bool(ra.respondent_alignment)
             if alignment_in_use
-            else ra.result != RequirementAssessment.Result.NOT_ASSESSED
+            else ra.is_assessed_for_progress(
+                status_driven=False,
+                has_questions=False,
+                result_visible=result_visible,
+                min_score_fallback=min_score_fallback,
+            )
         )
         if unit_done:
             answered_q += 1
