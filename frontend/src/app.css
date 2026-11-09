@@ -37,14 +37,36 @@
 	   same Skeleton btn hover (brightness 125% light / 75% dark) rather than a bg shift. */
 	@apply text-primary-contrast-500 bg-primary-500 hover:brightness-125 dark:hover:brightness-75;
 }
+/* Only the main action (primary) is filled; every secondary toolbar action shares one
+   neutral tonal look, so colour no longer competes with the primary or implies meaning. */
 @utility btn-mini-secondary {
-	@apply text-gray-50 bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500;
+	@apply text-surface-800-200 bg-surface-100-900 hover:bg-surface-200-800 border-l border-surface-200-800;
 }
 @utility btn-mini-tertiary {
-	@apply text-gray-50 bg-sky-500 hover:bg-sky-400 dark:bg-sky-600 dark:hover:bg-sky-500;
+	@apply btn-mini-secondary;
 }
 @utility btn-mini-quaternary {
-	@apply text-gray-50 bg-teal-500 hover:bg-teal-400 dark:bg-teal-600 dark:hover:bg-teal-500;
+	@apply btn-mini-secondary;
+}
+/* Secondary action next to a filled primary: quiet surface + hairline border, the icon carries
+   the brand colour. Same family as btn-mini-secondary so toolbars and headers read as one system. */
+/* Header action block: even 2-column grid of equal buttons; an odd last one spans the row. */
+@utility action-grid {
+	@apply grid grid-cols-2 gap-2 *:w-full;
+	& > :last-child:nth-child(odd) {
+		@apply col-span-2;
+	}
+}
+@utility btn-quiet {
+	@apply bg-surface-50-950 text-surface-800-200 border border-surface-200-800 shadow-xs hover:bg-surface-100-900 hover:border-surface-300-700;
+	/* Icons carry a per-action hue (same action, same colour app-wide); unmapped ones fall back to primary. */
+	& > i:not([class*='text-']) {
+		@apply text-primary-500;
+	}
+}
+/* Accelerator tile: left-aligned icon + label, the audit page's pattern, reused on every assessment. */
+@utility action-tile {
+	@apply flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 text-sm font-medium leading-tight text-left cursor-pointer transition-colors hover:bg-surface-100-900 hover:border-surface-300-700;
 }
 
 /* v5 styles the <code> element itself and dropped the `code` utility; we still tag

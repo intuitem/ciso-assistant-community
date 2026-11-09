@@ -73,7 +73,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[data.requirementAssessment.result] === '#000000'
+		complianceResultColorMap[data.requirementAssessment.result] === '#475569'
 			? 'text-white'
 			: 'text-gray-900'
 	);

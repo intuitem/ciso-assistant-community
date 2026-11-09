@@ -13,7 +13,7 @@ description: "TSP Section 100\n2017 Trust Services Criteria for Security, Availa
   s operational, reporting, or compliance objectives; and (d) for a particular type\
   \ of information used by the entity. Link: https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022"
 copyright: "\xA9 2023 Association of International Certified Professional Accountants\xAE"
-version: 2
+version: 3
 publication_date: 2025-01-12
 provider: AICPA
 packager: intuitem
@@ -4460,7 +4460,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.1
+      ref_id: PI1.1
       description: The entity obtains or generates, uses, and communicates relevant,
         quality information regarding the objectives related to processing, including
         definitions of data processed and product and service specifications, to support
@@ -4475,7 +4475,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.2
+      ref_id: PI1.2
       description: "The entity implements policies and procedures over system inputs,\
         \ including controls over completeness and accuracy, to result in products,\
         \ services, and reporting to meet the entity\u2019s objectives."
@@ -4488,7 +4488,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.3
+      ref_id: PI1.3
       description: "The entity implements policies and procedures over system processing\
         \ to result in products, services, and reporting to meet the entity\u2019\
         s objectives."
@@ -4501,7 +4501,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.4
+      ref_id: PI1.4
       description: "The entity implements policies and procedures to make available\
         \ or deliver output completely, accurately, and timely in accordance with\
         \ specifications to meet the entity\u2019s objectives."
@@ -4515,7 +4515,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.5
+      ref_id: PI1.5
       description: "The entity implements policies and procedures to store inputs,\
         \ items in processing, and outputs completely, accurately, and timely in accordance\
         \ with system specifications to meet the entity\u2019s objectives."

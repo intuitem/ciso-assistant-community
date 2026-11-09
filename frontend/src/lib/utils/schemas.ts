@@ -1462,6 +1462,14 @@ export const ebiosRMSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
+// the user picks the destination domain (folder); it defaults to the source's
+export const ebiosRMDuplicateSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	version: z.string().optional(),
+	folder: z.string().optional()
+});
+
 export const fearedEventsSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
@@ -2334,6 +2342,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'data-contractors': dataContractorSchema,
 	'data-transfers': dataTransferSchema,
 	'ebios-rm': ebiosRMSchema,
+	'ebios-rm_duplicate': ebiosRMDuplicateSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
 	stakeholders: StakeholderSchema,
