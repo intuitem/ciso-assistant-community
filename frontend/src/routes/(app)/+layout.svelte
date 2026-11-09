@@ -30,6 +30,7 @@
 	import ThemeToggle from '#lib/components/ThemeToggle/ThemeToggle.svelte';
 	import NotificationBell from '#lib/components/NotificationBell/NotificationBell.svelte';
 	import ChatWidget from '#lib/components/ChatWidget/ChatWidget.svelte';
+	import RespondentShell from '#lib/components/RespondentShell/RespondentShell.svelte';
 	import {
 		interceptExternalLinks,
 		setGlobalModalStore,
@@ -173,50 +174,54 @@
 <!-- min-height and background live here (not on <main>) so appbar + main can
      add up to exactly one viewport; min-h-screen on <main> alone always overflowed. -->
 
-<div class="overflow-x-clip min-h-dvh bg-linear-to-br from-surface-200-800 to-surface-150-850">
-	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
+{#if data?.user?.is_third_party}
+	<RespondentShell title={safeTranslate(displayTitle)}>
+		{@render children?.()}
+	</RespondentShell>
+{:else}
+	<div class="overflow-x-clip min-h-dvh bg-linear-to-br from-surface-200-800 to-surface-150-850">
+		<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 
-	<AppBar
-		class="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 bg-surface-50-950 w-auto pb-2 px-4 {classesSidebarOpen(
-			sidebarOpen
-		)}"
-	>
-		<div class="flex items-start justify-between px-4">
-			<div>
-				<div
-					class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-					id="page-title"
-				>
-					{safeTranslate(displayTitle)}
-				</div>
-				{#if displayModelName}
-					<div class="text-sm text-surface-600-400 font-medium">
-						{safeTranslate(displayModelName)}
-					</div>
-				{/if}
-				{#if displayModelDescription}
-					<div class="text-xs text-surface-600-400 italic">
-						{safeTranslate(displayModelDescription)}
-					</div>
-				{/if}
-			</div>
-			<div class="flex items-center gap-2">
-				{#if sideBarVisibleItems.notifications && !data?.user?.is_third_party}
-					<NotificationBell />
-				{/if}
-				<ThemeToggle />
-				{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
-					<a
-						href="/portal"
-						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
-			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
-			transition-all duration-150"
+		<AppBar
+			class="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 bg-surface-50-950 w-auto pb-2 px-4 {classesSidebarOpen(
+				sidebarOpen
+			)}"
+		>
+			<div class="flex items-start justify-between px-4">
+				<div>
+					<div
+						class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+						id="page-title"
 					>
-						<i class="fa-solid fa-table-cells-large text-surface-500"></i>
-						<span class="hidden sm:inline">{m.portals()}</span>
-					</a>
-				{/if}
-				{#if !data?.user?.is_third_party}
+						{safeTranslate(displayTitle)}
+					</div>
+					{#if displayModelName}
+						<div class="text-sm text-surface-600-400 font-medium">
+							{safeTranslate(displayModelName)}
+						</div>
+					{/if}
+					{#if displayModelDescription}
+						<div class="text-xs text-surface-600-400 italic">
+							{safeTranslate(displayModelDescription)}
+						</div>
+					{/if}
+				</div>
+				<div class="flex items-center gap-2">
+					{#if sideBarVisibleItems.notifications}
+						<NotificationBell />
+					{/if}
+					<ThemeToggle />
+					{#if data?.featureflags?.custom_portals}
+						<a
+							href="/portal"
+							class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+				text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+				transition-all duration-150"
+						>
+							<i class="fa-solid fa-table-cells-large text-surface-500"></i>
+							<span class="hidden sm:inline">{m.portals()}</span>
+						</a>
+					{/if}
 					<button
 						onclick={() => commandPalette?.toggle()}
 						aria-label={m.search()}
@@ -232,35 +237,33 @@
 				font-mono text-[10px] text-surface-500">{modifierKey}K</kbd
 						>
 					</button>
-				{/if}
-				{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
-					<button
-						onclick={() => getStartedTrigger.set(true)}
-						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 dark:bg-violet-600 text-white text-xs font-semibold shadow-lg
-			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
-					>
-						<i class="fa-solid fa-rocket mr-1"></i>
-						{m.getStarted()}
-					</button>
-				{/if}
+					{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
+						<button
+							onclick={() => getStartedTrigger.set(true)}
+							class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 dark:bg-violet-600 text-white text-xs font-semibold shadow-lg
+				ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+				hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+				focus:outline-hidden focus:ring-violet-500 cursor-pointer"
+						>
+							<i class="fa-solid fa-rocket mr-1"></i>
+							{m.getStarted()}
+						</button>
+					{/if}
+				</div>
 			</div>
-		</div>
-		<div class="px-4">
-			<hr class="my-1" />
-			<Breadcrumbs />
-		</div>
-	</AppBar>
-	<!-- Router Slot -->
-	{#if !data?.user?.is_third_party}
+			<div class="px-4">
+				<hr class="my-1" />
+				<Breadcrumbs />
+			</div>
+		</AppBar>
+		<!-- Router Slot -->
 		<CommandPalette bind:this={commandPalette} />
-	{/if}
-	{#if page.data.featureflags?.chat_mode}
-		<ChatWidget />
-	{/if}
-	<main class="p-8 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
-		{@render children?.()}
-	</main>
-	<!-- ---- / ---- -->
-</div>
+		{#if page.data.featureflags?.chat_mode}
+			<ChatWidget />
+		{/if}
+		<main class="p-8 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
+			{@render children?.()}
+		</main>
+		<!-- ---- / ---- -->
+	</div>
+{/if}
