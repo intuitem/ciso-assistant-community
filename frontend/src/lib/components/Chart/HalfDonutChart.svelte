@@ -56,12 +56,16 @@
 					{
 						name: level(),
 						type: 'pie',
-						radius: ['40%', '70%'],
-						center: ['50%', '70%'],
+						radius: ['32%', '55%'],
+						center: ['50%', '75%'],
 						// adjust the start and end angle
 						startAngle: 180,
 						endAngle: 360,
-						minShowLabelAngle: 1,
+						// Slivers get no outside label (it collides or truncates); the tooltip still names them.
+						minShowLabelAngle: 8,
+						labelLine: { length: 8, length2: 6 },
+						// Edge labels sit beside the arc's ends; let them wrap instead of truncating.
+						label: { overflow: 'break', width: 70 },
 						data: values,
 						color: colors
 					}

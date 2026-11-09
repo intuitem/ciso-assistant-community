@@ -125,6 +125,7 @@ export function buildCustomFieldFilters(
 				props: {
 					label: def.label_localized,
 					multiple: true,
+					translateOptions: false,
 					options: def.choices.map((c) => ({ label: c.label_localized, value: c.value }))
 				}
 			};
@@ -3905,9 +3906,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'metric_definition',
-			'rawValue',
+			'currentValue',
 			'target_value',
-			'unit',
 			'status',
 			'lastRefresh',
 			'folder'
@@ -3916,9 +3916,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'metric_definition',
-			'raw_value',
+			'current_value',
 			'target_value',
-			'unit',
 			'status',
 			'last_refresh',
 			'folder'

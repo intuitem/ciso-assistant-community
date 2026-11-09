@@ -35,11 +35,7 @@
 
 <DetailView {data}>
 	{#snippet actions()}
-		<button
-			class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
-			onclick={enrich}
-			disabled={enriching}
-		>
+		<button class="btn btn-quiet h-fit" onclick={enrich} disabled={enriching}>
 			{#if enriching}
 				<i class="fa-solid fa-spinner fa-spin mr-2"></i>
 			{:else}

@@ -12,6 +12,8 @@ from core.views import (
     GenericFilterSet,
     SmartOrderingFilter,
     actor_prefetch,
+    check_folder_add_permission,
+    check_folder_view_permission,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -20,7 +22,11 @@ from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
 from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
-from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
+from .helpers import (
+    ecosystem_radar_chart_data,
+    ebios_rm_visual_analysis,
+    duplicate_ebios_rm_study,
+)
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -33,7 +39,10 @@ from .models import (
     OperatingMode,
     KillChain,
 )
-from .serializers import EbiosRMStudyReadSerializer
+from .serializers import (
+    EbiosRMStudyReadSerializer,
+    EbiosRMStudyDuplicateSerializer,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -142,6 +151,60 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         with transaction.atomic():
             self._process_responsibility_matrix(request)
             return super().update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Duplicate EBIOS RM study",
+        serializer_class=EbiosRMStudyDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        source = self.get_object()  # 404s when the study is not viewable
+        serializer = EbiosRMStudyDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # the user picks the destination domain; default to the source's folder
+        target_folder = data.get("folder") or source.folder
+        # Objects are created in the target folder, so add permission is checked
+        # there. Only require the permission for the owned types the source
+        # actually has records of (an empty study must stay duplicable), like
+        # RiskAssessment duplication does.
+        owned = [
+            (FearedEvent, {"ebios_rm_study": source}),
+            (RoTo, {"ebios_rm_study": source}),
+            (Stakeholder, {"ebios_rm_study": source}),
+            (StrategicScenario, {"ebios_rm_study": source}),
+            (AttackPath, {"ebios_rm_study": source}),
+            (OperationalScenario, {"ebios_rm_study": source}),
+            (OperatingMode, {"operational_scenario__ebios_rm_study": source}),
+            (
+                KillChain,
+                {"operating_mode__operational_scenario__ebios_rm_study": source},
+            ),
+        ]
+        present = [
+            model for model, flt in owned if model.objects.filter(**flt).exists()
+        ]
+        # clone copies source children -> require view on each in the source folder
+        check_folder_view_permission(request.user, source.folder, *present)
+        check_folder_add_permission(request.user, target_folder, EbiosRMStudy, *present)
+
+        clone = duplicate_ebios_rm_study(
+            source,
+            name=data["name"],
+            description=data.get("description", source.description),
+            ref_id=data.get("ref_id", source.ref_id),
+            version=data.get("version", source.version),
+            folder=target_folder,
+            # a cross-domain clone copies the shared objects (assets, threats,
+            # controls, elementary actions, entities) the target cannot see into
+            # it: check the add permission for each type it actually creates
+            before_copy=lambda model: check_folder_add_permission(
+                request.user, target_folder, model
+            ),
+        )
+        return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
