@@ -1,7 +1,9 @@
-# Let users connect AI apps over OAuth, narrowed by built-in profiles of independent actions
+# Serve MCP from the instance through a secretless sidecar, with OAuth consent and delegated access
 
-- Status: Accepted
-- Deciders: @tchoumi313
+- Status: Proposed (revises the first, in-process version of this decision)
+- Date: 2026-11-09
+- Deciders: @tchoumi313, @eric-intuitem
+- Related: [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md) (the authorization model this ADR implements for MCP: delegations, planes, the profile cap and the security invariants), [service-accounts-composition](service-accounts-composition.md)
 
 ## Context
 
@@ -9,101 +11,103 @@ Customers want to plug AI apps (Claude Code, Copilot Studio, MCP Inspector, and 
 
 The instance should serve MCP itself, at `<url>/mcp`, so that a user only enters a URL in their app and signs in.
 
-MCP clients expect OAuth 2.1: they discover the server (RFC 9728, RFC 8414), register themselves (RFC 7591, DCR), and send the user through a browser sign-in with PKCE. Most of them cannot be registered in advance, because they create a new client at each install. Copilot Studio even creates one per connection, and does not send the `resource` parameter (RFC 8707).
+MCP clients expect OAuth 2.1: they discover the server (RFC 9728, RFC 8414), register themselves (RFC 7591, DCR, or Client ID Metadata Documents), and send the user through a browser sign-in with PKCE. Most of them cannot be registered in advance, because they create a new client at each install. Copilot Studio even creates one per connection, and does not send the `resource` parameter (RFC 8707).
 
-Administrators asked for three things first: an off switch, a say on who may connect, and a list of every connection. Then they asked that an app can get less than its user. The first version of that used cumulative levels (read, create, update, approve). It was rejected: an approver should not be able to create or delete just because approve sits higher. The user should pick the combination they want.
+An MCP server handles many users' tokens and faces the network, so it is the component most likely to be compromised. The first version of this decision ran tool calls in-process in a `backend-mcp` service, which held the database credentials and the Django secret key: a compromise would have exposed everything. What a connection may do, and how the backend enforces it, is decided in [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md). This ADR decides how MCP is served and how it plugs into that model.
 
 ## Decision
 
-We will run MCP as its own service, `backend-mcp`, acting as an OAuth resource server, with allauth's IdP as the authorization server at `<url>/api`. Users connect an app themselves, on a consent page, if an administrator allowed them. On that page they pick one of four built-in profiles. Each profile is a combination of independent actions: read (always), create, and update (which includes delete). Every tool call runs in-process as the user, so the app never gets more than the user, and the profile narrows it further.
+We will serve MCP at `<url>/mcp` from a sidecar running `ca_mcp`, the same code as in stdio mode. The sidecar holds no database access and no secret other than an introspection credential. It turns MCP requests into standard API calls, carrying the caller's OAuth token, to a dedicated backend listener that acts as the resource server for `<url>/mcp` and serves only the operations the tools use. allauth's IdP is the authorization server at `<url>/api`. Users connect an app themselves, on a consent page, if an administrator allowed them, and choose a delegation preset. What the connection may then do follows [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md): **RBAC ∩ delegation ∩ profile**, with control-plane and non-delegable operations always refused. Version 1 offers levels 0 and 1, enforced by the MCP server, with a backend backstop; domain overrides come with that ADR's step 1a.
 
 ## Consequences
 
-### Architecture (built)
+### Architecture
 
-- `backend-mcp` is a separate process. It shares the backend's database, checks each token there, and dispatches tool calls in-process as the user. The token is never passed through to `/api`.
-- allauth is the authorization server, with issuer `<url>/api`. The authorize view also accepts the Knox cookie of a user already signed in to the frontend. Nowhere else does the Knox cookie count as a session.
-- Clients register through DCR only. Self-registered clients can call `/mcp` only: their tokens are refused on `/api`.
-- The `resource` parameter is optional, because Copilot Studio does not send it. When it is missing, the token is bound to the MCP resource anyway.
+- **The MCP server is `ca_mcp`, run as a sidecar from the community `mcp` image.** In each customer's pod it runs next to the backend, under its own user ID, with no access to the backend's database volume, environment or secrets. It passes the caller's OAuth token through to the backend; the backend does not speak MCP.
+- **It learns each token's delegation through allauth's token introspection,** with `populate_introspection_response` adding the grant's selection and `is_introspection_allowed` limited to the sidecar's client. Introspection requires `IDP_OIDC_INTROSPECTION_ENABLED` and gives the sidecar its only secret: client credentials that let it check tokens it already holds, and nothing else. allauth limits introspection to 60 requests a minute per client, so the sidecar caches each answer for about a minute. Revocation still takes effect at once, because the backend checks the token itself on every call.
+- **MCP tokens are accepted only on a dedicated MCP listener:** a second gunicorn bind, turned on by an environment variable, bound to `127.0.0.1` in a pod and an internal port the reverse proxy does not route in compose. Every other listener refuses them.
+- **The MCP listener serves only the operations the tools use.** An inventory kept next to the tools lists each operation the `ca_mcp` tools perform (about 108 route patterns across 126 tools): route, method, custom action and any parameter that changes the effect. Each entry records the permissions the operation actually checks, their CRUD operation, and all its effects: database writes, emails, queued tasks, and outbound calls such as ITSM synchronization and webhooks. A bulk operation is classified by its strongest effect. The inventory flags every operation that can touch several domains or objects, directly or indirectly. Every other operation is refused on the MCP listener, so the API reachable through MCP is a finite, reviewed list, whatever the sidecar sends.
+- **allauth is the authorization server, with issuer `<url>/api`.** The authorize view also accepts the Knox cookie of a user already signed in to the frontend; nowhere else does the Knox cookie count as a session. The backend serves the authorization-server metadata; the sidecar serves only `/mcp` and the protected-resource metadata.
+- **The reverse proxy isolates `/mcp`** on the app's host. On every route to the sidecar (`/mcp`, `/.well-known/oauth-protected-resource`) it removes the `Cookie` request header, removes `Set-Cookie` and `Service-Worker-Allowed` from responses, and adds `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff`. The compose Caddy configuration does this by default, and the README documents it for other proxies.
+- **Removed from the first version:** the in-process `backend-mcp` service (`backend/mcp_server/`) and `Dockerfile.mcp`.
 
-### Who may connect (built)
+### The MCP resource boundary
 
-- A connection that is not used for 30 days ends: its refresh token expires and the user must approve the app again (`OAUTH_REFRESH_TOKEN_IDLE_DAYS`, `0` = never). allauth issues a new refresh token at each refresh, so an app in use never notices.
-- The `mcp` feature flag is the kill switch. Off: every connection is blocked, but kept, and works again when it is turned back on.
-- `can_connect_apps` on the user is off by default and only an administrator can change it. Unticking it, or deactivating the user, revokes all their connections at once.
-- Administrators see every connection in **Organization > Connected apps**, with its redirect hosts and allowed actions, and can search by user or app. They can revoke one, or revoke an app for everyone. Revoking an app for everyone groups the registrations that share a name and a return address, and deletes self-registered clients so their IDs cannot be reused.
+The MCP specification forbids an MCP server from passing a client's token on to an API the token was not issued for, and from accepting tokens that were not issued for it. The sidecar forwards the caller's token to the backend, so the boundary of the protected resource has to be explicit:
 
-### What an app may do (built)
+- **One resource, two components.** The protected resource `<url>/mcp` is implemented by two components deployed together: the protocol front, which is the sidecar, and the execution endpoint, which is the backend's MCP listener. It is the same resource that the first version of this decision ran in a single process. Moving execution out of the network-facing process keeps secrets out of it without creating a new resource.
+- **The execution endpoint is the resource server.** The MCP listener validates every token itself, without relying on the front's check: active, issued by this instance, audience `<url>/mcp`, and a live `AppGrant`. Only then does it run an operation from the inventory.
+- **Every MCP token carries that audience.** Clients send it as a resource indicator (RFC 8707). When a client omits it, as Copilot Studio does, the authorization server records `<url>/mcp` on the grant itself, so the audience check is the same for every client. allauth carries a grant's resource from the authorization request to the code and then to the token, so the authorize view can set it.
+- **The listener is not a downstream resource.** It exposes no API of its own, only the inventoried operations of the MCP resource, and it refuses any token with another audience. The API listeners, in turn, refuse tokens whose audience is `<url>/mcp`. The front presents the token to nothing else; introspection goes to the authorization server.
+- **The reasons behind the specification's rule are covered.** Controls cannot be bypassed, because the token works nowhere else. Every action is attributed to the app (`via_app`). The backend does not rely on the front's validation.
+- **Accepted interpretation.** The MCP specification does not say explicitly whether an MCP server may be split into a protocol front and an execution endpoint that share one audience. Clients and the authorization server see a single resource at `<url>/mcp`, so the split cannot be observed from outside. We accept the reading above (decided by @eric-intuitem, 2026-11-08).
+- **Fallback.** If a later revision of the specification rules this out, the front exchanges the MCP token for an internal credential (token exchange, RFC 8693). allauth does not implement token exchange, so this would mean a custom grant, a client secret in the front, and a second token carrying the same delegation.
 
-- There are three actions. Read covers `get_*`, `list_*`, `count_*` and `find_*`. Create covers `create_*` and `import_*`. Update covers `update_*`, `sync_*`, `refresh_*` and `delete_*`. Read is always granted, because the other tools need IDs that only read tools return.
-- Each tool's action is declared in a list in `ca_mcp/server.py`, never guessed from its name. A test fails when a tool has no action. A new tool must be added to one of the lists.
-- There are four built-in profiles, one per combination: Read only (the default), Read and create, Read and update, and Read, create and update. They are not exposed: there is no API and no admin screen, and nobody can edit them. The model keeps `can_create`, `can_update` and `builtin`, so that custom profiles can come later without a new data model.
-- The user picks a profile on the consent page. A client that skips consent gets the default profile.
-- The choice is stored as a grant per user and client, not on the token, because allauth issues new tokens at each refresh and copies nothing across. No grant means no access. There is no fallback.
-- To give an app more, the user approves it again and picks another profile. Profiles cannot be widened behind the user's back, because nobody can edit them.
-- `tools/list` hides the tools whose action is not granted. A guard on each write tool is the actual boundary. The `get_my_access` tool tells the agent what it can and cannot do. We do not use step-up (`insufficient_scope`) for now.
-- MCP has a single scope, `mcp:read`, which means "may use MCP". Every MCP token gets it, whatever the profile, and `backend-mcp` requires it. What the app may do comes only from the profile.
+### Who may connect
 
-### Audit and limits (built)
+- **Clients register through DCR,** and through Client ID Metadata Documents where they support it. Self-registered clients get nothing until a user who may connect apps approves them on the consent page.
+- **A connection that is not used for 30 days ends:** its refresh token expires and the user must approve the app again (`OAUTH_REFRESH_TOKEN_IDLE_DAYS`, `0` = never). allauth issues a new refresh token at each refresh, so an app in use never notices.
+- **The `mcp` feature flag turns MCP on or off for the instance.** Off: every OAuth app connection is blocked, but kept, and works again when it is turned back on. It does not affect `ca_mcp` run by a user over stdio with their own PAT.
+- **`can_connect_apps` on the user** is off by default and only an administrator can change it. Unticking it, or deactivating the user, revokes all their connections at once.
+- **Administrators see every connection** in **Organization > Connected apps**, with its redirect hosts and current delegation, and can search by user or app. They can revoke one, or revoke an app for everyone. Revoking an app for everyone groups the registrations that share a name and a return address, and deletes self-registered clients so their IDs cannot be reused.
 
-- Audit entries for changes made through an app keep the user as the actor and add `via_app` (client ID, name, profile). SIEM events carry it as `actor.app_name` and `actor.app_uid` in OCSF, and as `via_app` in the raw format.
-- Every tool call, reads included, is logged by `backend-mcp` as `mcp tool call`, with the user, app, profile, actions, tool, outcome, duration and answer size.
-- Each connection (one user with one app) has a budget: 60 calls per minute (`MCP_MAX_CALLS_PER_MINUTE`) and 2,000,000 characters per hour (`MCP_MAX_RESPONSE_CHARS_PER_HOUR`). `0` turns a limit off. An agent can loop, or be steered by a prompt injection into reading everything the user can see. The budget stops it from overloading the instance or pulling out the whole database in a few minutes, while normal use stays far below it.
-- The counters live in the Django cache, so they are only exact when the cache is shared by all workers. The shared cache (memcached) is a separate piece of work.
+### What an app may do
 
-### Next, in this order (decided, not built)
+- **The user picks a delegation preset on the consent page:** All data (level 0), Read, Read and create, Read, create and update, or Read, create, update and delete. A client that skips consent gets the default profile. Domain overrides (level 2) are edited afterwards on the connection, from step 1a of [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md).
+- **The choice is stored as a grant per user and client (`AppGrant`), not on the token,** because allauth issues new tokens at each refresh and copies nothing across. The grant stores the default consented to; its `ConnectionProfile` provides the organization's cap. No grant means no access; there is no fallback.
+- **Each tool's operations come from the inventory,** never guessed from its name. A test fails when a tool has no entry, so a new tool must be added to the inventory.
+- **In v1, the sidecar enforces the connection's default selection,** which we trust because we maintain its code. A tool is allowed when every operation it performs is in the selection; unknown tools are refused. The sidecar cannot know which domain a call will touch, so v1 offers levels 0 and 1 only.
+- **The backend backstop applies from v1:** the backend treats every MCP token as a level-0 delegation, refusing control-plane and non-delegable operations. Tools that write to the control plane (`update_user`, `create_folder`) are refused. From step 1a, the backend applies the grant's own delegation.
+- **`tools/list` hides the tools the delegation does not allow,** and the `get_my_access` tool tells the agent what it can and cannot do. We do not use step-up (`insufficient_scope`) for now.
+- **MCP has a single scope, `mcp:read`,** which means "may use MCP". Every MCP token gets it, and the MCP listener requires it. What the app may do comes only from the delegation.
+- **Existing admin-registered OAuth clients keep today's behavior,** unfiltered.
 
-1. **Small hardening batch.** PKCE is required for confidential clients too. `dispatch` checks the HTTP method against the profile as a second guard: a read-only connection may only send `GET` and `HEAD`. Which methods create and update need is checked tool by tool before this is turned on.
-2. **Apps as a governance list** ("Add an app"). See the next section.
-3. **Domain limit.** A profile can be limited to some domains (with subdomains). In the Global domain, the app can still read catalog objects (frameworks, reference controls, threats, matrices, libraries), but not real controls, assets or audits. The request shape follows RFC 9396 (rich authorization requests). This lives in the core rights code, not in MCP, so it is its own project.
+### Audit and limits
 
-### Apps as a governance list (decided, not built)
+- **Audit entries for changes made through an app keep the user as the actor and add `via_app`** (client ID, name, delegation). SIEM events carry it as `actor.app_name` and `actor.app_uid` in OCSF, and as `via_app` in the raw format.
+- **Every tool call, reads included, is logged by the sidecar** as `mcp tool call`, with the user, app, delegation, tool, outcome, duration and answer size.
+- **Each connection (one user with one app) has a budget,** enforced by the sidecar: 60 calls per minute (`MCP_MAX_CALLS_PER_MINUTE`) and 2,000,000 characters per hour (`MCP_MAX_RESPONSE_CHARS_PER_HOUR`); `0` turns a limit off. The budget stops a looping or prompt-injected agent from overloading the instance. It is a safeguard for well-behaved deployments, not a security boundary: a compromised sidecar would ignore it.
 
-- An administrator registers an app with its own client ID. Apps come in two kinds:
-  - **Server apps** are confidential clients with an HTTPS redirect (Copilot Studio, a hosted agent). They can be marked **Trusted**.
-  - **Desktop apps** use a loopback redirect (Claude Code, MCP Inspector). They can only be **Allowed**, never Trusted, because any program on the machine can listen on localhost and pretend to be them (RFC 8252, section 8.6). A desktop app never skips consent and never gets `/api`.
-- Admin-registered apps are MCP only by default. An "Allow REST API access" tick opens `/api` for server apps.
-- The profiles an app may offer are chosen on the app. Self-registered apps get all profiles.
-- Skip consent is allowed only for trusted server apps.
-- A deny list on redirect hosts blocks self-registration from those hosts and revokes their connections at once.
-- CIMD (client ID metadata documents) replaces or complements DCR once enough clients support it. Check client support before building it.
-- Self-registered clients that were never used, or not used for a long time, are cleaned up.
+### Next and later
 
-### Later (held, no date)
+- **PKCE required for confidential clients too.**
+- **Apps as a governance list.** An administrator registers an app with its own client ID. Server apps (confidential clients with an HTTPS redirect) can be marked Trusted; desktop apps (loopback redirect) can only be Allowed, never Trusted, because any program on the machine can listen on localhost and pretend to be them (RFC 8252, section 8.6). Skip consent is allowed only for trusted server apps. A deny list on redirect hosts blocks self-registration from those hosts and revokes their connections. Self-registered clients that were never used, or not used for a long time, are cleaned up. Consent policies per app follow step 2 of [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md).
+- **Making `resource` required,** once Copilot Studio sends it.
+- **A per-user budget** on top of the per-connection one, so that many apps cannot add up.
+- **Workflow tools** (risk acceptance, commitment, assignment): their custom permissions are mapped in the registry of [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md), or kept non-delegable.
 
-- Custom profiles, with checkboxes for create and update. The built-in ones are shown read-only.
-- Profiles per user or user group: one more field on the profile and one more check when listing them.
-- Profiles per app, which comes with the governance list above.
-- An Approve action, when the first workflow tool (risk acceptance, commitment, assignment) is added. It is a separate action, not above Update.
-- A PAT policy: a setting "PATs allowed on MCP", then deprecating them there.
-- Making `resource` required, once Copilot Studio sends it.
-- A per-user budget on top of the per-connection one, so that many apps cannot add up.
-- A recommendation to set `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` in production.
+## Security
 
-## Security considerations
+**Conclusion: serving MCP this way adds no path to more than a connection's delegation, and a compromise of the network-facing component stays bounded.** The sidecar holds no secrets that open the database or the instance; every authorization decision is made by the backend, under the invariants of [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md).
 
-- An app can never do more than its user, because calls run in-process with the user's own permission checks. The profile only removes access. This is why there is no Administer action: changing a user's email, a team or a domain already needs the user's own right to do so.
-- DCR is open: anyone can register a client. It gets nothing until a user who may connect apps approves it on the consent page. The warning on that page and the redirect list are the user's protection. `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` narrows it, and the deny list will narrow it further.
-- The name of a self-registered app is chosen by the app and proves nothing. The UI shows each app's redirect hosts, which are the only reliable sign. Today every app is self-registered, so the UI has no badge to tell them apart. An "Added by an admin" badge comes back with admin app registration.
-- Loopback redirects cannot prove which program is listening. Desktop apps are therefore never trusted, even when an administrator registers them. A trusted "localhost" entry would trust every local program.
-- Risks we accept for now:
-  - PATs bypass profiles;
-  - delete is part of update;
-  - the method guard is not there yet, so the tool guard is the only boundary in `backend-mcp`.
-- Self-registered tokens are refused on `/api`, so a stolen MCP token cannot reach the REST API.
-- Every call is logged and changes are tagged with the app, so an incident can be traced to one connection and revoked there.
+### Why the sidecar cannot be turned into more access
 
-## Alternatives considered
+1. **It holds nothing worth stealing beyond the tokens it sees.** No database access, no Django secret key, no IdP signing key; its only secret lets it introspect tokens it already holds.
+2. **MCP tokens are only valid at the MCP resource.** The backend's MCP listener validates each token's audience itself, every MCP token carries `<url>/mcp` as its audience, and the API listeners refuse such tokens. The listener serves only inventoried operations and is not reachable from outside the pod or the compose network. The token is never accepted by an API it was not issued for, and an app cannot skip the MCP server.
+3. **A compromised sidecar stays bounded.** The backstop refuses control-plane operations, administrator endpoints and non-delegable actions to MCP tokens, on operations that are all inventoried. A compromise gives the data-plane rights of the users whose tokens pass through it, until those tokens expire: it cannot create users, change emails, mint PATs or alter settings. Revoking a connection takes effect at once.
+4. **Browsers never hand session cookies to the sidecar.** The reverse proxy removes them on the MCP routes, and its responses cannot run script as the app or set cookies on the app's host.
+5. **Consent stays with users who may connect apps.** DCR is open, but a registered client gets nothing until such a user approves it. The consent page shows each app's redirect hosts, the only reliable sign of who it is, since a self-registered app chooses its own name. Loopback redirects cannot prove which program is listening, so desktop apps are never trusted.
+6. **Every change is attributed.** Audit entries carry `via_app`, and every tool call is logged, so an incident can be traced to one connection and revoked there.
 
-- **Cumulative levels (read < create < update < approve).** Rejected: a higher level forced the lower ones on, so an approver could also create and delete.
-- **Free checkboxes on the consent page, with no profiles.** Rejected in favour of named built-in profiles, which give a stable name in logs and audit and leave room for admin-managed profiles later.
-- **Admin-editable profiles now.** Postponed: not needed on day one, and editable profiles raise the question of widening a profile behind the user's back.
-- **A separate Delete action.** Rejected: an app that can update can already empty an object.
-- **Approve and Administer actions now.** Rejected: no tool approves anything yet, and administration is already limited by the user's rights. An empty action would look like protection without being one.
-- **Profiles per app now.** Postponed: self-registered apps cannot be named in advance or told apart (every Copilot Studio agent shares `global.consent.azure-apim.net`), and there is no admin registration yet.
-- **One scope per action (`mcp:write`, or `mcp:create` and `mcp:update`).** Rejected for now: the grant on the server already decides, so nothing would read these scopes. They only matter for step-up or for a client that shows what it was granted. A first version had `mcp:write`; it was removed before release.
-- **Step-up with `insufficient_scope`.** Postponed: client support is uneven. Hiding tools and `get_my_access` work with every client.
-- **Storing the profile on the token.** Rejected: allauth issues new tokens at refresh and copies no data, so the grant would be lost.
-- **Proxying MCP calls to `/api` with the user's token.** Rejected: token passthrough would put the OAuth token on the REST API and is forbidden by the MCP spec. In-process dispatch keeps one permission path.
-- **MCP inside the main backend process.** Rejected: a separate process can be scaled, turned off and exposed on its own.
-- **CIMD now.** Postponed until enough clients support it. DCR works with all of them today.
+### Verification
+
+Tests provide evidence, not proof; they are required validation for this design:
+
+- every read operation in the inventory producing no database write, email, queued task or outbound call, and every write operation producing only the effects its entry declares; HTTP methods are not trusted to describe effects (`GET /api/loaded-libraries/{id}/update/` writes);
+- the tools' calls checked against the inventory, and a tool without an entry failing the test;
+- every inventoried operation called with an MCP token; MCP tokens refused on the API listeners and on operations outside the inventory; tokens with another audience refused on the MCP listener;
+- a cross-domain test for every operation the inventory flags;
+- control-plane tools refused to MCP tokens from v1;
+- the compose proxy configuration applying the isolation rules.
+
+### Remaining risks, accepted as low
+
+- **In v1, the sidecar is trusted for the connection's default selection.** A compromise gives an app the full data-plane rights of its user on the inventoried operations, whatever its selection, until the token expires. A misclassified tool cannot cause this, since a test measures each operation's effects. Step 1a of [delegated-permissions-over-rbac](delegated-permissions-over-rbac.md) moves enforcement to the backend. A shorter access-token lifetime reduces the window meanwhile.
+- **Our reading of the MCP specification.** Forwarding the token rests on the resource boundary above. A reviewer, or a future revision of the specification, could read the rule more strictly; token exchange remains the fallback.
+- **A self-registered app can trick a user into consenting.** It then gets that user's data within the consented selection, since its token only works through the MCP server, and never the control plane. Setting `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` to the AI clients an instance supports limits which apps can register at all.
+- **A deployment without the proxy rules for `/mcp`.** Browsers could then send session cookies to the sidecar, and its responses would run on the app's origin. The compose configuration applies the rules by default, and the README states them for other proxies.
+- **v1's control-plane list is hand-written.** It only has to be right for the inventoried operations, each reviewed with its effects. Step 1a replaces it with the registry and its fail-closed test.
+
+### What would change this assessment
+
+Giving the sidecar database access or a backend secret, accepting MCP tokens outside the MCP listener or with another audience, presenting them to any other resource, serving operations outside the inventory on the MCP listener, removing the backstop, or dropping the proxy isolation rules from the default configuration would reopen these questions and requires a new decision.
