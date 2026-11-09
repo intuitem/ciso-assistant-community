@@ -8,7 +8,7 @@ import pytest
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.models import Terminology
-from iam.models import Folder
+from iam.models import Folder, Role, RoleAssignment
 from metrology.models import CustomMetricSample, MetricDefinition, MetricInstance
 from metrology.views import (
     CustomMetricSampleViewSet,
@@ -126,12 +126,20 @@ class TestOneStepCreation:
 
     def test_a_member_with_both_rights_creates_in_one_step(self):
         spain = make_domain("Spain")
+        user = member(spain, WRITE)
+        # Linking the library unit needs view on it: members get Global's baseline
+        # reader through its default role, a custom group does not.
+        RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name="BI-RL-BSL"),
+            folder=Folder.get_root_folder(),
+        ).perimeter_folders.add(Folder.get_root_folder())
         response = call(
             MetricInstanceViewSet,
             "post",
             "create",
             one_step(spain),
-            member(spain, WRITE),
+            user,
         )
         assert response.status_code == 201, response.data
 
