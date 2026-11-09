@@ -276,7 +276,6 @@ test('third-party representative can fill their assigned audit', async ({
 		await page.getByTestId('create-evidence-button').click();
 		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('form-input-name').fill('tp-evidence');
-		await page.getByTestId('form-input-filtering-labels').getByRole('combobox').click();
 		let objectCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
 			'The evidence object has been successfully created' + /.+/.source
 		);
