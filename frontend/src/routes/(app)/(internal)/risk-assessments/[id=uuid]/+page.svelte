@@ -422,13 +422,20 @@
 					<Anchor
 						label={m.actionPlan()}
 						href={withParams(`/risk-assessments/${risk_assessment.id}/action-plan`, selectionQuery)}
-						class="btn btn-quiet"
+						class="btn btn-quiet relative"
 						data-testid="action-plan-button"
 						><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}
 						{#if scoped && selection}
-							<span class="badge preset-tonal-primary ml-2 text-xs">
-								{m.scenarioCount({ count: selection.count })}
-							</span>
+							<!-- Corner badge: the side panel's half-width cells have no room inline. -->
+							<span
+								class="absolute -top-2 -right-1.5 badge preset-filled-primary-500 px-1.5 py-0.5 text-[10px] leading-none tabular-nums shadow-sm"
+								title={m.scenarioSelectionCount({
+									count: selection.count,
+									total: selection.total
+								})}
+								><i class="fa-solid fa-filter text-[9px] mr-1" aria-hidden="true"
+								></i>{selection.count}</span
+							>
 						{/if}</Anchor
 					>
 					<Anchor

@@ -178,7 +178,7 @@
 			<i class="fa-solid fa-filter" aria-hidden="true"></i>
 			{m.scenarioSelection()}
 		</div>
-		<div class="flex flex-wrap items-center gap-2 grow basis-96 min-w-0">
+		<div class="flex flex-wrap items-center gap-2 flex-1 basis-72 min-w-0">
 			{#if !scoped}
 				<span class="text-surface-600-400">{m.allScenarios()}</span>
 			{/if}
@@ -351,25 +351,13 @@
 				</Popover.Positioner>
 			</Popover>
 		</div>
-		<div class="flex flex-wrap items-center gap-3 ml-auto">
+		<div class="flex items-center gap-1 ml-auto shrink-0">
 			{#if selection}
-				<div class="flex flex-col gap-1 min-w-36" data-testid="selection-count">
-					<span class="text-sm">
-						{scoped
-							? m.scenarioSelectionCount({ count: selection.count, total: selection.total })
-							: m.scenarioCount({ count: selection.total })}
-					</span>
-					{#if scoped}
-						<span class="block h-1 rounded bg-surface-200-800 overflow-hidden">
-							<span
-								class="block h-1 bg-primary-500"
-								style="width: {selection.total
-									? Math.round((selection.count / selection.total) * 100)
-									: 0}%"
-							></span>
-						</span>
-					{/if}
-				</div>
+				<span class="text-sm whitespace-nowrap tabular-nums pr-2" data-testid="selection-count">
+					{scoped
+						? m.scenarioSelectionCount({ count: selection.count, total: selection.total })
+						: m.scenarioCount({ count: selection.total })}
+				</span>
 			{/if}
 			{#if scoped}
 				<button type="button" class="btn btn-sm preset-tonal-surface" onclick={copyLink}>
@@ -397,5 +385,15 @@
 		</p>
 	{:else if note && scoped}
 		<p class="px-4 pb-3 -mt-1 text-sm text-surface-600-400">{note}</p>
+	{/if}
+	{#if scoped && selection}
+		<div class="h-0.5 bg-primary-100 dark:bg-primary-900/50" aria-hidden="true">
+			<div
+				class="h-0.5 bg-primary-500 transition-[width]"
+				style="width: {selection.total
+					? Math.round((selection.count / selection.total) * 100)
+					: 0}%"
+			></div>
+		</div>
 	{/if}
 </section>
