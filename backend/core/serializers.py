@@ -19,7 +19,6 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.startup import BASELINE_READER_PERMISSIONS_LIST
 from core.utils import get_global_currency, time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
@@ -41,6 +40,9 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from integrations.models import IntegrationConfiguration, SyncMapping
 
 logger = structlog.get_logger(__name__)
+
+# library content any principal may link, even without view on Global
+GLOBAL_CATALOG_MODELS = (ReferentialObjectMixin, Question, QuestionChoice)
 
 
 class SerializerFactory:
@@ -257,7 +259,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not all(isinstance(item, models.Model) for item in items):
                 continue
             related_model = type(items[0])
-            if related_model is Folder and items is not value:
+            if related_model is Folder and field_name == "folder":
                 continue
             current_ids: set = set()
             if has_instance and items is not value:
@@ -272,14 +274,14 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not new_ids:
                 continue
             try:
-                visible = {str(pk) for pk in self._viewable_ids(related_model)}
+                visible = {
+                    str(pk)
+                    for pk in self._viewable_ids(related_model).filter(pk__in=new_ids)
+                }
             except NotImplementedError, Permission.DoesNotExist:
                 continue
             hidden = new_ids - visible
-            if hidden and (
-                f"view_{related_model._meta.model_name}"
-                in BASELINE_READER_PERMISSIONS_LIST
-            ):
+            if hidden and issubclass(related_model, GLOBAL_CATALOG_MODELS):
                 hidden -= self._global_ids(related_model, hidden)
             if hidden:
                 raise PermissionDenied(
@@ -303,8 +305,8 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def _global_ids(model: type[models.Model], ids: set) -> set:
-        """Baseline-readable objects in Global are shared, even with users
-        outside builtin groups."""
+        """Catalog objects in Global are shared, even with users outside
+        builtin groups."""
         try:
             field = RoleAssignment.get_iam_folder_field(model)
         except NotImplementedError:

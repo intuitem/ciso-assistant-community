@@ -691,8 +691,8 @@ def test_every_link_field_refuses_an_invisible_target(app_config):
             queryset = relation.get_queryset()
             if queryset is None or queryset.model in UNSCOPED_LINK_TARGETS:
                 continue
-            # a single folder is gated by the add/change check on it
-            if queryset.model is Folder and not many:
+            # the object's own folder is gated by the add/change check
+            if queryset.model is Folder and field.source == "folder":
                 continue
             model = queryset.model
             target = model(pk=uuid.uuid4())

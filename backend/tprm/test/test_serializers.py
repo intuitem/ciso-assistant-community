@@ -24,7 +24,8 @@ from tprm.serializers import (
 User = get_user_model()
 
 
-@pytest.fixture(autouse=True)
+# for tests whose MagicMock request user has no real permissions
+@pytest.fixture
 def skip_link_visibility():
     with patch("core.serializers.BaseModelSerializer._check_m2m_visibility"):
         yield
@@ -114,6 +115,7 @@ class EntitySerializersTestCase(TestCase):
         self.assertIn("updated_at", data)
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class EntityAssessmentSerializersTestCase(TestCase):
     """Tests for EntityAssessment-related serializers"""
 
@@ -351,6 +353,7 @@ class EntityAssessmentSerializersTestCase(TestCase):
         mock_assign.assert_called_once()
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class RepresentativeSerializersTestCase(TestCase):
     """Tests for Representative-related serializers"""
 
@@ -499,6 +502,7 @@ class RepresentativeSerializersTestCase(TestCase):
             serializer.save()
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class SolutionSerializersTestCase(TestCase):
     """Tests for Solution-related serializers"""
 
@@ -577,6 +581,7 @@ class SolutionSerializersTestCase(TestCase):
 # ===========================================================================
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class SolutionSubcontractingChainTestCase(TestCase):
     """
     Tests for the nested `subcontracting_chain` field on Solution serializers
