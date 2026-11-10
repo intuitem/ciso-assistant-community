@@ -33,12 +33,6 @@
 		tags={['import', 'xlsx', 'mapping', 'prototype']}
 	/>
 	<Article
-		title="Evidence review"
-		desc="Review queue for evidences: approve or reject each new file with a comment, recorded on the revision with reviewer and date. Honors the evidences list filters; optional four-eyes rule in general settings."
-		link="/evidences/review"
-		tags={['evidences', 'review', 'preview', 'prototype']}
-	/>
-	<Article
 		title="Questionnaire Autopilot"
 		desc="Upload a customer security questionnaire (.xlsx), scope it to a folder, then map its columns. LLM prefill comes next."
 		link="/experimental/questionnaire-autopilot"
