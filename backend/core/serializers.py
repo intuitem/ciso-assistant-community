@@ -3814,6 +3814,19 @@ class EvidenceReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
     link = serializers.SerializerMethodField()
+    latest_revision = serializers.SerializerMethodField()
+
+    def get_latest_revision(self, obj):
+        rev = obj.last_revision
+        if rev is None:
+            return None
+        return {
+            "id": rev.id,
+            "version": rev.version,
+            "review_status": rev.review_status,
+            "created_at": rev.created_at,
+            "uploaded_by": str(rev.uploaded_by) if rev.uploaded_by else None,
+        }
 
     def get_attachment(self, obj):
         last_revision = obj.last_revision
@@ -3896,12 +3909,14 @@ class EvidenceWriteSerializer(
         # something; a definition with no content stays revision-less until one
         # is filed against it.
         if attachment or link or observation:
+            request = self.context.get("request")
             EvidenceRevision.objects.get_or_create(
                 evidence=evidence,
                 defaults={
                     "link": link,
                     "attachment": attachment,
                     "observation": observation,
+                    "uploaded_by": getattr(request, "user", None),
                 },
             )
 
@@ -3930,6 +3945,15 @@ class EvidenceWriteSerializer(
                 Evidence.Status.APPROVED,
                 Evidence.Status.REJECTED,
             ):
+                # The status select is a review too: record it on the file it judged.
+                revision = instance.last_revision
+                if revision is not None:
+                    try:
+                        revision.record_review(
+                            self.context["request"].user, instance.status
+                        )
+                    except DjangoValidationError as e:
+                        raise serializers.ValidationError(e.message_dict)
                 self._send_review_notification(instance)
 
         return instance
@@ -3996,6 +4020,8 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     str = serializers.CharField(source="__str__")
     task_node = FieldsRelatedField()
+    uploaded_by = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+    reviewed_by = FieldsRelatedField(["id", "email", "first_name", "last_name"])
 
     class Meta:
         model = EvidenceRevision
@@ -4006,7 +4032,14 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EvidenceRevision
         fields = "__all__"
-        read_only_fields = ["version"]
+        read_only_fields = [
+            "version",
+            "uploaded_by",
+            "review_status",
+            "reviewed_by",
+            "reviewed_at",
+            "review_comment",
+        ]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -4033,6 +4066,7 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
                 models.Max("version")
             )["version__max"]
             validated_data["version"] = (max_version or 0) + 1
+            validated_data["uploaded_by"] = self.context["request"].user
             evidence.status = Evidence.Status.IN_REVIEW
             evidence.save()
             return super().create(validated_data)
