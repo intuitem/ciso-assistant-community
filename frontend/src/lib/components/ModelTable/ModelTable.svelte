@@ -506,6 +506,8 @@
 	// first request only ends the skeleton once no retry is still pending.
 	const isFetching = $derived(hasRemoteSource && !hasLoadedOnce && (!loadFailed || inFlight > 0));
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
+	// Requests can land out of order: only the latest one may fill the table.
+	let latestLoad = 0;
 
 	if (hasRemoteSource) {
 		// The trigger handler calls our reload synchronously before its first
@@ -520,10 +522,16 @@
 			query.delete('limit');
 			onQueryChange(query.toString());
 			inFlight += 1;
+			const request = ++latestLoad;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
 			currentLoad = loadTableData({
-				state,
+				state: {
+					...state,
+					setTotalRows: (value) => {
+						if (request === latestLoad) state.setTotalRows(value);
+					}
+				},
 				URLModel,
 				endpoint: withExtraParams(baseEndpoint, extraParams),
 				fields:
@@ -549,11 +557,13 @@
 				}
 			}).finally(() => {
 				inFlight -= 1;
+				if (request !== latestLoad) return;
 				if (!failed) hasLoadedOnce = true;
 				// The latest request decides: a failed search must not read as an empty result.
 				loadFailed = failed;
 			});
-			return currentLoad;
+			// The handler keeps its rows when it is handed nothing.
+			return currentLoad.then((rows) => (request === latestLoad ? rows : undefined));
 		});
 	}
 

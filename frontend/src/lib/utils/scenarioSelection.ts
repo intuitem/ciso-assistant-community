@@ -107,11 +107,15 @@ export function selectionToParams(values: SelectionValues): URLSearchParams {
 	return params;
 }
 
-/** The selection as `/risk-scenarios/` filters: same names, no prefix. */
-export function unprefixedSelection(search: SearchParamsLike): URLSearchParams {
+/**
+ * The resolved selection as `/risk-scenarios/` filters: same names, no prefix.
+ * Built from what the backend applied, not from the URL: the list endpoint
+ * rejects a value the selection only ignores (a deleted threat).
+ */
+export function selectionListFilters(filters: Record<string, string[]> = {}): URLSearchParams {
 	const params = new URLSearchParams();
-	for (const [key, value] of selectionParams(search)) {
-		params.append(key.slice(SELECTION_PREFIX.length), value);
+	for (const [name, values] of Object.entries(filters)) {
+		for (const value of values) params.append(name, value);
 	}
 	return params;
 }

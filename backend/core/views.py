@@ -4911,9 +4911,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         context = {"pk": pk, "link_type": link_type}
         if selection.active:
-            context["selected_scenario_ids"] = set(
-                selection.scenarios.values_list("id", flat=True)
-            )
+            context["selected_scenario_ids"] = {
+                str(pk) for pk in selection.scenarios.values_list("id", flat=True)
+            }
         serializer = RiskAssessmentActionPlanSerializer(
             queryset, many=True, context=context
         )
@@ -4922,7 +4922,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ws = wb.active
         ws.title = "Action Plan"
         report_selection = selection_report_context(
-            selection, risk_assessment.risk_scenarios.count()
+            selection, risk_assessment.risk_scenarios.count(), request.user
         )
         if report_selection:
             append_selection_sheet(wb, report_selection)
@@ -5218,7 +5218,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     worksheet.column_dimensions[column_letter].width = 20
 
             report_selection = selection_report_context(
-                selection, risk_assessment.risk_scenarios.count()
+                selection, risk_assessment.risk_scenarios.count(), request.user
             )
             if report_selection:
                 append_selection_sheet(writer.book, report_selection)
@@ -5279,7 +5279,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 tz=get_report_timezone(),
             )
             payload["selection"] = selection_report_context(
-                selection, risk_assessment.risk_scenarios.count()
+                selection, risk_assessment.risk_scenarios.count(), request.user
             )
             response = HttpResponse(
                 render_pdf(localized_template("risk_report", lang), payload),
@@ -5330,7 +5330,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 tz=get_report_timezone(),
             )
             payload["selection"] = selection_report_context(
-                selection, risk_assessment.risk_scenarios.count()
+                selection, risk_assessment.risk_scenarios.count(), request.user
             )
             response = HttpResponse(
                 render_pdf(localized_template("action_plan", lang), payload),
@@ -8076,9 +8076,9 @@ class RiskAssessmentActionPlanList(ActionPlanList):
         selection = getattr(self, "selection", None)
         context["link_type"] = getattr(self, "link_type", None) or LINK_ALL
         if selection is not None and selection.active:
-            context["selected_scenario_ids"] = set(
-                selection.scenarios.values_list("id", flat=True)
-            )
+            context["selected_scenario_ids"] = {
+                str(pk) for pk in selection.scenarios.values_list("id", flat=True)
+            }
         return context
 
 

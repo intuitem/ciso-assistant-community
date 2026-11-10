@@ -46,7 +46,8 @@
 			])
 		) as Record<SelectionFilter, string[]>
 	);
-	const scoped = $derived(SELECTION_FILTERS.some((name) => (values[name]?.length ?? 0) > 0));
+	// Any `scenario__` param counts, so one the backend rejects can still be cleared.
+	const scoped = $derived(hasSelection(page.url.searchParams));
 	const toleranceSet = $derived((selection?.risk_tolerance ?? -1) >= 0);
 
 	// Always shown as buttons; the others sit behind "More filters" until used.
@@ -56,6 +57,7 @@
 		'current_level',
 		'residual_level'
 	];
+	const SINGLE_VALUE_FILTERS: SelectionFilter[] = ['within_tolerance'];
 	const SEARCH_THRESHOLD = 8;
 
 	// Hover and open states stay in the primary hue: the bar is tinted once a
@@ -143,7 +145,9 @@
 
 	function toggle(name: SelectionFilter, value: string) {
 		const current = values[name] ?? [];
-		const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+		let next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+		// Takes one value: ticking the other one replaces it.
+		if (SINGLE_VALUE_FILTERS.includes(name)) next = next.slice(-1);
 		apply({ ...values, [name]: next });
 	}
 

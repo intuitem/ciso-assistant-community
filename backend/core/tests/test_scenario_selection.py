@@ -186,6 +186,9 @@ def test_unprefixed_scenario_params_are_not_the_selection(admin_client, setup):
         # Fixed by the assessment, so not part of the selection.
         f"scenario__risk_assessment={uuid4()}",
         "scenario__folder=x",
+        # Takes one value: the second would be dropped without a word.
+        "scenario__within_tolerance=YES&scenario__within_tolerance=NO",
+        "scenario__current_impact=1&scenario__current_impact=2",
         "link_type=everything",
     ],
 )
@@ -552,6 +555,30 @@ def test_pdf_exports_state_their_selection(admin_client, setup, path, lang, stat
 
     unfiltered = admin_client.get(f"/api/risk-assessments/{ra.id}/{path}/")
     assert statement not in _pdf_text(unfiltered.content)
+
+
+@pytest.mark.django_db
+def test_exports_never_name_what_the_user_cannot_view(setup, domain):
+    ra = setup["ra"]
+    r1 = setup["scenarios"]["R1"]
+    hidden = Asset.objects.create(name="hidden asset", folder=_hidden_domain())
+    visible = Asset.objects.create(name="visible asset", folder=domain)
+    r1.assets.add(hidden, visible)
+    client = _client(_reader(domain))
+    query = f"scenario__assets={hidden.id}&scenario__assets={visible.id}"
+
+    for path in ("risk_assessment_xlsx", "action_plan_excel"):
+        res = client.get(f"/api/risk-assessments/{ra.id}/{path}/?{query}")
+        sheet = load_workbook(io.BytesIO(res.content))["Selection"]
+        # The hidden value still filters: it is stated by its id, not its name.
+        assert sheet["A2"].value == "assets", path
+        assert sheet["B2"].value == f"visible asset, {hidden.id}", path
+
+    for path in ("risk_assessment_pdf", "action_plan_pdf"):
+        res = client.get(f"/api/risk-assessments/{ra.id}/{path}/?{query}")
+        assert res.status_code == 200, path
+        # A line break can fall inside the id.
+        assert str(hidden.id) in "".join(_pdf_text(res.content).split()), path
 
 
 @pytest.mark.django_db

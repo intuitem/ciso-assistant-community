@@ -13,7 +13,7 @@
 		hasSelection,
 		readSelection,
 		selectionParams,
-		unprefixedSelection,
+		selectionListFilters,
 		withParams
 	} from '#lib/utils/scenarioSelection.js';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '#lib/utils/types.js';
@@ -537,7 +537,7 @@
 				search={false}
 				tableFilters={{}}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
-				extraParams={unprefixedSelection(page.url.searchParams).toString()}
+				extraParams={selectionListFilters(selection?.filters).toString()}
 				folderId={data.risk_assessment.folder.id}
 				{fields}
 				disableCreate={risk_assessment.is_locked}

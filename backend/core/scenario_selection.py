@@ -201,6 +201,19 @@ def _run_filter(requested, scenarios, request):
         raise ValidationError(
             {f"{PARAM_PREFIX}{k}": v for k, v in filterset.errors.items()}
         )
+    # A single-valued filter reads the last value it is given and drops the
+    # rest: the selection would then state values it did not apply.
+    cleaned = filterset.form.cleaned_data
+    surplus = [
+        name
+        for name, values in requested.items()
+        if len(values) > 1
+        and not isinstance(cleaned.get(name), (list, tuple, QuerySet))
+    ]
+    if surplus:
+        raise ValidationError(
+            {f"{PARAM_PREFIX}{name}": "Expected a single value." for name in surplus}
+        )
     return filterset.qs
 
 
@@ -420,11 +433,14 @@ def related_filter_options(
 # ----------------------------------------------------------------- reports
 
 
-def selection_report_context(selection: ScenarioSelection, total: int) -> dict | None:
+def selection_report_context(
+    selection: ScenarioSelection, total: int, user
+) -> dict | None:
     """What a filtered report states about its selection, or None when unfiltered.
 
     Choice values (tolerance, treatment) stay raw keys for the locale template to
-    label; levels and related objects are resolved here.
+    label; levels and related objects are resolved here. An object `user` cannot
+    view keeps the id the request gave, as it does on the selection bar.
     """
     if not selection.active:
         return None
@@ -442,9 +458,13 @@ def selection_report_context(selection: ScenarioSelection, total: int) -> dict |
                 for v in values
             ]
         elif (queryset := _model_filter_queryset(filters[name], None)) is not None:
-            if queryset.model is Actor:
-                queryset = queryset.select_related("user", "team", "entity")
-            labels = sorted(str(obj) for obj in queryset.filter(pk__in=values))
+            names = {
+                str(obj.pk): str(obj)
+                for obj in _viewable_objects(user, queryset.model).filter(pk__in=values)
+            }
+            labels = sorted(names.values()) + [
+                v for v in values if str(UUID(v)) not in names
+            ]
         else:
             labels = list(values)
         rows.append({"key": name, "values": labels})

@@ -2476,7 +2476,6 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             return data
         # With a selection, the column lists the selected scenarios and the rest
         # move aside, so a control covering other risks still says so.
-        selected = {str(pk) for pk in selected}
         linked = data["risk_scenarios"]
         data["risk_scenarios"] = [s for s in linked if s["id"] in selected]
         data["risk_scenarios_outside_selection"] = [

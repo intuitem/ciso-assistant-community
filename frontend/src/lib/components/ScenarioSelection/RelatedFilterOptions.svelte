@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { onMount, tick, type Snippet } from 'svelte';
+	import { onMount, tick, untrack, type Snippet } from 'svelte';
 	import { m } from '#paraglide/messages.js';
 	import {
+		SELECTION_PREFIX,
 		selectionParams,
 		type FacetOption,
 		type RelatedFilter,
@@ -22,10 +23,17 @@
 	const SEARCH_THRESHOLD = 8;
 	const SEARCH_DELAY = 250;
 
-	// Read once, when the filter opens. Counts ignore this filter's own values,
-	// so ticking one changes nothing here, and following the URL would reorder
-	// the pages already listed (applied values come first).
-	const selectionQuery = selectionParams(page.url.searchParams).toString();
+	// Read when the filter opens, then only when another filter changes. Counts
+	// ignore this filter's own values, so ticking one changes nothing here, and
+	// following the URL would reorder the pages already listed (applied values
+	// come first).
+	let selectionQuery = selectionParams(page.url.searchParams).toString();
+	const otherFilters = $derived.by(() => {
+		const params = selectionParams(page.url.searchParams);
+		params.delete(`${SELECTION_PREFIX}${name}`);
+		return params.toString();
+	});
+	let listedFor = otherFilters;
 
 	let options: FacetOption[] = $state([]);
 	let total = $state(0);
@@ -85,6 +93,17 @@
 	onMount(() => {
 		load(0);
 		return () => clearTimeout(timer);
+	});
+
+	// Browser navigation can change the other filters under an open list: its
+	// counts and its next pages would then answer the previous selection.
+	$effect(() => {
+		if (otherFilters === listedFor) return;
+		listedFor = otherFilters;
+		untrack(() => {
+			selectionQuery = selectionParams(page.url.searchParams).toString();
+			load(0);
+		});
 	});
 </script>
 

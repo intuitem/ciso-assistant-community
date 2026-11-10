@@ -7,7 +7,7 @@ import {
 	rememberSelection,
 	selectionParams,
 	selectionToParams,
-	unprefixedSelection,
+	selectionListFilters,
 	withParams
 } from './scenarioSelection';
 
@@ -30,10 +30,11 @@ describe('scenario selection params', () => {
 		);
 	});
 
-	it('strips the prefix for the scenario list endpoint', () => {
-		expect(unprefixedSelection(url('scenario__within_tolerance=NO&owner=x')).toString()).toBe(
-			'within_tolerance=NO'
-		);
+	it('turns the resolved filters into scenario list params', () => {
+		expect(
+			selectionListFilters({ within_tolerance: ['NO'], current_level: ['2', '3'] }).toString()
+		).toBe('within_tolerance=NO&current_level=2&current_level=3');
+		expect(selectionListFilters(undefined).toString()).toBe('');
 	});
 
 	it('defaults the action plan to additional measures', () => {
