@@ -51,6 +51,7 @@ from rest_framework.response import Response
 
 
 import structlog
+from iam.utils import ViewableFilter
 
 logger = structlog.get_logger(__name__)
 
@@ -372,6 +373,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ).order_by("entity__name")
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
+        viewable = ViewableFilter(request.user)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
 
         # Get operating modes for all operational scenarios
@@ -392,7 +394,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             ea_ids = {step.elementary_action_id for step in steps}
 
-            eas = ElementaryAction.objects.filter(id__in=ea_ids)
+            eas = viewable(ElementaryAction.objects.filter(id__in=ea_ids))
             elementary_actions = [
                 {
                     "id": str(ea.id),
@@ -410,7 +412,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get compliance assessments with their result counts
         compliance_assessments_data = []
-        for assessment in study.compliance_assessments.all():
+        for assessment in viewable(study.compliance_assessments.all()):
             result_counts = {}
             for count, result in assessment.get_requirements_result_count():
                 result_counts[result] = count
@@ -433,7 +435,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get risk matrix data from last risk assessment
         risk_matrix_data = None
-        if study.last_risk_assessment:
+        last_risk_assessment = (
+            study.last_risk_assessment
+            if study.last_risk_assessment
+            and viewable.allows(study.last_risk_assessment)
+            else None
+        )
+        if last_risk_assessment:
             from core.serializers import (
                 RiskScenarioReadSerializer,
                 RiskMatrixReadSerializer,
@@ -468,7 +476,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
 
         compliance_action_plans = []
-        for assessment in study.compliance_assessments.all():
+        for assessment in viewable(study.compliance_assessments.all()):
             requirement_assessments = assessment.get_requirement_assessments(
                 include_non_assessable=False
             )
@@ -495,7 +503,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get action plan from risk assessment
         risk_action_plan = None
-        if study.last_risk_assessment:
+        if last_risk_assessment:
             risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
             risk_applied_controls = (
                 viewable_controls.filter(risk_scenarios__in=risk_scenarios)

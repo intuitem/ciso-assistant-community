@@ -30,6 +30,7 @@ from core.generators import breach_notification_context
 from core.typst_render import render_pdf
 from django.utils.text import slugify
 from iam.models import Folder, RoleAssignment
+from iam.utils import ViewableFilter
 from tprm.models import Entity
 
 from .models import (
@@ -1175,9 +1176,7 @@ class DataBreachViewSet(BaseModelViewSet):
             breach,
             lang,
             tz=get_report_timezone(),
-            readable=lambda obj: RoleAssignment.is_object_readable(
-                request.user, type(obj), obj.id
-            ),
+            readable=ViewableFilter(request.user).allows,
         )
         response = HttpResponse(
             render_pdf("breach_notification.typ", payload),

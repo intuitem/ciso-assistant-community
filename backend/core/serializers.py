@@ -2388,6 +2388,17 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
         method_name="get_requirement_assessments"
     )
     evidence_attachments = serializers.SerializerMethodField()
+    task_templates = serializers.SerializerMethodField()
+
+    def get_task_templates(self, obj):
+        if not self.context.get("with_tasks"):
+            return None
+        pk = str(self.context.get("pk"))
+        tasks = {task.id: task for task in obj.task_templates.all()}
+        for ra in obj.requirement_assessments.all():
+            if str(ra.compliance_assessment_id) == pk:
+                tasks.update({task.id: task for task in ra.task_templates.all()})
+        return [{"id": str(task.id), "str": str(task)} for task in tasks.values()]
 
     def get_requirement_assessments(self, obj):
         pk = self.context.get("pk")
@@ -2441,6 +2452,8 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "reference_control",
             "evidences",
             "evidence_attachments",
+            "task_templates",
+            "observation",
             "owner",
             "created_at",
             "updated_at",

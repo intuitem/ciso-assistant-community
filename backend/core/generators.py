@@ -1,4 +1,5 @@
 import io
+from collections import Counter
 import multiprocessing
 import resource
 import traceback
@@ -14,7 +15,7 @@ import jinja2.filters
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from django.db.models import Count
+from django.utils import translation
 from django.utils.safestring import SafeString
 from django.utils.timezone import now
 from docx.shared import Cm
@@ -414,6 +415,10 @@ _ACTION_PLAN_STATUS_FILLS = {
 }
 
 
+def _all_readable(obj) -> bool:
+    return True
+
+
 def _report_time_context(tz: tzinfo) -> dict[str, str]:
     """Return the report's `date`, `generated_at` and `timezone`, in `tz`."""
     moment = now()
@@ -425,7 +430,12 @@ def _report_time_context(tz: tzinfo) -> dict[str, str]:
 
 
 def action_plan_context(
-    assessment, controls, lang="en", linked=None, tz: tzinfo = timezone.utc
+    assessment,
+    controls,
+    lang="en",
+    linked=None,
+    tz: tzinfo = timezone.utc,
+    readable=_all_readable,
 ):
     """Payload for the action plan, grouped by status and sorted by ETA.
 
@@ -439,15 +449,17 @@ def action_plan_context(
     which item — and drops CSF function, effort, cost and expiry date.
     """
     linked = linked or {}
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
     buckets = {key: [] for key in _ACTION_PLAN_STATUS_FILLS}
 
-    for control in controls:
+    for control in seen(controls):
         buckets.setdefault(control.status or "--", []).append(
             {
                 "name": control.name or "-",
                 "description": control.description or "-",
                 "category_key": control.category or "",
-                "owner": ", ".join(str(actor) for actor in control.owner.all()) or "-",
+                "owner": ", ".join(str(actor) for actor in seen(control.owner.all()))
+                or "-",
                 "eta": _date_str(control.eta),
                 "linked": linked.get(control.id, []),
             }
@@ -464,6 +476,7 @@ def action_plan_context(
     ]
 
     perimeter = getattr(assessment, "perimeter", None)
+    perimeter = perimeter if perimeter and readable(perimeter) else None
     framework = getattr(assessment, "framework", None)
     return {
         "subject": {
@@ -502,7 +515,7 @@ _CLOSED_FINDING_STATUSES = (
 
 
 def findings_assessment_context(
-    assessment, findings, lang="en", tz: tzinfo = timezone.utc
+    assessment, findings, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
 ):
     """Payload for the findings report.
 
@@ -511,10 +524,11 @@ def findings_assessment_context(
     fifty pages.
     """
     metrics = assessment.get_findings_metrics()
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
     severity_counts = metrics.get("severity_distribution", {})
 
     rows = []
-    for finding in findings:
+    for finding in seen(findings):
         rows.append(
             {
                 "ref_id": finding.ref_id or "-",
@@ -527,12 +541,14 @@ def findings_assessment_context(
                 "priority": str(finding.get_priority_display())
                 if finding.priority
                 else "-",
-                "owners": ", ".join(str(a) for a in finding.owner.all()) or "-",
+                "owners": ", ".join(str(a) for a in seen(finding.owner.all())) or "-",
                 "eta": _date_str(finding.eta),
                 "due_date": _date_str(finding.due_date),
-                "controls": [c.name for c in finding.applied_controls.all()],
-                "evidences": [e.name for e in finding.evidences.all()],
-                "labels": [str(label) for label in finding.filtering_labels.all()],
+                "controls": [c.name for c in seen(finding.applied_controls.all())],
+                "evidences": [e.name for e in seen(finding.evidences.all())],
+                "labels": [
+                    str(label) for label in seen(finding.filtering_labels.all())
+                ],
             }
         )
 
@@ -563,8 +579,9 @@ def findings_assessment_context(
             "status_key": assessment.status or "",
             "folder": str(assessment.folder) if assessment.folder else "-",
             "observation": getattr(assessment, "observation", "") or "",
-            "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
-            "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
+            "authors": ", ".join(str(a) for a in seen(assessment.authors.all())) or "-",
+            "reviewers": ", ".join(str(r) for r in seen(assessment.reviewers.all()))
+            or "-",
         },
         "id": str(assessment.id),
         **_report_time_context(tz),
@@ -585,23 +602,32 @@ def findings_assessment_context(
     }
 
 
-def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezone.utc):
+def incident_context(
+    incident,
+    timeline_entries,
+    lang="en",
+    tz: tzinfo = timezone.utc,
+    readable=_all_readable,
+):
     """Payload for the incident report.
 
     The timeline is the substance: entries in chronological order, each keyed by
     its raw `entry_type` so the locale template supplies the label and the accent
     colour without depending on a translated string.
     """
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
     entries = []
-    for entry in timeline_entries:
+    for entry in seen(timeline_entries):
         entries.append(
             {
                 "entry": entry.entry or "-",
                 "type_key": entry.entry_type or "observation",
                 "timestamp": format_report_timestamp(entry.timestamp, tz),
-                "author": str(entry.author) if entry.author else "",
+                "author": str(entry.author)
+                if entry.author and readable(entry.author)
+                else "",
                 "observation": entry.observation or "",
-                "evidences": [e.name for e in entry.evidences.all()],
+                "evidences": [e.name for e in seen(entry.evidences.all())],
             }
         )
 
@@ -620,11 +646,11 @@ def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezon
             "description": incident.description or "",
             "resolution": getattr(incident, "resolution", "") or "",
             "is_bcp_activated": bool(incident.is_bcp_activated),
-            "owners": ", ".join(str(o) for o in incident.owners.all()) or "-",
-            "qualifications": [q.name for q in incident.qualifications.all()],
-            "entities": [e.name for e in incident.entities.all()],
-            "assets": [a.name for a in incident.assets.all()],
-            "threats": [t.name for t in incident.threats.all()],
+            "owners": ", ".join(str(o) for o in seen(incident.owners.all())) or "-",
+            "qualifications": [q.name for q in seen(incident.qualifications.all())],
+            "entities": [e.name for e in seen(incident.entities.all())],
+            "assets": [a.name for a in seen(incident.assets.all())],
+            "threats": [t.name for t in seen(incident.threats.all())],
             "reported_at": format_report_timestamp(incident.reported_at, tz),
             "occurred_at": format_report_timestamp(incident.occurred_at, tz),
             "resolved_at": format_report_timestamp(incident.resolved_at, tz),
@@ -638,10 +664,6 @@ def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezon
         },
         "timeline": entries,
     }
-
-
-def _all_readable(obj) -> bool:
-    return True
 
 
 def nis2_notification_context(
@@ -665,7 +687,7 @@ def nis2_notification_context(
             "ref_id": incident.ref_id or "",
             "name": incident.name or "",
             "folder": str(incident.folder) if incident.folder else "",
-            "owners": ", ".join(str(o) for o in incident.owners.all()),
+            "owners": ", ".join(str(o) for o in seen(incident.owners.all())),
             "description": incident.description or "",
             "severity_key": str(incident.severity or ""),
             "status_key": incident.status or "",
@@ -738,7 +760,7 @@ def breach_notification_context(
             "ref_id": breach.ref_id or "",
             "name": breach.name or "",
             "folder": str(breach.folder) if breach.folder else "",
-            "assigned_to": ", ".join(str(a) for a in breach.assigned_to.all()),
+            "assigned_to": ", ".join(str(a) for a in seen(breach.assigned_to.all())),
             "description": breach.description or "",
             "breach_type": breach.breach_type or "",
             "risk_level": breach.risk_level or "",
@@ -803,6 +825,7 @@ def risk_assessment_context(
     label_standard="ISO",
     use_risk_category_label=False,
     tz: tzinfo = timezone.utc,
+    readable=_all_readable,
 ):
     """Payload for the risk assessment report.
 
@@ -872,21 +895,28 @@ def risk_assessment_context(
             }
         )
 
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
+
+    def with_status(control):
+        with translation.override(lang):
+            return f"{control.name} ({control.get_status_display()})"
+
     scenario_rows = []
-    for scenario in scenarios:
+    for scenario in seen(scenarios):
         row = {
             "ref_id": scenario.ref_id or "-",
             "name": scenario.name or "-",
             "description": getattr(scenario, "description", "") or "",
             "qualifications": [
-                str(q) for q in getattr(scenario, "qualifications", _EMPTY).all()
+                str(q) for q in seen(getattr(scenario, "qualifications", _EMPTY).all())
             ],
-            "assets": [a.name for a in scenario.assets.all()],
-            "threats": [t.get_name_translated for t in scenario.threats.all()],
+            "assets": [a.name for a in seen(scenario.assets.all())],
+            "threats": [t.get_name_translated for t in seen(scenario.threats.all())],
+            "owners": [str(o) for o in seen(scenario.owner.all())],
             "existing_controls": [
-                c.name for c in scenario.existing_applied_controls.all()
+                with_status(c) for c in seen(scenario.existing_applied_controls.all())
             ],
-            "controls": [c.name for c in scenario.applied_controls.all()],
+            "controls": [with_status(c) for c in seen(scenario.applied_controls.all())],
             "treatment_key": scenario.treatment or "",
             "justification": scenario.justification or "",
             "strength_of_knowledge": str(scenario.strength_of_knowledge or "-"),
@@ -944,8 +974,16 @@ def _risk_level(level):
 
 
 def gen_audit_context(
-    id, tree, lang, assessments=None, charts=True, tz: tzinfo = timezone.utc
+    id,
+    tree,
+    lang,
+    assessments=None,
+    charts=True,
+    tz: tzinfo = timezone.utc,
+    readable=_all_readable,
 ):
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
+
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -1077,10 +1115,14 @@ def gen_audit_context(
     context = dict()
 
     authors = ", ".join(
-        dict.fromkeys(email for a in audit.authors.all() for email in a.get_emails())
+        dict.fromkeys(
+            email for a in seen(audit.authors.all()) for email in a.get_emails()
+        )
     )
     reviewers = ", ".join(
-        dict.fromkeys(email for r in audit.reviewers.all() for email in r.get_emails())
+        dict.fromkeys(
+            email for r in seen(audit.reviewers.all()) for email in r.get_emails()
+        )
     )
 
     spider_data = list()
@@ -1302,30 +1344,28 @@ def gen_audit_context(
                 "max_score": audit.framework.max_score if ra.is_scored else None,
                 "observation": ra.observation or "-",
                 "answers": _answer_rows(ra),
-                "evidences": [e.name for e in ra.evidences.all()],
-                "task_templates": [t.name for t in ra.task_templates.all()],
+                "evidences": [e.name for e in seen(ra.evidences.all())],
+                "task_templates": [t.name for t in seen(ra.task_templates.all())],
                 "applied_controls": ", ".join(
-                    ac.name for ac in ra.applied_controls.all()
+                    ac.name for ac in seen(ra.applied_controls.all())
                 )
                 or "-",
             }
         )
 
-    applied_controls = AppliedControl.objects.filter(
-        requirement_assessments__in=requirement_assessments_objects
-    ).distinct()
-    ac_total = applied_controls.count()
-    status_cnt = applied_controls.values("status").annotate(count=Count("id"))
+    applied_controls = seen(
+        AppliedControl.objects.filter(
+            requirement_assessments__in=requirement_assessments_objects
+        ).distinct()
+    )
+    ac_total = len(applied_controls)
     ac_chart_data = [
-        {
-            "category": safe_translate(lang, item["status"]),
-            "value": item["count"],
-        }
-        for item in status_cnt
+        {"category": safe_translate(lang, status), "value": count}
+        for status, count in Counter(ac.status for ac in applied_controls).items()
     ]
     p1_controls = list()
     full_controls = list()
-    for ac in applied_controls.filter(priority=1):
+    for ac in [ac for ac in applied_controls if ac.priority == 1]:
         requirements_count = (
             RequirementAssessment.objects.filter(compliance_assessment=audit)
             .filter(applied_controls=ac.id)
@@ -1342,7 +1382,7 @@ def gen_audit_context(
             }
         )
 
-    for ac in applied_controls.all():
+    for ac in applied_controls:
         requirements_count = (
             RequirementAssessment.objects.filter(compliance_assessment=audit)
             .filter(applied_controls=ac.id)
@@ -1688,7 +1728,9 @@ def _commitment_row(obj, lang, kind):
     }
 
 
-def audit_undertakings(audit, lang="en", assessments=None, hidden=()):
+def audit_undertakings(
+    audit, lang="en", assessments=None, hidden=(), readable=_all_readable
+):
     """Applied controls and tasks attached to the audit, with commitment state.
 
     Returns ``(commitments, tasks)``: the first is everything carrying a live
@@ -1717,6 +1759,8 @@ def audit_undertakings(audit, lang="en", assessments=None, hidden=()):
         .order_by("name")
     )
 
+    controls = [c for c in controls if readable(c)]
+    task_templates = [t for t in task_templates if readable(t)]
     if "applied_controls" in hidden:
         controls = []
     if "task_templates" in hidden:
@@ -1733,14 +1777,18 @@ def audit_undertakings(audit, lang="en", assessments=None, hidden=()):
     return commitments, tasks
 
 
-def counterparty_context(audit):
+def counterparty_context(audit, readable=_all_readable):
     """The assessed entity behind this audit, when it is a third-party questionnaire.
 
     An audit reached through an entity assessment identifies a counterparty; a plain
     internal audit does not, and the cover simply omits the block.
     """
     entity_assessment = audit.entityassessment_set.select_related("entity").first()
-    if entity_assessment is None or entity_assessment.entity is None:
+    if (
+        entity_assessment is None
+        or entity_assessment.entity is None
+        or not readable(entity_assessment.entity)
+    ):
         return None
     entity = entity_assessment.entity
     identifiers = entity.legal_identifiers_dict
@@ -1759,7 +1807,13 @@ def counterparty_context(audit):
 
 
 def audit_context_for_typst(
-    context, audit, role="auditor", lang="en", profile="full", assessments=None
+    context,
+    audit,
+    role="auditor",
+    lang="en",
+    profile="full",
+    assessments=None,
+    readable=_all_readable,
 ):
     """Split `gen_audit_context` output into a JSON payload and chart images.
 
@@ -1820,14 +1874,16 @@ def audit_context_for_typst(
             images.pop(f"{name}.png", None)
 
     if {"commitments", "tasks"} & set(spec["sections"]):
-        commitments, tasks = audit_undertakings(audit, lang, assessments, hidden)
+        commitments, tasks = audit_undertakings(
+            audit, lang, assessments, hidden, readable
+        )
         payload["commitments"] = commitments
         payload["tasks"] = tasks
 
     if "charts" not in spec["sections"]:
         images = {}
 
-    payload["counterparty"] = counterparty_context(audit)
+    payload["counterparty"] = counterparty_context(audit, readable)
     payload["profile"] = profile
     payload["sections"] = list(spec["sections"])
     payload["charts"] = sorted(images)

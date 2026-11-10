@@ -1,3 +1,4 @@
+import uuid
 from typing import Any, Optional
 
 import structlog
@@ -50,3 +51,55 @@ def redact_audited_secret(value: str) -> str:
     only masks the first half of the value, which would still publish most of a
     password hash to anyone holding `view_central_auditlog`."""
     return "**********" if value else value
+
+
+def _as_uuid(value):
+    try:
+        return uuid.UUID(str(value))
+    except ValueError:
+        return None
+
+
+class ViewableFilter:
+    """Keeps the linked objects a user may view, with one IAM lookup per model."""
+
+    def __init__(self, user):
+        self.user = user
+        self._ids = {}
+
+    def ids(self, model) -> set | None:
+        """Viewable ids of `model`, or None when it is not filtered: models outside
+        IAM, and people, whose names the app shows wherever they are linked."""
+        from core.models import Actor, Team
+        from iam.models import RoleAssignment, User
+
+        model = model._meta.concrete_model
+        if model in (Actor, Team, User):
+            return None
+        if model not in self._ids:
+            try:
+                self._ids[model] = set(
+                    RoleAssignment.get_viewable_object_ids(self.user, model)
+                )
+            except NotImplementedError:
+                self._ids[model] = None
+        return self._ids[model]
+
+    def allows(self, obj) -> bool:
+        from core.models import Actor
+
+        # an actor standing for a third party is that entity, not a person
+        if isinstance(obj, Actor) and obj.entity_id:
+            return self.allows(obj.entity)
+        ids = self.ids(type(obj))
+        return ids is None or obj.pk in ids
+
+    def __call__(self, objs) -> list:
+        return [obj for obj in objs if obj is not None and self.allows(obj)]
+
+    def serialized(self, model, items) -> list:
+        """Keep the serialized `{"id": ...}` items of `model` the user may view."""
+        ids = self.ids(model)
+        if ids is None:
+            return list(items or [])
+        return [item for item in items or [] if _as_uuid(item.get("id")) in ids]
