@@ -162,15 +162,76 @@ class TestEvidenceRevisionReview:
         old.refresh_from_db()
         assert old.review_status == EvidenceRevision.ReviewStatus.PENDING
 
-    def test_first_file_on_approved_evidence_goes_back_to_review(self):
+    def _approved_evidence(self):
         evidence = Evidence.objects.create(
             name="Pen test", folder=Folder.get_root_folder()
         )
         evidence.status = Evidence.Status.APPROVED
         evidence.save()
-        EvidenceRevision.objects.create(evidence=evidence, link="https://example.com")
+        return evidence
+
+    def test_import_keeps_the_decision(self):
+        from core.serializers import EvidenceRevisionImportExportSerializer
+
+        evidence = self._approved_evidence()
+        revision = EvidenceRevision.objects.create(
+            evidence=evidence, link="https://example.com", review_status="approved"
+        )
+        evidence.refresh_from_db()
+        assert evidence.status == Evidence.Status.APPROVED
+        exported = EvidenceRevisionImportExportSerializer(revision).data
+        assert exported["review_status"] == "approved"
+
+    def test_first_upload_on_approved_evidence_goes_back_to_review(
+        self, authenticated_client
+    ):
+        evidence = self._approved_evidence()
+        response = authenticated_client.post(
+            f"/api/evidences/{evidence.id}/upload/",
+            data=b"report",
+            content_type="application/octet-stream",
+            HTTP_CONTENT_DISPOSITION='attachment; filename="report.txt"',
+        )
+        assert response.status_code == 200, response.content
         evidence.refresh_from_db()
         assert evidence.status == Evidence.Status.IN_REVIEW
+
+    def test_swapping_content_makes_you_the_uploader(self, authenticated_client):
+        other = User.objects.create_user("uploader@tests.com")
+        revision = EvidenceRevision.objects.create(
+            evidence=self._approved_evidence(),
+            link="https://example.com/a",
+            uploaded_by=other,
+        )
+        general, _ = GlobalSettings.objects.get_or_create(name="general")
+        general.value = {**(general.value or {}), "evidence_four_eyes": True}
+        general.save()
+        response = authenticated_client.patch(
+            reverse("evidence-revisions-detail", args=[revision.id]),
+            {"link": "https://example.com/b"},
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+        revision.refresh_from_db()
+        assert revision.uploaded_by == self._admin()
+        assert (
+            self._review(authenticated_client, revision, "approved").status_code == 400
+        )
+
+    def test_leaving_a_decision_in_the_status_select_requeues_the_file(
+        self, authenticated_client
+    ):
+        revision = self._revision(authenticated_client)
+        self._review(authenticated_client, revision, "approved")
+        response = authenticated_client.patch(
+            reverse("evidences-detail", args=[revision.evidence_id]),
+            {"status": "in_review"},
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+        revision.refresh_from_db()
+        assert revision.review_status == EvidenceRevision.ReviewStatus.PENDING
+        assert revision.reviewed_by is None
 
     def test_third_parties_see_the_outcome_not_who_or_why(self, authenticated_client):
         from types import SimpleNamespace

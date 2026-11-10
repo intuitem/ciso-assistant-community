@@ -546,10 +546,10 @@ class FullRestoreView(APIView):
 
                         revision.attachment = saved_path
                         revision.attachment_hash = actual_hash
-                        with disable_auditlog():
-                            revision.save(
-                                update_fields=["attachment", "attachment_hash"]
-                            )
+                        # Restoring the same bytes is not new content: skip save() so the imported review stands.
+                        EvidenceRevision.objects.filter(pk=revision.pk).update(
+                            attachment=saved_path, attachment_hash=actual_hash
+                        )
 
                         stats["restored"] += 1
 
@@ -993,8 +993,10 @@ class BatchUploadAttachmentsView(APIView):
 
                     revision.attachment = saved_path
                     revision.attachment_hash = actual_hash
-                    with disable_auditlog():
-                        revision.save(update_fields=["attachment", "attachment_hash"])
+                    # Restoring the same bytes is not new content: skip save() so the imported review stands.
+                    EvidenceRevision.objects.filter(pk=revision.pk).update(
+                        attachment=saved_path, attachment_hash=actual_hash
+                    )
 
                     stats["restored"] += 1
 

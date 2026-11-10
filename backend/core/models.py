@@ -6775,6 +6775,13 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             or self.reviewed_by_id != user.id
         ):
             raise ValidationError({"decision": "cannot_undo"})
+        self.clear_review()
+        if self.evidence.last_revision == self:
+            self.evidence.status = Evidence.Status.IN_REVIEW
+            self.evidence.save(update_fields=["status", "updated_at"])
+
+    def clear_review(self) -> None:
+        """Back to pending, without touching the evidence status."""
         self.review_status = self.ReviewStatus.PENDING
         self.reviewed_by = None
         self.reviewed_at = None
@@ -6788,9 +6795,17 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                 "updated_at",
             ]
         )
-        if self.evidence.last_revision == self:
-            self.evidence.status = Evidence.Status.IN_REVIEW
-            self.evidence.save(update_fields=["status", "updated_at"])
+
+    def reopen_evidence_review(self) -> None:
+        """New, unreviewed content on the latest revision sends a decided evidence back to review.
+        Called from upload paths only: imports and seeds create revisions without new content."""
+        evidence = self.evidence
+        if (
+            evidence.status in (Evidence.Status.APPROVED, Evidence.Status.REJECTED)
+            and evidence.last_revision == self
+        ):
+            evidence.status = Evidence.Status.IN_REVIEW
+            evidence.save(update_fields=["status", "updated_at"])
 
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
@@ -6798,9 +6813,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             self.folder = self.evidence.folder
 
         # A review covers the content it saw: new content on a reviewed revision voids it.
-        if self._state.adding:
-            content_changed = bool(self.attachment) or bool(self.link)
-        else:
+        content_changed = False
+        if not self._state.adding:
             old = (
                 EvidenceRevision.objects.filter(pk=self.pk)
                 .values("attachment", "link")
@@ -6812,11 +6826,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                 or (old["attachment"] or None) != (self.attachment.name or None)
                 or (old["link"] or None) != (self.link or None)
             )
-        if (
-            content_changed
-            and not self._state.adding
-            and self.review_status != self.ReviewStatus.PENDING
-        ):
+        review_voided = (
+            content_changed and self.review_status != self.ReviewStatus.PENDING
+        )
+        if review_voided:
             self.review_status = self.ReviewStatus.PENDING
             self.reviewed_by = None
             self.reviewed_at = None
@@ -6879,16 +6892,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-        # Unreviewed content on the latest revision, first file included: back to review.
-        if (
-            content_changed
-            and self.review_status == self.ReviewStatus.PENDING
-            and self.evidence.status
-            in (Evidence.Status.APPROVED, Evidence.Status.REJECTED)
-            and self.evidence.last_revision == self
-        ):
-            self.evidence.status = Evidence.Status.IN_REVIEW
-            self.evidence.save(update_fields=["status", "updated_at"])
+        if review_voided:
+            self.reopen_evidence_review()
 
     def filename(self) -> str | None:
         if not self.attachment:

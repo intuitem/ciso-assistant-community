@@ -3960,6 +3960,14 @@ class EvidenceWriteSerializer(
                     except DjangoValidationError as e:
                         raise serializers.ValidationError(e.message_dict)
                 self._send_review_notification(instance)
+            elif instance.status != old_status:
+                # Leaving approved/rejected undoes the decision, so the file is queued again.
+                revision = instance.last_revision
+                if (
+                    revision is not None
+                    and revision.review_status != EvidenceRevision.ReviewStatus.PENDING
+                ):
+                    revision.clear_review()
 
         return instance
 
@@ -4089,6 +4097,16 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
             evidence.save()
             return super().create(validated_data)
 
+    def update(self, instance, validated_data):
+        # Four-eyes follows the content: whoever swaps the file or link is its uploader now.
+        if "attachment" in validated_data or (
+            "link" in validated_data and validated_data["link"] != instance.link
+        ):
+            user = getattr(self.context.get("request"), "user", None)
+            if user is not None and user.is_authenticated:
+                validated_data["uploaded_by"] = user
+        return super().update(instance, validated_data)
+
 
 class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -4111,6 +4129,9 @@ class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
             "updated_at",
             "size",
             "attachment_hash",
+            "review_status",
+            "reviewed_at",
+            "review_comment",
         ]
 
 

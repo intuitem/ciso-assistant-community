@@ -12391,6 +12391,7 @@ class EvidenceViewSet(BaseModelViewSet):
             return
 
         revision.save()
+        revision.reopen_evidence_review()
         if superseded_name and superseded_name != revision.attachment.name:
             revision.attachment.storage.delete(superseded_name)
         result["outcome"] = "replaced"
@@ -12589,6 +12590,7 @@ class UploadAttachmentView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             revision.save()
+            revision.reopen_evidence_review()
             if superseded_name and superseded_name != revision.attachment.name:
                 revision.attachment.storage.delete(superseded_name)
 
