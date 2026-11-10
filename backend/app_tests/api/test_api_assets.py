@@ -534,6 +534,22 @@ class TestCrossDomainAssetLinkPermissions:
         assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
         assert not self.local.parent_assets.exists()
 
+    def test_support_only_request_cannot_close_a_cycle(self):
+        # sibling is already above local; putting it below as well is a cycle,
+        # even though the request does not mention local's parents.
+        self.local.parent_assets.add(self.sibling)
+        user = _make_scoped_user(self.folder_a)
+        r = self._patch(user, self.local, {"support_assets": [str(self.sibling.id)]})
+        assert r.status_code == status.HTTP_400_BAD_REQUEST, r.content
+        assert "errorAssetGraphMustNotContainCycles" in r.content.decode()
+        assert not self.local.child_assets.exists()
+
+    def test_asset_cannot_support_itself(self):
+        user = _make_scoped_user(self.folder_a)
+        r = self._patch(user, self.local, {"support_assets": [str(self.local.id)]})
+        assert r.status_code == status.HTTP_400_BAD_REQUEST, r.content
+        assert not self.local.child_assets.exists()
+
     def test_view_only_asset_can_be_linked_as_support(self):
         user = _make_scoped_user(self.folder_a, self.folder_b)
         r = self._patch(user, self.sibling, {"support_assets": [str(self.remote.id)]})
@@ -635,6 +651,41 @@ class TestCrossDomainAssetLinkPermissions:
         assert not self.sibling.parent_assets.exists()
         reused = {a["name"]: a["parent"] for a in r.json()["reused_assets"]}
         assert reused["sibling"] is None, r.content
+
+    # Read side: `children_assets` lists every asset below one. Those the user
+    # cannot see are masked like the direct links, in the detail and in the full
+    # listing (the plain list does not carry the field).
+
+    def _children_seen(self, user):
+        # sibling <- local <- remote: remote sits below sibling, through local.
+        self.local.parent_assets.add(self.sibling)
+        self.remote.parent_assets.add(self.local)
+        client = _client_for(user)
+        detail = client.get(f"/api/assets/{self.sibling.id}/")
+        listing = client.get(f"/api/assets/full/?id={self.sibling.id}")
+        assert detail.status_code == status.HTTP_200_OK, detail.content
+        assert listing.status_code == status.HTTP_200_OK, listing.content
+        return detail, listing
+
+    def test_hidden_descendants_are_masked(self):
+        detail, listing = self._children_seen(_make_scoped_user(self.folder_a))
+        for response, row in (
+            (detail, detail.json()),
+            (listing, listing.json()["results"][0]),
+        ):
+            children = row["children_assets"]
+            assert [c["id"] for c in children if c] == [str(self.local.id)]
+            assert children.count({}) == 1
+            assert str(self.remote.id) not in response.content.decode()
+
+    def test_visible_descendants_are_named(self):
+        user = _make_scoped_user(self.folder_a, self.folder_b)
+        detail, listing = self._children_seen(user)
+        for row in (detail.json(), listing.json()["results"][0]):
+            assert {c["id"] for c in row["children_assets"]} == {
+                str(self.local.id),
+                str(self.remote.id),
+            }
 
 
 @pytest.mark.django_db

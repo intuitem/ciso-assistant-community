@@ -26,7 +26,8 @@ export const countMasked = (value: unknown): number => {
 /**
  * The ids among `ids` that the user cannot see, looked up on `endpoint` without
  * its query string: a picker's filters must not pass an object it merely leaves
- * out for a hidden one. When the lookup fails, nothing is reported hidden.
+ * out for a hidden one. When the lookup fails, all of them are reported: a link
+ * nobody could check is kept, not dropped on the next save.
  */
 export async function findHiddenIds(
 	fetchFn: typeof fetch,
@@ -39,6 +40,6 @@ export async function findHiddenIds(
 		const seen = new Set(visible.map((row) => String(row.id)));
 		return ids.filter((id) => !seen.has(id));
 	} catch {
-		return [];
+		return ids;
 	}
 }

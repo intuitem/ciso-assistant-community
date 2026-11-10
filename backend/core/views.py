@@ -144,7 +144,7 @@ from core.domain_quality_checks import (
     domain_quality_checks,
     object_xrays,
 )
-from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework import filters, generics, permissions, serializers, status, viewsets
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
 from rest_framework.decorators import (
@@ -2905,6 +2905,11 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
 
             return AssetListSerializer
         return super().get_serializer_class(**kwargs)
+
+    def _get_fieldsrelated_map(self, serializer):
+        """`children_assets` names every asset below this one, including ones the
+        user cannot see: it is masked like the direct links."""
+        return {**super()._get_fieldsrelated_map(serializer), "children_assets": Asset}
 
     def retrieve(self, request, *args, **kwargs):
         """Populate `optimized_data` for the single retrieved asset so the
@@ -20845,7 +20850,13 @@ class TaskNodeViewSet(BaseModelViewSet):
         the evidence. Moving it to the task template links it there, which needs
         change on the template and view on the evidence."""
         task_node = self.get_object()
-        to_move = request.data.get("move", False)
+        try:
+            # "false" sent as text must not read as a request to move
+            to_move = serializers.BooleanField().to_internal_value(
+                request.data.get("move") or False
+            )
+        except DRFValidationError as e:
+            raise DRFValidationError({"move": e.detail})
         try:
             evidence_id = uuid.UUID(str(request.data.get("evidence_id")))
         except ValueError:
@@ -20854,6 +20865,8 @@ class TaskNodeViewSet(BaseModelViewSet):
         if evidence is None:
             raise NotFound("This evidence is not linked to the task.")
         template = task_node.task_template
+        if to_move and template is None:
+            raise DRFValidationError({"move": "This task has no template."})
         if to_move and not (
             RoleAssignment.is_access_allowed(
                 user=request.user,

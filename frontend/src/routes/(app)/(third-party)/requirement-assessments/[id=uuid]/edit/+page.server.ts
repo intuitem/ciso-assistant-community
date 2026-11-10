@@ -9,7 +9,7 @@ import { headData } from '#lib/utils/table.js';
 import { m } from '#paraglide/messages.js';
 import { type TableSource } from '#lib/components/ModelTable/types.js';
 import type { Actions } from '@sveltejs/kit';
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -62,10 +62,16 @@ export const load = (async ({ fetch, params }) => {
 	const schema = modelSchema(URLModel);
 	// Linked ids from the raw object: the read data masks the objects the user cannot
 	// see, and the form must send those links back untouched. Only for fields the read
-	// data shows: it leaves out those hidden from respondents.
-	const rawObject = await fetchJson(`${endpoint}object/`);
+	// data shows: it leaves out those hidden from respondents. Without the raw object
+	// the page does not load: a form built from the read data would unlink the hidden
+	// objects on its next save.
+	const rawResponse = await fetch(`${endpoint}object/`);
+	if (!rawResponse.ok) {
+		error(rawResponse.status, rawResponse.statusText || 'Failed to load the linked objects');
+	}
+	const rawObject = await rawResponse.json();
 	const linkedIds = (field: string): string[] =>
-		field in requirementAssessment && Array.isArray(rawObject?.[field])
+		field in requirementAssessment && Array.isArray(rawObject[field])
 			? rawObject[field].map(String)
 			: (object[field] ?? []).map((item: any) => item?.id).filter(Boolean);
 	for (const field of [

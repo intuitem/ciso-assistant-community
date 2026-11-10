@@ -176,7 +176,7 @@
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	const initialValue = resetForm ? undefined : $value;
-	// Set by ModelForm when it edits an existing object; elsewhere hidden ids are dropped.
+	// Set by the form or page that edits an existing object; elsewhere hidden ids are dropped.
 	const formKeepsHiddenLinks = getContext<boolean | undefined>('formKeepsHiddenLinks') ?? false;
 
 	type SelectValue = string | number | undefined;

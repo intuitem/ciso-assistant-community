@@ -1178,22 +1178,25 @@ class AssetWriteSerializer(
         # Link checks first: the cycle walk below follows hidden assets, and its
         # answer must not tell where a hidden asset sits in the graph.
         data = super().validate(data)
-        parent_assets = data.get("parent_assets", [])
+        parent_assets = data.get("parent_assets")
         support_assets = data.get("child_assets", [])
-        """
-        Check that the assets graph will not contain cycles
-        """
-        myset = set()
+        if parent_assets is None:
+            # A request that only sets the supports keeps the asset's parents.
+            parent_assets = (
+                self.instance.parent_assets.all()
+                if self.instance and support_assets
+                else []
+            )
+        # The graph has a cycle when the asset, or one it is put above, is also
+        # above it.
+        below = set(support_assets)
         if self.instance:
-            myset = set([self.instance])
-        if parent_assets:
-            myset = myset | set(support_assets)
-
-            for asset in parent_assets:
-                if myset & set(asset.ancestors_plus_self()):
-                    raise serializers.ValidationError(
-                        "errorAssetGraphMustNotContainCycles"
-                    )
+            if self.instance in below:
+                raise serializers.ValidationError("errorAssetGraphMustNotContainCycles")
+            below.add(self.instance)
+        for asset in parent_assets:
+            if below & asset.ancestors_plus_self():
+                raise serializers.ValidationError("errorAssetGraphMustNotContainCycles")
         return data
 
     def create(self, validated_data):
@@ -1276,7 +1279,7 @@ class AssetReadSerializer(AssetWriteSerializer):
             return optimized_data.get("descendants", {}).get(obj.id, [])
 
         # Fallback for single object serialization
-        return obj.children_assets.annotate(str=F("name")).values("id", "str")
+        return list(obj.children_assets.annotate(str=F("name")).values("id", "str"))
 
     def get_security_objectives(self, obj):
         """

@@ -26,9 +26,9 @@ describe('findHiddenIds', () => {
 		expect(url).not.toContain('folder=');
 	});
 
-	it('reports nothing hidden when the lookup fails', async () => {
+	it('keeps every id when the lookup fails, so none is dropped on save', async () => {
 		const fetchFn = serving([], false);
-		expect(await findHiddenIds(fetchFn, 'evidences', ['a'])).toEqual([]);
+		expect(await findHiddenIds(fetchFn, 'evidences', ['a', 'b'])).toEqual(['a', 'b']);
 	});
 
 	it('does not fetch without ids', async () => {

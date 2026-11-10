@@ -3394,8 +3394,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objet non visible. Le lien peut être perdu lors de l’édition.",
-				"countPlural=other": "{count} objets non visibles. Les liens peuvent être perdus lors de l’édition."
+				"countPlural=one": "{count} objet non visible.",
+				"countPlural=other": "{count} objets non visibles."
 			}
 		}
 	],
