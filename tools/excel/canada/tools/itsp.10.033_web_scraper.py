@@ -344,10 +344,14 @@ SOURCE_CORRECTIONS = [
 
 
 def fetch_html(url: str, retries: int = 5) -> str:
+    # Family page URLs come from links in the index page: only fetch the
+    # publisher's site over https.
+    if not url.startswith(f"{BASE_URL}/"):
+        raise ValueError(f"Refusing to fetch a URL outside {BASE_URL}: {url}")
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     for attempt in range(retries):
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urllib.request.urlopen(request, timeout=60) as response:  # nosec B310
                 html = response.read().decode("utf-8")
         except (urllib.error.URLError, TimeoutError) as error:
             if isinstance(error, urllib.error.HTTPError) and error.code < 500:
