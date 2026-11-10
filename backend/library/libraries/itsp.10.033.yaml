@@ -179,9 +179,9 @@ objects:
         \ Orders in Council, directives, regulations, policies, standards, and guidelines.\
         \ Simply restating controls does not constitute an organizational policy or\
         \ procedure.\n\n**Related controls and activities:** IA-01, PM-09, PM-24,\
-        \ PS-08, SI-02, SI-12.\n\n**Enhancements:** None\n\n**References:**\n\u2022\
-        \ [TBS Directive on Security Management, Appendix E: Mandatory Procedures\
-        \ for Information Management Security Control](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32611&section=procedure&p=E)\n\
+        \ PS-08, SI-02, SI-12.\n\n**References:**\n\u2022 [TBS Directive on Security\
+        \ Management, Appendix E: Mandatory Procedures for Information Management\
+        \ Security Control](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32611&section=procedure&p=E)\n\
         \u2022 [An introduction to the cyber threat environment](https://www.cyber.gc.ca/en/guidance/introduction-cyber-threat-environment)\n\
         \u2022 [TBS Guide to Integrated Risk Management](https://www.canada.ca/en/treasury-board-secretariat/corporate/risk-management/guide-integrated-risk-management.html)"
       implementation_groups:
@@ -247,11 +247,10 @@ objects:
             \ la r\xE9glementation, aux politiques, aux normes et aux lignes directrices\
             \ applicables. R\xE9p\xE9ter les contr\xF4les ne constitue pas une politique\
             \ ou une proc\xE9dure organisationnelle.\n\n**Contr\xF4les et activit\xE9\
-            s connexes :** IA-01, PM-09, PM-24, PS-08, SI-02 et SI-12.\n\n**Am\xE9\
-            liorations:** Aucune.\n\n**R\xE9f\xE9rences :**\n\u2022 [SCT, Directive\
-            \ sur la gestion de la s\xE9curit\xE9 \u2013 Annexe E : Proc\xE9dures\
-            \ obligatoires relatives aux mesures de s\xE9curit\xE9 de la gestion de\
-            \ l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=E)\n\
+            s connexes :** IA-01, PM-09, PM-24, PS-08, SI-02 et SI-12.\n\n**R\xE9\
+            f\xE9rences :**\n\u2022 [SCT, Directive sur la gestion de la s\xE9curit\xE9\
+            \ \u2013 Annexe E : Proc\xE9dures obligatoires relatives aux mesures de\
+            \ s\xE9curit\xE9 de la gestion de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=E)\n\
             \u2022 [Introduction \xE0 l\u2019environnement de cybermenaces](https://www.cyber.gc.ca/fr/orientation/introduction-lenvironnement-de-cybermenaces)\n\
             \u2022 [SCT, Guide de gestion int\xE9gr\xE9e du risque](https://www.canada.ca/fr/secretariat-conseil-tresor/organisation/gestion-risque/guide-gestion-integree-risque.html)"
     - urn: urn:intuitem:risk:req_node:itsp.10.033:ac-02
@@ -277,7 +276,7 @@ objects:
         D.3. access authorizations (i.e., privileges) and [Assignment: organization-defined
         attributes (as required)] for each account
 
-        E. Require approvals by [Assignment: organization-defined personnel orroles]
+        E. Require approvals by [Assignment: organization-defined personnel or roles]
         for requests to create accounts
 
         F. Create, enable, modify, disable, and remove accounts in accordance with
@@ -481,17 +480,15 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itsp.10.033:ac-02
       ref_id: AC-02(01)
       name: 'Account management: Automated system account management'
-      description: 'Support of system accounts using [Assignment: organization-defined
-        automated mechanisms].
-
-
-        Automated mechanisms can include internal system functions and email, telephonic,
-        and text messaging notifications.'
+      description: 'Support the management of system accounts using [Assignment: organization-defined
+        automated mechanisms].'
       annotation: "Automated system account management includes using automated mechanisms\
         \ to\n\n\u2022 create, enable, modify, disable, and remove accounts\n\u2022\
         \ notify account managers when an account is created, enabled, modified, disabled,\
         \ or removed, or when users are terminated or transferred\n\u2022 monitor\
-        \ system account usage; and report atypical system account usage"
+        \ system account usage; and report atypical system account usage\n\nAutomated\
+        \ mechanisms can include internal system functions and email, telephonic,\
+        \ and text messaging notifications."
       implementation_groups:
       - medium
       translations:
@@ -499,10 +496,7 @@ objects:
           name: "Gestion des comptes : Gestion automatis\xE9e des comptes syst\xE8\
             me"
           description: "Appuyer la gestion des comptes syst\xE8me au moyen de [Affectation\
-            \ : m\xE9canismes automatis\xE9s d\xE9finis par l\u2019organisation].\n\
-            \nLes m\xE9canismes automatis\xE9s peuvent comprendre des fonctions de\
-            \ syst\xE8mes internes ainsi que des notifications t\xE9l\xE9phoniques,\
-            \ de courriels et de messages texte."
+            \ : m\xE9canismes automatis\xE9s d\xE9finis par l\u2019organisation]."
           annotation: "La gestion automatis\xE9e des comptes syst\xE8me comprend le\
             \ recours \xE0 des m\xE9canismes automatis\xE9s pour :\n\n\u2022 cr\xE9\
             er, activer, modifier, d\xE9sactiver et supprimer les comptes;\n\u2022\
@@ -510,7 +504,10 @@ objects:
             \xE9, activ\xE9, modifi\xE9, d\xE9sactiv\xE9 ou supprim\xE9, ou lorsque\
             \ des utilisatrices ou utilisateurs sont cong\xE9di\xE9s ou transf\xE9\
             r\xE9s;\n\u2022 surveiller l\u2019usage du compte de syst\xE8me; et signaler\
-            \ une utilisation irr\xE9guli\xE8re de celui-ci."
+            \ une utilisation irr\xE9guli\xE8re de celui-ci.\n\nLes m\xE9canismes\
+            \ automatis\xE9s peuvent comprendre des fonctions de syst\xE8mes internes\
+            \ ainsi que des notifications t\xE9l\xE9phoniques, de courriels et de\
+            \ messages texte."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:ac-02(02)
       assessable: true
       depth: 3
@@ -3428,13 +3425,13 @@ objects:
         fr:
           name: "Droit d\u2019acc\xE8s minimal : Examen des privil\xE8ges d\u2019\
             utilisateur"
-          description: "a. Examiner les [Affectation : droits d\u2019acc\xE8s attribu\xE9\
-            s aux [Affectation : r\xF4les ou classes d\u2019utilisateur d\xE9finis\
-            \ par l\u2019organisation] tous les [Affectation : fr\xE9quence d\xE9\
-            finie par l\u2019organisation] pour valider la n\xE9cessit\xE9 de d\xE9\
-            tenir ces droits d\u2019acc\xE8s\nb. R\xE9attribuer ou retirer les droits\
-            \ d\u2019acc\xE8s, au besoin, pour bien refl\xE9ter les besoins organisationnels\
-            \ li\xE9s \xE0 la mission et aux op\xE9rations"
+          description: "a. Examiner les droits d\u2019acc\xE8s attribu\xE9s aux [Affectation\
+            \ : r\xF4les ou classes d\u2019utilisateur d\xE9finis par l\u2019organisation]\
+            \ tous les [Affectation : fr\xE9quence d\xE9finie par l\u2019organisation]\
+            \ pour valider la n\xE9cessit\xE9 de d\xE9tenir ces droits d\u2019acc\xE8\
+            s\nb. R\xE9attribuer ou retirer les droits d\u2019acc\xE8s, au besoin,\
+            \ pour bien refl\xE9ter les besoins organisationnels li\xE9s \xE0 la mission\
+            \ et aux op\xE9rations"
           annotation: "La n\xE9cessit\xE9 de d\xE9tenir certains droits d\u2019acc\xE8\
             s d\u2019utilisatrice ou utilisateur pourrait changer au fil du temps\
             \ selon les changements aux fonctions op\xE9rationnelles et aux missions\
@@ -4089,7 +4086,7 @@ objects:
       ref_id: AC-11
       name: Device lock
       description: 'A. Prevent further access to the system by [Selection (1 or more):
-        initiating a device lock after [Assignment: organization-defined tie period]
+        initiating a device lock after [Assignment: organization-defined time period]
         of inactivity; requiring the user to initiate a device lock before leaving
         the system unattended]
 
@@ -5629,7 +5626,7 @@ objects:
         \ SC-34, SC-43, SI-03, SI-04.\n\n**References:**\n\u2022 [TBS Directive on\
         \ Security Management: Appendix B: Mandatory Procedures for Information Technology\
         \ Security Control](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32611&section=procedure&p=B)\n\
-        \u2022 [Security requirements for sireless local area networks (ITSG-41)](https://www.cyber.gc.ca/en/guidance/security-requirements-wireless-local-area-networks-itsg-41)\n\
+        \u2022 [Security requirements for wireless local area networks (ITSG-41)](https://www.cyber.gc.ca/en/guidance/security-requirements-wireless-local-area-networks-itsg-41)\n\
         \u2022 [Security considerations for mobile device deployments (ITSAP.70.002)](https://www.cyber.gc.ca/en/guidance/security-considerations-mobile-device-deployments-itsap70002)\n\
         \u2022 Security configurations and best practices to protect your mobile device\
         \ (ITSM.80.002)\n\u2022 [Securing the enterprise for mobility (ITSM.80.001)](https://www.cyber.gc.ca/en/guidance/securing-enterprise-mobility-itsm80001)"
@@ -8689,8 +8686,9 @@ objects:
             \ est re\xE7ue.\n\n**Contr\xF4les et activit\xE9s connexes :** AC-02,\
             \ AC-03, AC-05, AC-06, AC-07, AC-17, AU-07, AU-16, CA-02, CA-07, CM-02,\
             \ CM-05, CM-06, CM-10, CM-11, IA-02, IA-03, IA-05, IA-08, IR-05, MA-04,\
-            \ MP-04, PE-03, PE-06, RA-05, SA-08, SC-07, SI-03, SI-04 et-07.\n\n**R\xE9\
-            f\xE9rences :**\n\u2022 [SCT, Politique sur la s\xE9curit\xE9 du gouvernement](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=16578)\n\
+            \ MP-04, PE-03, PE-06, RA-05, SA-08, SC-07, SI-03, SI-04 et SI-07.\n\n\
+            **R\xE9f\xE9rences :**\n\u2022 [SCT, Politique sur la s\xE9curit\xE9 du\
+            \ gouvernement](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=16578)\n\
             \u2022 [SCT, Directive sur la gestion de la s\xE9curit\xE9 \u2013 Annexe\
             \ B : Proc\xE9dures obligatoires relatives aux mesures de s\xE9curit\xE9\
             \ de la technologie de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)\n\
@@ -10915,33 +10913,51 @@ objects:
             s. La connaissance des obligations en mati\xE8re de protection des renseignements\
             \ personnels, comme il est document\xE9 dans la loi, la r\xE9glementation,\
             \ la jurisprudence et l\u2019ensemble des politiques, est n\xE9cessaire\
-            \ pour effectuer les EFVP.\n\nLes organisations effectuent des \xE9valuations\
-            \ des contr\xF4les mis en \u0153uvre comme il est document\xE9 dans les\
-            \ plans de s\xE9curit\xE9 et de protection de la vie priv\xE9e. Bien qu\u2019\
-            il soit possible d\u2019effectuer les \xE9valuations tout au long du cycle\
-            \ de d\xE9veloppement des syst\xE8mes dans le cadre des processus d\u2019\
-            ing\xE9nierie des syst\xE8mes et d\u2019ing\xE9nierie de la s\xE9curit\xE9\
-            \ des syst\xE8mes, il est recommand\xE9 de r\xE9aliser les \xE9valuations\
-            \ t\xF4t pendant la phase de conception pour s\u2019assurer que la protection\
-            \ de la protection de la vie priv\xE9e et de la s\xE9curit\xE9 soit prise\
-            \ en compte dans le programme ou la conception du syst\xE8me.\n\nLa conception\
-            \ pour les contr\xF4les peut \xEAtre \xE9valu\xE9e alors que les demandes\
-            \ de proposition sont \xE9labor\xE9es, les interventions \xE9valu\xE9\
-            es et les revues de conception effectu\xE9es. Si une conception pour mettre\
-            \ en \u0153uvre des contr\xF4les et une mise en \u0153uvre subs\xE9quente\
-            \ conform\xE9ment \xE0 la conception sont \xE9valu\xE9es durant la phase\
-            \ de d\xE9veloppement, l\u2019essai final des contr\xF4les peut s\u2019\
-            av\xE9rer une simple confirmation faisant appel \xE0 une \xE9valuation\
-            \ de contr\xF4le pr\xE9c\xE9demment effectu\xE9e et \xE0 des r\xE9sultats\
-            \ combin\xE9s.\n\nLes organisations peuvent \xE9laborer un seul plan consolid\xE9\
-            \ d\u2019\xE9valuation de la s\xE9curit\xE9 et de la protection de la\
-            \ vie priv\xE9e pour le syst\xE8me ou tenir \xE0 jour plusieurs plans\
-            \ distincts. Un plan d\u2019\xE9valuation consolid\xE9 d\xE9limite clairement\
-            \ les r\xF4les et les responsabilit\xE9s lors de l\u2019\xE9valuation\
-            \ de contr\xF4le. Si plusieurs organisations participent \xE0 l\u2019\xE9\
-            valuation d\u2019un syst\xE8me, une approche coordonn\xE9e peut permettre\
-            \ de r\xE9duire les redondances et les co\xFBts connexes.\n\nLes organisations\
-            \ peuvent mener d\u2019autres types d\u2019activit\xE9s d\u2019\xE9valuation,\
+            \ pour effectuer les EFVP.\n\nLes organisations \xE9valuent les contr\xF4\
+            les dans les syst\xE8mes et les environnements dans lesquels ces syst\xE8\
+            mes fonctionnent dans le cadre des autorisations initiales ou continues\
+            \ du syst\xE8me, de la surveillance continue, de la conception et du d\xE9\
+            veloppement des syst\xE8mes, de l\u2019ing\xE9nierie de la s\xE9curit\xE9\
+            \ et de la protection de la vie priv\xE9e des syst\xE8mes, et du cycle\
+            \ de d\xE9veloppement des syst\xE8mes comme il est recommand\xE9 dans\
+            \ les documents Activit\xE9s organisationnelles de gestion des risques\
+            \ pour la cybers\xE9curit\xE9 et la vie priv\xE9e (ITSP.10.036) et Activit\xE9\
+            s de gestion des risques pour la cybers\xE9curit\xE9 et la vie priv\xE9\
+            e tout au long du cycle de vie des syst\xE8mes (ITSP.10.037). Les \xE9\
+            valuations aident \xE0 assurer que les organisations respectent les exigences\
+            \ de s\xE9curit\xE9 et de protection de la vie priv\xE9e, \xE0 identifier\
+            \ les faiblesses et les lacunes dans le processus de conception et de\
+            \ d\xE9veloppement du syst\xE8me, et \xE0 fournir les renseignements essentiels\
+            \ n\xE9cessaires pour prendre des d\xE9cisions en fonction des risques\
+            \ dans le cadre des processus d\u2019autorisation, et assurer le respect\
+            \ des proc\xE9dures d\u2019att\xE9nuation des vuln\xE9rabilit\xE9s.\n\n\
+            Les organisations effectuent des \xE9valuations des contr\xF4les mis en\
+            \ \u0153uvre comme il est document\xE9 dans les plans de s\xE9curit\xE9\
+            \ et de protection de la vie priv\xE9e. Bien qu\u2019il soit possible\
+            \ d\u2019effectuer les \xE9valuations tout au long du cycle de d\xE9veloppement\
+            \ des syst\xE8mes dans le cadre des processus d\u2019ing\xE9nierie des\
+            \ syst\xE8mes et d\u2019ing\xE9nierie de la s\xE9curit\xE9 des syst\xE8\
+            mes, il est recommand\xE9 de r\xE9aliser les \xE9valuations t\xF4t pendant\
+            \ la phase de conception pour s\u2019assurer que la protection de la protection\
+            \ de la vie priv\xE9e et de la s\xE9curit\xE9 soit prise en compte dans\
+            \ le programme ou la conception du syst\xE8me.\n\nLa conception pour les\
+            \ contr\xF4les peut \xEAtre \xE9valu\xE9e alors que les demandes de proposition\
+            \ sont \xE9labor\xE9es, les interventions \xE9valu\xE9es et les revues\
+            \ de conception effectu\xE9es. Si une conception pour mettre en \u0153\
+            uvre des contr\xF4les et une mise en \u0153uvre subs\xE9quente conform\xE9\
+            ment \xE0 la conception sont \xE9valu\xE9es durant la phase de d\xE9veloppement,\
+            \ l\u2019essai final des contr\xF4les peut s\u2019av\xE9rer une simple\
+            \ confirmation faisant appel \xE0 une \xE9valuation de contr\xF4le pr\xE9\
+            c\xE9demment effectu\xE9e et \xE0 des r\xE9sultats combin\xE9s.\n\nLes\
+            \ organisations peuvent \xE9laborer un seul plan consolid\xE9 d\u2019\xE9\
+            valuation de la s\xE9curit\xE9 et de la protection de la vie priv\xE9\
+            e pour le syst\xE8me ou tenir \xE0 jour plusieurs plans distincts. Un\
+            \ plan d\u2019\xE9valuation consolid\xE9 d\xE9limite clairement les r\xF4\
+            les et les responsabilit\xE9s lors de l\u2019\xE9valuation de contr\xF4\
+            le. Si plusieurs organisations participent \xE0 l\u2019\xE9valuation d\u2019\
+            un syst\xE8me, une approche coordonn\xE9e peut permettre de r\xE9duire\
+            \ les redondances et les co\xFBts connexes.\n\nLes organisations peuvent\
+            \ mener d\u2019autres types d\u2019activit\xE9s d\u2019\xE9valuation,\
             \ comme l\u2019analyse des vuln\xE9rabilit\xE9s et la surveillance du\
             \ syst\xE8me, pour maintenir la posture de s\xE9curit\xE9 et de protection\
             \ de la vie priv\xE9e des syst\xE8mes durant tout leur cycle de vie. Les\
@@ -18514,6 +18530,8 @@ objects:
         personal information. Consideration of the privacy concept of necessity versus
         proportionality requires that organizations collect just enough personal information
         required to ensure accurate authentication.'
+      implementation_groups:
+      - medium
       translations:
         fr:
           name: "Identification et authentification (utilisatrices et utilisateurs\
@@ -23826,7 +23844,7 @@ objects:
       translations:
         fr:
           name: 'Maintenance non locale : Documenter la maintenance non locale'
-          description: "Annul\xE9 : Int\xE9gr\xE9 au contr\xF4le MA-01 and MA-04."
+          description: "Annul\xE9 : Int\xE9gr\xE9 aux contr\xF4les MA-01 et MA-04."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:ma-04(03)
       assessable: true
       depth: 3
@@ -24063,7 +24081,7 @@ objects:
             \ et devrait donc \xEAtre prot\xE9g\xE9e en cons\xE9quence.\n\n**Contr\xF4\
             les et activit\xE9s connexes :** AC-02, AC-03, AC-05, AC-06, IA-02, IA-08,\
             \ MA-04, MP-02, PE-02, PE-03, PS-07, RA-03 et SA-400.\n\n**R\xE9f\xE9\
-            rences :**\n[SCAP, Manuel de la s\xE9curit\xE9 des contrats, Chapitre\
+            rences :**\n[SPAC, Manuel de la s\xE9curit\xE9 des contrats, Chapitre\
             \ 6 : Manipulation et protection de renseignements et de biens](https://www.canada.ca/fr/services-publics-approvisionnement/services/securite-industrielle/exigences-securite-contrats/manuel-securite-contrats-gouvernement-canada.html)"
     - urn: urn:intuitem:risk:req_node:itsp.10.033:ma-05(01)
       assessable: true
@@ -26879,7 +26897,7 @@ objects:
       translations:
         fr:
           name: "Contr\xF4le des visiteuses et visiteurs"
-          description: "Annul\xE9 : Int\xE9gr\xE9 au contr\xF4le PE-02 and PE-03."
+          description: "Annul\xE9 : Int\xE9gr\xE9 aux contr\xF4les PE-02 et PE-03."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:pe-08
       assessable: true
       depth: 2
@@ -27838,7 +27856,7 @@ objects:
       translations:
         fr:
           name: "Emplacement des composants du syst\xE8me : Site de l\u2019installation"
-          description: 'Withdrawn: Moved to PE-23.'
+          description: "Annul\xE9 : Transf\xE9r\xE9 sous le contr\xF4le PE-23."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:pe-19
       assessable: true
       depth: 2
@@ -28607,8 +28625,8 @@ objects:
             \ aux normes et aux lignes directrices applicables. R\xE9p\xE9ter les\
             \ contr\xF4les ne constitue pas une politique ou une proc\xE9dure organisationnelle.\n\
             \n**Contr\xF4les et activit\xE9s connexes :** PM-09, PS-08, SI-02 et SI-12.\n\
-            \n**References :**\n\u2022 [SCT, Politique sur la protection de la vie\
-            \ priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=12510)\n\
+            \n**R\xE9f\xE9rences :**\n\u2022 [SCT, Politique sur la protection de\
+            \ la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=12510)\n\
             \u2022 [SCT, Directive sur les pratiques relatives \xE0 la protection\
             \ de la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=18309)\n\
             \u2022 [SCT, Cadre de l\u2019architecture int\xE9gr\xE9e du gouvernement\
@@ -28715,50 +28733,51 @@ objects:
         fr:
           name: "Plans de s\xE9curit\xE9 et de protection de la vie priv\xE9e des\
             \ syst\xE8mes"
-          description: "A. sont conformes \xE0 l\u2019architecture d\u2019entreprise\
-            \ de l\u2019organisation\nA.1. d\xE9finissent explicitement les composants\
-            \ constitutifs du syst\xE8me\nA.2. d\xE9crivent le contexte op\xE9rationnel\
-            \ du syst\xE8me sur le plan des processus li\xE9s \xE0 la mission et aux\
-            \ activit\xE9s\nA.3. identifient les personnes qui assument des responsabilit\xE9\
-            s et des r\xF4les li\xE9s au syst\xE8me\nA.4. identifient les types d\u2019\
-            informations trait\xE9es, stock\xE9es et transmises par le syst\xE8me\n\
-            A.5. d\xE9finissent la cat\xE9gorisation de s\xE9curit\xE9 du syst\xE8\
-            me, y compris la justification \xE0 l\u2019appui\nA.6. d\xE9crivent les\
-            \ menaces particuli\xE8res pour le syst\xE8me qui sont pr\xE9occupantes\
-            \ pour l\u2019organisation\nA.7. fournissent les r\xE9sultats de l\u2019\
-            \xE9valuation des risques d\u2019atteinte \xE0 la vie priv\xE9e pour les\
-            \ syst\xE8mes qui traitent les renseignements personnels\nA.8. d\xE9crivent\
-            \ l\u2019environnement op\xE9rationnel du syst\xE8me ainsi que les d\xE9\
-            pendances ou les connexions \xE0 d\u2019autres syst\xE8mes ou \xE0 d\u2019\
-            autres composants du syst\xE8me\nA.9. donnent un aper\xE7u des exigences\
-            \ en mati\xE8re de contr\xF4le de la s\xE9curit\xE9 et de la protection\
-            \ de la vie priv\xE9e du syst\xE8me\nA.10. d\xE9terminent les bases de\
-            \ r\xE9f\xE9rence ou les profils des contr\xF4les pertinents, le cas \xE9\
-            ch\xE9ant\nA.11. d\xE9crivent les contr\xF4les en place ou pr\xE9vus pour\
-            \ satisfaire aux exigences de s\xE9curit\xE9 et de protection de la vie\
-            \ priv\xE9e, y compris la justification des d\xE9cisions concernant l\u2019\
-            adaptation des contr\xF4les\nA.12. incluent les d\xE9terminations des\
-            \ risques d\xE9coulant des d\xE9cisions li\xE9es \xE0 la conception et\
-            \ \xE0 l\u2019architecture de s\xE9curit\xE9 et de protection de la vie\
-            \ priv\xE9e\nA.13. comprennent des activit\xE9s li\xE9es \xE0 la s\xE9\
-            curit\xE9 et \xE0 la protection de la vie priv\xE9e visant le syst\xE8\
-            me dont la planification et la coordination doivent \xEAtre assur\xE9\
-            es avec [Affectation : personnes ou groupes d\xE9sign\xE9s par l\u2019\
-            organisation]\nA.14. sont examin\xE9s et approuv\xE9s par l\u2019autorit\xE9\
-            \ responsable ou une repr\xE9sentante ou un repr\xE9sentant d\xE9sign\xE9\
-            \ avant leur mise en \u0153uvre\nA.400. documentent les objectifs organisationnels\
-            \ pour le traitement des renseignements personnels\nA.401. d\xE9finissent\
-            \ les normes de conservation et d\u2019\xE9limination des documents pour\
-            \ les renseignements personnels stock\xE9s dans le syst\xE8me\nB. Distribuer\
-            \ des copies des plans et communiquer les changements qui y sont apport\xE9\
-            s par la suite aux [Affectation : personnel ou r\xF4les d\xE9finis par\
-            \ l\u2019organisation]\nC. Examiner les plans [Affectation : fr\xE9quence\
-            \ d\xE9finie par l\u2019organisation]\nD. Mettre \xE0 jour les plans pour\
-            \ tenir compte des changements apport\xE9s au syst\xE8me et \xE0 l\u2019\
-            environnement d\u2019exploitation, ou des probl\xE8mes soulev\xE9s lors\
-            \ de la mise en \u0153uvre des plans ou des \xE9valuations des contr\xF4\
-            les\nE. Prot\xE9ger les plans contre les divulgations ou les modifications\
-            \ non autoris\xE9es"
+          description: "A. \xC9laborer des plans de s\xE9curit\xE9 et de protection\
+            \ de la vie priv\xE9e pour le syst\xE8me qui\nA.1. sont conformes \xE0\
+            \ l\u2019architecture d\u2019entreprise de l\u2019organisation\nA.2. d\xE9\
+            finissent explicitement les composants constitutifs du syst\xE8me\nA.3.\
+            \ d\xE9crivent le contexte op\xE9rationnel du syst\xE8me sur le plan des\
+            \ processus li\xE9s \xE0 la mission et aux activit\xE9s\nA.4. identifient\
+            \ les personnes qui assument des responsabilit\xE9s et des r\xF4les li\xE9\
+            s au syst\xE8me\nA.5. identifient les types d\u2019informations trait\xE9\
+            es, stock\xE9es et transmises par le syst\xE8me\nA.6. d\xE9finissent la\
+            \ cat\xE9gorisation de s\xE9curit\xE9 du syst\xE8me, y compris la justification\
+            \ \xE0 l\u2019appui\nA.7. d\xE9crivent les menaces particuli\xE8res pour\
+            \ le syst\xE8me qui sont pr\xE9occupantes pour l\u2019organisation\nA.8.\
+            \ fournissent les r\xE9sultats de l\u2019\xE9valuation des risques d\u2019\
+            atteinte \xE0 la vie priv\xE9e pour les syst\xE8mes qui traitent les renseignements\
+            \ personnels\nA.9. d\xE9crivent l\u2019environnement op\xE9rationnel du\
+            \ syst\xE8me ainsi que les d\xE9pendances ou les connexions \xE0 d\u2019\
+            autres syst\xE8mes ou \xE0 d\u2019autres composants du syst\xE8me\nA.10.\
+            \ donnent un aper\xE7u des exigences en mati\xE8re de contr\xF4le de la\
+            \ s\xE9curit\xE9 et de la protection de la vie priv\xE9e du syst\xE8me\n\
+            A.11. d\xE9terminent les bases de r\xE9f\xE9rence ou les profils des contr\xF4\
+            les pertinents, le cas \xE9ch\xE9ant\nA.12. d\xE9crivent les contr\xF4\
+            les en place ou pr\xE9vus pour satisfaire aux exigences de s\xE9curit\xE9\
+            \ et de protection de la vie priv\xE9e, y compris la justification des\
+            \ d\xE9cisions concernant l\u2019adaptation des contr\xF4les\nA.13. incluent\
+            \ les d\xE9terminations des risques d\xE9coulant des d\xE9cisions li\xE9\
+            es \xE0 la conception et \xE0 l\u2019architecture de s\xE9curit\xE9 et\
+            \ de protection de la vie priv\xE9e\nA.14. comprennent des activit\xE9\
+            s li\xE9es \xE0 la s\xE9curit\xE9 et \xE0 la protection de la vie priv\xE9\
+            e visant le syst\xE8me dont la planification et la coordination doivent\
+            \ \xEAtre assur\xE9es avec [Affectation : personnes ou groupes d\xE9sign\xE9\
+            s par l\u2019organisation]\nA.15. sont examin\xE9s et approuv\xE9s par\
+            \ l\u2019autorit\xE9 responsable ou une repr\xE9sentante ou un repr\xE9\
+            sentant d\xE9sign\xE9 avant leur mise en \u0153uvre\nA.400. documentent\
+            \ les objectifs organisationnels pour le traitement des renseignements\
+            \ personnels\nA.401. d\xE9finissent les normes de conservation et d\u2019\
+            \xE9limination des documents pour les renseignements personnels stock\xE9\
+            s dans le syst\xE8me\nB. Distribuer des copies des plans et communiquer\
+            \ les changements qui y sont apport\xE9s par la suite aux [Affectation\
+            \ : personnel ou r\xF4les d\xE9finis par l\u2019organisation]\nC. Examiner\
+            \ les plans [Affectation : fr\xE9quence d\xE9finie par l\u2019organisation]\n\
+            D. Mettre \xE0 jour les plans pour tenir compte des changements apport\xE9\
+            s au syst\xE8me et \xE0 l\u2019environnement d\u2019exploitation, ou des\
+            \ probl\xE8mes soulev\xE9s lors de la mise en \u0153uvre des plans ou\
+            \ des \xE9valuations des contr\xF4les\nE. Prot\xE9ger les plans contre\
+            \ les divulgations ou les modifications non autoris\xE9es"
           annotation: "Les plans de s\xE9curit\xE9 et de protection de la vie priv\xE9\
             e du syst\xE8me sont adapt\xE9s au syst\xE8me et aux composants du syst\xE8\
             me dans la limite d\u2019autorisation d\xE9finie et contiennent une vue\
@@ -28840,8 +28859,8 @@ objects:
             \ CA-03, CA-07, CM-09, CM-13, CP-02, CP-04, IR-04, IR-08, MA-04, MA-05,\
             \ MP-04, MP-05, PL-07, PL-08, PL-10, PL-11, PM-01, PM-07, PM-08, PM-09,\
             \ PM-10, PM-11, RA-03, RA-08, RA-09, SA-05, SA-17, SA-22, SI-12, SR-02\
-            \ et SR-04.\n\n**References :**\n\u2022 [SCT, Politique sur les services\
-            \ et le num\xE9rique](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32603)\n\
+            \ et SR-04.\n\n**R\xE9f\xE9rences :**\n\u2022 [SCT, Politique sur les\
+            \ services et le num\xE9rique](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32603)\n\
             \u2022 [SCT, Directive sur la gestion de la s\xE9curit\xE9 \u2013 Annexe\
             \ B : Proc\xE9dures obligatoires relatives aux mesures de s\xE9curit\xE9\
             \ de la technologie de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)"
@@ -29000,8 +29019,8 @@ objects:
             \ un accord d\u2019\xE9change de renseignements.\n\n**Contr\xF4les et\
             \ activit\xE9s connexes :** AC-02, AC-06, AC-08, AC-09, AC-17, AC-18,\
             \ AC-19, AC-20, AT-02, AT-03, CM-11, IA-02, IA-04, IA-05, MP-07, PS-06,\
-            \ PS-08, SA-05 et SI-12.\n\n**References :**\n\u2022 [SCT, Politique sur\
-            \ les services et le num\xE9rique](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32603)\n\
+            \ PS-08, SA-05 et SI-12.\n\n**R\xE9f\xE9rences :**\n\u2022 [SCT, Politique\
+            \ sur les services et le num\xE9rique](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32603)\n\
             \u2022 [SCT, Directive sur les services et le num\xE9rique \u2013 Annexe\
             \ A : Exemples d\u2019utilisation acceptable des dispositifs et des r\xE9\
             seaux](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32707)\n\u2022\
@@ -29144,9 +29163,9 @@ objects:
             \ les documents relatifs au cycle de d\xE9veloppement des syst\xE8mes\
             \ et les documents li\xE9s \xE0 l\u2019ing\xE9nierie des syst\xE8mes.\n\
             \n**Contr\xF4les et activit\xE9s connexes :** PL-02, SA-02 et SI-12.\n\
-            \n**References :**\n\u2022 [SCT, Directive sur la gestion de la s\xE9\
-            curit\xE9 \u2013 Annexe B : Proc\xE9dures obligatoires relatives aux mesures\
-            \ de s\xE9curit\xE9 de la technologie de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)"
+            \n**R\xE9f\xE9rences :**\n\u2022 [SCT, Directive sur la gestion de la\
+            \ s\xE9curit\xE9 \u2013 Annexe B : Proc\xE9dures obligatoires relatives\
+            \ aux mesures de s\xE9curit\xE9 de la technologie de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)"
     - urn: urn:intuitem:risk:req_node:itsp.10.033:pl-08
       assessable: true
       depth: 2
@@ -29330,10 +29349,10 @@ objects:
             \ de s\xE9curit\xE9 et de protection de la vie priv\xE9e de l\u2019organisation.\n\
             \n**Contr\xF4les et activit\xE9s connexes :** CM-02, CM-06, PL-02, PL-07,\
             \ PL-09, PM-05, PM-07, RA-09, SA-03, SA-05, SA-08, SA-17 et SC-07.\n\n\
-            **References :**\n\u2022 [SCT, Directive sur les services et le num\xE9\
-            rique](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32601)\n\u2022\
-            \ [SCT, Cadre de l\u2019architecture int\xE9gr\xE9e du gouvernement du\
-            \ Canada](https://www.canada.ca/fr/gouvernement/systeme/gouvernement-numerique/politiques-normes/cadre-architecture-integree-gouvernement-canada.html)\n\
+            **R\xE9f\xE9rences :**\n\u2022 [SCT, Directive sur les services et le\
+            \ num\xE9rique](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32601)\n\
+            \u2022 [SCT, Cadre de l\u2019architecture int\xE9gr\xE9e du gouvernement\
+            \ du Canada](https://www.canada.ca/fr/gouvernement/systeme/gouvernement-numerique/politiques-normes/cadre-architecture-integree-gouvernement-canada.html)\n\
             \u2022 [SCT, Politique sur la protection de la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=12510)\n\
             \u2022 [SCT, Directive sur les pratiques relatives \xE0 la protection\
             \ de la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=18309)\n\
@@ -29590,7 +29609,7 @@ objects:
         \ control baselines in Security and privacy controls and assurance activities\
         \ catalogue \u2013 Baseline profiles (ITSP.10.033-01) are compliant with TBS\
         \ policies, directives, standards, and guidelines. For guidance on control\
-        \ baselines for national security systems, contact [contact@cyber.gc.ca](https://www.cyber.gc.ca/contact@cyber.gc.ca).\n\
+        \ baselines for national security systems, contact [contact@cyber.gc.ca](mailto:contact@cyber.gc.ca).\n\
         \n**Related controls and activities:** PL-02, PL-11, RA-02, RA-03, SA-08.\n\
         \n**References:**\n\u2022 [TBS Directive on Security Management: Appendix\
         \ B: Mandatory Procedures for Information Technology Security Control](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32611&section=procedure&p=B)\n\
@@ -29660,9 +29679,9 @@ objects:
             mes de s\xE9curit\xE9 nationale, pri\xE8re d\u2019envoyer un courriel\
             \ \xE0 [contact@cyber.gc.ca](mailto:contact@cyber.gc.ca).\n\n**Contr\xF4\
             les et activit\xE9s connexes :** PL-02, PL-11, RA-02, RA-03 et SA-08.\n\
-            \n**References :**\n\u2022 [SCT, Directive sur la gestion de la s\xE9\
-            curit\xE9 \u2013 Annexe B : Proc\xE9dures obligatoires relatives aux mesures\
-            \ de s\xE9curit\xE9 de la technologie de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)\n\
+            \n**R\xE9f\xE9rences :**\n\u2022 [SCT, Directive sur la gestion de la\
+            \ s\xE9curit\xE9 \u2013 Annexe B : Proc\xE9dures obligatoires relatives\
+            \ aux mesures de s\xE9curit\xE9 de la technologie de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)\n\
             \u2022 [SCT, Profil de mesures de s\xE9curit\xE9 pour les services du\
             \ GC fond\xE9s sur l\u2019informatique en nuage du gouvernement du Canada](https://www.canada.ca/fr/gouvernement/systeme/gouvernement-numerique/innovations-gouvernementales-numeriques/services-informatique-nuage/profil-controle-securite-services-ti-fondes-information-nuage.html)\n\
             \u2022 [SCT, Directive sur les services et le num\xE9rique \u2013 Annexe\
@@ -29774,9 +29793,10 @@ objects:
             \ cycle de vie pour sp\xE9cialiser ou personnaliser les contr\xF4les qui\
             \ repr\xE9sentent les besoins et les pr\xE9occupations de ces entit\xE9\
             s.\n\n**Contr\xF4les et activit\xE9s connexes :** PL-10, RA-02, RA-03,\
-            \ RA-09 et SA-08.\n\n**References :**\n\u2022 [SCT, Directive sur la gestion\
-            \ de la s\xE9curit\xE9 \u2013 Annexe B : Proc\xE9dures obligatoires relatives\
-            \ aux mesures de s\xE9curit\xE9 de la technologie de l\u2019information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)\n\
+            \ RA-09 et SA-08.\n\n**R\xE9f\xE9rences :**\n\u2022 [SCT, Directive sur\
+            \ la gestion de la s\xE9curit\xE9 \u2013 Annexe B : Proc\xE9dures obligatoires\
+            \ relatives aux mesures de s\xE9curit\xE9 de la technologie de l\u2019\
+            information](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=B)\n\
             \u2022 [SCT, Profil de mesures de s\xE9curit\xE9 pour les services du\
             \ GC fond\xE9s sur l\u2019informatique en nuage du gouvernement du Canada](https://www.canada.ca/fr/gouvernement/systeme/gouvernement-numerique/innovations-gouvernementales-numeriques/services-informatique-nuage/profil-controle-securite-services-ti-fondes-information-nuage.html)\n\
             \u2022 [SCT, Directive sur les services et le num\xE9rique \u2013 Annexe\
@@ -30026,8 +30046,8 @@ objects:
         \ expertise and resources as needed. Organizations may designate and empower\
         \ a group to manage and provide oversight for the information security and\
         \ privacy aspects of the capital planning and investment control process.\n\
-        \n**Related controls and activities:** PM-04, SA-02.\n\n**Enhancements:**\
-        \ None\n\n**References:**\n\u2022 [TBS Directive on Privacy Practices](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=18309)\n\
+        \n**Related controls and activities:** PM-04, SA-02.\n\n**References:**\n\u2022\
+        \ [TBS Directive on Privacy Practices](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=18309)\n\
         \u2022 [TBS Guideline on Service and Digital](https://www.canada.ca/en/government/system/digital-government/guideline-service-digital.html)\n\
         \u2022 [TBS Directive on Security Management: Appendix F: Mandatory Procedures\
         \ for Security in Contracts and Other Arrangements Control](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32611&section=procedure&p=F)"
@@ -30056,10 +30076,10 @@ objects:
             \ la s\xE9curit\xE9 et de la protection de la vie priv\xE9e de l\u2019\
             information dans le cadre du processus de planification des immobilisations\
             \ et de contr\xF4le des investissements.\n\n**Contr\xF4les et activit\xE9\
-            s connexes :** PM-04 et SA-02.\n\n**Am\xE9liorations:** Aucune.\n\n**R\xE9\
-            f\xE9rences :**\n\u2022 [SCT, Directive sur les pratiques relatives \xE0\
-            \ la protection de la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=18309)\n\
-            \u2022 [SCT, Ligne directrice sur les services et le num\xE9rique](https://www.canada.ca/fr/gouvernement/systeme/gouvernement-numerique/ligne-directrice-services-numerique.html)\n\
+            s connexes :** PM-04 et SA-02.\n\n**R\xE9f\xE9rences :**\n\u2022 [SCT,\
+            \ Directive sur les pratiques relatives \xE0 la protection de la vie priv\xE9\
+            e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=18309)\n\u2022 [SCT,\
+            \ Ligne directrice sur les services et le num\xE9rique](https://www.canada.ca/fr/gouvernement/systeme/gouvernement-numerique/ligne-directrice-services-numerique.html)\n\
             \u2022 [SCT, Directive sur la gestion de la s\xE9curit\xE9 \u2013 Annexe\
             \ F : Proc\xE9dures obligatoires relatives aux mesures de s\xE9curit\xE9\
             \ lors de l\u2019octroi de contrats et d\u2019autres ententes](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32611&section=procedure&p=F)"
@@ -31555,8 +31575,8 @@ objects:
         \ should consult with their appropriate privacy senior official or executive,\
         \ legal counsel and information management officials on this requirement and\
         \ be aware of the statutory exceptions and TBS guidance relating to the provision.\n\
-        \n**Related controls and activities:** AC-03, AU-02, PT-02.\n\n**Enhancements:**\
-        \ None.\n\n**References:**\n\u2022 [TBS Policy on Privacy Protection](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=12510)\n\
+        \n**Related controls and activities:** AC-03, AU-02, PT-02.\n\n**References:**\n\
+        \u2022 [TBS Policy on Privacy Protection](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=12510)\n\
         \u2022 [TBS Directive on Privacy Practices](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=18309)\n\
         \u2022 [Privacy Act](https://laws-lois.justice.gc.ca/eng/ACTS/P-21/index.html)\n\
         \u2022 [Privacy Regulations SOR/83-508](https://laws-lois.justice.gc.ca/eng/Regulations/SOR-83-508/index.html)\n\
@@ -31613,8 +31633,8 @@ objects:
             \ concernant cette exigence et \xEAtre au courant des exceptions pr\xE9\
             vues par les lois et des conseils du SCT en lien avec le provisionnement.\n\
             \n**Contr\xF4les et activit\xE9s connexes :** AC-03, AU-02 et PT-02.\n\
-            \n**Am\xE9liorations:** Aucune.\n\n**R\xE9f\xE9rences :**\n\u2022 [SCT,\
-            \ Politique sur la protection de la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=12510)\n\
+            \n**R\xE9f\xE9rences :**\n\u2022 [SCT, Politique sur la protection de\
+            \ la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=12510)\n\
             \u2022 [SCT, Directive sur les pratiques relatives \xE0 la protection\
             \ de la vie priv\xE9e](https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=18309)\n\
             \u2022 [Loi sur la protection des renseignements personnels](https://laws-lois.justice.gc.ca/fra/lois/p-21/index.html)\n\
@@ -32117,8 +32137,8 @@ objects:
         \ or other official designated to receive complaints. Privacy complaints may\
         \ also include personal information, which is handled in accordance with relevant\
         \ policies and processes. Under certain circumstances, the OPC can initiate\
-        \ its own investigation or complaint.\n\nGC discussion: departments and agencies\
-        \ are required to implement a process that acknowledges individuals\u2019\
+        \ its own investigation or complaint.\n\n**GC discussion:** GC departments\
+        \ and agencies are required to implement a process that acknowledges individuals\u2019\
         \ rights to file a complaint related to the collection, retention, or disposal\
         \ of personal information; the use or disclosure of personal information;\
         \ and their rights of access to their personal information. Organizations\
@@ -32430,23 +32450,17 @@ objects:
         \ for the organization, acceptable supply chain risk mitigation strategies\
         \ or controls, a process for consistently evaluating and monitoring supply\
         \ chain risk, approaches for implementing and communicating the supply chain\
-        \ risk management strategy, and the associated roles and responsibilities.\
-        \ An organization-wide supply chain risk management strategy includes an unambiguous\
-        \ expression of the supply chain risk appetite and tolerance for the organization,\
-        \ acceptable supply chain risk mitigation strategies or controls, a process\
-        \ for consistently evaluating and monitoring supply chain risk, approaches\
-        \ for implementing and communicating the supply chain risk management strategy,\
-        \ and the associated roles and responsibilities.\n\nSupply chain risk management\
-        \ includes considerations of the security and privacy risks associated with\
-        \ the development, acquisition, maintenance, and disposal of systems, system\
-        \ components, and system services. The supply chain risk management strategy\
-        \ can be incorporated into the organization\u2019s overarching risk management\
-        \ strategy and can guide and inform supply chain policies and system-level\
-        \ supply chain risk management plans.\n\nIn addition, the use of a risk executive\
-        \ function can facilitate a consistent, organization-wide application of the\
-        \ supply chain risk management strategy. The supply chain risk management\
-        \ strategy is implemented at the organization and mission/business levels,\
-        \ whereas the supply chain risk management plan (see SR-02) is implemented\
+        \ risk management strategy, and the associated roles and responsibilities.\n\
+        \nSupply chain risk management includes considerations of the security and\
+        \ privacy risks associated with the development, acquisition, maintenance,\
+        \ and disposal of systems, system components, and system services. The supply\
+        \ chain risk management strategy can be incorporated into the organization\u2019\
+        s overarching risk management strategy and can guide and inform supply chain\
+        \ policies and system-level supply chain risk management plans.\n\nIn addition,\
+        \ the use of a risk executive function can facilitate a consistent, organization-wide\
+        \ application of the supply chain risk management strategy. The supply chain\
+        \ risk management strategy is implemented at the organization and mission/business\
+        \ levels, whereas the supply chain risk management plan (see SR-02) is implemented\
         \ at the system level.\n\n**Related controls and activities:** CM-10, PM-09,\
         \ SR-01, SR-02, SR-03, SR-04, SR-05, SR-06, SR-07, SR-08, SR-09, SR-11.\n\n\
         **References:**\n\u2022 [Cyber supply chain: An approach to assessing risk\
@@ -33402,6 +33416,8 @@ objects:
         \ for Information Technology Security Control](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32611&section=procedure&p=B)\n\
         \u2022 [TBS Directive on Security Management, Appendix C: Mandatory Procedures\
         \ for Physical Security Control](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32611&section=procedure&p=C)"
+      implementation_groups:
+      - medium
       translations:
         fr:
           name: Transfert du personnel
@@ -33631,9 +33647,10 @@ objects:
             \ de l\u2019organisation\nb. Exiger que les employ\xE9es et employ\xE9\
             s attestent par \xE9crit de ces exigences, le cas \xE9ch\xE9ant, au moment\
             \ d\u2019accorder l\u2019acc\xE8s \xE0 l\u2019information concern\xE9e"
-          annotation: "Organizations comply with applicable laws, Orders in Council,\
-            \ directives, regulations, policies, standards, and guidelines regarding\
-            \ matters of post-employment requirements on terminated individuals.\n\
+          annotation: "Les organisations se conforment aux lois, aux d\xE9crets, aux\
+            \ directives, \xE0 la r\xE9glementation, aux politiques, aux normes et\
+            \ aux lignes directrices applicables pour ce qui est des exigences r\xE9\
+            gissant l\u2019apr\xE8s-mandat des personnes ayant quitt\xE9 leur emploi.\n\
             \n**Contr\xF4les et activit\xE9s connexes :** PS-04."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:ps-07
       assessable: true
@@ -34859,7 +34876,10 @@ objects:
 
         Federal department and agency personnel should consult with the appropriate
         privacy senior official or executive and legal counsel regarding the notice
-        provisions of the Privacy Act.'
+        provisions of the Privacy Act.
+
+
+        **Related controls and activities:** PT-06.'
       translations:
         fr:
           name: "\xC9nonc\xE9 de confidentialit\xE9 : Avis et \xE9nonc\xE9s de confidentialit\xE9"
@@ -36711,8 +36731,8 @@ objects:
         \ a PIA even if the personal information held by the organization is not being\
         \ used for decision-making or administrative purposes.\n\nApproval of the\
         \ PIA must be obtained from the executive or senior official who manages the\
-        \ program or activity and the official responsible for section 10 of the rivacy\
-        \ ActP. Upon approval, the PIA needs to be transmitted to TBS and to the OPC.\
+        \ program or activity and the official responsible for section 10 of the Privacy\
+        \ Act. Upon approval, the PIA needs to be transmitted to TBS and to the OPC.\
         \ Organizations are required to create a mitigation plan for compliance gaps\
         \ or privacy risks identified during the PIA process.\n\nFor multi-institutional\
         \ PIAs, participating organizations should refer to the directive for specific\
@@ -38457,7 +38477,7 @@ objects:
       translations:
         fr:
           name: "Restrictions relatives \xE0 l\u2019utilisation des logiciels"
-          description: "Annul\xE9 : Int\xE9gr\xE9 au contr\xF4le CM-10 and SI-07."
+          description: "Annul\xE9 : Int\xE9gr\xE9 aux contr\xF4les CM-10 et SI-07."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:sa-07
       assessable: false
       depth: 2
@@ -38468,7 +38488,7 @@ objects:
       translations:
         fr:
           name: "Logiciels install\xE9s par les utilisatrices et utilisateurs"
-          description: "Annul\xE9 : Int\xE9gr\xE9 au contr\xF4le CM-11 and SI-07."
+          description: "Annul\xE9 : Int\xE9gr\xE9 aux contr\xF4les CM-11 et SI-07."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:sa-08
       assessable: true
       depth: 2
@@ -42432,7 +42452,7 @@ objects:
         fr:
           name: "Protection de la cha\xEEne d\u2019approvisionnement : Composants\
             \ de syst\xE8mes d\u2019information essentiels"
-          description: "Annul\xE9 : Int\xE9gr\xE9 au contr\xF4le MA-06 and RA-09."
+          description: "Annul\xE9 : Int\xE9gr\xE9 aux contr\xF4les MA-06 et RA-09."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:sa-12(14)
       assessable: false
       depth: 3
@@ -42444,8 +42464,8 @@ objects:
         fr:
           name: "Protection de la cha\xEEne d\u2019approvisionnement : Identit\xE9\
             \ et tra\xE7abilit\xE9"
-          description: "Annul\xE9 : Transf\xE9r\xE9 sous le contr\xF4le SR-04(01)\
-            \ and SR-04(02)."
+          description: "Annul\xE9 : Transf\xE9r\xE9 sous les contr\xF4les SR-04(01)\
+            \ et SR-04(02)."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:sa-12(15)
       assessable: false
       depth: 3
@@ -44742,8 +44762,8 @@ objects:
         \ and activities:** MA-05."
       translations:
         fr:
-          name: 'Sovereignty and jurisdiction: Protection against extraterritorial
-            compulsion'
+          name: "Souverainet\xE9 et juridiction : Protection contre les contraintes\
+            \ extraterritoriales"
           description: "Pr\xE9venir la compromission des fonctions op\xE9rationnelles\
             \ par des personnes ou des soci\xE9t\xE9s assujetties \xE0 une autre comp\xE9\
             tence juridique."
@@ -45612,6 +45632,8 @@ objects:
 
 
         **Related controls and activities:** CA-07, SI-04.'
+      implementation_groups:
+      - medium
       translations:
         fr:
           name: "Protection contre les d\xE9nis de service : D\xE9tection et surveillance"
@@ -48156,8 +48178,9 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itsp.10.033:sc-18
       ref_id: SC-18(02)
       name: 'Mobile code: Acquisition, development, and use'
-      description: 'Prevent the download and execution of [Assignment: organization-defined
-        unacceptable mobile code].'
+      description: 'Verify that the acquisition, development, and use of mobile code
+        to be deployed in the system meets [Assignment: organization-defined mobile
+        code requirements].'
       implementation_groups:
       - medium
       translations:
@@ -50342,7 +50365,7 @@ objects:
         \ considerations for exposure of classified IT systems to mobile devices and\
         \ wireless signals (ITSB-104)](https://www.cyber.gc.ca/en/security-considerations-exposure-classified-it-systems-mobile-devices-and-wireless-signals-itsb-104)\n\
         \u2022 [Using your mobile device securely (ITSAP.00.001)](https://www.cyber.gc.ca/en/guidance/using-your-mobile-device-securely-itsap00001)\n\
-        \u2022 [Security considerations for nobile device deployments (ITSAP.70.002)](https://www.cyber.gc.ca/en/guidance/security-considerations-mobile-device-deployments-itsap70002)"
+        \u2022 [Security considerations for mobile device deployments (ITSAP.70.002)](https://www.cyber.gc.ca/en/guidance/security-considerations-mobile-device-deployments-itsap70002)"
       translations:
         fr:
           name: "Capacit\xE9 des capteurs et donn\xE9es"
@@ -51286,8 +51309,8 @@ objects:
             \ classifi\xE9s les exigences particuli\xE8res suivantes\nC.1. assurer\
             \ la protection audio de type \xAB combin\xE9 raccroch\xE9 \xBB par l\u2019\
             utilisation d\u2019\xE9quipement CNSSI 5006, de dispositifs de d\xE9connexion\
-            \ approuv\xE9s CNSSI , ou d\u2019une configuration syst\xE8me CNSSI 5002\
-            \ \xE9quivalente\nC.2. assurer l\u2019isolation par l\u2019utilisation\
+            \ approuv\xE9s CNSSI 5006, ou d\u2019une configuration syst\xE8me CNSSI\
+            \ 5002 \xE9quivalente\nC.2. assurer l\u2019isolation par l\u2019utilisation\
             \ d\u2019un syst\xE8me t\xE9l\xE9phonique informatis\xE9 dot\xE9 d\u2019\
             un contr\xF4le de configuration logicielle et mat\xE9rielle, et d\u2019\
             un contr\xF4le des rapports de v\xE9rification (enregistrement d\xE9taill\xE9\
@@ -51767,6 +51790,8 @@ objects:
         removed from the system after updates have been installed may be exploited
         by adversaries. Some products may automatically remove previous versions of
         software and firmware from the system.
+      implementation_groups:
+      - medium
       translations:
         fr:
           name: "Correction des d\xE9fauts : Retrait des versions ant\xE9rieures des\
@@ -53134,8 +53159,8 @@ objects:
           description: "a. D\xE9tecter les services r\xE9seau qui n\u2019ont pas \xE9\
             t\xE9 autoris\xE9s ou approuv\xE9s par [Affectation : processus d\u2019\
             autorisation et d\u2019approbation d\xE9finis par l\u2019organisation]\n\
-            b. S\xE9lection (un choix ou plus) : V\xE9rifier; Alerter [Affectation\
-            \ : personnel ou r\xF4les d\xE9finis par l\u2019organisation] lorsqu\u2019\
+            b. [S\xE9lection (un choix ou plus) : V\xE9rifier; Alerter [Affectation\
+            \ : personnel ou r\xF4les d\xE9finis par l\u2019organisation]] lorsqu\u2019\
             une menace est d\xE9tect\xE9e"
           annotation: "Les services r\xE9seau non autoris\xE9s ou non approuv\xE9\
             s comprennent, les services dans les architectures ax\xE9es sur le service\
@@ -53260,8 +53285,7 @@ objects:
             \ le trafic r\xE9seau. Limiter la collecte, le d\xE9chiffrement, le pr\xE9\
             traitement et la distribution du trafic pertinent aux dispositifs de surveillance\
             \ peut simplifier l\u2019efficacit\xE9 et l\u2019utilisation des dispositifs\
-            \ et optimiser l\u2019analyse du trafic.\n\n**Contr\xF4les et activit\xE9\
-            s connexes :** AC-18."
+            \ et optimiser l\u2019analyse du trafic."
     - urn: urn:intuitem:risk:req_node:itsp.10.033:si-05
       assessable: true
       depth: 2
@@ -53814,8 +53838,8 @@ objects:
         **Related controls and activities:** AU-02, AU-06, AU-12.'
       translations:
         fr:
-          name: "Firmware and information integrity: V\xE9rification des capacit\xE9\
-            s en cas d\u2019\xE9v\xE9nements importants"
+          name: "Int\xE9grit\xE9 des micrologiciels et de l\u2019information : V\xE9\
+            rification des capacit\xE9s en cas d\u2019\xE9v\xE9nements importants"
           description: "Apr\xE8s avoir d\xE9tect\xE9 une possible atteinte \xE0 l\u2019\
             int\xE9grit\xE9, fournir les capacit\xE9s n\xE9cessaires pour v\xE9rifier\
             \ l\u2019\xE9v\xE9nement et mettre en \u0153uvre les mesures suivantes\
@@ -55606,7 +55630,7 @@ objects:
         \u2022 [TBS Directive on Privacy Practices](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=18309)\n\
         \u2022 [TBS Privacy Implementation Notice 2023-01: De-identification](https://www.canada.ca/en/treasury-board-secretariat/services/access-information-privacy/access-information-privacy-notices/2023-01-de-identification.html)\n\
         \u2022 [NIST SP 800-188 De-Identifying Government Datasets: Techniques and\
-        \ Governan](https://csrc.nist.gov/pubs/sp/800/188/final)"
+        \ Governance](https://csrc.nist.gov/pubs/sp/800/188/final)"
       translations:
         fr:
           name: "D\xE9personnalisation"
@@ -55691,7 +55715,7 @@ objects:
         in an information sharing arrangement or agreement.
       translations:
         fr:
-          name: "D\xE9personnalisation : Collection"
+          name: "D\xE9personnalisation : Collecte"
           description: "D\xE9personnaliser les jeux de donn\xE9es au moment de la\
             \ collecte en ne collectant pas les renseignements personnels."
           annotation: "Si un jeu de donn\xE9es provient d\u2019un autre programme\
