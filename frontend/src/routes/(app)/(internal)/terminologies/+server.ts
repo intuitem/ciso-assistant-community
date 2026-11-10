@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const res = await fetch(`${BASE_API_URL}/terminologies/?${url.searchParams.toString()}`);
 	if (!res.ok) {
-		errorFromBody(res.status, await res.json());
+		errorFromBody(res.status, await res.json().catch(() => null));
 	}
 	return new Response(JSON.stringify(await res.json()), {
 		status: res.status,
