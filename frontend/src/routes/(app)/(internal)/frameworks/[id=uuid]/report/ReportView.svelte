@@ -996,8 +996,6 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					requirement: [...new Set(exportRows.map((r) => r.requirement_urn))],
-					compliance_assessments: [...new Set(exportRows.map((r) => r.compliance_assessment_id))],
 					requirement_assessments: exportRows.map((r) => r.requirement_assessment_id),
 					...(igFilter !== 'all' ? { implementation_group: igFilter } : {})
 				})

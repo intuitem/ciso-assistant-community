@@ -11604,77 +11604,50 @@ class FrameworkViewSet(BaseModelViewSet):
 
     @action(
         detail=True,
-        methods=["get", "post"],
+        methods=["post"],
         url_path="requirement_evidences",
         permission_classes=[permissions.IsAuthenticated],
     )
     def requirement_evidences(self, request, pk):
-        """Zip of requirements' evidences across this framework's audits.
+        """Zip of the evidences of picked requirement assessments of this framework.
 
-        Parameters, in the query string or as JSON lists in a POST body:
-          - requirement (urn, required): repeat it, or separate urns with commas.
-          - compliance_assessments (uuids): defaults to every readable audit;
-            present but empty selects none.
-          - exclude (requirement assessment uuids): left out.
-          - requirement_assessments (uuids): when given, only these.
+        JSON body:
+          - requirement_assessments (uuids, required): the selection to export.
           - implementation_group (str): keep requirements of this group only.
+        Each picked assessment is also checked against what the caller may see.
         """
         framework = self.get_object()
         if not RoleAssignment.is_object_readable(request.user, Framework, framework.id):
             raise NotFound()
 
-        def values(name: str) -> list[str] | None:
-            if request.method == "POST":
-                raw = request.data.get(name)
-                if raw is None:
-                    return None
-                items = raw if isinstance(raw, list) else [raw]
-            else:
-                if name not in request.query_params:
-                    return None
-                items = request.query_params.getlist(name)
-            return [v for item in items for v in str(item).split(",") if v]
-
-        requirement_urns = list(dict.fromkeys(values("requirement") or []))
-        if not requirement_urns:
+        raw_ids = request.data.get("requirement_assessments")
+        if not isinstance(raw_ids, list) or not raw_ids:
             return Response(
-                {"error": "requirement is required"},
+                {"error": "requirement_assessments is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        audits = ComplianceAssessment.objects.filter(
-            framework=framework,
-            id__in=RoleAssignment.get_viewable_object_ids(
-                request.user, ComplianceAssessment
-            ),
-        )
-        audit_ids = values("compliance_assessments")
-        if audit_ids is not None:
-            try:
-                ids = [UUID(i) for i in audit_ids]
-            except ValueError:
-                return Response(
-                    {"error": "invalid compliance_assessments"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            audits = audits.filter(id__in=ids)
         try:
-            excluded = [UUID(i) for i in values("exclude") or []]
-            picked = values("requirement_assessments")
-            picked = None if picked is None else {UUID(i) for i in picked}
+            picked = {UUID(str(i)) for i in raw_ids}
         except ValueError:
             return Response(
                 {"error": "invalid requirement assessment id"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        ig_filter = request.data.get("implementation_group") or None
 
+        audits = ComplianceAssessment.objects.filter(
+            framework=framework,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                request.user, ComplianceAssessment
+            ),
+            requirement_assessments__id__in=picked,
+        ).distinct()
         viewable_evidences = set(
             RoleAssignment.get_viewable_object_ids(request.user, Evidence)
         )
         viewable_controls = set(
             RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
         )
-        ig_filter = next(iter(values("implementation_group") or []), None)
-        urn_set = set(requirement_urns)
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
         audit_roles = {}
         allowed_ra_ids: set = set()
@@ -11690,17 +11663,14 @@ class FrameworkViewSet(BaseModelViewSet):
             allowed_ra_ids.update(
                 ra.id
                 for ra in scoped
-                if ra.requirement.urn in urn_set
+                if ra.id in picked
                 and (
                     not ig_filter
                     or ig_filter in (ra.requirement.implementation_groups or [])
                 )
             )
-        if picked is not None:
-            allowed_ra_ids &= picked
         ras = (
             RequirementAssessment.objects.filter(id__in=allowed_ra_ids)
-            .exclude(id__in=excluded)
             .select_related("compliance_assessment__folder", "requirement")
             .prefetch_related(
                 "evidences__revisions",
@@ -11712,7 +11682,8 @@ class FrameworkViewSet(BaseModelViewSet):
                 "requirement__urn",
             )
         )
-        several = len(requirement_urns) > 1
+        requirements = {ra.requirement for ra in ras}
+        several = len(requirements) > 1
 
         def sanitize(name: str) -> str:
             return (
@@ -11840,14 +11811,11 @@ class FrameworkViewSet(BaseModelViewSet):
                 index_wb.save(index_buffer)
                 zipf.writestr("index.xlsx", index_buffer.getvalue())
             temp_file.seek(0)
-            if several:
-                filename = f"{sanitize(framework.name)}-evidences.zip"
-            else:
-                requirement = RequirementNode.objects.filter(
-                    framework=framework, urn=requirement_urns[0]
-                ).first()
-                label = (requirement.ref_id if requirement else None) or "requirement"
+            if len(requirements) == 1:
+                label = next(iter(requirements)).ref_id or "requirement"
                 filename = f"{sanitize(framework.name)}-{sanitize(label)}-evidences.zip"
+            else:
+                filename = f"{sanitize(framework.name)}-evidences.zip"
             return FileResponse(temp_file, as_attachment=True, filename=filename)
         except Exception:
             temp_file.close()
