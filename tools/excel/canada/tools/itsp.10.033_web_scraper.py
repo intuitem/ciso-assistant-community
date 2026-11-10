@@ -1,4 +1,5 @@
 import argparse
+import http.client
 import re
 import time
 import urllib.error
@@ -353,8 +354,13 @@ def fetch_html(url: str, retries: int = 5) -> str:
         try:
             with urllib.request.urlopen(request, timeout=60) as response:  # nosec B310
                 html = response.read().decode("utf-8")
-        except (urllib.error.URLError, TimeoutError) as error:
-            if isinstance(error, urllib.error.HTTPError) and error.code < 500:
+        except (OSError, http.client.HTTPException) as error:
+            # Client errors are final, except rate limiting.
+            if (
+                isinstance(error, urllib.error.HTTPError)
+                and error.code < 500
+                and error.code != 429
+            ):
                 raise
             print(f"⚠️  [WARNING] {url}: {error}, retrying")
             html = ""
