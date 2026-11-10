@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import type { CacheLock } from '#lib/utils/types.js';
 	import FolderTreeNode, { type TreeNode } from '../FocusMode/FolderTreeNode.svelte';
+	import { keepOnlyEnclaveOf } from './folder-tree';
 
 	const PERSONAL_SENTINEL = '__personal__';
 
@@ -48,6 +49,11 @@
 		 * without write access do.
 		 */
 		allowedIds?: string[] | null;
+		/**
+		 * With 'EN' in contentTypes, list only the enclave holding the value the form
+		 * opened with (an object already filed there), not every third-party workspace.
+		 */
+		onlyCurrentEnclave?: boolean;
 	}
 
 	let {
@@ -69,7 +75,8 @@
 		optionsSelf = null,
 		contentTypes = ['DO', 'GL'],
 		writePermission = undefined,
-		allowedIds = null
+		allowedIds = null,
+		onlyCurrentEnclave = false
 	}: Props = $props();
 
 	// Write permission is inferred from ModelForm context: add_<model.name>.
@@ -324,7 +331,8 @@
 				if (res.ok) return res.json();
 			})
 			.then((data) => {
-				if (data) orgTree = data;
+				if (!data) return;
+				orgTree = onlyCurrentEnclave ? (keepOnlyEnclaveOf(data, $value) ?? undefined) : data;
 			})
 			.catch((e) => console.error('FolderTreeSelect: failed to fetch org_tree', e))
 			.finally(() => (isLoading = false));

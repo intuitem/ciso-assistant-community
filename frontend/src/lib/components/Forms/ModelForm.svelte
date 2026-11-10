@@ -484,6 +484,7 @@
 						(['compliance-assessments', 'evidences'].includes(URLModel)
 							? ['DO', 'GL', 'EN']
 							: undefined)}
+					onlyCurrentEnclave={URLModel === 'compliance-assessments'}
 					helpText={URLModel === 'campaigns'
 						? m.campaignDomainHelpText()
 						: URLModel === 'custom-fields'
