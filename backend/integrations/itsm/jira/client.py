@@ -472,6 +472,20 @@ class JiraClient(BaseIntegrationClient):
 
     # Discovery (powers the FieldMapper RPC actions)
 
+    def resolve_table_name(self, table_name: str) -> str:
+        """Return ``table_name`` in its id form (``"KAN:Tâche"`` -> ``"KAN:10002"``).
+
+        The settings page calls this on load so a config saved with an issue
+        type name opens on the matching id-based picker option, instead of
+        matching no option and clearing the table and its maps. Values that
+        are already ids, or pin no issue type, come back unchanged.
+        """
+        project_key, issue_type = self._parse_table_name(table_name)
+        issue_type_id = self._resolve_issue_type_id(project_key, issue_type)
+        if not issue_type_id:
+            return table_name
+        return f"{project_key}{TABLE_NAME_SEPARATOR}{issue_type_id}"
+
     def get_available_tables(self) -> list[dict]:
         """Return every ``(project, issue type)`` pair as a flat table list.
 

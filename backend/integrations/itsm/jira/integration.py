@@ -158,6 +158,7 @@ class JiraOrchestrator(BaseITSMOrchestrator):
             "get_choices",
             "suggest_mapping",
             "refresh_schema",
+            "resolve_table",
         ]
 
     def execute_action(self, action: str, params: dict):
@@ -173,6 +174,12 @@ class JiraOrchestrator(BaseITSMOrchestrator):
 
         if action == "get_tables":
             return client.get_available_tables()
+
+        if action == "resolve_table":
+            table = params.get("table_name")
+            if not table:
+                raise ValueError("Parameter 'table_name' is required for resolve_table")
+            return client.resolve_table_name(table)
 
         if action == "get_columns":
             table = params.get("table_name")

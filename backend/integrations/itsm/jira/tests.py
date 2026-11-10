@@ -5,6 +5,7 @@ from jira import JIRAError
 from core.models import AppliedControl
 from integrations.models import IntegrationConfiguration
 from .client import JiraClient
+from .integration import JiraOrchestrator
 from .mapper import JiraFieldMapper
 
 
@@ -1007,3 +1008,62 @@ def test_legacy_issue_type_matches_untranslated_name(mock_jira, configuration):
 
     fields = mock_jira.return_value.create_issue.call_args.kwargs["fields"]
     assert fields["issuetype"] == {"id": "10001"}
+
+
+# The settings page resolves a stored name-based table to its id form on load,
+# so the id-based picker finds its option instead of clearing the table and
+# its maps.
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_resolve_table_name_turns_issue_type_name_into_id(mock_jira, configuration):
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[
+            SimpleNamespace(id="10000", name="Epic"),
+            SimpleNamespace(id="10002", name="Tâche"),
+        ]
+    )
+
+    client = JiraClient(configuration)
+
+    assert client.resolve_table_name("KAN:Tâche") == "KAN:10002"
+    mock_jira.return_value.project.assert_called_once_with("KAN")
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_resolve_table_name_keeps_id_and_unpinned_tables(mock_jira, configuration):
+    client = JiraClient(configuration)
+
+    assert client.resolve_table_name("KAN:10002") == "KAN:10002"
+    assert client.resolve_table_name("KAN") == "KAN"
+    mock_jira.return_value.project.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_resolve_table_name_raises_on_unknown_issue_type(mock_jira, configuration):
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[SimpleNamespace(id="10002", name="Tâche")]
+    )
+
+    client = JiraClient(configuration)
+
+    with pytest.raises(ValueError, match="not found"):
+        client.resolve_table_name("KAN:Bug")
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_resolve_table_rpc_action(mock_jira, configuration):
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[SimpleNamespace(id="10002", name="Tâche")]
+    )
+    orchestrator = JiraOrchestrator(configuration)
+
+    assert "resolve_table" in orchestrator.get_interactive_actions()
+    assert (
+        orchestrator.execute_action(
+            "resolve_table", {"table_name": "KAN:Tâche", "model_key": "asset"}
+        )
+        == "KAN:10002"
+    )
+    with pytest.raises(ValueError):
+        orchestrator.execute_action("resolve_table", {})
