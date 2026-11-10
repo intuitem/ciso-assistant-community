@@ -155,4 +155,5 @@ def test_task_export_drops_hidden_linked_controls(setup):
         )
     }
 
+    assert set(rows) == {"seen-task"}
     assert rows["seen-task"]["applied_controls"] == "seen-control"
