@@ -3825,8 +3825,14 @@ class EvidenceReadSerializer(BaseModelSerializer):
             "version": rev.version,
             "review_status": rev.review_status,
             "created_at": rev.created_at,
-            "uploaded_by": str(rev.uploaded_by) if rev.uploaded_by else None,
+            "uploaded_by": str(rev.uploaded_by)
+            if rev.uploaded_by and not self._is_third_party()
+            else None,
         }
+
+    def _is_third_party(self):
+        request = self.context.get("request")
+        return getattr(getattr(request, "user", None), "is_third_party", False)
 
     def get_attachment(self, obj):
         last_revision = obj.last_revision
@@ -4025,6 +4031,17 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
     class Meta:
         model = EvidenceRevision
         fields = "__all__"
+
+    # Review deliberation is internal: third parties see the outcome, not who or why.
+    THIRD_PARTY_HIDDEN = ("uploaded_by", "reviewed_by", "review_comment")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if getattr(getattr(request, "user", None), "is_third_party", False):
+            for field in self.THIRD_PARTY_HIDDEN:
+                data[field] = None
+        return data
 
 
 class EvidenceRevisionWriteSerializer(BaseModelSerializer):

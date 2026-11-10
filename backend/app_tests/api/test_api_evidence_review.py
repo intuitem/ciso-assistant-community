@@ -172,6 +172,28 @@ class TestEvidenceRevisionReview:
         evidence.refresh_from_db()
         assert evidence.status == Evidence.Status.IN_REVIEW
 
+    def test_third_parties_see_the_outcome_not_who_or_why(self, authenticated_client):
+        from types import SimpleNamespace
+
+        from core.serializers import (
+            EvidenceReadSerializer,
+            EvidenceRevisionReadSerializer,
+        )
+
+        revision = self._revision(authenticated_client)
+        self._review(authenticated_client, revision, "rejected", "wrong scope")
+        revision.refresh_from_db()
+        vendor = User.objects.create_user("rep@vendor.test", is_third_party=True)
+        for user, hidden in ((vendor, True), (self._admin(), False)):
+            ctx = {"request": SimpleNamespace(user=user)}
+            rev = EvidenceRevisionReadSerializer(revision, context=ctx).data
+            ev = EvidenceReadSerializer(revision.evidence, context=ctx).data
+            assert rev["review_status"] == "rejected"
+            assert (rev["review_comment"] is None) is hidden
+            assert (rev["reviewed_by"] is None) is hidden
+            assert (rev["uploaded_by"] is None) is hidden
+            assert (ev["latest_revision"]["uploaded_by"] is None) is hidden
+
     def test_undo_puts_the_decision_back_in_the_queue(self, authenticated_client):
         revision = self._revision(authenticated_client)
         assert (
