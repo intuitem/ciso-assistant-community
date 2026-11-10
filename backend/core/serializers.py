@@ -3947,11 +3947,10 @@ class EvidenceWriteSerializer(
             ):
                 # The status select is a review too: record it on the file it judged.
                 revision = instance.last_revision
-                if revision is not None:
+                request = self.context.get("request")
+                if revision is not None and request is not None:
                     try:
-                        revision.record_review(
-                            self.context["request"].user, instance.status
-                        )
+                        revision.record_review(request.user, instance.status)
                     except DjangoValidationError as e:
                         raise serializers.ValidationError(e.message_dict)
                 self._send_review_notification(instance)
@@ -4066,7 +4065,9 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
                 models.Max("version")
             )["version__max"]
             validated_data["version"] = (max_version or 0) + 1
-            validated_data["uploaded_by"] = self.context["request"].user
+            user = getattr(self.context.get("request"), "user", None)
+            if user is not None and user.is_authenticated:
+                validated_data["uploaded_by"] = user
             evidence.status = Evidence.Status.IN_REVIEW
             evidence.save()
             return super().create(validated_data)

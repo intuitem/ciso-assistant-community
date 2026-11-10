@@ -225,7 +225,13 @@
 		url.searchParams.set('scope', key);
 		return `${url.pathname}${url.search}`;
 	}
-	const clearHref = $derived(`?scope=${data.scope}`);
+	const KEEP_ON_CLEAR = ['scope', 'compliance_assessment', 'backUrl', 'backLabel'];
+	const clearHref = $derived.by(() => {
+		const q = new URLSearchParams();
+		for (const [k, v] of page.url.searchParams) if (KEEP_ON_CLEAR.includes(k)) q.append(k, v);
+		q.set('scope', data.scope);
+		return `?${q}`;
+	});
 
 	function onKey(e: KeyboardEvent) {
 		const target = e.target as HTMLElement;

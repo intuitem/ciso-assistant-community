@@ -72,6 +72,17 @@
 				onFilterChange={(filters) => (tableFilters = filters)}
 				onQueryChange={(query) => (tableSearch = new URLSearchParams(query).get('search') ?? '')}
 			>
+				{#snippet optButton()}
+					{#if URLModel === 'evidences' && !page.data.user?.is_third_party}
+						<a
+							href={reviewHref}
+							class="btn preset-tonal-primary"
+							title={m.reviewEvidences()}
+							data-testid="review-evidences-button"
+							><i class="fa-solid fa-clipboard-check"></i>{m.reviewEvidences()}</a
+						>
+					{/if}
+				{/snippet}
 				{#snippet addButton()}
 					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
@@ -90,16 +101,6 @@
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exportButton()}
 										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
-									>
-								{/if}
-								{#if URLModel === 'evidences' && !page.data.user?.is_third_party}
-									<a
-										href={reviewHref}
-										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
-										title={m.reviewEvidences()}
-										aria-label={m.reviewEvidences()}
-										data-testid="review-evidences-button"
-										><i class="fa-solid fa-clipboard-check"></i></a
 									>
 								{/if}
 							{:else if URLModel === 'risk-matrices'}

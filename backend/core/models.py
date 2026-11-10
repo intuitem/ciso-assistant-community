@@ -6765,7 +6765,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             ]
         )
         if self.evidence.last_revision == self:
-            Evidence.objects.filter(pk=self.evidence_id).update(status=decision)
+            self.evidence.status = decision
+            self.evidence.save(update_fields=["status", "updated_at"])
 
     def undo_review(self, user) -> None:
         """Put a decision back in the queue; only the reviewer who made it can."""
@@ -6788,9 +6789,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             ]
         )
         if self.evidence.last_revision == self:
-            Evidence.objects.filter(pk=self.evidence_id).update(
-                status=Evidence.Status.IN_REVIEW
-            )
+            self.evidence.status = Evidence.Status.IN_REVIEW
+            self.evidence.save(update_fields=["status", "updated_at"])
 
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
