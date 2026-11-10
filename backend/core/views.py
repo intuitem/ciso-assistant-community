@@ -11814,7 +11814,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         target = written or (revision.link if revision else "") or ""
                         index_ws.append(
                             [
-                                sanitize_xlsx_value(escape_excel_formula(value))
+                                escape_excel_formula(sanitize_xlsx_value(value))
                                 for value in (
                                     domain_paths[ca.folder_id],
                                     ca.name,

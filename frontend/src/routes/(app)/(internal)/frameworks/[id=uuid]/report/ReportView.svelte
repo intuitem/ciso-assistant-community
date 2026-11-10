@@ -1073,15 +1073,18 @@
 				...scoreValues(auditScoresById.get(ca.id)?.total),
 				...outcomeRollup.map((o) => outcomeExportValue(ca, o.def))
 			]);
-			const verdictRows = outcomeDomains.map((d) => [
+			// A numeric outcome that failed somewhere gets its own failure-count column.
+			const numericFailures = (o: (typeof outcomeRollup)[number]) => o.numeric && o.failed > 0;
+			const verdictRows = outcomeDomains.map((d): Cell[] => [
 				d.key,
 				d.audits.length,
-				...d.cells.map((c, i) =>
+				...d.cells.flatMap((c, i): Cell[] =>
 					outcomeRollup[i].numeric
-						? c.mean === null
-							? null
-							: roundScore(c.mean)
-						: `${c.met} / ${c.evaluated}` + (c.failed ? ` (${m.error()}: ${c.failed})` : '')
+						? [
+								c.mean === null ? null : roundScore(c.mean),
+								...(numericFailures(outcomeRollup[i]) ? [c.failed] : [])
+							]
+						: [`${c.met} / ${c.evaluated}` + (c.failed ? ` (${m.error()}: ${c.failed})` : '')]
 				)
 			]);
 			const requirements = hierarchical.flatMap((section) => [
@@ -1155,7 +1158,9 @@
 								columns: [
 									`${m.domain()} (${m.depthLabel()} ${domainDepth})`,
 									m.complianceAssessments(),
-									...outcomeRollup.map((o) => o.label)
+									...outcomeRollup.flatMap((o) =>
+										numericFailures(o) ? [o.label, `${o.label} (${m.error()})`] : [o.label]
+									)
 								],
 								rows: verdictRows
 							}
