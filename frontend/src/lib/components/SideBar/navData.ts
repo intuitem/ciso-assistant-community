@@ -375,7 +375,7 @@ export const navData = {
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
-					permissions: ['view_perimeter'] //this is temporary workaround to manage 3rd parties
+					permissions: ['view_compliance_assessment_full']
 				},
 				{
 					name: 'complianceAssessments',

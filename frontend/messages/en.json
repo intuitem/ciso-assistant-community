@@ -7936,5 +7936,6 @@
 	"selectForEvidenceExport": "Select for the evidence export",
 	"exportSelectedRequirementsEvidences": "Export evidences ({count} requirements)",
 	"exportEvidences": "Export evidences",
-	"evidenceExportHint": "Tick requirements, or audits within a requirement, to export their evidences"
+	"evidenceExportHint": "Tick requirements, or audits within a requirement, to export their evidences",
+	"outcomeEvaluationFailed": "This rule could not be evaluated for this audit"
 }

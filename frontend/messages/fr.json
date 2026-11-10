@@ -7936,5 +7936,6 @@
 	"selectForEvidenceExport": "Sélectionner pour l'export des preuves",
 	"exportSelectedRequirementsEvidences": "Exporter les preuves ({count} exigences)",
 	"exportEvidences": "Exporter les preuves",
-	"evidenceExportHint": "Cochez des exigences, ou des audits dans une exigence, pour exporter leurs preuves"
+	"evidenceExportHint": "Cochez des exigences, ou des audits dans une exigence, pour exporter leurs preuves",
+	"outcomeEvaluationFailed": "Cette règle n'a pas pu être évaluée pour cet audit"
 }

@@ -424,7 +424,7 @@ export const navData = {
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
-					permissions: ['view_appliedcontrol']
+					permissions: ['view_compliance_assessment_full']
 				},
 				{
 					name: 'complianceAssessments',

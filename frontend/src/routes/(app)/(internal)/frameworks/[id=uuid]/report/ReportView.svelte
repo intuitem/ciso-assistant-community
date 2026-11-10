@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { pageTitle } from '#lib/utils/stores.js';
+	import { breadcrumbs } from '#lib/utils/breadcrumbs.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { m } from '#paraglide/messages.js';
@@ -115,7 +116,7 @@
 		eta: string | null;
 		due_date: string | null;
 		// Verdicts (met) and numbers (value) the viewer may read; null when none.
-		outcomes: { ref_id: string; met?: boolean; value?: number }[] | null;
+		outcomes: { ref_id: string; met?: boolean; value?: number; error?: boolean }[] | null;
 		is_counted: boolean;
 		// Only counted audits carry scores.
 		score_scale: { min: number | null; max: number | null; calculation_method: string } | null;
@@ -201,6 +202,9 @@
 		$pageTitle = campaign
 			? `${campaign.name} — ${m.frameworkReport()}`
 			: `${framework.name} — ${m.frameworkReport()}`;
+		breadcrumbs.updateCrumb(new RegExp(`^/frameworks/${framework.id}/report`), {
+			label: `${framework.name} · ${m.frameworkReport()}`
+		});
 	});
 
 	// IG id resolver: most YAMLs use ref_id as the canonical key on the requirement
@@ -850,10 +854,12 @@
 		ca.outcomes?.find((o) => o.ref_id === def.ref_id);
 
 	function rollOutcome(audits: ComplianceAssessmentSummary[], def: OutcomeDef) {
-		const entries = audits.flatMap((ca) => outcomeOf(ca, def) ?? []);
+		const all = audits.flatMap((ca) => outcomeOf(ca, def) ?? []);
+		const entries = all.filter((o) => !o.error);
 		const values = entries.map((o) => o.value).filter((v): v is number => typeof v === 'number');
 		return {
 			evaluated: entries.length,
+			failed: all.length - entries.length,
 			met: entries.filter((o) => o.met).length,
 			mean: values.length ? values.reduce((a, v) => a + v, 0) / values.length : null
 		};
@@ -867,7 +873,7 @@
 				numeric: def.kind === 'number',
 				...rollOutcome(filteredAudits, def)
 			}))
-			.filter((o) => o.evaluated > 0)
+			.filter((o) => o.evaluated + o.failed > 0)
 	);
 
 	let outcomeView = $state<'summary' | 'audit' | 'domain'>('summary');
@@ -892,6 +898,7 @@
 	function outcomeExportValue(ca: ComplianceAssessmentSummary, def: OutcomeDef): Cell {
 		const o = outcomeOf(ca, def);
 		if (!o) return null;
+		if (o.error) return m.error();
 		if (def.kind === 'number') return typeof o.value === 'number' ? roundScore(o.value) : null;
 		return o.met ? m.yes() : m.no();
 	}
@@ -983,12 +990,6 @@
 	const toastStore = getToastStore();
 	let exportingEvidences = $state(false);
 	async function exportEvidences() {
-		const excluded = filteredRows
-			.filter(
-				(r) =>
-					selectedReqs.has(r.requirement_urn) && evidenceExcluded.has(r.requirement_assessment_id)
-			)
-			.map((r) => r.requirement_assessment_id);
 		exportingEvidences = true;
 		try {
 			const res = await fetch(`/frameworks/${framework.id}/report/requirement-evidences`, {
@@ -997,7 +998,7 @@
 				body: JSON.stringify({
 					requirement: [...new Set(exportRows.map((r) => r.requirement_urn))],
 					compliance_assessments: [...new Set(exportRows.map((r) => r.compliance_assessment_id))],
-					exclude: excluded,
+					requirement_assessments: exportRows.map((r) => r.requirement_assessment_id),
 					...(igFilter !== 'all' ? { implementation_group: igFilter } : {})
 				})
 			});
@@ -1080,7 +1081,7 @@
 						? c.mean === null
 							? null
 							: roundScore(c.mean)
-						: `${c.met} / ${c.evaluated}`
+						: `${c.met} / ${c.evaluated}` + (c.failed ? ` (${m.error()}: ${c.failed})` : '')
 				)
 			]);
 			const requirements = hierarchical.flatMap((section) => [
@@ -1800,6 +1801,14 @@
 		{/if}
 	</div>
 
+	{#snippet failedBadge(count?: number)}
+		<span class="badge preset-tonal-warning text-xs" title={m.outcomeEvaluationFailed()}
+			><i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>{m.error()}{count
+				? ` (${count})`
+				: ''}</span
+		>
+	{/snippet}
+
 	{#snippet verdictCell(met: number, evaluated: number)}
 		<div class="flex items-center gap-2 justify-end">
 			<div
@@ -1861,6 +1870,9 @@
 									<span class="text-xs text-surface-600-400"
 										>({m.averageOverAudits({ count: o.evaluated })})</span
 									>
+									{#if o.failed}
+										{@render failedBadge(o.failed)}
+									{/if}
 								</span>
 							{:else}
 								<div class="flex items-center gap-2">
@@ -1871,10 +1883,13 @@
 									>
 										<div
 											class="h-full bg-success-500"
-											style="width:{(o.met / o.evaluated) * 100}%"
+											style="width:{o.evaluated ? (o.met / o.evaluated) * 100 : 0}%"
 										></div>
 									</div>
 									<span class="text-xs font-mono w-16 text-right">{o.met} / {o.evaluated}</span>
+									{#if o.failed}
+										{@render failedBadge(o.failed)}
+									{/if}
 								</div>
 							{/if}
 						</li>
@@ -1911,6 +1926,8 @@
 											<td class="px-2 py-1.5 text-right">
 												{#if !r}
 													<span class="text-surface-500">—</span>
+												{:else if r.error}
+													{@render failedBadge()}
 												{:else if o.numeric}
 													<span class="font-mono"
 														>{typeof r.value === 'number' ? roundScore(r.value) : '—'}</span
@@ -1944,6 +1961,9 @@
 													>
 												{:else}
 													{@render verdictCell(c.met, c.evaluated)}
+												{/if}
+												{#if c.failed}
+													<div class="text-right">{@render failedBadge(c.failed)}</div>
 												{/if}
 											</td>
 										{/each}

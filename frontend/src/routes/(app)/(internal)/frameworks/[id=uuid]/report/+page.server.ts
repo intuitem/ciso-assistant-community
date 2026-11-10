@@ -20,11 +20,5 @@ export const load = (async ({ fetch, params, url }) => {
 		return res.json();
 	});
 
-	const frameworkName = await fetch(`${BASE_API_URL}/frameworks/${params.id}/`)
-		.then((res) => (res.ok ? res.json() : null))
-		.then((fw) => fw?.name as string | undefined)
-		.catch(() => undefined);
-	const title = frameworkName ? `${frameworkName} · ${m.frameworkReport()}` : m.frameworkReport();
-
-	return { title, stream: { report: reportPromise } };
+	return { title: m.frameworkReport(), stream: { report: reportPromise } };
 }) satisfies PageServerLoad;

@@ -6,7 +6,13 @@ import {
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-const FORWARDED = ['requirement', 'compliance_assessments', 'exclude', 'implementation_group'];
+const FORWARDED = [
+	'requirement',
+	'compliance_assessments',
+	'exclude',
+	'requirement_assessments',
+	'implementation_group'
+];
 
 function zipResponse(res: Response): Response {
 	if (!res.ok || !res.body) throw error(res.status, 'Error fetching the ZIP file');

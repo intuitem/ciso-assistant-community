@@ -11491,15 +11491,21 @@ class FrameworkViewSet(BaseModelViewSet):
             )
             fired = ca.computed_outcome or {}
             values = ca.computed_values or {}
+            failed = set(ca.outcome_errors or [])
             out = []
             for rule in applicable_rules(framework, ca.selected_implementation_groups):
                 if rule.get("kind") in ("staircase", "weakest_link"):
                     continue
                 ref_id = rule.get("ref_id")
-                if is_numeric_rule(rule):
-                    if score_visible and values.get(ref_id) is not None:
+                visible = score_visible if is_numeric_rule(rule) else verdict_visible
+                if not visible:
+                    continue
+                if ref_id in failed:
+                    out.append({"ref_id": ref_id, "error": True})
+                elif is_numeric_rule(rule):
+                    if values.get(ref_id) is not None:
                         out.append({"ref_id": ref_id, "value": values[ref_id]})
-                elif verdict_visible:
+                else:
                     out.append({"ref_id": ref_id, "met": ref_id in fired})
             return out or None
 
@@ -11610,6 +11616,7 @@ class FrameworkViewSet(BaseModelViewSet):
           - compliance_assessments (uuids): defaults to every readable audit;
             present but empty selects none.
           - exclude (requirement assessment uuids): left out.
+          - requirement_assessments (uuids): when given, only these.
           - implementation_group (str): keep requirements of this group only.
         """
         framework = self.get_object()
@@ -11652,9 +11659,11 @@ class FrameworkViewSet(BaseModelViewSet):
             audits = audits.filter(id__in=ids)
         try:
             excluded = [UUID(i) for i in values("exclude") or []]
+            picked = values("requirement_assessments")
+            picked = None if picked is None else {UUID(i) for i in picked}
         except ValueError:
             return Response(
-                {"error": "invalid exclude"},
+                {"error": "invalid requirement assessment id"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -11687,6 +11696,8 @@ class FrameworkViewSet(BaseModelViewSet):
                     or ig_filter in (ra.requirement.implementation_groups or [])
                 )
             )
+        if picked is not None:
+            allowed_ra_ids &= picked
         ras = (
             RequirementAssessment.objects.filter(id__in=allowed_ra_ids)
             .exclude(id__in=excluded)
@@ -11803,7 +11814,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         target = written or (revision.link if revision else "") or ""
                         index_ws.append(
                             [
-                                sanitize_xlsx_value(value)
+                                sanitize_xlsx_value(escape_excel_formula(value))
                                 for value in (
                                     domain_paths[ca.folder_id],
                                     ca.name,
