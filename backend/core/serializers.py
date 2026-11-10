@@ -28,6 +28,7 @@ from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
 
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
+from core.scenario_selection import LINK_ALL, linked_scenarios_q
 from iam.models import *
 from django.contrib.auth.models import Permission
 
@@ -2347,9 +2348,10 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
         pk = self.context.get("pk")
         if pk is None:
             return None
+        link_type = self.context.get("link_type", LINK_ALL)
         risk_scenarios = (
             RiskScenario.objects.filter(risk_assessment=pk)
-            .filter(Q(applied_controls=obj) | Q(existing_applied_controls=obj))
+            .filter(linked_scenarios_q(obj, link_type))
             .distinct()
         )
         return [
@@ -2359,6 +2361,20 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             }
             for req in risk_scenarios
         ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        selected = self.context.get("selected_scenario_ids")
+        if selected is None or data.get("risk_scenarios") is None:
+            return data
+        # With a selection, the column lists the selected scenarios and the rest
+        # move aside, so a control covering other risks still says so.
+        linked = data["risk_scenarios"]
+        data["risk_scenarios"] = [s for s in linked if s["id"] in selected]
+        data["risk_scenarios_outside_selection"] = [
+            s for s in linked if s["id"] not in selected
+        ]
+        return data
 
     class Meta:
         model = AppliedControl

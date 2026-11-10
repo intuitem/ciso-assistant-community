@@ -27,6 +27,11 @@ services:
     volumes:
       - ./db:/code/db
     user: "1001:1001"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://backend:8000/api/health/', timeout=5)"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
 
   huey:
     container_name: huey
