@@ -21,6 +21,7 @@ from core.models import (
     RiskScenario,
     Threat,
 )
+from core.scenario_selection import RELATED_FACETS
 from core.startup import startup
 from iam.models import Folder, Role, RoleAssignment, RoleCodename, User, UserGroup
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
@@ -435,6 +436,18 @@ def test_related_options_search_their_label(admin_client, setup):
     assert labels("threats", "nothing") == []
     assert labels("owner", "ada love") == ["Ada Lovelace"]
     assert labels("owner", "alan@") == ["alan@scenario-selection-tests.com"]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("name", RELATED_FACETS)
+def test_every_related_filter_serves_options(admin_client, setup, name):
+    ra = setup["ra"]
+
+    _options(admin_client, ra, name)
+    _options(admin_client, ra, name, "q=a")
+
+    res = admin_client.get(f"/api/risk-assessments/{ra.id}/scenario-selection/")
+    assert name in res.json()["related_filters"]
 
 
 @pytest.mark.django_db
