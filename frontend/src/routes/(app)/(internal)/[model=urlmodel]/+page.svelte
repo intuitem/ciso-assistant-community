@@ -541,16 +541,6 @@
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
 									>
 								{/if}
-								{#if URLModel === 'evidences'}
-									<a
-										href="evidences/review/{currentFilterSearch}"
-										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
-										title={m.reviewEvidences()}
-										aria-label={m.reviewEvidences()}
-										data-testid="review-evidences-button"
-										><i class="fa-solid fa-clipboard-check"></i></a
-									>
-								{/if}
 								{#if ANALYTICS_LABELS[URLModel]}
 									{@const analyticsLabel = ANALYTICS_LABELS[URLModel]()}
 									<a
