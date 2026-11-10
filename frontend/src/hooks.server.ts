@@ -358,7 +358,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		// FocusModeMiddleware re-checks the flag and drops the header when it is off,
 		// so gating here would only cost a feature-flag round-trip per proxied call.
 		const focusFolderId = event.cookies.get('focus_folder_id');
-		if (focusFolderId) {
+		if (focusFolderId && !event.locals.user?.is_third_party) {
 			request.headers.set('X-Focus-Folder-Id', focusFolderId);
 		}
 		if (unsafeMethods.has(request.method) && csrfToken) {

@@ -101,14 +101,14 @@ most likely because the initialization took longer than expected. Make sure you 
 
 ### Update the backend healthcheck in your docker-compose
 
-The backend image now runs on a hardened base. `curl` is still installed for the time being, so an existing healthcheck keeps working, but it will be removed in a future release. If you maintain your own `docker-compose.yml`, replace the `healthcheck` of the `backend` service now:
+The backend image now runs on a hardened base. `curl` is still installed for the time being, so an existing healthcheck keeps working, but it will be removed in a future release. If you maintain your own `docker-compose.yml`, or generated `config/docker-compose-custom.yml` with `config/make_config.py` before this change, replace the `test` line of the `backend` service's `healthcheck` in the file you actually start, and keep its other settings (`interval`, `retries`, `start_period`) as they are:
 
 ```yaml
 healthcheck:
   test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://backend:8000/api/health/', timeout=5)"]
 ```
 
-then run `docker compose up -d`. The check uses the Python standard library, which is always present in the image.
+then run `docker compose up -d` (for a generated config, `docker compose -f docker-compose-custom.yml up -d` from `config/`). The check uses the Python standard library, which is always present in the image.
 
 If you skip this and `curl` is gone from a later image, the healthcheck fails on every attempt and nothing else comes up, because `frontend`, `caddy`, `huey` and `mcp` all wait for the backend to be healthy:
 
