@@ -106,7 +106,7 @@ Open your **Server Manager**
 
 28. Click **Finish**
 
-    ![](../../../.gitbook/assets/sso/adfs_policy_rule_step_3.png)
+    ![Claim rule mapping LDAP attributes to outgoing claim types](../../../.gitbook/assets/sso/adfs_policy_rule_step_3.png)
 
 29. Click **Apply** then **OK**
 
@@ -174,7 +174,18 @@ To solve this problem, go to SSO settings in CISO Assistant. In the **Advanced s
 
 ## I want to log in from the AD FS Login Portal
 
-If you want to be able to log in directly from the AD FS Login Portal, go to SSO settings in CISO Assistant.
-In the **Advanced settings** section, uncheck the **Reject IdP initiated SSO** option.
+{% hint style="warning" %}
+Only enable this if you need it. When IdP-initiated SSO is accepted, CISO Assistant cannot tie the SAML response to a login it started, which exposes users to login CSRF: an attacker can make a victim's browser sign in to the attacker's account.
+{% endhint %}
 
-  ![](../../../.gitbook/assets/sso/adfs_ciso_part_2.png)
+If you want to be able to log in directly from the AD FS Login Portal:
+
+1. On the AD FS server, enable the IdP-initiated sign-on page (disabled by default) from an elevated PowerShell prompt:
+
+    ```powershell
+    Set-AdfsProperties -EnableIdpInitiatedSignonPage $true
+    ```
+
+2. Go to SSO settings in CISO Assistant. In the **Advanced settings** section, uncheck the **Reject IdP initiated SSO** option.
+
+    ![](../../../.gitbook/assets/sso/adfs_ciso_part_2.png)
