@@ -41,6 +41,14 @@ from integrations.models import IntegrationConfiguration, SyncMapping
 
 logger = structlog.get_logger(__name__)
 
+# library content any principal may link, even without view on Global
+GLOBAL_CATALOG_MODELS = (
+    ReferentialObjectMixin,
+    Question,
+    QuestionChoice,
+    Terminology,
+)
+
 
 class SerializerFactory:
     """Factory to get a serializer class from a list of modules.
@@ -241,45 +249,82 @@ class BaseModelSerializer(serializers.ModelSerializer):
             self._check_object_perm(obj, "add", folder=saved_folder)
 
     def _check_m2m_visibility(self, validated_data: dict) -> None:
-        """Verify that all M2M linked objects are visible to the requesting user."""
+        """A new link needs view on its target, or change for fields in
+        Meta.link_requires_change, whose save alters the target."""
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return
         user = request.user
-        accessible_cache: dict = {}
+        requires_change = getattr(self.Meta, "link_requires_change", ())
+        has_instance = self.instance is not None and not isinstance(self.instance, list)
         for field_name, value in validated_data.items():
-            if not isinstance(value, list) or not value:
+            items = [value] if isinstance(value, models.Model) else value
+            if not isinstance(items, list) or not items:
                 continue
-            if not all(isinstance(item, models.Model) for item in value):
+            if not all(isinstance(item, models.Model) for item in items):
                 continue
-            related_model = type(value[0])
-            if related_model not in accessible_cache:
-                try:
-                    ids = RoleAssignment.get_viewable_object_ids(user, related_model)
-                    accessible_cache[related_model] = {str(i) for i in ids}
-                except NotImplementedError, Permission.DoesNotExist:
-                    accessible_cache[related_model] = None
-            accessible_ids = accessible_cache[related_model]
-            if accessible_ids is None:
+            related_model = type(items[0])
+            if related_model is Folder and field_name == "folder":
                 continue
-            # keeping an already-linked object is not linking a new one
             current_ids: set = set()
-            if self.instance is not None and not isinstance(self.instance, list):
+            if has_instance and items is not value:
+                current_ids = {str(getattr(self.instance, f"{field_name}_id", None))}
+            elif has_instance:
                 manager = getattr(self.instance, field_name, None)
                 if manager is not None and hasattr(manager, "values_list"):
                     current_ids = {
                         str(pk) for pk in manager.values_list("pk", flat=True)
                     }
-            for item in value:
-                if (
-                    str(item.id) not in accessible_ids
-                    and str(item.id) not in current_ids
-                ):
+            new_ids = {str(item.pk) for item in items} - current_ids
+            if not new_ids:
+                continue
+            try:
+                viewable = self._viewable_ids(related_model)
+                if isinstance(viewable, models.QuerySet):
+                    viewable = viewable.filter(pk__in=new_ids)
+                visible = {str(pk) for pk in viewable}
+            except NotImplementedError, Permission.DoesNotExist:
+                continue
+            hidden = new_ids - visible
+            if related_model is User:
+                hidden.discard(str(user.pk))
+            if hidden and issubclass(related_model, GLOBAL_CATALOG_MODELS):
+                hidden -= self._global_ids(related_model, hidden)
+            if hidden:
+                raise PermissionDenied(
+                    {
+                        field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
+                    }
+                )
+            if field_name in requires_change:
+                changeable = {
+                    str(pk)
+                    for pk in RoleAssignment.get_changeable_object_ids(
+                        user, related_model
+                    )
+                }
+                if new_ids - changeable:
                     raise PermissionDenied(
                         {
-                            field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
+                            field_name: f"You do not have permission to change this {related_model._meta.model_name}"
                         }
                     )
+
+    @staticmethod
+    def _global_ids(model: type[models.Model], ids: set) -> set:
+        """Library content in Global is shared, even with users outside
+        builtin groups."""
+        try:
+            field = RoleAssignment.get_iam_folder_field(model)
+        except NotImplementedError:
+            return set()
+        shared = {"urn__gt": ""} if hasattr(model, "urn") else {"builtin": True}
+        return {
+            str(pk)
+            for pk in model.objects.filter(
+                pk__in=ids, **{field: Folder.get_root_folder().id}, **shared
+            ).values_list("pk", flat=True)
+        }
 
     def _check_reverse_m2m_change(self, validated_data: dict) -> None:
         """A reverse many-to-many (declared on the other model) edits the objects
@@ -873,7 +918,30 @@ class RiskAssessmentWriteSerializer(
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the risk assessment attributes when it is locked. Only the 'Locked' field can be modified."
                 )
-        return super().validate(attrs)
+        attrs = super().validate(attrs)
+        study = attrs.get("ebios_rm_study")
+        request = self.context.get("request")
+        if study and self.instance is None and request:
+            # creating unlinks the study's other risk assessments
+            linked = {
+                str(pk)
+                for pk in RiskAssessment.objects.filter(
+                    ebios_rm_study=study
+                ).values_list("pk", flat=True)
+            }
+            changeable = {
+                str(pk)
+                for pk in RoleAssignment.get_changeable_object_ids(
+                    request.user, RiskAssessment
+                )
+            }
+            if linked - changeable:
+                raise PermissionDenied(
+                    {
+                        "ebios_rm_study": "You do not have permission to change this riskassessment"
+                    }
+                )
+        return attrs
 
     def update(self, instance, validated_data):
         # Track old folder before update
@@ -905,6 +973,7 @@ class RiskAssessmentWriteSerializer(
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
+        link_requires_change = ("ebios_rm_study",)
 
 
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
@@ -1195,7 +1264,9 @@ class AssetWriteSerializer(
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return super().validate(data)
+        data = super().validate(data)
+        self._check_reverse_m2m_change(data)
+        return data
 
     def _check_linked_assets_changeable(self, data):
         request = self.context.get("request")
@@ -7380,9 +7451,12 @@ class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer
         return self.validate_commitment(super().validate(attrs))
 
     def create(self, validated_data):
+        assigned_to_data = validated_data.get("assigned_to", [])
+        user = self.context["request"].user
+        if user.is_third_party and not assigned_to_data:
+            validated_data["assigned_to"] = [user.actor]
         commitment_data = dict(validated_data)
         self.pop_commitment(validated_data)
-        assigned_to_data = validated_data.get("assigned_to", [])
         incidents = validated_data.pop("incidents", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
         with transaction.atomic():
