@@ -1147,21 +1147,6 @@
 								</div>
 								<span class="text-sm font-semibold leading-tight">{m.tableMode()}</span>
 							</Anchor>
-							{#if !page.data.user.is_third_party}
-								<Anchor
-									breadcrumbAction="push"
-									href={`/evidences/review?compliance_assessment=${data.compliance_assessment.id}`}
-									class="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
-									data-testid="review-evidences-button"
-								>
-									<div
-										class="flex items-center justify-center w-6 h-6 rounded-md bg-emerald-500 text-white shrink-0"
-									>
-										<i class="fa-solid fa-clipboard-check text-sm"></i>
-									</div>
-									<span class="text-sm font-semibold leading-tight">{m.reviewEvidences()}</span>
-								</Anchor>
-							{/if}
 						</div>
 					</div>
 
@@ -1283,6 +1268,15 @@
 										<span class="text-sm font-medium leading-tight">{m.reviewResponses()}</span>
 									</Anchor>
 								{/if}
+								<Anchor
+									breadcrumbAction="push"
+									href={`/evidences/review?compliance_assessment=${data.compliance_assessment.id}`}
+									class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
+									data-testid="review-evidences-button"
+								>
+									<i class="fa-solid fa-file-circle-check text-emerald-500 text-base"></i>
+									<span class="text-sm font-medium leading-tight">{m.reviewEvidences()}</span>
+								</Anchor>
 							</div>
 						</div>
 					{/if}
