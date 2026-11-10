@@ -523,12 +523,23 @@ def findings_assessment_context(
     and one block per page (what the HTML template did) turns fifty findings into
     fifty pages.
     """
-    metrics = assessment.get_findings_metrics()
     seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
-    severity_counts = metrics.get("severity_distribution", {})
+    findings = seen(findings)
+    # counted from the listed findings, so the summary never covers hidden ones
+    severity_counts = Counter(
+        _SEVERITY_KEYS.get(f.severity, "undefined") for f in findings
+    )
+    status_counts = Counter(f.status for f in findings)
+    unresolved_important = sum(
+        1
+        for f in findings
+        if f.severity is not None
+        and f.severity >= 3
+        and f.status not in ("mitigated", "resolved", "dismissed", "closed")
+    )
 
     rows = []
-    for finding in seen(findings):
+    for finding in findings:
         rows.append(
             {
                 "ref_id": finding.ref_id or "-",
@@ -565,10 +576,10 @@ def findings_assessment_context(
 
     closed = sum(
         count
-        for status, count in metrics.get("status_distribution", {}).items()
+        for status, count in status_counts.items()
         if status in _CLOSED_FINDING_STATUSES
     )
-    total = metrics.get("total_count", 0)
+    total = len(findings)
 
     return {
         "assessment": {
@@ -589,7 +600,7 @@ def findings_assessment_context(
             "total": total,
             "closed": closed,
             "open": total - closed,
-            "unresolved_important": metrics.get("unresolved_important_count", 0),
+            "unresolved_important": unresolved_important,
         },
         "severity_rows": [
             {
@@ -833,6 +844,10 @@ def risk_assessment_context(
     only to encode `swap_axes` x `flip_vertical`, which is a transform on the grid
     rather than four layouts.
     """
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
+    visible = seen(scenarios)
+    hidden_refs = {s.ref_id for s in scenarios} - {s.ref_id for s in visible}
+    scenarios = visible
     matrix = assessment.risk_matrix
     definition = matrix.parse_json_translated()
     grid = matrix.render_grid_as_colors()
@@ -880,7 +895,10 @@ def risk_assessment_context(
         if cluster is None:
             continue
         cells = [
-            [{**rows[r][c], "refs": sorted(cluster[r][c])} for c in range(len(rows[r]))]
+            [
+                {**rows[r][c], "refs": sorted(cluster[r][c] - hidden_refs)}
+                for c in range(len(rows[r]))
+            ]
             for r in range(len(rows))
         ]
         oriented, y_labels, x_labels = orient(cells, y_axis, x_axis)
@@ -895,14 +913,12 @@ def risk_assessment_context(
             }
         )
 
-    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
-
     def with_status(control):
         with translation.override(lang):
             return f"{control.name} ({control.get_status_display()})"
 
     scenario_rows = []
-    for scenario in seen(scenarios):
+    for scenario in scenarios:
         row = {
             "ref_id": scenario.ref_id or "-",
             "name": scenario.name or "-",
@@ -936,8 +952,9 @@ def risk_assessment_context(
             "matrix": str(matrix),
             "status_key": assessment.status or "",
             "description": assessment.description or "",
-            "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
-            "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
+            "authors": ", ".join(str(a) for a in seen(assessment.authors.all())) or "-",
+            "reviewers": ", ".join(str(r) for r in seen(assessment.reviewers.all()))
+            or "-",
             "eta": _date_str(assessment.eta),
             "due_date": _date_str(assessment.due_date),
         },
@@ -1363,14 +1380,17 @@ def gen_audit_context(
         {"category": safe_translate(lang, status), "value": count}
         for status, count in Counter(ac.status for ac in applied_controls).items()
     ]
+    coverage = Counter(
+        RequirementAssessment.applied_controls.through.objects.filter(
+            requirementassessment_id__in=[
+                ra.id for ra in requirement_assessments_objects
+            ]
+        ).values_list("appliedcontrol_id", flat=True)
+    )
     p1_controls = list()
     full_controls = list()
     for ac in [ac for ac in applied_controls if ac.priority == 1]:
-        requirements_count = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .filter(applied_controls=ac.id)
-            .count()
-        )
+        requirements_count = coverage[ac.id]
         print(f"[{ac.name}] {ac.category}: {type(ac.category)}")
         p1_controls.append(
             {
@@ -1383,11 +1403,7 @@ def gen_audit_context(
         )
 
     for ac in applied_controls:
-        requirements_count = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .filter(applied_controls=ac.id)
-            .count()
-        )
+        requirements_count = coverage[ac.id]
         full_controls.append(
             {
                 "name": ac.name,

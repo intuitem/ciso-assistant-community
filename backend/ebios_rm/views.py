@@ -386,15 +386,25 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             """Build kill chain steps and elementary actions"""
             from .serializers import KillChainReadSerializer
 
-            steps = mo.kill_chain_steps.all()
-            if not steps.exists():
+            steps = [
+                step
+                for step in mo.kill_chain_steps.select_related("elementary_action")
+                if viewable.allows(step.elementary_action)
+            ]
+            if not steps:
                 return None
 
             kill_chain_steps = KillChainReadSerializer(steps, many=True).data
+            step_ids = {str(step.id) for step in steps}
+            for step in kill_chain_steps:
+                step["antecedents"] = [
+                    a for a in step["antecedents"] if str(a["id"]) in step_ids
+                ]
+                step["assets"] = viewable.serialized(Asset, step["assets"])
 
-            ea_ids = {step.elementary_action_id for step in steps}
-
-            eas = viewable(ElementaryAction.objects.filter(id__in=ea_ids))
+            eas = sorted(
+                {step.elementary_action for step in steps}, key=lambda ea: ea.name
+            )
             elementary_actions = [
                 {
                     "id": str(ea.id),
@@ -435,26 +445,23 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get risk matrix data from last risk assessment
         risk_matrix_data = None
-        last_risk_assessment = (
-            study.last_risk_assessment
-            if study.last_risk_assessment
-            and viewable.allows(study.last_risk_assessment)
-            else None
-        )
+        last_risk_assessment = study.last_risk_assessment
+        if last_risk_assessment and not viewable.allows(last_risk_assessment):
+            last_risk_assessment = None
         if last_risk_assessment:
             from core.serializers import (
                 RiskScenarioReadSerializer,
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
+            risk_scenarios = last_risk_assessment.risk_scenarios.all().order_by(
                 "ref_id"
             )
             risk_matrix_data = {
                 "risk_assessment": {
-                    "id": str(study.last_risk_assessment.id),
-                    "name": study.last_risk_assessment.name,
-                    "version": study.last_risk_assessment.version,
+                    "id": str(last_risk_assessment.id),
+                    "name": last_risk_assessment.name,
+                    "version": last_risk_assessment.version,
                 },
                 "risk_matrix": RiskMatrixReadSerializer(study.risk_matrix).data,
                 "risk_scenarios": RiskScenarioReadSerializer(
@@ -504,7 +511,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Get action plan from risk assessment
         risk_action_plan = None
         if last_risk_assessment:
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_scenarios = last_risk_assessment.risk_scenarios.all()
             risk_applied_controls = (
                 viewable_controls.filter(risk_scenarios__in=risk_scenarios)
                 .distinct()
@@ -512,8 +519,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             )
             if risk_applied_controls.exists():
                 risk_action_plan = {
-                    "risk_assessment_id": str(study.last_risk_assessment.id),
-                    "risk_assessment_name": study.last_risk_assessment.name,
+                    "risk_assessment_id": str(last_risk_assessment.id),
+                    "risk_assessment_name": last_risk_assessment.name,
                     "applied_controls": AppliedControlReadSerializer(
                         risk_applied_controls, many=True
                     ).data,

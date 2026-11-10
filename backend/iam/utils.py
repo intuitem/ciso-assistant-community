@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 import structlog
 from allauth.headless.tokens.strategies.sessions import SessionTokenStrategy
+from django.db.models import Q
 from django.http import HttpRequest
 from knox.models import AuthToken
 
@@ -72,10 +73,23 @@ class ViewableFilter:
         IAM, and people, whose names the app shows wherever they are linked."""
         from core.models import Actor, Team
         from iam.models import RoleAssignment, User
+        from tprm.models import Entity
 
         model = model._meta.concrete_model
-        if model in (Actor, Team, User):
+        if model in (Team, User):
             return None
+        if model is Actor and Actor not in self._ids:
+            # people stay listed; an actor standing for a third party follows its entity
+            self._ids[Actor] = set(
+                Actor.objects.filter(
+                    Q(entity__isnull=True)
+                    | Q(
+                        entity_id__in=RoleAssignment.get_viewable_object_ids(
+                            self.user, Entity
+                        )
+                    )
+                ).values_list("id", flat=True)
+            )
         if model not in self._ids:
             try:
                 self._ids[model] = set(
@@ -86,11 +100,6 @@ class ViewableFilter:
         return self._ids[model]
 
     def allows(self, obj) -> bool:
-        from core.models import Actor
-
-        # an actor standing for a third party is that entity, not a person
-        if isinstance(obj, Actor) and obj.entity_id:
-            return self.allows(obj.entity)
         ids = self.ids(type(obj))
         return ids is None or obj.pk in ids
 

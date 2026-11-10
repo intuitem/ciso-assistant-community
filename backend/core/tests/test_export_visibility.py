@@ -138,3 +138,21 @@ def test_entity_owner_follows_entity_visibility(setup):
     supplier = Entity.objects.create(name="hidden-supplier", folder=hidden)
 
     assert not ViewableFilter(reader).allows(Actor.objects.get(entity=supplier))
+
+
+@pytest.mark.django_db
+def test_task_export_drops_hidden_linked_controls(setup):
+    client, _ = setup
+    task = TaskTemplate.objects.get(name="seen-task")
+    task.applied_controls.add(AppliedControl.objects.get(name="hidden-control"))
+
+    response = client.get("/api/task-templates/export_csv/")
+    assert response.status_code == 200
+    rows = {
+        row["name"]: row
+        for row in csv.DictReader(
+            io.StringIO(response.content.decode("utf-8-sig")), delimiter=";"
+        )
+    }
+
+    assert rows["seen-task"]["applied_controls"] == "seen-control"

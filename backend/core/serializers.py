@@ -2393,10 +2393,10 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
     def get_task_templates(self, obj):
         if not self.context.get("with_tasks"):
             return None
-        pk = str(self.context.get("pk"))
+        scoped = self.context.get("scoped_ra_ids", set())
         tasks = {task.id: task for task in obj.task_templates.all()}
         for ra in obj.requirement_assessments.all():
-            if str(ra.compliance_assessment_id) == pk:
+            if str(ra.id) in scoped:
                 tasks.update({task.id: task for task in ra.task_templates.all()})
         return [{"id": str(task.id), "str": str(task)} for task in tasks.values()]
 

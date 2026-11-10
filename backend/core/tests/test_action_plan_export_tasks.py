@@ -49,11 +49,19 @@ def test_tasks_come_from_control_and_its_covered_requirements():
     )
     task("unrelated")
 
+    in_scope = {
+        str(ra.id)
+        for ra in RequirementAssessment.objects.filter(compliance_assessment=audit)
+    }
     data = ComplianceAssessmentActionPlanSerializer(
-        control, context={"pk": audit.id, "with_tasks": True}
+        control,
+        context={"pk": audit.id, "with_tasks": True, "scoped_ra_ids": in_scope},
     ).data
 
     assert sorted(t["str"] for t in data["task_templates"]) == [
         "on control",
         "on requirement",
     ]
+    # the action plan page does not ask for tasks
+    page = ComplianceAssessmentActionPlanSerializer(control, context={"pk": audit.id})
+    assert page.data["task_templates"] is None
