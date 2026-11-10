@@ -151,6 +151,27 @@ class TestEvidenceRevisionReview:
         assert row["latest_revision"]["review_status"] == "pending"
         assert row["latest_revision"]["uploaded_by"]
 
+    def test_decision_on_a_superseded_revision_is_refused(self, authenticated_client):
+        old = self._revision(authenticated_client)
+        authenticated_client.post(
+            reverse("evidence-revisions-list"),
+            {"evidence": str(old.evidence_id), "link": "https://example.com/v2"},
+            format="json",
+        )
+        assert self._review(authenticated_client, old, "approved").status_code == 409
+        old.refresh_from_db()
+        assert old.review_status == EvidenceRevision.ReviewStatus.PENDING
+
+    def test_first_file_on_approved_evidence_goes_back_to_review(self):
+        evidence = Evidence.objects.create(
+            name="Pen test", folder=Folder.get_root_folder()
+        )
+        evidence.status = Evidence.Status.APPROVED
+        evidence.save()
+        EvidenceRevision.objects.create(evidence=evidence, link="https://example.com")
+        evidence.refresh_from_db()
+        assert evidence.status == Evidence.Status.IN_REVIEW
+
     def test_undo_puts_the_decision_back_in_the_queue(self, authenticated_client):
         revision = self._revision(authenticated_client)
         assert (

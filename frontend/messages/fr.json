@@ -7942,6 +7942,8 @@
 	"reviewClearFilters": "Effacer les filtres",
 	"reviewReviewedCount": "Examinées : {count}",
 	"reviewFourEyesError": "Vous avez déposé ce fichier : une autre personne doit l'examiner.",
+	"reviewOlderVersionShown": "Vous consultiez une version antérieure. La dernière version est maintenant affichée : vérifiez-la avant de décider.",
+	"reviewStaleVersion": "Une version plus récente a été déposée entre-temps. Examinez-la avant de décider.",
 	"reviewSaveError": "La décision n'a pas pu être enregistrée.",
 	"reviewKeyMove": "naviguer",
 	"reviewDecision": "Décision",

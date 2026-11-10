@@ -1,5 +1,6 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { getSecureRedirect } from '#lib/utils/helpers.js';
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { PAGE_SIZE, SCOPES, type Scope } from './types';
 
@@ -24,10 +25,12 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		for (const [k, v] of Object.entries(extra)) q.set(k, v);
 		return `${BASE_API_URL}/evidences/?${q}`;
 	};
-	const get = (u: string) =>
-		fetch(u)
-			.then((r) => (r.ok ? r.json() : { count: 0, results: [] }))
-			.catch(() => ({ count: 0, results: [] }));
+	// A failed load must not read as "nothing to review".
+	const get = async (u: string) => {
+		const r = await fetch(u);
+		if (!r.ok) error(r.status, 'evidence list unavailable');
+		return r.json();
+	};
 
 	// Oldest first while reviewing (first in, first out); newest first when browsing decisions.
 	const ordering =

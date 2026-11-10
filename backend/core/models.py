@@ -6798,25 +6798,30 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             self.folder = self.evidence.folder
 
         # A review covers the content it saw: new content on a reviewed revision voids it.
-        review_voided = False
-        if not self._state.adding and self.review_status != self.ReviewStatus.PENDING:
+        if self._state.adding:
+            content_changed = bool(self.attachment) or bool(self.link)
+        else:
             old = (
                 EvidenceRevision.objects.filter(pk=self.pk)
                 .values("attachment", "link")
                 .first()
             )
             new_file = bool(self.attachment) and not self.attachment._committed
-            if old and (
+            content_changed = bool(old) and (
                 new_file
                 or (old["attachment"] or None) != (self.attachment.name or None)
                 or (old["link"] or None) != (self.link or None)
-            ):
-                review_voided = True
-                self.review_status = self.ReviewStatus.PENDING
-                self.reviewed_by = None
-                self.reviewed_at = None
-                self.review_comment = ""
-                kwargs.pop("update_fields", None)
+            )
+        if (
+            content_changed
+            and not self._state.adding
+            and self.review_status != self.ReviewStatus.PENDING
+        ):
+            self.review_status = self.ReviewStatus.PENDING
+            self.reviewed_by = None
+            self.reviewed_at = None
+            self.review_comment = ""
+            kwargs.pop("update_fields", None)
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
@@ -6874,11 +6879,16 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-        if review_voided and self.evidence.last_revision == self:
-            Evidence.objects.filter(
-                pk=self.evidence_id,
-                status__in=[Evidence.Status.APPROVED, Evidence.Status.REJECTED],
-            ).update(status=Evidence.Status.IN_REVIEW)
+        # Unreviewed content on the latest revision, first file included: back to review.
+        if (
+            content_changed
+            and self.review_status == self.ReviewStatus.PENDING
+            and self.evidence.status
+            in (Evidence.Status.APPROVED, Evidence.Status.REJECTED)
+            and self.evidence.last_revision == self
+        ):
+            self.evidence.status = Evidence.Status.IN_REVIEW
+            self.evidence.save(update_fields=["status", "updated_at"])
 
     def filename(self) -> str | None:
         if not self.attachment:

@@ -12461,6 +12461,15 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                 if decision == EvidenceRevision.ReviewStatus.PENDING:
                     revision.undo_review(request.user)
                 else:
+                    # Same lock as revision creation: a decision can't land on a superseded file.
+                    evidence = Evidence.objects.select_for_update().get(
+                        pk=revision.evidence_id
+                    )
+                    if evidence.last_revision != revision:
+                        return Response(
+                            {"decision": "stale_revision"},
+                            status=status.HTTP_409_CONFLICT,
+                        )
                     revision.record_review(request.user, decision, comment)
         except ValidationError as e:
             return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)

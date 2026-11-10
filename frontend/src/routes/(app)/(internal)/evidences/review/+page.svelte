@@ -170,12 +170,24 @@
 		const ev = selected;
 		const rev = selectedRevisions?.[0];
 		if (!ev || !rev || busy) return;
+		// A decision always targets the latest file: never send it while an older one is on screen.
+		if (viewedRevision && viewedRevision.id !== rev.id) {
+			viewed[ev.id] = rev.id;
+			error = m.reviewOlderVersionShown();
+			return;
+		}
 		busy = true;
 		error = '';
 		const res = await post(rev.id, decision, comment);
 		busy = false;
 		if (!res?.ok) {
 			const body = await res?.json().catch(() => ({}));
+			if (res?.status === 409) {
+				delete revisions[ev.id];
+				await loadRevisions(ev.id);
+				error = m.reviewStaleVersion();
+				return;
+			}
 			error = body?.decision?.includes?.('four_eyes_uploader_cannot_review')
 				? m.reviewFourEyesError()
 				: m.reviewSaveError();
