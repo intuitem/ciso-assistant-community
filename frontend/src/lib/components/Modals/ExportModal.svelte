@@ -102,7 +102,7 @@
 					<span class="flex flex-wrap gap-1.5">
 						{#each selection.summary as line}
 							<span
-								class="text-xs rounded-full border border-primary-200 bg-surface-50-950 px-2.5 py-0.5"
+								class="text-xs rounded-full px-2.5 py-0.5 bg-primary-100 dark:bg-primary-900/50 ring-1 ring-inset ring-primary-300 dark:ring-primary-700"
 								>{line}</span
 							>
 						{/each}

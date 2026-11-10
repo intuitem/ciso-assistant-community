@@ -136,9 +136,10 @@
 					<button
 						type="button"
 						aria-pressed={linkType === type}
-						class="min-h-9 px-3.5 rounded-md text-sm font-semibold {linkType === type
+						class="min-h-9 px-3.5 rounded-md text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 {linkType ===
+						type
 							? 'bg-surface-50-950 shadow-sm'
-							: 'text-surface-600-400'}"
+							: 'text-surface-600-400 hover:text-surface-950-50'}"
 						onclick={() => pickLinkType(type)}
 					>
 						{LINK_TYPE_LABELS[type]()}

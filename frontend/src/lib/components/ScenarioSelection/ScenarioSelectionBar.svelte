@@ -56,6 +56,19 @@
 	];
 	const SEARCH_THRESHOLD = 8;
 
+	// Hover and open states stay in the primary hue: the bar is tinted once a
+	// selection applies, and a neutral gray reads as a smudge on it. They are
+	// lighter than an applied filter so a hovered button never looks applied.
+	const HOVER_TINT = 'hover:bg-primary-500/10';
+	const OPEN_TINT = 'bg-primary-500/15';
+	const APPLIED = 'bg-primary-100 dark:bg-primary-900/50 ring-1 ring-inset';
+	const APPLIED_RING =
+		'ring-primary-300 dark:ring-primary-700 hover:ring-primary-500 dark:hover:ring-primary-400';
+	const APPLIED_RING_OPEN = 'ring-primary-500 dark:ring-primary-400';
+	const FOCUS_RING =
+		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500';
+	const QUIET_BUTTON = `inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-sm font-medium whitespace-nowrap text-primary-700 dark:text-primary-200 ${HOVER_TINT} ${FOCUS_RING}`;
+
 	let openFilter: SelectionFilter | 'more' | null = $state(null);
 	let query = $state('');
 	let restored = $state(false);
@@ -186,7 +199,7 @@
 <section
 	aria-label={m.scenarioSelection()}
 	class="rounded-lg border overflow-hidden {scoped
-		? 'border-primary-300 bg-primary-50/60 dark:bg-primary-950/30'
+		? 'border-primary-300 dark:border-primary-700 bg-primary-50/60 dark:bg-primary-950/30'
 		: 'border-surface-200-800 bg-surface-50-950'} {restored && scoped
 		? 'border-2 border-primary-500'
 		: ''}"
@@ -209,7 +222,7 @@
 		</div>
 	{/if}
 	<div class="flex flex-wrap items-start gap-x-4 gap-y-2 px-4 py-3">
-		<div class="flex items-center gap-2 h-8 font-semibold text-primary-700 dark:text-primary-300">
+		<div class="flex items-center gap-2 h-8 font-semibold text-primary-700 dark:text-primary-200">
 			<i class="fa-solid fa-filter" aria-hidden="true"></i>
 			{m.scenarioSelection()}
 		</div>
@@ -217,14 +230,15 @@
 			{#each buttonFilters as name (name)}
 				{@const isActive = applied[name].length > 0}
 				{@const locked = name === 'within_tolerance' && !toleranceSet}
+				{@const isOpen = openFilter === name}
 				<span
-					class="inline-flex items-center h-8 rounded-full text-sm {isActive
-						? 'bg-primary-100 dark:bg-primary-900/50 ring-1 ring-inset ring-primary-300 dark:ring-primary-700'
-						: 'hover:bg-surface-200-800'}"
+					class="inline-flex items-center h-8 rounded-full text-sm transition-colors {isActive
+						? `${APPLIED} ${isOpen ? APPLIED_RING_OPEN : APPLIED_RING}`
+						: `${HOVER_TINT} ${isOpen ? OPEN_TINT : ''}`}"
 					data-testid="selection-filter-{name}"
 				>
 					<Popover
-						open={openFilter === name}
+						open={isOpen}
 						onOpenChange={(e) => setOpen(name, e.open)}
 						positioning={{ placement: 'bottom-start' }}
 						autoFocus={false}
@@ -233,7 +247,7 @@
 						<Popover.Trigger
 							class="inline-flex items-center gap-1.5 h-8 pl-3 {isActive
 								? 'pr-1.5'
-								: 'pr-2.5'} rounded-full whitespace-nowrap"
+								: 'pr-2.5'} rounded-full whitespace-nowrap {FOCUS_RING}"
 							title={isActive
 								? applied[name].map((v) => optionLabel(name, v)).join(', ')
 								: undefined}
@@ -252,7 +266,10 @@
 								<i
 									class="fa-solid {locked
 										? 'fa-lock'
-										: 'fa-chevron-down'} text-[10px] text-surface-500"
+										: 'fa-chevron-down'} text-[10px] text-surface-500 transition-transform {isOpen &&
+									!locked
+										? 'rotate-180'
+										: ''}"
 									aria-hidden="true"
 								></i>
 							{/if}
@@ -261,7 +278,7 @@
 							<Popover.Content
 								class="card p-1.5 bg-surface-50-950 w-72 shadow-lg border border-surface-200-800"
 							>
-								{#if openFilter === name}
+								{#if isOpen}
 									{#if locked}
 										<p class="px-2.5 py-2 text-sm text-surface-600-400">
 											{m.noRiskToleranceDefined()}
@@ -311,11 +328,7 @@
 										</ul>
 										{#if isActive}
 											<div class="flex justify-end pt-1.5 mt-1 border-t border-surface-200-800">
-												<button
-													type="button"
-													class="btn btn-sm underline underline-offset-4"
-													onclick={() => remove(name)}
-												>
+												<button type="button" class={QUIET_BUTTON} onclick={() => remove(name)}>
 													{m.clearFilterValues()}
 												</button>
 											</div>
@@ -328,7 +341,7 @@
 					{#if isActive}
 						<button
 							type="button"
-							class="size-6 mr-1 rounded-full inline-flex items-center justify-center text-xs text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800"
+							class="size-6 mr-1 rounded-full inline-flex items-center justify-center text-xs text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-800 {FOCUS_RING}"
 							aria-label={m.removeSelectionFilter({ filter: FILTER_LABELS[name]() })}
 							onclick={() => remove(name)}
 						>
@@ -346,7 +359,7 @@
 					closeOnInteractOutside={true}
 				>
 					<Popover.Trigger
-						class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-primary-700 dark:text-primary-300 font-medium text-sm whitespace-nowrap hover:bg-primary-100 dark:hover:bg-primary-900/50"
+						class="{QUIET_BUTTON} {openFilter === 'more' ? OPEN_TINT : ''}"
 						data-testid="selection-more-filters"
 					>
 						<i class="fa-solid fa-plus text-[10px]" aria-hidden="true"></i>
@@ -407,16 +420,12 @@
 				</span>
 			{/if}
 			{#if scoped}
-				<button type="button" class="btn btn-sm preset-tonal-surface" onclick={copyLink}>
-					<i class="fa-solid fa-link mr-1" aria-hidden="true"></i>
+				<button type="button" class={QUIET_BUTTON} onclick={copyLink}>
+					<i class="fa-solid {copied ? 'fa-check' : 'fa-link'} text-xs" aria-hidden="true"></i>
 					{copied ? m.selectionLinkCopied() : m.copySelectionLink()}
 				</button>
-				<button
-					type="button"
-					class="btn btn-sm underline underline-offset-4"
-					onclick={clear}
-					data-testid="selection-clear"
-				>
+				<button type="button" class={QUIET_BUTTON} onclick={clear} data-testid="selection-clear">
+					<i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
 					{m.clearSelection()}
 				</button>
 			{/if}

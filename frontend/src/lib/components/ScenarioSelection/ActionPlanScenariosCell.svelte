@@ -21,7 +21,12 @@
 
 <div class="flex flex-col gap-1">
 	{#if linked.length > 0}
-		<ul class="list-disc pl-4 whitespace-normal">
+		<!-- The table clips cells at 8em: cap the list so the hint below it stays visible. -->
+		<ul
+			class="list-disc pl-4 whitespace-normal {outside.length > 0
+				? 'max-h-[4.5em] overflow-hidden hover:overflow-y-auto'
+				: ''}"
+		>
 			{#each linked as scenario (scenario.id)}
 				<li>
 					<Anchor href="/risk-scenarios/{scenario.id}" class="anchor" stopPropagation
@@ -33,7 +38,7 @@
 	{/if}
 	{#if outside.length > 0}
 		<span
-			class="text-xs text-surface-500 underline decoration-dotted underline-offset-2 w-fit"
+			class="text-xs text-surface-600-400 underline decoration-dotted underline-offset-2 w-fit cursor-help"
 			title={outside.map((s) => s.str).join('\n')}
 			data-testid="outside-selection-count"
 		>
