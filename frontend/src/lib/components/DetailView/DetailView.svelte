@@ -469,19 +469,21 @@
 	let relatedModels = $derived(getSortedRelatedModels());
 	let relatedModelsNames: Set<string> = $state(new Set());
 
-	let group = $state(
-		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
-	);
+	// Open on the first tab not known to be empty (an unknown count may hold rows), else the first.
+	function firstTabKey(models: [string, any][]): string | undefined {
+		return (models.find(([, model]) => model.count !== 0) ?? models[0])?.[0];
+	}
+
+	let group = $state(firstTabKey(getSortedRelatedModels()));
 	// Tabs.Content renders hidden panels too, so gate on first visit. Kept once
 	// visited, so switching back costs no refetch. Reassigned: a Set is not deep state.
-	let visitedTabs = $state(
-		new Set(
-			Object.keys(data?.relatedModels ?? {}).length > 0 ? [getSortedRelatedModels()[0][0]] : []
-		)
-	);
+	let visitedTabs = $state(new Set(group ? [group] : []));
 	$effect(() => {
 		if (group && !visitedTabs.has(group)) visitedTabs = new Set(visitedTabs).add(group);
 	});
+	// Plain (non-reactive) marker: navigating to another record of the same model keeps the same
+	// tab names but different counts, so the default tab must be recomputed then too.
+	let shownRecordId = data?.data?.id;
 	$effect(() => {
 		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
 
@@ -489,10 +491,12 @@
 		const setsAreDifferent =
 			relatedModelsNames.size !== newRelatedModelsNames.size ||
 			[...newRelatedModelsNames].some((name) => !relatedModelsNames.has(name));
+		const recordChanged = data?.data?.id !== shownRecordId;
 
-		if (setsAreDifferent) {
+		if (setsAreDifferent || recordChanged) {
+			shownRecordId = data?.data?.id;
 			relatedModelsNames = newRelatedModelsNames;
-			const firstTab = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+			const firstTab = firstTabKey(relatedModels);
 			group = firstTab;
 			visitedTabs = new Set(firstTab ? [firstTab] : []);
 		}
@@ -712,7 +716,7 @@
 														{/each}
 													</ul>
 												{:else}
-													--
+													<span class="text-surface-400-600">--</span>
 												{/if}
 											{:else if key === 'translations'}
 												{#if Object.keys(value).length > 0}
@@ -725,7 +729,7 @@
 														{/each}
 													</div>
 												{:else}
-													--
+													<span class="text-surface-400-600">--</span>
 												{/if}
 												<!-- Values that are Arrays -->
 											{:else if Array.isArray(value)}
@@ -812,7 +816,7 @@
 														{m.objectsNotVisible({ count: hiddenCountForValue })}
 													</p>
 												{:else}
-													--
+													<span class="text-surface-400-600">--</span>
 												{/if}
 											{:else if value.id && !value.hexcolor}
 												{@const itemHref = `/${
@@ -866,7 +870,7 @@
 												{(value.str || value.name) ?? value}
 											{/if}
 										{:else}
-											--
+											<span class="text-surface-400-600">--</span>
 										{/if}
 									</li>
 								</ul>
@@ -897,7 +901,7 @@
 		{/if}
 
 		<!-- Bottom row for action buttons -->
-		<div class="flex flex-row justify-end mt-4 gap-2">
+		<div class="flex flex-row flex-wrap justify-end items-start mt-4 gap-2">
 			{#if mailing}
 				<button
 					class="btn preset-filled-primary-500 h-fit"
@@ -916,7 +920,9 @@
 						)}
 				>
 					<i class="fas fa-paper-plane mr-2"></i>
-					{m.sendQuestionnaire()}
+					{data.data.assignment_status && data.data.assignment_status !== 'draft'
+						? m.resendQuestionnaire()
+						: m.sendQuestionnaire()}
 				</button>
 			{/if}
 
@@ -978,21 +984,21 @@
 
 				{#if data.urlModel === 'applied-controls'}
 					<button
-						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
+						class="btn btn-quiet"
 						onclick={(_) => modalDuplicateForm(m.duplicateAppliedControl)}
 						data-testid="duplicate-button"
 					>
-						<i class="fa-solid fa-copy mr-2"></i>
+						<i class="fa-solid fa-copy mr-2 text-fuchsia-500"></i>
 						{m.duplicate()}</button
 					>
 				{/if}
 				{#if data.urlModel === 'organisation-objectives'}
 					<button
-						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
+						class="btn btn-quiet"
 						onclick={(_) => modalDuplicateForm(m.duplicateOrganisationObjective)}
 						data-testid="duplicate-button"
 					>
-						<i class="fa-solid fa-copy mr-2"></i>
+						<i class="fa-solid fa-copy mr-2 text-fuchsia-500"></i>
 						{m.duplicate()}</button
 					>
 				{/if}
@@ -1000,14 +1006,16 @@
 			{#if showRelations}
 				<button
 					type="button"
-					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
+					class="btn btn-quiet h-fit"
 					data-testid="relations-button"
 					onclick={() => (relationsOpen = true)}
 				>
-					<i class="fa-solid fa-circle-nodes mr-2"></i>{m.relationsGraph()}
+					<i class="fa-solid fa-circle-nodes mr-2 text-purple-500"></i>{m.relationsGraph()}
 				</button>
 			{/if}
-			{@render actions?.()}
+			<!-- Pages wrap their actions in a flex-col div; flatten it so every button joins this one
+			     right-aligned row (filled primary first, quiet ones after) instead of a stray column. -->
+			<div class="contents [&>div]:contents">{@render actions?.()}</div>
 			{#if data.urlModel === 'data-breaches'}
 				<a
 					class="btn preset-filled-primary-500 h-fit"
@@ -1094,7 +1102,7 @@
 			{#each relatedModels as [urlmodel, model]}
 				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
 					{#if visitedTabs.has(urlmodel)}
-						{#key urlmodel}
+						{#key `${data?.data?.id}:${urlmodel}`}
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}

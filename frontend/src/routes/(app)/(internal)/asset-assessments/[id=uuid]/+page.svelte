@@ -59,9 +59,9 @@
 		<Anchor
 			breadcrumbAction="push"
 			href={`${page.url.pathname}/dependencies`}
-			class="btn preset-filled-secondary-500 h-fit"
+			class="btn btn-quiet h-fit"
 		>
-			<i class="fa-solid fa-sitemap mr-2"></i>
+			<i class="fa-solid fa-sitemap mr-2 text-emerald-500"></i>
 			{m.assetDependencies()}
 		</Anchor>
 	{/snippet}

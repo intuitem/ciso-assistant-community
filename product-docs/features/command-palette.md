@@ -20,7 +20,7 @@ There are two ways to open the palette, and both produce the same UI:
 The shortcut works from any page in the app — there's no need to focus the search button first.
 
 {% hint style="info" %}
-The palette is **not available** to third-party users (representatives logging into the auditee surface). It's an internal-user tool — the search pill and shortcut are simply not wired up on that surface.
+The palette is **not available** to third-party users (representatives logging into the auditee surface). It's an internal-user tool: the respondent layout they see has no search pill and no shortcut.
 {% endhint %}
 
 ## What's inside

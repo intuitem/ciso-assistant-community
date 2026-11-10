@@ -407,6 +407,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 36. JM 181101-02 - Cybersecurity and Information Security Regulation (Junta Monetaria, Dominican Republic) 🏦🇩🇴
 37. R-CNMV-2024-08-MV - Cybersecurity and Information Security Regulation for the Securities Market (CNMV, Dominican Republic) 🏦🇩🇴
 38. Vyhláška 409/2025 Sb. (Czech cybersecurity decree) - compliance questionnaire 🇨🇿
+39. LYSS - Lyaazale Switch Security: network switch security controls (draft) 🇲🇦🌐
 
 ### Threat and TTP catalogs
 

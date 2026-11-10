@@ -8,6 +8,7 @@ import json
 import mimetypes
 import re
 from django_filters.filterset import filterset_factory
+from django_filters.constants import EMPTY_VALUES
 from django_filters.utils import try_dbfield
 from django import forms
 from django_filters.widgets import QueryArrayWidget
@@ -199,8 +200,13 @@ from core.models import (
     rescale_score,
 )
 from core.pagination import CustomLimitOffsetPagination
-from core.serializers import ComplianceAssessmentReadSerializer
+from core.serializers import (
+    USER_FULL_VIEW_FIELDS,
+    ComplianceAssessmentReadSerializer,
+    full_user_view_folder_ids,
+)
 from core.utils import (
+    duration_day_unit,
     build_answers_dict,
     escape_excel_formula,
     sanitize_xlsx_value,
@@ -209,6 +215,7 @@ from core.utils import (
     format_report_timestamp,
     get_report_timezone,
     get_respondent_scoped_folder_ids,
+    is_applicability_readable,
     is_field_visible_to,
     render_answers_cell,
     respondent_progress_counts,
@@ -225,7 +232,7 @@ from ebios_rm.models import (
     Stakeholder,
 )
 
-from tprm.models import Entity, SolutionSubcontractor
+from tprm.models import Entity, Representative, SolutionSubcontractor
 from privacy.models import Processing, DataBreach
 from resilience.models import AssetAssessment, DoraIncidentReport
 
@@ -278,6 +285,7 @@ LONG_CACHE_TTL = 60  # mn
 # RowsPerPage options and EntityPickerModal PAGE_SIZE_OPTIONS) so a full-page
 # selection always fits in a single request.
 BATCH_SIZE_LIMIT = 100
+MAX_CALENDAR_RANGE_DAYS = 366
 
 
 MAPPING_MAX_DEPTH = 3
@@ -1203,6 +1211,19 @@ def check_folder_add_permission(user, folder, *models):
         ):
             raise PermissionDenied(
                 {"folder": "You do not have permission to add objects in this folder"}
+            )
+
+
+def check_folder_view_permission(user, folder, *models):
+    """Raise PermissionDenied unless *user* may view each of *models* in *folder*."""
+    for model in models:
+        if not RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=f"view_{model._meta.model_name}"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to view objects in this folder"}
             )
 
 
@@ -3036,15 +3057,18 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         def format_seconds(s: int) -> str:
             if not isinstance(s, int) or s < 0:
                 return "0s"
-            h, r = divmod(s, 3600)
+            d, r = divmod(s, 86400)
+            h, r = divmod(r, 3600)
             m, s_rem = divmod(r, 60)
             parts = []
+            if d > 0:
+                parts.append(f"{d}{duration_day_unit()}")
             if h > 0:
                 parts.append(f"{h}h")
             if m > 0:
-                parts.append(f"{m:02d}m")
+                parts.append(f"{m:02d}m" if parts else f"{m}m")
             if s_rem > 0 or not parts:
-                parts.append(f"{s_rem:02d}s")
+                parts.append(f"{s_rem:02d}s" if parts else f"{s_rem}s")
             return "".join(parts)
 
         return [
@@ -4629,7 +4653,10 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         if instance.ebios_rm_study:
             # Unlink all previous risk assessments from this EBIOS RM study
             RiskAssessment.objects.filter(
-                ebios_rm_study=instance.ebios_rm_study
+                ebios_rm_study=instance.ebios_rm_study,
+                id__in=RoleAssignment.get_changeable_object_ids(
+                    self.request.user, RiskAssessment
+                ),
             ).exclude(id=instance.id).update(ebios_rm_study=None)
 
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
@@ -7673,7 +7700,9 @@ class UserRolesOnFolderList(generics.ListAPIView):
         filters.SearchFilter,
         SmartOrderingFilter,
     ]
-    ordering_fields = "__all__"
+    # The serialized fields only: sorting on a full-view field (`is_superuser`,
+    # `keep_local_login`...) would give its values away.
+    ordering_fields = ["email", "first_name", "last_name", "is_active"]
     ordering = ["email"]
 
     _user_roles_map = None  # cached variable
@@ -8632,6 +8661,31 @@ class UserFilter(GenericFilterSet):
     )
     # Add-only member pickers: drop users already in the given group.
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
+    # Who belongs to a group is not for who can't read the group: such a group
+    # matches no user.
+    user_groups = df.ModelMultipleChoiceFilter(
+        queryset=UserGroup.objects.all(), method="filter_readable_groups"
+    )
+    idp_groups = df.ModelMultipleChoiceFilter(
+        queryset=IdPGroup.objects.all(), method="filter_readable_groups"
+    )
+
+    def filter_queryset(self, queryset):
+        # Full-view fields are only serialized to who has the full view (see
+        # USER_FULL_VIEW_FIELDS); matching on them for anyone else would give the
+        # values away, so while any of their lookups is set, other rows never match.
+        if any(
+            self.form.cleaned_data.get(name) not in EMPTY_VALUES
+            for name, f in self.filters.items()
+            if f.field_name in USER_FULL_VIEW_FIELDS
+        ):
+            if self.request is None:
+                return queryset.none()
+            queryset = queryset.filter(
+                Q(folder_id__in=full_user_view_folder_ids(self.request))
+                | Q(pk=self.request.user.pk)
+            )
+        return super().filter_queryset(queryset)
 
     def filter_exclude_user_groups(self, queryset, name, value):
         # Only honour the exclusion for a group the caller can actually read, so
@@ -8643,6 +8697,19 @@ class UserFilter(GenericFilterSet):
         ):
             return queryset.exclude(user_groups__id=value)
         return queryset
+
+    def filter_readable_groups(self, queryset, name, value):
+        if not value:
+            return queryset
+        readable = [
+            group
+            for group in value
+            if self.request
+            and RoleAssignment.is_object_readable(
+                self.request.user, type(group), group.id
+            )
+        ]
+        return queryset.filter(**{f"{name}__in": readable}).distinct()
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -9011,10 +9078,69 @@ class UserViewSet(BaseModelViewSet):
     """
 
     model = User
-    ordering = ["-is_active", "-is_superuser", "email", "id"]
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
     autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
+
+    # Sorting on a full-view field (or listing superusers first) gives its values
+    # away, so it is only offered to whoever has the full view of every listed user.
+    BASE_VIEW_ORDERING_FIELDS = [
+        "id",
+        "created_at",
+        "updated_at",
+        "folder",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "is_third_party",
+        "date_joined",
+    ]
+
+    def filter_queryset(self, queryset):
+        # Checked against the rows about to be listed. Single-object actions don't
+        # sort and pickers don't need superusers first, so both skip the query and
+        # get the base-view ordering.
+        if not self.detail and self.action != "autocomplete":
+            self._full_view_of_every_row = self._has_full_view_of(queryset)
+        return super().filter_queryset(queryset)
+
+    def _has_full_view_of(self, queryset) -> bool:
+        """Whether the requester has the full view of every user in `queryset`."""
+        return (
+            not queryset.exclude(folder_id__in=full_user_view_folder_ids(self.request))
+            .exclude(pk=self.request.user.pk)
+            .exists()
+        )
+
+    def _has_full_view_of_every_row(self) -> bool:
+        if getattr(self, "request", None) is None:
+            # Schema generation introspects the ordering without a request.
+            return True
+        return getattr(self, "_full_view_of_every_row", False)
+
+    @property
+    def ordering(self):
+        if self._has_full_view_of_every_row():
+            return ["-is_active", "-is_superuser", "email", "id"]
+        return ["-is_active", "email", "id"]
+
+    @property
+    def ordering_fields(self):
+        if self._has_full_view_of_every_row():
+            return "__all__"
+        return self.BASE_VIEW_ORDERING_FIELDS
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        # The base action builds the serializer without context; the full-view
+        # fields need the request to decide what this requester may see.
+        serializer_class = self.get_serializer_class(action="update")
+        return Response(
+            serializer_class(
+                self.get_object(), context=self.get_serializer_context()
+            ).data
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get language choices")
@@ -9060,13 +9186,38 @@ class UserViewSet(BaseModelViewSet):
             )
         return Response(sorted(rows, key=lambda r: r["str"].lower()))
 
+    def _third_party_visibility(self) -> Q:
+        """Third-party users are created in Global, where the baseline role lets
+        every member view users, but what makes one relevant is the entity it
+        represents. So it shows only to those who can view one of its
+        `Representative` rows, or who have the full view of users where it sits
+        (`view_user_full` or `change_user`, see the full-view-permissions ADR), and
+        to itself. Internal users are unaffected.
+
+        This scopes the users endpoint only. Their names on objects the requester
+        can read still render: `_filter_related_fields` checks User viewability
+        on its own, not through this queryset."""
+        user = self.request.user
+        representative_user_ids = Representative.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, Representative),
+            user__isnull=False,
+        ).values("user_id")
+        return (
+            Q(is_third_party=False)
+            | Q(pk=user.pk)
+            | Q(pk__in=representative_user_ids)
+            | Q(folder_id__in=full_user_view_folder_ids(self.request))
+        )
+
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
         # Service account users are managed via /api/iam/service-accounts/.
         queryset = (
-            super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
-        ).exclude(service_account__isnull=False)
+            (super().get_queryset() | User.objects.filter(pk=self.request.user.pk))
+            .exclude(service_account__isnull=False)
+            .filter(self._third_party_visibility())
+        )
 
         # The autocomplete path serializes only id/name/email — skip the
         # user_groups prefetch so it stays lightweight at scale.
@@ -11130,6 +11281,61 @@ class FrameworkViewSet(BaseModelViewSet):
             folder_path_cache[folder.id] = path
             return path
 
+        # Non-assessable nodes that act as sections (the immediate parents of
+        # assessable requirements). The frontend uses this to render the
+        # section-then-requirement hierarchy without a second roundtrip.
+        sections = [
+            {
+                "urn": node.urn,
+                "ref_id": node.ref_id,
+                "name": node.name,
+                "description": node.get_description_translated,
+                "parent_urn": node.parent_urn,
+            }
+            for node in RequirementNode.objects.filter(
+                framework=framework, assessable=False
+            ).order_by(F("order_id").asc(nulls_last=True))
+        ]
+        section_urns = {section["urn"] for section in sections}
+
+        # Each audit's scores, computed as on its own page (calculation method,
+        # N/A anchoring, weights) over its in-scope requirements.
+        from core.framework_report import (
+            TOP_SECTION,
+            audit_scores,
+            inherited_requirement,
+            requirement_scores,
+            visible_layers,
+        )
+
+        def section_of(ra) -> str:
+            """The report section of a requirement assessment, as the page groups them."""
+            parent_urn = ra.requirement.parent_urn
+            return parent_urn if parent_urn in section_urns else TOP_SECTION
+
+        if any(
+            ca.score_calculation_method
+            == ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+            for ca in cas
+        ):
+            # Build the framework tree AVG_OF_AVG walks once, not once per audit.
+            tree = ComplianceAssessment.framework_node_trees([framework.id]).get(
+                framework.id
+            )
+            if tree is not None:
+                for ca in cas:
+                    ca.__dict__["framework_node_tree"] = tree
+        audits_by_id = {ca.id: ca for ca in cas}
+        visible_layers_by_ca = {
+            ca.id: visible_layers(ca, ca_viewer_roles[ca.id]) for ca in cas
+        }
+        applicability_readable_by_ca = {
+            ca.id: is_applicability_readable(ca, ca_viewer_roles[ca.id]) for ca in cas
+        }
+        in_scope_by_ca: Dict[Any, list] = defaultdict(list)
+        # Requirement assessments as the combined view reads them, by CA then RA id.
+        inherited_by_ca: Dict[Any, Dict[Any, Any]] = defaultdict(dict)
+
         rows: List[Dict[str, Any]] = []
         for ra in ras:
             ca = ra.compliance_assessment
@@ -11160,6 +11366,20 @@ class FrameworkViewSet(BaseModelViewSet):
                     indirect_evidence_ids.add(e.id)
             total_evidence_ids = direct_evidence_ids | indirect_evidence_ids
 
+            # Inheritance overlay for this (audit, requirement); None when
+            # no ancestor audit covers it or the feature is off.
+            overlay = redact_overlay(
+                overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                str(ca.id),
+                hidden_for_ca,
+            )
+            audit = audits_by_id[ca.id]
+            visible = visible_layers_by_ca[ca.id]
+            in_scope_by_ca[ca.id].append(ra)
+            inherited_ra = inherited_requirement(audit, ra, overlay)
+            if inherited_ra is not None:
+                inherited_by_ca[ca.id][ra.id] = inherited_ra
+
             rows.append(
                 {
                     "requirement_assessment_id": str(ra.id),
@@ -11167,6 +11387,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "requirement_parent_urn": req.parent_urn,
                     "requirement_ref_id": req.ref_id,
                     "requirement_name": req.name,
+                    "requirement_description": req.get_description_translated,
                     "assessable": req.assessable,
                     "implementation_groups": ig_list,
                     "result": field("result", ra.result),
@@ -11177,6 +11398,23 @@ class FrameworkViewSet(BaseModelViewSet):
                         "documentation_score", ra.documentation_score
                     ),
                     "is_scored": field("is_scored", ra.is_scored),
+                    # Implementation, documentation and maturity scores as the
+                    # audit counts this requirement (N/A at the target when it
+                    # anchors N/A); combined_scores is the combined view's
+                    # reading, None when the row inherits nothing.
+                    "scores": requirement_scores(audit, ra, visible, inherited=False),
+                    "combined_scores": requirement_scores(
+                        audit, inherited_ra, visible, inherited=True
+                    )
+                    if inherited_ra is not None
+                    else None,
+                    # Part of what the scores mean, so readable with them where
+                    # compliance is readable or hidden from everyone (score-only
+                    # audits); elsewhere it would disclose a hidden verdict.
+                    "not_applicable": ra.result
+                    == RequirementAssessment.Result.NOT_APPLICABLE
+                    if applicability_readable_by_ca[ca.id]
+                    else None,
                     "compliance_assessment_id": str(ca.id),
                     "compliance_assessment_name": ca.name,
                     "folder_id": str(ca.folder_id) if ca.folder_id else None,
@@ -11188,19 +11426,52 @@ class FrameworkViewSet(BaseModelViewSet):
                     "indirect_evidences_count": len(
                         indirect_evidence_ids - direct_evidence_ids
                     ),
-                    # Inheritance overlay for this (audit, requirement); None when
-                    # no ancestor audit covers it or the feature is off.
-                    "inheritance": redact_overlay(
-                        overlays_by_ca.get(ca.id, {}).get(str(req.id)),
-                        str(ca.id),
-                        hidden_for_ca,
-                    ),
+                    "inheritance": overlay,
                 }
             )
 
+        def scores_of(ca) -> Dict[str, Any]:
+            """A counted audit's scores (total and per section) and their
+            combined-view reading, None when it inherits nothing."""
+            visible = visible_layers_by_ca[ca.id]
+            in_scope = in_scope_by_ca[ca.id]
+            inherited = inherited_by_ca[ca.id]
+            return {
+                # What the scores are on: the page only averages audits that
+                # share a scale, and never combines several audits' sums.
+                "score_scale": {
+                    "min": ca.min_score,
+                    "max": ca.max_score,
+                    "calculation_method": ca.score_calculation_method,
+                },
+                # Score-only audits hide compliance: the page then leaves out
+                # the compliance distribution and percentage.
+                "result_visible": is_field_visible_to(
+                    ca, "result", ca_viewer_roles[ca.id]
+                ),
+                "documentation_score_visible": ca.show_documentation_score
+                and "documentation_score" in visible,
+                "scores": audit_scores(
+                    ca,
+                    in_scope,
+                    section_of=section_of,
+                    visible=visible,
+                    inherited_ids=frozenset(),
+                ),
+                "combined_scores": audit_scores(
+                    ca,
+                    [inherited.get(ra.id, ra) for ra in in_scope],
+                    section_of=section_of,
+                    visible=visible,
+                    inherited_ids=inherited.keys(),
+                )
+                if inherited
+                else None,
+            }
+
         # Per-CA summary used by the frontend "detected assessments" drawer.
         # Includes every visible CA, counted or not, so users can see what
-        # the live-status filter excluded.
+        # the live-status filter excluded. Only counted CAs carry scores.
         compliance_assessments = [
             {
                 "id": str(ca.id),
@@ -11210,23 +11481,19 @@ class FrameworkViewSet(BaseModelViewSet):
                 "folder_path": folder_path_for(ca.folder),
                 "folder_path_str": " / ".join(folder_path_for(ca.folder)),
                 "is_counted": ca.status in LIVE_STATUSES,
+                **(
+                    scores_of(audits_by_id[ca.id])
+                    if ca.id in audits_by_id
+                    else {
+                        "score_scale": None,
+                        "result_visible": False,
+                        "documentation_score_visible": False,
+                        "scores": None,
+                        "combined_scores": None,
+                    }
+                ),
             }
             for ca in sorted(all_visible_cas, key=lambda c: (c.name or "").lower())
-        ]
-
-        # Non-assessable nodes that act as sections (the immediate parents of
-        # assessable requirements). The frontend uses this to render the
-        # section-then-requirement hierarchy without a second roundtrip.
-        sections = [
-            {
-                "urn": node.urn,
-                "ref_id": node.ref_id,
-                "name": node.name,
-                "parent_urn": node.parent_urn,
-            }
-            for node in RequirementNode.objects.filter(
-                framework=framework, assessable=False
-            ).order_by(F("order_id").asc(nulls_last=True))
         ]
 
         return Response(
@@ -19760,7 +20027,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "assets",
                 "applied_controls",
                 "compliance_assessments",
-                "requirement_assessments",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ),
+                ),
                 "risk_assessments",
                 actor_prefetch("assigned_to"),
                 "findings_assessment",
@@ -20112,6 +20384,20 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             start = timezone.now().date()
         if end is None:
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
+        try:
+            span = datetime.strptime(str(end), "%Y-%m-%d") - datetime.strptime(
+                str(start), "%Y-%m-%d"
+            )
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Use YYYY-MM-DD"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not 0 <= span.days <= MAX_CALENDAR_RANGE_DAYS:
+            return Response(
+                {"error": "calendarRangeTooLarge"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(
             self.task_calendar(
                 task_templates=self.get_queryset().filter(enabled=True),

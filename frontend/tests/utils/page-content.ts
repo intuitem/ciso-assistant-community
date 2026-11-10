@@ -64,6 +64,9 @@ export class PageContent extends BasePage {
 			await this.goto();
 		}
 
+		// The page title is server-rendered, so a visible title no longer implies the add
+		// button is interactive: wait for hydration before clicking it.
+		await this.page.locator('body[data-hydrated="true"]').waitFor();
 		// Default to the first add button if no value is provided
 		// addButtonValue is useful when there is multiple tabs with add buttons
 		if (addButtonValue === undefined) {
