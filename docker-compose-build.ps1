@@ -63,7 +63,7 @@ function Prepare-MetaFile {
 
 function Wait-ForBackend {
     for ($i = 1; $i -le $BackendCheckAttempts; $i++) {
-        & docker compose -f $DockerComposeFile exec -T backend curl --fail --silent http://localhost:8000/api/health/ *> $null
+        & docker compose -f $DockerComposeFile exec -T backend python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/', timeout=5)" *> $null
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Backend is ready!" -ForegroundColor Green
             return
