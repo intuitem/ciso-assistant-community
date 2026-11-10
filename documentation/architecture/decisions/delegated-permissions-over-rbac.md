@@ -1,7 +1,7 @@
 # Restrict token credentials with progressive delegation
 
 - Status: Proposed
-- Date: 2026-11-09
+- Date: 2026-11-10
 - Deciders: @eric-intuitem
 - Related: [mcp-app-access-model](mcp-app-access-model.md) (how MCP is served and plugs into this model), [service-accounts-composition](service-accounts-composition.md), [global-user-creator-role](global-user-creator-role.md)
 
@@ -183,7 +183,7 @@ Presets are named default selections: **All data** (level 0), **Read**, **Read a
 
 **The profile cap.** For an app connection, the connection profile caps every rule: **effective(d) = RBAC(d) ∩ rule(d) ∩ profile**, where rule(d) is the nearest override or the default consented to. The default is not a maximum: an override is intersected with RBAC and the profile, never with the default. An override can only be set within the preset in force at that time. Tightening a shared profile applies to every connection using it at once. Widening or restoring it may give back rights an owner explicitly chose and a tightening had suspended, but never anything the owner has not chosen; rights beyond the owner's choices need a consent renewal or an edit by the delegator.
 
-**From step 1a, changes take effect on the next backend request:** the backend resolves the current grant and profile on each request; it does not capture permissions when an OAuth token is issued. MCP v1 is an exception: the backend does not enforce delegations yet. The MCP server does, and its cache of each token's grant can delay a change by about a minute. Revoking a connection remains immediate, because the backend checks the token itself on every call.
+**Changes take effect on the next backend request:** the backend resolves the current grant and profile on each request; it does not capture permissions when an OAuth token is issued. This already holds in MCP v1, where the backend enforces the profile. The MCP server's cache of each token's grant, about a minute, only delays which tools it shows.
 
 Existing PATs, service accounts and administrator-registered app connections migrate with `unfiltered: true`. This follows the pattern used when SSO email trust was introduced. New PATs default to a preset in the UI; the API exception is stated in the Decision. Credential expiry remains unchanged: PAT expiry, service account `expiry_date`, and OAuth access-token lifetime.
 
@@ -217,7 +217,7 @@ Delegated credentials depend on their delegator at every request. Reduced RBAC r
 
 ### Enforcement
 
-This machinery arrives with step 1a. MCP v1 uses only the `IsGlobalAdmin` refusal: the operation inventory gates MCP tokens (see MCP v1).
+This machinery arrives with step 1a. MCP v1 uses only the `IsGlobalAdmin` refusal, a check of the profile by HTTP method, and a marker of the app for the audit trail: the operation inventory gates MCP tokens (see MCP v1).
 
 - **Credential context.** A value in `core/context.py`, next to `focus_folder_id_var`, describing the authenticated credential: its kind and, when it has one, its delegation, resolved into one set of allowed folders per operation by walking the folder tree once (Knox for PATs, `OIDCServiceAccountAuthentication` for OAuth tokens and service accounts). Correctness comes first: the delegation is resolved on every request, and caching is added only if measurements require it, with version-based invalidation covering every input (the grant, the profile, the overrides and the folder tree). The delegator's RBAC is computed on every request in any case.
 - **Fail closed.** A delegated credential (an MCP token, any credential with a delegation) is accepted only in the same step that sets its context. If the context cannot be built, the credential is refused.
@@ -233,9 +233,10 @@ This machinery arrives with step 1a. MCP v1 uses only the `IsGlobalAdmin` refusa
 
 MCP is the first consumer of this model. How it is served (the secretless `ca_mcp` sidecar, the operation inventory, the MCP resource boundary and the proxy isolation) is decided in [mcp-app-access-model](mcp-app-access-model.md). From this ADR's point of view, v1:
 
-- **Offers levels 0 and 1,** through four built-in profiles that cannot be changed: Read only, Read and create, Read and update, and Read, create and update, where update includes delete. The MCP server enforces the chosen profile; it cannot know which domain a call will touch, so overrides (level 2) arrive with step 1a, when the backend enforces delegations. The presets above, with a separate Delete, and the consented selection stored on the grant arrive with step 1a too.
-- **Applies the backstop in the backend.** Every MCP token is treated as a level-0 delegation: control-plane and non-delegable operations are refused, because the inventory lists none of them and the backend refuses every unlisted operation to MCP tokens; `IsGlobalAdmin` refuses them too. When an inventoried operation can also write to the control plane, such as creating a representative's user account, that part is refused. The credential context, the central check and the worker-model guard arrive with step 1a, when the backend applies the grant's own delegation.
-- **Accepts MCP tokens only for inventoried operations,** as decided in [mcp-app-access-model](mcp-app-access-model.md). The backend keeps a single port and does not tell the MCP server's calls from an app's own, so the profile holds only for calls made through the MCP server until step 1a.
+- **Offers levels 0 and 1,** through four built-in profiles that cannot be changed: Read only, Read and create, Read and update, and Read, create and update, where update includes delete. The backend enforces the chosen profile by HTTP method, on every call that carries an MCP token. Overrides (level 2) arrive with step 1a, with the central check. The presets above, with a separate Delete, and the consented selection stored on the grant arrive with step 1a too.
+- **Lets the organization keep apps read-only.** Write profiles are offered only once an administrator turns on the `mcp_write` flag. Until then the backend refuses every write method to MCP tokens.
+- **Applies the backstop in the backend.** Every MCP token is treated as at most a level-0 delegation: control-plane and non-delegable operations are refused, because the inventory lists none of them and the backend refuses every unlisted operation to MCP tokens; `IsGlobalAdmin` refuses them too. When an inventoried operation can also write to the control plane, such as creating a representative's user account, that part is refused. The credential context, the central check and the worker-model guard arrive with step 1a, when the backend applies domain overrides. Until then the backend keeps only the app's identity for the audit trail, set at authentication and cleared when each request begins.
+- **Accepts MCP tokens only for inventoried operations,** as decided in [mcp-app-access-model](mcp-app-access-model.md). The backend keeps a single port and does not tell the MCP server's calls from an app's own: every check, the profile included, applies to both.
 - **Leaves existing admin-registered OAuth clients unfiltered.**
 
 ### What each step guarantees
@@ -243,10 +244,10 @@ MCP is the first consumer of this model. How it is served (the secretless `ca_mc
 | Guarantee | MCP v1 | Step 1a |
 |---|---|---|
 | Control-plane operations, administrator endpoints and credential management refused to MCP tokens | backend | backend |
-| MCP tokens validated by the backend as the MCP resource server (audience `<url>/mcp`), on inventoried operations only | backend | backend |
-| The connection's profile, then its default selection (levels 0 and 1) | MCP server, trusted; not applied to direct calls | backend |
+| MCP tokens validated by the backend as the MCP resource server (the `mcp` scope, no other resource), on inventoried operations only | backend | backend |
+| The connection's profile, then its default selection (levels 0 and 1) | backend, by HTTP method | backend, in the central check |
 | Domain overrides (level 2) | not offered | backend |
-| A changed or revoked delegation applies to the next request | MCP server, within about a minute | backend |
+| A changed or revoked delegation applies to the next request | backend | backend |
 | Delegated PATs and service accounts | — | backend |
 | Every operation classified, unclassified ones refused to delegated credentials | MCP operations, by the inventory | whole API, by the registry |
 
@@ -255,7 +256,7 @@ MCP is the first consumer of this model. How it is served (the secretless `ca_mc
 | Step | Content | Effect on API clients |
 |---|---|---|
 | **MCP v1** | MCP v1 above, implemented as decided in [mcp-app-access-model](mcp-app-access-model.md), with levels 0 and 1 | Additive |
-| **1a. Delegation** | Delegations on PATs, service accounts and app connections, with the migration setting `unfiltered` on existing ones; defaults and overrides; non-delegable actions refused to every delegated credential; the registry of operations and planes with its fail-closed test, so the classification is complete before any delegated PAT or service account exists, recording each operation's effects and flagging those that span several domains, each with a cross-domain test; presets with a separate Delete, and the consented selection stored on the grant; a control-plane audit category. The backend takes over the enforcement of delegations from the MCP server, with the credential context, the central check and the worker-model guard. Also fixes `FocusModeMiddleware` leaving the previous request's focus in place when the header is invalid | New optional fields |
+| **1a. Delegation** | Delegations on PATs, service accounts and app connections, with the migration setting `unfiltered` on existing ones; defaults and overrides; non-delegable actions refused to every delegated credential; the registry of operations and planes with its fail-closed test, so the classification is complete before any delegated PAT or service account exists, recording each operation's effects and flagging those that span several domains, each with a cross-domain test; presets with a separate Delete, and the consented selection stored on the grant; a control-plane audit category. The central check replaces MCP v1's check by HTTP method, with the credential context and the worker-model guard. Also fixes `FocusModeMiddleware` leaving the previous request's focus in place when the header is invalid | New optional fields |
 | **2. Administrator policies** | Forbid unrestricted credentials, with exemptions for an external management system's account; maximum lifespan; make a delegation the API default; consent policies per app, for apps that identify themselves with CIMD | Opt-in |
 
 Later, in its own ADR: step-up authentication for the control plane (protected actions), PIM-style activation of control-plane roles, deny assignments (for example, a domain no app may reach), and Conditional Access conditions.
@@ -298,14 +299,14 @@ Each invariant is a requirement on the implementation, followed by the tests req
 9. **MCP meets the guarantees of [mcp-app-access-model](mcp-app-access-model.md):** MCP tokens are valid only at the MCP resource, on inventoried operations, and browsers never hand session cookies to the MCP server.
    *Verification:* as listed in that ADR.
 
-10. **A compromised MCP server stays bounded.** The backstop refuses control-plane operations, administrator endpoints and non-delegable actions to MCP tokens, on operations that are all inventoried. A compromise gives the data-plane rights of the users whose tokens pass through it, until those tokens expire: it cannot create users, change emails, mint PATs or alter settings. Revoking a connection takes effect at once.
+10. **A compromised MCP server stays bounded.** The backstop refuses control-plane operations, administrator endpoints and non-delegable actions to MCP tokens, on operations that are all inventoried. A compromise gives what each connection's profile allows, for the users whose tokens pass through it, until those tokens expire: it cannot create users, change emails, mint PATs or alter settings. Revoking a connection takes effect at once.
     *Tests:* covered by invariant 2 and by [mcp-app-access-model](mcp-app-access-model.md).
 11. **New endpoints are classified.** Any endpoint that does not go through the central functions declares its plane. Until step 1a, MCP tokens reach only the inventoried operations, so a new endpoint stays refused to them until it is reviewed and listed.
     *Tests:* the registry test of invariant 2; until step 1a, the inventory tests of [mcp-app-access-model](mcp-app-access-model.md).
 
 ### Remaining risks, accepted as low
 
-- **MCP v1 trusts the MCP server for the connection's profile.** A compromise of the MCP server, or an app presenting its MCP token to the backend directly where the deployment exposes `/api`, gives the full data-plane rights of the user on the inventoried operations, whatever the selection. So can a misclassified tool, limited by tests that catch any read tool calling a write method or a `GET` route marked as writing. Step 1a moves enforcement to the backend (see What each step guarantees). Meanwhile, a shorter access-token lifetime limits how long a compromised MCP server keeps the tokens it saw, and revoking a connection stops an app calling directly.
+- **MCP v1 enforces the profile by HTTP method.** A route whose method does not say what it does would escape the split between create and update: the two known ones are marked by hand, and a test checks every tool's calls against its class. A compromised MCP server gets what each connection's profile allows, until the tokens it saw expire. Step 1a replaces the method check with the central check (see What each step guarantees).
 - **A coarse selection gives more than intended.** Allowing create, for instance, allows creating any kind of data-plane object the delegator can create. Delegations never reach the control plane or credential management, and overrides narrow them where it matters.
 - **MCP v1's classification is the hand-reviewed inventory.** Keeping control-plane operations out of it rests on reviewing each route. Step 1a adds the registry and its fail-closed test for the whole API, before any delegated PAT or service account exists.
 - **Code that writes without checking a permission bypasses delegation,** as it already bypasses RBAC. The same holds for an operation that checks only some of the objects or domains it touches, such as a bulk endpoint checking only the first object, or a move that does not check its destination. The registry of step 1a, which records each operation's effects, reduces it.
