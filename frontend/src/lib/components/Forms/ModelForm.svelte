@@ -138,6 +138,8 @@
 		importFolder?: boolean;
 		customNameDescription?: boolean;
 		customFolder?: boolean;
+		/** Folder types the domain picker offers; overrides the per-model default. */
+		folderContentTypes?: string[];
 		onFolderChange?: (folderId: string) => void;
 		additionalInitialData?: any;
 		schema?: any;
@@ -161,6 +163,7 @@
 		importFolder = false,
 		customNameDescription = false,
 		customFolder = false,
+		folderContentTypes = undefined,
 		onFolderChange = undefined,
 		additionalInitialData = {},
 		schema = modelSchema(model.urlModel),
@@ -477,9 +480,10 @@
 						(['evidences', 'task-templates'].includes(URLModel) && page.data?.user?.is_third_party)}
 					disabled={(URLModel === 'entities' && object?.builtin) ||
 						(URLModel === 'perimeters' && !!initialData?.folder)}
-					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)
-						? ['DO', 'GL', 'EN']
-						: undefined}
+					contentTypes={folderContentTypes ??
+						(['compliance-assessments', 'evidences'].includes(URLModel)
+							? ['DO', 'GL', 'EN']
+							: undefined)}
 					helpText={URLModel === 'campaigns'
 						? m.campaignDomainHelpText()
 						: URLModel === 'custom-fields'
