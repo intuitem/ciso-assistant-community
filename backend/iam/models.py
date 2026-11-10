@@ -66,17 +66,14 @@ ALLOWED_PERMISSION_APPS = (
     "global_settings",
     "portals",
     "automation",
-    "cal",
     "chat",
     "custom_fields",
     "data_wizard",
     "doc_management",
     "integrations",
-    "metrology",
     "notifications",
     "sec_intel",
     "threat_modeling",
-    "enterprise_core",
 )
 
 IGNORED_PERMISSION_MODELS = (
@@ -91,7 +88,6 @@ IGNORED_PERMISSION_MODELS = (
     "serviceaccount",
     # Internal: access is gated through the parent object, never by these permissions
     "answerattachment",
-    "builtinmetricsample",
     "conditionbranch",
     "customfieldchoice",
     "customfieldvalue",
@@ -134,8 +130,6 @@ READ_ONLY_PERMISSION_MODELS = (
 
 # Created only by the system; users still delete their own notifications
 SYSTEM_MANAGED_PERMISSIONS = (
-    "add_clientsettings",
-    "delete_clientsettings",
     "add_notification",
     "add_workflowtoken",
     "delete_workflowtoken",
@@ -144,6 +138,7 @@ SYSTEM_MANAGED_PERMISSIONS = (
 )
 
 ADMINISTRATOR_ONLY_PERMISSIONS = (
+    "change_indexeddocument",
     "add_integrationconfiguration",
     "change_integrationconfiguration",
     "delete_integrationconfiguration",

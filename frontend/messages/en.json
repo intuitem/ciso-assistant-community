@@ -6945,7 +6945,6 @@
 	"syncMapping": "Sync mapping",
 	"threatModelEdge": "Threat model edge",
 	"threatModelNode": "Threat model node",
-	"enterpriseCore": "Enterprise",
 	"threatModelingDescription": "Build attack sequences over a TTP catalog and wire them to risk scenarios",
 	"ttpsDescription": "Adversary tactics and techniques catalogs such as MITRE ATT&CK and ATLAS",
 	"removeNode": "Remove node",

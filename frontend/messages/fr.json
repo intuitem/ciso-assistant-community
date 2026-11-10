@@ -6547,7 +6547,6 @@
 	"syncMapping": "Correspondance de synchronisation",
 	"threatModelEdge": "Lien du modèle de menaces",
 	"threatModelNode": "Étape du modèle de menaces",
-	"enterpriseCore": "Entreprise",
 	"threatModelingDescription": "Construire des séquences d'attaque à partir d'un catalogue de TTP et les relier aux scénarios de risque",
 	"ttpsDescription": "Catalogues de tactiques et techniques adverses tels que MITRE ATT&CK et ATLAS",
 	"removeNode": "Supprimer le nœud",
