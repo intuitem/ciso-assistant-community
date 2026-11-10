@@ -215,6 +215,7 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Risk trajectory](features/risk-trajectory.md)
+* [Scenario selection](features/scenario-selection.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
 * [Workflow builder](features/workflows/README.md)
