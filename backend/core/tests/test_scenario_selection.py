@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pymupdf
 import pytest
+from django.contrib.auth.models import Permission
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from knox.models import AuthToken
@@ -297,17 +298,38 @@ def _hidden_domain():
     )
 
 
-def _reader(domain):
-    reader = User.objects.create_user("reader@scenario-selection-tests.com")
-    group = UserGroup.objects.create(name="selection-readers", folder=domain)
-    group.user_set.add(reader)
+def _member(domain, role):
+    member = User.objects.create_user(f"{role.name}@scenario-selection-tests.com")
+    group = UserGroup.objects.create(name=f"selection-{role.name}", folder=domain)
+    group.user_set.add(member)
     RoleAssignment.objects.create(
         user_group=group,
-        role=Role.objects.get(name=RoleCodename.READER.value),
+        role=role,
         folder=domain,
         is_recursive=True,
     ).perimeter_folders.add(domain)
-    return reader
+    return member
+
+
+def _reader(domain):
+    return _member(domain, Role.objects.get(name=RoleCodename.READER.value))
+
+
+def _assessment_only_viewer(domain):
+    """A custom role can give the assessments and their threats, not the scenarios."""
+    role = Role.objects.create(name="assessment-only", folder=Folder.get_root_folder())
+    role.permissions.set(
+        Permission.objects.filter(
+            codename__in=[
+                "view_folder",
+                "view_perimeter",
+                "view_riskmatrix",
+                "view_riskassessment",
+                "view_threat",
+            ]
+        )
+    )
+    return _member(domain, role)
 
 
 @pytest.mark.django_db
@@ -473,6 +495,42 @@ def test_related_options_never_name_what_the_user_cannot_view(setup, domain):
     r1.assets.remove(visible)
     res = client.get(f"/api/risk-assessments/{ra.id}/scenario-selection/")
     assert res.json()["related_filters"]["assets"]["has_options"] is False
+
+
+@pytest.mark.django_db
+def test_selection_counts_only_scenarios_the_user_can_view(setup, domain):
+    ra = setup["ra"]
+    setup["scenarios"]["R1"].threats.add(
+        Threat.objects.create(name="phishing", folder=domain)
+    )
+    query = "scenario__treatment=mitigate"
+
+    def selection(client):
+        res = client.get(f"/api/risk-assessments/{ra.id}/scenario-selection/?{query}")
+        assert res.status_code == 200, res.content
+        return res.json()
+
+    def listed(client):
+        res = client.get(f"/api/risk-scenarios/?risk_assessment={ra.id}")
+        return res.json()["count"]
+
+    reader = _client(_reader(domain))
+    body = selection(reader)
+    assert (body["count"], body["total"]) == (2, 3)
+    assert body["total"] == listed(reader)
+    assert body["related_filters"]["threats"]["has_options"] is True
+    assert [
+        (o["label"], o["count"]) for o in _options(reader, ra, "threats")["results"]
+    ] == [("phishing", 1)]
+
+    viewer = _client(_assessment_only_viewer(domain))
+    body = selection(viewer)
+    assert listed(viewer) == 0
+    assert (body["count"], body["total"], body["ids"]) == (0, 0, [])
+    assert not any(o["count"] for facet in body["facets"].values() for o in facet)
+    # The threat itself is viewable: it is the scenarios linking it that are not.
+    assert body["related_filters"]["threats"]["has_options"] is False
+    assert _options(viewer, ra, "threats", query)["results"] == []
 
 
 @pytest.mark.django_db

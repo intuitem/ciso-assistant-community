@@ -112,6 +112,8 @@ def selection_filter_class():
 @dataclass
 class ScenarioSelection:
     risk_assessment: RiskAssessment
+    # The scenarios the filters narrow, and what is left of them.
+    base: QuerySet
     scenarios: QuerySet
     # Filter name -> raw values, as applied (stale values already dropped).
     filters: dict[str, list[str]] = field(default_factory=dict)
@@ -217,20 +219,34 @@ def _run_filter(requested, scenarios, request):
     return filterset.qs
 
 
-def resolve_selection(request, risk_assessment: RiskAssessment) -> ScenarioSelection:
-    """The assessment's scenarios narrowed by the request's `scenario__*` params."""
-    scenarios = risk_assessment.risk_scenarios.all()
+def viewable_scenarios(user, risk_assessment: RiskAssessment) -> QuerySet:
+    """The assessment's scenarios `user` may view: the ones the scenario list
+    gives them. The viewable ids stay a subquery."""
+    viewable = RoleAssignment.get_viewable_object_ids(user, RiskScenario)
+    return risk_assessment.risk_scenarios.filter(pk__in=viewable)
+
+
+def resolve_selection(
+    request, risk_assessment: RiskAssessment, base: QuerySet | None = None
+) -> ScenarioSelection:
+    """The assessment's scenarios narrowed by the request's `scenario__*` params.
+
+    `base` limits the scenarios the selection starts from, see
+    `viewable_scenarios`. Counts, facets and related options then stay within it.
+    """
+    base = risk_assessment.risk_scenarios.all() if base is None else base
+    scenarios = base
     params = getattr(request, "query_params", request.GET)
     filters = selection_filter_class()(
         queryset=scenarios, request=request, prefix=PREFIX
     ).filters
     requested = _requested_filters(params, filters)
     if not requested:
-        return ScenarioSelection(risk_assessment, scenarios)
+        return ScenarioSelection(risk_assessment, base, scenarios)
     ignored = _drop_stale_values(requested, filters, request)
     if requested:
         scenarios = _run_filter(requested, scenarios, request)
-    return ScenarioSelection(risk_assessment, scenarios, requested, ignored)
+    return ScenarioSelection(risk_assessment, base, scenarios, requested, ignored)
 
 
 def resolve_link_type(request) -> str:
@@ -294,12 +310,12 @@ def _viewable_objects(user, model) -> QuerySet:
     return objects.filter(pk__in=viewable)
 
 
-def _related_objects(risk_assessment, name, user) -> QuerySet:
+def _related_objects(scenarios, name, user) -> QuerySet:
     """What a related filter can offer: the viewable objects linked to at least
-    one scenario of the assessment. One row per link, until grouped."""
+    one of `scenarios`. One row per link, until grouped."""
     field = RiskScenario._meta.get_field(name)
     return _viewable_objects(user, field.related_model).filter(
-        **{f"{field.related_query_name()}__risk_assessment": risk_assessment}
+        **{f"{field.related_query_name()}__in": scenarios}
     )
 
 
@@ -307,8 +323,9 @@ def _scenarios_without(selection, name, request):
     if name not in selection.filters:
         return selection.scenarios
     requested = {k: v for k, v in selection.filters.items() if k != name}
-    base = selection.risk_assessment.risk_scenarios.all()
-    return _run_filter(requested, base, request) if requested else base
+    return (
+        _run_filter(requested, selection.base, request) if requested else selection.base
+    )
 
 
 def _tolerance_counts(scenarios):
@@ -371,9 +388,7 @@ def selection_related_filters(selection: ScenarioSelection, request) -> dict:
             _viewable_objects(user, model).filter(pk__in=applied) if applied else ()
         )
         related[name] = {
-            "has_options": _related_objects(
-                selection.risk_assessment, name, user
-            ).exists(),
+            "has_options": _related_objects(selection.base, name, user).exists(),
             "selected": [{"value": str(obj.pk), "label": str(obj)} for obj in selected],
         }
     return related
@@ -400,7 +415,7 @@ def related_filter_options(
         )
     link = RiskScenario._meta.get_field(name).related_query_name()
     search_fields, sort_key = _RELATED_LOOKUPS[name]
-    options = _related_objects(selection.risk_assessment, name, request.user)
+    options = _related_objects(selection.base, name, request.user)
     # Every word has to match, in any of the fields: "ada lovelace" finds a
     # first and a last name.
     for term in search.split():
@@ -408,7 +423,7 @@ def related_filter_options(
         for search_field in search_fields:
             matches |= Q(**{f"{search_field}__icontains": term})
         options = options.filter(matches)
-    # Counts the links `_related_objects` joined, so this assessment's only.
+    # Counts the links `_related_objects` joined, so to its scenarios only.
     # Without other filters every one of them counts.
     others = {k: v for k, v in selection.filters.items() if k != name}
     kept = (

@@ -257,6 +257,7 @@ from core.scenario_selection import (
     selection_facets,
     selection_related_filters,
     selection_report_context,
+    viewable_scenarios,
 )
 
 DEPENDENCY_GRAPH_LIMIT = 300
@@ -5348,8 +5349,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     def scenario_selection(self, request, pk):
         """Resolve the `scenario__*` params into the selected scenarios.
 
-        Returns the selected ids and counts and the values dropped because their
-        object no longer exists. `facets` holds the filters with a fixed set of
+        Only the scenarios the user can view are selected and counted, as in
+        the scenario list. Returns the selected ids and counts and the values
+        dropped because their object no longer exists. `facets` holds the filters with a fixed set of
         values (tolerance, treatment, levels): how many scenarios each value
         would keep given the other active filters. `related_filters` holds the
         filters on related objects (owner, threats, assets, qualifications,
@@ -5357,11 +5359,15 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         values applied. Their options are paged, see `scenario-selection/options/`.
         """
         risk_assessment = self.get_object()
-        selection = resolve_selection(request, risk_assessment)
+        selection = resolve_selection(
+            request,
+            risk_assessment,
+            viewable_scenarios(request.user, risk_assessment),
+        )
         return Response(
             {
                 "count": selection.scenarios.count(),
-                "total": risk_assessment.risk_scenarios.count(),
+                "total": selection.base.count(),
                 "ids": [
                     str(pk) for pk in selection.scenarios.values_list("id", flat=True)
                 ],
@@ -5385,9 +5391,10 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """One page of the values a related selection filter offers.
 
         `filter` names the filter: owner, threats, assets, qualifications or
-        filtering_labels. Only objects linked to a scenario of this assessment
-        and viewable by the user are listed. Each comes with the number of
-        scenarios it would keep given the other `scenario__*` params. Applied
+        filtering_labels. Only objects viewable by the user and linked to a
+        scenario of this assessment they can view are listed. Each comes with
+        the number of such scenarios it would keep given the other
+        `scenario__*` params. Applied
         values come first, then the values keeping the most scenarios.
 
         `q` narrows the options by label (`search` already searches the risk
@@ -5395,7 +5402,11 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         `offset` page through them.
         """
         risk_assessment = self.get_object()
-        selection = resolve_selection(request, risk_assessment)
+        selection = resolve_selection(
+            request,
+            risk_assessment,
+            viewable_scenarios(request.user, risk_assessment),
+        )
         options = related_filter_options(
             selection,
             request.query_params.get("filter", ""),
