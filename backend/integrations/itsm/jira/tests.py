@@ -917,7 +917,7 @@ def test_columns_fetched_by_issue_type_id(mock_jira, configuration):
     assert {c["name"] for c in columns} == {"summary", "status"}
     kwargs = mock_jira.return_value.createmeta.call_args.kwargs
     assert kwargs["issuetypeIds"] == ["10001"]
-    assert "issuetypeNames" not in kwargs
+    assert kwargs.get("issuetypeNames") is None
 
 
 @patch("integrations.itsm.jira.client.JIRA")
@@ -979,16 +979,70 @@ def test_legacy_issue_type_setting_creates_by_id(mock_jira, configuration):
     assert fields["issuetype"] == {"id": "10001"}
 
 
+# A legacy name matching none of the project's (translated) issue types, such
+# as the "Task" default for a French API user, is referenced by name: Jira's
+# create API, JQL and createmeta ``issuetypeNames`` take the untranslated name.
+
+
 @patch("integrations.itsm.jira.client.JIRA")
-def test_unknown_legacy_issue_type_raises(mock_jira, configuration):
+def test_unmatched_legacy_issue_type_creates_by_name(mock_jira, configuration):
+    configuration.settings = {"project_key": "PROJ", "issue_type": "Task"}
     mock_jira.return_value.project.return_value = SimpleNamespace(
         issueTypes=[SimpleNamespace(id="10001", name="Tâche")]
     )
+    mock_jira.return_value.create_issue.return_value = MagicMock(key="PROJ-1")
 
     client = JiraClient(configuration)
+    client.create_remote_object(AppliedControl(folder_id=None, name="Control"))
+    client.create_remote_object(AppliedControl(folder_id=None, name="Other"))
 
-    with pytest.raises(ValueError, match="not found"):
-        client.get_table_columns("KAN:Task")
+    fields = mock_jira.return_value.create_issue.call_args.kwargs["fields"]
+    assert fields["issuetype"] == {"name": "Task"}
+    mock_jira.return_value.project.assert_called_once_with("PROJ")
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_unmatched_legacy_issue_type_lists_by_quoted_name(mock_jira, configuration):
+    client = JiraClient(configuration)
+
+    jql, _ = client._build_list_jql("PROJ", 'Ta"sk')
+
+    assert jql == 'project = PROJ AND issuetype = "Ta\\"sk"'
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_unmatched_legacy_issue_type_columns_filter_by_name(mock_jira, configuration):
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[SimpleNamespace(id="10001", name="Tâche")]
+    )
+    # Jira matches the untranslated name but lists the type translated.
+    mock_jira.return_value.createmeta.return_value = {
+        "projects": [
+            {
+                "issuetypes": [
+                    {
+                        "id": "10001",
+                        "name": "Tâche",
+                        "fields": {
+                            "summary": {
+                                "name": "Summary",
+                                "schema": {"type": "string"},
+                                "operations": ["set"],
+                            }
+                        },
+                    }
+                ]
+            }
+        ]
+    }
+
+    client = JiraClient(configuration)
+    columns = client.get_table_columns("KAN:Task")
+
+    assert "summary" in {c["name"] for c in columns}
+    kwargs = mock_jira.return_value.createmeta.call_args.kwargs
+    assert kwargs["issuetypeNames"] == ["Task"]
+    assert kwargs["issuetypeIds"] is None
 
 
 @patch("integrations.itsm.jira.client.JIRA")
@@ -1040,15 +1094,14 @@ def test_resolve_table_name_keeps_id_and_unpinned_tables(mock_jira, configuratio
 
 
 @patch("integrations.itsm.jira.client.JIRA")
-def test_resolve_table_name_raises_on_unknown_issue_type(mock_jira, configuration):
+def test_resolve_table_name_keeps_unmatched_name(mock_jira, configuration):
     mock_jira.return_value.project.return_value = SimpleNamespace(
         issueTypes=[SimpleNamespace(id="10002", name="Tâche")]
     )
 
     client = JiraClient(configuration)
 
-    with pytest.raises(ValueError, match="not found"):
-        client.resolve_table_name("KAN:Bug")
+    assert client.resolve_table_name("KAN:Task") == "KAN:Task"
 
 
 @patch("integrations.itsm.jira.client.JIRA")
