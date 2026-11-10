@@ -8,6 +8,7 @@ import json
 import mimetypes
 import re
 from django_filters.filterset import filterset_factory
+from django_filters.constants import EMPTY_VALUES
 from django_filters.utils import try_dbfield
 from django import forms
 from django_filters.widgets import QueryArrayWidget
@@ -199,8 +200,13 @@ from core.models import (
     rescale_score,
 )
 from core.pagination import CustomLimitOffsetPagination
-from core.serializers import ComplianceAssessmentReadSerializer
+from core.serializers import (
+    USER_FULL_VIEW_FIELDS,
+    ComplianceAssessmentReadSerializer,
+    full_user_view_folder_ids,
+)
 from core.utils import (
+    duration_day_unit,
     build_answers_dict,
     escape_excel_formula,
     sanitize_xlsx_value,
@@ -226,7 +232,7 @@ from ebios_rm.models import (
     Stakeholder,
 )
 
-from tprm.models import Entity, SolutionSubcontractor
+from tprm.models import Entity, Representative, SolutionSubcontractor
 from privacy.models import Processing, DataBreach
 from resilience.models import AssetAssessment, DoraIncidentReport
 
@@ -295,6 +301,7 @@ LONG_CACHE_TTL = 60  # mn
 # RowsPerPage options and EntityPickerModal PAGE_SIZE_OPTIONS) so a full-page
 # selection always fits in a single request.
 BATCH_SIZE_LIMIT = 100
+MAX_CALENDAR_RANGE_DAYS = 366
 
 
 MAPPING_MAX_DEPTH = 3
@@ -3066,15 +3073,18 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         def format_seconds(s: int) -> str:
             if not isinstance(s, int) or s < 0:
                 return "0s"
-            h, r = divmod(s, 3600)
+            d, r = divmod(s, 86400)
+            h, r = divmod(r, 3600)
             m, s_rem = divmod(r, 60)
             parts = []
+            if d > 0:
+                parts.append(f"{d}{duration_day_unit()}")
             if h > 0:
                 parts.append(f"{h}h")
             if m > 0:
-                parts.append(f"{m:02d}m")
+                parts.append(f"{m:02d}m" if parts else f"{m}m")
             if s_rem > 0 or not parts:
-                parts.append(f"{s_rem:02d}s")
+                parts.append(f"{s_rem:02d}s" if parts else f"{s_rem}s")
             return "".join(parts)
 
         return [
@@ -4659,7 +4669,10 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         if instance.ebios_rm_study:
             # Unlink all previous risk assessments from this EBIOS RM study
             RiskAssessment.objects.filter(
-                ebios_rm_study=instance.ebios_rm_study
+                ebios_rm_study=instance.ebios_rm_study,
+                id__in=RoleAssignment.get_changeable_object_ids(
+                    self.request.user, RiskAssessment
+                ),
             ).exclude(id=instance.id).update(ebios_rm_study=None)
 
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
@@ -7812,7 +7825,9 @@ class UserRolesOnFolderList(generics.ListAPIView):
         filters.SearchFilter,
         SmartOrderingFilter,
     ]
-    ordering_fields = "__all__"
+    # The serialized fields only: sorting on a full-view field (`is_superuser`,
+    # `keep_local_login`...) would give its values away.
+    ordering_fields = ["email", "first_name", "last_name", "is_active"]
     ordering = ["email"]
 
     _user_roles_map = None  # cached variable
@@ -8776,6 +8791,31 @@ class UserFilter(GenericFilterSet):
     )
     # Add-only member pickers: drop users already in the given group.
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
+    # Who belongs to a group is not for who can't read the group: such a group
+    # matches no user.
+    user_groups = df.ModelMultipleChoiceFilter(
+        queryset=UserGroup.objects.all(), method="filter_readable_groups"
+    )
+    idp_groups = df.ModelMultipleChoiceFilter(
+        queryset=IdPGroup.objects.all(), method="filter_readable_groups"
+    )
+
+    def filter_queryset(self, queryset):
+        # Full-view fields are only serialized to who has the full view (see
+        # USER_FULL_VIEW_FIELDS); matching on them for anyone else would give the
+        # values away, so while any of their lookups is set, other rows never match.
+        if any(
+            self.form.cleaned_data.get(name) not in EMPTY_VALUES
+            for name, f in self.filters.items()
+            if f.field_name in USER_FULL_VIEW_FIELDS
+        ):
+            if self.request is None:
+                return queryset.none()
+            queryset = queryset.filter(
+                Q(folder_id__in=full_user_view_folder_ids(self.request))
+                | Q(pk=self.request.user.pk)
+            )
+        return super().filter_queryset(queryset)
 
     def filter_exclude_user_groups(self, queryset, name, value):
         # Only honour the exclusion for a group the caller can actually read, so
@@ -8787,6 +8827,19 @@ class UserFilter(GenericFilterSet):
         ):
             return queryset.exclude(user_groups__id=value)
         return queryset
+
+    def filter_readable_groups(self, queryset, name, value):
+        if not value:
+            return queryset
+        readable = [
+            group
+            for group in value
+            if self.request
+            and RoleAssignment.is_object_readable(
+                self.request.user, type(group), group.id
+            )
+        ]
+        return queryset.filter(**{f"{name}__in": readable}).distinct()
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -9155,10 +9208,69 @@ class UserViewSet(BaseModelViewSet):
     """
 
     model = User
-    ordering = ["-is_active", "-is_superuser", "email", "id"]
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
     autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
+
+    # Sorting on a full-view field (or listing superusers first) gives its values
+    # away, so it is only offered to whoever has the full view of every listed user.
+    BASE_VIEW_ORDERING_FIELDS = [
+        "id",
+        "created_at",
+        "updated_at",
+        "folder",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "is_third_party",
+        "date_joined",
+    ]
+
+    def filter_queryset(self, queryset):
+        # Checked against the rows about to be listed. Single-object actions don't
+        # sort and pickers don't need superusers first, so both skip the query and
+        # get the base-view ordering.
+        if not self.detail and self.action != "autocomplete":
+            self._full_view_of_every_row = self._has_full_view_of(queryset)
+        return super().filter_queryset(queryset)
+
+    def _has_full_view_of(self, queryset) -> bool:
+        """Whether the requester has the full view of every user in `queryset`."""
+        return (
+            not queryset.exclude(folder_id__in=full_user_view_folder_ids(self.request))
+            .exclude(pk=self.request.user.pk)
+            .exists()
+        )
+
+    def _has_full_view_of_every_row(self) -> bool:
+        if getattr(self, "request", None) is None:
+            # Schema generation introspects the ordering without a request.
+            return True
+        return getattr(self, "_full_view_of_every_row", False)
+
+    @property
+    def ordering(self):
+        if self._has_full_view_of_every_row():
+            return ["-is_active", "-is_superuser", "email", "id"]
+        return ["-is_active", "email", "id"]
+
+    @property
+    def ordering_fields(self):
+        if self._has_full_view_of_every_row():
+            return "__all__"
+        return self.BASE_VIEW_ORDERING_FIELDS
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        # The base action builds the serializer without context; the full-view
+        # fields need the request to decide what this requester may see.
+        serializer_class = self.get_serializer_class(action="update")
+        return Response(
+            serializer_class(
+                self.get_object(), context=self.get_serializer_context()
+            ).data
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get language choices")
@@ -9204,13 +9316,38 @@ class UserViewSet(BaseModelViewSet):
             )
         return Response(sorted(rows, key=lambda r: r["str"].lower()))
 
+    def _third_party_visibility(self) -> Q:
+        """Third-party users are created in Global, where the baseline role lets
+        every member view users, but what makes one relevant is the entity it
+        represents. So it shows only to those who can view one of its
+        `Representative` rows, or who have the full view of users where it sits
+        (`view_user_full` or `change_user`, see the full-view-permissions ADR), and
+        to itself. Internal users are unaffected.
+
+        This scopes the users endpoint only. Their names on objects the requester
+        can read still render: `_filter_related_fields` checks User viewability
+        on its own, not through this queryset."""
+        user = self.request.user
+        representative_user_ids = Representative.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, Representative),
+            user__isnull=False,
+        ).values("user_id")
+        return (
+            Q(is_third_party=False)
+            | Q(pk=user.pk)
+            | Q(pk__in=representative_user_ids)
+            | Q(folder_id__in=full_user_view_folder_ids(self.request))
+        )
+
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
         # Service account users are managed via /api/iam/service-accounts/.
         queryset = (
-            super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
-        ).exclude(service_account__isnull=False)
+            (super().get_queryset() | User.objects.filter(pk=self.request.user.pk))
+            .exclude(service_account__isnull=False)
+            .filter(self._third_party_visibility())
+        )
 
         # The autocomplete path serializes only id/name/email — skip the
         # user_groups prefetch so it stays lightweight at scale.
@@ -20020,7 +20157,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "assets",
                 "applied_controls",
                 "compliance_assessments",
-                "requirement_assessments",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ),
+                ),
                 "risk_assessments",
                 actor_prefetch("assigned_to"),
                 "findings_assessment",
@@ -20372,6 +20514,20 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             start = timezone.now().date()
         if end is None:
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
+        try:
+            span = datetime.strptime(str(end), "%Y-%m-%d") - datetime.strptime(
+                str(start), "%Y-%m-%d"
+            )
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Use YYYY-MM-DD"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not 0 <= span.days <= MAX_CALENDAR_RANGE_DAYS:
+            return Response(
+                {"error": "calendarRangeTooLarge"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(
             self.task_calendar(
                 task_templates=self.get_queryset().filter(enabled=True),

@@ -57,6 +57,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 
+from core.utils import duration_day_unit
 from core.utils import format_currency as _fmt_currency
 from core.utils import get_global_currency
 from core.quick_form_scoring import (
@@ -5850,18 +5851,21 @@ class Asset(
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
         def format_seconds(seconds: int) -> str:
-            hours, remainder = divmod(seconds, 3600)
+            days, remainder = divmod(seconds, 86400)
+            hours, remainder = divmod(remainder, 3600)
             minutes, secs = divmod(remainder, 60)
 
             parts = []
+            if days > 0:
+                parts.append(f"{days}{duration_day_unit()}")
             if hours > 0:
                 parts.append(f"{hours}h")
             if minutes > 0:
-                parts.append(f"{minutes:02d}m")
+                parts.append(f"{minutes:02d}m" if parts else f"{minutes}m")
             if secs > 0 or (
                 not parts
             ):  # Always show seconds if no other parts, or if > 0
-                parts.append(f"{secs:02d}s")
+                parts.append(f"{secs:02d}s" if parts else f"{secs}s")
 
             return "".join(parts)
 
@@ -5903,18 +5907,21 @@ class Asset(
 
     def get_recovery_capabilities_display(self) -> list[dict[str, str]]:
         def format_seconds(seconds: int) -> str:
-            hours, remainder = divmod(seconds, 3600)
+            days, remainder = divmod(seconds, 86400)
+            hours, remainder = divmod(remainder, 3600)
             minutes, secs = divmod(remainder, 60)
 
             parts = []
+            if days > 0:
+                parts.append(f"{days}{duration_day_unit()}")
             if hours > 0:
                 parts.append(f"{hours}h")
             if minutes > 0:
-                parts.append(f"{minutes:02d}m")
+                parts.append(f"{minutes:02d}m" if parts else f"{minutes}m")
             if secs > 0 or (
                 not parts
             ):  # Always show seconds if no other parts, or if > 0
-                parts.append(f"{secs:02d}s")
+                parts.append(f"{secs:02d}s" if parts else f"{secs}s")
 
             return "".join(parts)
 

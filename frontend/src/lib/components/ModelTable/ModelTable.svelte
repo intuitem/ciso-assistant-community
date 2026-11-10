@@ -1112,6 +1112,13 @@
 	});
 
 	let tableWrapEl: HTMLElement | undefined = $state();
+
+	const refPrefix = (key: string, val: { ref_id?: string; str?: string }) => {
+		const name = val.str ?? '';
+		const named =
+			!!val.ref_id && name.startsWith(val.ref_id) && !/[\w-]/.test(name.charAt(val.ref_id.length));
+		return key === 'applied_controls' && val.ref_id && !named ? `${val.ref_id} - ` : '';
+	};
 </script>
 
 <div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
@@ -1368,10 +1375,10 @@
 																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{safeTranslate(val.str)}</Anchor
+																					>{refPrefix(key, val)}{safeTranslate(val.str)}</Anchor
 																				>
 																			{:else}
-																				{safeTranslate(val.str)}
+																				{refPrefix(key, val)}{safeTranslate(val.str)}
 																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
@@ -1545,15 +1552,13 @@
 														{value.name}
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{@const displayValue = [
-															'name',
-															'description',
-															'observation',
-															'ref_id',
-															'key'
-														].includes(key)
-															? (value ?? '-')
-															: safeTranslate(value ?? '-')}
+														{@const displayValue =
+															['name', 'description', 'observation', 'ref_id', 'key'].includes(
+																key
+															) ||
+															(key.startsWith('cf__') && typeof value === 'string')
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
 
 														{#if displayValue?.length > 300}
 															{displayValue.slice(0, 300)}...
