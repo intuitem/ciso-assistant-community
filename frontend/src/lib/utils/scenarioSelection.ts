@@ -26,6 +26,22 @@ export const SELECTION_FILTERS = [
 ] as const;
 export type SelectionFilter = (typeof SELECTION_FILTERS)[number];
 
+// Filters on related objects. An assessment can link thousands of them, so
+// their options are fetched one page at a time, when the filter is opened.
+export const RELATED_FILTERS = [
+	'owner',
+	'threats',
+	'assets',
+	'qualifications',
+	'filtering_labels'
+] as const satisfies readonly SelectionFilter[];
+export type RelatedFilter = (typeof RELATED_FILTERS)[number];
+export type FixedFilter = Exclude<SelectionFilter, RelatedFilter>;
+
+export function isRelatedFilter(name: string): name is RelatedFilter {
+	return (RELATED_FILTERS as readonly string[]).includes(name);
+}
+
 export type SelectionValues = Partial<Record<SelectionFilter, string[]>>;
 
 /** `page.url.searchParams` is read-only; these helpers only read. */
@@ -47,7 +63,18 @@ export interface ScenarioSelectionData {
 	risk_tolerance: number;
 	/** Risk matrix level names, translated, indexed by level value. */
 	levels: string[];
-	facets: Record<SelectionFilter, FacetOption[]>;
+	/** Filters with a fixed set of values: every value, with its count. */
+	facets: Record<FixedFilter, FacetOption[]>;
+	related_filters: Record<
+		RelatedFilter,
+		{ has_options: boolean; selected: { value: string; label: string }[] }
+	>;
+}
+
+/** `GET /risk-assessments/<id>/scenario-selection/options/` */
+export interface RelatedOptionsPage {
+	count: number;
+	results: Required<FacetOption>[];
 }
 
 /** The selection part of a query string, prefix kept. */

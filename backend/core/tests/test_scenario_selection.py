@@ -6,11 +6,20 @@ from uuid import uuid4
 
 import pymupdf
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from knox.models import AuthToken
 from openpyxl import load_workbook
 from rest_framework.test import APIClient
 
-from core.models import AppliedControl, RiskAssessment, RiskMatrix, RiskScenario, Threat
+from core.models import (
+    AppliedControl,
+    Asset,
+    RiskAssessment,
+    RiskMatrix,
+    RiskScenario,
+    Threat,
+)
 from core.startup import startup
 from iam.models import Folder, Role, RoleAssignment, RoleCodename, User, UserGroup
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
@@ -257,16 +266,35 @@ def test_no_tolerance_means_no_tolerance_facet(admin_client, setup):
     assert body["facets"]["within_tolerance"] == []
 
 
-@pytest.mark.django_db
-def test_selection_never_reveals_controls_the_user_cannot_view(setup, domain):
-    other = Folder.objects.create(
+def _options(client, ra, name, query=""):
+    res = client.get(
+        f"/api/risk-assessments/{ra.id}/scenario-selection/options/"
+        f"?filter={name}&{query}"
+    )
+    assert res.status_code == 200, res.content
+    return res.json()
+
+
+def _threats(setup, links):
+    """Create one threat per name, linked to the scenarios listed for it."""
+    threats = {}
+    for name, ref_ids in links.items():
+        threat = Threat.objects.create(name=name, folder=Folder.get_root_folder())
+        for ref_id in ref_ids:
+            setup["scenarios"][ref_id].threats.add(threat)
+        threats[name] = threat
+    return threats
+
+
+def _hidden_domain():
+    return Folder.objects.create(
         parent_folder=Folder.get_root_folder(),
         name="hidden domain",
         content_type=Folder.ContentType.DOMAIN,
     )
-    hidden = _control(other, "hidden control")
-    setup["scenarios"]["R1"].applied_controls.add(hidden)
 
+
+def _reader(domain):
     reader = User.objects.create_user("reader@scenario-selection-tests.com")
     group = UserGroup.objects.create(name="selection-readers", folder=domain)
     group.user_set.add(reader)
@@ -276,8 +304,180 @@ def test_selection_never_reveals_controls_the_user_cannot_view(setup, domain):
         folder=domain,
         is_recursive=True,
     ).perimeter_folders.add(domain)
+    return reader
 
-    rows = _plan(_client(reader), setup["ra"], "scenario__within_tolerance=NO")
+
+@pytest.mark.django_db
+def test_selection_carries_related_labels_not_related_options(admin_client, setup):
+    ra = setup["ra"]
+    threats = _threats(setup, {"Ransomware": ["R1"], "Phishing": ["R2"]})
+
+    res = admin_client.get(
+        f"/api/risk-assessments/{ra.id}/scenario-selection/"
+        f"?scenario__threats={threats['Ransomware'].id}"
+    )
+    body = res.json()
+
+    assert set(body["facets"]) == {
+        "within_tolerance",
+        "treatment",
+        "current_level",
+        "residual_level",
+    }
+    assert body["related_filters"]["threats"] == {
+        "has_options": True,
+        "selected": [{"value": str(threats["Ransomware"].id), "label": "Ransomware"}],
+    }
+    assert body["related_filters"]["assets"] == {"has_options": False, "selected": []}
+
+
+@pytest.mark.django_db
+def test_related_options_are_paged_in_a_stable_order(admin_client, setup):
+    ra = setup["ra"]
+    threats = _threats(
+        setup,
+        {
+            "delta": ["R1"],
+            "Bravo": ["R2"],
+            "alpha": ["R1", "R2", "R3"],
+            "Charlie": ["R3"],
+            "echo": ["R1", "R2"],
+        },
+    )
+    elsewhere = Threat.objects.create(name="elsewhere", folder=Folder.get_root_folder())
+    other_ra = RiskAssessment.objects.create(
+        name="other ra", folder=ra.folder, risk_matrix=ra.risk_matrix
+    )
+    _scenario(other_ra, "X1", HIGH).threats.add(elsewhere, threats["delta"])
+
+    first = _options(admin_client, ra, "threats", "limit=2")
+    rest = _options(admin_client, ra, "threats", "limit=10&offset=2")
+
+    # Most scenarios first, then by label whatever its case. Links to other
+    # assessments neither add options nor count.
+    assert first["count"] == rest["count"] == 5
+    assert first["next"] is not None and rest["next"] is None
+    assert [(o["label"], o["count"]) for o in first["results"] + rest["results"]] == [
+        ("alpha", 3),
+        ("echo", 2),
+        ("Bravo", 1),
+        ("Charlie", 1),
+        ("delta", 1),
+    ]
+    assert first["results"][0]["value"] == str(threats["alpha"].id)
+
+
+@pytest.mark.django_db
+def test_related_option_counts_follow_the_other_filters(admin_client, setup):
+    ra = setup["ra"]
+    threats = _threats(
+        setup, {"Ransomware": ["R1", "R3"], "Phishing": ["R1", "R2"], "Flood": ["R3"]}
+    )
+
+    body = _options(
+        admin_client,
+        ra,
+        "threats",
+        f"scenario__within_tolerance=NO&scenario__threats={threats['Flood'].id}",
+    )
+
+    # Counted against within_tolerance=NO only (R1, R2): the filter's own values
+    # do not narrow its options, they only come first.
+    assert [(o["label"], o["count"]) for o in body["results"]] == [
+        ("Flood", 0),
+        ("Phishing", 2),
+        ("Ransomware", 1),
+    ]
+
+
+@pytest.mark.django_db
+def test_related_options_search_their_label(admin_client, setup):
+    ra = setup["ra"]
+    _threats(setup, {"Ransomware": ["R1"], "Phishing": ["R2"]})
+    ada = User.objects.create_user(
+        "ada@scenario-selection-tests.com", first_name="Ada", last_name="Lovelace"
+    )
+    alan = User.objects.create_user("alan@scenario-selection-tests.com")
+    setup["scenarios"]["R1"].owner.add(ada.actor, alan.actor)
+
+    def labels(name, q):
+        return [
+            o["label"] for o in _options(admin_client, ra, name, f"q={q}")["results"]
+        ]
+
+    # The risk assessment itself is searched with `search`, not `q`.
+    assert labels("threats", "RANSOM") == ["Ransomware"]
+    assert labels("threats", "nothing") == []
+    assert labels("owner", "ada love") == ["Ada Lovelace"]
+    assert labels("owner", "alan@") == ["alan@scenario-selection-tests.com"]
+
+
+@pytest.mark.django_db
+def test_related_options_cost_the_same_whatever_their_number(admin_client, setup):
+    ra = setup["ra"]
+
+    def queries():
+        with CaptureQueriesContext(connection) as captured:
+            _options(admin_client, ra, "owner")
+        return len(captured)
+
+    def add_owners(count, start):
+        for i in range(start, start + count):
+            user = User.objects.create_user(f"owner{i}@scenario-selection-tests.com")
+            setup["scenarios"]["R1"].owner.add(user.actor)
+
+    queries()  # the first request also fills the per-process caches
+    add_owners(2, 0)
+    few = queries()
+    add_owners(10, 2)
+
+    assert queries() == few
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("name", ["", "treatment", "applied_controls"])
+def test_related_options_reject_other_filters(admin_client, setup, name):
+    res = admin_client.get(
+        f"/api/risk-assessments/{setup['ra'].id}/scenario-selection/options/"
+        f"?filter={name}"
+    )
+    assert res.status_code == 400, res.content
+
+
+@pytest.mark.django_db
+def test_related_options_never_name_what_the_user_cannot_view(setup, domain):
+    ra = setup["ra"]
+    r1 = setup["scenarios"]["R1"]
+    hidden = Asset.objects.create(name="hidden asset", folder=_hidden_domain())
+    visible = Asset.objects.create(name="visible asset", folder=domain)
+    r1.assets.add(hidden, visible)
+    client = _client(_reader(domain))
+
+    body = _options(client, ra, "assets")
+    assert [o["label"] for o in body["results"]] == ["visible asset"]
+    assert body["count"] == 1
+
+    # Applying a hidden value still filters, but its label is not given away.
+    res = client.get(
+        f"/api/risk-assessments/{ra.id}/scenario-selection/"
+        f"?scenario__assets={hidden.id}"
+    )
+    assert res.json()["related_filters"]["assets"] == {
+        "has_options": True,
+        "selected": [],
+    }
+
+    r1.assets.remove(visible)
+    res = client.get(f"/api/risk-assessments/{ra.id}/scenario-selection/")
+    assert res.json()["related_filters"]["assets"]["has_options"] is False
+
+
+@pytest.mark.django_db
+def test_selection_never_reveals_controls_the_user_cannot_view(setup, domain):
+    hidden = _control(_hidden_domain(), "hidden control")
+    setup["scenarios"]["R1"].applied_controls.add(hidden)
+
+    rows = _plan(_client(_reader(domain)), setup["ra"], "scenario__within_tolerance=NO")
 
     assert "hidden control" not in rows
     assert "only R1" in rows

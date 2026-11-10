@@ -7855,6 +7855,7 @@
 	"scenarioSelection": "Selection",
 	"moreFilters": "More filters",
 	"clearFilterValues": "Clear",
+	"loadMoreOptions": "Load more",
 	"selectionFilterLabel": "{filter}:",
 	"scenarioSelectionCount": "{count} of {total} scenarios",
 	"scenarioCount": "{count} scenarios",

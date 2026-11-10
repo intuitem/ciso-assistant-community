@@ -241,12 +241,15 @@ from core.scenario_selection import (
     LINK_ALL,
     LINK_EXISTING,
     LINK_TYPE_PARAM,
+    RelatedOptionsPagination,
     action_plan_controls,
     append_selection_sheet,
     link_q,
+    related_filter_options,
     resolve_link_type,
     resolve_selection,
     selection_facets,
+    selection_related_filters,
     selection_report_context,
 )
 
@@ -5332,9 +5335,13 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     def scenario_selection(self, request, pk):
         """Resolve the `scenario__*` params into the selected scenarios.
 
-        Returns the selected ids and counts, the values dropped because their
-        object no longer exists, and, per filter the selection bar offers, how
-        many scenarios each value would keep given the other active filters.
+        Returns the selected ids and counts and the values dropped because their
+        object no longer exists. `facets` holds the filters with a fixed set of
+        values (tolerance, treatment, levels): how many scenarios each value
+        would keep given the other active filters. `related_filters` holds the
+        filters on related objects (owner, threats, assets, qualifications,
+        labels): whether the assessment has any to pick, and the labels of the
+        values applied. Their options are paged, see `scenario-selection/options/`.
         """
         risk_assessment = self.get_object()
         selection = resolve_selection(request, risk_assessment)
@@ -5356,7 +5363,39 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     )
                 ],
                 "facets": selection_facets(selection, request),
+                "related_filters": selection_related_filters(selection, request),
             }
+        )
+
+    @action(detail=True, methods=["get"], url_path="scenario-selection/options")
+    def scenario_selection_options(self, request, pk):
+        """One page of the values a related selection filter offers.
+
+        `filter` names the filter: owner, threats, assets, qualifications or
+        filtering_labels. Only objects linked to a scenario of this assessment
+        and viewable by the user are listed. Each comes with the number of
+        scenarios it would keep given the other `scenario__*` params. Applied
+        values come first, then the values keeping the most scenarios.
+
+        `q` narrows the options by label (`search` already searches the risk
+        assessments themselves). `limit` (25 by default, 100 at most) and
+        `offset` page through them.
+        """
+        risk_assessment = self.get_object()
+        selection = resolve_selection(request, risk_assessment)
+        options = related_filter_options(
+            selection,
+            request.query_params.get("filter", ""),
+            request,
+            search=request.query_params.get("q", ""),
+        )
+        paginator = RelatedOptionsPagination()
+        page = paginator.paginate_queryset(options, request, view=self)
+        return paginator.get_paginated_response(
+            [
+                {"value": str(obj.pk), "label": str(obj), "count": obj.scenario_count}
+                for obj in page
+            ]
         )
 
     @action(

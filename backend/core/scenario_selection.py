@@ -13,11 +13,22 @@ from uuid import UUID
 
 import django_filters as df
 from django import forms
-from django.db.models import Count, Q, QuerySet
+from django.db.models import (
+    Case,
+    CharField,
+    Count,
+    IntegerField,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
+from django.db.models.functions import Coalesce, Concat, Lower
 from django.http import QueryDict
 from rest_framework.exceptions import ValidationError
 
-from core.models import AppliedControl, RiskAssessment, RiskScenario
+from core.models import Actor, AppliedControl, RiskAssessment, RiskScenario
+from core.pagination import CustomLimitOffsetPagination
 from core.utils import sanitize_xlsx_value
 from iam.models import Permission, RoleAssignment
 
@@ -33,20 +44,44 @@ LINK_EXISTING = "existing"
 LINK_ALL = "all"
 LINK_TYPES = (LINK_ADDITIONAL, LINK_EXISTING, LINK_ALL)
 
-# Filters the selection bar offers, in display order.
-FACETS = (
-    "within_tolerance",
-    "treatment",
-    "current_level",
-    "residual_level",
-    "owner",
-    "threats",
-    "assets",
-    "qualifications",
-    "filtering_labels",
-)
+# Filters the selection bar offers, in display order. The first four have a
+# handful of fixed values and travel with the selection. The related ones can
+# hold thousands of objects: the selection only says whether they have anything
+# to offer, and their options are served one page at a time.
+FACETS = ("within_tolerance", "treatment", "current_level", "residual_level")
+RELATED_FACETS = ("owner", "threats", "assets", "qualifications", "filtering_labels")
 _LEVEL_FACETS = ("current_level", "residual_level")
-_RELATED_FACETS = ("owner", "threats", "assets", "qualifications", "filtering_labels")
+
+# What `str(actor)` shows: a user's full name when they have one, else their
+# email; a team's or an entity's name.
+_OWNER_LABEL = Case(
+    When(
+        user__first_name__gt="",
+        user__last_name__gt="",
+        then=Concat("user__first_name", Value(" "), "user__last_name"),
+    ),
+    default=Coalesce("user__email", "team__name", "entity__name"),
+    output_field=CharField(),
+)
+
+# Related filter -> (fields its search reads, expression its options sort on).
+# Both follow the label the option shows.
+_RELATED_LOOKUPS = {
+    "owner": (
+        (
+            "user__first_name",
+            "user__last_name",
+            "user__email",
+            "team__name",
+            "entity__name",
+        ),
+        _OWNER_LABEL,
+    ),
+    "threats": (("name",), "name"),
+    "assets": (("name",), "name"),
+    "qualifications": (("name",), "name"),
+    "filtering_labels": (("label",), "label"),
+}
 
 
 class _DunderPrefixForm(forms.Form):
@@ -228,16 +263,31 @@ def linked_scenarios_q(control, link_type: str) -> Q:
 # ------------------------------------------------------------------ facets
 
 
-def _viewable_ids(user, model):
-    """IDs of `model` the user may view, or None when nothing is hidden from them.
+def _viewable_objects(user, model) -> QuerySet:
+    """`model` objects the user may view.
 
-    Mirrors the related-field masking of the list endpoints, so an option label
-    never names an object the scenario table would hide.
+    Mirrors the related-field masking of the list endpoints, so an option never
+    names an object the scenario table would hide. The viewable ids stay a
+    subquery: they are never loaded for the whole instance.
     """
+    objects = model.objects.all()
+    if model is Actor:
+        # An actor's label is its user, team or entity.
+        objects = objects.select_related("user", "team", "entity")
     try:
-        return {str(pk) for pk in RoleAssignment.get_viewable_object_ids(user, model)}
+        viewable = RoleAssignment.get_viewable_object_ids(user, model)
     except NotImplementedError, Permission.DoesNotExist:
-        return None
+        return objects
+    return objects.filter(pk__in=viewable)
+
+
+def _related_objects(risk_assessment, name, user) -> QuerySet:
+    """What a related filter can offer: the viewable objects linked to at least
+    one scenario of the assessment. One row per link, until grouped."""
+    field = RiskScenario._meta.get_field(name)
+    return _viewable_objects(user, field.related_model).filter(
+        **{f"{field.related_query_name()}__risk_assessment": risk_assessment}
+    )
 
 
 def _scenarios_without(selection, name, request):
@@ -268,25 +318,10 @@ def _grouped_counts(scenarios, field_name):
     }
 
 
-def _related_options(risk_assessment, field_name, user):
-    model = RiskScenario._meta.get_field(field_name).related_model
-    objects = model.objects.filter(
-        pk__in=risk_assessment.risk_scenarios.values(field_name)
-    ).distinct()
-    viewable = _viewable_ids(user, model)
-    options = [
-        {"value": str(obj.pk), "label": str(obj)}
-        for obj in objects
-        if viewable is None or str(obj.pk) in viewable
-    ]
-    return sorted(options, key=lambda o: o["label"].lower())
-
-
 def selection_facets(selection: ScenarioSelection, request) -> dict:
-    """For each filter the bar offers, the scenarios each value would keep given
-    the other active filters."""
+    """For each fixed-value filter the bar offers, the scenarios each value would
+    keep given the other active filters."""
     risk_assessment = selection.risk_assessment
-    user = request.user
     facets = {}
     for name in FACETS:
         base = _scenarios_without(selection, name, request)
@@ -295,29 +330,91 @@ def selection_facets(selection: ScenarioSelection, request) -> dict:
                 _tolerance_counts(base) if risk_assessment.risk_tolerance >= 0 else []
             )
             continue
+        counts = _grouped_counts(base, name)
         if name == "treatment":
-            counts = _grouped_counts(base, "treatment")
             facets[name] = [
                 {"value": value, "count": counts.get(value, 0)}
                 for value, _label in RiskScenario.TREATMENT_OPTIONS
             ]
             continue
-        if name in _LEVEL_FACETS:
-            counts = _grouped_counts(base, name)
-            levels = len(risk_assessment.risk_matrix.parse_json().get("risk", []))
-            values = list(range(levels - 1, -1, -1))
-            if counts.get(-1):
-                values.append(-1)
-            facets[name] = [
-                {"value": str(v), "count": counts.get(v, 0)} for v in values
-            ]
-            continue
-        counts = _grouped_counts(base, name)
-        facets[name] = [
-            {**option, "count": counts.get(UUID(option["value"]), 0)}
-            for option in _related_options(risk_assessment, name, user)
-        ]
+        levels = len(risk_assessment.risk_matrix.parse_json().get("risk", []))
+        values = list(range(levels - 1, -1, -1))
+        if counts.get(-1):
+            values.append(-1)
+        facets[name] = [{"value": str(v), "count": counts.get(v, 0)} for v in values]
     return facets
+
+
+def selection_related_filters(selection: ScenarioSelection, request) -> dict:
+    """For each related filter, whether the assessment has anything to pick and
+    the labels of the values applied. The options themselves are paged, see
+    `related_filter_options`."""
+    user = request.user
+    related = {}
+    for name in RELATED_FACETS:
+        model = RiskScenario._meta.get_field(name).related_model
+        applied = selection.filters.get(name)
+        selected = (
+            _viewable_objects(user, model).filter(pk__in=applied) if applied else ()
+        )
+        related[name] = {
+            "has_options": _related_objects(
+                selection.risk_assessment, name, user
+            ).exists(),
+            "selected": [{"value": str(obj.pk), "label": str(obj)} for obj in selected],
+        }
+    return related
+
+
+class RelatedOptionsPagination(CustomLimitOffsetPagination):
+    default_limit = 25
+    max_limit = 100
+
+
+def related_filter_options(
+    selection: ScenarioSelection, name: str, request, search: str = ""
+) -> QuerySet:
+    """The objects a related filter offers, each with `scenario_count`: the
+    scenarios it would keep given the other active filters.
+
+    Applied values come first, so they can be unticked without looking for
+    them, then the values keeping the most scenarios. The label and the id
+    settle ties: a page boundary must not depend on the database's mood.
+    """
+    if name not in RELATED_FACETS:
+        raise ValidationError(
+            {"filter": f"Expected one of: {', '.join(RELATED_FACETS)}."}
+        )
+    link = RiskScenario._meta.get_field(name).related_query_name()
+    search_fields, sort_key = _RELATED_LOOKUPS[name]
+    options = _related_objects(selection.risk_assessment, name, request.user)
+    # Every word has to match, in any of the fields: "ada lovelace" finds a
+    # first and a last name.
+    for term in search.split():
+        matches = Q()
+        for search_field in search_fields:
+            matches |= Q(**{f"{search_field}__icontains": term})
+        options = options.filter(matches)
+    # Counts the links `_related_objects` joined, so this assessment's only.
+    # Without other filters every one of them counts.
+    others = {k: v for k, v in selection.filters.items() if k != name}
+    kept = (
+        Q(**{f"{link}__in": _scenarios_without(selection, name, request).values("pk")})
+        if others
+        else None
+    )
+    options = options.annotate(scenario_count=Count(link, filter=kept, distinct=True))
+    ordering = ["-scenario_count", Lower(sort_key), "pk"]
+    if applied := selection.filters.get(name):
+        options = options.annotate(
+            unapplied=Case(
+                When(pk__in=applied, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+        )
+        ordering.insert(0, "unapplied")
+    return options.order_by(*ordering)
 
 
 # ----------------------------------------------------------------- reports
@@ -345,6 +442,8 @@ def selection_report_context(selection: ScenarioSelection, total: int) -> dict |
                 for v in values
             ]
         elif (queryset := _model_filter_queryset(filters[name], None)) is not None:
+            if queryset.model is Actor:
+                queryset = queryset.select_related("user", "team", "entity")
             labels = sorted(str(obj) for obj in queryset.filter(pk__in=values))
         else:
             labels = list(values)

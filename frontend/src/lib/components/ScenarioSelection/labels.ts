@@ -33,7 +33,9 @@ export function optionLabel(
 	if (name === 'treatment') return safeTranslate(value);
 	if (name === 'current_level' || name === 'residual_level')
 		return selection?.levels?.[Number(value)] ?? '--';
-	return selection?.facets?.[name]?.find((o) => o.value === value)?.label ?? value;
+	return (
+		selection?.related_filters?.[name]?.selected.find((o) => o.value === value)?.label ?? value
+	);
 }
 
 /** One "Filter: value, value" line per active filter, for summaries. */

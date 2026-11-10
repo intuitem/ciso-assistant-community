@@ -6,10 +6,12 @@
 	import { m } from '#paraglide/messages.js';
 	import { breadcrumbs } from '#lib/utils/breadcrumbs.js';
 	import { FILTER_LABELS, filterLabel, optionLabel as labelFor } from './labels';
+	import RelatedFilterOptions from './RelatedFilterOptions.svelte';
 	import {
 		SELECTION_FILTERS,
 		SELECTION_PREFIX,
 		hasSelection,
+		isRelatedFilter,
 		readSelection,
 		recallSelection,
 		rememberSelection,
@@ -81,14 +83,18 @@
 		return labelFor(name, value, selection);
 	}
 
+	// Related filters have no options here: they load theirs once opened.
 	function options(name: SelectionFilter): FacetOption[] {
-		return selection?.facets?.[name] ?? [];
+		return isRelatedFilter(name) ? [] : (selection?.facets?.[name] ?? []);
 	}
 
 	// Filters with nothing to pick in this assessment are left out, except
 	// tolerance, which explains why it is unavailable.
 	function available(name: SelectionFilter): boolean {
-		return name === 'within_tolerance' || applied[name].length > 0 || options(name).length > 0;
+		if (name === 'within_tolerance' || applied[name].length > 0) return true;
+		return isRelatedFilter(name)
+			? (selection?.related_filters?.[name]?.has_options ?? false)
+			: options(name).length > 0;
 	}
 
 	const buttonFilters = $derived(
@@ -196,6 +202,21 @@
 	});
 </script>
 
+{#snippet optionRow(name: SelectionFilter, option: FacetOption)}
+	{@const checked = (values[name] ?? []).includes(option.value)}
+	<label
+		class="flex items-center gap-2.5 min-h-10 px-2.5 rounded-md text-sm cursor-pointer hover:bg-surface-100-900 {option.count ===
+			0 && !checked
+			? 'text-surface-500'
+			: ''}"
+		data-testid="selection-option"
+	>
+		<input type="checkbox" class="checkbox" {checked} onchange={() => toggle(name, option.value)} />
+		<span class="grow">{option.label ?? optionLabel(name, option.value)}</span>
+		<span class="tabular-nums text-surface-500">{option.count}</span>
+	</label>
+{/snippet}
+
 <section
 	aria-label={m.scenarioSelection()}
 	class="rounded-lg border overflow-hidden {scoped
@@ -287,45 +308,33 @@
 											>
 										</p>
 									{:else}
-										{#if options(name).length > SEARCH_THRESHOLD}
-											<label class="block px-1 pt-1 pb-1.5">
-												<span class="sr-only">{m.search()}</span>
-												<input
-													type="search"
-													class="input text-sm"
-													placeholder={m.searchPlaceholder()}
-													bind:value={query}
-													{@attach (el) => el.focus()}
-												/>
-											</label>
+										{#if isRelatedFilter(name)}
+											<RelatedFilterOptions {riskAssessmentId} {name}>
+												{#snippet option(item)}
+													{@render optionRow(name, item)}
+												{/snippet}
+											</RelatedFilterOptions>
+										{:else}
+											{#if options(name).length > SEARCH_THRESHOLD}
+												<label class="block px-1 pt-1 pb-1.5">
+													<span class="sr-only">{m.search()}</span>
+													<input
+														type="search"
+														class="input text-sm"
+														placeholder={m.searchPlaceholder()}
+														bind:value={query}
+														{@attach (el) => el.focus()}
+													/>
+												</label>
+											{/if}
+											<ul class="max-h-72 overflow-y-auto">
+												{#each matchingOptions(name) as option (option.value)}
+													<li>{@render optionRow(name, option)}</li>
+												{:else}
+													<li class="px-2.5 py-2 text-sm text-surface-500">{m.noResults()}</li>
+												{/each}
+											</ul>
 										{/if}
-										<ul class="max-h-72 overflow-y-auto">
-											{#each matchingOptions(name) as option (option.value)}
-												{@const checked = (values[name] ?? []).includes(option.value)}
-												<li>
-													<label
-														class="flex items-center gap-2.5 min-h-10 px-2.5 rounded-md text-sm cursor-pointer hover:bg-surface-100-900 {option.count ===
-															0 && !checked
-															? 'text-surface-500'
-															: ''}"
-														data-testid="selection-option"
-													>
-														<input
-															type="checkbox"
-															class="checkbox"
-															{checked}
-															onchange={() => toggle(name, option.value)}
-														/>
-														<span class="grow"
-															>{option.label ?? optionLabel(name, option.value)}</span
-														>
-														<span class="tabular-nums text-surface-500">{option.count}</span>
-													</label>
-												</li>
-											{:else}
-												<li class="px-2.5 py-2 text-sm text-surface-500">{m.noResults()}</li>
-											{/each}
-										</ul>
 										{#if isActive}
 											<div class="flex justify-end pt-1.5 mt-1 border-t border-surface-200-800">
 												<button type="button" class={QUIET_BUTTON} onclick={() => remove(name)}>
@@ -379,10 +388,7 @@
 												onclick={() => setOpen(name, true)}
 												data-testid="selection-more-{name}"
 											>
-												<span>{FILTER_LABELS[name]()}</span>
-												<span class="text-xs text-surface-500 tabular-nums"
-													>{options(name).length}</span
-												>
+												{FILTER_LABELS[name]()}
 											</button>
 										</li>
 									{/each}
