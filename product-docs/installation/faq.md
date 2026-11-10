@@ -101,7 +101,7 @@ most likely because the initialization took longer than expected. Make sure you 
 
 ### Update the backend healthcheck in your docker-compose
 
-The backend image now runs on a hardened base. `curl` is still installed for the time being, so an existing healthcheck keeps working, but it will be removed in a future release. If you maintain your own `docker-compose.yml`, or generated it with `config/make_config.py` before this change, replace the `healthcheck` of the `backend` service now:
+The backend image now runs on a hardened base. `curl` is still installed for the time being, so an existing healthcheck keeps working, but it will be removed in a future release. If you maintain your own `docker-compose.yml`, or generated `config/docker-compose-custom.yml` with `config/make_config.py` before this change, replace the `healthcheck` of the `backend` service in the file you actually start (for a generated config, run `docker compose -f docker-compose-custom.yml up -d` from `config/`):
 
 ```yaml
 healthcheck:
