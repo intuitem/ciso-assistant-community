@@ -127,11 +127,17 @@
 		if (i >= rows.length - 5) loadMore();
 	}
 
-	function post(revision: string, decision: ReviewStatus, comment: string) {
+	// `seen` is the content on screen: the API refuses a decision if it was swapped since.
+	function post(
+		revision: string,
+		decision: ReviewStatus,
+		comment: string,
+		seen?: Pick<Revision, 'attachment_hash' | 'link'>
+	) {
 		return fetch('/evidences/review/decide', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ revision, decision, comment })
+			body: JSON.stringify({ revision, decision, comment, seen })
 		}).catch(() => undefined);
 	}
 
@@ -178,7 +184,10 @@
 		}
 		busy = true;
 		error = '';
-		const res = await post(rev.id, decision, comment);
+		const res = await post(rev.id, decision, comment, {
+			attachment_hash: rev.attachment_hash,
+			link: rev.link
+		});
 		busy = false;
 		if (!res?.ok) {
 			const body = await res?.json().catch(() => ({}));

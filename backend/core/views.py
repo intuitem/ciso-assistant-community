@@ -12752,7 +12752,9 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
     @action(methods=["post"], detail=True)
     def review(self, request, pk):
         """Approve or reject this revision: {"decision": "approved"|"rejected", "comment": str}.
-        "pending" undoes the caller's own decision."""
+        "pending" undoes the caller's own decision.
+        "seen": {"attachment_hash", "link"} is the content the reviewer had on screen: the
+        decision is refused if the file or link was swapped in place since."""
         from core.utils import get_respondent_scoped_folder_ids
 
         revision = self.get_object()
@@ -12777,6 +12779,24 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                         pk=revision.evidence_id
                     )
                     if evidence.last_revision != revision:
+                        return Response(
+                            {"decision": "stale_revision"},
+                            status=status.HTTP_409_CONFLICT,
+                        )
+                    # In-place uploads keep the revision id: lock the row and compare content.
+                    current = (
+                        EvidenceRevision.objects.select_for_update()
+                        .filter(pk=revision.pk)
+                        .values("attachment_hash", "link")
+                        .get()
+                    )
+                    seen = request.data.get("seen")
+                    if seen is not None and (
+                        not isinstance(seen, dict)
+                        or (seen.get("attachment_hash") or None)
+                        != (current["attachment_hash"] or None)
+                        or (seen.get("link") or None) != (current["link"] or None)
+                    ):
                         return Response(
                             {"decision": "stale_revision"},
                             status=status.HTTP_409_CONFLICT,

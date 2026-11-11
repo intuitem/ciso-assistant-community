@@ -34,10 +34,10 @@ class TestEvidenceRevisionReview:
         assert response.status_code == 201, response.json()
         return EvidenceRevision.objects.get(id=response.json()["id"])
 
-    def _review(self, client, revision, decision, comment=""):
+    def _review(self, client, revision, decision, comment="", **extra):
         return client.post(
             reverse("evidence-revisions-review", args=[revision.id]),
-            {"decision": decision, "comment": comment},
+            {"decision": decision, "comment": comment, **extra},
             format="json",
         )
 
@@ -161,6 +161,23 @@ class TestEvidenceRevisionReview:
         assert self._review(authenticated_client, old, "approved").status_code == 409
         old.refresh_from_db()
         assert old.review_status == EvidenceRevision.ReviewStatus.PENDING
+
+    def test_decision_on_content_swapped_in_place_is_refused(
+        self, authenticated_client
+    ):
+        revision = self._revision(authenticated_client)
+        seen = {"attachment_hash": revision.attachment_hash, "link": revision.link}
+        EvidenceRevision.objects.filter(pk=revision.pk).update(
+            link="https://example.com/swapped"
+        )
+        response = self._review(authenticated_client, revision, "approved", seen=seen)
+        assert response.status_code == 409
+        revision.refresh_from_db()
+        assert revision.review_status == EvidenceRevision.ReviewStatus.PENDING
+
+        seen["link"] = revision.link
+        response = self._review(authenticated_client, revision, "approved", seen=seen)
+        assert response.status_code == 200
 
     def _approved_evidence(self):
         evidence = Evidence.objects.create(
