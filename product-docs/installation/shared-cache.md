@@ -26,7 +26,7 @@ The cache is used for:
 
 ## Enabling memcached
 
-The backend and Huey reach memcached through a **unix socket**, never over the network. Memcached has no authentication, and anything that can write to it can run code in the backend, because cached values are stored as Python pickles. With a socket, memcached has no network at all: only the containers that mount the socket can reach it, and no URL configured in CISO Assistant (webhook, SIEM, LLM...) can point at it.
+By default, the backend and Huey reach memcached through a **unix socket**, not over the network. Memcached has no authentication, and anything that can write to it can run code in the backend, because cached values are stored as Python pickles. With a socket, memcached has no network at all: only the containers that mount the socket can reach it, and no URL configured in CISO Assistant (webhook, SIEM, LLM...) can point at it. If several hosts or pods must share one memcached, see [memcached over TCP](#memcached-over-tcp).
 
 ### Docker Compose
 
@@ -81,14 +81,14 @@ The `memcached_socket` volume is a small RAM disk that only holds the socket. It
 | Variable | Default | Description |
 |---|---|---|
 | `ENABLE_MEMCACHED` | `False` | Set to `True` on the **backend** and **huey** containers to use memcached. |
-| `MEMCACHED_LOCATION` | `unix:/run/memcached/memcached.sock` | Where memcached listens. Keep the default with the setup above. A socket path must be absolute: a relative one is read as a host name. |
+| `MEMCACHED_LOCATION` | `unix:/run/memcached/memcached.sock` | Where memcached listens: `unix:/absolute/path` or `/absolute/path` for a socket, `host:port` for [TCP](#memcached-over-tcp). Keep the default with the setup above. A relative socket path is read as a host name. |
 
 {% hint style="warning" %}
 Set `ENABLE_MEMCACHED=True` on **both** the backend **and** huey containers. Without it, each worker keeps using its own private cache, and no error or warning is shown.
 {% endhint %}
 
 {% hint style="warning" %}
-Do not switch memcached to a network port, and never publish one. The socket is what keeps memcached out of reach of everything but the backend and Huey.
+Keep the socket unless you need [memcached over TCP](#memcached-over-tcp). The socket is what keeps memcached out of reach of everything but the backend and Huey. Never publish a memcached port.
 {% endhint %}
 
 The `-m 16` option gives memcached 16 MB of memory. This is enough: the cache only holds small items such as rate limit counters and feature flags.
@@ -104,7 +104,18 @@ memcached:
 ```
 
 {% hint style="warning" %}
-Each backend pod has its own memcached. If you set `backend.replicas` above 1, the pods do **not** share their cache, and rate limits are multiplied by the number of pods. The chart has no option for a cache shared between pods: it would mean reaching memcached over the network.
+Each backend pod has its own memcached. If you set `backend.replicas` above 1, the pods do **not** share their cache, and rate limits are multiplied by the number of pods. To share one cache between pods, run memcached yourself and reach it [over TCP](#memcached-over-tcp).
+{% endhint %}
+
+### memcached over TCP
+
+Several backend hosts or pods can only share one memcached over the network. Run memcached as its own service, and set `ENABLE_MEMCACHED=True` and `MEMCACHED_LOCATION` to its address (for example `memcached:11211`) on the backend and Huey. With the Helm chart, leave `memcached.enabled` at `false` and set both variables in `backend.env` and `backend.huey.env`.
+
+{% hint style="danger" %}
+Anything that can connect to memcached can run code in the backend. Over TCP, only your network filtering keeps others out:
+
+* Allow only the backend and Huey to connect to memcached, for example with a Kubernetes NetworkPolicy or a dedicated internal network. Never publish its port.
+* The backend's own outbound requests (webhooks, SIEM, LLM...) are refused for private addresses unless `ALLOW_PRIVATE_NETWORK_REQUESTS` is set. With it set, they can reach memcached too.
 {% endhint %}
 
 ## Login rate limiting

@@ -816,16 +816,6 @@ MEMCACHED_LOCATION = os.environ.get(
     "MEMCACHED_LOCATION", "unix:/run/memcached/memcached.sock"
 )
 if ENABLE_MEMCACHED:
-    if "," in MEMCACHED_LOCATION or ";" in MEMCACHED_LOCATION:
-        raise ImproperlyConfigured(
-            "The ',' and ';' characters are forbidden in MEMCACHED_LOCATION (as the backend MUST point to a single memcached instance)."
-        )
-
-    if not MEMCACHED_LOCATION.startswith(("unix:", "/")):
-        raise ImproperlyConfigured(
-            "The MEMCACHED_LOCATION MUST be a unix socket (TCP sockets are forbidden as they are unsafe due to RCE risks related to django cache using pickle under the hood)."
-        )
-
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
