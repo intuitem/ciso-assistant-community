@@ -18931,7 +18931,7 @@ class FindingFilterSet(GenericFilterSet):
             "evidences": ["exact"],
             "vulnerabilities": ["exact"],
             "task_templates": ["exact"],
-            "due_date": ["exact"],
+            "due_date": ["exact", "year", "month"],
             "created_at": ["gte", "lt"],
             "updated_at": ["gte", "lt"],
             "eta": ["exact"],
