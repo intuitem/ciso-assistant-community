@@ -215,6 +215,11 @@
 				<span class="ml-2">{study.status ? safeTranslate(study.status) : 'N/A'}</span>
 			</div>
 		</div>
+		{#if data.hiddenObjects > 0}
+			<p class="mt-2 text-sm text-yellow-700" data-testid="hidden-links-note">
+				{m.objectsNotVisible({ count: data.hiddenObjects })}
+			</p>
+		{/if}
 	</div>
 
 	{#if study.observation}
