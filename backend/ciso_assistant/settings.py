@@ -10,6 +10,7 @@ else it is sqlite, and no env variable is required
 """
 
 from pathlib import Path
+import hashlib
 import os
 import re
 from dotenv import load_dotenv
@@ -815,24 +816,41 @@ ENABLE_MEMCACHED = os.environ.get("ENABLE_MEMCACHED", "False").lower() in (
 MEMCACHED_LOCATION = os.environ.get(
     "MEMCACHED_LOCATION", "unix:/run/memcached/memcached.sock"
 )
+
+
+def _memcached_key(key, key_prefix, version):
+    # Django's default key, hashed when memcached would refuse it: longer than
+    # 250 characters, or with spaces, control or non-ASCII characters. allauth's
+    # SAML metadata key, for example, holds the metadata URL and the entity ID.
+    full_key = f"{key_prefix}:{version}:{key}"
+    if len(full_key) <= 250 and all(32 < ord(char) < 127 for char in full_key):
+        return full_key
+    digest = hashlib.sha256(full_key.encode()).hexdigest()
+    return f"{key_prefix}:{version}:sha256:{digest}"
+
+
+def _memcached_cache(location):
+    return {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": location,
+        "KEY_FUNCTION": _memcached_key,
+        # If memcached is down or stuck, reads miss, writes are dropped and
+        # add() fails, instead of raising, so the app keeps working without it.
+        # Login rate limiting fails closed: allauth refuses a login when its
+        # add() lock fails, so logins are refused until memcached is back.
+        "OPTIONS": {
+            "ignore_exc": True,
+            "dead_timeout": 5,  # retry a dead memcached after 5 s, not 60
+            "connect_timeout": 0.5,
+            "timeout": 0.5,
+        },
+    }
+
+
 logger.info("ENABLE_MEMCACHED: %s", ENABLE_MEMCACHED)
 if ENABLE_MEMCACHED:
     logger.info("MEMCACHED_LOCATION: %s", MEMCACHED_LOCATION)
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
-            "LOCATION": MEMCACHED_LOCATION,
-            # If memcached is down or stuck, cache operations become misses
-            # instead of errors, so the app keeps working without it. Login rate
-            # limiting fails closed: logins are refused until memcached is back.
-            "OPTIONS": {
-                "ignore_exc": True,
-                "dead_timeout": 5,  # retry a dead memcached after 5 s, not 60
-                "connect_timeout": 0.5,
-                "timeout": 0.5,
-            },
-        }
-    }
+    CACHES = {"default": _memcached_cache(MEMCACHED_LOCATION)}
 
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 

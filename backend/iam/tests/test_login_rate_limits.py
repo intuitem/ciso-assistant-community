@@ -54,6 +54,17 @@ def error_codes(response):
     return [error["code"] for error in response.json().get("errors", [])]
 
 
+@override_settings(
+    CACHES={
+        "default": project_settings._memcached_cache("unix:/nonexistent/memcached.sock")
+    }
+)
+def test_logins_are_refused_while_memcached_is_unreachable(user):
+    """With the real memcached settings, allauth cannot take its rate-limit
+    lock and refuses the login, even with the right password: it fails closed."""
+    assert login(EMAIL, PASSWORD, "203.0.113.1").status_code == 429
+
+
 def test_correct_password_logs_in(user):
     assert login(EMAIL, PASSWORD, "203.0.113.1").status_code == 200
 

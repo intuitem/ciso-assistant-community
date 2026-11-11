@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
 from core.utils import sha256
+from iam.signals import LOGIN_FAILED_ACTION
 from iam.models import FolderMixin
 
 from enum import IntEnum
@@ -95,7 +96,7 @@ class LogEntryAction(IntEnum):
     UPDATE = 1
     DELETE = 2
     ACCESS = 3
-    LOGIN_FAILED = 4
+    LOGIN_FAILED = LOGIN_FAILED_ACTION
 
     def to_string(self):
         LOG_ENTRY_ACTION_TRANSLATIONS: dict[LogEntryAction, str] = {

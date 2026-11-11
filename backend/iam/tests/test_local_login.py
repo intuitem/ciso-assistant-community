@@ -9,11 +9,12 @@ import json
 
 import pytest
 from allauth.account.adapter import get_adapter
-from django.contrib.auth import get_user
+from asgiref.sync import async_to_sync
+from django.contrib.auth import aauthenticate, get_user
 from django.contrib.auth.hashers import make_password
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.cache import cache
-from django.test import Client, RequestFactory
+from django.test import Client, RequestFactory, override_settings
 
 from global_settings.models import GlobalSettings
 from iam.models import User
@@ -105,6 +106,30 @@ def test_a_refused_right_password_counts_as_a_failure():
         "email_password_mismatch"
     ]
     assert error_codes(login("wrong", ip="203.0.113.51")) == ["too_many_login_attempts"]
+
+
+@override_settings(
+    AUTHENTICATION_BACKENDS=[
+        "iam.auth_backends.LocalLoginBackend",
+        "allauth.account.auth_backends.AuthenticationBackend",
+    ]
+)
+def test_no_other_backend_accepts_a_refused_password():
+    """allauth's docs suggest adding its own backend: the refusal must stop
+    Django from trying it."""
+    make_user()
+    force_sso()
+
+    assert error_codes(login(PASSWORD)) == ["email_password_mismatch"]
+
+
+def test_async_authentication_applies_the_rule():
+    user = make_user()
+    assert async_to_sync(aauthenticate)(None, email=EMAIL, password=PASSWORD) == user
+
+    force_sso()
+
+    assert async_to_sync(aauthenticate)(None, email=EMAIL, password=PASSWORD) is None
 
 
 def test_sso_user_keeps_its_session():

@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
 from core.custom_middleware import resolve_client_ip
+from iam.login_refusals import record_refused_login
 
 import structlog
 
@@ -48,6 +49,13 @@ class AccountAdapter(DefaultAccountAdapter):
             return client_ip
         else:
             return super().get_client_ip(request)
+
+    def pre_authenticate(self, request, **credentials):
+        try:
+            super().pre_authenticate(request, **credentials)
+        except ValidationError:  # refused by the failed-login rate limit
+            record_refused_login(request, credentials)
+            raise
 
     def reauthenticate(self, user, password):
         from allauth.mfa.utils import is_mfa_enabled

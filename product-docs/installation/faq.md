@@ -124,7 +124,7 @@ docker inspect --format '{{json .State.Health}}' backend
 
 ### All users are locked out
 
-Login rate limiting relies on your reverse proxy passing the client IP address. If you enabled the optional `memcached` container and it is stopped, every login is refused, even with the correct password, until it is back. Users who are already logged in are not affected:
+Login rate limiting relies on your reverse proxy passing the client IP address. If you enabled the optional `memcached` container and it is stopped, every login is refused, even with the correct password, until it is back. Users who are already logged in can keep working, except for actions that ask for their password again:
 
 ```
 docker compose up -d memcached

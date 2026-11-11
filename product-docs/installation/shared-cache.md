@@ -91,7 +91,7 @@ Set `ENABLE_MEMCACHED=True` on **both** the backend **and** huey containers. Wit
 Keep the socket unless you need [memcached over TCP](#memcached-over-tcp). The socket is what keeps memcached out of reach of everything but the backend and Huey. Never publish a memcached port.
 {% endhint %}
 
-The `-m 16` option gives memcached 16 MB of memory. This is enough: the cache only holds small items such as rate limit counters and feature flags.
+The `-m 16` option gives memcached 16 MB of memory. The cache holds rate limit counters, feature flags, short-lived OAuth codes and copies of small API responses.
 
 ### Helm chart
 
@@ -132,7 +132,7 @@ Without memcached, each worker counts on its own, so the effective limits are hi
 
 A successful login does not count as a failure. When a limit is reached, the login page shows:
 
-> Too many failed login attempts. Please try again later.
+> Too many login attempts. Please try again later.
 
 The block lifts by itself when the time window ends. To clear all limits at once, for example after a test, restart memcached, or the backend if you do not use memcached:
 
@@ -146,7 +146,7 @@ Set these variables on the **backend** container:
 
 | Variable | Default | What it limits |
 |---|---|---|
-| `LOGIN_FAILED_RATE_LIMIT` | `10/m/ip,5/5m/key` | Failed logins, per IP address (`ip`) and per email (`key`) |
+| `LOGIN_FAILED_RATE_LIMIT` | `10/m/ip,5/5m/key` | Failed logins and wrong second-factor (MFA) codes, per IP address (`ip`) and per account (`key`) |
 | `LOGIN_RATE_LIMIT` | `30/m/ip` | All login attempts, per IP address |
 
 A value is a comma-separated list of rules written `amount/period/per`:
@@ -166,7 +166,7 @@ services:
       - LOGIN_FAILED_RATE_LIMIT=10/m/ip
 ```
 
-The account is then no longer protected against password guessing spread over many IP addresses.
+The account is then no longer protected against password guessing spread over many IP addresses. The same goes for second-factor codes, for anyone who already has the password: without a `key` rule they are limited only per IP address, and an empty value removes their limit entirely.
 
 With the Helm chart, set the variables through `backend.env`:
 
@@ -205,13 +205,17 @@ With the Helm chart, `ADDRESS_HEADER` and `XFF_DEPTH` are set on the frontend on
 
 The same IP address is recorded in the [audit log](../features/audit-log.md) (`remote_addr`).
 
+Every failed login is logged as `Failed login attempt`, with the email and the IP address, and recorded in the audit log as *Login failed*. Failed logins have their own cap in the audit log (`AUDITLOG_MAX_RECORDS`, like other entries), so a flood of them cannot push other entries out.
+
+Logins refused by these limits are logged too, squashed so that an attack does not flood the logs: a `Logins refused by rate limit` warning with the IP address or the email and the number of refusals, at the 2nd, 4th, 8th... refusal and at least every 5 minutes while refusals go on. Counts restart 1 hour after the first refusal. A single refusal is not logged.
+
 ## Troubleshooting
 
 ### Nobody can log in, but everything else works
 
-If you enabled memcached and it is stopped or stuck, the backend keeps working without it, but every login is refused with "Too many failed login attempts", even with the correct password. Login rate limiting cannot count attempts without memcached, so it refuses them rather than letting them through. Users who are already logged in are not affected, and the backend health check (`/api/health/`) still reports the backend as healthy.
+If you enabled memcached and it is stopped or stuck, the backend keeps working without it, but every login is refused with "Too many login attempts. Please try again later.", even with the correct password. Login rate limiting cannot count attempts without memcached, so it refuses them rather than letting them through. Users who are already logged in can keep working, except for actions that ask for their password or second factor again (such as managing MFA). Applications that sign in through CISO Assistant as an OAuth provider cannot complete their sign-in. The backend health check (`/api/health/`) still reports the backend as healthy.
 
-While memcached is down, metric computations are skipped or postponed, and the inbound webhook rate limit is not applied.
+While memcached is down, metric computations are skipped or postponed, and the rate limits of inbound webhooks and of the chat assistant are not applied.
 
 Check that memcached is running and start it again if needed:
 

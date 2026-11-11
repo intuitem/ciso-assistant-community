@@ -16,9 +16,9 @@ We will support memcached as an optional shared Django cache, disabled by defaul
 ## Consequences
 
 - Without memcached, behaviour is unchanged: caches stay per process.
-- Whoever enables memcached runs it. If it stops or hangs, cache operations become misses after a short timeout and the app keeps working, but logins are refused until it is back: login rate limiting fails closed. The backend health check stays green.
+- Whoever enables memcached runs it. If it stops or hangs, after a short timeout reads miss, writes are dropped and `add()` fails, and the app keeps working, but logins are refused until it is back: login rate limiting fails closed. The backend health check stays green.
 - Code must stay correct with a per-process cache. Use the cache for rate limits, locks and short-lived copies of data, never as the only copy.
-- Never store secrets, sessions or tokens in the cache.
+- Our code must never store secrets or sessions in the cache. allauth's OAuth provider keeps its short-lived authorization and device codes there.
 - Never mount the socket into another container. Whoever switches memcached to TCP must filter the network so that only the backend and Huey reach it.
 - The chart's memcached is per pod: with several backend replicas, rate limits count per pod, unless the operator runs a shared memcached over TCP.
 
@@ -30,6 +30,6 @@ Memcached has no authentication, and Django stores cached values as pickles, so 
 - **No SSRF path.** Every outbound request the backend makes to a configured URL (webhooks, audit sinks, LLM, Jira, ServiceNow, mail server) targets a host and port. A unix socket cannot be named that way. This holds even where `ALLOW_PRIVATE_NETWORK_REQUESTS` turns off the SSRF guard (`core/net_safety.py`), and without relying on memcached's own refusal of HTTP request lines.
 - **Only the cache's own users mount the socket.** In Compose, the socket volume is owned by uid 1001 with mode 0700 and is mounted only into the backend, Huey and memcached. In the chart, it is an `emptyDir` private to the backend pod, mounted into the same three containers. The frontend never mounts it.
 
-Accepted residual risks: code running in the backend or Huey can write to memcached, but it already holds the database credentials. The rate-limit counters, feature flags and locks in the cache are not sensitive. An operator can switch memcached to TCP: the docs say what network filtering it needs, and that filtering is the operator's responsibility.
+Accepted residual risks: code running in the backend or Huey can write to memcached, but it already holds the database credentials. The rate-limit counters, feature flags and locks in the cache are not sensitive. The OAuth codes are, but reading them needs the same access as writing to memcached, which already means running code in the backend. An operator can switch memcached to TCP: the docs say what network filtering it needs, and that filtering is the operator's responsibility.
 
-What would reopen this assessment: shipping memcached over TCP in our own Compose files or chart, mounting its socket into another container, or caching secrets or session data.
+What would reopen this assessment: shipping memcached over TCP in our own Compose files or chart, mounting its socket into another container, or our code caching secrets or session data.
