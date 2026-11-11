@@ -815,7 +815,9 @@ ENABLE_MEMCACHED = os.environ.get("ENABLE_MEMCACHED", "False").lower() in (
 MEMCACHED_LOCATION = os.environ.get(
     "MEMCACHED_LOCATION", "unix:/run/memcached/memcached.sock"
 )
+logger.info("ENABLE_MEMCACHED: %s", ENABLE_MEMCACHED)
 if ENABLE_MEMCACHED:
+    logger.info("MEMCACHED_LOCATION: %s", MEMCACHED_LOCATION)
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
