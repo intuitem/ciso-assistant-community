@@ -3,6 +3,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import OccurrenceHistory from '#lib/components/TaskOccurrences/OccurrenceHistory.svelte';
 	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import { superValidate } from 'sveltekit-superforms';
@@ -18,6 +19,8 @@
 	} from '#lib/components/Modals/stores.js';
 	import { page } from '$app/state';
 	import { refreshAll } from '$app/navigation';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
 
 	interface Props {
 		data: PageData;
@@ -116,7 +119,8 @@
 		refreshAll();
 	}
 
-	const categories = [
+	// Derived: previous / next reuse this page for another occurrence.
+	const categories = $derived([
 		{
 			label: m.appliedControls(),
 			items: taskNode.applied_controls,
@@ -142,10 +146,67 @@
 			items: taskNode.findings_assessment,
 			baseUrl: '/finding-assessments'
 		}
-	];
+	]);
+
+	// The task's history, oldest first. The viewed occurrence is added when it
+	// falls outside the history's window, so it is always there to ring.
+	const history = $derived.by(() => {
+		const occurrences = data.history.some((occurrence) => occurrence.id === taskNode.id)
+			? data.history
+			: [
+					...data.history,
+					{ id: taskNode.id, due_date: taskNode.due_date, status: taskNode.status }
+				];
+		return [...occurrences].sort((a, b) => (a.due_date ?? '').localeCompare(b.due_date ?? ''));
+	});
 </script>
 
+{#snippet occurrenceLink(
+	occurrence: { id: string; due_date: string | null } | null,
+	label: string,
+	icon: string,
+	iconFirst: boolean
+)}
+	{#if occurrence}
+		<!-- A plain link: the breadcrumb then swaps this occurrence for the other
+		     one instead of stacking a crumb per click -->
+		<a
+			href="/task-nodes/{occurrence.id}"
+			title={formatDateOrDateTime(occurrence.due_date, getLocale()) ?? ''}
+			class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1 text-sm rounded-lg border border-surface-300-700 text-surface-700-300 hover:bg-surface-100-900 transition-colors"
+		>
+			{#if iconFirst}<i class="fa-solid {icon} text-xs"></i>{/if}
+			{label}
+			{#if !iconFirst}<i class="fa-solid {icon} text-xs"></i>{/if}
+		</a>
+	{:else}
+		<span
+			aria-disabled="true"
+			class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1 text-sm rounded-lg border border-surface-200-800 text-surface-400-600 cursor-not-allowed"
+		>
+			{#if iconFirst}<i class="fa-solid {icon} text-xs"></i>{/if}
+			{label}
+			{#if !iconFirst}<i class="fa-solid {icon} text-xs"></i>{/if}
+		</span>
+	{/if}
+{/snippet}
+
 <div class="bg-surface-50-950 p-4 m-4 shadow-sm rounded-lg space-y-6">
+	{#if taskNode.is_recurrent}
+		<!-- The task's history, with this occurrence ringed, and a way to the others -->
+		<div class="flex items-center justify-between gap-4" data-testid="occurrence-navigation">
+			{@render occurrenceLink(data.previousOccurrence, m.previous(), 'fa-chevron-left', true)}
+			<div class="min-w-0 space-y-1">
+				<OccurrenceHistory
+					occurrences={history}
+					markedId={taskNode.id}
+					markedLabel={null}
+					stackBreadcrumb={false}
+				/>
+			</div>
+			{@render occurrenceLink(data.nextOccurrence, m.next(), 'fa-chevron-right', false)}
+		</div>
+	{/if}
 	<!-- HEADER COMPACT -->
 	<div class="flex flex-row justify-between">
 		<!-- Task -->
@@ -357,8 +418,8 @@
 					}}
 					class="px-4 py-0.5 rounded-lg text-md border
 			{taskNode.status === 'cancelled'
-						? 'bg-error-500 text-white border-error-600'
-						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-error-50'}"
+						? 'bg-surface-500 text-white border-surface-600'
+						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-surface-100-900'}"
 				>
 					{m.cancelled()}
 				</button>
