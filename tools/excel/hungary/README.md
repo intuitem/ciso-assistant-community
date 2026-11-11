@@ -215,8 +215,8 @@ Ellenőrzés: a `check_library_v2.py` hibát nem jelez. Betöltési teszt a `pre
 * tipikus beszállítókat, eszközöket és egy megállapítás-nyilvántartást.
 
 A 13 lépés rövid jogszabályi hivatkozásokkal vezet végig a folyamaton. Bekapcsolt funkciók: `compliance`,
-`risk_management`, `tprm`, `incidents`, `follow_up`, `policy_documents`, `exceptions`, `risk_acceptances`,
-`tasks`; ha az alkalmazáskor a funkciók beállítását is kéri, a fel nem sorolt funkciókat a CISO Assistant
+`risk_management`, `tprm`, `incidents`, `nis2`, `follow_up`, `policy_documents`, `exceptions`, `risk_acceptances`,
+`tasks`, `control_plan`, `comments`, `xrays`, `terminologies`; ha az alkalmazáskor a funkciók beállítását is kéri, a fel nem sorolt funkciókat a CISO Assistant
 kikapcsolja. A szövegek angol fordítással is szerepelnek.
 
 Korlátok: a biztonsági osztálynak nincs külön mezője, a lépés leírása az eszközök biztonsági céljait
@@ -442,8 +442,8 @@ A preset for essential and important entities supervised by the SZTFH (Cybersecu
 * typical suppliers, assets and a findings register.
 
 The 13 steps guide through the process with short legal references. Enabled features: `compliance`,
-`risk_management`, `tprm`, `incidents`, `follow_up`, `policy_documents`, `exceptions`,
-`risk_acceptances`, `tasks`; when the feature settings are applied too, CISO Assistant turns the
+`risk_management`, `tprm`, `incidents`, `nis2`, `follow_up`, `policy_documents`, `exceptions`,
+`risk_acceptances`, `tasks`, `control_plan`, `comments`, `xrays`, `terminologies`; when the feature settings are applied too, CISO Assistant turns the
 features not listed off. The texts include an English translation.
 
 Limitations: the security class has no field of its own, the step description suggests the security

@@ -37,11 +37,16 @@ objects:
         - risk_management
         - tprm
         - incidents
+        - nis2
         - follow_up
         - policy_documents
         - exceptions
         - risk_acceptances
         - tasks
+        - control_plan
+        - comments
+        - xrays
+        - terminologies
 
     scaffolded_objects:
       - type: risk_assessment
@@ -405,7 +410,7 @@ objects:
           translations:
             en:
               title: "Security classification"
-              description: "Classify the EIRs into the Alap (basic), Jelentős (substantial) or Magas (high) security class based on an impact analysis approved by the head of the organisation. The damage levels of the impact analysis (minor, moderate, major) are also the impact levels of the risk matrix. The class is determined by the data handled in the system and by its functions (MK Decree 7/2024, annex 1, point 2.1.2): set the Security objectives of the primary assets for confidentiality, integrity and availability, and on each system enter the primary assets it supports; the systems inherit the highest value. On the FIPS-199 scale, selectable in the Settings and applying to the whole instance, Low = Alap, Moderate = Jelentős, High = Magas. With another scale you can record the class in the Labels field of the asset instead. The class determines which requirement groups have to be assessed."
+              description: "Classify the EIRs into the Alap (basic), Jelentős (substantial) or Magas (high) security class based on an impact analysis approved by the head of the organisation. The damage levels of the impact analysis (minor, moderate, major) are also the impact levels of the risk matrix. The class is determined by the data handled in the system and by its functions (MK Decree 7/2024, annex 1, point 2.1.2): set the Security targets of the primary assets for confidentiality, integrity and availability, and on each system enter the primary assets it supports; the systems inherit the highest value. On the FIPS-199 scale, selectable in the Settings and applying to the whole instance, Low = Alap, Moderate = Jelentős, High = Magas. With another scale you can record the class in the Labels field of the asset instead. The class determines which requirement groups have to be assessed."
         - key: risk_assessment
           title: "Kockázatelemzés"
           description: "Vizsgálja meg a 7/2024. MK rendelet 3. mellékletének mind a 47 fenyegetését (1. melléklet 5.1.1.1.): értékelje az előre létrehozott forgatókönyveket, és a még le nem fedett fenyegetésekhez vegyen fel továbbiakat. A mátrix a rendelet négy kockázati kategóriáját használja; az „alacsony” feletti kockázat felvállalását kockázatonként, indoklással kell jóváhagyni (5.1.2.2.), ezt a Kockázatelfogadások között rögzítheti. Ha az eredmény indokolja, pontosítsa az osztályba sorolást (5.1.2.3.)."
