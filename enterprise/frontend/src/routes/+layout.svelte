@@ -140,7 +140,8 @@
 </svelte:head>
 
 <Modal components={modalRegistry} />
-<Toaster position="bottom-center" visibleToasts={3} gap={10} />
+<!-- offset clears the ChatWidget button (fixed bottom-6 right-6, 56px) -->
+<Toaster position="bottom-right" offset={{ bottom: 96, right: 24 }} visibleToasts={3} gap={10} />
 {@render children?.()}
 
 {#if $flash}
