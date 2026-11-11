@@ -101,13 +101,40 @@
 		).filter((i): i is Item => i !== false && (i.show ?? i.count > 0))
 	);
 
-	const tierStyle: Record<Tier, { label: () => string; number: string; rule: string }> = {
-		now: { label: m.briefingTierNow, number: 'text-error-600-400', rule: 'bg-error-500' },
-		late: { label: m.briefingTierLate, number: 'text-warning-700-300', rule: 'bg-warning-500' },
+	const tierStyle: Record<
+		Tier,
+		{
+			label: () => string;
+			number: string;
+			panel: string;
+			heading: string;
+			dot: string;
+			divider: string;
+		}
+	> = {
+		now: {
+			label: m.briefingTierNow,
+			number: 'text-error-600-400',
+			panel: 'bg-error-500/[0.06] border-error-500/20',
+			heading: 'text-error-700-300',
+			dot: 'bg-error-500',
+			divider: 'border-error-500/15'
+		},
+		late: {
+			label: m.briefingTierLate,
+			number: 'text-warning-700-300',
+			panel: 'bg-warning-500/[0.08] border-warning-500/25',
+			heading: 'text-warning-800-200',
+			dot: 'bg-warning-500',
+			divider: 'border-warning-500/20'
+		},
 		housekeeping: {
 			label: m.briefingTierHousekeeping,
 			number: 'text-surface-800-200',
-			rule: 'bg-surface-300-700'
+			panel: 'bg-surface-100-900 border-surface-200-800',
+			heading: 'text-surface-700-300',
+			dot: 'bg-surface-400-600',
+			divider: 'border-surface-200-800'
 		}
 	};
 
@@ -152,6 +179,35 @@
 		{ key: 'residual', label: m.briefingAfterTreatment(), count: metrics.risk?.high_residual ?? 0 }
 	]);
 
+	// Hero trend: daily root snapshots, only sent to users who can see the whole organisation.
+	type Point = [string, number];
+	const activeSeries: Point[] = $derived(metrics.trends?.active_controls ?? []);
+	const shortDate = (iso: string) =>
+		new Date(iso).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
+	const heroDelta = $derived.by(() => {
+		if (activeSeries.length < 2) return '';
+		const delta = activeSeries.at(-1)![1] - activeSeries[0][1];
+		const since = shortDate(activeSeries[0][0]);
+		return delta === 0
+			? m.briefingNoChangeSince({ date: since })
+			: m.briefingDeltaSince({
+					delta: delta.toLocaleString(getLocale(), { signDisplay: 'exceptZero' }),
+					date: since
+				});
+	});
+	// x follows the dates, so gaps between snapshots stay visible as straight runs.
+	const heroChart = $derived.by(() => {
+		if (activeSeries.length < 2) return null;
+		const [w, h, pad] = [360, 72, 8];
+		const t = activeSeries.map(([d]) => new Date(d).getTime());
+		const v = activeSeries.map(([, n]) => n);
+		const [t0, t1, lo, hi] = [t[0], t.at(-1)!, Math.min(...v), Math.max(...v)];
+		const x = (i: number) => ((t[i] - t0) / (t1 - t0 || 1)) * w;
+		const y = (n: number) => (hi === lo ? h / 2 : pad + (1 - (n - lo) / (hi - lo)) * (h - 2 * pad));
+		const line = v.map((n, i) => `${x(i).toFixed(1)},${y(n).toFixed(1)}`).join(' ');
+		return { line, area: `M0,${h} L${line.replaceAll(' ', ' L')} L${w},${h} Z`, w, h };
+	});
+
 	// Meters fill once on first paint; the CSS transition is skipped under reduced motion.
 	let filled = $state(false);
 	onMount(() => requestAnimationFrame(() => (filled = true)));
@@ -159,78 +215,115 @@
 </script>
 
 <section class="pt-3 pb-2">
-	<dl class="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-5 border-b border-surface-200-800 pb-6">
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.briefingActiveControls()}</dt>
-			<dd class="mt-1">
-				<a href="/applied-controls/?status=active" class="stat-link">
-					<span class="text-[1.75rem] leading-none font-semibold tabular-nums tracking-tight"
-						><AnimatedNumber value={metrics.controls?.active ?? 0} countUp /></span
+	<div
+		class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-7 border-b border-surface-200-800 pb-6"
+	>
+		<a href="/applied-controls/?status=active" class="hero">
+			<span class="flex items-start justify-between gap-3 px-5 pt-5">
+				<span>
+					<span class="block text-[13px] text-surface-600-400">{m.briefingActiveControls()}</span>
+					<span class="mt-1.5 flex flex-wrap items-baseline gap-x-2.5">
+						<span class="hero-number"
+							><AnimatedNumber value={metrics.controls?.active ?? 0} countUp /><span
+								class="hero-tint"
+								aria-hidden="true"
+							></span></span
+						>
+						<span class="text-[15px] text-surface-600-400"
+							>{m.briefingOfAppliedControls({ total: fmt(metrics.controls?.total) })}</span
+						>
+					</span>
+				</span>
+				{#if heroDelta}
+					<span
+						class="shrink-0 rounded-full bg-primary-500/10 px-2.5 py-1 text-[13px] font-semibold tabular-nums text-primary-700-300"
+						>{heroDelta}</span
 					>
-					<span class="ml-1 text-sm text-surface-600-400"
-						>{m.briefingOfTotal({ total: fmt(metrics.controls?.total) })}</span
-					>
-				</a>
-				<span class="meter" aria-hidden="true"
-					><span
-						style="width: {fill(
-							share(metrics.controls?.active ?? 0, metrics.controls?.total ?? 0)
-						)}%"
-					></span></span
+				{/if}
+			</span>
+			{#if heroChart}
+				<svg
+					viewBox="0 0 {heroChart.w} {heroChart.h}"
+					preserveAspectRatio="none"
+					class="mt-3 block h-[72px] w-full"
+					aria-hidden="true"
 				>
-			</dd>
-		</div>
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.sumpageAvgProgress()}</dt>
-			<dd class="mt-1">
-				{#await auditsMetrics}
-					<span class="text-[1.75rem] leading-none font-semibold text-surface-400">–</span>
-					<span class="meter" aria-hidden="true"><span style="width: 0%"></span></span>
-				{:then a}
-					<a href="/compliance-assessments/" class="stat-link">
-						<span class="text-[1.75rem] leading-none font-semibold tabular-nums tracking-tight"
+					<defs>
+						<linearGradient id="hero-fill" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0%" stop-color="#8e51ff" stop-opacity="0.26" />
+							<stop offset="100%" stop-color="#8e51ff" stop-opacity="0" />
+						</linearGradient>
+						<linearGradient id="hero-line" x1="0" y1="0" x2="1" y2="0">
+							<stop offset="0%" stop-color="#f6339a" />
+							<stop offset="100%" stop-color="#8e51ff" />
+						</linearGradient>
+					</defs>
+					<path d={heroChart.area} fill="url(#hero-fill)" />
+					<polyline
+						points={heroChart.line}
+						fill="none"
+						stroke="url(#hero-line)"
+						stroke-width="2.25"
+						stroke-linejoin="round"
+						vector-effect="non-scaling-stroke"
+					/>
+				</svg>
+				<span class="flex justify-between px-5 pt-1 pb-2.5 text-[11px] text-surface-600-400">
+					<span>{shortDate(activeSeries[0][0])}</span>
+					<span>{shortDate(activeSeries.at(-1)![0])}</span>
+				</span>
+			{:else}
+				<span class="block pb-5"></span>
+			{/if}
+		</a>
+
+		<dl class="flex flex-col justify-between gap-3">
+			<div class="stat-row">
+				<dt class="text-[13px] text-surface-600-400">
+					{m.sumpageAvgProgress()}
+					<span class="block mt-0.5 text-xs"
+						>{m.briefingAcrossAudits({ count: fmt(metrics.compliance?.active_audits) })}</span
+					>
+				</dt>
+				<dd>
+					{#await auditsMetrics}
+						<span class="stat-number text-surface-400">–</span>
+					{:then a}
+						<a href="/compliance-assessments/" class="stat-number stat-link"
 							><AnimatedNumber
 								value={(a?.progress_avg ?? 0) / 100}
 								format={{ style: 'percent' }}
 								countUp
-							/></span
+							/></a
 						>
-						<span class="ml-1 text-sm text-surface-600-400"
-							>{m.briefingAcrossAudits({ count: fmt(metrics.compliance?.active_audits) })}</span
-						>
-					</a>
-					<span class="meter" aria-hidden="true"
-						><span style="width: {fill(a?.progress_avg ?? 0)}%"></span></span
+					{:catch}
+						<span class="stat-number">–</span>
+					{/await}
+				</dd>
+			</div>
+			<div class="stat-row">
+				<dt class="text-[13px] text-surface-600-400">{m.sumpageNonCompliantItems()}</dt>
+				<dd>
+					<a href="/requirement-assessments?result=non_compliant" class="stat-number stat-link"
+						><AnimatedNumber value={metrics.compliance?.non_compliant_items ?? 0} countUp /></a
 					>
-				{:catch}
-					<span class="text-[1.75rem] leading-none font-semibold">–</span>
-				{/await}
-			</dd>
-		</div>
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.sumpageNonCompliantItems()}</dt>
-			<dd class="mt-1">
-				<a href="/requirement-assessments?result=non_compliant" class="stat-link">
-					<span class="text-[1.75rem] leading-none font-semibold tabular-nums tracking-tight"
-						><AnimatedNumber value={metrics.compliance?.non_compliant_items ?? 0} countUp /></span
-					>
-				</a>
-			</dd>
-		</div>
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.riskScenarios()}</dt>
-			<dd class="mt-1">
-				<a href="/risk-scenarios/" class="stat-link">
-					<span class="text-[1.75rem] leading-none font-semibold tabular-nums tracking-tight"
-						><AnimatedNumber value={scenarios} countUp /></span
-					>
-					<span class="ml-1 text-sm text-surface-600-400"
+				</dd>
+			</div>
+			<div class="stat-row last">
+				<dt class="text-[13px] text-surface-600-400">
+					{m.riskScenarios()}
+					<span class="block mt-0.5 text-xs"
 						>{m.briefingInAssessments({ count: fmt(metrics.risk?.assessments) })}</span
 					>
-				</a>
-			</dd>
-		</div>
-	</dl>
+				</dt>
+				<dd>
+					<a href="/risk-scenarios/" class="stat-number stat-link"
+						><AnimatedNumber value={scenarios} countUp /></a
+					>
+				</dd>
+			</div>
+		</dl>
+	</div>
 
 	<div
 		class="mt-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-x-12 gap-y-10 items-start"
@@ -238,18 +331,17 @@
 		<div>
 			<h3 class="text-[15px] font-semibold mb-3">{m.briefingNeedsAttention()}</h3>
 			{#if groups.length}
-				<div class="space-y-5">
+				<div class="space-y-2.5">
 					{#each groups as group (group.tier)}
 						{@const style = tierStyle[group.tier]}
-						<div class="grid grid-cols-[6rem_minmax(0,1fr)] gap-x-3">
-							<p class="pt-3 text-[13px] text-surface-600-400">{style.label()}</p>
-							<ul class="relative pl-3">
-								<span
-									class="absolute left-0 top-2 bottom-2 w-[3px] rounded-full {style.rule}"
-									aria-hidden="true"
-								></span>
-								{#each group.items as item (item.label)}
-									<li>
+						<div class="rounded-xl border px-3.5 pt-2.5 pb-1 {style.panel}">
+							<p class="flex items-center gap-2 pb-1 text-[13px] font-semibold {style.heading}">
+								<span class="size-2 rounded-full {style.dot}" aria-hidden="true"></span>
+								{style.label()}
+							</p>
+							<ul>
+								{#each group.items as item, i (item.label)}
+									<li class={i > 0 ? `border-t ${style.divider}` : ''}>
 										<a href={item.href} class="row group">
 											<span
 												class="text-right text-[1.375rem] leading-none font-semibold tabular-nums {style.number}"
@@ -382,48 +474,92 @@
 		margin-inline: -0.5rem;
 		border-radius: 0.5rem;
 	}
+	/* A translucent hover reads on every tier tint. */
 	.row:hover {
-		background: var(--color-surface-100);
+		background: rgb(15 23 42 / 0.045);
 	}
 	:global(.dark) .row:hover {
-		background: var(--color-surface-900);
+		background: rgb(255 255 255 / 0.06);
 	}
 	.row:focus-visible,
-	.stat-link:focus-visible {
+	.stat-link:focus-visible,
+	.hero:focus-visible {
 		outline: 2px solid var(--color-primary-500);
 		outline-offset: 2px;
 	}
-	.stat-link {
-		display: inline-flex;
+	.hero {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		border-radius: 0.875rem;
+		border: 1px solid var(--color-primary-100);
+		background: white;
+		transition: border-color 150ms;
+	}
+	.hero:hover {
+		border-color: var(--color-primary-300);
+	}
+	:global(.dark) .hero {
+		border-color: var(--color-primary-900);
+		background: var(--color-surface-900);
+	}
+	:global(.dark) .hero:hover {
+		border-color: var(--color-primary-700);
+	}
+	/* The brand gradient of the page title, spent on one figure only. NumberFlow renders in
+	   a shadow root that background-clip:text cannot reach, so the gradient is blended over
+	   solid digits instead: lighten keeps the white card white and tints the black digits. */
+	.hero-number {
+		position: relative;
+		display: inline-block;
+		font-size: 4rem;
+		line-height: 0.95;
+		font-weight: 700;
+		letter-spacing: -0.04em;
+		font-variant-numeric: tabular-nums;
+		color: #000;
+	}
+	.hero-tint {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		background: linear-gradient(90deg, #f6339a, #8e51ff);
+		mix-blend-mode: lighten;
+	}
+	:global(.dark) .hero-number {
+		color: #fff;
+	}
+	:global(.dark) .hero-tint {
+		mix-blend-mode: darken;
+	}
+	.stat-row {
+		display: flex;
 		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid var(--color-surface-200);
+	}
+	:global(.dark) .stat-row {
+		border-color: var(--color-surface-800);
+	}
+	.stat-row.last {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+	.stat-number {
+		font-size: 1.75rem;
+		line-height: 1;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		font-variant-numeric: tabular-nums;
+	}
+	.stat-link {
 		border-radius: 0.25rem;
 	}
-	.stat-link:hover > span:first-child {
+	.stat-link:hover {
 		text-decoration: underline;
 		text-decoration-thickness: 2px;
 		text-underline-offset: 4px;
-	}
-	.meter {
-		display: block;
-		margin-top: 0.625rem;
-		height: 3px;
-		max-width: 10rem;
-		border-radius: 9999px;
-		background: var(--color-surface-200);
-		overflow: hidden;
-	}
-	:global(.dark) .meter {
-		background: var(--color-surface-800);
-	}
-	.meter > span {
-		display: block;
-		height: 100%;
-		border-radius: inherit;
-		background: var(--color-primary-500);
-	}
-	@media (prefers-reduced-motion: no-preference) {
-		.meter > span {
-			transition: width 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
-		}
 	}
 </style>

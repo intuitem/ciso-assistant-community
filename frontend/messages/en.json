@@ -7965,8 +7965,10 @@
 	"briefingTierNow": "Act now",
 	"briefingTierLate": "Overdue",
 	"briefingTierHousekeeping": "Housekeeping",
-	"briefingOfTotal": "of {total}",
 	"briefingAcrossAudits": "across {count} active audits",
 	"briefingInAssessments": "in {count} assessments",
-	"briefingAfterTreatment": "After treatment"
+	"briefingAfterTreatment": "After treatment",
+	"briefingOfAppliedControls": "of {total} applied controls",
+	"briefingDeltaSince": "{delta} since {date}",
+	"briefingNoChangeSince": "No change since {date}"
 }

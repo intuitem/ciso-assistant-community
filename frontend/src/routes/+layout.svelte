@@ -13,6 +13,8 @@
 	});
 
 	import { Toaster } from 'svelte-sonner';
+	import { afterNavigate } from '$app/navigation';
+	import { revealActiveTabs } from '#lib/utils/tabs.js';
 	import Dialog from '#lib/components/Modals/Modal.svelte';
 	import DisplayJSONModal from '#lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
@@ -34,6 +36,9 @@
 
 	const flash = getFlash(page);
 	const toastStore = getToastStore();
+
+	// Tab bars that overflow keep the selected tab in view (deep links like ?tab=custom).
+	afterNavigate(() => requestAnimationFrame(() => revealActiveTabs()));
 
 	const toast = (message: string, options: Record<string, string>) => {
 		const t: ToastSettings = { message, ...options };

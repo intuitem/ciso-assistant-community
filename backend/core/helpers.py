@@ -1739,8 +1739,79 @@ def get_metrics(user: User, folder_id):
             "overdue_tasks_total": overdue_tasks.count(),
         },
         "csf_functions": csf_functions(user, folder_id),
+        # Root snapshots cover the whole organisation, not a single domain.
+        "trends": None if folder_id else get_summary_trends(user),
     }
     return data
+
+
+SUMMARY_TREND_DAYS = 30
+# Snapshot keys trended on the analytics summary; computed in
+# metrology.models.BuiltinMetricSample._compute_folder_metrics with the same definitions.
+SUMMARY_TREND_KEYS = [
+    "audits_avg_assessed",
+    "non_compliant_items",
+    "total_risk_scenarios",
+    "risk_scenarios_high_current",
+    "risk_scenarios_high_residual",
+    "incidents_open",
+    "controls_eta_missed",
+    "controls_p1_pending",
+    "tasks_overdue",
+    "findings_open",
+    "evidence_expired",
+    "controls_no_status",
+]
+# Models the root snapshot counts: a trend is only shown to users who can see all of them.
+SUMMARY_TREND_MODELS = (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RiskScenario,
+    Incident,
+    Finding,
+    Evidence,
+    TaskNode,
+)
+
+
+def get_summary_trends(user: User):
+    """Daily series of the summary figures from the root folder snapshots.
+
+    The root snapshot is organisation-wide, so it is only returned to users with a
+    recursive view grant on the root folder for every counted model; others get None.
+    """
+    from django.contrib.contenttypes.models import ContentType
+    from metrology.models import BuiltinMetricSample
+
+    root = Folder.get_root_folder()
+    for model in SUMMARY_TREND_MODELS:
+        grants = RoleAssignment._get_grant_folder_set(user, ("view", model))
+        if root.id not in grants.recursive_grant_folder_ids:
+            return None
+
+    samples = (
+        BuiltinMetricSample.objects.filter(
+            content_type=ContentType.objects.get_for_model(Folder),
+            object_id=root.id,
+            date__gte=date.today() - timedelta(days=SUMMARY_TREND_DAYS),
+        )
+        .order_by("date")
+        .values_list("date", "metrics")
+    )
+    series = {key: [] for key in ["active_controls", *SUMMARY_TREND_KEYS]}
+    for day, metrics in samples:
+        values = {
+            "active_controls": (metrics.get("controls_status_breakdown") or {}).get(
+                "active"
+            ),
+            **{key: metrics.get(key) for key in SUMMARY_TREND_KEYS},
+        }
+        for key, value in values.items():
+            # Snapshots taken before a metric existed simply lack it.
+            if value is not None:
+                series[key].append([day.isoformat(), value])
+    return series
 
 
 # Recurring tasks pile up; the briefing only surfaces the recent backlog.

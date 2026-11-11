@@ -7965,8 +7965,10 @@
 	"briefingTierNow": "Urgent",
 	"briefingTierLate": "En retard",
 	"briefingTierHousekeeping": "Hygiène",
-	"briefingOfTotal": "sur {total}",
 	"briefingAcrossAudits": "sur {count} audits actifs",
 	"briefingInAssessments": "dans {count} analyses",
-	"briefingAfterTreatment": "Après traitement"
+	"briefingAfterTreatment": "Après traitement",
+	"briefingOfAppliedControls": "sur {total} mesures appliquées",
+	"briefingDeltaSince": "{delta} depuis le {date}",
+	"briefingNoChangeSince": "Aucun changement depuis le {date}"
 }

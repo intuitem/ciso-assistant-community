@@ -242,6 +242,69 @@ BUILTIN_METRICS = {
             "description": _("Vulnerabilities count per status"),
         },
         # Tasks
+        "controls_no_status": {
+            "label": _("Controls Without Status"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Applied controls with no status set"),
+        },
+        "controls_eta_missed": {
+            "label": _("Controls Past ETA"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Applied controls not active after their ETA"),
+        },
+        "controls_p1_pending": {
+            "label": _("Pending P1 Controls"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Priority 1 applied controls not yet active"),
+        },
+        "audits_avg_assessed": {
+            "label": _("Audits Average Assessed"),
+            "type": METRIC_TYPE_PERCENTAGE,
+            "description": _(
+                "Average share of assessed requirements across audits, as on the analytics summary"
+            ),
+        },
+        "non_compliant_items": {
+            "label": _("Non-compliant Items"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Requirement assessments with a non-compliant result"),
+        },
+        "total_risk_scenarios": {
+            "label": _("Total Risk Scenarios"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Risk scenarios (root folder = whole organization)"),
+        },
+        "risk_scenarios_high_current": {
+            "label": _("High Current Risks"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Risk scenarios whose current level is in the top levels of their own matrix"
+            ),
+        },
+        "risk_scenarios_high_residual": {
+            "label": _("High Residual Risks"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Risk scenarios whose residual level is in the top levels of their own matrix"
+            ),
+        },
+        "incidents_open": {
+            "label": _("Open Incidents"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Incidents not closed or dismissed"),
+        },
+        "findings_open": {
+            "label": _("Open Findings"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Findings not dismissed, mitigated, resolved, closed or deprecated"
+            ),
+        },
+        "evidence_expired": {
+            "label": _("Expired Evidence"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Evidence past its validity date"),
+        },
         "tasks_overdue": {
             "label": _("Tasks Overdue"),
             "type": METRIC_TYPE_NUMBER,

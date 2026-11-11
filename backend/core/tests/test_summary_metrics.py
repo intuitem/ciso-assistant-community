@@ -109,3 +109,35 @@ def test_top_level_filter_matches_the_count(admin_client, domain):  # noqa: F811
     residual = admin_client.get("/api/risk-scenarios/?top_level=residual").json()
     assert [s["name"] for s in current["results"]] == ["s0"]
     assert [s["name"] for s in residual["results"]] == ["s1"]
+
+
+@pytest.mark.django_db
+def test_snapshot_matches_summary_and_trends_are_gated(admin_client, domain):  # noqa: F811
+    from core.helpers import get_summary_trends
+    from iam.models import User
+    from metrology.models import BuiltinMetricSample
+
+    AppliedControl.objects.create(name="no status", folder=domain)
+    AppliedControl.objects.create(name="active", folder=domain, status="active")
+    Incident.objects.create(name="open", folder=domain)
+    fa = FindingsAssessment.objects.create(name="fa", folder=domain)
+    Finding.objects.create(name="open", folder=domain, findings_assessment=fa)
+    _scenarios(domain, RISK_MATRIX_JSON_DEFINITION, [(2, 0), (1, 1)])
+
+    root = Folder.get_root_folder()
+    snapshot = BuiltinMetricSample.compute_metrics(root)
+    BuiltinMetricSample.update_or_create_snapshot(root)
+    summary = admin_client.get("/api/get_metrics/").json()["results"]
+
+    assert snapshot["controls_no_status"] == summary["controls"]["no_status"]
+    assert snapshot["incidents_open"] == summary["operations"]["open_incidents"]
+    assert snapshot["findings_open"] == summary["operations"]["open_findings"]
+    assert snapshot["total_risk_scenarios"] == summary["risk"]["scenarios"]
+    assert snapshot["risk_scenarios_high_current"] == summary["risk"]["high_current"]
+
+    trends = summary["trends"]
+    assert trends["active_controls"][-1][1] == summary["controls"]["active"]
+    assert trends["incidents_open"][-1][1] == 1
+
+    nobody = User.objects.create_user(email="no-global-view@tests.local")
+    assert get_summary_trends(nobody) is None
