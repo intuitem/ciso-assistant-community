@@ -324,6 +324,8 @@ frontend:
   config:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
+    # -- Number of reverse proxies in front of the frontend (used to pick the real client address for login rate limiting; only used when `ingress.enabled`).
+    xffDepth: 1 # @schema minimum: 1
 
   # -- Set extra volumes for frontend
   extraVolumes: []
@@ -464,6 +466,40 @@ networkPolicy:
   ingress: []
   # -- Egress rules (raw Kubernetes NetworkPolicy `egress` entries)
   egress: []
+
+## Cache (shared by the backend gunicorn workers and the huey workers)
+## Note: pod-level settings (imagePullSecrets, nodeSelector, tolerations, affinity) come from `backend`.
+memcached:
+  # -- Run a memcached container in the backend pod, reached by the backend and Huey through a unix socket (sets ENABLE_MEMCACHED). Optional: whoever enables it runs it
+  enabled: false
+
+  # -- Memory memcached may use for items, in megabytes
+  memoryLimit: 16 # @schema minimum: 1
+
+  ## Memcached image
+  image:
+    # -- Registry to use for memcached
+    registry: docker.io
+    # -- Repository to use for memcached
+    repository: library/memcached
+    # -- Tag to use for memcached
+    tag: 1.6-alpine
+    # -- Image pull policy for memcached
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Resources for memcached
+  resources: {} # @schema additionalProperties: true
+
+  # -- Container-level security context for memcached
+  containerSecurityContext: # @schema additionalProperties: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
 
 ## DEPRECATED - Bundled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql

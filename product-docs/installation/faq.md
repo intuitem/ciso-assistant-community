@@ -122,6 +122,16 @@ You can confirm that case from the health log, which shows `curl: not found`:
 docker inspect --format '{{json .State.Health}}' backend
 ```
 
+### All users are locked out
+
+Login rate limiting relies on your reverse proxy passing the client IP address. If you enabled the optional `memcached` container and it is stopped, every login is refused, even with the correct password, until it is back. Users who are already logged in can keep working, except for actions that ask for their password again:
+
+```
+docker compose up -d memcached
+```
+
+If all users are blocked at the same time after a few wrong passwords, the backend probably sees the same IP address for everyone. See [Shared cache and login rate limiting](shared-cache.md#troubleshooting).
+
 ### Don't want / Can't run the init script
 
 The recommended pattern for a first local setup is to go with ./docker-compose.sh ;\
