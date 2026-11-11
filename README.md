@@ -366,6 +366,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 114. China: Personal Information Protection Law (PIPL) and CAC Personal Information Protection Compliance Audit Measures 🇨🇳
 115. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 116. Australian Information Security Manual (ASD ISM) (September 2026) 🇦🇺
+117. ITSP.10.033 - Security and privacy controls and assurance activities catalogue, with the medium impact profile (ITSP.10.033-01) 🇨🇦
 
 ### Community contributions
 

@@ -3,9 +3,9 @@ import { contentDispositionHeader } from '#lib/utils/contentDisposition.js';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-export const GET: RequestHandler = async ({ fetch, params }) => {
+export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const URLModel = 'risk-assessments';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/risk_assessment_pdf/`;
+	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/risk_assessment_pdf/${url.search}`;
 
 	const risk_assessment = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/`).then((res) =>
 		res.json()

@@ -2024,7 +2024,10 @@ def acceptances_to_review(user: User):
     return acceptances
 
 
-def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=False):
+def build_scenario_clusters(
+    risk_assessment: RiskAssessment, include_inherent=False, scenarios=None
+):
+    """Scenario ref_ids per matrix cell; `scenarios` narrows it to a selection."""
     risk_matrix = risk_assessment.risk_matrix.parse_json()
     grid = risk_matrix["grid"]
     risk_matrix_current = [
@@ -2037,9 +2040,9 @@ def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=Fa
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
 
-    for ri in RiskScenario.objects.filter(risk_assessment=risk_assessment).order_by(
-        "created_at"
-    ):
+    if scenarios is None:
+        scenarios = RiskScenario.objects.filter(risk_assessment=risk_assessment)
+    for ri in scenarios.order_by("created_at"):
         if ri.current_level >= 0:
             risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.ref_id)
         if ri.residual_level >= 0:
