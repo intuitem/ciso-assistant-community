@@ -74,13 +74,16 @@
 			>
 				{#snippet optButton()}
 					{#if URLModel === 'evidences' && !page.data.user?.is_third_party}
-						<a
-							href={reviewHref}
-							class="btn preset-tonal-primary"
-							title={m.reviewEvidences()}
-							data-testid="review-evidences-button"
-							><i class="fa-solid fa-clipboard-check"></i>{m.reviewEvidences()}</a
-						>
+						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+							<a
+								href={reviewHref}
+								class="inline-block p-3 btn-mini-secondary w-12 text-center focus:relative"
+								title={m.reviewEvidences()}
+								aria-label={m.reviewEvidences()}
+								data-testid="review-evidences-button"
+								><i class="fa-solid fa-clipboard-check"></i></a
+							>
+						</span>
 					{/if}
 				{/snippet}
 				{#snippet addButton()}
