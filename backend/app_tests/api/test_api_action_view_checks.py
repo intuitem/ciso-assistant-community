@@ -14,16 +14,21 @@ from core.models import (
     Asset,
     ComplianceAssessment,
     Evidence,
+    EvidenceRevision,
     Finding,
     FindingsAssessment,
     Framework,
     Perimeter,
+    RequirementAssessment,
+    RequirementNode,
     RiskAcceptance,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
+    TaskNode,
     TaskTemplate,
 )
+from ebios_rm.models import EbiosRMStudy
 from iam.models import Folder, User
 from privacy.models import Processing, RightRequest
 from test_api_requirements_list_masking import _analyst, _domain
@@ -235,6 +240,7 @@ def test_task_calendar_and_yearly_review_mask_hidden_links(world):
     )
     task.assets.set([_concealed(Asset, world)])
     task.applied_controls.set([_concealed(AppliedControl, world)])
+    task.assigned_to.set([world.stranger.actor])
 
     start, end = today - timedelta(days=3), today + timedelta(days=20)
     (occurrence,) = _body(
@@ -243,9 +249,12 @@ def test_task_calendar_and_yearly_review_mask_hidden_links(world):
     (folder,) = _body(world.client.get("/api/task-templates/yearly_review/"))["folders"]
     (row,) = folder["tasks"]
 
-    for entry in (occurrence, row):
+    (node,) = _body(world.client.get("/api/task-nodes/"))["results"]
+
+    for entry in (occurrence, row, node):
         assert entry["assets"] == [{}]
         assert entry["applied_controls"] == [{}]
+        assert entry["assigned_to"] == [{}]
 
 
 @pytest.mark.django_db
@@ -255,6 +264,7 @@ def test_composer_data_masks_hidden_links(world):
         name="scenario", risk_assessment=risk_assessment
     )
     scenario.assets.set([_concealed(Asset, world)])
+    scenario.applied_controls.set([_concealed(AppliedControl, world)])
     scenario.owner.set([world.stranger.actor])
 
     result = _body(
@@ -264,4 +274,168 @@ def test_composer_data_masks_hidden_links(world):
     (untreated,) = result["riskscenarios"]["untreated"]
     assert untreated["id"] == str(scenario.id)
     assert untreated["assets"] == [{}]
+    assert untreated["applied_controls"] == [{}]
     assert untreated["owner"] == [{}]
+
+
+def _requirement_assessment(audit):
+    node = RequirementNode.objects.create(
+        framework=audit.framework,
+        urn=f"{audit.framework.urn}:1",
+        ref_id="1",
+        assessable=True,
+        folder=Folder.get_root_folder(),
+    )
+    return RequirementAssessment.objects.create(
+        compliance_assessment=audit, requirement=node, folder=audit.folder
+    )
+
+
+@pytest.mark.django_db
+def test_ebios_rm_report_leaves_out_what_the_user_cannot_view(world):
+    study = EbiosRMStudy.objects.create(
+        name="study",
+        folder=world.mine,
+        risk_matrix=RiskMatrix.objects.create(
+            name="matrix",
+            folder=world.mine,
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
+        ),
+    )
+    audit = _audit("audit", world.mine, world.perimeter)
+    study.compliance_assessments.set(
+        [audit, _audit("concealed audit", world.hidden, world.perimeter)]
+    )
+    study.assets.set([_concealed(Asset, world)])
+    RiskAssessment.objects.create(
+        name="concealed risk assessment",
+        folder=world.hidden,
+        perimeter=world.perimeter,
+        risk_matrix=study.risk_matrix,
+        ebios_rm_study=study,
+    )
+    url = f"/api/ebios-rm/studies/{study.id}"
+
+    report = _body(world.client.get(f"{url}/report-data/"))
+    step = _body(
+        world.client.patch(
+            f"{url}/workshop/1/step/1/", {"status": "done"}, format="json"
+        )
+    )
+
+    assert [item["id"] for item in report["compliance_assessments"]] == [str(audit.id)]
+    assert report["risk_matrix_data"] is None
+    assert report["risk_action_plan"] is None
+    for data in (report["study"], step):
+        assert data["assets"] == [{}]
+        assert {} in data["compliance_assessments"]
+        assert data["last_risk_assessment"] == {}
+
+
+@pytest.mark.django_db
+def test_sync_previews_mask_what_the_user_cannot_view(world):
+    risk_assessment = _risk_assessment("ra", world.mine, world.perimeter)
+    scenario = RiskScenario.objects.create(
+        name="scenario", risk_assessment=risk_assessment
+    )
+    control = AppliedControl.objects.create(
+        name="control", folder=world.mine, status="active"
+    )
+    concealed = AppliedControl.objects.create(
+        name="concealed control", folder=world.hidden, status="active"
+    )
+    scenario.applied_controls.set([control, concealed])
+
+    controls = _body(
+        world.client.post(f"/api/risk-scenarios/{scenario.id}/sync-to-actions/")
+    )["changes"]
+    (changed,) = _body(
+        world.client.post(
+            f"/api/risk-assessments/{risk_assessment.id}/sync-to-actions/"
+        )
+    )["changes"]
+
+    assert [item.get("id") for item in controls] == [str(control.id), None]
+    assert changed["id"] == str(scenario.id)
+    assert {} in changed["applied_controls"]
+
+
+@pytest.mark.django_db
+def test_action_plans_mask_hidden_links(world):
+    audit = _audit("audit", world.mine, world.perimeter)
+    risk_assessment = _risk_assessment("ra", world.mine, world.perimeter)
+    control = AppliedControl.objects.create(name="control", folder=world.mine)
+    evidence = _concealed(Evidence, world)
+    EvidenceRevision.objects.create(evidence=evidence, attachment="concealed.txt")
+    control.evidences.set([evidence])
+    control.owner.set([world.stranger.actor])
+    _requirement_assessment(audit).applied_controls.set([control])
+    RiskScenario.objects.create(
+        name="scenario", risk_assessment=risk_assessment
+    ).applied_controls.set([control])
+
+    for url in (
+        f"/api/compliance-assessments/{audit.id}/action-plan/",
+        f"/api/risk-assessments/{risk_assessment.id}/action-plan/",
+    ):
+        (row,) = _body(world.client.get(url))["results"]
+        assert row["id"] == str(control.id)
+        assert row["evidences"] == [{}]
+        assert row["owner"] == [{}]
+        assert not row.get("evidence_attachments")
+
+
+@pytest.mark.django_db
+def test_evidence_lists_mask_hidden_links(world):
+    audit = _audit("audit", world.mine, world.perimeter)
+    evidence = Evidence.objects.create(name="evidence", folder=world.mine)
+    evidence.owner.set([world.stranger.actor])
+    _requirement_assessment(audit).evidences.set([evidence])
+    task = TaskTemplate.objects.create(name="task", folder=world.mine)
+    task.evidences.set([evidence])
+    node = TaskNode.objects.create(
+        task_template=task, folder=world.mine, due_date=date.today()
+    )
+
+    for url in (
+        f"/api/compliance-assessments/{audit.id}/evidences-list/",
+        f"/api/task-nodes/{node.id}/evidences/",
+    ):
+        (row,) = _body(world.client.get(url))["results"]
+        assert row["id"] == str(evidence.id)
+        assert row["owner"] == [{}]
+
+
+@pytest.mark.django_db
+def test_quality_checks_leave_out_findings_on_hidden_linked_objects(world):
+    # A control with no reference control and no effort is reported by both checks.
+    control = AppliedControl.objects.create(name="control", folder=world.mine)
+    concealed = _concealed(AppliedControl, world)
+    audit = _audit("audit", world.mine, world.perimeter)
+    _requirement_assessment(audit).applied_controls.set([control, concealed])
+    risk_assessment = _risk_assessment("ra", world.mine, world.perimeter)
+    RiskScenario.objects.create(
+        name="scenario", risk_assessment=risk_assessment
+    ).applied_controls.set([control, concealed])
+
+    for url in (
+        f"/api/compliance-assessments/{audit.id}/quality_check/",
+        f"/api/risk-assessments/{risk_assessment.id}/quality_check/",
+    ):
+        check = _body(world.client.get(url))
+        findings = [*check["errors"], *check["warnings"], *check["info"]]
+        assert check["count"] == len(findings)
+        assert {
+            finding["object"]["id"]
+            for finding in findings
+            if finding["obj_type"] == "appliedcontrol"
+        } == {str(control.id)}
+    for url in (
+        "/api/compliance-assessments/quality_check/",
+        "/api/risk-assessments/quality_check/",
+        "/api/folders/quality_check/",
+        f"/api/perimeters/{world.perimeter.id}/quality_check/",
+        f"/api/compliance-assessments/{audit.id}/x-rays/",
+        f"/api/risk-assessments/{risk_assessment.id}/x-rays/",
+    ):
+        assert str(control.id) in str(_body(world.client.get(url)))

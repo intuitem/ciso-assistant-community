@@ -140,6 +140,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
 from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
+    linked_findings_filter,
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
     domain_quality_checks,
     object_xrays,
@@ -1655,6 +1656,28 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             data = self._filter_related_fields(data, field_models, allowed_ids)
         return data
 
+    def _masked_reader(self, *serializer_classes):
+        """`_mask_related_objects` for a response built from many serializers:
+        a function giving the masked data of a serializer of one of
+        `serializer_classes`, what the user may view being worked out once."""
+        field_models = {
+            serializer_class: self._get_fieldsrelated_map(
+                serializer_class(), model=serializer_class.Meta.model
+            )
+            for serializer_class in serializer_classes
+        }
+        allowed_ids = self._get_accessible_ids_map(
+            {related for fields in field_models.values() for related in fields.values()}
+        )
+
+        def read(serializer):
+            serializer_class = type(getattr(serializer, "child", serializer))
+            return self._filter_related_fields(
+                serializer.data, field_models[serializer_class], allowed_ids
+            )
+
+        return read
+
     def _viewable_actors(self, **filters):
         """Read data of the actors matching `filters` that the user can view: the
         options of an owner or assignee filter."""
@@ -2572,6 +2595,7 @@ class PerimeterViewSet(BaseModelViewSet):
         and risk assessments the user can view. Related objects are masked as in
         `list`."""
         perimeters = list(perimeters)
+        keep = linked_findings_filter(self.request.user)
         res = {
             str(perimeter.id): {
                 "perimeter": data,
@@ -2609,7 +2633,7 @@ class PerimeterViewSet(BaseModelViewSet):
             ):
                 res[str(assessment.perimeter_id)][group]["objects"][
                     str(assessment.id)
-                ] = {"object": data, "quality_check": assessment.quality_check()}
+                ] = {"object": data, "quality_check": keep(assessment.quality_check())}
         return res
 
     @action(detail=False, methods=["get"])
@@ -4906,8 +4930,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             request.user, RiskAssessment
         )
         risk_assessments = RiskAssessment.objects.filter(id__in=viewable_objects)
+        keep = linked_findings_filter(request.user)
         res = [
-            {"id": a.id, "name": a.name, "quality_check": a.quality_check()}
+            {"id": a.id, "name": a.name, "quality_check": keep(a.quality_check())}
             for a in risk_assessments
         ]
         return Response({"results": res})
@@ -4922,7 +4947,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         )
         if UUID(pk) in viewable_objects:
             risk_assessment = self.get_object()
-            return Response(risk_assessment.quality_check())
+            return Response(
+                linked_findings_filter(request.user)(risk_assessment.quality_check())
+            )
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -5567,7 +5594,12 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             reset_residual=reset_residual, dry_run=dry_run
         )
         return Response(
-            {"changes": RiskScenarioReadSerializer(changes, many=True).data}
+            {
+                "changes": self._mask_related_objects(
+                    RiskScenarioReadSerializer(changes, many=True),
+                    model=RiskScenario,
+                )
+            }
         )
 
     @action(
@@ -7582,7 +7614,23 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         return response
 
 
-class ActionPlanList(generics.ListAPIView):
+class MaskedListMixin:
+    """`list` for the list views that are not a `BaseModelViewSet`: it masks, as
+    that one does, the related objects the user cannot view."""
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(queryset if page is None else page, many=True)
+        data = BaseModelViewSet(request=request)._mask_related_objects(
+            serializer, model=queryset.model
+        )
+        if page is None:
+            return Response(data)
+        return self.get_paginated_response(data)
+
+
+class ActionPlanList(MaskedListMixin, generics.ListAPIView):
     search_fields = ["name", "description", "ref_id"]
     filterset_class = AppliedControlFilterSet
 
@@ -7926,6 +7974,14 @@ class UserRolesOnFolderList(generics.ListAPIView):
 class ComplianceAssessmentActionPlanList(ActionPlanList):
     serializer_class = ComplianceAssessmentActionPlanSerializer
 
+    def get_serializer_context(self):
+        # `evidence_attachments` names evidences: only the ones the user can view
+        context = super().get_serializer_context()
+        context["viewable_evidences"] = RoleAssignment.get_viewable_object_ids(
+            self.request.user, Evidence
+        )
+        return context
+
     def get_queryset(self):
         """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
         compliance_id = self.kwargs["pk"]
@@ -7952,7 +8008,7 @@ class ComplianceAssessmentActionPlanList(ActionPlanList):
         return qs.filter(id__in=viewable_controls)
 
 
-class ComplianceAssessmentEvidenceList(generics.ListAPIView):
+class ComplianceAssessmentEvidenceList(MaskedListMixin, generics.ListAPIView):
     serializer_class = ComplianceAssessmentEvidenceSerializer
     filterset_fields = {
         "folder": ["exact"],
@@ -8575,8 +8631,21 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
         changes = risk_scenario.sync_to_applied_controls(
             reset_residual=reset_residual, dry_run=dry_run
         )
+        # The controls are the scenario's links: like any link, one the user
+        # cannot view is returned as {}.
+        viewable = set(
+            RoleAssignment.get_viewable_object_ids(request.user, AppliedControl).filter(
+                id__in=[control.id for control in changes]
+            )
+        )
+        controls = self._mask_related_objects(
+            AppliedControlReadSerializer(
+                [control for control in changes if control.id in viewable], many=True
+            ),
+            model=AppliedControl,
+        )
         return Response(
-            {"changes": AppliedControlReadSerializer(changes, many=True).data}
+            {"changes": [*controls, *[{}] * (len(changes) - len(controls))]}
         )
 
 
@@ -10351,6 +10420,7 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         viewable_ra_ids = RoleAssignment.get_viewable_object_ids(user, RiskAssessment)
 
         domain_checks = domain_quality_checks(folders, user)
+        keep = linked_findings_filter(user)
         res = {
             str(f.id): {
                 "folder": {"id": f.id, "name": f.name},
@@ -10365,14 +10435,14 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         ):
             res[str(ca.folder_id)]["compliance_assessments"]["objects"][str(ca.id)] = {
                 "object": {"id": ca.id, "name": ca.name},
-                "quality_check": ca.quality_check(),
+                "quality_check": keep(ca.quality_check()),
             }
         for ra in RiskAssessment.objects.filter(
             folder__in=folders, id__in=viewable_ra_ids
         ):
             res[str(ra.folder_id)]["risk_assessments"]["objects"][str(ra.id)] = {
                 "object": {"id": ra.id, "name": ra.name},
-                "quality_check": ra.quality_check(),
+                "quality_check": keep(ra.quality_check()),
             }
         return res
 
@@ -11086,32 +11156,9 @@ def get_agg_data(request):
     return Response({"results": data})
 
 
-def masked_reader(request, serializer_classes: dict):
-    """A function giving the read data of an instance of one of the models in
-    `serializer_classes` (model -> read serializer), with the related objects the
-    user cannot view masked as in `list`. What the user may view is worked out
-    once, for all the instances to come."""
-    view = BaseModelViewSet(request=request)
-    field_models = {
-        model: view._get_fieldsrelated_map(serializer_class(), model=model)
-        for model, serializer_class in serializer_classes.items()
-    }
-    allowed_ids = view._get_accessible_ids_map(
-        {related for fields in field_models.values() for related in fields.values()}
-    )
-
-    def read(instance):
-        model = type(instance)
-        return view._filter_related_fields(
-            serializer_classes[model](instance).data, field_models[model], allowed_ids
-        )
-
-    return read
-
-
 def serialize_nested(data: Any, *, read) -> dict:
-    """`data` as plain values; `read` gives the read data of the risk assessments
-    and risk scenarios in it."""
+    """`data` as plain values; `read` gives the masked data of the serializers of
+    the risk assessments and risk scenarios in it."""
     if isinstance(data, (list, tuple)):
         return [serialize_nested(i, read=read) for i in data]
     elif isinstance(data, dict):
@@ -11122,8 +11169,10 @@ def serialize_nested(data: Any, *, read) -> dict:
         return dict(data)
     elif isinstance(data, models.query.QuerySet):
         return serialize_nested(list(data), read=read)
-    elif isinstance(data, (RiskAssessment, RiskScenario)):
-        return read(data)
+    elif isinstance(data, RiskAssessment):
+        return read(RiskAssessmentReadSerializer(data))
+    elif isinstance(data, RiskScenario):
+        return read(RiskScenarioReadSerializer(data))
     elif isinstance(data, uuid.UUID):
         return str(data)
     elif isinstance(data, Promise):
@@ -11161,19 +11210,19 @@ def get_composer_data(request):
     if not all(risk_assessment in viewable_ids for risk_assessment in risk_assessments):
         return Response({"error": "Permission denied"}, status=403)
 
-    read = masked_reader(
-        request,
-        {
-            RiskAssessment: RiskAssessmentReadSerializer,
-            RiskScenario: RiskScenarioReadSerializer,
-        },
+    # The masking of `BaseModelViewSet`, which this view is not.
+    read = BaseModelViewSet(request=request)._masked_reader(
+        RiskAssessmentReadSerializer, RiskScenarioReadSerializer
     )
+    keep = linked_findings_filter(request.user)
     data = compile_risk_assessment_for_composer(request.user, risk_assessments)
     for _data in data["risk_assessment_objects"]:
         quality_check = serialize_nested(
-            _data["risk_assessment"].quality_check(), read=read
+            keep(_data["risk_assessment"].quality_check()), read=read
         )
-        _data["risk_assessment"] = read(_data["risk_assessment"])
+        _data["risk_assessment"] = read(
+            RiskAssessmentReadSerializer(_data["risk_assessment"])
+        )
         _data["risk_assessment"]["quality_check"] = quality_check
 
     data = serialize_nested(data, read=read)
@@ -15037,8 +15086,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         compliance_assessments = ComplianceAssessment.objects.filter(
             id__in=viewable_objects
         )
+        keep = linked_findings_filter(request.user)
         res = [
-            {"id": a.id, "name": a.name, "quality_check": a.quality_check()}
+            {"id": a.id, "name": a.name, "quality_check": keep(a.quality_check())}
             for a in compliance_assessments
         ]
         return Response({"results": res})
@@ -15074,11 +15124,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         Returns the quality check of a specific assessment
         """
         viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, Assessment
+            request.user, ComplianceAssessment
         )
         if UUID(pk) in viewable_objects:
             compliance_assessment = self.get_object()
-            return Response(compliance_assessment.quality_check())
+            return Response(
+                linked_findings_filter(request.user)(
+                    compliance_assessment.quality_check()
+                )
+            )
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -21115,7 +21169,7 @@ class TaskNodeViewSet(BaseModelViewSet):
         return super().perform_create(serializer)
 
 
-class TaskNodeEvidenceList(generics.ListAPIView):
+class TaskNodeEvidenceList(MaskedListMixin, generics.ListAPIView):
     serializer_class = EvidenceReadSerializer
     filterset_fields = {
         "folder": ["exact"],

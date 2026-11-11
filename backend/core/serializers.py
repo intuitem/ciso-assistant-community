@@ -2300,7 +2300,10 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
 
     def get_evidence_attachments(self, obj):
         attachments = []
-        for evidence in obj.evidences.all():
+        evidences = obj.evidences.all()
+        if "viewable_evidences" in self.context:
+            evidences = evidences.filter(id__in=self.context["viewable_evidences"])
+        for evidence in evidences:
             filename = evidence.filename()
             if filename:
                 attachments.append(
@@ -7507,7 +7510,9 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     task_template = FieldsRelatedField(["folder", "id", "description"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
-    assigned_to = FieldsRelatedField(many=True)
+    # Named through the template, like the fields below: the masking of related
+    # objects cannot resolve the node's `assigned_to` property to a model.
+    assigned_to = FieldsRelatedField(many=True, source="task_template.assigned_to")
     evidences = FieldsRelatedField(["folder", "id"], many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
     # These read off the template. The model exposes them as properties returning
