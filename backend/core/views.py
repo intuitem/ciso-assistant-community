@@ -8230,6 +8230,14 @@ class RiskScenarioFilter(GenericFilterSet):
         method="filter_exclude",
         label="Exclude scenario",
     )
+    # Same per-matrix rule as the analytics summary's high risks count.
+    top_level = df.ChoiceFilter(
+        choices=[("current", "current"), ("residual", "residual")],
+        method="filter_top_level",
+    )
+
+    def filter_top_level(self, queryset, name, value):
+        return filter_top_risk_levels(queryset, f"{value}_level")
 
     def filter_within_tolerance(self, queryset, name, value):
         if value == "YES":

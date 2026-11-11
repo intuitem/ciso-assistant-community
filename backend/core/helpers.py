@@ -9,7 +9,7 @@ from uuid import UUID
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.views import api_settings
@@ -1679,6 +1679,10 @@ def get_metrics(user: User, folder_id):
         .count()
     )
 
+    overdue_tasks = viewable_items(TaskNode, folder_id).filter(
+        due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+    )
+
     data = {
         "controls": {
             "total": controls_count,
@@ -1690,10 +1694,19 @@ def get_metrics(user: User, folder_id):
             "deprecated": viewable_controls.filter(status="deprecated").count(),
             "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
             "eta_missed": missed_eta_count,
+            "no_status": viewable_controls.filter(
+                Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
+            ).count(),
         },
         "risk": {
             "assessments": viewable_risk_assessments.count(),
             "scenarios": viewable_risk_scenarios.count(),
+            "high_current": count_top_risk_levels(
+                viewable_risk_scenarios, "current_level"
+            ),
+            "high_residual": count_top_risk_levels(
+                viewable_risk_scenarios, "residual_level"
+            ),
             "threats": viewable_threats.filter(risk_scenarios__isnull=False)
             .distinct()
             .count(),
@@ -1713,9 +1726,60 @@ def get_metrics(user: User, folder_id):
                 result="non_compliant"
             ).count(),
         },
+        "operations": {
+            "open_incidents": viewable_items(Incident, folder_id)
+            .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
+            .count(),
+            "open_findings": viewable_items(Finding, folder_id)
+            .exclude(status__in=FINDING_CLOSED_STATUSES)
+            .count(),
+            "overdue_tasks": overdue_tasks.filter(
+                due_date__gte=date.today() - timedelta(days=OVERDUE_TASKS_WINDOW_DAYS)
+            ).count(),
+            "overdue_tasks_total": overdue_tasks.count(),
+        },
         "csf_functions": csf_functions(user, folder_id),
     }
     return data
+
+
+# Recurring tasks pile up; the briefing only surfaces the recent backlog.
+OVERDUE_TASKS_WINDOW_DAYS = 30
+
+FINDING_CLOSED_STATUSES = [
+    Finding.Status.DISMISSED,
+    Finding.Status.MITIGATED,
+    Finding.Status.RESOLVED,
+    Finding.Status.CLOSED,
+    Finding.Status.DEPRECATED,
+]
+
+
+def filter_top_risk_levels(scenarios, level_field: str):
+    """Scenarios in the top levels of their own matrix (top 2, or top 1 on matrices of 3 levels or fewer).
+
+    Levels are matrix-relative, so they are compared per matrix rather than merged by name.
+    """
+    matrix_ids = scenarios.values_list(
+        "risk_assessment__risk_matrix_id", flat=True
+    ).distinct()
+    q = Q(pk__in=[])
+    for matrix_id, json_def in RiskMatrix.objects.filter(id__in=matrix_ids).values_list(
+        "id", "json_definition"
+    ):
+        n = len((json_def or {}).get("risk", []))
+        if n == 0:
+            continue
+        threshold = n - min(2, max(n // 2, 1))
+        q |= Q(
+            risk_assessment__risk_matrix_id=matrix_id,
+            **{f"{level_field}__gte": threshold},
+        )
+    return scenarios.filter(q)
+
+
+def count_top_risk_levels(scenarios, level_field: str) -> int:
+    return filter_top_risk_levels(scenarios, level_field).count()
 
 
 def _compute_progress_by_assessment(assessment_ids: QuerySet[UUID]) -> dict[UUID, int]:
