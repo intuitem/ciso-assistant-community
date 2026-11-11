@@ -80,8 +80,7 @@
 								class="inline-block p-3 btn-mini-secondary w-12 text-center focus:relative"
 								title={m.reviewEvidences()}
 								aria-label={m.reviewEvidences()}
-								data-testid="review-evidences-button"
-								><i class="fa-solid fa-clipboard-check"></i></a
+								data-testid="review-evidences-button"><i class="fa-solid fa-clipboard-check"></i></a
 							>
 						</span>
 					{/if}
