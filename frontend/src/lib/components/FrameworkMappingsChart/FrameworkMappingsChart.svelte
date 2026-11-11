@@ -30,12 +30,4 @@
 	data={metrics.data}
 	title="Equivalence with other frameworks"
 	uuids={metrics.uuids}
-	seriesNames={[
-		'compliant',
-		'partially compliant',
-		'non compliant',
-		'not applicable',
-		'not assessed'
-	]}
-	colors={['#86EFAC', '#FDE047', '#F87171', '#000000', '#D1D5DB']}
 />

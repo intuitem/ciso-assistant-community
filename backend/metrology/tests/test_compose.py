@@ -441,6 +441,7 @@ class TestPicksMustBeReadable:
         clicks = i["clicks_fr"].metric_definition
         reader = make_definition(
             "Reader",
+            urn="urn:test:reader",
             inputs=[{"key": "a", "definition": str(clicks.id), "combine": "one"}],
             expression="a",
         )

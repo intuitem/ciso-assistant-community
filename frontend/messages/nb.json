@@ -4601,8 +4601,6 @@
 	"backToFramework": "Tilbake til rammeverket",
 	"compliancePercentage": "Etterlevelse (%)",
 	"complianceFormulaShort": "oppfylt + ½·delvis, ekskl. N/A og ikke vurdert",
-	"averageImplementationScore": "Gjennomsnittlig implementeringspoengsum",
-	"overScoredRequirementsOnly": "bare for krav med poengsum",
 	"visibleToCurrentUser": "synlig for deg",
 	"inScopeAfterIGFilter": "i utvalget etter IG-filter",
 	"overallResultDistribution": "Samlet resultatfordeling",

@@ -95,28 +95,29 @@
 			</Popover>
 			<Anchor
 				href={`${page.url.pathname}/visual`}
-				class="btn preset-filled-primary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				breadcrumbAction="push"
-				><i class="fa-solid fa-stopwatch mr-2"></i>{m.impactOverTime()}</Anchor
+				><i class="fa-solid fa-stopwatch mr-2 text-pink-500"></i>{m.impactOverTime()}</Anchor
 			>
 			<Anchor
 				href={`${page.url.pathname}/dependencies`}
-				class="btn preset-filled-primary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				breadcrumbAction="push"
-				><i class="fa-solid fa-sitemap mr-2"></i>{m.assetDependencies()}</Anchor
+				><i class="fa-solid fa-sitemap mr-2 text-emerald-500"></i>{m.assetDependencies()}</Anchor
 			>
 			<Anchor
 				href={`${page.url.pathname}/report`}
-				class="btn preset-filled-primary-500 h-fit"
-				breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.report()}</Anchor
+				class="btn btn-quiet h-fit"
+				breadcrumbAction="push"
+				><i class="fa-solid fa-file-lines mr-2 text-blue-500"></i>{m.report()}</Anchor
 			>
 			{#if !business_impact_analysis?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
-					<i class="fa-solid fa-check-circle mr-2"></i>
+					<i class="fa-solid fa-check-circle mr-2 text-amber-500"></i>
 					{m.requestValidation()}
 				</button>
 			{/if}

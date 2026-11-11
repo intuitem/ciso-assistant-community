@@ -12,15 +12,21 @@ from core.views import (
     GenericFilterSet,
     SmartOrderingFilter,
     actor_prefetch,
+    check_folder_add_permission,
+    check_folder_view_permission,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
-from core.models import Asset, Terminology
+from core.models import Asset, ComplianceAssessment, RiskAssessment, Terminology
 from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
 from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
-from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
+from .helpers import (
+    ecosystem_radar_chart_data,
+    ebios_rm_visual_analysis,
+    duplicate_ebios_rm_study,
+)
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -33,7 +39,10 @@ from .models import (
     OperatingMode,
     KillChain,
 )
-from .serializers import EbiosRMStudyReadSerializer
+from .serializers import (
+    EbiosRMStudyReadSerializer,
+    EbiosRMStudyDuplicateSerializer,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -42,6 +51,7 @@ from rest_framework.response import Response
 
 
 import structlog
+from iam.utils import ViewableFilter
 
 logger = structlog.get_logger(__name__)
 
@@ -142,6 +152,60 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         with transaction.atomic():
             self._process_responsibility_matrix(request)
             return super().update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Duplicate EBIOS RM study",
+        serializer_class=EbiosRMStudyDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        source = self.get_object()  # 404s when the study is not viewable
+        serializer = EbiosRMStudyDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # the user picks the destination domain; default to the source's folder
+        target_folder = data.get("folder") or source.folder
+        # Objects are created in the target folder, so add permission is checked
+        # there. Only require the permission for the owned types the source
+        # actually has records of (an empty study must stay duplicable), like
+        # RiskAssessment duplication does.
+        owned = [
+            (FearedEvent, {"ebios_rm_study": source}),
+            (RoTo, {"ebios_rm_study": source}),
+            (Stakeholder, {"ebios_rm_study": source}),
+            (StrategicScenario, {"ebios_rm_study": source}),
+            (AttackPath, {"ebios_rm_study": source}),
+            (OperationalScenario, {"ebios_rm_study": source}),
+            (OperatingMode, {"operational_scenario__ebios_rm_study": source}),
+            (
+                KillChain,
+                {"operating_mode__operational_scenario__ebios_rm_study": source},
+            ),
+        ]
+        present = [
+            model for model, flt in owned if model.objects.filter(**flt).exists()
+        ]
+        # clone copies source children -> require view on each in the source folder
+        check_folder_view_permission(request.user, source.folder, *present)
+        check_folder_add_permission(request.user, target_folder, EbiosRMStudy, *present)
+
+        clone = duplicate_ebios_rm_study(
+            source,
+            name=data["name"],
+            description=data.get("description", source.description),
+            ref_id=data.get("ref_id", source.ref_id),
+            version=data.get("version", source.version),
+            folder=target_folder,
+            # a cross-domain clone copies the shared objects (assets, threats,
+            # controls, elementary actions, entities) the target cannot see into
+            # it: check the add permission for each type it actually creates
+            before_copy=lambda model: check_folder_add_permission(
+                request.user, target_folder, model
+            ),
+        )
+        return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -309,6 +373,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ).order_by("entity__name")
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
+        viewable = ViewableFilter(request.user)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
 
         # Get operating modes for all operational scenarios
@@ -321,15 +386,25 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             """Build kill chain steps and elementary actions"""
             from .serializers import KillChainReadSerializer
 
-            steps = mo.kill_chain_steps.all()
-            if not steps.exists():
+            steps = [
+                step
+                for step in mo.kill_chain_steps.select_related("elementary_action")
+                if viewable.allows(step) and viewable.allows(step.elementary_action)
+            ]
+            if not steps:
                 return None
 
             kill_chain_steps = KillChainReadSerializer(steps, many=True).data
+            step_ids = {str(step.id) for step in steps}
+            for step in kill_chain_steps:
+                step["antecedents"] = [
+                    a for a in step["antecedents"] if str(a["id"]) in step_ids
+                ]
+                step["assets"] = viewable.serialized(Asset, step["assets"])
 
-            ea_ids = {step.elementary_action_id for step in steps}
-
-            eas = ElementaryAction.objects.filter(id__in=ea_ids)
+            eas = sorted(
+                {step.elementary_action for step in steps}, key=lambda ea: ea.name
+            )
             elementary_actions = [
                 {
                     "id": str(ea.id),
@@ -347,7 +422,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get compliance assessments with their result counts
         compliance_assessments_data = []
-        for assessment in study.compliance_assessments.all():
+        for assessment in viewable(study.compliance_assessments.all()):
             result_counts = {}
             for count, result in assessment.get_requirements_result_count():
                 result_counts[result] = count
@@ -370,20 +445,23 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get risk matrix data from last risk assessment
         risk_matrix_data = None
-        if study.last_risk_assessment:
+        last_risk_assessment = study.last_risk_assessment
+        if last_risk_assessment and not viewable.allows(last_risk_assessment):
+            last_risk_assessment = None
+        if last_risk_assessment:
             from core.serializers import (
                 RiskScenarioReadSerializer,
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
-                "ref_id"
+            risk_scenarios = viewable(
+                last_risk_assessment.risk_scenarios.all().order_by("ref_id")
             )
             risk_matrix_data = {
                 "risk_assessment": {
-                    "id": str(study.last_risk_assessment.id),
-                    "name": study.last_risk_assessment.name,
-                    "version": study.last_risk_assessment.version,
+                    "id": str(last_risk_assessment.id),
+                    "name": last_risk_assessment.name,
+                    "version": last_risk_assessment.version,
                 },
                 "risk_matrix": RiskMatrixReadSerializer(study.risk_matrix).data,
                 "risk_scenarios": RiskScenarioReadSerializer(
@@ -405,7 +483,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
 
         compliance_action_plans = []
-        for assessment in study.compliance_assessments.all():
+        for assessment in viewable(study.compliance_assessments.all()):
             requirement_assessments = assessment.get_requirement_assessments(
                 include_non_assessable=False
             )
@@ -432,8 +510,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get action plan from risk assessment
         risk_action_plan = None
-        if study.last_risk_assessment:
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+        if last_risk_assessment:
+            risk_scenarios = last_risk_assessment.risk_scenarios.all()
             risk_applied_controls = (
                 viewable_controls.filter(risk_scenarios__in=risk_scenarios)
                 .distinct()
@@ -441,8 +519,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             )
             if risk_applied_controls.exists():
                 risk_action_plan = {
-                    "risk_assessment_id": str(study.last_risk_assessment.id),
-                    "risk_assessment_name": study.last_risk_assessment.name,
+                    "risk_assessment_id": str(last_risk_assessment.id),
+                    "risk_assessment_name": last_risk_assessment.name,
                     "applied_controls": AppliedControlReadSerializer(
                         risk_applied_controls, many=True
                     ).data,
@@ -475,6 +553,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Sort study assets: primary before support, then alphabetical
         study_data = EbiosRMStudyReadSerializer(study).data
+        study_data["assets"] = viewable.serialized(Asset, study_data.get("assets"))
+        for field, model in (
+            ("compliance_assessments", ComplianceAssessment),
+            ("risk_assessments", RiskAssessment),
+        ):
+            study_data[field] = viewable.serialized(model, study_data.get(field))
+        if not last_risk_assessment:
+            study_data["last_risk_assessment"] = None
         if study_data.get("assets"):
             study_data["assets"] = sorted(
                 study_data["assets"],

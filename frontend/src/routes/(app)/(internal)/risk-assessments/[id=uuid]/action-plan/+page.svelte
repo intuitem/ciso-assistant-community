@@ -5,8 +5,40 @@
 	import { m } from '#paraglide/messages.js';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import ActionPlanBudgetOverview from '#lib/components/DataViz/ActionPlanBudgetOverview.svelte';
+	import ScenarioSelectionBar from '#lib/components/ScenarioSelection/ScenarioSelectionBar.svelte';
+	import ActionPlanScenariosCell from '#lib/components/ScenarioSelection/ActionPlanScenariosCell.svelte';
+	import { goto } from '$app/navigation';
+	import {
+		LINK_TYPES,
+		LINK_TYPE_PARAM,
+		readLinkType,
+		selectionParams,
+		withParams,
+		type LinkType
+	} from '#lib/utils/scenarioSelection.js';
 
 	let { data } = $props();
+
+	const LINK_TYPE_LABELS: Record<LinkType, () => string> = {
+		additional: m.linkTypeAdditional,
+		existing: m.linkTypeExisting,
+		all: m.linkTypeAll
+	};
+
+	const linkType = $derived(readLinkType(page.url.searchParams));
+	// What the action plan is computed from: the scenario selection and the
+	// measure type. The table's own control filters come on top.
+	const planQuery = $derived.by(() => {
+		const params = selectionParams(page.url.searchParams);
+		params.set(LINK_TYPE_PARAM, linkType);
+		return params;
+	});
+
+	function pickLinkType(next: LinkType) {
+		const url = new URL(page.url.href);
+		url.searchParams.set(LINK_TYPE_PARAM, next);
+		goto(url, { replace: true, reset: false });
+	}
 
 	const appliedControlsHead = {
 		ref_id: 'refId',
@@ -71,8 +103,21 @@
 		>
 	</p>
 </div>
+<div class="mb-2">
+	<ScenarioSelectionBar
+		riskAssessmentId={page.params.id ?? ''}
+		selection={data.selection}
+		note={m.actionPlanSelectionNote()}
+	/>
+	{#if data.selectionError}
+		<p class="mt-2 text-sm text-error-600" role="alert">{m.selectionError()}</p>
+	{/if}
+</div>
 <ActionPlanBudgetOverview
-	budgetEndpoint={`/risk-assessments/${page.params.id}/action-plan/budget-overview`}
+	budgetEndpoint={withParams(
+		`/risk-assessments/${page.params.id}/action-plan/budget-overview`,
+		planQuery
+	)}
 />
 <div class="flex flex-col space-y-4 bg-surface-50-950 p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
@@ -81,24 +126,49 @@
 			<p class="text-sm text-surface-600-400">
 				{m.actionPlanHelpText()}
 			</p>
+			<div
+				role="group"
+				aria-label={m.measureType()}
+				class="inline-flex mt-3 p-0.5 gap-0.5 rounded-lg bg-surface-100-900"
+				data-testid="link-type-toggle"
+			>
+				{#each LINK_TYPES as type (type)}
+					<button
+						type="button"
+						aria-pressed={linkType === type}
+						class="min-h-9 px-3.5 rounded-md text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 {linkType ===
+						type
+							? 'bg-surface-50-950 shadow-sm'
+							: 'text-surface-600-400 hover:text-surface-950-50'}"
+						onclick={() => pickLinkType(type)}
+					>
+						{LINK_TYPE_LABELS[type]()}
+					</button>
+				{/each}
+			</div>
 		</div>
 		{#if hasAppliedControls}
 			<div class="flex gap-2 ml-auto items-center">
 				<Anchor
 					breadcrumbAction="push"
-					href={`/risk-assessments/${page.params.id}/action-plan/analytics`}
+					href={withParams(`/risk-assessments/${page.params.id}/action-plan/analytics`, planQuery)}
 					label={m.analytics()}
-					class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+					class="btn btn-quiet h-fit"
 					title={m.appliedControlsAnalytics()}
 					aria-label={m.appliedControlsAnalytics()}
 					data-testid="analytics-button"
-					><i class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></i>{m.analytics()}</Anchor
+					><i class="fa-solid fa-chart-pie mr-2 text-indigo-500" aria-hidden="true"
+					></i>{m.analytics()}</Anchor
 				>
 				<Anchor
 					breadcrumbAction="push"
-					href={`/applied-controls/flash-mode?risk_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2" aria-hidden="true"></i> {m.flashMode()}</Anchor
+					href={withParams(
+						`/applied-controls/flash-mode?risk_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname + page.url.search)}&backLabel=${encodeURIComponent(m.actionPlan())}`,
+						planQuery
+					)}
+					class="btn btn-quiet h-fit"
+					><i class="fa-solid fa-bolt mr-2 text-orange-500" aria-hidden="true"></i>
+					{m.flashMode()}</Anchor
 				>
 			</div>
 		{/if}
@@ -111,6 +181,8 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
+			extraParams={planQuery.toString()}
+			fieldComponents={{ risk_scenarios: ActionPlanScenariosCell }}
 			columnSelector={true}
 			columnStateKey="applied-controls:risk-action-plan"
 			fields={[

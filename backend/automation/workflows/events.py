@@ -262,13 +262,13 @@ def _evaluate_condition(condition, payload, state_cache):
         # and its new value must satisfy the condition.
         if field not in changes:
             return False
-        return _compare(condition, changes[field][1])
+        return _compare(condition, _new_value(changes[field]))
 
     # State semantics: evaluate against the live object; deleted objects fall
     # back to the diff's old values.
     if payload.get("operation") == "deleted":
         if field in changes:
-            return _compare(condition, changes[field][0])
+            return _compare(condition, _old_value(changes[field]))
         return False
     value = _current_value(field, payload, state_cache)
     if value is _MISSING:
@@ -277,6 +277,17 @@ def _evaluate_condition(condition, payload, state_cache):
 
 
 _MISSING = object()
+
+
+def _new_value(diff):
+    """A diff's new value; a many-to-many change reads as its operation, `add` or `delete`."""
+    if isinstance(diff, dict):
+        return diff.get("operation")
+    return diff[1]
+
+
+def _old_value(diff):
+    return None if isinstance(diff, dict) else diff[0]
 
 
 def _current_value(field, payload, state_cache):
@@ -414,7 +425,7 @@ def payload_from_log_entry(log_entry):
         "object_id": str(log_entry.object_pk),
         "object_repr": log_entry.object_repr,
         "changes": changes,
-        "new_values": {field: diff[1] for field, diff in changes.items()},
+        "new_values": {field: _new_value(diff) for field, diff in changes.items()},
         "cid": log_entry.cid or "",
         "folder_id": additional.get("folder_id"),
         "actor_email": getattr(log_entry.actor, "email", None),

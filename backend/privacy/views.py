@@ -4,7 +4,7 @@ import uuid
 
 import pandas as pd
 
-from core.constants import COUNTRY_CHOICES
+from core.constants import COUNTRY_CHOICES, EU_COUNTRIES_SET
 from core.models import Actor, Terminology, ValidationFlow
 from core.serializers import ActorReadSerializer
 from core.views import (
@@ -25,8 +25,12 @@ from django.db.models import Case, Count, F, Prefetch, Q, When
 from itertools import chain
 from collections import defaultdict
 
-from core.utils import camel_case
+from core.utils import camel_case, get_report_timezone
+from core.generators import breach_notification_context
+from core.typst_render import render_pdf
+from django.utils.text import slugify
 from iam.models import Folder, RoleAssignment
+from iam.utils import ViewableFilter
 from tprm.models import Entity
 
 from .models import (
@@ -47,36 +51,6 @@ from .models import (
 )
 
 DPIA_OVERVIEW_PAGE = 50
-
-EU_COUNTRIES_SET = {
-    "AT",
-    "BE",
-    "BG",
-    "HR",
-    "CY",
-    "CZ",
-    "DK",
-    "EE",
-    "FI",
-    "FR",
-    "DE",
-    "GR",
-    "HU",
-    "IE",
-    "IT",
-    "LV",
-    "LT",
-    "LU",
-    "MT",
-    "NL",
-    "PL",
-    "PT",
-    "RO",
-    "SK",
-    "SI",
-    "ES",
-    "SE",
-}
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -1192,6 +1166,27 @@ class DataBreachViewSet(BaseModelViewSet):
                 "evidences",
             )
         )
+
+    @action(detail=True, methods=["get"], name="GDPR art. 33 notification worksheet")
+    def notification(self, request, pk):
+        # get_object enforces view permission (404 otherwise)
+        breach = self.get_object()
+        lang = request.user.preferences.get("lang") or "en"
+        payload = breach_notification_context(
+            breach,
+            lang,
+            tz=get_report_timezone(),
+            readable=ViewableFilter(request.user).allows,
+        )
+        response = HttpResponse(
+            render_pdf("breach_notification.typ", payload),
+            content_type="application/pdf",
+        )
+        safe_name = slugify(breach.name) or "data-breach"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_notification.pdf"'
+        )
+        return response
 
     def _process_incident(self, request) -> None:
         """Turn a name typed into the incident picker into an incident.
