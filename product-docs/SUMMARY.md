@@ -79,6 +79,7 @@
   * [Setting up mailer](installation/mailer.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
   * [Structured logging](installation/structured-logging.md)
+  * [Shared cache and login rate limiting](installation/shared-cache.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -216,6 +217,7 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Risk trajectory](features/risk-trajectory.md)
+* [Scenario selection](features/scenario-selection.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
 * [Workflow builder](features/workflows/README.md)

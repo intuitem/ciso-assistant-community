@@ -28,6 +28,7 @@ from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
 
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
+from core.scenario_selection import LINK_ALL, linked_scenarios_q
 from iam.models import *
 from django.contrib.auth.models import Permission
 
@@ -2388,6 +2389,17 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
         method_name="get_requirement_assessments"
     )
     evidence_attachments = serializers.SerializerMethodField()
+    task_templates = serializers.SerializerMethodField()
+
+    def get_task_templates(self, obj):
+        if not self.context.get("with_tasks"):
+            return None
+        scoped = self.context.get("scoped_ra_ids", set())
+        tasks = {task.id: task for task in obj.task_templates.all()}
+        for ra in obj.requirement_assessments.all():
+            if str(ra.id) in scoped:
+                tasks.update({task.id: task for task in ra.task_templates.all()})
+        return [{"id": str(task.id), "str": str(task)} for task in tasks.values()]
 
     def get_requirement_assessments(self, obj):
         pk = self.context.get("pk")
@@ -2441,6 +2453,8 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "reference_control",
             "evidences",
             "evidence_attachments",
+            "task_templates",
+            "observation",
             "owner",
             "created_at",
             "updated_at",
@@ -2454,9 +2468,10 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
         pk = self.context.get("pk")
         if pk is None:
             return None
+        link_type = self.context.get("link_type", LINK_ALL)
         risk_scenarios = (
             RiskScenario.objects.filter(risk_assessment=pk)
-            .filter(Q(applied_controls=obj) | Q(existing_applied_controls=obj))
+            .filter(linked_scenarios_q(obj, link_type))
             .distinct()
         )
         return [
@@ -2466,6 +2481,20 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             }
             for req in risk_scenarios
         ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        selected = self.context.get("selected_scenario_ids")
+        if selected is None or data.get("risk_scenarios") is None:
+            return data
+        # With a selection, the column lists the selected scenarios and the rest
+        # move aside, so a control covering other risks still says so.
+        linked = data["risk_scenarios"]
+        data["risk_scenarios"] = [s for s in linked if s["id"] in selected]
+        data["risk_scenarios_outside_selection"] = [
+            s for s in linked if s["id"] not in selected
+        ]
+        return data
 
     class Meta:
         model = AppliedControl
