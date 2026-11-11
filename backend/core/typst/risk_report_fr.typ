@@ -247,6 +247,7 @@
       ..(
         if scenario.description != "" { row("Description", [#scenario.description]) } else { () }
           + if scenario.qualifications.len() > 0 { row(qualification-label, [#scenario.qualifications.join(", ")]) } else { () }
+          + if scenario.owners.len() > 0 { row("Assigné à", [#scenario.owners.join(", ")]) } else { () }
           + if scenario.assets.len() > 0 { row("Actifs", [#scenario.assets.join(", ")]) } else { () }
           + if scenario.threats.len() > 0 { row("Menaces", [#scenario.threats.join(", ")]) } else { () }
           + if "inherent" in scenario { row("Niveau inhérent", level-badge(scenario.inherent)) } else { () }

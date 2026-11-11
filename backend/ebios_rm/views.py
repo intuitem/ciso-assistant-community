@@ -51,6 +51,7 @@ from rest_framework.response import Response
 
 
 import structlog
+from iam.utils import ViewableFilter
 
 logger = structlog.get_logger(__name__)
 
@@ -370,14 +371,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         from .models import OperatingMode
         from core.models import (
             AppliedControl,
-            ComplianceAssessment,
             RequirementAssessment,
         )
         from core.serializers import (
             AppliedControlReadSerializer,
             RiskScenarioReadSerializer,
         )
-        from iam.models import RoleAssignment
         from .helpers import ecosystem_circular_chart_data
 
         # Study access doesn't imply access to every object the study links:
@@ -397,18 +396,11 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             AppliedControlReadSerializer,
         )
 
-        def viewable(model):
-            return RoleAssignment.get_viewable_object_ids(request.user, model)
-
-        compliance_assessments = study.compliance_assessments.filter(
-            id__in=viewable(ComplianceAssessment)
-        )
+        viewable = ViewableFilter(request.user)
+        compliance_assessments = viewable(study.compliance_assessments.all())
         risk_assessment = study.last_risk_assessment
-        if risk_assessment and not RoleAssignment.is_object_readable(
-            request.user, RiskAssessment, risk_assessment.id
-        ):
+        if risk_assessment and not viewable.allows(risk_assessment):
             risk_assessment = None
-        viewable_elementary_actions = viewable(ElementaryAction)
 
         # Get all related data, sorted per issue #3715
         feared_events = FearedEvent.objects.filter(
@@ -432,16 +424,24 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Build graph data for each operating mode
         def build_mode_graph(mo):
             """Build kill chain steps and elementary actions"""
-            steps = mo.kill_chain_steps.all()
-            if not steps.exists():
+            steps = [
+                step
+                for step in mo.kill_chain_steps.select_related("elementary_action")
+                if viewable.allows(step) and viewable.allows(step.elementary_action)
+            ]
+            if not steps:
                 return None
 
-            kill_chain_steps = read(KillChainReadSerializer(steps, many=True))
+            kill_chain_steps = KillChainReadSerializer(steps, many=True).data
+            step_ids = {str(step.id) for step in steps}
+            for step in kill_chain_steps:
+                step["antecedents"] = [
+                    a for a in step["antecedents"] if str(a["id"]) in step_ids
+                ]
+                step["assets"] = viewable.serialized(Asset, step["assets"])
 
-            ea_ids = {step.elementary_action_id for step in steps}
-
-            eas = ElementaryAction.objects.filter(id__in=ea_ids).filter(
-                id__in=viewable_elementary_actions
+            eas = sorted(
+                {step.elementary_action for step in steps}, key=lambda ea: ea.name
             )
             elementary_actions = [
                 {
@@ -484,7 +484,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Get risk matrix data from last risk assessment
         risk_matrix_data = None
         if risk_assessment:
-            risk_scenarios = risk_assessment.risk_scenarios.all().order_by("ref_id")
+            risk_scenarios = viewable(
+                risk_assessment.risk_scenarios.all().order_by("ref_id")
+            )
             risk_matrix_data = {
                 "risk_assessment": {
                     "id": str(risk_assessment.id),
@@ -502,7 +504,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get action plans from compliance assessments
         viewable_controls = AppliedControl.objects.filter(
-            id__in=viewable(AppliedControl)
+            id__in=viewable.ids(AppliedControl)
         )
 
         compliance_action_plans = []

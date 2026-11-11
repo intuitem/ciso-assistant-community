@@ -3,6 +3,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, Font
 import csv
+import functools
 import hashlib
 import json
 import mimetypes
@@ -138,6 +139,7 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from iam.utils import ViewableFilter
 from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     linked_findings_filter,
@@ -589,6 +591,17 @@ def create_xlsx_response(entries, filename, wrap_columns=None):
     return response
 
 
+class _ViewableObjects(list):
+    """Related objects already narrowed to what the user may view, for formatters
+    written against a manager."""
+
+    def all(self):
+        return self
+
+    def exists(self):
+        return bool(self)
+
+
 class ExportMixin:
     """
     Generic export mixin for CSV/XLSX exports.
@@ -596,6 +609,10 @@ class ExportMixin:
     """
 
     export_config = None
+
+    @functools.cached_property
+    def _viewable(self):
+        return ViewableFilter(self.request.user)
 
     def _get_export_queryset(self):
         """Get filtered queryset with permissions applied."""
@@ -630,6 +647,8 @@ class ExportMixin:
             if value is None:
                 return ""
             value = getattr(value, part, "")
+            if isinstance(value, models.Model) and not self._viewable.allows(value):
+                return ""
 
         # Call methods but keep managers for format functions
         if callable(value):
@@ -641,6 +660,14 @@ class ExportMixin:
                     value = value()
                 except TypeError:
                     pass
+                if isinstance(value, models.QuerySet):
+                    value = _ViewableObjects(self._viewable(value))
+            else:
+                value = _ViewableObjects(self._viewable(value.all()))
+        elif isinstance(value, (list, tuple)) and any(
+            isinstance(v, models.Model) for v in value
+        ):
+            value = self._viewable(value)
 
         # Always apply if formatter exists, let formatter handle empties
         format_func = field_config.get("format")
@@ -763,7 +790,7 @@ class ExportMixin:
             # Get related objects for detail sheet
             related_getter = detail_config.get("related_queryset_method")
             if related_getter:
-                related_objects = getattr(obj, related_getter)()
+                related_objects = self._viewable(getattr(obj, related_getter)())
 
                 # Skip empty detail sheets if configured
                 if not related_objects and detail_config.get("skip_empty", True):
@@ -4963,6 +4990,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         risk_assessment = RiskAssessment.objects.get(id=pk)
+        viewable = ViewableFilter(request.user)
         selection = resolve_selection(request, risk_assessment)
         link_type = resolve_link_type(request)
         queryset = action_plan_controls(request.user, selection.scenarios, link_type)
@@ -5017,8 +5045,16 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 item.get("effort"),
                 item.get("control_impact"),
                 item.get("annual_cost"),
-                "\n".join([ra.get("str") for ra in item.get("owner")]),
-                "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
+                "\n".join(
+                    ra.get("str")
+                    for ra in viewable.serialized(Actor, item.get("owner"))
+                ),
+                "\n".join(
+                    ra.get("str")
+                    for ra in viewable.serialized(
+                        RiskScenario, item.get("risk_scenarios")
+                    )
+                ),
             ]
             ws.append([sanitize_xlsx_value(value) for value in row])
 
@@ -5058,6 +5094,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
     @action(detail=True, name="Get risk assessment CSV")
     def risk_assessment_csv(self, request, pk):
+        viewable = ViewableFilter(request.user)
         object_ids_view = RoleAssignment.get_viewable_object_ids(
             request.user, RiskAssessment
         )
@@ -5099,17 +5136,19 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 )
             writer.writerow(columns)
 
-            for scenario in selection.scenarios.order_by("ref_id"):
+            for scenario in viewable(selection.scenarios.order_by("ref_id")):
                 additional_controls = ",".join(
-                    [m.name for m in scenario.applied_controls.all()]
+                    [m.name for m in viewable(scenario.applied_controls.all())]
                 )
                 existing_controls = ",".join(
-                    [m.name for m in scenario.existing_applied_controls.all()]
+                    [m.name for m in viewable(scenario.existing_applied_controls.all())]
                 )
 
                 # ref_id first: names may hold the import's separators
-                threats = ",".join([t.ref_id or t.name for t in scenario.threats.all()])
-                assets = ",".join([t.name for t in scenario.assets.all()])
+                threats = ",".join(
+                    [t.ref_id or t.name for t in viewable(scenario.threats.all())]
+                )
+                assets = ",".join([t.name for t in viewable(scenario.assets.all())])
 
                 row = [
                     scenario.ref_id,
@@ -5153,6 +5192,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
     @action(detail=True, name="Get risk assessment XLSX")
     def risk_assessment_xlsx(self, request, pk):
+        viewable = ViewableFilter(request.user)
         if not RoleAssignment.is_object_accessible(
             request.user, "view", RiskAssessment, UUID(pk)
         ):
@@ -5197,18 +5237,21 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             "assets",
         ).order_by("ref_id")
 
-        for scenario in scenarios:
+        for scenario in viewable(scenarios):
             additional_controls = ", ".join(
-                escape_excel_formula(m.name) for m in scenario.applied_controls.all()
+                escape_excel_formula(m.name)
+                for m in viewable(scenario.applied_controls.all())
             )
             existing_controls = ", ".join(
                 escape_excel_formula(m.name)
-                for m in scenario.existing_applied_controls.all()
+                for m in viewable(scenario.existing_applied_controls.all())
             )
             # ref_id first: names may hold the import's separators
-            threats = ", ".join(t.ref_id or t.name for t in scenario.threats.all())
+            threats = ", ".join(
+                t.ref_id or t.name for t in viewable(scenario.threats.all())
+            )
             assets = ", ".join(
-                escape_excel_formula(t.name) for t in scenario.assets.all()
+                escape_excel_formula(t.name) for t in viewable(scenario.assets.all())
             )
 
             entry = {
@@ -5305,6 +5348,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "assets",
                 "applied_controls",
                 "existing_applied_controls",
+                actor_prefetch("owner"),
             ).order_by("ref_id")
             for scenario in scenarios:
                 scenario.strength_of_knowledge = RiskScenario.DEFAULT_SOK_OPTIONS[
@@ -5335,6 +5379,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "use_risk_category_label", False
                 ),
                 tz=get_report_timezone(),
+                readable=ViewableFilter(request.user).allows,
             )
             payload["selection"] = selection_report_context(
                 selection, risk_assessment.risk_scenarios.count(), request.user
@@ -5368,6 +5413,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 )
                 .order_by("eta")
             )
+            viewable = ViewableFilter(request.user)
             scenario_ids = {scenario.id for scenario in scenarios}
             linked = {}
             for control in applied_controls:
@@ -5386,6 +5432,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 lang,
                 linked,
                 tz=get_report_timezone(),
+                readable=viewable.allows,
             )
             payload["selection"] = selection_report_context(
                 selection, risk_assessment.risk_scenarios.count(), request.user
@@ -6448,6 +6495,11 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
             "description": {
                 "source": "description",
                 "label": "description",
+                "escape": True,
+            },
+            "observation": {
+                "source": "observation",
+                "label": "observation",
                 "escape": True,
             },
             "reference_control_name": {
@@ -13025,8 +13077,43 @@ class JourneyStepViewSet(BaseModelViewSet):
     search_fields = ["title", "description"]
 
 
-class OrganisationObjectiveViewSet(BaseModelViewSet):
+class OrganisationObjectiveViewSet(ExportMixin, BaseModelViewSet):
     model = OrganisationObjective
+    export_config = {
+        "filename": "objectives_export",
+        "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id"},
+            "name": {"source": "name", "label": "name"},
+            "description": {"source": "description", "label": "description"},
+            "domain": {"source": "folder.name", "label": "domain"},
+            "status": {"source": "get_status_display", "label": "status"},
+            "health": {"source": "get_health_display", "label": "health"},
+            "is_active": {"source": "is_active", "label": "is_active"},
+            "start_date": {"source": "start_date", "label": "start_date"},
+            "eta": {"source": "eta", "label": "eta"},
+            "due_date": {"source": "due_date", "label": "due_date"},
+            "closing_date": {"source": "closing_date", "label": "closing_date"},
+            "assigned_to": {
+                "source": "assigned_to",
+                "label": "assigned_to",
+                "format": lambda qs: ",".join(str(a) for a in qs.all()),
+            },
+            "applied_controls": {
+                "source": "applied_controls",
+                "label": "applied_controls",
+                "format": lambda qs: "\n".join(str(c) for c in qs.all()),
+            },
+            "metrics": {
+                "source": "metrics",
+                "label": "metrics",
+                "format": lambda qs: "\n".join(str(m) for m in qs.all()),
+            },
+            "observation": {"source": "observation", "label": "observation"},
+        },
+        "select_related": ["folder"],
+        "prefetch_related": ["assigned_to", "applied_controls", "metrics"],
+        "wrap_columns": ["name", "description", "applied_controls", "observation"],
+    }
 
     filterset_fields = [
         "folder",
@@ -13978,6 +14065,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
+        viewable = ViewableFilter(request.user)
         response = HttpResponse(content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
         response.write("\ufeff")
@@ -14030,7 +14118,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         req.status,
                         req.score,
                         req.observation,
-                        ",".join(c.name for c in req.applied_controls.all()),
+                        ",".join(c.name for c in viewable(req.applied_controls.all())),
                     ]
                 else:
                     row += ["", "", "", "", "", ""]
@@ -14050,6 +14138,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Audit as an Excel")
     def xlsx(self, request, pk):
+        viewable = ViewableFilter(request.user)
         if not RoleAssignment.is_object_accessible(
             request.user, "view", ComplianceAssessment, UUID(pk)
         ):
@@ -14102,7 +14191,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "requirement_progress": req.status,
                 "observations": escape_excel_formula(req.observation),
                 "applied_controls": ", ".join(
-                    escape_excel_formula(c.name) for c in req.applied_controls.all()
+                    escape_excel_formula(c.name)
+                    for c in viewable(req.applied_controls.all())
                 ),
             }
             if show_documentation_score:
@@ -14234,7 +14324,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
-        context = gen_audit_context(pk, tree, user_lang, tz=get_report_timezone())
+        context = gen_audit_context(
+            pk,
+            tree,
+            user_lang,
+            tz=get_report_timezone(),
+            readable=ViewableFilter(request.user).allows,
+        )
 
         # Custom overrides support any language; auto-generated strings only en/fr.
         custom_template = None
@@ -14332,6 +14428,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         lang = request.user.preferences.get("lang") or "en"
         wants_charts = "charts" in REPORT_PROFILES[profile]["sections"]
+        viewable = ViewableFilter(request.user)
         context = gen_audit_context(
             pk,
             tree,
@@ -14339,9 +14436,16 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             assessments=assessments,
             charts=wants_charts,
             tz=get_report_timezone(),
+            readable=viewable.allows,
         )
         payload, images = audit_context_for_typst(
-            context, audit, role, lang, profile, assessments=assessments
+            context,
+            audit,
+            role,
+            lang,
+            profile,
+            assessments=assessments,
+            readable=viewable.allows,
         )
 
         template = localized_template(REPORT_PROFILES[profile]["template"], lang)
@@ -14381,20 +14485,31 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
-        requirement_assessments = compliance_assessment.get_requirement_assessments(
-            include_non_assessable=False
+        viewable = ViewableFilter(request.user)
+        requirement_assessments = viewable(
+            scoped_requirement_assessments(
+                compliance_assessment, request.user, include_non_assessable=False
+            )[0]
         )
+        scoped_ids = {str(ra.id) for ra in requirement_assessments}
         queryset = (
             AppliedControl.objects.filter(
                 requirement_assessments__in=requirement_assessments
             )
-            .prefetch_related("evidences__revisions")
+            .prefetch_related(
+                "evidences__revisions",
+                "task_templates",
+                "requirement_assessments__task_templates",
+            )
             .distinct()
         )
+        queryset = viewable(queryset)
 
         # Use the same serializer to maintain consistency - to review
         serializer = ComplianceAssessmentActionPlanSerializer(
-            queryset, many=True, context={"pk": pk}
+            queryset,
+            many=True,
+            context={"pk": pk, "with_tasks": True, "scoped_ra_ids": scoped_ids},
         )
 
         response = HttpResponse(content_type="text/csv; charset=utf-8")
@@ -14407,6 +14522,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             [
                 "Name",
                 "Description",
+                "Observation",
                 "Category",
                 "CSF Function",
                 "Priority",
@@ -14417,6 +14533,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "Impact",
                 "Cost",
                 "Covered requirements",
+                "Tasks",
                 "Associated evidences",
                 "Evidence attachments",
             ]
@@ -14428,6 +14545,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     [
                         item.get("name"),
                         item.get("description"),
+                        item.get("observation"),
                         item.get("category"),
                         item.get("csf_function"),
                         item.get("priority"),
@@ -14439,16 +14557,27 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         item.get("annual_cost"),
                         "\n".join(
                             escape_excel_formula(ra.get("str"))
-                            for ra in (item.get("requirement_assessments") or [])
+                            for ra in item.get("requirement_assessments") or []
+                            if ra.get("id") in scoped_ids
+                        ),
+                        "\n".join(
+                            escape_excel_formula(task.get("str"))
+                            for task in viewable.serialized(
+                                TaskTemplate, item.get("task_templates")
+                            )
                         ),
                         "\n".join(
                             escape_excel_formula(evidence.get("str"))
-                            for evidence in (item.get("evidences") or [])
+                            for evidence in viewable.serialized(
+                                Evidence, item.get("evidences")
+                            )
                             if evidence.get("str")
                         ),
                         "\n".join(
                             escape_excel_formula(evidence.get("filename"))
-                            for evidence in (item.get("evidence_attachments") or [])
+                            for evidence in viewable.serialized(
+                                Evidence, item.get("evidence_attachments")
+                            )
                             if evidence.get("filename")
                         ),
                     ]
@@ -14467,19 +14596,30 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
-        requirement_assessments = compliance_assessment.get_requirement_assessments(
-            include_non_assessable=False
+        viewable = ViewableFilter(request.user)
+        requirement_assessments = viewable(
+            scoped_requirement_assessments(
+                compliance_assessment, request.user, include_non_assessable=False
+            )[0]
         )
+        scoped_ids = {str(ra.id) for ra in requirement_assessments}
         queryset = (
             AppliedControl.objects.filter(
                 requirement_assessments__in=requirement_assessments
             )
-            .prefetch_related("evidences__revisions")
+            .prefetch_related(
+                "evidences__revisions",
+                "task_templates",
+                "requirement_assessments__task_templates",
+            )
             .distinct()
         )
+        queryset = viewable(queryset)
 
         serializer = ComplianceAssessmentActionPlanSerializer(
-            queryset, many=True, context={"pk": pk}
+            queryset,
+            many=True,
+            context={"pk": pk, "with_tasks": True, "scoped_ra_ids": scoped_ids},
         )
 
         entries = []
@@ -14487,6 +14627,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             entry = {
                 "name": item.get("name"),
                 "description": item.get("description"),
+                "observation": item.get("observation"),
                 "category": item.get("category"),
                 "csf_function": item.get("csf_function"),
                 "priority": item.get("priority"),
@@ -14498,16 +14639,25 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "cost": item.get("annual_cost"),
                 "covered_requirements": "\n".join(
                     escape_excel_formula(ra.get("str"))
-                    for ra in (item.get("requirement_assessments") or [])
+                    for ra in item.get("requirement_assessments") or []
+                    if ra.get("id") in scoped_ids
+                ),
+                "tasks": "\n".join(
+                    escape_excel_formula(task.get("str"))
+                    for task in viewable.serialized(
+                        TaskTemplate, item.get("task_templates")
+                    )
                 ),
                 "associated_evidences": "\n".join(
                     escape_excel_formula(evidence.get("str"))
-                    for evidence in (item.get("evidences") or [])
+                    for evidence in viewable.serialized(Evidence, item.get("evidences"))
                     if evidence.get("str")
                 ),
                 "evidence_attachments": "\n".join(
                     escape_excel_formula(evidence.get("filename"))
-                    for evidence in (item.get("evidence_attachments") or [])
+                    for evidence in viewable.serialized(
+                        Evidence, item.get("evidence_attachments")
+                    )
                     if evidence.get("filename")
                 ),
             }
@@ -14523,7 +14673,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             wrap_columns = [
                 "name",
                 "description",
+                "observation",
                 "covered_requirements",
+                "tasks",
                 "associated_evidences",
                 "evidence_attachments",
             ]
@@ -14578,8 +14730,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             }
             audit: ComplianceAssessment = self.get_object()
             assessments, _hidden = scoped_requirement_assessments(audit, request.user)
+            viewable = ViewableFilter(request.user)
+            scoped_ids = {ra.id for ra in viewable(assessments)}
             applied_controls = list(
-                AppliedControl.objects.filter(requirement_assessments__in=assessments)
+                AppliedControl.objects.filter(requirement_assessments__in=scoped_ids)
                 .distinct()
                 .prefetch_related(
                     "requirement_assessments__requirement", actor_prefetch("owner")
@@ -14590,13 +14744,18 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 control.id: [
                     str(ra.requirement.display_short)
                     for ra in control.requirement_assessments.all()
-                    if ra.compliance_assessment_id == audit.id
+                    if ra.id in scoped_ids
                 ]
                 for control in applied_controls
             }
             lang = request.user.preferences.get("lang") or "en"
             payload = action_plan_context(
-                audit, applied_controls, lang, linked, tz=get_report_timezone()
+                audit,
+                applied_controls,
+                lang,
+                linked,
+                tz=get_report_timezone(),
+                readable=viewable.allows,
             )
             response = HttpResponse(
                 render_pdf(localized_template("action_plan", lang), payload),
@@ -15367,9 +15526,19 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
 
         # Build ra_id → RequirementAssessment lookup with prefetched applied_controls
+        viewable = ViewableFilter(request.user)
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment
-        ).prefetch_related("applied_controls")
+        ).prefetch_related(
+            Prefetch(
+                "applied_controls",
+                queryset=AppliedControl.objects.filter(
+                    id__in=RoleAssignment.get_viewable_object_ids(
+                        request.user, AppliedControl
+                    )
+                ),
+            )
+        )
         ra_lookup = {str(ra.id): ra for ra in ras}
 
         # Collect all applied control IDs
@@ -15420,10 +15589,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "treatment": rs.treatment,
                     "residual_level": rs.residual_level,
                     "threats": [
-                        {"id": str(t.id), "name": t.name} for t in rs.threats.all()
+                        {"id": str(t.id), "name": t.name}
+                        for t in viewable(rs.threats.all())
                     ],
                     "assets": [
-                        {"id": str(a.id), "name": a.name} for a in rs.assets.all()
+                        {"id": str(a.id), "name": a.name}
+                        for a in viewable(rs.assets.all())
                     ],
                 }
                 for ac in rs.applied_controls.all():
@@ -15470,8 +15641,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "current_risk": rs.get_current_risk(),
                     "residual_risk": rs.get_residual_risk(),
                 }
-                for ac in list(rs.applied_controls.all()) + list(
-                    rs.existing_applied_controls.all()
+                for ac in viewable(
+                    list(rs.applied_controls.all())
+                    + list(rs.existing_applied_controls.all())
                 ):
                     ac_key = str(ac.id)
                     if ac_key not in controls_map:
@@ -18553,7 +18725,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         # Prepare data for Excel export
         tz = get_report_timezone()
         entries = []
-        for finding in findings:
+        viewable = ViewableFilter(request.user)
+        for finding in viewable(findings):
             entry = {
                 "ref_id": finding.ref_id,
                 "name": finding.name,
@@ -18567,20 +18740,22 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "filtering_labels": "|".join(
                     [
                         escape_excel_formula(label.label)
-                        for label in finding.filtering_labels.all()
+                        for label in viewable(finding.filtering_labels.all())
                     ]
                 ),
                 "applied_controls": "\n".join(
                     [
                         f"{ac.name} [{ac.get_status_display().lower()}]"
-                        for ac in finding.applied_controls.all()
+                        for ac in viewable(finding.applied_controls.all())
                     ]
                 ),
-                "evidences": "\n".join([ev.name for ev in finding.evidences.all()]),
+                "evidences": "\n".join(
+                    [ev.name for ev in viewable(finding.evidences.all())]
+                ),
                 "vulnerabilities": "|".join(
                     [
                         escape_excel_formula(v.name)
-                        for v in finding.vulnerabilities.all()
+                        for v in viewable(finding.vulnerabilities.all())
                     ]
                 ),
                 "observation": escape_excel_formula(finding.observation),
@@ -18796,7 +18971,11 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         )
         lang = request.user.preferences.get("lang") or "en"
         payload = findings_assessment_context(
-            findings_assessment, findings, lang, tz=get_report_timezone()
+            findings_assessment,
+            findings,
+            lang,
+            tz=get_report_timezone(),
+            readable=ViewableFilter(request.user).allows,
         )
         response = HttpResponse(
             render_pdf(localized_template("findings_report", lang), payload),
@@ -19278,7 +19457,11 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
         lang = request.user.preferences.get("lang") or "en"
         payload = incident_context(
-            incident, timeline_entries, lang, tz=get_report_timezone()
+            incident,
+            timeline_entries,
+            lang,
+            tz=get_report_timezone(),
+            readable=ViewableFilter(request.user).allows,
         )
         response = HttpResponse(
             render_pdf(localized_template("incident_report", lang), payload),
@@ -19321,9 +19504,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             breaches,
             lang,
             tz=get_report_timezone(),
-            readable=lambda obj: RoleAssignment.is_object_readable(
-                request.user, type(obj), obj.id
-            ),
+            readable=ViewableFilter(request.user).allows,
         )
         response = HttpResponse(
             render_pdf("nis2_notification.typ", payload),
@@ -20780,7 +20961,9 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 for field_name, field_config in task_node_fields.items():
                     if field_name == "expected_evidence":
                         # Special handling for expected evidence with done/pending status
-                        evidences = task_node.task_template.evidences.all()
+                        evidences = self._viewable(
+                            task_node.task_template.evidences.all()
+                        )
                         evidence_statuses = []
                         for evidence in evidences:
                             last_revision = evidence.last_revision
