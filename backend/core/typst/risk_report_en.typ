@@ -40,6 +40,38 @@
   cancelled: "Cancelled",
 )
 
+// Set when the report covers a scenario selection rather than the whole assessment.
+#let selection = d.at("selection", default: none)
+#let selection-filter-label = (
+  within_tolerance: "Tolerable",
+  treatment: "Treatment",
+  current_level: "Current level",
+  residual_level: "Residual level",
+  owner: "Owner",
+  threats: "Threats",
+  assets: "Assets",
+  qualifications: "Qualifications",
+  filtering_labels: "Labels",
+)
+#let tolerance-label = ("YES": "Yes", "NO": "No", "--": "Not set")
+#let selection-value(key, value) = if key == "within_tolerance" {
+  tolerance-label.at(value, default: value)
+} else if key == "treatment" {
+  treatment-label.at(value, default: value)
+} else { value }
+#let selection-box = if selection != none {
+  block(width: 100%, fill: rgb("#eef2ff"), stroke: 0.6pt + accent, radius: 3pt, inset: 8pt)[
+    #set par(justify: false)
+    #set align(left)
+    #text(weight: "bold", fill: accent)[Scenario selection] · #selection.count of #selection.total scenarios
+    #v(2pt)
+    #for f in selection.filters [
+      #selection-filter-label.at(f.key, default: f.key): #f.values.map(v => selection-value(f.key, v)).join(", ") \
+    ]
+    #text(fill: muted)[Scenarios outside the selection are not in this report.]
+  ]
+}
+
 #let level-badge(level) = box(
   fill: rgb(level.hexcolor),
   inset: (x: 5pt, y: 2pt),
@@ -60,7 +92,8 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      [#d.date · #d.timezone], align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone#if selection != none [ · Selection #selection.count/#selection.total]],
+      align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -98,6 +131,10 @@
         [*Reviewers*], [#ra.reviewers],
         [*ETA / Due*], [#ra.eta — #ra.due_date],
       )
+      #if selection != none [
+        #v(1em)
+        #selection-box
+      ]
       #v(1em)
       #block(width: 100%)[
         #set text(7.5pt, fill: muted)
