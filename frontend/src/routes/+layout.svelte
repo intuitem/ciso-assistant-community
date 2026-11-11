@@ -12,7 +12,7 @@
 		document.body.dataset.hydrated = 'true';
 	});
 
-	import Toast from '#lib/components/Toast/Toast.svelte';
+	import { Toaster } from 'svelte-sonner';
 	import Dialog from '#lib/components/Modals/Modal.svelte';
 	import DisplayJSONModal from '#lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
@@ -111,7 +111,7 @@
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
 <Dialog components={modalRegistry} />
-<Toast zIndex="z-[1000]" />
+<Toaster position="bottom-center" visibleToasts={3} gap={10} />
 {@render children?.()}
 
 {#if $flash}

@@ -7943,8 +7943,6 @@
 	"assetLifecycleStage": "Cycle de vie de l'actif",
 	"changeLifecycleStage": "Changer le cycle de vie",
 	"briefingActiveControls": "Mesures actives",
-	"briefingActiveAudits": "{count} audits actifs",
-	"briefingAssessments": "{count} analyses",
 	"briefingNeedsAttention": "À traiter",
 	"briefingAllClear": "Rien à traiter pour le moment.",
 	"briefingOpenIncidentsHint": "Ni clos ni écartés",
@@ -7963,5 +7961,12 @@
 	"briefingAssessedPct": "{pct} % évalué",
 	"briefingHighRisks": "Risques élevés",
 	"briefingHighRisksHint": "Scénarios aux niveaux les plus hauts de leur propre matrice, sur {count}",
-	"briefingNoScenarios": "Aucun scénario de risque pour l'instant."
+	"briefingNoScenarios": "Aucun scénario de risque pour l'instant.",
+	"briefingTierNow": "Urgent",
+	"briefingTierLate": "En retard",
+	"briefingTierHousekeeping": "Hygiène",
+	"briefingOfTotal": "sur {total}",
+	"briefingAcrossAudits": "sur {count} audits actifs",
+	"briefingInAssessments": "dans {count} analyses",
+	"briefingAfterTreatment": "Après traitement"
 }

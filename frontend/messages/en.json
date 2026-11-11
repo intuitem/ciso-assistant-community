@@ -7943,8 +7943,6 @@
 	"assetLifecycleStage": "Asset lifecycle",
 	"changeLifecycleStage": "Change lifecycle",
 	"briefingActiveControls": "Active controls",
-	"briefingActiveAudits": "{count} active audits",
-	"briefingAssessments": "{count} assessments",
 	"briefingNeedsAttention": "Needs attention",
 	"briefingAllClear": "Nothing needs your attention right now.",
 	"briefingOpenIncidentsHint": "Not closed or dismissed yet",
@@ -7963,5 +7961,12 @@
 	"briefingAssessedPct": "{pct}% assessed",
 	"briefingHighRisks": "High risks",
 	"briefingHighRisksHint": "Scenarios at the top levels of their own matrix, out of {count}",
-	"briefingNoScenarios": "No risk scenarios yet."
+	"briefingNoScenarios": "No risk scenarios yet.",
+	"briefingTierNow": "Act now",
+	"briefingTierLate": "Overdue",
+	"briefingTierHousekeeping": "Housekeeping",
+	"briefingOfTotal": "of {total}",
+	"briefingAcrossAudits": "across {count} active audits",
+	"briefingInAssessments": "in {count} assessments",
+	"briefingAfterTreatment": "After treatment"
 }
