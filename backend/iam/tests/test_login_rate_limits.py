@@ -1,9 +1,10 @@
 """Login brute-force limits (allauth's ACCOUNT_RATE_LIMITS) through the
 headless endpoint the frontend uses.
 
-AccountAdapter.authenticate replaces allauth's, so it must consume and roll
-back the "login_failed" limit itself; before it did, failed logins were never
-limited. Per-IP limits key on the client IP resolved from X-Forwarded-For
+AccountAdapter keeps allauth's authenticate, which consumes the "login_failed"
+limit and rolls it back on success. The override that used to replace it
+skipped both, so failed logins were never limited. Per-IP limits key on the
+client IP resolved from X-Forwarded-For
 (core.custom_middleware.resolve_client_ip). LOGIN_RATE_LIMIT and
 LOGIN_FAILED_RATE_LIMIT set the two login limits."""
 

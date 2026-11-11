@@ -16,7 +16,7 @@ We will support memcached as an optional shared Django cache, disabled by defaul
 ## Consequences
 
 - Without memcached, behaviour is unchanged: caches stay per process.
-- Whoever enables memcached runs it. If it stops, requests that use the cache fail until it is back, while the backend health check stays green.
+- Whoever enables memcached runs it. If it stops or hangs, cache operations become misses after a short timeout and the app keeps working, but logins are refused until it is back: login rate limiting fails closed. The backend health check stays green.
 - Code must stay correct with a per-process cache. Use the cache for rate limits, locks and short-lived copies of data, never as the only copy.
 - Never store secrets, sessions or tokens in the cache.
 - Never mount the socket into another container. Whoever switches memcached to TCP must filter the network so that only the backend and Huey reach it.

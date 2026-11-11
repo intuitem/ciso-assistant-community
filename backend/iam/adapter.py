@@ -14,7 +14,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
-from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
@@ -49,36 +48,6 @@ class AccountAdapter(DefaultAccountAdapter):
             return client_ip
         else:
             return super().get_client_ip(request)
-
-    def authenticate(self, request, **credentials):
-        # We need to call this for allauth rate-limiting to still be applied (even though we implement our own `authenticate` method).
-        self.pre_authenticate(request, **credentials)
-        user = self._authenticate_local(credentials)
-        if user:
-            # Rollback the failed login counter increment (as we don't want a successfull login to be considered(counted) as "failed").
-            self._rollback_login_failed_rl_usage()
-        else:
-            self.authentication_failed(request, **credentials)
-        return user
-
-    def _authenticate_local(self, credentials):
-        try:
-            serializer = AuthTokenSerializer(
-                data={
-                    "username": credentials.get("email"),
-                    "password": credentials.get("password"),
-                }
-            )
-            serializer.is_valid(raise_exception=True)
-            user = serializer.validated_data["user"]
-            if not user.is_local:
-                raise NotImplementedError(
-                    "This user is not allowed to use local login."
-                )
-
-            return user
-        except Exception:
-            return None
 
     def reauthenticate(self, user, password):
         from allauth.mfa.utils import is_mfa_enabled

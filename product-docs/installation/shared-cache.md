@@ -207,9 +207,11 @@ The same IP address is recorded in the [audit log](../features/audit-log.md) (`r
 
 ## Troubleshooting
 
-### Requests fail with an internal error
+### Nobody can log in, but everything else works
 
-If you enabled memcached and it is stopped, every request that uses the cache fails with an internal error, logins included, until it is back. The backend health check (`/api/health/`) still reports the backend as healthy.
+If you enabled memcached and it is stopped or stuck, the backend keeps working without it, but every login is refused with "Too many failed login attempts", even with the correct password. Login rate limiting cannot count attempts without memcached, so it refuses them rather than letting them through. Users who are already logged in are not affected, and the backend health check (`/api/health/`) still reports the backend as healthy.
+
+While memcached is down, metric computations are skipped or postponed, and the inbound webhook rate limit is not applied.
 
 Check that memcached is running and start it again if needed:
 
@@ -218,7 +220,7 @@ docker compose ps memcached
 docker compose up -d memcached
 ```
 
-The backend recovers on its own within about two minutes. Restart it to recover at once.
+Logins work again within about 10 seconds of memcached being back, without restarting the backend.
 
 ### All users are blocked at the same time
 

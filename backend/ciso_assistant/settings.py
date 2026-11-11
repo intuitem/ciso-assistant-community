@@ -822,6 +822,15 @@ if ENABLE_MEMCACHED:
         "default": {
             "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
             "LOCATION": MEMCACHED_LOCATION,
+            # If memcached is down or stuck, cache operations become misses
+            # instead of errors, so the app keeps working without it. Login rate
+            # limiting fails closed: logins are refused until memcached is back.
+            "OPTIONS": {
+                "ignore_exc": True,
+                "dead_timeout": 5,  # retry a dead memcached after 5 s, not 60
+                "connect_timeout": 0.5,
+                "timeout": 0.5,
+            },
         }
     }
 
@@ -915,6 +924,9 @@ ACCOUNT_RATE_LIMITS = _login_rate_limits()
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Password logins run allauth's own AccountAdapter.authenticate; this backend
+# only adds the local-login rule (User.is_local).
+AUTHENTICATION_BACKENDS = ["iam.auth_backends.LocalLoginBackend"]
 ACCOUNT_ADAPTER = "iam.adapter.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "iam.adapter.SocialAccountAdapter"
 

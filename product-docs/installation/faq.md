@@ -122,9 +122,9 @@ You can confirm that case from the health log, which shows `curl: not found`:
 docker inspect --format '{{json .State.Health}}' backend
 ```
 
-### Login fails with an internal error, or all users are locked out
+### All users are locked out
 
-Login rate limiting relies on your reverse proxy passing the client IP address. If you enabled the optional `memcached` container and it is stopped, every request that uses the cache fails with an internal error, logins included, until it is back:
+Login rate limiting relies on your reverse proxy passing the client IP address. If you enabled the optional `memcached` container and it is stopped, every login is refused, even with the correct password, until it is back. Users who are already logged in are not affected:
 
 ```
 docker compose up -d memcached
