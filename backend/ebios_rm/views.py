@@ -17,7 +17,7 @@ from core.views import (
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
-from core.models import Asset, ComplianceAssessment, RiskAssessment, Terminology
+from core.models import Asset, RiskAssessment, Terminology
 from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
 from openpyxl.workbook.child import INVALID_TITLE_REGEX
@@ -75,6 +75,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     ]
 
     model = EbiosRMStudy
+
+    def _get_fieldsrelated_map(self, serializer, *, model=None):
+        """`last_risk_assessment` is read from a property, which the masking cannot
+        resolve to a model: name it, so that it is masked like the other links."""
+        field_models = super()._get_fieldsrelated_map(serializer, model=model)
+        if "last_risk_assessment" in getattr(serializer, "child", serializer).fields:
+            field_models["last_risk_assessment"] = RiskAssessment
+        return field_models
 
     def get_queryset(self):
         return (
@@ -314,7 +322,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ebios_rm_study.update_workshop_step_status(
             workshop, step, new_status=request.data.get("status", "in_progress")
         )
-        return Response(EbiosRMStudyReadSerializer(ebios_rm_study).data)
+        return Response(
+            self._mask_related_objects(EbiosRMStudyReadSerializer(ebios_rm_study))
+        )
 
     @action(detail=True, name="Get ecosystem radar chart data")
     def ecosystem_chart_data(self, request, pk):
@@ -356,10 +366,41 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             AttackPathReadSerializer,
             OperationalScenarioReadSerializer,
             OperatingModeReadSerializer,
+            KillChainReadSerializer,
         )
         from .models import OperatingMode
-        from core.models import RequirementAssessment
+        from core.models import (
+            AppliedControl,
+            RequirementAssessment,
+        )
+        from core.serializers import (
+            AppliedControlReadSerializer,
+            RiskScenarioReadSerializer,
+        )
         from .helpers import ecosystem_circular_chart_data
+
+        # Study access doesn't imply access to every object the study links:
+        # the ones the user cannot view are left out or masked, as in `list`.
+        read = self._masked_reader(
+            EbiosRMStudyReadSerializer,
+            FearedEventReadSerializer,
+            RoToReadSerializer,
+            StakeholderReadSerializer,
+            StrategicScenarioReadSerializer,
+            AttackPathReadSerializer,
+            OperationalScenarioReadSerializer,
+            OperatingModeReadSerializer,
+            KillChainReadSerializer,
+            RiskMatrixReadSerializer,
+            RiskScenarioReadSerializer,
+            AppliedControlReadSerializer,
+        )
+
+        viewable = ViewableFilter(request.user)
+        compliance_assessments = viewable(study.compliance_assessments.all())
+        risk_assessment = study.last_risk_assessment
+        if risk_assessment and not viewable.allows(risk_assessment):
+            risk_assessment = None
 
         # Get all related data, sorted per issue #3715
         feared_events = FearedEvent.objects.filter(
@@ -373,7 +414,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ).order_by("entity__name")
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
-        viewable = ViewableFilter(request.user)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
 
         # Get operating modes for all operational scenarios
@@ -384,8 +424,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Build graph data for each operating mode
         def build_mode_graph(mo):
             """Build kill chain steps and elementary actions"""
-            from .serializers import KillChainReadSerializer
-
             steps = [
                 step
                 for step in mo.kill_chain_steps.select_related("elementary_action")
@@ -422,7 +460,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get compliance assessments with their result counts
         compliance_assessments_data = []
-        for assessment in viewable(study.compliance_assessments.all()):
+        for assessment in compliance_assessments:
             result_counts = {}
             for count, result in assessment.get_requirements_result_count():
                 result_counts[result] = count
@@ -445,45 +483,32 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Get risk matrix data from last risk assessment
         risk_matrix_data = None
-        last_risk_assessment = study.last_risk_assessment
-        if last_risk_assessment and not viewable.allows(last_risk_assessment):
-            last_risk_assessment = None
-        if last_risk_assessment:
-            from core.serializers import (
-                RiskScenarioReadSerializer,
-                RiskMatrixReadSerializer,
-            )
-
+        if risk_assessment:
             risk_scenarios = viewable(
-                last_risk_assessment.risk_scenarios.all().order_by("ref_id")
+                risk_assessment.risk_scenarios.all().order_by("ref_id")
             )
             risk_matrix_data = {
                 "risk_assessment": {
-                    "id": str(last_risk_assessment.id),
-                    "name": last_risk_assessment.name,
-                    "version": last_risk_assessment.version,
+                    "id": str(risk_assessment.id),
+                    "name": risk_assessment.name,
+                    "version": risk_assessment.version,
                 },
-                "risk_matrix": RiskMatrixReadSerializer(study.risk_matrix).data,
-                "risk_scenarios": RiskScenarioReadSerializer(
-                    risk_scenarios, many=True
-                ).data,
+                "risk_matrix": read(RiskMatrixReadSerializer(study.risk_matrix)),
+                "risk_scenarios": read(
+                    RiskScenarioReadSerializer(risk_scenarios, many=True)
+                ),
             }
 
         # Get ecosystem radar data
         radar_data = ecosystem_circular_chart_data(stakeholders)
 
         # Get action plans from compliance assessments
-        from core.serializers import AppliedControlReadSerializer
-        from core.models import AppliedControl
-        from iam.models import RoleAssignment
-
-        # Study access doesn't imply access to every linked control
         viewable_controls = AppliedControl.objects.filter(
-            id__in=RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+            id__in=viewable.ids(AppliedControl)
         )
 
         compliance_action_plans = []
-        for assessment in viewable(study.compliance_assessments.all()):
+        for assessment in compliance_assessments:
             requirement_assessments = assessment.get_requirement_assessments(
                 include_non_assessable=False
             )
@@ -502,16 +527,16 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "framework": (
                             assessment.framework.name if assessment.framework else None
                         ),
-                        "applied_controls": AppliedControlReadSerializer(
-                            applied_controls, many=True
-                        ).data,
+                        "applied_controls": read(
+                            AppliedControlReadSerializer(applied_controls, many=True)
+                        ),
                     }
                 )
 
         # Get action plan from risk assessment
         risk_action_plan = None
-        if last_risk_assessment:
-            risk_scenarios = last_risk_assessment.risk_scenarios.all()
+        if risk_assessment:
+            risk_scenarios = risk_assessment.risk_scenarios.all()
             risk_applied_controls = (
                 viewable_controls.filter(risk_scenarios__in=risk_scenarios)
                 .distinct()
@@ -519,17 +544,17 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             )
             if risk_applied_controls.exists():
                 risk_action_plan = {
-                    "risk_assessment_id": str(last_risk_assessment.id),
-                    "risk_assessment_name": last_risk_assessment.name,
-                    "applied_controls": AppliedControlReadSerializer(
-                        risk_applied_controls, many=True
-                    ).data,
+                    "risk_assessment_id": str(risk_assessment.id),
+                    "risk_assessment_name": risk_assessment.name,
+                    "applied_controls": read(
+                        AppliedControlReadSerializer(risk_applied_controls, many=True)
+                    ),
                 }
 
         # Serialize operating modes with graph data
         operating_modes_data = []
         for mode in operating_modes:
-            mode_data = OperatingModeReadSerializer(mode).data
+            mode_data = read(OperatingModeReadSerializer(mode))
             graph_data = build_mode_graph(mode)
             if graph_data:
                 mode_data["graph"] = graph_data
@@ -537,13 +562,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Sort strategic scenarios by gravity desc, then name asc
         strategic_scenarios_data = sorted(
-            StrategicScenarioReadSerializer(strategic_scenarios, many=True).data,
+            read(StrategicScenarioReadSerializer(strategic_scenarios, many=True)),
             key=lambda s: (-s.get("gravity", {}).get("value", -1), s.get("name", "")),
         )
 
         # Sort operational scenarios by gravity desc, likelihood desc, then name asc
         operational_scenarios_data = sorted(
-            OperationalScenarioReadSerializer(operational_scenarios, many=True).data,
+            read(OperationalScenarioReadSerializer(operational_scenarios, many=True)),
             key=lambda s: (
                 -s.get("gravity", {}).get("value", -1),
                 -s.get("likelihood", {}).get("value", -1),
@@ -552,15 +577,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
 
         # Sort study assets: primary before support, then alphabetical
-        study_data = EbiosRMStudyReadSerializer(study).data
-        study_data["assets"] = viewable.serialized(Asset, study_data.get("assets"))
-        for field, model in (
-            ("compliance_assessments", ComplianceAssessment),
-            ("risk_assessments", RiskAssessment),
-        ):
-            study_data[field] = viewable.serialized(model, study_data.get(field))
-        if not last_risk_assessment:
-            study_data["last_risk_assessment"] = None
+        study_data = read(EbiosRMStudyReadSerializer(study))
         if study_data.get("assets"):
             study_data["assets"] = sorted(
                 study_data["assets"],
@@ -568,13 +585,15 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             )
 
         # Full control details (priority, status, owner, eta) for the treatment plan
-        stakeholders_data = StakeholderReadSerializer(stakeholders, many=True).data
+        stakeholders_data = read(StakeholderReadSerializer(stakeholders, many=True))
         controls_by_id = {
             str(c["id"]): c
-            for c in AppliedControlReadSerializer(
-                viewable_controls.filter(stakeholders__in=stakeholders).distinct(),
-                many=True,
-            ).data
+            for c in read(
+                AppliedControlReadSerializer(
+                    viewable_controls.filter(stakeholders__in=stakeholders).distinct(),
+                    many=True,
+                )
+            )
         }
         links = Stakeholder.applied_controls.through.objects.filter(
             stakeholder__in=stakeholders
@@ -594,11 +613,11 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Build comprehensive report data
         report_data = {
             "study": study_data,
-            "feared_events": FearedEventReadSerializer(feared_events, many=True).data,
-            "ro_to_couples": RoToReadSerializer(ro_to_couples, many=True).data,
+            "feared_events": read(FearedEventReadSerializer(feared_events, many=True)),
+            "ro_to_couples": read(RoToReadSerializer(ro_to_couples, many=True)),
             "stakeholders": stakeholders_data,
             "strategic_scenarios": strategic_scenarios_data,
-            "attack_paths": AttackPathReadSerializer(attack_paths, many=True).data,
+            "attack_paths": read(AttackPathReadSerializer(attack_paths, many=True)),
             "operational_scenarios": operational_scenarios_data,
             "operating_modes": operating_modes_data,
             "compliance_assessments": compliance_assessments_data,
