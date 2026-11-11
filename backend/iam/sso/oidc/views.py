@@ -59,6 +59,18 @@ def _get_oidc_scopes(provider, request: HttpRequest) -> list[str]:
     return scopes
 
 
+class UserCapturingOAuth2CallbackView(OAuth2CallbackView):
+    """Custom OAuth2CallbackView that captures the authenticated user in a
+    headless flow. In headless mode, request.user remains anonymous, but
+    complete_social_login() sets up the session state. We intercept to store
+    the user on the request so the callback handler can access it."""
+
+    def complete_social_login(self, request, sociallogin):
+        # Store the user before calling parent (in case parent fails)
+        request._sso_user = sociallogin.user if sociallogin else None
+        return super().complete_social_login(request, sociallogin)
+
+
 class NonceValidatingOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
     """OIDC adapter that validates the id_token `nonce` claim against the value
     stashed at the start of the authorization flow. Per OIDC Core 3.1.3.7, if
@@ -202,7 +214,7 @@ def callback(request, provider_id):
             user_authenticated=not request.user.is_anonymous,
         )
 
-        response = OAuth2CallbackView.adapter_view(
+        response = UserCapturingOAuth2CallbackView.adapter_view(
             NonceValidatingOpenIDConnectAdapter(request, provider_id)
         )(request)
 
@@ -211,7 +223,7 @@ def callback(request, provider_id):
             provider=provider_id,
             status_code=response.status_code,
             has_location_header=bool(response.get("Location")),
-            user_authenticated=not request.user.is_anonymous,
+            user_authenticated=bool(getattr(request, "_sso_user", None)),
         )
 
         if response.status_code != 302:
@@ -223,9 +235,10 @@ def callback(request, provider_id):
             )
             return response
 
-        if request.user.is_anonymous:
+        sso_user = getattr(request, "_sso_user", None)
+        if not sso_user:
             logger.error(
-                "SSO authentication failed - user is anonymous after callback",
+                "SSO authentication failed - no user captured during callback",
                 provider=provider_id,
                 has_socialaccount_state=bool(
                     request.session.get("socialaccount_state")
@@ -235,7 +248,7 @@ def callback(request, provider_id):
                 request, None, error=AuthError.FAILED_SSO
             )
 
-        token = generate_token(request.user)
+        token = generate_token(sso_user)
         next = get_sso_authenticate_url(response.get("Location"))
 
         logger.info(
