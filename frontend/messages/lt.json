@@ -2653,8 +2653,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objektas yra paslėptas. Redaguojant nuoroda gali būti prarasta.",
-				"countPlural=other": "{count} objektai yra paslėpti. Redaguojant nuorodos gali būti prarastos."
+				"countPlural=one": "{count} objektas yra paslėptas.",
+				"countPlural=other": "{count} objektai yra paslėpti."
 			}
 		}
 	],
