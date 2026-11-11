@@ -239,6 +239,7 @@ class TestEvidenceRevisionReview:
         from core.serializers import (
             EvidenceReadSerializer,
             EvidenceRevisionReadSerializer,
+            EvidenceRevisionWriteSerializer,
         )
 
         revision = self._revision(authenticated_client)
@@ -254,6 +255,15 @@ class TestEvidenceRevisionReview:
             assert (rev["reviewed_by"] is None) is hidden
             assert (rev["uploaded_by"] is None) is hidden
             assert (ev["latest_revision"]["uploaded_by"] is None) is hidden
+            written = EvidenceRevisionWriteSerializer(revision, context=ctx).data
+            assert (written["review_comment"] is None) is hidden
+            assert (written["reviewed_by"] is None) is hidden
+        # Sparse responses stay sparse.
+        sparse = EvidenceRevisionReadSerializer(
+            revision, context={"request": SimpleNamespace(user=vendor)}
+        )
+        sparse.fields.pop("review_comment")
+        assert "review_comment" not in sparse.data
 
     def test_undo_puts_the_decision_back_in_the_queue(self, authenticated_client):
         revision = self._revision(authenticated_client)

@@ -3826,7 +3826,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
             "review_status": rev.review_status,
             "created_at": rev.created_at,
             "uploaded_by": str(rev.uploaded_by)
-            if rev.uploaded_by and not self._is_third_party()
+            if not self._is_third_party() and rev.uploaded_by
             else None,
         }
 
@@ -4044,12 +4044,16 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
     THIRD_PARTY_HIDDEN = ("uploaded_by", "reviewed_by", "review_comment")
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
-        request = self.context.get("request")
-        if getattr(getattr(request, "user", None), "is_third_party", False):
-            for field in self.THIRD_PARTY_HIDDEN:
+        return hide_review_details(self, super().to_representation(instance))
+
+
+def hide_review_details(serializer, data):
+    request = serializer.context.get("request")
+    if getattr(getattr(request, "user", None), "is_third_party", False):
+        for field in EvidenceRevisionReadSerializer.THIRD_PARTY_HIDDEN:
+            if field in data:
                 data[field] = None
-        return data
+    return data
 
 
 class EvidenceRevisionWriteSerializer(BaseModelSerializer):
@@ -4064,6 +4068,9 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
             "reviewed_at",
             "review_comment",
         ]
+
+    def to_representation(self, instance):
+        return hide_review_details(self, super().to_representation(instance))
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

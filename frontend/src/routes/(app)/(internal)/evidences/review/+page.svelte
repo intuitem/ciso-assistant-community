@@ -184,6 +184,7 @@
 			const body = await res?.json().catch(() => ({}));
 			if (res?.status === 409) {
 				delete revisions[ev.id];
+				delete viewed[ev.id];
 				await loadRevisions(ev.id);
 				error = m.reviewStaleVersion();
 				return;

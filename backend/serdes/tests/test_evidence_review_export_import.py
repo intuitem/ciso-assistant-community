@@ -54,3 +54,61 @@ def test_round_trip_keeps_the_decision(admin_user):
     assert rev.review_status == EvidenceRevision.ReviewStatus.APPROVED
     assert rev.review_comment == "covers all hosts"
     assert rev.reviewed_at is not None
+
+
+def _restore(user, revision, file_bytes):
+    import hashlib
+    import json
+    import struct
+
+    from django.urls import reverse
+    from rest_framework.test import APIClient
+
+    header = json.dumps(
+        {
+            "id": str(revision.id),
+            "filename": "report.txt",
+            "hash": hashlib.sha256(file_bytes).hexdigest(),
+        }
+    ).encode()
+    block = header + file_bytes
+    client = APIClient()
+    client.force_authenticate(user)
+    return client.post(
+        reverse("batch-upload-attachments"),
+        data=struct.pack(">I", len(block)) + block,
+        content_type="application/octet-stream",
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("same_bytes", [True, False])
+def test_restoring_other_bytes_voids_the_decision(admin_user, same_bytes):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    evidence = Evidence.objects.create(
+        name="ERX Restore", folder=Folder.get_root_folder()
+    )
+    revision = EvidenceRevision.objects.create(
+        evidence=evidence,
+        attachment=SimpleUploadedFile("report.txt", b"reviewed bytes"),
+    )
+    revision.record_review(admin_user, "approved", "")
+    revision.refresh_from_db()
+    # Lose the stored file so the restore cannot skip on a hash match.
+    revision.attachment.storage.delete(revision.attachment.name)
+
+    response = _restore(
+        admin_user, revision, b"reviewed bytes" if same_bytes else b"other bytes"
+    )
+    assert response.status_code == 200, response.content
+    assert response.json()["restored"] == 1, response.json()
+
+    revision.refresh_from_db()
+    evidence.refresh_from_db()
+    if same_bytes:
+        assert revision.review_status == EvidenceRevision.ReviewStatus.APPROVED
+        assert evidence.status == Evidence.Status.APPROVED
+    else:
+        assert revision.review_status == EvidenceRevision.ReviewStatus.PENDING
+        assert evidence.status == Evidence.Status.IN_REVIEW
