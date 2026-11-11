@@ -5,8 +5,17 @@
 	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '#lib/utils/crud.js';
-	import { listViewFields } from '#lib/utils/table.js';
-	import type { ListViewFilterConfig } from '#lib/utils/table.js';
+	import ScenarioSelectionBar from '#lib/components/ScenarioSelection/ScenarioSelectionBar.svelte';
+	import { selectionSummary } from '#lib/components/ScenarioSelection/labels.js';
+	import {
+		DEFAULT_LINK_TYPE,
+		LINK_TYPE_PARAM,
+		hasSelection,
+		readSelection,
+		selectionParams,
+		selectionListFilters,
+		withParams
+	} from '#lib/utils/scenarioSelection.js';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '#lib/utils/types.js';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
@@ -39,19 +48,17 @@
 	const useBubbles = data.useBubbles;
 	const risk_assessment = $derived(data.risk_assessment);
 
-	const scenarioTableFilters = $derived.by(() => {
-		const base = listViewFields['risk-scenarios'].filters;
-		const scope: [string, string][] = [['risk_assessment', risk_assessment.id]];
-		const withScope = (filter: ListViewFilterConfig): ListViewFilterConfig => ({
-			...filter,
-			props: { ...filter.props, optionsDetailedUrlParameters: scope }
-		});
-		return {
-			...base,
-			current_level: withScope(base.current_level),
-			residual_level: withScope(base.residual_level)
-		};
+	// The selection bar filters the table, the matrices, the action plan link and
+	// the exports alike; the table keeps no filters of its own.
+	const selection = $derived(data.selection);
+	const scoped = $derived(hasSelection(page.url.searchParams));
+	const selectionQuery = $derived(selectionParams(page.url.searchParams));
+	const selectedScenarios = $derived.by(() => {
+		if (!scoped || !selection) return risk_assessment.risk_scenarios;
+		const ids = new Set(selection.ids);
+		return risk_assessment.risk_scenarios.filter((s: { id: string }) => ids.has(s.id));
 	});
+	const hiddenCount = $derived(risk_assessment.risk_scenarios.length - selectedScenarios.length);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -200,15 +207,11 @@
 		return grid;
 	};
 
-	const currentCluster = buildRiskCluster(
-		risk_assessment.risk_scenarios,
-		risk_assessment.risk_matrix,
-		'current'
+	const currentCluster = $derived(
+		buildRiskCluster(selectedScenarios, risk_assessment.risk_matrix, 'current')
 	);
-	const residualCluster = buildRiskCluster(
-		risk_assessment.risk_scenarios,
-		risk_assessment.risk_matrix,
-		'residual'
+	const residualCluster = $derived(
+		buildRiskCluster(selectedScenarios, risk_assessment.risk_matrix, 'residual')
 	);
 
 	let fields = [
@@ -223,8 +226,11 @@
 		'residual_level'
 	];
 
-	function buildExportGroups(): ExportGroup[] {
+	function buildExportGroups(selectionQuery: URLSearchParams): ExportGroup[] {
 		const id = risk_assessment.id;
+		// Same default as the action plan page: the measures still to implement.
+		const actionPlanQuery = new URLSearchParams(selectionQuery);
+		actionPlanQuery.set(LINK_TYPE_PARAM, DEFAULT_LINK_TYPE);
 		return [
 			{
 				titleKey: 'riskAssessment',
@@ -233,21 +239,21 @@
 						titleKey: 'exportRiskReport',
 						descriptionKey: 'exportRiskReportDesc',
 						format: 'PDF' as const,
-						href: `/risk-assessments/${id}/export/pdf`,
+						href: withParams(`/risk-assessments/${id}/export/pdf`, selectionQuery),
 						testId: 'export-option-pdf'
 					},
 					{
 						titleKey: 'exportRiskScenariosData',
 						descriptionKey: 'exportRiskScenariosDataDesc',
 						format: 'CSV' as const,
-						href: `/risk-assessments/${id}/export/csv`,
+						href: withParams(`/risk-assessments/${id}/export/csv`, selectionQuery),
 						testId: 'export-option-csv'
 					},
 					{
 						titleKey: 'exportRiskScenariosWorkbook',
 						descriptionKey: 'exportRiskScenariosWorkbookDesc',
 						format: 'XLSX' as const,
-						href: `/risk-assessments/${id}/export/xlsx`,
+						href: withParams(`/risk-assessments/${id}/export/xlsx`, selectionQuery),
 						testId: 'export-option-xlsx'
 					}
 				]
@@ -259,14 +265,14 @@
 						titleKey: 'exportStatusGroupedReport',
 						descriptionKey: 'exportStatusGroupedReportDesc',
 						format: 'PDF' as const,
-						href: `/risk-assessments/${id}/action-plan/export/pdf`,
+						href: withParams(`/risk-assessments/${id}/action-plan/export/pdf`, actionPlanQuery),
 						testId: 'export-option-ap-pdf'
 					},
 					{
 						titleKey: 'exportControlsWorkbook',
 						descriptionKey: 'exportControlsWorkbookDesc',
 						format: 'XLSX' as const,
-						href: `/risk-assessments/${id}/action-plan/export/excel`,
+						href: withParams(`/risk-assessments/${id}/action-plan/export/excel`, actionPlanQuery),
 						testId: 'export-option-ap-xlsx'
 					}
 				]
@@ -277,7 +283,19 @@
 	function modalExport(): void {
 		const modalComponent: ModalComponent = {
 			ref: ExportModal,
-			props: { title: m.exportOptionsTitle(), groups: buildExportGroups() }
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups(new URLSearchParams()),
+				selection:
+					scoped && selection
+						? {
+								count: selection.count,
+								total: selection.total,
+								summary: selectionSummary(readSelection(page.url.searchParams), selection),
+								groups: buildExportGroups(selectionQuery)
+							}
+						: undefined
+			}
 		};
 		modalStore.trigger({ type: 'component', component: modalComponent });
 	}
@@ -403,9 +421,22 @@
 					</button>
 					<Anchor
 						label={m.actionPlan()}
-						href="/risk-assessments/{risk_assessment.id}/action-plan"
-						class="btn btn-quiet"
-						><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}</Anchor
+						href={withParams(`/risk-assessments/${risk_assessment.id}/action-plan`, selectionQuery)}
+						class="btn btn-quiet relative"
+						data-testid="action-plan-button"
+						><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}
+						{#if scoped && selection}
+							<!-- Corner badge: the side panel's half-width cells have no room inline. -->
+							<span
+								class="absolute -top-2 -right-1.5 badge preset-filled-primary-500 px-1.5 py-0.5 text-[10px] leading-none tabular-nums shadow-sm"
+								title={m.scenarioSelectionCount({
+									count: selection.count,
+									total: selection.total
+								})}
+								><i class="fa-solid fa-filter text-[9px] mr-1" aria-hidden="true"
+								></i>{selection.count}</span
+							>
+						{/if}</Anchor
 					>
 					<Anchor
 						label={m.analytics()}
@@ -484,6 +515,12 @@
 			</div>
 		</div>
 	</div>
+	<div class="mx-4">
+		<ScenarioSelectionBar riskAssessmentId={risk_assessment.id} {selection} />
+		{#if data.selectionError}
+			<p class="mt-2 text-sm text-error-600" role="alert">{m.selectionError()}</p>
+		{/if}
+	</div>
 	<!--Risk risk_assessment-->
 	<div class="card m-4 p-4 shadow-sm bg-surface-50-950">
 		<div class="bg-surface-50-950">
@@ -498,8 +535,9 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
-				tableFilters={scenarioTableFilters}
+				tableFilters={{}}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				extraParams={selectionListFilters(selection?.filters).toString()}
 				folderId={data.risk_assessment.folder.id}
 				{fields}
 				disableCreate={risk_assessment.is_locked}
@@ -522,7 +560,19 @@
 	</div>
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow-sm bg-surface-50-950 page-break">
-		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
+		<div class="flex flex-wrap items-baseline justify-between gap-2">
+			<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
+			{#if scoped && selection}
+				<span
+					class="inline-flex items-center gap-2 text-xs font-semibold rounded-full px-3 py-1 bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200"
+					data-testid="matrix-selection-badge"
+				>
+					<i class="fa-solid fa-filter" aria-hidden="true"></i>
+					{m.scenarioSelectionCount({ count: selection.count, total: selection.total })}
+					<span class="font-normal">· {m.outsideSelectionHidden({ count: hiddenCount })}</span>
+				</span>
+			{/if}
+		</div>
 		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
 			{#if page.data?.featureflags?.inherent_risk}
 				<div>
@@ -531,11 +581,7 @@
 					<RiskMatrix
 						riskMatrix={risk_assessment.risk_matrix}
 						matrixName={'inherent'}
-						data={buildRiskCluster(
-							risk_assessment.risk_scenarios,
-							risk_assessment.risk_matrix,
-							'inherent'
-						)}
+						data={buildRiskCluster(selectedScenarios, risk_assessment.risk_matrix, 'inherent')}
 						dataItemComponent={RiskScenarioItem}
 						{useBubbles}
 					/>
