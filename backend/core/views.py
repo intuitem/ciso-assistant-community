@@ -861,7 +861,7 @@ class GenericFilterSet(df.FilterSet):
     # Range lookups every date column gets, so listing a date in filterset_fields is
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
     # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
-    DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull", "year", "month")
     # `lt`/`gt`: half-open bounds, so a BI partition boundary lands in one page.
     DATETIME_LOOKUPS = (
         "date",
@@ -19076,7 +19076,7 @@ class FindingFilterSet(GenericFilterSet):
             "evidences": ["exact"],
             "vulnerabilities": ["exact"],
             "task_templates": ["exact"],
-            "due_date": ["exact", "year", "month"],
+            "due_date": ["exact"],
             "created_at": ["gte", "lt"],
             "updated_at": ["gte", "lt"],
             "eta": ["exact"],
