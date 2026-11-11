@@ -5079,7 +5079,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 )
             writer.writerow(columns)
 
-            for scenario in selection.scenarios.order_by("ref_id"):
+            for scenario in viewable(selection.scenarios.order_by("ref_id")):
                 additional_controls = ",".join(
                     [m.name for m in viewable(scenario.applied_controls.all())]
                 )
@@ -14595,7 +14595,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             viewable = ViewableFilter(request.user)
             scoped_ids = {ra.id for ra in viewable(assessments)}
             applied_controls = list(
-                AppliedControl.objects.filter(requirement_assessments__in=assessments)
+                AppliedControl.objects.filter(requirement_assessments__in=scoped_ids)
                 .distinct()
                 .prefetch_related(
                     "requirement_assessments__requirement", actor_prefetch("owner")

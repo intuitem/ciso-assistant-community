@@ -881,7 +881,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "country": esc(entity.country),
                     "currency": esc(entity.currency),
                     "parent_entity_ref_id": (
-                        esc(entity.parent_entity.ref_id) if entity.parent_entity else ""
+                        esc(parent.ref_id)
+                        if (parent := visible_entity(entity.parent_entity))
+                        else ""
                     ),
                     "dependency": entity.default_dependency,
                     "penetration": entity.default_penetration,

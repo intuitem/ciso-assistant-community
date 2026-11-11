@@ -78,6 +78,7 @@ def setup(db):
                 "view_appliedcontrol",
                 "view_evidence",
                 "view_tasktemplate",
+                "view_entity",
             ]
         )
     )
@@ -157,3 +158,27 @@ def test_task_export_drops_hidden_linked_controls(setup):
 
     assert set(rows) == {"seen-task"}
     assert rows["seen-task"]["applied_controls"] == "seen-control"
+
+
+@pytest.mark.django_db
+def test_ecosystem_export_drops_hidden_parent_entity(setup):
+    from tprm.models import Entity
+
+    client, _ = setup
+    parent = Entity.objects.create(
+        name="hidden-parent",
+        ref_id="HP-1",
+        folder=Folder.objects.get(name="ExportHidden"),
+    )
+    Entity.objects.create(
+        name="seen-child",
+        parent_entity=parent,
+        folder=Folder.objects.get(name="ExportVisible"),
+    )
+
+    response = client.get("/api/entities/export_ecosystem/")
+    assert response.status_code == 200
+    rows = pd.read_excel(io.BytesIO(response.content), sheet_name="Entities").fillna("")
+
+    assert rows["name"].tolist() == ["seen-child"]
+    assert rows["parent_entity_ref_id"].tolist() == [""]

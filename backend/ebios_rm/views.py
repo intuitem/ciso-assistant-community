@@ -17,7 +17,7 @@ from core.views import (
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
-from core.models import Asset, Terminology
+from core.models import Asset, ComplianceAssessment, RiskAssessment, Terminology
 from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
 from openpyxl.workbook.child import INVALID_TITLE_REGEX
@@ -389,7 +389,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             steps = [
                 step
                 for step in mo.kill_chain_steps.select_related("elementary_action")
-                if viewable.allows(step.elementary_action)
+                if viewable.allows(step) and viewable.allows(step.elementary_action)
             ]
             if not steps:
                 return None
@@ -454,8 +454,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = last_risk_assessment.risk_scenarios.all().order_by(
-                "ref_id"
+            risk_scenarios = viewable(
+                last_risk_assessment.risk_scenarios.all().order_by("ref_id")
             )
             risk_matrix_data = {
                 "risk_assessment": {
@@ -553,6 +553,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Sort study assets: primary before support, then alphabetical
         study_data = EbiosRMStudyReadSerializer(study).data
+        study_data["assets"] = viewable.serialized(Asset, study_data.get("assets"))
+        for field, model in (
+            ("compliance_assessments", ComplianceAssessment),
+            ("risk_assessments", RiskAssessment),
+        ):
+            study_data[field] = viewable.serialized(model, study_data.get(field))
+        if not last_risk_assessment:
+            study_data["last_risk_assessment"] = None
         if study_data.get("assets"):
             study_data["assets"] = sorted(
                 study_data["assets"],
