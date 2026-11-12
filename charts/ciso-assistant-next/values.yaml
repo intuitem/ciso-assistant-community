@@ -207,8 +207,8 @@ backend:
   ## MCP server for AI apps (Claude, Copilot Studio, ChatGPT...), served at /mcp.
   ## It runs as a sidecar in the backend pod and holds no secret: it passes each
   ## app's own OAuth token to the backend, which decides what the app may do.
-  ## Users sign in with their own account. Turning on the `mcp` feature flag needs
-  ## a shared cache (memcached).
+  ## Users sign in with their own account. Sign-in needs a shared cache: set
+  ## `memcached.enabled: true`, or the `mcp` feature flag cannot be turned on.
   ## Ref: https://intuitem.gitbook.io/ciso-assistant/integrations/mcp-oauth
   mcp:
     # -- Serve MCP at /mcp

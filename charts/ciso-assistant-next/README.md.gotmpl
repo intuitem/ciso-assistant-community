@@ -83,9 +83,9 @@ backend next to it, which decides what the app may do.
 
 Before users can connect apps:
 
-- the backend needs a shared cache (memcached): sign-in keeps each authorization code in the cache
-  until the app redeems it, possibly on another worker, and the `mcp` feature flag cannot be turned
-  on without it;
+- the backend needs a shared cache: set `memcached.enabled: true`. Sign-in keeps each authorization
+  code in the cache until the app redeems it, possibly on another worker, and the `mcp` feature flag
+  cannot be turned on without it;
 - an administrator turns on the `mcp` feature flag, and `mcp_write` to let apps change data;
 - an administrator ticks "Can connect AI apps" on each user who may do so.
 
@@ -112,6 +112,8 @@ spec:
 ```
 
 ```yaml
+memcached:
+  enabled: true
 backend:
   mcp:
     enabled: true
