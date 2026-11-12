@@ -27,7 +27,12 @@ description: 'This framework is based on 2 documents:
 
   JUNE 2025, VERSION 1.0
 
-  Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance'
+  Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance
+
+
+  Only section and subsection titles (e.g. 1.1, 6.10) come from the regulation.
+  Names of individual points (e.g. 1.1.1, 1.1.1.a) are informal summaries added
+  for readability; the description holds the official text.'
 copyright: EUROPEAN COMMISSION + ENISA
 version: 14
 publication_date: 2026-11-11
@@ -31160,7 +31165,7 @@ objects:
       name: Verification of background
       translations:
         de:
-          name: Umgang mit und Offenlegung von Sicherheitslücken
+          name: Zuverlässigkeitsüberprüfung
         fr:
           name: "V\xE9rification des ant\xE9c\xE9dents"
         es:
@@ -31168,7 +31173,7 @@ objects:
         cs:
           name: "Ov\u011B\u0159en\xED spolehlivosti"
         it:
-          name: "Gestione e divulgazione delle vulnerabilit\xE0"
+          name: Verifica dei precedenti personali
     - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.2.1
       assessable: true
       depth: 3
