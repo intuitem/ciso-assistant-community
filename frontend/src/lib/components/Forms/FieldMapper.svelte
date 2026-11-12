@@ -122,6 +122,9 @@
 	let tables = $state<SelectOption[]>([]);
 	let columns = $state<SelectOption[]>([]);
 	let choicesCache = $state({}); // Key: "table:field", Value: Option[]
+	// Saved-only options shown while a choice list fails to load. Kept out of
+	// choicesCache so the next load retries instead of reusing the failure.
+	let fallbackChoices = $state<Record<string, SelectOption[]>>({});
 	let isLoadingColumns = $state(false);
 	let isRefreshing = $state(false);
 
@@ -211,13 +214,18 @@
 			table_name: tableName,
 			field_name: fieldName
 		});
-		if (rawChoices === null) return; // RPC failed — don't cache an empty list as success
 		// Saved values of every local field mapped to this remote field.
 		const savedChoices = isSavedTable(tableName)
 			? localFields
 					.filter((f) => savedFieldMap[f.key] === fieldName)
 					.flatMap((f) => Object.values(savedValueMap[f.key] ?? {}))
 			: [];
+		if (rawChoices === null) {
+			// RPC failed: show the saved values, but don't cache the failure.
+			fallbackChoices[cacheKey] = withSavedOptions([], savedChoices, unverifiedLabel);
+			return;
+		}
+		delete fallbackChoices[cacheKey];
 		choicesCache[cacheKey] = withSavedOptions(
 			rawChoices.map((c) => ({ value: c.value, label: c.label })),
 			savedChoices,
@@ -428,7 +436,10 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{#each activeChoiceFields as field}
 						{@const remoteField = fieldMap[field.key]}
-						{@const choices = choicesCache[`${selectedTable}:${remoteField}`] || []}
+						{@const choices =
+							choicesCache[`${selectedTable}:${remoteField}`] ||
+							fallbackChoices[`${selectedTable}:${remoteField}`] ||
+							[]}
 
 						<div class="border border-surface-200-800 rounded-lg">
 							<div
