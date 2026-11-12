@@ -26,7 +26,7 @@ from core.models import (
 from core.startup import startup
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
-FIXTURE = Path(__file__).parent / "fixtures" / "test-splash-assessable.yaml"
+FIXTURE = Path(__file__).parent / "fixtures" / "test-mixed-scoring.yaml"
 HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
 
 
@@ -102,7 +102,7 @@ def setup(db):
     assert err is None
     assert stored.load() is None
     framework = Framework.objects.get(
-        urn="urn:intuitem:test:framework:splash-assessable"
+        urn="urn:intuitem:test:framework:mixed-scoring"
     )
     domain, other = _domain("ExportDomain"), _domain("OtherDomain")
     audit = ComplianceAssessment.objects.create(
