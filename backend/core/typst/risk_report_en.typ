@@ -248,6 +248,7 @@
       ..(
         if scenario.description != "" { row("Description", [#scenario.description]) } else { () }
           + if scenario.qualifications.len() > 0 { row(qualification-label, [#scenario.qualifications.join(", ")]) } else { () }
+          + if scenario.owners.len() > 0 { row("Owner", [#scenario.owners.join(", ")]) } else { () }
           + if scenario.assets.len() > 0 { row("Assets", [#scenario.assets.join(", ")]) } else { () }
           + if scenario.threats.len() > 0 { row("Threats", [#scenario.threats.join(", ")]) } else { () }
           + if "inherent" in scenario { row("Inherent level", level-badge(scenario.inherent)) } else { () }

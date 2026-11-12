@@ -55,12 +55,10 @@ export const load = (async ({ fetch, params }) => {
 				folder: requirementAssessment.folder.id,
 				requirement: requirementAssessment.requirement.id,
 				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				...(requirementAssessment.evidences !== undefined && {
-					evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
-				}),
-				...(requirementAssessment.applied_controls !== undefined && {
-					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
-				})
+				// Every link field this viewer reads, as ids: the read data holds objects
+				// and masks the ones the user cannot see, and the form must send those
+				// links back untouched.
+				...requirementAssessment.linked_ids
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
