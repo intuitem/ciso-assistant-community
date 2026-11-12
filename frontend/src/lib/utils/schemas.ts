@@ -1043,6 +1043,7 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
+	is_active: z.boolean().optional().default(true),
 	tier: z.string().uuid().optional().nullable(),
 	tier_note: z.string().optional(),
 	owner: z.string().uuid().optional().array().optional(),
