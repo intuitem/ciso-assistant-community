@@ -1,18 +1,16 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { TestContent, test, expect, getUniqueValue, type Page } from '../../utils/test-utils.js';
+import { optionLocator } from '../../utils/form-content.js';
 
 test.use({ actionTimeout: 60_000 });
 
 async function selectOptions(page: Page, field: string, ...names: string[]) {
 	const input = page.getByTestId(field);
 	for (const name of names) {
-		const option = input
-			.getByRole('option', { name })
-			.or(page.locator('ul.portaled-options:visible').getByRole('option', { name }))
-			.first();
+		const option = optionLocator(page, input, name);
 		await expect(async () => {
 			if (!(await option.isVisible())) {
-				await input.getByRole('combobox').click();
+				await input.getByRole('combobox').click({ timeout: 2_000 });
 			}
 			await option.click({ timeout: 2_000 });
 		}).toPass({ timeout: 30_000, intervals: [500, 1000, 2000] });
@@ -533,7 +531,6 @@ test('ebios rm study', async ({
 				.fill(
 					'Minim ad dolore do pariatur non. Nostrud enim dolore est fugiat occaecat deserunt minim labore. Commodo minim adipisicing proident esse irure. Veniam nostrud et adipisicing.'
 				);
-			await page.getByTestId('form-input-threats').getByRole('combobox').click();
 			await selectOptions(page, 'form-input-attack-path', 'test attack path 1');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
