@@ -5661,7 +5661,6 @@
 	"implementationGroup": "Implementierungsgruppe",
 	"frameworkReportSubtitle": "Bewertungsskala {min}–{max} · {nIGs} Implementierungsgruppen",
 	"complianceAssessmentsInScope": "Audits im Scope",
-	"onlyLiveStatusesCounted": "Es werden nur Bewertungen mit dem Status {statuses} gezählt. Markieren Sie Audits als {deprecated}, um sie auszuschließen.",
 	"detectedComplianceAssessments": "Erkannte {total}-Audits ({counted} gezählt, {excluded} ausgeschlossen):",
 	"backToFramework": "Zurück zum Referenzwerk",
 	"compliancePercentage": "Konformität %",

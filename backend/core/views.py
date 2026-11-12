@@ -11476,19 +11476,21 @@ class FrameworkViewSet(BaseModelViewSet):
           - campaign (uuid): narrow to one campaign's audits. A campaign is
             already an explicit scope, so planned audits are kept — they are the
             normal state right after a launch and cannot double-count here.
+          - statuses ("live"): count only live audits (LIVE_STATUSES below).
+            Default counts every status but deprecated.
         """
         framework = self.get_object()  # checks read permission
 
         ig_filter = request.query_params.get("implementation_group") or None
         campaign_id = request.query_params.get("campaign") or None
+        live_only = request.query_params.get("statuses") == "live"
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
 
-        # Statuses considered "live" for cross-CA rollups. Planned and
-        # deprecated CAs are intentionally excluded; surface them via the
-        # standard CA list page if needed.
+        # Statuses considered "live" when `statuses=live`: planned and
+        # deprecated CAs are then excluded from the rollups.
         LIVE_STATUSES = ("in_progress", "in_review", "done")
         if campaign_id:
             LIVE_STATUSES = LIVE_STATUSES + ("planned",)
@@ -11524,7 +11526,12 @@ class FrameworkViewSet(BaseModelViewSet):
             key = ca.status or "unknown"
             ca_status_counts[key] = ca_status_counts.get(key, 0) + 1
 
-        cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
+        def is_counted(ca) -> bool:
+            if live_only:
+                return ca.status in LIVE_STATUSES
+            return ca.status != "deprecated"
+
+        cas = [ca for ca in all_visible_cas if is_counted(ca)]
 
         # Per-CA viewer role: respondent unless the user holds the full auditor
         # view (view_compliance_assessment_full) on the CA's folder. Computed once per CA.
@@ -11851,7 +11858,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     if actor.id in viewable_actor_ids
                 ],
                 "outcomes": outcomes_of(ca) if ca.id in audits_by_id else None,
-                "is_counted": ca.status in LIVE_STATUSES,
+                "is_counted": is_counted(ca),
                 **(
                     scores_of(audits_by_id[ca.id])
                     if ca.id in audits_by_id
@@ -11906,6 +11913,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "compliance_assessments": compliance_assessments,
                 "ca_status_counts": ca_status_counts,
                 "live_statuses": list(LIVE_STATUSES),
+                "live_only": live_only,
                 "aggregation_strategy": aggregation_strategy,
                 "campaign": campaign_scope,
                 "generated_at": timezone.now().isoformat(),
@@ -12120,6 +12128,9 @@ class FrameworkViewSet(BaseModelViewSet):
                 index_buffer = io.BytesIO()
                 index_wb.save(index_buffer)
                 zipf.writestr("index.xlsx", index_buffer.getvalue())
+            if index_ws.max_row == 1:  # header only: nothing to export
+                temp_file.close()
+                return Response(status=status.HTTP_204_NO_CONTENT)
             temp_file.seek(0)
             if len(requirements) == 1:
                 label = next(iter(requirements)).ref_id or "requirement"

@@ -5900,7 +5900,6 @@
 	"implementationGroup": "Megvalósítási csoport",
 	"frameworkReportSubtitle": "Pontozási skála: {min}–{max} · {nIGs} megvalósítási csoport",
 	"complianceAssessmentsInScope": "audit a terjedelemben",
-	"onlyLiveStatusesCounted": "Csak a(z) {statuses} állapotú értékelések számítanak – a kizáráshoz jelölje az auditokat {deprecated} állapotúnak.",
 	"detectedComplianceAssessments": "{total} audit észlelve ({counted} beleszámítva, {excluded} kizárva):",
 	"backToFramework": "Vissza a keretrendszerhez",
 	"compliancePercentage": "Megfelelőség %",

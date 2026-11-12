@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pageTitle } from '#lib/utils/stores.js';
+	import { pageTitle, frameworkReportFiltersOpen as filtersOpen } from '#lib/utils/stores.js';
 	import { breadcrumbs } from '#lib/utils/breadcrumbs.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -163,6 +163,8 @@
 		compliance_assessments: ComplianceAssessmentSummary[];
 		ca_status_counts: Record<string, number>;
 		live_statuses: string[];
+		// True when only live_statuses are counted (`statuses=live`); default counts all.
+		live_only?: boolean;
 		aggregation_strategy: string;
 		campaign: { id: string; name: string } | null;
 		generated_at: string;
@@ -195,7 +197,13 @@
 		STATUS_ORDER.map((s) => [s, caStatusCounts[s] ?? 0] as const).filter(([, n]) => n > 0)
 	);
 	let totalDetectedCAs = $derived(Object.values(caStatusCounts).reduce((a, b) => a + b, 0));
-	let countedCAs = $derived(liveStatuses.reduce((a, s) => a + (caStatusCounts[s] ?? 0), 0));
+	let liveOnly = $derived(report.live_only ?? false);
+	let liveStatusesLabel = $derived(liveStatuses.map((s) => safeTranslate(s)).join(', '));
+	let countedCAs = $derived(
+		liveOnly
+			? liveStatuses.reduce((a, s) => a + (caStatusCounts[s] ?? 0), 0)
+			: totalDetectedCAs - (caStatusCounts.deprecated ?? 0)
+	);
 	let excludedCAs = $derived(totalDetectedCAs - countedCAs);
 
 	$effect(() => {
@@ -281,11 +289,18 @@
 		setIG((event.currentTarget as HTMLSelectElement).value);
 	}
 
-	function setIG(nextIG: string) {
+	// Server-side filters live in the URL; null or 'all' drops the param.
+	function setParams(params: Record<string, string | null>) {
 		const url = new URL(page.url.href);
-		if (nextIG && nextIG !== 'all') url.searchParams.set('implementation_group', nextIG);
-		else url.searchParams.delete('implementation_group');
+		for (const [key, value] of Object.entries(params)) {
+			if (value && value !== 'all') url.searchParams.set(key, value);
+			else url.searchParams.delete(key);
+		}
 		goto(url, { refreshAll: true, reset: false });
+	}
+
+	function setIG(nextIG: string) {
+		setParams({ implementation_group: nextIG });
 	}
 
 	const RESULT_COLORS = complianceResultColorMap as Record<Result, string>;
@@ -530,7 +545,8 @@
 			selectedLabels.size > 0 ||
 			selectedAuthors.size > 0 ||
 			dateWindowActive ||
-			igFilter !== 'all'
+			igFilter !== 'all' ||
+			liveOnly
 	);
 
 	type FilterOption = { id: string; name: string };
@@ -608,7 +624,7 @@
 		selectedLabels = new Set();
 		selectedAuthors = new Set();
 		clearDateWindow();
-		if (igFilter !== 'all') setIG('all');
+		if (igFilter !== 'all' || liveOnly) setParams({ implementation_group: null, statuses: null });
 	}
 
 	let allowedAuditIds = $derived(
@@ -1000,6 +1016,10 @@
 					...(igFilter !== 'all' ? { implementation_group: igFilter } : {})
 				})
 			});
+			if (res.status === 204) {
+				toastStore.trigger({ message: m.noEvidenceToExport() });
+				return;
+			}
 			if (!res.ok) throw new Error(`${res.status}`);
 			const url = URL.createObjectURL(await res.blob());
 			const link = document.createElement('a');
@@ -1318,12 +1338,11 @@
 						nIGs: igDefs.length
 					})}
 				</div>
-				<div class="text-xs text-surface-600-400 mt-1">
-					{m.onlyLiveStatusesCounted({
-						statuses: liveStatuses.map((s) => safeTranslate(s)).join(', '),
-						deprecated: m.deprecated()
-					})}
-				</div>
+				{#if liveOnly}
+					<div class="text-xs text-surface-600-400 mt-1">
+						{m.onlyStatusesCounted({ statuses: liveStatusesLabel })}
+					</div>
+				{/if}
 				{#if totalDetectedCAs > 0}
 					<div
 						class="text-xs text-surface-600-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1"
@@ -1336,7 +1355,7 @@
 							})}
 						</span>
 						{#each orderedStatusCounts as [s, n]}
-							{@const isLive = liveStatuses.includes(s)}
+							{@const isLive = liveOnly ? liveStatuses.includes(s) : s !== 'deprecated'}
 							<span
 								class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 border text-[11px] {isLive
 									? 'border-emerald-300 bg-emerald-50 text-emerald-800'
@@ -1450,9 +1469,23 @@
 
 		<!-- Filters -->
 		<section class="mt-4 rounded-lg border border-surface-200-800 bg-surface-100-900/40 p-3">
-			<div class="flex items-center gap-2 mb-3">
-				<i class="fa-solid fa-filter text-surface-600-400" aria-hidden="true"></i>
-				<h2 class="text-sm font-semibold">{m.filters()}</h2>
+			<div class="flex items-center gap-2 {$filtersOpen ? 'mb-3' : ''}">
+				<h2 class="text-sm font-semibold">
+					<button
+						type="button"
+						class="flex items-center gap-2 hover:text-primary-600-400"
+						aria-expanded={$filtersOpen}
+						aria-controls="report-filters"
+						onclick={() => ($filtersOpen = !$filtersOpen)}
+					>
+						<i class="fa-solid fa-filter text-surface-600-400" aria-hidden="true"></i>
+						{m.filters()}
+						<i
+							class="fa-solid fa-chevron-{$filtersOpen ? 'up' : 'down'} text-xs text-surface-500"
+							aria-hidden="true"
+						></i>
+					</button>
+				</h2>
 				{#if filtersActive}
 					<span class="text-xs text-surface-600-400">
 						{m.auditsCount({ count: filteredAudits.length })}
@@ -1467,7 +1500,11 @@
 				{/if}
 			</div>
 
-			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+			<div
+				id="report-filters"
+				class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3"
+				hidden={!$filtersOpen}
+			>
 				<!-- Domains -->
 				<div class="relative" data-filter-menu="domains">
 					<span class="text-xs font-medium text-surface-600-400 block mb-1" id="domain-filter-label"
@@ -1586,8 +1623,25 @@
 					</select>
 				</div>
 
+				<!-- Audit status: every status by default, or live ones only -->
+				<div>
+					<label class="text-xs font-medium text-surface-600-400 block mb-1" for="status-filter"
+						><i class="fa-solid fa-circle-half-stroke mr-1" aria-hidden="true"
+						></i>{m.status()}</label
+					>
+					<select
+						id="status-filter"
+						value={liveOnly ? 'live' : 'all'}
+						onchange={(e) => setParams({ statuses: e.currentTarget.value })}
+						class="w-full rounded-lg border-surface-300-700 text-sm bg-surface-50-950 py-1.5"
+					>
+						<option value="all">{m.allButDeprecated()}</option>
+						<option value="live">{liveStatusesLabel}</option>
+					</select>
+				</div>
+
 				<!-- Deadline window -->
-				<div class="md:col-span-2 xl:col-span-4">
+				<div class="md:col-span-2 xl:col-span-5">
 					<div class="flex items-center gap-2 mb-1">
 						<span class="text-xs font-medium text-surface-600-400" id="deadline-label"
 							><i class="fa-regular fa-calendar mr-1" aria-hidden="true"></i>{m.deadline()}</span
@@ -1707,6 +1761,17 @@
 							>
 						</span>
 					{/if}
+					{#if liveOnly}
+						<span class="chip preset-tonal-primary text-xs">
+							<i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>{liveStatusesLabel}
+							<button
+								type="button"
+								aria-label={m.remove()}
+								onclick={() => setParams({ statuses: null })}
+								><i class="fa-solid fa-xmark"></i></button
+							>
+						</span>
+					{/if}
 					{#if dateWindowActive}
 						<span class="chip preset-tonal-primary text-xs">
 							<i class="fa-regular fa-calendar" aria-hidden="true"></i>{dateField === 'eta'
@@ -1799,7 +1864,9 @@
 			</div>
 		{:else if totalAssessments === 0}
 			<div class="mt-4 text-sm text-surface-600-400 italic">
-				{m.noVisibleComplianceAssessments()}
+				{filtersActive && totalDetectedCAs > 0
+					? m.noAssessmentMatchesFilters()
+					: m.noVisibleComplianceAssessments()}
 			</div>
 		{/if}
 	</div>

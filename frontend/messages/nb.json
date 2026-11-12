@@ -4596,7 +4596,6 @@
 	"implementationGroup": "Implementeringsgruppe",
 	"frameworkReportSubtitle": "Poengskala {min}–{max} · {nIGs} implementeringsgrupper",
 	"complianceAssessmentsInScope": "samsvarsvurderinger i omfanget",
-	"onlyLiveStatusesCounted": "Bare vurderinger med status {statuses} telles med – merk samsvarsvurderinger som {deprecated} for å utelate dem.",
 	"detectedComplianceAssessments": "Fant {total} samsvarsvurderinger ({counted} tellet med, {excluded} utelatt):",
 	"backToFramework": "Tilbake til rammeverket",
 	"compliancePercentage": "Etterlevelse (%)",

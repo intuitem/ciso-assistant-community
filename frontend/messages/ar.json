@@ -5718,7 +5718,6 @@
 	"implementationGroup": "مجموعة التطبيق",
 	"frameworkReportSubtitle": "مقياس التقييم {min}–{max} · {nIGs} من مجموعات التطبيق",
 	"complianceAssessmentsInScope": "تدقيقات ضمن النطاق",
-	"onlyLiveStatusesCounted": "لا تُحتسب سوى التقييمات ذات الحالة {statuses} — ضع علامة {deprecated} على التدقيقات لاستبعادها.",
 	"detectedComplianceAssessments": "اكتُشف {total} تدقيقًا ({counted} محتسب، و{excluded} مستبعد):",
 	"backToFramework": "العودة إلى الإطار",
 	"compliancePercentage": "نسبة الامتثال %",
