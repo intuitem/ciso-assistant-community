@@ -19,8 +19,6 @@
 
 	const isoDay = (d: Date) => d.toISOString().split('T')[0];
 	const today = isoDay(new Date());
-	// Matches OVERDUE_TASKS_WINDOW_DAYS in backend/core/helpers.py.
-	const overdueSince = isoDay(new Date(Date.now() - 30 * 86_400_000));
 	const fmt = (n: number | undefined) => (n ?? 0).toLocaleString(getLocale());
 
 	type Tier = 'now' | 'late' | 'housekeeping';
@@ -30,10 +28,8 @@
 		label: string;
 		hint: string;
 		href: string;
-		show?: boolean;
 		/** Key of its daily series in `metrics.trends`. */
 		trend?: string;
-		secondary?: { label: string; href: string };
 	};
 
 	// Listed most urgent first.
@@ -69,15 +65,8 @@
 					count: metrics.operations?.overdue_tasks,
 					label: m.briefingOverdueTasks(),
 					hint: m.briefingOverdueTasksHint(),
-					href: `/task-nodes?past=true&status=pending&status=in_progress&due_date__gte=${overdueSince}&task_template__enabled=true`,
-					trend: 'tasks_overdue_recent',
-					show: metrics.operations?.overdue_tasks_total > 0,
-					secondary: {
-						label: m.briefingOverdueTasksTotal({
-							count: fmt(metrics.operations?.overdue_tasks_total)
-						}),
-						href: '/task-nodes?past=true&status=pending&status=in_progress&task_template__enabled=true'
-					}
+					href: '/task-templates?overdue=true',
+					trend: 'task_templates_overdue'
 				},
 				featureflags.follow_up !== false && {
 					tier: 'late',
@@ -111,7 +100,7 @@
 					href: '/applied-controls/?status=degraded'
 				}
 			] as (Item | false)[]
-		).filter((i): i is Item => i !== false && (i.show ?? i.count > 0))
+		).filter((i): i is Item => i !== false && i.count > 0)
 	);
 
 	const tierStyle: Record<
@@ -196,9 +185,30 @@
 	const scenarios = $derived(metrics.risk?.scenarios ?? 0);
 	const share = (n: number, of: number) => (of ? Math.max((n / of) * 100, n ? 1.5 : 0) : 0);
 	const highRiskRows = $derived([
+		...(featureflags.inherent_risk
+			? [{ key: 'inherent', label: m.inherentRisk(), count: metrics.risk?.high_inherent ?? 0 }]
+			: []),
 		{ key: 'current', label: m.currentRisk(), count: metrics.risk?.high_current ?? 0 },
 		{ key: 'residual', label: m.briefingAfterTreatment(), count: metrics.risk?.high_residual ?? 0 }
 	]);
+	const lShape = $derived(highRiskRows.length > 2);
+	const riskTone: Record<string, { box: string; text: string; bar: string }> = {
+		inherent: {
+			box: 'border-surface-300-700 bg-surface-100-900',
+			text: 'text-surface-800-200',
+			bar: 'bg-surface-500'
+		},
+		current: {
+			box: 'border-error-500/25 bg-error-500/8',
+			text: 'text-error-600-400',
+			bar: 'bg-error-500'
+		},
+		residual: {
+			box: 'border-warning-500/30 bg-warning-500/10',
+			text: 'text-warning-700-300',
+			bar: 'bg-warning-500'
+		}
+	};
 
 	// Trend: daily root snapshots, only sent to users who can see the whole organisation.
 	type Point = [string, number];
@@ -225,10 +235,11 @@
 		const points: Point[] = (key && metrics.trends?.[key]) || [];
 		return points.length >= 3 ? points.map((p) => p[1]) : [];
 	};
-	const highDrop = $derived.by(() => {
-		const [current, residual] = highRiskRows.map((r) => r.count);
-		return current ? Math.round(((residual - current) / current) * 100) : 0;
-	});
+	// Change from the previous stage, shown on the arrow leading to row i.
+	const highDrop = (i: number) => {
+		const [from, to] = [highRiskRows[i - 1].count, highRiskRows[i].count];
+		return from ? Math.round(((to - from) / from) * 100) : 0;
+	};
 	// Meters fill once on first paint; the CSS transition is skipped under reduced motion.
 	let filled = $state(false);
 	onMount(() => requestAnimationFrame(() => (filled = true)));
@@ -296,7 +307,7 @@
 								/></span
 							>
 							<span class="stat-context"
-								>{m.briefingAcrossAudits({ count: fmt(metrics.compliance?.active_audits) })}</span
+								>{m.briefingAcrossAudits({ count: fmt(a?.audits_count ?? 0) })}</span
 							>
 						</span>
 					</a>
@@ -423,13 +434,6 @@
 												aria-hidden="true"
 											></i>
 										</a>
-										{#if item.secondary}
-											<a
-												href={item.secondary.href}
-												class="ml-[4.75rem] -mt-1 mb-2 inline-block text-[13px] text-primary-700-300 underline decoration-primary-300-700 underline-offset-2 hover:decoration-current"
-												>{item.secondary.label}</a
-											>
-										{/if}
 									</li>
 								{/each}
 							</ul>
@@ -496,15 +500,27 @@
 			<div>
 				<h3 class="text-[15px] font-semibold mb-3">{m.briefingHighRisks()}</h3>
 				{#if scenarios}
-					<div class="flex items-stretch gap-2">
+					<div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2">
 						{#each highRiskRows as row, i (row.key)}
+							{@const down = lShape && i === 1}
 							{#if i}
-								<span class="flex flex-col items-center justify-center px-1 text-surface-400-600">
-									<i class="fa-solid fa-arrow-right rtl:rotate-180 text-sm" aria-hidden="true"></i>
-									{#if highDrop < 0}
+								<span
+									class="flex items-center justify-center gap-1.5 text-surface-400-600 {down
+										? 'col-start-1 flex-row py-0.5'
+										: 'flex-col px-1'}"
+								>
+									<i
+										class="fa-solid text-sm {down
+											? 'fa-arrow-down'
+											: 'fa-arrow-right rtl:rotate-180'}"
+										aria-hidden="true"
+									></i>
+									{#if highDrop(i) < 0}
 										<span
-											class="mt-1 rounded-full bg-success-500/12 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-success-700-300"
-											>{(highDrop / 100).toLocaleString(getLocale(), {
+											class="{down
+												? ''
+												: 'mt-1'} rounded-full bg-success-500/12 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-success-700-300"
+											>{(highDrop(i) / 100).toLocaleString(getLocale(), {
 												style: 'percent',
 												signDisplay: 'exceptZero'
 											})}</span
@@ -514,32 +530,39 @@
 							{/if}
 							<a
 								href="/risk-scenarios?top_level={row.key}"
-								class="risk-box flex-1 rounded-xl border px-3.5 py-3 {i === 0
-									? 'border-error-500/25 bg-error-500/8'
-									: 'border-warning-500/30 bg-warning-500/10'}"
+								class="risk-box min-w-0 rounded-xl border px-3.5 py-3 {down
+									? 'col-start-1'
+									: ''} {riskTone[row.key].box}"
 							>
 								<span class="block text-[13px] text-surface-700-300">{row.label}</span>
 								<span
-									class="mt-1 block text-[2rem] leading-none font-bold tabular-nums tracking-tight {i ===
-									0
-										? 'text-error-600-400'
-										: 'text-warning-700-300'}"><AnimatedNumber value={row.count} countUp /></span
+									class="mt-1 block text-[2rem] leading-none font-bold tabular-nums tracking-tight {riskTone[
+										row.key
+									].text}"><AnimatedNumber value={row.count} countUp /></span
 								>
 								<span class="mt-2.5 block h-1.5 rounded-full bg-surface-50-950/70 overflow-hidden"
 									><span
-										class="block h-full rounded-full motion-safe:transition-[width] motion-safe:duration-700 {i ===
-										0
-											? 'bg-error-500'
-											: 'bg-warning-500'}"
+										class="block h-full rounded-full motion-safe:transition-[width] motion-safe:duration-700 {riskTone[
+											row.key
+										].bar}"
 										style="width: {fill(share(row.count, scenarios))}%"
 									></span></span
 								>
 							</a>
 						{/each}
+						{#if lShape}
+							<p
+								class="col-start-2 col-span-2 row-start-1 self-center ps-2 text-xs text-surface-600-400"
+							>
+								{m.briefingHighRisksHint({ count: fmt(scenarios) })}
+							</p>
+						{/if}
 					</div>
-					<p class="mt-2 text-xs text-surface-600-400">
-						{m.briefingHighRisksHint({ count: fmt(scenarios) })}
-					</p>
+					{#if !lShape}
+						<p class="mt-2 text-xs text-surface-600-400">
+							{m.briefingHighRisksHint({ count: fmt(scenarios) })}
+						</p>
+					{/if}
 				{:else}
 					<p class="text-sm text-surface-600-400">{m.briefingNoScenarios()}</p>
 				{/if}

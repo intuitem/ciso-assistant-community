@@ -51,11 +51,16 @@ def test_top_levels_are_matrix_relative(domain):  # noqa: F811
     # 5 levels: the top two count (3 and 4).
     five = copy.deepcopy(RISK_MATRIX_JSON_DEFINITION)
     five["risk"] = [dict(five["risk"][0], abbreviation=str(i)) for i in range(5)]
-    _scenarios(domain, five, [(4, 2), (3, 3), (2, 0)])
+    # (4, -1): residual not assessed yet, so it stays at its current level.
+    _scenarios(domain, five, [(4, 2), (3, 3), (2, 0), (4, -1)])
 
     qs = RiskScenario.objects.all()
-    assert count_top_risk_levels(qs, "current_level") == 3
-    assert count_top_risk_levels(qs, "residual_level") == 1
+    assert count_top_risk_levels(qs, "current_level") == 4
+    assert count_top_risk_levels(qs, "residual_level") == 2
+    # No inherent level anywhere: each scenario counts at its current level, until one is set lower.
+    assert count_top_risk_levels(qs, "inherent_level") == 4
+    qs.filter(name="s0", current_level=4).update(inherent_level=0)
+    assert count_top_risk_levels(qs, "inherent_level") == 3
 
 
 @pytest.mark.django_db
@@ -72,20 +77,18 @@ def test_get_metrics_exposes_briefing_counts(admin_client, domain):  # noqa: F81
         findings_assessment=fa,
         status=Finding.Status.RESOLVED,
     )
+    # Counted once however many of its occurrences are late.
     template = TaskTemplate.objects.create(name="t", folder=domain)
     yesterday = date.today() - timedelta(days=1)
-    TaskNode.objects.create(task_template=template, folder=domain, due_date=yesterday)
+    for days in (1, 45):
+        TaskNode.objects.create(
+            task_template=template,
+            folder=domain,
+            due_date=date.today() - timedelta(days=days),
+        )
+    done = TaskTemplate.objects.create(name="done", folder=domain)
     TaskNode.objects.create(
-        task_template=template,
-        folder=domain,
-        due_date=yesterday - timedelta(days=1),
-        status="completed",
-    )
-    # Overdue but outside the 30-day window: only in the total.
-    TaskNode.objects.create(
-        task_template=template,
-        folder=domain,
-        due_date=date.today() - timedelta(days=45),
+        task_template=done, folder=domain, due_date=yesterday, status="completed"
     )
     disabled = TaskTemplate.objects.create(name="off", folder=domain, enabled=False)
     TaskNode.objects.create(task_template=disabled, folder=domain, due_date=yesterday)
@@ -100,8 +103,9 @@ def test_get_metrics_exposes_briefing_counts(admin_client, domain):  # noqa: F81
         "open_incidents": 1,
         "open_findings": 1,
         "overdue_tasks": 1,
-        "overdue_tasks_total": 2,
     }
+    overdue = admin_client.get("/api/task-templates/?overdue=true").json()
+    assert overdue["count"] == 1
 
 
 @pytest.mark.django_db
@@ -112,6 +116,8 @@ def test_top_level_filter_matches_the_count(admin_client, domain):  # noqa: F811
     residual = admin_client.get("/api/risk-scenarios/?top_level=residual").json()
     assert [s["name"] for s in current["results"]] == ["s0"]
     assert [s["name"] for s in residual["results"]] == ["s1"]
+    inherent = admin_client.get("/api/risk-scenarios/?top_level=inherent").json()
+    assert [s["name"] for s in inherent["results"]] == ["s0"]
 
 
 @pytest.mark.django_db
@@ -139,6 +145,8 @@ def test_snapshot_matches_summary_and_trends_are_gated(
     root = Folder.get_root_folder()
     snapshot = BuiltinMetricSample.compute_metrics(root)
     BuiltinMetricSample.update_or_create_snapshot(root)
+    # A domain save leaves the stored root snapshot behind; the trend must still end on the live value.
+    AppliedControl.objects.create(name="later", folder=domain, status="active")
     summary = admin_client.get("/api/get_metrics/").json()["results"]
 
     assert snapshot["controls_no_status"] == summary["controls"]["no_status"]
@@ -150,7 +158,7 @@ def test_snapshot_matches_summary_and_trends_are_gated(
         == summary["compliance"]["partially_compliant_items"]
     )
     assert snapshot["risk_scenarios_high_current"] == summary["risk"]["high_current"]
-    assert snapshot["tasks_overdue_recent"] == summary["operations"]["overdue_tasks"]
+    assert snapshot["task_templates_overdue"] == summary["operations"]["overdue_tasks"]
 
     trends = summary["trends"]
     assert trends["active_controls"][-1][1] == summary["controls"]["active"]

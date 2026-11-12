@@ -319,11 +319,11 @@ BUILTIN_METRICS = {
                 "Task occurrences whose due date is in the past and that are not completed or cancelled"
             ),
         },
-        "tasks_overdue_recent": {
-            "label": _("Recently Overdue Tasks"),
+        "task_templates_overdue": {
+            "label": _("Tasks With Overdue Occurrences"),
             "type": METRIC_TYPE_NUMBER,
             "description": _(
-                "Open task occurrences of enabled tasks that fell due in the last 30 days"
+                "Enabled tasks with a past occurrence that is not completed or cancelled"
             ),
         },
         "tasks_due_7d": {

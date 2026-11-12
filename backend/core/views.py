@@ -8315,7 +8315,11 @@ class RiskScenarioFilter(GenericFilterSet):
     )
     # Same per-matrix rule as the analytics summary's high risks count.
     top_level = df.ChoiceFilter(
-        choices=[("current", "current"), ("residual", "residual")],
+        choices=[
+            ("inherent", "inherent"),
+            ("current", "current"),
+            ("residual", "residual"),
+        ],
         method="filter_top_level",
     )
 
@@ -21416,7 +21420,6 @@ class TaskNodeFilterSet(GenericFilterSet):
             "folder": ["exact"],
             "status": ["exact"],
             "task_template": ["exact"],
-            "task_template__enabled": ["exact"],
             "due_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
         }
 

@@ -1135,9 +1135,9 @@ class BuiltinMetricSample(AbstractBaseModel):
         # figures can carry a trend. Lazy import: core.helpers imports core.models.
         from core.helpers import (
             FINDING_CLOSED_STATUSES,
-            OVERDUE_TASKS_WINDOW_DAYS,
             _compute_progress_by_assessment,
             filter_top_risk_levels,
+            overdue_task_templates,
         )
 
         summary_scenarios = scope(RiskScenario.objects.all())
@@ -1147,14 +1147,7 @@ class BuiltinMetricSample(AbstractBaseModel):
             ).values()
         )
         summary_metrics = {
-            "tasks_overdue_recent": scope(TaskNode.objects.all())
-            .filter(
-                status__in=TaskNode.OPEN_STATUSES,
-                task_template__enabled=True,
-                due_date__lt=today,
-                due_date__gte=today - timedelta(days=OVERDUE_TASKS_WINDOW_DAYS),
-            )
-            .count(),
+            "task_templates_overdue": overdue_task_templates(task_templates).count(),
             "controls_no_status": controls.filter(
                 Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
             ).count(),

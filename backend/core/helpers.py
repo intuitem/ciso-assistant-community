@@ -9,7 +9,7 @@ from uuid import UUID
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.db.models import Count, Q
+from django.db.models import Case, Count, F, Q, When
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.views import api_settings
@@ -1679,12 +1679,6 @@ def get_metrics(user: User, folder_id):
         .count()
     )
 
-    overdue_tasks = viewable_items(TaskNode, folder_id).filter(
-        due_date__lt=date.today(),
-        status__in=TaskNode.OPEN_STATUSES,
-        task_template__enabled=True,
-    )
-
     data = {
         "controls": {
             "total": controls_count,
@@ -1703,6 +1697,9 @@ def get_metrics(user: User, folder_id):
         "risk": {
             "assessments": viewable_risk_assessments.count(),
             "scenarios": viewable_risk_scenarios.count(),
+            "high_inherent": count_top_risk_levels(
+                viewable_risk_scenarios, "inherent_level"
+            ),
             "high_current": count_top_risk_levels(
                 viewable_risk_scenarios, "current_level"
             ),
@@ -1742,10 +1739,9 @@ def get_metrics(user: User, folder_id):
             "open_findings": viewable_items(Finding, folder_id)
             .exclude(status__in=FINDING_CLOSED_STATUSES)
             .count(),
-            "overdue_tasks": overdue_tasks.filter(
-                due_date__gte=date.today() - timedelta(days=OVERDUE_TASKS_WINDOW_DAYS)
+            "overdue_tasks": overdue_task_templates(
+                viewable_items(TaskTemplate, folder_id)
             ).count(),
-            "overdue_tasks_total": overdue_tasks.count(),
         },
         "csf_functions": csf_functions(user, folder_id),
         # Root snapshots cover the whole organisation, not a single domain.
@@ -1767,7 +1763,7 @@ SUMMARY_TREND_KEYS = [
     "incidents_open",
     "controls_eta_missed",
     "controls_p1_pending",
-    "tasks_overdue_recent",
+    "task_templates_overdue",
     "findings_open",
     "evidence_expired",
     "controls_no_status",
@@ -1809,10 +1805,13 @@ def get_summary_trends(user: User):
             content_type=ContentType.objects.get_for_model(Folder),
             object_id=root.id,
             date__gte=date.today() - timedelta(days=SUMMARY_TREND_DAYS),
+            date__lt=date.today(),
         )
         .order_by("date")
         .values_list("date", "metrics")
     )
+    # Domain saves don't refresh the root snapshot, so today's point is computed live.
+    samples = [*samples, (date.today(), BuiltinMetricSample.compute_metrics(root))]
     series = {key: [] for key in ["active_controls", *SUMMARY_TREND_KEYS]}
     for day, metrics in samples:
         values = {
@@ -1828,8 +1827,15 @@ def get_summary_trends(user: User):
     return series
 
 
-# Recurring tasks pile up; the briefing only surfaces the recent backlog.
-OVERDUE_TASKS_WINDOW_DAYS = 30
+def overdue_task_templates(templates):
+    """Enabled tasks with a past occurrence still open: the task list's "overdue" filter."""
+    return templates.filter(
+        enabled=True,
+        id__in=TaskNode.objects.filter(
+            due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        ).values("task_template_id"),
+    )
+
 
 FINDING_CLOSED_STATUSES = [
     Finding.Status.DISMISSED,
@@ -1844,7 +1850,17 @@ def filter_top_risk_levels(scenarios, level_field: str):
     """Scenarios in the top levels of their own matrix (top 2, or top 1 on matrices of 3 levels or fewer).
 
     Levels are matrix-relative, so they are compared per matrix rather than merged by name.
+    An unassessed inherent or residual level counts at the current level: nothing shows
+    the risk was lower before controls, or that it was treated.
     """
+    if level_field in ("inherent_level", "residual_level"):
+        scenarios = scenarios.annotate(
+            effective_level=Case(
+                When(**{f"{level_field}__lt": 0}, then=F("current_level")),
+                default=F(level_field),
+            )
+        )
+        level_field = "effective_level"
     matrix_ids = scenarios.values_list(
         "risk_assessment__risk_matrix_id", flat=True
     ).distinct()
@@ -1918,6 +1934,7 @@ def get_audits_metrics(user: User, folder_id=None):
     progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
         "progress_avg": progress_avg,
+        "audits_count": len(progresses),
         "audits_stats": build_audits_stats(user, folder_id, object_ids=object_ids),
     }
 
