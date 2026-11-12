@@ -208,6 +208,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                 "label": "description",
                 "escape": True,
             },
+            "is_active": {"source": "is_active", "label": "is_active"},
             "mission": {"source": "mission", "label": "mission", "escape": True},
             "country": {"source": "country", "label": "country"},
             "currency": {"source": "currency", "label": "currency"},
@@ -260,6 +261,10 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         "tier": "tier__rank",
     }
     ordering_nulls_last = ("last_assessment_date", "tier__rank")
+
+    @action(detail=False, name="Get is_active choices")
+    def is_active(self, request):
+        return Response({"true": str(_("Yes")), "false": str(_("No"))})
 
     @action(detail=False, name="Get last assessment status choices")
     def last_assessment_status(self, request):
@@ -2164,6 +2169,7 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
                 "label": "provider",
                 "escape": True,
             },
+            "is_active": {"source": "is_active", "label": "is_active"},
             "criticality": {"source": "criticality", "label": "criticality"},
         },
         "select_related": ["provider_entity"],
@@ -2176,6 +2182,10 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "tier": "tier__rank",
     }
     ordering_nulls_last = ("tier__rank",)
+
+    @action(detail=False, name="Get is_active choices")
+    def is_active(self, request):
+        return Response({"true": str(_("Yes")), "false": str(_("No"))})
 
     def get_autocomplete_serializer_class(self):
         from tprm.serializers import SolutionAutocompleteSerializer
