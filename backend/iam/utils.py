@@ -72,6 +72,8 @@ def mask_social_app_settings(value: str) -> str:
         {k: app_settings[k] for k in AUDITED_SOCIAL_APP_SETTINGS if k in app_settings},
         sort_keys=True,
     )
+
+
 def _as_uuid(value):
     try:
         return uuid.UUID(str(value))
