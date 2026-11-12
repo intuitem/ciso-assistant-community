@@ -1282,13 +1282,12 @@
 																	<Anchor
 																		href="/task-nodes/{task.earlier_overdue.node_id}"
 																		label={task.name}
-																		class="inline-flex shrink-0 items-center gap-0.5 rounded-sm border border-red-400 bg-red-100 px-1 text-[10px] font-medium leading-4 text-red-700 hover:opacity-80 dark:border-red-500 dark:bg-red-900/70 dark:text-red-200"
+																		class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-red-500 bg-red-200 text-red-800 hover:opacity-80 dark:border-red-400 dark:bg-red-800/70 dark:text-red-100"
 																		title={earlier}
 																		aria-label={earlier}
 																		data-testid="control-plan-earlier-overdue"
 																	>
-																		<i class="fa-solid fa-clock-rotate-left text-[8px]"></i>
-																		{task.earlier_overdue.count}
+																		<i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
 																	</Anchor>
 																{/if}
 																{#if task.link}
@@ -1343,8 +1342,8 @@
 															data-cell-state={state}
 														>
 															{#if nodeIds.length > 1 && !view.compact}
-																<span class="text-[10px] font-medium text-surface-600-400"
-																	>{nodeIds.length}</span
+																<span class="text-[10px] font-semibold text-surface-900-100"
+																	>×{nodeIds.length}</span
 																>
 															{/if}
 														</Anchor>

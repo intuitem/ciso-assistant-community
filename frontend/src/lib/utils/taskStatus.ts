@@ -27,13 +27,13 @@ export const TASK_STATUS_COLORS: Record<string, string> = {
  * Pastel fills glare on a dark background: dark mode uses deep, translucent ones.
  */
 export const OCCURRENCE_STYLES = {
-	none: 'bg-surface-50-950 border border-dashed border-surface-200-800',
-	completed: 'bg-green-100 border border-green-300 dark:bg-green-900/60 dark:border-green-700',
+	none: 'border border-dashed border-surface-300-700',
+	completed: 'bg-green-200 border border-green-600 dark:bg-green-800/70 dark:border-green-400',
 	in_progress:
-		'bg-violet-100 border border-violet-300 dark:bg-violet-900/60 dark:border-violet-600',
-	planned: 'bg-sky-50 border border-sky-200 dark:bg-sky-950/60 dark:border-sky-800',
-	overdue: 'bg-red-100 border border-red-400 dark:bg-red-900/70 dark:border-red-500',
-	cancelled: 'bg-surface-100-900 border border-surface-300-700'
+		'bg-violet-200 border border-violet-500 dark:bg-violet-800/70 dark:border-violet-400',
+	planned: 'bg-sky-100 border border-sky-500 dark:bg-sky-800/60 dark:border-sky-400',
+	overdue: 'bg-red-200 border border-red-500 dark:bg-red-800/70 dark:border-red-400',
+	cancelled: 'bg-surface-200-800 border border-surface-500'
 };
 export type OccurrenceState = keyof typeof OCCURRENCE_STYLES;
 
