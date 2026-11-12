@@ -78,12 +78,17 @@ export class SideBar {
 	}
 
 	async click(parent: string, tab: string, waitForURL = true) {
-		if (!(await this.page.getByTestId('accordion-item-' + tab.substring(1)).isVisible())) {
-			await this.page
-				.getByTestId('accordion-item-' + parent.toLowerCase().replace(' ', '-'))
-				.click();
-		}
-		await expect(this.page.getByTestId('accordion-item-' + tab.substring(1))).toBeVisible();
+		// Retried: a click that lands during a post-create redirect is undone when the new page opens its own group.
+		await expect(async () => {
+			if (!(await this.page.getByTestId('accordion-item-' + tab.substring(1)).isVisible())) {
+				await this.page
+					.getByTestId('accordion-item-' + parent.toLowerCase().replace(' ', '-'))
+					.click();
+			}
+			await expect(this.page.getByTestId('accordion-item-' + tab.substring(1))).toBeVisible({
+				timeout: 2000
+			});
+		}).toPass({ timeout: 20000 });
 		await this.page.getByTestId('accordion-item-' + tab.substring(1)).click();
 		waitForURL ? await this.page.waitForURL(tab) : null;
 	}
