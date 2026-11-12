@@ -144,6 +144,10 @@ def test_snapshot_matches_summary_and_trends_are_gated(
 
     root = Folder.get_root_folder()
     snapshot = BuiltinMetricSample.compute_metrics(root)
+    # The live trend point computes only this part; it must match the full snapshot.
+    assert (
+        BuiltinMetricSample._compute_summary_metrics(root).items() <= snapshot.items()
+    )
     BuiltinMetricSample.update_or_create_snapshot(root)
     # A domain save leaves the stored root snapshot behind; the trend must still end on the live value.
     AppliedControl.objects.create(name="later", folder=domain, status="active")

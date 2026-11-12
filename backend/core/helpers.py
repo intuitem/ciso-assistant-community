@@ -1811,7 +1811,13 @@ def get_summary_trends(user: User):
         .values_list("date", "metrics")
     )
     # Domain saves don't refresh the root snapshot, so today's point is computed live.
-    samples = [*samples, (date.today(), BuiltinMetricSample.compute_metrics(root))]
+    live = {
+        **BuiltinMetricSample._compute_summary_metrics(root),
+        "controls_status_breakdown": {
+            "active": AppliedControl.objects.filter(status="active").count()
+        },
+    }
+    samples = [*samples, (date.today(), live)]
     series = {key: [] for key in ["active_controls", *SUMMARY_TREND_KEYS]}
     for day, metrics in samples:
         values = {
