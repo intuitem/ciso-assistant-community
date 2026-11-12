@@ -43,7 +43,7 @@ The **Filters** panel at the top of the report drives every figure below it: ind
 - **Labels** and **Authors**: keep the audits carrying one of the ticked labels, or written by one of the ticked authors.
 - **Implementation group**: narrow the report to a single group.
 - **Status**: **All but deprecated** (the default) or only live audits, in progress, in review or done.
-- **Deadline**: pick **ETA** or **Due date**, then **Overdue**, **Next 3 / 6 / 12 months**, or **Custom** for a window in months from today. In a custom window, `3 → 6` keeps audits due between three and six months from now, and a negative bound reaches back into overdue audits. Audits without that date are left out while the filter is on.
+- **Deadline**: pick **ETA** or **Due date**, then **Overdue** (done audits are never overdue), **Next 3 / 6 / 12 months**, or **Custom** for a window in months from today. In a custom window, `3 → 6` keeps audits due between three and six months from now, and a negative bound reaches back into overdue audits. Audits without that date are left out while the filter is on.
 
 Active filters show as chips under the panel; click a chip's cross to remove it, or **Reset filters** to clear them all. The detected audits drawer greys out the audits the filters leave out.
 
@@ -56,7 +56,7 @@ The **View** toggle in the filter bar switches the body of the report between tw
 
 ## Exporting evidences
 
-Tick what to export in the **Requirements tree**: a requirement covers all its audits, a section ticks all its requirements, and in a requirement's **Per-assessment breakdown** each audit can be ticked on its own (the requirement then shows as partly ticked). The box in the **Ref.** header ticks every requirement shown. **Export evidences (N requirements)** above the table downloads one zip for the selection, over the filtered audits, with one folder per domain and audit, plus one per requirement when several are exported. When the selection has no evidence, a message says so and nothing is downloaded. It includes evidences attached to the requirements and those attached to their applied controls, limited to the evidences you can read. An `index.xlsx` at the root of the zip lists every evidence with its domain, audit and requirement, the applied control it comes from when it is not attached to the requirement directly, and a clickable link to its file in the zip, or to its URL when it has no file.
+Tick what to export in the **Requirements tree**: a requirement covers all its audits, a section ticks all its requirements, and in a requirement's **Per-assessment breakdown** each audit can be ticked on its own (the requirement then shows as partly ticked). The box in the **Ref.** header ticks every requirement shown. **Export evidences (N requirements)** above the table downloads one zip for the selection, over the filtered audits, with one folder per domain and audit. Each file is stored once per audit, however many of its requirements it supports; the index lists one row per requirement. When the selection has no evidence, a message says so and nothing is downloaded. It includes evidences attached to the requirements and those attached to their applied controls, limited to the evidences you can read. An `index.xlsx` at the root of the zip lists every evidence with its domain, audit and requirement, the applied control it comes from when it is not attached to the requirement directly, and a clickable link to its file in the zip, or to its URL when it has no file.
 
 ## What gets counted
 
@@ -66,7 +66,7 @@ By default every audit you can read rolls into the numbers, except deprecated on
 - `in_review`
 - `done`
 
-Planned audits are then left out as well. Excluded audits stay visible in the drawer. In a campaign report, planned audits count as live.
+Planned audits are then left out as well. In the default mode, planned audits count in the figures but not in the verdicts, since they have not started. Excluded audits stay visible in the drawer. In a campaign report, planned audits count as live.
 
 ## Combined view: domain-tree inheritance
 

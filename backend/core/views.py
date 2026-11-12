@@ -11464,11 +11464,9 @@ class FrameworkViewSet(BaseModelViewSet):
         field_visibility for the viewer's role) come back as null so the
         row still contributes to domain/section counts.
 
-        Only "live" CAs participate by default: status in (in_progress,
-        in_review, done). This excludes planned (not yet started) and
-        deprecated (superseded by a newer audit on the same folder),
-        which would otherwise double-count requirements when multiple
-        audit cycles coexist on the same folder.
+        Every CA but deprecated ones participates by default; deprecated CAs
+        are superseded by a newer audit on the same folder and would otherwise
+        double-count requirements. Planned CAs count but carry no verdicts.
 
         Query params:
           - implementation_group (str): narrow to a single IG.
@@ -11857,7 +11855,10 @@ class FrameworkViewSet(BaseModelViewSet):
                     for actor in ca.authors.all()
                     if actor.id in viewable_actor_ids
                 ],
-                "outcomes": outcomes_of(ca) if ca.id in audits_by_id else None,
+                # A planned audit has not started: its verdicts would all read as not met.
+                "outcomes": outcomes_of(ca)
+                if ca.id in audits_by_id and ca.status != "planned"
+                else None,
                 "is_counted": is_counted(ca),
                 **(
                     scores_of(audits_by_id[ca.id])
@@ -12001,7 +12002,6 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
         requirements = {ra.requirement for ra in ras}
-        several = len(requirements) > 1
 
         def sanitize(name: str) -> str:
             return (
@@ -12028,7 +12028,9 @@ class FrameworkViewSet(BaseModelViewSet):
         temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
         try:
             with zipfile.ZipFile(temp_file, "w") as zipf:
-                taken_dirs: set = set()
+                # (ra, evidence, carrying controls) per index row; files per audit.
+                rows: list = []
+                audit_evidences: dict = {}
                 for ra in ras:
                     ca = ra.compliance_assessment
                     if ca.folder_id not in domain_paths:
@@ -12064,18 +12066,27 @@ class FrameworkViewSet(BaseModelViewSet):
                         for e in ac.evidences.all()
                         if e.id not in direct
                     }
-                    evidences = {
-                        k: v
-                        for k, v in {**direct, **indirect}.items()
-                        if k in viewable_evidences
-                    }
-                    if not evidences:
-                        continue
-                    base_dir = f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
-                    if several:
-                        base_dir += (
-                            f"/{sanitize(ra.requirement.ref_id or ra.requirement.name)}"
+                    for evidence_id, evidence in {**direct, **indirect}.items():
+                        if evidence_id not in viewable_evidences:
+                            continue
+                        audit_evidences.setdefault(ca.id, (ca, {}))[1][evidence_id] = (
+                            evidence
                         )
+                        rows.append(
+                            (
+                                ra,
+                                evidence,
+                                ""
+                                if evidence_id in direct
+                                else ", ".join(carriers.get(evidence_id, [])),
+                            )
+                        )
+
+                # Each file once per audit; the index rows of every requirement point to it.
+                written_paths: dict = {}
+                taken_dirs: set = set()
+                for ca, evidences in audit_evidences.values():
+                    base_dir = f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
                     directory, counter = base_dir, 1
                     while directory.lower() in taken_dirs:
                         counter += 1
@@ -12084,42 +12095,43 @@ class FrameworkViewSet(BaseModelViewSet):
                     names = build_evidence_archive_names(list(evidences.values()))
                     for evidence in evidences.values():
                         entry = names.get(evidence.id)
-                        written = ""
                         revision = evidence.last_revision
-                        if revision and revision.attachment:
-                            try:
-                                with default_storage.open(
-                                    revision.attachment.name
-                                ) as attachment_file:
-                                    zipf.writestr(
-                                        f"{directory}/{entry}", attachment_file.read()
-                                    )
-                                written = f"{directory}/{entry}"
-                            except Exception:
-                                logger.warning(
-                                    "evidence file unreadable, omitted from archive",
-                                    evidence_id=evidence.id,
+                        if not entry or not revision or not revision.attachment:
+                            continue
+                        try:
+                            with default_storage.open(
+                                revision.attachment.name
+                            ) as attachment_file:
+                                zipf.writestr(
+                                    f"{directory}/{entry}", attachment_file.read()
                                 )
-                        target = written or (revision.link if revision else "") or ""
-                        index_ws.append(
-                            [
-                                escape_excel_formula(sanitize_xlsx_value(value))
-                                for value in (
-                                    domain_paths[ca.folder_id],
-                                    ca.name,
-                                    ra.requirement.ref_id or ra.requirement.urn,
-                                    evidence.name,
-                                    ""
-                                    if evidence.id in direct
-                                    else ", ".join(carriers.get(evidence.id, [])),
-                                    target,
-                                )
-                            ]
-                        )
-                        if written or target.startswith(("http://", "https://")):
-                            index_ws.cell(
-                                row=index_ws.max_row, column=6
-                            ).hyperlink = target
+                            written_paths[(ca.id, evidence.id)] = f"{directory}/{entry}"
+                        except Exception:
+                            logger.warning(
+                                "evidence file unreadable, omitted from archive",
+                                evidence_id=evidence.id,
+                            )
+
+                for ra, evidence, carried_by in rows:
+                    ca = ra.compliance_assessment
+                    written = written_paths.get((ca.id, evidence.id), "")
+                    revision = evidence.last_revision
+                    target = written or (revision.link if revision else "") or ""
+                    index_ws.append(
+                        [
+                            escape_excel_formula(sanitize_xlsx_value(value))
+                            for value in (
+                                domain_paths[ca.folder_id],
+                                ca.name,
+                                ra.requirement.ref_id or ra.requirement.urn,
+                                evidence.name,
+                                carried_by,
+                                target,
+                            )
+                        ]
+                    )
+                    if written or target.startswith(("http://", "https://")):
+                        index_ws.cell(row=index_ws.max_row, column=6).hyperlink = target
                 index_ws.freeze_panes = "A2"
                 for cell in index_ws[1]:
                     cell.font = Font(bold=True)

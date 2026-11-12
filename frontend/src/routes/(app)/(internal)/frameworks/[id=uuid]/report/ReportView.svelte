@@ -528,6 +528,8 @@
 
 	function inDateWindow(ca: ComplianceAssessmentSummary): boolean {
 		if (dateFromMonths === null && dateToMonths === null) return true;
+		// A done audit is never overdue.
+		if (activePreset === 'overdue' && ca.status === 'done') return false;
 		const raw = ca[dateField];
 		if (!raw) return false;
 		const date = new Date(`${raw}T00:00:00`);
