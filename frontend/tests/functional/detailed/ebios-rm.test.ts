@@ -15,6 +15,16 @@ async function selectOptions(page: Page, field: string, ...names: string[]) {
 			await option.click({ timeout: 2_000 });
 		}).toPass({ timeout: 30_000, intervals: [500, 1000, 2000] });
 	}
+	const visibleOptions = input
+		.getByRole('option')
+		.or(page.locator('ul.portaled-options').getByRole('option'))
+		.filter({ visible: true });
+	await expect(async () => {
+		if ((await visibleOptions.count()) > 0) {
+			await input.getByRole('combobox').press('Escape', { timeout: 2_000 });
+		}
+		await expect(visibleOptions).toHaveCount(0, { timeout: 1_000 });
+	}).toPass({ timeout: 10_000, intervals: [500, 1000] });
 }
 
 let vars = TestContent.generateTestVars();
@@ -171,7 +181,6 @@ test('ebios rm study', async ({
 			await page.getByTestId('select-button').click();
 			// Scoped: bare combobox is ambiguous — native <select>s (e.g. "Show entries") share the role
 			await selectOptions(page, 'form-input-assets', `${vars.folderName}/${vars.assetName}`);
-			await page.getByText(`Assets ${vars.folderName}/${vars.assetName}`).click();
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await assetsPage.createItem({ name: 'added asset' });
@@ -196,7 +205,6 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-gravity').selectOption('3');
 			await selectOptions(page, 'form-input-assets', `${vars.folderName}/added asset Primary`);
 			await selectOptions(page, 'form-input-qualifications', 'Authenticity', 'Availability');
-			await page.getByTestId('form-input-name').click(); // just to close the qualifications
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
@@ -209,7 +217,6 @@ test('ebios rm study', async ({
 				`${vars.folderName}/${vars.assetName} Primary`
 			);
 			await selectOptions(page, 'form-input-qualifications', 'Environmental');
-			await page.getByTestId('form-input-qualifications').getByRole('combobox').press('Escape');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: 'Go back to EBIOS RM study' }).click();
