@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
-	import { taskStatusColor } from '#lib/utils/taskStatus.js';
+	import { localIsoDate } from '#lib/utils/control-plan.js';
+	import { OCCURRENCE_STYLES, isOccurrenceLate, occurrenceState } from '#lib/utils/taskStatus.js';
 
 	interface Occurrence {
 		id: string;
@@ -51,7 +53,36 @@
 		}
 		return [...years.entries()];
 	});
+
+	// Squares are occurrences, not days: today sits between two of them, after
+	// the last one already due and before the first one still to come. Across a
+	// year change, the marker stays on the row of the current year.
+	const today = $derived.by((): { before: string } | { after: string } | null => {
+		const firstUpcoming = occurrences.findIndex(
+			(occurrence) => (daysUntil(occurrence.due_date) ?? 0) > 0
+		);
+		const upcoming = firstUpcoming === -1 ? undefined : occurrences[firstUpcoming];
+		const lastDue = firstUpcoming === -1 ? occurrences.at(-1) : occurrences[firstUpcoming - 1];
+		const thisYear = String(new Date().getFullYear());
+		const yearOf = (occurrence: Occurrence) => occurrence.due_date?.slice(0, 4);
+
+		if (upcoming && (!lastDue || yearOf(upcoming) === thisYear || yearOf(lastDue) !== thisYear)) {
+			return { before: upcoming.id };
+		}
+		return lastDue ? { after: lastDue.id } : null;
+	});
+	const todayLabel = $derived(`${m.today()} — ${formatDate(localIsoDate(new Date()))}`);
 </script>
+
+{#snippet todayMarker()}
+	<span
+		role="img"
+		data-testid="occurrence-history-today"
+		class="-my-0.5 h-6 w-0.5 shrink-0 rounded-full bg-violet-600 dark:bg-violet-400"
+		title={todayLabel}
+		aria-label={todayLabel}
+	></span>
+{/snippet}
 
 <!-- w-fit: rows align within the widest year rather than the panel width. -->
 <div class="space-y-1 w-fit max-w-full" data-testid="occurrence-history">
@@ -68,24 +99,31 @@
 			>
 				{#each yearOccurrences as occurrence (occurrence.id)}
 					{@const isMarked = occurrence.id === markedId}
-					{@const isFuture = !isMarked && (daysUntil(occurrence.due_date) ?? 0) > 0}
+					<!-- Drawn as the control plan draws its cells: late takes over the status. -->
+					{@const isLate = isOccurrenceLate(occurrence)}
+					{@const state = occurrenceState(occurrence.status, isLate)}
 					{@const href = `/task-nodes/${occurrence.id}`}
-					{@const squareClass = `h-5 w-5 rounded-sm ${
+					{@const squareClass = `h-5 w-5 rounded-sm ${OCCURRENCE_STYLES[state]} ${
 						isMarked ? 'ring-2 ring-offset-1 ring-surface-950-50' : ''
-					} ${isFuture ? 'opacity-40' : ''}`}
-					{@const style = `background-color: ${taskStatusColor(occurrence.status)};`}
-					{@const title = `${formatDate(occurrence.due_date)} — ${safeTranslate(occurrence.status)}${
-						isMarked && markedLabel ? ` (${markedLabel})` : ''
 					}`}
+					{@const title = `${formatDate(occurrence.due_date)} — ${safeTranslate(occurrence.status)}${
+						isLate ? ` · ${m.overdue()}` : ''
+					}${isMarked && markedLabel ? ` (${markedLabel})` : ''}`}
+					{#if today && 'before' in today && today.before === occurrence.id}
+						{@render todayMarker()}
+					{/if}
 					<!-- A plain link: no breadcrumb is stacked per occurrence opened. -->
 					<a
 						{href}
 						class={squareClass}
-						{style}
 						{title}
 						aria-label={title}
 						aria-current={isMarked ? 'true' : undefined}
+						data-late={isLate ? '' : undefined}
 					></a>
+					{#if today && 'after' in today && today.after === occurrence.id}
+						{@render todayMarker()}
+					{/if}
 				{/each}
 			</div>
 		</div>
@@ -95,10 +133,19 @@
 	{#each HISTORY_STATUSES as status (status)}
 		<span class="flex items-center gap-1.5">
 			<span
-				class="inline-block h-2.5 w-2.5 rounded-sm"
-				style="background-color: {taskStatusColor(status)};"
+				class="inline-block h-3 w-3 rounded-sm {OCCURRENCE_STYLES[occurrenceState(status, false)]}"
 			></span>
 			{safeTranslate(status)}
 		</span>
 	{/each}
+	<span class="flex items-center gap-1.5">
+		<span class="inline-block h-3 w-3 rounded-sm {OCCURRENCE_STYLES.overdue}"></span>
+		{m.overdue()}
+	</span>
+	{#if today}
+		<span class="flex items-center gap-1.5">
+			<span class="inline-block h-3 w-0.5 rounded-full bg-violet-600 dark:bg-violet-400"></span>
+			{m.today()}
+		</span>
+	{/if}
 </div>

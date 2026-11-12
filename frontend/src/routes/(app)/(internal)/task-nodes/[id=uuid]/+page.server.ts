@@ -42,6 +42,9 @@ export const load: PageServerLoad = async (event) => {
 	let history: OccurrenceSummary[] = [];
 	let previousOccurrence: OccurrenceSummary | null = null;
 	let nextOccurrence: OccurrenceSummary | null = null;
+	// Any of the requests failing: the page says so rather than showing a
+	// history with holes or greying out a button that has somewhere to go.
+	let occurrencesFailed = false;
 	if (node?.is_recurrent && taskTemplateId) {
 		const [occurrences, previous, next] = await Promise.all([
 			fetchOccurrenceHistory(event.fetch, taskTemplateId),
@@ -51,11 +54,13 @@ export const load: PageServerLoad = async (event) => {
 		history = [...occurrences.pastOccurrences, ...occurrences.upcomingOccurrences].map(
 			({ id, due_date, status }) => ({ id, due_date, status })
 		);
-		previousOccurrence = previous;
-		nextOccurrence = next;
+		previousOccurrence = previous?.occurrence ?? null;
+		nextOccurrence = next?.occurrence ?? null;
+		occurrencesFailed =
+			occurrences.occurrencesFailed || previous?.failed === true || next?.failed === true;
 	}
 
-	return { ...data, history, previousOccurrence, nextOccurrence };
+	return { ...data, history, previousOccurrence, nextOccurrence, occurrencesFailed };
 };
 
 const updateStatus = async (status: string, { fetch, params, cookies }) => {

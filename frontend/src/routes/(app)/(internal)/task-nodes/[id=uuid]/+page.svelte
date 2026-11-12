@@ -192,7 +192,15 @@
 {/snippet}
 
 <div class="bg-surface-50-950 p-4 m-4 shadow-sm rounded-lg space-y-6">
-	{#if taskNode.is_recurrent}
+	{#if taskNode.is_recurrent && data.occurrencesFailed}
+		<!-- Not known, rather than none: no history, and no greyed-out buttons -->
+		<p
+			class="text-center text-sm text-surface-600-400"
+			data-testid="occurrence-history-unavailable"
+		>
+			{m.occurrenceHistoryUnavailable()}
+		</p>
+	{:else if taskNode.is_recurrent}
 		<!-- The task's history, with this occurrence ringed, and a way to the others -->
 		<div class="flex items-center justify-between gap-4" data-testid="occurrence-navigation">
 			{@render occurrenceLink(data.previousOccurrence, m.previous(), 'fa-chevron-left', true)}

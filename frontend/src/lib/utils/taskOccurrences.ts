@@ -14,18 +14,28 @@ export interface OccurrenceSummary {
 const PAST_WINDOW = 120;
 const UPCOMING_WINDOW = 12;
 
+interface Occurrences {
+	results: OccurrenceSummary[];
+	count: number;
+	/**
+	 * The request did not go through. Kept apart from an empty result, so a
+	 * page can say it could not check instead of reporting no occurrence.
+	 */
+	failed: boolean;
+}
+
 async function fetchOccurrences(
 	fetch: typeof globalThis.fetch,
 	params: Record<string, string>
-): Promise<{ results: OccurrenceSummary[]; count: number }> {
+): Promise<Occurrences> {
 	try {
 		const res = await fetch(`${BASE_API_URL}/task-nodes/?${new URLSearchParams(params)}`);
-		if (!res.ok) return { results: [], count: 0 };
+		if (!res.ok) return { results: [], count: 0, failed: true };
 		const body = await res.json();
 		const results = body.results ?? [];
-		return { results, count: body.count ?? results.length };
+		return { results, count: body.count ?? results.length, failed: false };
 	} catch {
-		return { results: [], count: 0 };
+		return { results: [], count: 0, failed: true };
 	}
 }
 
@@ -48,7 +58,9 @@ export async function fetchOccurrenceHistory(
 	return {
 		pastOccurrences: past.results,
 		upcomingOccurrences: upcoming.results,
-		upcomingCount: upcoming.count
+		upcomingCount: upcoming.count,
+		// Half a history would mislead as much as none.
+		occurrencesFailed: past.failed || upcoming.failed
 	};
 }
 
@@ -58,12 +70,12 @@ export async function fetchNeighbour(
 	taskTemplateId: string,
 	dueDate: string,
 	before: boolean
-): Promise<OccurrenceSummary | null> {
-	const { results } = await fetchOccurrences(fetch, {
+): Promise<{ occurrence: OccurrenceSummary | null; failed: boolean }> {
+	const { results, failed } = await fetchOccurrences(fetch, {
 		task_template: taskTemplateId,
 		[before ? 'due_date__lt' : 'due_date__gt']: dueDate,
 		ordering: before ? '-due_date' : 'due_date',
 		limit: '1'
 	});
-	return results[0] ?? null;
+	return { occurrence: results[0] ?? null, failed };
 }

@@ -2962,6 +2962,7 @@
 	],
 	"occurrenceHistory": "Occurrence history",
 	"noOccurrenceHistory": "This task has not run yet.",
+	"occurrenceHistoryUnavailable": "Occurrence history could not be loaded.",
 	"moreUpcoming": "{count} more upcoming",
 	"allOccurrences": "All occurrences",
 	"taskTemplate": "Task",

@@ -12,6 +12,7 @@
 	import {
 		GROUPINGS,
 		OPTIONAL_COLUMNS,
+		moveColumn,
 		PANE_WIDTH,
 		clampPaneWidth,
 		defaultViewSettings,
@@ -29,6 +30,7 @@
 		type Bucket,
 		type BucketStatus,
 		type Granularity,
+		type ColumnId,
 		type Grouping,
 		type MonthWindow,
 		type OptionalColumn,
@@ -39,6 +41,11 @@
 	} from '#lib/utils/control-plan.js';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
 	import { scheduleLabel } from '#lib/utils/taskSchedule.js';
+	import {
+		OCCURRENCE_STYLES,
+		occurrenceState,
+		type OccurrenceState
+	} from '#lib/utils/taskStatus.js';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -114,7 +121,7 @@
 	};
 
 	interface Column {
-		id: 'name' | OptionalColumn;
+		id: ColumnId;
 		sortKey: SortKey;
 		label: () => string;
 		/**
@@ -124,24 +131,71 @@
 		track: string;
 	}
 
-	const COLUMNS: Column[] = [
-		{ id: 'ref', sortKey: 'ref', label: m.refId, track: 'minmax(0, 64px)' },
-		{ id: 'name', sortKey: 'name', label: m.name, track: 'minmax(120px, 3fr)' },
-		{ id: 'frequency', sortKey: 'frequency', label: m.frequency, track: 'minmax(0, 100px)' },
-		{ id: 'assignee', sortKey: 'assignee', label: m.assignedTo, track: 'minmax(0, 1.5fr)' },
-		{
-			id: 'appliedControl',
+	const COLUMNS: Record<ColumnId, Omit<Column, 'id'>> = {
+		ref: { sortKey: 'ref', label: m.refId, track: 'minmax(0, 64px)' },
+		name: { sortKey: 'name', label: m.name, track: 'minmax(120px, 3fr)' },
+		frequency: { sortKey: 'frequency', label: m.frequency, track: 'minmax(0, 100px)' },
+		assignee: { sortKey: 'assignee', label: m.assignedTo, track: 'minmax(0, 1.5fr)' },
+		appliedControl: {
 			sortKey: 'appliedControl',
 			label: m.appliedControl,
 			track: 'minmax(0, 2fr)'
 		},
-		{ id: 'nextDue', sortKey: 'nextDue', label: m.nextOccurrence, track: 'minmax(0, 88px)' },
-		{ id: 'domain', sortKey: 'domain', label: m.domain, track: 'minmax(0, 1.5fr)' }
-	];
+		nextDue: { sortKey: 'nextDue', label: m.nextOccurrence, track: 'minmax(0, 88px)' },
+		domain: { sortKey: 'domain', label: m.domain, track: 'minmax(0, 1.5fr)' }
+	};
 
-	const pickerColumns = COLUMNS.filter(
-		(column): column is Column & { id: OptionalColumn } => column.id !== 'name'
-	);
+	// Every column, shown or not, in the order the user gave them.
+	const orderedColumns: Column[] = $derived(view.columnOrder.map((id) => ({ id, ...COLUMNS[id] })));
+
+	function resetColumns() {
+		const { columns, columnOrder } = defaultViewSettings();
+		updateView({ columns, columnOrder });
+	}
+
+	// Reordering: drag a header onto another one to take its place. Pointer
+	// events rather than native drag and drop, which buttons do not all support.
+	let columnDrag: { column: ColumnId; target: ColumnId | null } | null = $state(null);
+	// The click that ends a drag must not sort.
+	let columnDragEnded = false;
+
+	function startColumnDrag(event: PointerEvent, column: ColumnId) {
+		if (event.button !== 0) return;
+		const header = event.currentTarget as HTMLElement;
+		const headers = header.parentElement as HTMLElement;
+		const startX = event.clientX;
+		header.setPointerCapture(event.pointerId);
+
+		const move = (moveEvent: PointerEvent) => {
+			// A few pixels of slack: a click is not a drag.
+			if (!columnDrag && Math.abs(moveEvent.clientX - startX) < 5) return;
+			const candidates = [...headers.querySelectorAll<HTMLElement>('[data-column]')];
+			// The gap between two headers belongs to the one on its right.
+			const over =
+				candidates.find((el) => moveEvent.clientX <= el.getBoundingClientRect().right) ??
+				candidates.at(-1);
+			const target = over?.dataset.column as ColumnId | undefined;
+			columnDrag = { column, target: target && target !== column ? target : null };
+		};
+		const release = () => {
+			header.removeEventListener('pointermove', move);
+			header.removeEventListener('pointerup', drop);
+			header.removeEventListener('pointercancel', release);
+			if (columnDrag) {
+				columnDragEnded = true;
+				setTimeout(() => (columnDragEnded = false));
+			}
+			columnDrag = null;
+		};
+		const drop = () => {
+			const target = columnDrag?.target;
+			if (target) updateView({ columnOrder: moveColumn(view.columnOrder, column, target) });
+			release();
+		};
+		header.addEventListener('pointermove', move);
+		header.addEventListener('pointerup', drop);
+		header.addEventListener('pointercancel', release);
+	}
 	// Checkbox menus (columns, statuses): one open at a time, closed by a click
 	// elsewhere or Escape.
 	type Menu = 'columns' | 'statuses';
@@ -530,7 +584,7 @@
 
 	const hasRefs = $derived(allRows.some((row) => row.task.ref_id));
 	const visibleColumns = $derived(
-		COLUMNS.filter((column) => {
+		orderedColumns.filter((column) => {
 			if (column.id === 'name') return true;
 			if (!view.columns.includes(column.id)) return false;
 			// Nothing to show: no task has a reference, or the group header says it already.
@@ -571,19 +625,7 @@
 		}
 	}
 
-	// Pastel fills glare on a dark background: dark mode uses deep, translucent ones.
-	const CELL_STYLES = {
-		none: 'bg-surface-50-950 border border-dashed border-surface-200-800',
-		completed: 'bg-green-100 border border-green-300 dark:bg-green-900/60 dark:border-green-700',
-		in_progress:
-			'bg-violet-100 border border-violet-300 dark:bg-violet-900/60 dark:border-violet-600',
-		planned: 'bg-sky-50 border border-sky-200 dark:bg-sky-950/60 dark:border-sky-800',
-		overdue: 'bg-red-100 border border-red-400 dark:bg-red-900/70 dark:border-red-500',
-		cancelled: 'bg-surface-100-900 border border-surface-300-700'
-	};
-	type CellState = keyof typeof CELL_STYLES;
-
-	const CELL_LABELS: Record<CellState, () => string> = {
+	const CELL_LABELS: Record<OccurrenceState, () => string> = {
 		none: m.noData,
 		completed: m.completed,
 		in_progress: m.inProgress,
@@ -592,14 +634,8 @@
 		cancelled: m.cancelled
 	};
 
-	// Red is reserved for what is late: open work whose due date has passed.
-	// Open work that is not late yet is merely planned.
-	function cellState(bucket: BucketStatus | undefined): CellState {
-		if (!bucket?.status) return 'none';
-		if (bucket.overdue) return 'overdue';
-		if (bucket.status === 'pending') return 'planned';
-		if (bucket.status in CELL_STYLES) return bucket.status as CellState;
-		return 'none';
+	function cellState(bucket: BucketStatus | undefined): OccurrenceState {
+		return occurrenceState(bucket?.status, bucket?.overdue === true);
 	}
 
 	/** Bring the current period into view when the table scrolls sideways. */
@@ -628,23 +664,41 @@
 		class="sticky left-0 z-30 p-0 align-bottom bg-surface-50-950 border-b border-r border-surface-200-800"
 	>
 		<div
-			class="grid items-center gap-x-2 px-3 {view.compact ? 'py-1' : 'py-2'}"
+			class="grid items-center gap-x-2 px-3 {view.compact ? 'py-1' : 'py-2.5'}"
+			class:cursor-grabbing={columnDrag}
 			style:grid-template-columns={gridTemplate}
 		>
-			{#each visibleColumns as column (column.id)}
+			{#each visibleColumns as column, index (column.id)}
 				{@const sorted = view.sort.key === column.sortKey}
+				{@const dragged = columnDrag?.column === column.id}
+				{@const landing = columnDrag?.target === column.id}
+				{@const draggedIndex = visibleColumns.findIndex((other) => other.id === columnDrag?.column)}
 				<button
 					type="button"
 					data-testid="control-plan-sort-{column.id}"
-					class="flex items-center gap-1 min-w-0 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors hover:text-violet-700
-						{sorted ? 'text-violet-700' : 'text-surface-500'}"
-					title="{m.sortBy()} {column.label()}"
-					onclick={() => toggleSort(column.sortKey)}
+					data-column={column.id}
+					class="relative flex items-center gap-1 min-w-0 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors hover:text-violet-700
+						{sorted ? 'text-violet-700' : 'text-surface-500'}
+						{columnDrag ? 'cursor-grabbing' : ''}
+						{dragged ? 'opacity-40' : ''}"
+					title="{m.sortBy()} {column.label()} · {m.dragToReorder()}"
+					onpointerdown={(event) => startColumnDrag(event, column.id)}
+					onclick={() => {
+						if (!columnDragEnded) toggleSort(column.sortKey);
+					}}
 				>
 					<span class="truncate">{column.label()}</span>
 					{#if sorted}
 						<i class="fa-solid {view.sort.descending ? 'fa-arrow-down' : 'fa-arrow-up'} text-[9px]"
 						></i>
+					{/if}
+					{#if landing}
+						<!-- Where the dragged column will land: on the far side of this one -->
+						<span
+							data-testid="control-plan-column-landing"
+							class="absolute -inset-y-1 w-0.5 rounded bg-violet-500
+								{index > draggedIndex ? '-right-1' : '-left-1'}"
+						></span>
 					{/if}
 				</button>
 			{/each}
@@ -753,20 +807,53 @@
 					<div
 						class="absolute right-0 top-full z-40 mt-1 min-w-52 p-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 shadow-lg"
 					>
-						{#each pickerColumns as column (column.id)}
-							<label
-								class="flex items-center gap-2 px-2 py-1.5 text-xs rounded cursor-pointer text-surface-800-200 hover:bg-surface-100-900"
-							>
-								<input
-									type="checkbox"
-									class="checkbox"
-									data-testid="control-plan-column-{column.id}"
-									checked={view.columns.includes(column.id)}
-									onchange={() => toggleColumn(column.id)}
-								/>
-								{column.label()}
-							</label>
+						{#each orderedColumns as column, index (column.id)}
+							{@const id = column.id}
+							<div class="flex items-center rounded hover:bg-surface-100-900">
+								<label
+									class="flex flex-1 items-center gap-2 px-2 py-1.5 text-xs text-surface-800-200
+										{id === 'name' ? '' : 'cursor-pointer'}"
+								>
+									<!-- The name is what a row is: it moves, it does not hide -->
+									<input
+										type="checkbox"
+										class="checkbox"
+										data-testid="control-plan-column-{id}"
+										checked={id === 'name' || view.columns.includes(id)}
+										disabled={id === 'name'}
+										onchange={() => id !== 'name' && toggleColumn(id)}
+									/>
+									{column.label()}
+								</label>
+								{#each [{ step: -1, label: m.moveUp(), icon: 'fa-chevron-up', testid: 'up' }, { step: 1, label: m.moveDown(), icon: 'fa-chevron-down', testid: 'down' }] as move (move.step)}
+									{@const neighbour = orderedColumns[index + move.step]}
+									<button
+										type="button"
+										data-testid="control-plan-column-{id}-{move.testid}"
+										class="px-1.5 py-1.5 text-[9px] text-surface-500 transition-colors hover:text-violet-700 disabled:opacity-30 disabled:hover:text-surface-500"
+										title={move.label}
+										aria-label="{move.label} · {column.label()}"
+										disabled={!neighbour}
+										onclick={() =>
+											neighbour &&
+											updateView({
+												columnOrder: moveColumn(view.columnOrder, id, neighbour.id)
+											})}
+									>
+										<i class="fa-solid {move.icon}"></i>
+									</button>
+								{/each}
+							</div>
 						{/each}
+						<button
+							type="button"
+							data-testid="control-plan-columns-reset"
+							class="mt-1 w-full border-t border-surface-200-800 px-2 pt-2 pb-1 text-left text-xs text-surface-600-400 transition-colors hover:text-violet-700"
+							onclick={resetColumns}
+						>
+							<i class="fa-solid fa-rotate-left mr-1 text-[10px]"></i>
+							{m.resetToDefault()}
+						</button>
 					</div>
 				{/if}
 			</div>
@@ -1083,7 +1170,7 @@
 										<th
 											colspan={band.span}
 											class="px-1.5 pb-0.5 text-left text-[11px] font-semibold uppercase tracking-wider text-surface-500 border-l border-surface-200-800 whitespace-nowrap overflow-hidden
-												{view.compact ? 'pt-1' : 'pt-2'}"
+												{view.compact ? 'pt-1' : 'pt-2.5'}"
 										>
 											{getMonthName(band.month - 1)}
 											{#if band.span > 1}
@@ -1103,7 +1190,7 @@
 										data-current-period={isCurrent ? '' : undefined}
 										aria-current={isCurrent ? 'date' : undefined}
 										class="px-0 text-center text-[11px] font-semibold uppercase tracking-wider border-b border-surface-200-800
-											{view.compact || granularity === 'weekly' ? 'py-1' : 'py-2'}
+											{view.compact || granularity === 'weekly' ? 'py-1' : 'py-2.5'}
 											{isCurrent ? 'bg-violet-600 text-white dark:bg-violet-700' : 'text-surface-500'}"
 										title={isCurrent
 											? `${m.controlPlanCurrentPeriod()} · ${bucket.start} — ${bucket.end}`
@@ -1136,7 +1223,7 @@
 												type="button"
 												aria-expanded={!collapsed}
 												class="flex w-full items-center gap-2 px-3 text-left font-semibold text-surface-800-200
-													{view.compact ? 'h-5 text-[11px]' : 'h-7 text-xs'}"
+													{view.compact ? 'h-6 text-[11px]' : 'h-8 text-xs'}"
 												onclick={() => toggleGroup(groupId)}
 											>
 												<i
@@ -1163,8 +1250,8 @@
 											>
 												<div
 													class="grid items-center gap-x-2 px-3 {view.compact
-														? 'h-5 text-[11px]'
-														: 'h-8 text-[13px]'}"
+														? 'h-7 text-xs'
+														: 'h-10 text-[13px]'}"
 													style:grid-template-columns={gridTemplate}
 												>
 													{#each visibleColumns as column (column.id)}
@@ -1229,7 +1316,7 @@
 													(state === 'overdue' && bucketData?.overdue_node_id) ||
 													nodeIds[0] ||
 													null}
-												{@const cellShape = view.compact ? 'mx-px h-3' : 'mx-0.5 h-5'}
+												{@const cellShape = view.compact ? 'mx-0.5 h-4' : 'mx-0.5 h-6'}
 												<td
 													class="p-0 border-b border-surface-100-900 group-hover/row:bg-surface-100-900
 														{bucket.key === currentBucketKey ? 'bg-violet-100/60 dark:bg-violet-900/30' : ''}"
@@ -1238,7 +1325,7 @@
 														<Anchor
 															href="/task-nodes/{firstNodeId}"
 															label={task.name}
-															class="flex items-center justify-center rounded-sm {CELL_STYLES[
+															class="flex items-center justify-center rounded-sm {OCCURRENCE_STYLES[
 																state
 															]} {cellShape} hover:opacity-80 transition-opacity"
 															title={nodeIds.length > 1
@@ -1253,7 +1340,7 @@
 															{/if}
 														</Anchor>
 													{:else}
-														<div class="rounded-sm {CELL_STYLES[state]} {cellShape}"></div>
+														<div class="rounded-sm {OCCURRENCE_STYLES[state]} {cellShape}"></div>
 													{/if}
 												</td>
 											{/each}
@@ -1285,7 +1372,7 @@
 		>
 			{#each ['completed', 'in_progress', 'planned', 'overdue', 'cancelled', 'none'] as const as state}
 				<div class="flex items-center gap-1.5">
-					<div class="w-3 h-3 rounded-sm {CELL_STYLES[state]}"></div>
+					<div class="w-3 h-3 rounded-sm {OCCURRENCE_STYLES[state]}"></div>
 					<span>{CELL_LABELS[state]()}</span>
 				</div>
 			{/each}

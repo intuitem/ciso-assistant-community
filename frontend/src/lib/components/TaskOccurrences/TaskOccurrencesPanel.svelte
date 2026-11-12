@@ -5,7 +5,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
-	import { taskStatusColor } from '#lib/utils/taskStatus.js';
+	import { OCCURRENCE_STYLES, isOccurrenceLate, occurrenceState } from '#lib/utils/taskStatus.js';
 	import { scheduleLabel, type TaskSchedule } from '#lib/utils/taskSchedule.js';
 
 	interface Occurrence {
@@ -24,6 +24,8 @@
 		upcoming?: Occurrence[];
 		/** Total upcoming occurrences on the server; `upcoming` is only a window of them. */
 		upcomingCount?: number;
+		/** The occurrences could not be loaded: not the same as there being none. */
+		failed: boolean;
 	}
 
 	let {
@@ -32,7 +34,8 @@
 		schedule = null,
 		past = [],
 		upcoming = [],
-		upcomingCount = undefined
+		upcomingCount = undefined,
+		failed
 	}: Props = $props();
 
 	const cadence = $derived(scheduleLabel(schedule));
@@ -77,7 +80,15 @@
 </script>
 
 <div class="card shadow-lg bg-surface-50-950 p-6 space-y-6">
-	{#if !isRecurrent}
+	{#if failed}
+		<!-- "Has not run yet" would be a statement about the task; this one is not. -->
+		<div class="space-y-2">
+			<p class="font-semibold">{isRecurrent ? m.occurrenceHistory() : m.dueDate()}</p>
+			<p class="text-sm text-surface-600-400" data-testid="occurrence-history-unavailable">
+				{m.occurrenceHistoryUnavailable()}
+			</p>
+		</div>
+	{:else if !isRecurrent}
 		<!-- A one-time task has exactly one occurrence; showing it as a list of one
 		     makes the reader look for the others. -->
 		{@const only = sortedUpcoming[0] ?? sortedPast[sortedPast.length - 1]}
@@ -89,8 +100,9 @@
 				<span class="text-2xl font-semibold">{formatDate(only.due_date)}</span>
 				<span class="badge preset-tonal inline-flex items-center gap-1.5">
 					<span
-						class="inline-block h-2 w-2 rounded-full"
-						style="background-color: {taskStatusColor(only.status)};"
+						class="inline-block h-3 w-3 rounded-sm {OCCURRENCE_STYLES[
+							occurrenceState(only.status, isOccurrenceLate(only))
+						]}"
 					></span>
 					{safeTranslate(only.status)}
 				</span>
@@ -126,8 +138,9 @@
 					</div>
 					<span class="badge preset-tonal inline-flex items-center gap-1.5">
 						<span
-							class="inline-block h-2 w-2 rounded-full"
-							style="background-color: {taskStatusColor(next.status)};"
+							class="inline-block h-3 w-3 rounded-sm {OCCURRENCE_STYLES[
+								occurrenceState(next.status, isOccurrenceLate(next))
+							]}"
 						></span>
 						{safeTranslate(next.status)}
 					</span>

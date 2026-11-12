@@ -386,6 +386,29 @@ export const OPTIONAL_COLUMNS = [
 ] as const;
 export type OptionalColumn = (typeof OPTIONAL_COLUMNS)[number];
 
+/** Every column of the task pane, in its initial order. The name always shows. */
+export const COLUMN_IDS = [
+	'ref',
+	'name',
+	'frequency',
+	'assignee',
+	'appliedControl',
+	'nextDue',
+	'domain'
+] as const;
+export type ColumnId = (typeof COLUMN_IDS)[number];
+
+/** Give a column the place of another one, shifting those in between. */
+export function moveColumn(order: ColumnId[], column: ColumnId, target: ColumnId): ColumnId[] {
+	const from = order.indexOf(column);
+	const to = order.indexOf(target);
+	if (from === -1 || to === -1 || from === to) return order;
+	const moved = [...order];
+	moved.splice(from, 1);
+	moved.splice(to, 0, column);
+	return moved;
+}
+
 export const PANE_WIDTH = { min: 220, max: 1200, initial: 560 } as const;
 
 export function clampPaneWidth(width: number): number {
@@ -397,16 +420,22 @@ export interface ViewSettings {
 	compact: boolean;
 	grouping: Grouping;
 	sort: Sort;
+	/** Optional columns that are shown. */
 	columns: OptionalColumn[];
+	/** Left to right order of all the columns, shown or not. */
+	columnOrder: ColumnId[];
 	paneWidth: number;
 }
 
 export function defaultViewSettings(): ViewSettings {
 	return {
 		compact: false,
-		grouping: 'none',
+		// One section per domain, as the page always was. The domain column is
+		// hidden while it is the grouping, and takes over under any other one.
+		grouping: 'domain',
 		sort: { key: 'frequency', descending: false },
-		columns: ['ref', 'frequency', 'assignee', 'appliedControl'],
+		columns: ['ref', 'frequency', 'assignee', 'appliedControl', 'domain'],
+		columnOrder: [...COLUMN_IDS],
 		paneWidth: PANE_WIDTH.initial
 	};
 }
@@ -427,7 +456,10 @@ export function parseViewSettings(raw: string | null): ViewSettings {
 		return settings;
 	}
 	if (typeof stored !== 'object' || stored === null) return settings;
-	const { compact, grouping, sort, columns, paneWidth } = stored as Record<string, unknown>;
+	const { compact, grouping, sort, columns, columnOrder, paneWidth } = stored as Record<
+		string,
+		unknown
+	>;
 
 	if (typeof compact === 'boolean') settings.compact = compact;
 	if (GROUPINGS.includes(grouping as Grouping)) settings.grouping = grouping as Grouping;
@@ -438,8 +470,15 @@ export function parseViewSettings(raw: string | null): ViewSettings {
 		}
 	}
 	if (Array.isArray(columns)) {
-		// Canonical order, unknown names dropped.
+		// Unknown names dropped. The order is kept apart, in columnOrder.
 		settings.columns = OPTIONAL_COLUMNS.filter((column) => columns.includes(column));
+	}
+	if (Array.isArray(columnOrder)) {
+		// Stored order first, each known column once; the others follow in their
+		// initial order, so a column added later still shows up.
+		const known = COLUMN_IDS.filter((column) => columnOrder.includes(column));
+		known.sort((a, b) => columnOrder.indexOf(a) - columnOrder.indexOf(b));
+		settings.columnOrder = [...known, ...COLUMN_IDS.filter((column) => !known.includes(column))];
 	}
 	if (typeof paneWidth === 'number' && Number.isFinite(paneWidth)) {
 		settings.paneWidth = clampPaneWidth(paneWidth);

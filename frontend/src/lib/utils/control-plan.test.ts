@@ -4,6 +4,7 @@ import {
 	defaultViewSettings,
 	flattenTasks,
 	groupRows,
+	moveColumn,
 	parseViewSettings,
 	schedulePeriodDays,
 	sortRows,
@@ -375,13 +376,37 @@ describe('parseViewSettings', () => {
 			grouping: 'assignee',
 			sort: { key: 'name', descending: true },
 			columns: ['domain', 'ref'],
+			columnOrder: ['name', 'domain', 'ref', 'frequency', 'assignee', 'appliedControl', 'nextDue'],
 			paneWidth: 480
 		};
 		expect(parseViewSettings(JSON.stringify(stored))).toEqual({
 			...stored,
-			// Columns come back in display order.
+			// The shown columns are a set: their order is columnOrder's business.
 			columns: ['ref', 'domain']
 		});
+	});
+
+	it('groups by domain and keeps the domain column by default', () => {
+		const settings = defaultViewSettings();
+		expect(settings.grouping).toBe('domain');
+		expect(settings.columns).toContain('domain');
+	});
+
+	it('completes a stored column order', () => {
+		const order = (columnOrder: unknown) =>
+			parseViewSettings(JSON.stringify({ columnOrder })).columnOrder;
+
+		// Unknown and repeated names dropped, missing columns appended.
+		expect(order(['domain', 'bogus', 'name', 'domain'])).toEqual([
+			'domain',
+			'name',
+			'ref',
+			'frequency',
+			'assignee',
+			'appliedControl',
+			'nextDue'
+		]);
+		expect(order('name')).toEqual(defaultViewSettings().columnOrder);
 	});
 
 	it('ignores unusable fields one by one', () => {
@@ -403,6 +428,20 @@ describe('parseViewSettings', () => {
 
 	it('accepts an empty column list', () => {
 		expect(parseViewSettings(JSON.stringify({ columns: [] })).columns).toEqual([]);
+	});
+});
+
+describe('moveColumn', () => {
+	const order = defaultViewSettings().columnOrder;
+
+	it('takes the place of the target, in either direction', () => {
+		expect(moveColumn(order, 'ref', 'frequency').slice(0, 3)).toEqual(['name', 'frequency', 'ref']);
+		expect(moveColumn(order, 'domain', 'ref').slice(0, 3)).toEqual(['domain', 'ref', 'name']);
+	});
+
+	it('leaves the order alone when there is nothing to move', () => {
+		expect(moveColumn(order, 'name', 'name')).toBe(order);
+		expect(moveColumn(['name', 'ref'], 'domain', 'ref')).toEqual(['name', 'ref']);
 	});
 });
 
