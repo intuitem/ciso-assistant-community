@@ -8,6 +8,8 @@ class IamConfig(AppConfig):
     def ready(self):
         from django.apps import apps
 
+        from . import signals  # noqa: F401
+
         ServiceAccount = apps.get_model("iam", "ServiceAccount")
 
         self._patch_client_check_secret(ServiceAccount)

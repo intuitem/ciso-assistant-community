@@ -178,6 +178,7 @@ spec:
             value: {{ . | quote }}
           {{- end }}
           {{- end }}
+          {{- include "ciso-assistant.memcachedEnv" . | nindent 10 }}
           {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         ports:
           - name: http
@@ -186,6 +187,10 @@ spec:
         volumeMounts:
           - name: tmp-data
             mountPath: /tmp
+          {{- if .Values.memcached.enabled }}
+          - name: memcached-socket
+            mountPath: /run/memcached
+          {{- end }}
           {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
           - name: sqlite-data
             mountPath: /ciso/db
@@ -340,10 +345,15 @@ spec:
           - name: QDRANT_URL
             value: {{ include "ciso-assistant.qdrantUrl" . }}
           {{- end }}
+          {{- include "ciso-assistant.memcachedEnv" . | nindent 10 }}
           {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         volumeMounts:
           - name: tmp-data
             mountPath: /tmp
+          {{- if .Values.memcached.enabled }}
+          - name: memcached-socket
+            mountPath: /run/memcached
+          {{- end }}
           {{- if .Values.backend.persistence.sqlite.enabled }}
           - name: sqlite-data
             mountPath: /ciso/db
@@ -411,6 +421,27 @@ spec:
         {{- end }}
       {{- end }}
       {{- end }}
+      {{- if .Values.memcached.enabled }}
+      # Shared cache for the backend and Huey containers of this pod, on a unix
+      # socket only (no TCP listener). Socket mode 0777: the backend image runs as
+      # root unless backend.containerSecurityContext sets a user; only the
+      # containers of this pod that mount memcached-socket can reach it.
+      - name: memcached
+        image: {{ .Values.memcached.image.registry }}/{{ .Values.memcached.image.repository }}:{{ .Values.memcached.image.tag }}
+        imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.memcached.image.imagePullPolicy }}
+        args: ["memcached", "-s", "/run/memcached/memcached.sock", "-a", "0777", "-m", {{ .Values.memcached.memoryLimit | quote }}]
+        volumeMounts:
+          - name: memcached-socket
+            mountPath: /run/memcached
+        {{- if .Values.memcached.resources }}
+        resources:
+          {{- toYaml .Values.memcached.resources | nindent 10 }}
+        {{- end }}
+        {{- with .Values.memcached.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.backend.nodeSelector | default .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -431,6 +462,13 @@ spec:
         - name: mcp-tmp
           emptyDir:
             sizeLimit: 64Mi
+        {{- end }}
+        {{- if .Values.memcached.enabled }}
+        # Holds only memcached's socket.
+        - name: memcached-socket
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
         {{- end }}
         {{- if .Values.backend.persistence.sqlite.enabled }}
         - name: sqlite-data

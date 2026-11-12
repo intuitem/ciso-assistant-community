@@ -2951,10 +2951,10 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objekt je skrit. Povezava se lahko med urejanjem izgubi.",
-				"countPlural=two": "{count} objekta sta skrita. Povezave se lahko med urejanjem izgubijo.",
-				"countPlural=few": "{count} objekti so skriti. Povezave se lahko med urejanjem izgubijo.",
-				"countPlural=other": "{count} objektov je skritih. Povezave se lahko med urejanjem izgubijo."
+				"countPlural=one": "{count} objekt je skrit.",
+				"countPlural=two": "{count} objekta sta skrita.",
+				"countPlural=few": "{count} objekti so skriti.",
+				"countPlural=other": "{count} objektov je skritih."
 			}
 		}
 	],
@@ -5317,8 +5317,6 @@
 	"backToFramework": "Nazaj na okvir",
 	"compliancePercentage": "% skladnosti",
 	"complianceFormulaShort": "skladno + ½·delno, izklj. ni uporabno & neocenjeno",
-	"averageImplementationScore": "Povprečna ocena izvedbe",
-	"overScoredRequirementsOnly": "samo pri točkovanih zahtevah",
 	"visibleToCurrentUser": "vidno trenutnemu uporabniku",
 	"inScopeAfterIGFilter": "v obsegu po filtru izvedbenih skupin",
 	"overallResultDistribution": "Splošna porazdelitev rezultatov",

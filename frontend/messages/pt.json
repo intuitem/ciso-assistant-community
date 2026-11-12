@@ -3377,8 +3377,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objeto está oculto. O vínculo pode ser perdido ao editar.",
-				"countPlural=other": "{count} objetos estão ocultos. Os vínculos podem ser perdidos ao editar."
+				"countPlural=one": "{count} objeto está oculto.",
+				"countPlural=other": "{count} objetos estão ocultos."
 			}
 		}
 	],
@@ -5951,8 +5951,6 @@
 	"backToFramework": "Voltar ao framework",
 	"compliancePercentage": "Conformidade %",
 	"complianceFormulaShort": "conforme + ½·parcial, excl. N/A e não avaliados",
-	"averageImplementationScore": "Pontuação média de implementação",
-	"overScoredRequirementsOnly": "apenas sobre requisitos pontuados",
 	"visibleToCurrentUser": "visíveis ao usuário atual",
 	"inScopeAfterIGFilter": "no escopo após o filtro de IG",
 	"overallResultDistribution": "Distribuição do resultado geral",

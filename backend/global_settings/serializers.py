@@ -88,6 +88,7 @@ GENERAL_SETTINGS_KEYS = [
     "daily_rate",
     "mapping_max_depth",
     "allow_self_validation",
+    "evidence_four_eyes",
     "show_warning_external_links",
     "show_get_started",
     "builtin_metrics_retention_days",

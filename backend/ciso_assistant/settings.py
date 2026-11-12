@@ -10,7 +10,9 @@ else it is sqlite, and no env variable is required
 """
 
 from pathlib import Path
+import hashlib
 import os
+import re
 from dotenv import load_dotenv
 from datetime import timedelta
 import logging.config
@@ -799,6 +801,58 @@ else:
     }
     logger.info("SQLITE_FILE: %s", SQLITE_FILE)
 
+# Optional shared cache. Without it, each gunicorn worker keeps its own
+# in-memory cache: rate limits count per worker and cached values (feature
+# flags) reach the other workers only when they expire.
+ENABLE_MEMCACHED = os.environ.get("ENABLE_MEMCACHED", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+# A unix socket by default: memcached then has no network listener at all, so
+# no outbound request of the backend (webhook, SIEM, LLM URL...) can reach it.
+# Anything that can write to memcached can run code in the backend (values are
+# pickled). The path must be absolute: pymemcache reads a relative one as a host.
+MEMCACHED_LOCATION = os.environ.get(
+    "MEMCACHED_LOCATION", "unix:/run/memcached/memcached.sock"
+)
+
+
+def _memcached_key(key, key_prefix, version):
+    # Django's default key, hashed when memcached would refuse it: longer than
+    # 250 characters, or with spaces, control or non-ASCII characters. allauth's
+    # SAML metadata key, for example, holds the metadata URL and the entity ID.
+    full_key = f"{key_prefix}:{version}:{key}"
+    if len(full_key) <= 250 and all(32 < ord(char) < 127 for char in full_key):
+        return full_key
+    digest = hashlib.sha256(full_key.encode()).hexdigest()
+    return f"{key_prefix}:{version}:sha256:{digest}"
+
+
+def _memcached_cache(location):
+    return {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": location,
+        "KEY_FUNCTION": _memcached_key,
+        # If memcached is down or stuck, reads miss, writes are dropped and
+        # add() fails, instead of raising, so the app keeps working without it.
+        # Login rate limiting fails closed: allauth refuses a login when its
+        # add() lock fails, so logins are refused until memcached is back.
+        "OPTIONS": {
+            "ignore_exc": True,
+            "dead_timeout": 5,  # retry a dead memcached after 5 s, not 60
+            "connect_timeout": 0.5,
+            "timeout": 0.5,
+        },
+    }
+
+
+logger.info("ENABLE_MEMCACHED: %s", ENABLE_MEMCACHED)
+if ENABLE_MEMCACHED:
+    logger.info("MEMCACHED_LOCATION: %s", MEMCACHED_LOCATION)
+    CACHES = {"default": _memcached_cache(MEMCACHED_LOCATION)}
+
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
 PASSWORD_HASHERS = [
@@ -842,8 +896,56 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
 ACCOUNT_REAUTHENTICATION_TIMEOUT = 2 * 60 * 60  # 2 hours
 
+# Login rate limits, adjustable on the backend container. A value is a
+# comma-separated list of "amount/period/per" rules: period is s, m, h or d,
+# optionally preceded by a number (5m = 5 minutes), and per is "ip" (the
+# default) or, for failed logins only, "key" (the email being logged in to).
+# An empty value turns that limit off. A malformed one stops the backend here
+# instead of failing every login.
+_LOGIN_RATE_RULE = re.compile(
+    r"[1-9][0-9]*/(?:[0-9]+(?:\.[0-9]+)?)?[smhd](?:/([a-z]+))?"
+)
+
+
+def _login_rate_limit(*, variable: str, default: str, allowed_per: set[str]) -> str:
+    value = os.environ.get(variable, default).strip()
+    if not value:
+        return value
+    for rule in value.split(","):
+        match = _LOGIN_RATE_RULE.fullmatch(rule.strip())
+        if not match or (match.group(1) or "ip") not in allowed_per:
+            raise ImproperlyConfigured(
+                f"{variable}: invalid rule {rule.strip()!r}. Use amount/period/per, "
+                f"for example 10/m/ip, with per one of: {', '.join(sorted(allowed_per))}. "
+                "Leave the value empty to turn the limit off."
+            )
+    return value
+
+
+def _login_rate_limits() -> dict[str, str]:
+    return {
+        # Every login attempt. Above it, allauth answers a bare 429.
+        "login": _login_rate_limit(
+            variable="LOGIN_RATE_LIMIT", default="30/m/ip", allowed_per={"ip"}
+        ),
+        # Failed logins, per IP and per email ("key"). The per-email rule locks
+        # the account, even for the right password, until the period ends.
+        "login_failed": _login_rate_limit(
+            variable="LOGIN_FAILED_RATE_LIMIT",
+            default="10/m/ip,5/5m/key",
+            allowed_per={"ip", "key"},
+        ),
+    }
+
+
+# allauth keeps its own defaults for the other actions (password reset...).
+ACCOUNT_RATE_LIMITS = _login_rate_limits()
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Password logins run allauth's own AccountAdapter.authenticate; this backend
+# only adds the local-login rule (User.is_local).
+AUTHENTICATION_BACKENDS = ["iam.auth_backends.LocalLoginBackend"]
 ACCOUNT_ADAPTER = "iam.adapter.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "iam.adapter.SocialAccountAdapter"
 

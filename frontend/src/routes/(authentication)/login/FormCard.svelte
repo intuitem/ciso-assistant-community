@@ -138,10 +138,9 @@
 					<span class="flex items-center text-surface-600-400 text-sm">{m.or()}</span>
 					<hr class="w-64 items-center bg-surface-200-800 border-0" />
 				</div>
-				<button
-					class="btn bg-linear-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
-					onclick={triggerSSO}>{m.loginSSO()}</button
-				>
+				<button class="btn preset-tonal-primary font-semibold w-full" onclick={triggerSSO}>
+					<i class="fa-solid fa-key mr-2"></i>{m.loginSSO()}
+				</button>
 			{/if}
 		{/if}
 	</div>

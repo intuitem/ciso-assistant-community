@@ -79,6 +79,7 @@
   * [Setting up mailer](installation/mailer.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
   * [Structured logging](installation/structured-logging.md)
+  * [Shared cache and login rate limiting](installation/shared-cache.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -109,6 +110,7 @@
   * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
+    * [Active Directory Federation Services (AD FS)](configuration/sso/identity-providers/adfs.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
     * [Google Workspace](configuration/sso/identity-providers/google-workspace.md)
     * [Keycloak](configuration/sso/identity-providers/keycloak.md)
@@ -215,6 +217,7 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Risk trajectory](features/risk-trajectory.md)
+* [Scenario selection](features/scenario-selection.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
 * [Workflow builder](features/workflows/README.md)

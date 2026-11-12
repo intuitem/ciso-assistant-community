@@ -3351,8 +3351,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objektum rejtett. A kapcsolat szerkesztéskor elveszhet.",
-				"countPlural=other": "{count} objektum rejtett. A kapcsolatok szerkesztéskor elveszhetnek."
+				"countPlural=one": "{count} objektum rejtett.",
+				"countPlural=other": "{count} objektum rejtett."
 			}
 		}
 	],
@@ -5905,8 +5905,6 @@
 	"backToFramework": "Vissza a keretrendszerhez",
 	"compliancePercentage": "Megfelelőség %",
 	"complianceFormulaShort": "megfelelő + ½·részleges, N/A és nem értékelt nélkül",
-	"averageImplementationScore": "Átlagos megvalósítási pontszám",
-	"overScoredRequirementsOnly": "csak a pontozott követelményeken",
 	"visibleToCurrentUser": "a jelenlegi felhasználó számára látható",
 	"inScopeAfterIGFilter": "a megvalósítási csoport szerinti szűrés utáni terjedelemben",
 	"overallResultDistribution": "Eredmények összesített eloszlása",

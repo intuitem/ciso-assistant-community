@@ -125,6 +125,7 @@ export function buildCustomFieldFilters(
 				props: {
 					label: def.label_localized,
 					multiple: true,
+					translateOptions: false,
 					options: def.choices.map((c) => ({ label: c.label_localized, value: c.value }))
 				}
 			};

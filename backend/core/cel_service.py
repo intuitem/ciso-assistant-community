@@ -103,29 +103,19 @@ def _requirement_layers(ca, node, ra) -> dict:
     counted as the audit's aggregates count it: -1 when it does not count (or
     the audit has no documentation score), N/A at the target when the audit
     anchors N/A, a missing documentation score at the bottom of the scale."""
-    none = {"documentation_score": -1.0, "maturity_score": -1.0}
     if ca is None or not ra:
-        return none
-    low = node.get("min_score")
-    low = ca.min_score if low is None else low
-    high = node.get("max_score")
-    high = ca.max_score if high is None else high
-    if ra["result"] == "not_applicable":
-        if not ca.anchor_na_to_target or low is None or high is None:
-            return none
-        implementation = documentation = ca.na_anchor_score(low, high)
-    elif ra["is_scored"] and ra["score"] is not None:
-        implementation = ra["score"]
-        documentation = ra.get("documentation_score")
-        if documentation is None:
-            documentation = low or 0
-    else:
-        return none
-    if not ca.show_documentation_score:
-        return {"documentation_score": -1.0, "maturity_score": float(implementation)}
+        return {"documentation_score": -1.0, "maturity_score": -1.0}
+    layers = ca.requirement_layer_scores(
+        result=ra["result"],
+        is_scored=ra["is_scored"],
+        score=ra["score"],
+        documentation_score=ra.get("documentation_score"),
+        min_score=node.get("min_score"),
+        max_score=node.get("max_score"),
+    )
     return {
-        "documentation_score": float(documentation),
-        "maturity_score": (implementation + documentation) / 2,
+        layer: -1.0 if layers[layer] is None else float(layers[layer])
+        for layer in ("documentation_score", "maturity_score")
     }
 
 

@@ -9,13 +9,16 @@
 		getFieldVisibility,
 		getRequirementTitle,
 		getSecureRedirect,
-		alignmentColorMap
+		alignmentColorMap,
+		maturityScore,
+		roundScore
 	} from '#lib/utils/helpers.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	import { hideSuggestions } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import MaturityRing from '#lib/components/ComplianceAssessment/MaturityRing.svelte';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
@@ -70,7 +73,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[data.requirementAssessment.result] === '#000000'
+		complianceResultColorMap[data.requirementAssessment.result] === '#475569'
 			? 'text-white'
 			: 'text-gray-900'
 	);
@@ -80,8 +83,19 @@
 		data.requirementAssessment.effective_max_score ?? data.complianceAssessmentScore.max_score;
 	const min_score =
 		data.requirementAssessment.effective_min_score ?? data.complianceAssessmentScore.min_score ?? 0;
-	const score = data.requirementAssessment.score;
-	const documentationScore = data.requirementAssessment.documentation_score;
+	// An N/A requirement counts for the audit's target on its scale (anchored_score),
+	// shown greyed in place of its stored scores; nothing when the audit leaves N/A out.
+	const notApplicable = Boolean(data.requirementAssessment.not_applicable);
+	const anchoredScore: number | null = data.requirementAssessment.anchored_score ?? null;
+	const score = notApplicable
+		? anchoredScore === null
+			? null
+			: roundScore(anchoredScore)
+		: data.requirementAssessment.score;
+	const documentationScore = notApplicable ? score : data.requirementAssessment.documentation_score;
+	const showScoreRings = notApplicable ? score !== null : data.requirementAssessment.is_scored;
+	const naClass = notApplicable ? 'opacity-60' : '';
+	const naTitle = notApplicable && score !== null ? m.notApplicableCountsAsScore({ score }) : null;
 
 	const fw = data.requirementAssessment.compliance_assessment.framework;
 	const complianceAssessment = data.requirementAssessment.compliance_assessment;
@@ -164,13 +178,13 @@
 				{/each}
 			</div>
 		{/if}
-		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
+		{#if data.complianceAssessmentScore.scoring_enabled && showScoreRings}
 			<ScorePair>
 				{#snippet implementation()}
 					{#if showScore}
 						<div
-							class="shrink-0 relative"
-							title={showDocumentationScore ? m.implementationScore() : m.score()}
+							class="shrink-0 relative {naClass}"
+							title={naTitle ?? (showDocumentationScore ? m.implementationScore() : m.score())}
 						>
 							<Progress
 								value={formatScoreValue(score, max_score, false, min_score)}
@@ -192,7 +206,7 @@
 				{/snippet}
 				{#snippet documentation()}
 					{#if showDocumentationScore}
-						<div class="shrink-0 relative" title={m.documentationScore()}>
+						<div class="shrink-0 relative {naClass}" title={naTitle ?? m.documentationScore()}>
 							<Progress
 								value={formatScoreValue(documentationScore, max_score, false, min_score)}
 								min={0}
@@ -212,6 +226,16 @@
 					{/if}
 				{/snippet}
 			</ScorePair>
+			{#if showScore && showDocumentationScore && score != null}
+				<div class="shrink-0 {naClass}">
+					<MaturityRing
+						small
+						value={maturityScore(score, documentationScore, min_score)}
+						min={min_score}
+						max={max_score}
+					/>
+				</div>
+			{/if}
 		{/if}
 		<div class="ml-auto shrink-0 self-center flex flex-col gap-2">
 			<ObjectValidationFlows

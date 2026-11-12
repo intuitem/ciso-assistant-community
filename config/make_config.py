@@ -204,6 +204,15 @@ def get_config():
     # what apps may do is set in the app: the mcp and mcp_write feature flags
     config["mcp"] = {"enabled": bool(enable_mcp)}
 
+    # Shared cache, opt-in: one more container for the operator to run
+    config["memcached"] = {
+        "enabled": questionary.confirm(
+            "Would you like to run memcached as a cache shared by the backend workers? "
+            "Without it, each worker counts login rate limits on its own.",
+            default=False,
+        ).ask()
+    }
+
     # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
         "Enable debug mode?", default=False

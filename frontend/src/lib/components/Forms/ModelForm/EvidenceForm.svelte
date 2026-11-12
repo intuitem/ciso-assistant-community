@@ -84,34 +84,36 @@
 		bind:cachedValue={formDataCache['link']}
 	/>
 {/if}
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	translateOptions={false}
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	allowUserOptions="append"
-/>
+{#if !page.data?.user?.is_third_party}
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		translateOptions={false}
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
 
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="actors"
-	lazy
-	optionsLabelField="str"
-	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
-		position: 'prefix'
-	}}
-	field="owner"
-	cacheLock={cacheLocks['owner']}
-	bind:cachedValue={formDataCache['owner']}
-	label={m.owner()}
-/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="actors"
+		lazy
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="owner"
+		cacheLock={cacheLocks['owner']}
+		bind:cachedValue={formDataCache['owner']}
+		label={m.owner()}
+	/>
+{/if}
 
 <!-- Evidence status is an auditor-side review decision: respondents deposit
 	 evidence but must not set/change its status (e.g. self-approve). -->
