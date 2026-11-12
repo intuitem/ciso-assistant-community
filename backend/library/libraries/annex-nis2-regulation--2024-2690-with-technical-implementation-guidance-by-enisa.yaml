@@ -386,6 +386,7 @@ objects:
             \ Initiativen, die darauf hinweisen, dass die Leitungsorgane Verbesserungen im Bereich der Netz- und Informationssicherheit\
             \ fördern."
         fr:
+          name: 'Contenu requis de la politique de sécurité'
           description: "Aux fins de l\u2019article\_21, paragraphe\_2, point\_a),\
             \ de la directive (UE)\_2022/2555, la politique relative \xE0 la s\xE9\
             curit\xE9 des r\xE9seaux et des syst\xE8mes d\u2019information:"
@@ -627,6 +628,7 @@ objects:
           description: den Ansatz der betreffenden Einrichtungen für das Management der Sicherheit ihrer Netz- und Informationssysteme
             darlegen;
         fr:
+          name: 'Approche de gestion de la sécurité des réseaux et des systèmes d’information'
           description: "d\xE9finit l\u2019approche que les entit\xE9s concern\xE9\
             es suivent pour g\xE9rer la s\xE9curit\xE9 de leurs r\xE9seaux et de leurs\
             \ syst\xE8mes d\u2019information;"
@@ -652,6 +654,7 @@ objects:
         de:
           description: für die Geschäftsstrategie und die Ziele der betreffenden Einrichtungen geeignet sein und diese ergänzen;
         fr:
+          name: 'Alignement sur la stratégie et les objectifs métier'
           description: "est adapt\xE9e et apporte un compl\xE9ment \xE0 la strat\xE9\
             gie et aux objectifs \xE9conomiques des entit\xE9s concern\xE9es;"
         es:
@@ -674,6 +677,7 @@ objects:
         de:
           description: die Ziele der Sicherheit von Netz- und Informationssystemen darlegen;
         fr:
+          name: 'Objectifs de sécurité des réseaux et de l’information'
           description: "fixe des objectifs en mati\xE8re de s\xE9curit\xE9 des r\xE9\
             seaux et de l\u2019information;"
         es:
@@ -697,6 +701,7 @@ objects:
           description: eine Verpflichtung zur kontinuierlichen Verbesserung der Sicherheit von Netz- und Informationssystemen
             enthalten;
         fr:
+          name: 'Engagement d’amélioration continue'
           description: "comprend un engagement \xE0 am\xE9liorer de fa\xE7on continue\
             \ la s\xE9curit\xE9 des r\xE9seaux et des syst\xE8mes d\u2019information;"
         es:
@@ -723,6 +728,7 @@ objects:
             einschließlich des erforderlichen Personals, der erforderlichen Finanzmittel sowie der Verfahren, Instrumente
             und Technologien;
         fr:
+          name: 'Engagement à fournir les ressources nécessaires'
           description: "comprend un engagement \xE0 fournir les ressources appropri\xE9\
             es pour sa mise en \u0153uvre, y compris le personnel, les moyens financiers,\
             \ les proc\xE9dures, les outils et les technologies n\xE9cessaires;"
@@ -752,6 +758,7 @@ objects:
           description: den einschlägigen Mitarbeitenden und interessierten externen Beteiligten mitgeteilt und von ihnen
             anerkannt werden;
         fr:
+          name: 'Communication au personnel et aux parties intéressées'
           description: "est communiqu\xE9e aux membres du personnel concern\xE9s et\
             \ aux tiers concern\xE9s, qui en prennent acte;"
         es:
@@ -775,6 +782,7 @@ objects:
         de:
           description: die Festlegung der Rollen und Verantwortlichkeiten gemäß Nummer 1.2 enthalten;
         fr:
+          name: 'Rôles et responsabilités'
           description: "d\xE9finit les r\xF4les et les responsabilit\xE9s conform\xE9\
             ment au point\_1.2;"
         es:
@@ -796,6 +804,7 @@ objects:
         de:
           description: die aufzubewahrenden Unterlagen und die Dauer ihrer Aufbewahrung aufführen;
         fr:
+          name: 'Documentation et durées de conservation'
           description: "dresse la liste des documents \xE0 conserver en indiquant\
             \ leur dur\xE9e de conservation;"
         es:
@@ -818,6 +827,7 @@ objects:
         de:
           description: die themenspezifischen Konzepte aufführen;
         fr:
+          name: 'Liste des politiques thématiques'
           description: "\xE9num\xE8re les politiques concernant des domaines sp\xE9\
             cifiques;"
         es:
@@ -841,6 +851,7 @@ objects:
           description: Indikatoren und Maßnahmen zur Überwachung seiner Umsetzung und des aktuellen Reifegrads der Netz-
             und Informationssicherheit in den betreffenden Einrichtungen festlegen;
         fr:
+          name: 'Indicateurs de suivi de la mise en œuvre et de la maturité'
           description: "d\xE9finit des indicateurs et des mesures pour suivre sa mise\
             \ en \u0153uvre, ainsi que le stade de maturit\xE9 atteint par les entit\xE9\
             s concern\xE9es en ce qui concerne la s\xE9curit\xE9 des r\xE9seaux et\
@@ -871,6 +882,7 @@ objects:
           description: das Datum der förmlichen Genehmigung durch die Leitungsorgane der betreffenden Einrichtungen (im
             Folgenden „Leitungsorgane“) enthalten.
         fr:
+          name: 'Date d’approbation formelle par les organes de direction'
           description: "indique la date d\u2019approbation formelle par les organes\
             \ de direction des entit\xE9s concern\xE9es (ci-apr\xE8s les \xABorganes\
             \ de direction\xBB)."
@@ -1014,6 +1026,7 @@ objects:
             \ regelmäßige Briefings oder Aktualisierungen zu Fragen der Cybersicherheit oder bei bedeutenden Vorfällen zur\
             \ Verfügung gestellt werden."
         fr:
+          name: 'Réexamen annuel de la politique de sécurité'
           description: "La politique relative \xE0 la s\xE9curit\xE9 des r\xE9seaux\
             \ et des syst\xE8mes d\u2019information est r\xE9examin\xE9e et, s\u2019\
             il est besoin, mise \xE0 jour par les organes de direction au moins chaque\
@@ -1437,6 +1450,7 @@ objects:
             \ Unternehmensorganigramm oder Managementbeschluss usw. \n• Liste der Termine und Beschreibung der Verantwortlichkeiten\
             \ und Aufgaben für Sicherheitsrollen. \n• Nachweis der Kompetenz der eingesetzten Personen."
         fr:
+          name: 'Attribution des responsabilités et des pouvoirs en matière de sécurité'
           description: "Dans le cadre de leur politique relative \xE0 la s\xE9curit\xE9\
             \ des r\xE9seaux et des syst\xE8mes d\u2019information vis\xE9e au point\_\
             1.1, les entit\xE9s concern\xE9es d\xE9finissent les responsabilit\xE9\
@@ -1609,6 +1623,7 @@ objects:
             \ dass sie ihre Verpflichtungen im Zusammenhang mit der Netz- und Informationssystemsicherheit erhalten und\
             \ verstanden haben, sofern diese Anforderungen nicht durch vertragliche Vereinbarungen abgedeckt sind."
         fr:
+          name: 'Application des politiques de sécurité par le personnel et les tiers'
           description: "Les entit\xE9s concern\xE9es exigent de l\u2019ensemble du\
             \ personnel et des tiers qu\u2019ils appliquent les mesures de s\xE9curit\xE9\
             \ des r\xE9seaux et des syst\xE8mes d\u2019information conform\xE9ment\
@@ -1788,6 +1803,7 @@ objects:
             \ \n• Protokolle von Besprechungen mit der Geschäftsführung. \n• Nachweise über getroffene Geschäftsentscheidungen\
             \ (z. B. Investitionen in Cybersicherheit)."
         fr:
+          name: 'Rapport direct aux organes de direction'
           description: "Au moins une personne fait directement rapport aux organes\
             \ de direction sur les questions relatives \xE0 la s\xE9curit\xE9 des\
             \ r\xE9seaux et des syst\xE8mes d\u2019information."
@@ -1877,6 +1893,7 @@ objects:
             • Überprüfen Sie, ob in kleineren Einheiten Sicherheitsverantwortlichkeiten den bestehenden Rollen zugewiesen\
             \ sind."
         fr:
+          name: 'Rôles de sécurité dédiés ou cumulés'
           description: "Selon la taille des entit\xE9s concern\xE9es, la s\xE9curit\xE9\
             \ des r\xE9seaux et des syst\xE8mes d\u2019information rel\xE8ve de r\xF4\
             les ou de fonctions sp\xE9cifiques assum\xE9s en sus des r\xF4les existants."
@@ -1983,6 +2000,7 @@ objects:
             \ genutzt werden, um mögliche widersprüchliche Aufgaben und Verantwortungsbereiche zu identifizieren."
           typical_evidence: • Aktuelle Dokumentation der Struktur der Sicherheitsrollenzuweisungen und Verantwortlichkeiten.
         fr:
+          name: 'Séparation des tâches incompatibles'
           description: "Les fonctions et les domaines de responsabilit\xE9 incompatibles\
             \ sont dissoci\xE9s, s\u2019il y a lieu."
           annotation: "\u2022 Envisager de s\xE9parer les obligations et les domaines\
@@ -2099,6 +2117,7 @@ objects:
             \ Geschäftsleitung, klar erkennbar ist. Das Organigramm sollte datiert sein und die Person, die die Aktualisierung\
             \ vornimmt, sollte vermerkt sein."
         fr:
+          name: 'Réexamen des rôles et des responsabilités'
           description: "Les r\xF4les, les responsabilit\xE9s et les pouvoirs sont\
             \ r\xE9examin\xE9s et, s\u2019il est besoin, mis \xE0 jour par les organes\
             \ de direction \xE0 intervalles pr\xE9d\xE9finis, ainsi qu\u2019en cas\
@@ -2369,6 +2388,7 @@ objects:
             \ Aufzeichnung der Genehmigung von Restrisiken durch Leitungsorgane oder ggf. durch Personen, die rechenschaftspflichtig\
             \ und befugt sind, Risiken zu verwalten."
         fr:
+          name: 'Appréciation des risques, plan de traitement et acceptation des risques résiduels'
           description: "Aux fins de l\u2019article\_21, paragraphe\_2, point\_a),\
             \ de la directive (UE)\_2022/2555, les entit\xE9s concern\xE9es \xE9tablissent\
             \ et maintiennent un cadre appropri\xE9 pour la gestion des risques afin\
@@ -2796,6 +2816,7 @@ objects:
             \ natürliche oder vom Menschen verursachte, zufällige oder absichtliche Bedrohungen und Risiken). \n• Nachweis,\
             \ dass Restrisiken, die sich aus Abhängigkeiten von Dritten ergeben, aufgelistet und gemindert werden."
         fr:
+          name: 'Processus de gestion des risques de cybersécurité'
           description: "Aux fins du point\_2.1.1, les entit\xE9s concern\xE9es \xE9\
             tablissent des proc\xE9dures d\u2019identification, d\u2019analyse, d\u2019\
             \xE9valuation et de traitement des risques (ci-apr\xE8s la \xABproc\xE9\
@@ -3405,6 +3426,7 @@ objects:
         de:
           description: eine Risikomanagementmethodik befolgen;
         fr:
+          name: 'Méthodologie de gestion des risques'
           description: "suivent une m\xE9thodologie de gestion des risques;"
         es:
           description: "seguir\xE1n una metodolog\xEDa de gesti\xF3n de riesgos;"
@@ -3425,6 +3447,7 @@ objects:
           description: eine Risikotoleranzschwelle im Einklang mit der Risikobereitschaft der betreffenden Einrichtungen
             festlegen;
         fr:
+          name: 'Niveau de tolérance au risque aligné sur l’appétence au risque'
           description: "\xE9tablissent le niveau de tol\xE9rance au risque en fonction\
             \ de leur propension au risque;"
         es:
@@ -3447,6 +3470,7 @@ objects:
         de:
           description: einschlägige Risikokriterien einführen und pflegen;
         fr:
+          name: 'Critères de risque'
           description: "d\xE9finissent et maintiennent les crit\xE8res de risque pertinents;"
         es:
           description: "establecer\xE1n y mantendr\xE1n criterios de riesgo pertinentes;"
@@ -3473,6 +3497,7 @@ objects:
             die zu Störungen der Verfügbarkeit, Integrität, Authentizität oder Vertraulichkeit der Netz- und Informationssysteme
             führen könnten, wobei auch punktuelle Ausfälle zu ermitteln sind;
         fr:
+          name: 'Identification des risques selon une approche « tous risques »'
           description: "en suivant une approche \xABtous risques\xBB, identifient\
             \ et consignent les risques pour la s\xE9curit\xE9 des r\xE9seaux et des\
             \ syst\xE8mes d\u2019information, en particulier en ce qui concerne les\
@@ -3518,6 +3543,7 @@ objects:
             des Niveaus der Bedrohung, der Wahrscheinlichkeit, der Auswirkung und des Risikos unter Berücksichtigung der
             Erkenntnisse über Cyberbedrohungen und Schwachstellen;
         fr:
+          name: 'Analyse des risques'
           description: "analysent les risques qui p\xE8sent sur la s\xE9curit\xE9\
             \ des r\xE9seaux et des syst\xE8mes d\u2019information, y compris la menace,\
             \ la probabilit\xE9, l\u2019impact et le niveau de risque, en tenant compte\
@@ -3548,6 +3574,7 @@ objects:
         de:
           description: die ermittelten Risiken auf der Grundlage der Risikokriterien bewerten;
         fr:
+          name: 'Évaluation des risques au regard des critères de risque'
           description: "\xE9valuent les risques identifi\xE9s en se fondant sur les\
             \ crit\xE8res de risque;"
         es:
@@ -3570,6 +3597,7 @@ objects:
         de:
           description: geeignete Optionen und Maßnahmen für die Behandlung von Risiken bestimmen;
         fr:
+          name: 'Identification et priorisation des options de traitement des risques'
           description: "d\xE9terminent et hi\xE9rarchisent les options et les mesures\
             \ qu\u2019il convient d\u2019appliquer en mati\xE8re de traitement des\
             \ risques;"
@@ -3594,6 +3622,7 @@ objects:
         de:
           description: die Umsetzung der Maßnahmen für die Behandlung von Risiken fortlaufend überwachen;
         fr:
+          name: 'Suivi de la mise en œuvre du traitement des risques'
           description: "suivent en continu la mise en \u0153uvre des mesures de traitement\
             \ du risque;"
         es:
@@ -3618,6 +3647,7 @@ objects:
           description: ermitteln, wer für die Umsetzung der Maßnahmen für die Behandlung von Risiken verantwortlich ist
             und wann diese erfolgen sollte;
         fr:
+          name: 'Responsabilités et échéances du traitement des risques'
           description: "d\xE9terminent qui est responsable de la mise en \u0153uvre\
             \ des mesures de traitement des risques et quand celles-ci devraient \xEA\
             tre mises en \u0153uvre;"
@@ -3646,6 +3676,7 @@ objects:
           description: die gewählten Maßnahmen für die Behandlung von Risiken in einem Risikobehandlungsplan dokumentieren
             und die Gründe für das Eingehen der Restrisiken umfassend erläutern.
         fr:
+          name: 'Plan de traitement des risques et justification des risques résiduels'
           description: "consignent de mani\xE8re compr\xE9hensible dans un plan de\
             \ traitement des risques les mesures de traitement des risques choisies\
             \ et les raisons justifiant l\u2019acceptation des risques r\xE9siduels."
@@ -3690,6 +3721,7 @@ objects:
           typical_evidence: • Anleitung für das Personal zur Risikobewertung unter Berücksichtigung der in Abschnitt 2.1.3
             des Anhangs der Verordnung genannten Elemente.
         fr:
+          name: 'Facteurs de priorisation du traitement des risques'
           description: "Lorsqu\u2019elles identifient et hi\xE9rarchisent les options\
             \ et les mesures de traitement des risques qu\u2019il convient d\u2019\
             appliquer, les entit\xE9s concern\xE9es tiennent compte des r\xE9sultats\
@@ -3846,6 +3878,7 @@ objects:
             \ (z. B. Beweise aus E-Mails, Interviews und Sensibilisierungssitzungen). \n• Dokumentierte Ausnahmen bei der\
             \ Umsetzung von Risikobehandlungsplänen. \n• Risikoregister."
         fr:
+          name: 'Réexamen de l’appréciation des risques et du plan de traitement'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour les r\xE9sultats de l\u2019\xE9valuation\
             \ des risques et le plan de traitement des risques \xE0 intervalles pr\xE9\
@@ -4186,6 +4219,7 @@ objects:
                 o Verschlüsselung: Wenn ein Altsystem keine Verschlüsselung unterstützt, kann eine Ausnahme gewährt werden, bis das System ersetzt wird.
             • Aufzeichnungen über den Ausnahmeantrag und dessen Genehmigung sowie Einzelheiten zu den umgesetzten kompensierenden Maßnahmen.
         fr:
+          name: 'Revues de conformité régulières et compte rendu aux organes de direction'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent r\xE9guli\xE8\
             rement la conformit\xE9 avec leurs politiques en mati\xE8re de s\xE9curit\xE9\
             \ des r\xE9seaux et des syst\xE8mes d\u2019information, les politiques\
@@ -4355,6 +4389,7 @@ objects:
             \ der Ergebnisse, einschließlich des aktuellen Stands des Risikomanagements des Unternehmens. \n• Detaillierte\
             \ Compliance-Überwachungspläne, einschließlich langfristiger, übergeordneter Ziele und Planung."
         fr:
+          name: 'Dispositif de reporting de la conformité'
           description: "Les entit\xE9s concern\xE9es mettent en place un syst\xE8\
             me de rapports de conformit\xE9 efficace et adapt\xE9 \xE0 leur structure,\
             \ \xE0 l\u2019environnement dans lequel elles op\xE8rent et \xE0 leur\
@@ -4480,6 +4515,7 @@ objects:
             \ Verordnung, Punkt 7.1.1, bewertet wurde. \n• Nachweis, dass gegebenenfalls Berichte über gewonnene Erkenntnisse\
             \ oder Ursachenanalysen früherer Vorfälle berücksichtigt wurden."
         fr:
+          name: 'Fréquence du contrôle de la conformité'
           description: "Les entit\xE9s concern\xE9es proc\xE8dent \xE0 un contr\xF4\
             le de conformit\xE9 \xE0 intervalles pr\xE9d\xE9finis ainsi qu\u2019en\
             \ cas d\u2019incidents importants ou lorsque des changements majeurs concernant\
@@ -4615,6 +4651,7 @@ objects:
             \ zertifizierter Wirtschaftsprüfer für Informationssysteme, zertifizierter Informationssystemsicherheitsexperte,\
             \ zertifizierter Informationssicherheitsmanager usw."
         fr:
+          name: 'Réexamen indépendant de la gestion de la sécurité'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent en toute ind\xE9\
             pendance leur approche de la gestion de la s\xE9curit\xE9 des r\xE9seaux\
             \ et des syst\xE8mes d\u2019information et sa mise en \u0153uvre, y compris\
@@ -4769,6 +4806,7 @@ objects:
             \ \n• Erklärungen zu Interessenkonflikten. \n• Verträge mit externen externen Bewertungsdienstleistern. \n•\
             \ Detaillierte unabhängige Prüfpläne."
         fr:
+          name: 'Compétence et impartialité des évaluateurs indépendants'
           description: "Les entit\xE9s concern\xE9es \xE9laborent et maintiennent\
             \ les proc\xE9dures \xE0 suivre en vue de r\xE9aliser des r\xE9examens\
             \ ind\xE9pendants, lesquels seront confi\xE9s \xE0 des personnes poss\xE9\
@@ -4967,6 +5005,7 @@ objects:
             \ \n• Budgetgenehmigung für etwaige Korrekturmaßnahmen. \n• Die neuesten Ergebnisse der Compliance-Überwachung\
             \ und -Prüfung. \n• Aufzeichnungen aus dem aktualisierten Risikoregister."
         fr:
+          name: 'Restitution et suivi des résultats des réexamens indépendants'
           description: "Les r\xE9sultats des r\xE9examens ind\xE9pendants, y compris\
             \ les r\xE9sultats du contr\xF4le de la conformit\xE9 pr\xE9vu au point\_\
             2.2 ainsi que du suivi et du mesurage pr\xE9vus au point\_7, sont communiqu\xE9\
@@ -5163,6 +5202,7 @@ objects:
             \ darlegen.\n\n[TIPPS]\n\n• Dokumentierte, von den Leitungsorganen genehmigte Verfahren. \n• Genehmigung der\
             \ Restrisiken durch die Leitungsorgane."
         fr:
+          name: 'Fréquence des réexamens indépendants'
           description: "Les r\xE9examens ind\xE9pendants ont lieu \xE0 intervalles\
             \ pr\xE9d\xE9finis et en cas d\u2019incidents importants ou lorsque des\
             \ changements majeurs concernant les op\xE9rations ou les risques se produisent."
@@ -5338,6 +5378,7 @@ objects:
             \ Anhangs der Verordnung genannten Elemente enthält. \n• Dokumentierte Standards und/oder bewährte Praktiken,\
             \ die für dieses Konzept berücksichtigt werden."
         fr:
+          name: 'Mise en place de la politique de gestion des incidents'
           description: "Aux fins de l\u2019article\_21, paragraphe\_2, point\_b),\
             \ de la directive (UE)\_2022/2555, les entit\xE9s concern\xE9es \xE9tablissent\
             \ et mettent en \u0153uvre, en temps utile, une politique de gestion des\
@@ -5544,6 +5585,7 @@ objects:
             \ Security Incident Response Team (CSIRT) sind vorhanden. \n• Verfahren, wie der Vorfall den Kunden mitgeteilt\
             \ wird oder wie und wann ein Lieferant einzubeziehen ist (falls zutreffend)."
         fr:
+          name: 'Contenu requis de la politique de gestion des incidents'
           description: "La politique vis\xE9e au point\_3.1.1 est compatible avec\
             \ le plan de continuit\xE9 de l'activit\xE9 et de r\xE9tablissement vis\xE9\
             \ au point\_4.1. Cette politique comprend:"
@@ -5932,6 +5974,7 @@ objects:
           description: ein Kategorisierungssystem für Sicherheitsvorfälle, das mit der Bewertung und Klassifizierung von
             Ereignissen gemäß Nummer 3.4.1 im Einklang steht;
         fr:
+          name: 'Système de catégorisation des incidents'
           description: "un syst\xE8me de cat\xE9gorisation des incidents compatible\
             \ avec l\u2019\xE9valuation et la classification des \xE9v\xE9nements\
             \ effectu\xE9es conform\xE9ment au point\_3.4.1;"
@@ -5958,6 +6001,7 @@ objects:
         de:
           description: wirksame Kommunikationspläne, auch für die Eskalation und Meldung;
         fr:
+          name: 'Plans de communication pour l’escalade et le signalement'
           description: "des plans de communication efficaces, y compris pour la remont\xE9\
             e de l\u2019information et l\u2019\xE9tablissement des rapports;"
         es:
@@ -5983,6 +6027,7 @@ objects:
           description: eine Zuweisung der Rollen bei der Erkennung von Sicherheitsvorfällen und der angemessenen Reaktion
             darauf an kompetente Mitarbeitende;
         fr:
+          name: 'Attribution des rôles de détection et de réponse aux incidents'
           description: "l\u2019attribution aux membres du personnel comp\xE9tents\
             \ de r\xF4les en vue de d\xE9tecter les incidents et d\u2019y r\xE9agir\
             \ de mani\xE8re appropri\xE9e;"
@@ -6009,6 +6054,7 @@ objects:
           description: Dokumente, die im Laufe der Erkennung von Sicherheitsvorfällen und der Reaktion darauf zu verwenden
             sind, wie Anleitungen für die Reaktion bei Sicherheitsvorfällen, Eskalationsschemata, Kontaktlisten und Vorlagen.
         fr:
+          name: 'Documentation et modèles de réponse aux incidents'
           description: "les documents \xE0 utiliser dans le cadre de la d\xE9tection\
             \ et de la r\xE9action aux incidents, tels que des guides d\u2019intervention,\
             \ des diagrammes de remont\xE9e de l\u2019information, des listes de contacts\
@@ -6099,6 +6145,7 @@ objects:
             \ von Vorfällen, die dem Personal gegebenenfalls mitgeteilt werden. \n• Eine Liste von Meldepflichten und -fristen,\
             \ die sowohl gesetzliche als auch vertragliche Verpflichtungen umfassen können."
         fr:
+          name: 'Test et réexamen de la politique de gestion des incidents'
           description: "Les r\xF4les, les responsabilit\xE9s et les proc\xE9dures\
             \ d\xE9finis dans la politique sont test\xE9s, r\xE9examin\xE9s et, s\u2019\
             il est besoin, mis \xE0 jour \xE0 intervalles pr\xE9d\xE9finis, ainsi\
@@ -6372,6 +6419,7 @@ objects:
             \ mit dokumentierten Standards und/oder guten Praktiken. \n• Schutzmaßnahmen zum Schutz der Vertraulichkeit,\
             \ Integrität und Verfügbarkeit von Protokollen."
         fr:
+          name: 'Procédures et outils de surveillance et de journalisation'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent des proc\xE9dures\
             \ et utilisent des outils pour surveiller et journaliser les activit\xE9\
             s sur leurs r\xE9seaux et dans leurs syst\xE8mes d\u2019information afin\
@@ -6563,6 +6611,7 @@ objects:
             \ falsch-positive und falsch-negative Ergebnisse zu minimieren. \n• Gegebenenfalls Zuordnung von Anwendungsfällen\
             \ zu potenziellen Risiken, um eine umfassende und wirksame Überwachung sicherzustellen."
         fr:
+          name: 'Surveillance automatisée et réduction des faux positifs et faux négatifs'
           description: "Dans la mesure du possible, la surveillance est automatis\xE9\
             e et r\xE9alis\xE9e soit en continu soit \xE0 intervalles r\xE9guliers,\
             \ sous r\xE9serve de capacit\xE9s op\xE9rationnelles. Les entit\xE9s concern\xE9\
@@ -6730,6 +6779,7 @@ objects:
             \ Elemente enthalten. \n• Beispiele von Protokolldateien mit aktuellen und historischen DNS-Protokollen (Domain\
             \ Name System) und DHCP-Protokollen (Dynamic Host Configuration Protocol)."
         fr:
+          name: 'Tenue des journaux et périmètre de journalisation'
           description: "Sur la base des proc\xE9dures vis\xE9es au point\_3.2.1, les\
             \ entit\xE9s concern\xE9es tiennent des journaux, les documentent et les\
             \ r\xE9examinent. Les entit\xE9s concern\xE9es \xE9tablissent une liste\
@@ -6843,6 +6893,7 @@ objects:
         de:
           description: relevanten ausgehenden und eingehenden Netzverkehr;
         fr:
+          name: 'Journalisation du trafic réseau entrant et sortant'
           description: "le trafic sortant et entrant pertinent sur les r\xE9seaux;"
         es:
           description: "el tr\xE1fico de entrada y salida de la red;"
@@ -6864,6 +6915,7 @@ objects:
           description: Einrichtung, Änderung oder Löschung von Nutzern der Netz- und Informationssysteme der betreffenden
             Einrichtungen und Erweiterung der Berechtigungen;
         fr:
+          name: 'Journalisation des modifications de comptes utilisateurs et des extensions de droits'
           description: "la cr\xE9ation, la modification ou la suppression d\u2019\
             utilisateurs sur les r\xE9seaux et dans les syst\xE8mes d\u2019information\
             \ des entit\xE9s concern\xE9es, ainsi que l\u2019extension des autorisations;"
@@ -6891,6 +6943,7 @@ objects:
         de:
           description: Zugriffe auf Systeme und Anwendungen;
         fr:
+          name: 'Journalisation des accès aux systèmes et aux applications'
           description: "l\u2019acc\xE8s aux syst\xE8mes et aux applications;"
         es:
           description: el acceso a los sistemas y aplicaciones;
@@ -6909,6 +6962,7 @@ objects:
         de:
           description: authentifizierungsbezogene Ereignisse;
         fr:
+          name: 'Journalisation des événements d’authentification'
           description: "les \xE9v\xE9nements li\xE9s \xE0 l\u2019authentification;"
         es:
           description: "los sucesos relacionados con la autenticaci\xF3n;"
@@ -6928,6 +6982,7 @@ objects:
         de:
           description: alle privilegierten Zugriffe auf Systeme und Anwendungen sowie Aktivitäten der Verwaltungskonten;
         fr:
+          name: 'Journalisation des accès à privilèges et de l’activité des comptes d’administration'
           description: "tous les acc\xE8s privil\xE9gi\xE9s aux syst\xE8mes et aux\
             \ applications, ainsi que les activit\xE9s exerc\xE9es par les comptes\
             \ d\u2019administration;"
@@ -6953,6 +7008,7 @@ objects:
         de:
           description: Zugriffe auf kritische Konfigurations- und Backup-Sicherungsdateien oder Änderungen dieser Dateien;
         fr:
+          name: 'Journalisation des accès aux fichiers critiques de configuration et de sauvegarde'
           description: "l\u2019acc\xE8s aux fichiers critiques de configuration et\
             \ de sauvegarde, ou leur modification;"
         es:
@@ -6976,6 +7032,7 @@ objects:
           description: Ereignisprotokolle und Protokolle von Sicherheitstools wie Antivirenprogrammen, Angriffserkennungssystemen
             oder Firewalls;
         fr:
+          name: 'Journaux d’événements et journaux des outils de sécurité'
           description: "les journaux d\u2019\xE9v\xE9nements et les journaux des outils\
             \ de s\xE9curit\xE9, tels que les antivirus, les syst\xE8mes de d\xE9\
             tection d\u2019intrusion ou les pare-feu;"
@@ -7001,6 +7058,7 @@ objects:
         de:
           description: Nutzung der Systemressourcen sowie deren Leistung;
         fr:
+          name: 'Journalisation de l’utilisation et des performances des ressources système'
           description: "l\u2019utilisation des ressources du syst\xE8me, ainsi que\
             \ leur performance;"
         es:
@@ -7021,6 +7079,7 @@ objects:
         de:
           description: physischen Zugang zu Betriebsstätten;
         fr:
+          name: 'Journalisation des accès physiques aux installations'
           description: "l\u2019acc\xE8s physique aux installations;"
         es:
           description: "el acceso f\xEDsico a las instalaciones;"
@@ -7039,6 +7098,7 @@ objects:
         de:
           description: Zugang zu ihren Netzwerkausrüstungen und -geräten und deren Nutzung;
         fr:
+          name: 'Journalisation des accès aux équipements réseau et de leur utilisation'
           description: "l\u2019acc\xE8s \xE0 leurs \xE9quipements et dispositifs de\
             \ r\xE9seau et leur utilisation;"
         es:
@@ -7061,6 +7121,7 @@ objects:
         de:
           description: Aktivierung, Beendigung und Pausieren der verschiedenen Protokolle;
         fr:
+          name: 'Journalisation de l’activation, de l’arrêt et de la suspension des journaux'
           description: "l\u2019activation, l\u2019arr\xEAt et la suspension des divers\
             \ journaux;"
         es:
@@ -7082,6 +7143,7 @@ objects:
         de:
           description: Ereignisse im Umfeld.
         fr:
+          name: 'Journalisation des événements environnementaux'
           description: "les \xE9v\xE9nements li\xE9s \xE0 l\u2019environnement."
         es:
           description: los sucesos medioambientales.
@@ -7164,6 +7226,7 @@ objects:
             \ \n• Alarmschwellen eingestellt. \n• Aufzeichnungen vergangener Alarmauslöser bei Überschreitung von Schwellenwerten.\
             \ \n• Bestehende Workflows, die Ereignisberichte auslösen (Abschnitt 3.3)."
         fr:
+          name: 'Revue des journaux et seuils d’alerte'
           description: "Les journaux sont r\xE9guli\xE8rement r\xE9examin\xE9s pour\
             \ d\xE9tecter toute tendance inhabituelle ou ind\xE9sirable. Les entit\xE9\
             s concern\xE9es fixent, s\u2019il est besoin, les valeurs appropri\xE9\
@@ -7416,6 +7479,7 @@ objects:
             \ sind vorhanden. \n• Die Zugangskontrolle entspricht den Angaben in Abschnitt 4.2.2 Buchstabe d des Anhangs\
             \ der Verordnung."
         fr:
+          name: 'Conservation, sauvegarde et protection des journaux'
           description: "Les entit\xE9s concern\xE9es tiennent les journaux et en font\
             \ des sauvegardes pendant une p\xE9riode pr\xE9d\xE9finie; elles les prot\xE8\
             gent contre tout acc\xE8s non autoris\xE9 ou toute modification non autoris\xE9\
@@ -7605,6 +7669,7 @@ objects:
             \ Speicherung von Protokollen. \n• Protokolle der Aktivität der Tools, die die Kapazität und Verfügbarkeit der\
             \ primären Überwachungs- und Protokollierungssysteme des Unternehmens überwachen."
         fr:
+          name: 'Synchronisation horaire et redondance des systèmes de journalisation'
           description: "Dans la mesure du possible, les entit\xE9s concern\xE9es veillent\
             \ \xE0 ce que tous les syst\xE8mes disposent d\u2019horloges synchronis\xE9\
             es pour \xEAtre en mesure de corr\xE9ler les journaux entre les diff\xE9\
@@ -7880,6 +7945,7 @@ objects:
             \ Sie Baselines. \n• Protokolle (Beispiele), die die erforderlichen Metadaten enthalten. \n• EDR-Tools. \n•\
             \ Tools zur Netzwerkerkennung und -reaktion (NDR)."
         fr:
+          name: 'Réexamen des procédures de journalisation et des actifs journalisés'
           description: "Les proc\xE9dures ainsi que la liste des actifs qui font l\u2019\
             objet d\u2019une journalisation sont r\xE9examin\xE9es et, s\u2019il est\
             \ besoin, mises \xE0 jour \xE0 intervalles r\xE9guliers et \xE0 la suite\
@@ -8182,6 +8248,7 @@ objects:
             \ E-Mail-Adressen, Webformulare, Telefonnummern oder dedizierter Meldeportale.\n\n(29) Achten Sie auf Konsistenz\
             \ mit den vom nationalen CSIRT oder gegebenenfalls der zuständigen Behörde geforderten Meldevorlagen."
         fr:
+          name: 'Mécanisme de signalement des événements suspects'
           description: "Les entit\xE9s concern\xE9es mettent en place un m\xE9canisme\
             \ simple permettant \xE0 leurs membres du personnel, fournisseurs et clients\
             \ de signaler les \xE9v\xE9nements suspects."
@@ -8384,6 +8451,7 @@ objects:
             \ und für jedes Ereignis die Auswirkungen, die Ursache, die ergriffenen Maßnahmen und die gewonnenen Erkenntnisse.\
             \ \n• Zusammenfassungen früherer Bewertungen, falls vorhanden."
         fr:
+          name: 'Communication et formation sur le mécanisme de signalement'
           description: "Les entit\xE9s concern\xE9es informent, s\u2019il est besoin,\
             \ leurs fournisseurs et leurs clients du m\xE9canisme de signalement des\
             \ \xE9v\xE9nements et dispensent r\xE9guli\xE8rement \xE0 leur personnel\
@@ -8600,6 +8668,7 @@ objects:
           typical_evidence: "• Definierte Kriterien vorhanden. \n• Ein Kategorisierungssystem gemäß Abschnitt 3.1.2 Buchstabe\
             \ a des Anhangs der Verordnung."
         fr:
+          name: 'Évaluation des événements suspects'
           description: "Les entit\xE9s concern\xE9es \xE9valuent les \xE9v\xE9nements\
             \ suspects afin de d\xE9terminer s\u2019ils constituent des incidents\
             \ et, dans l\u2019affirmative, en d\xE9terminent la nature et la gravit\xE9\
@@ -8760,6 +8829,7 @@ objects:
             \n[TIPPS]\n\n• SIEM, EDR/XDR oder ähnliches System. \n• Tools zur Unterstützung der Vorfalltriage. \n• Maßnahmen\
             \ zum Schutz der Informationssicherheit bei der Protokollanalyse und -korrelation."
         fr:
+          name: 'Activités d’évaluation des événements'
           description: "Aux fins du point\_3.4.1, les entit\xE9s concern\xE9es proc\xE8\
             dent de la fa\xE7on suivante:"
           annotation: "Dans les proc\xE9dures d\xE9finies aux points 3.1.1 et 3.1.2\
@@ -9081,6 +9151,7 @@ objects:
           description: Sie führen die Bewertung auf der Grundlage vorab festgelegter Kriterien und einer Triage durch, um
             die Priorisierung der Eindämmung und Beseitigung von Sicherheitsvorfällen zu bestimmen;
         fr:
+          name: 'Évaluation selon des critères prédéfinis et triage'
           description: "elles effectuent l\u2019\xE9valuation sur la base de crit\xE8\
             res pr\xE9d\xE9finis \xE9tablis \xE0 l\u2019avance et d\u2019un triage\
             \ afin d\u2019\xE9tablir une hi\xE9rarchisation des mesures d\u2019endiguement\
@@ -9111,6 +9182,7 @@ objects:
           description: sie bewerten vierteljährlich, ob wiederholte Sicherheitsvorfälle gemäß Artikel 4 dieser Verordnung
             vorliegen;
         fr:
+          name: 'Analyse trimestrielle des incidents récurrents'
           description: "elles examinent chaque trimestre si des incidents r\xE9currents\
             \ tels que d\xE9crits \xE0 l\u2019article\_4 du pr\xE9sent r\xE8glement\
             \ sont survenus;"
@@ -9136,6 +9208,7 @@ objects:
         de:
           description: sie überprüfen die betreffenden Protokolle für die Zwecke der Bewertung und Klassifizierung von Ereignissen;
         fr:
+          name: 'Revue des journaux pour l’évaluation des événements'
           description: "elles passent en revue les journaux appropri\xE9s aux fins\
             \ de l\u2019\xE9valuation et de la classification des \xE9v\xE9nements;"
         es:
@@ -9158,6 +9231,7 @@ objects:
         de:
           description: sie führen ein Verfahren für die Korrelation und Analyse von Protokollen ein, und
         fr:
+          name: 'Corrélation et analyse des journaux'
           description: "elles mettent en place une proc\xE9dure de corr\xE9lation\
             \ et d\u2019analyse des journaux; et"
         es:
@@ -9182,6 +9256,7 @@ objects:
           description: sie bewerten und klassifizieren Ereignisse neu, falls neue Informationen verfügbar werden, oder nach
             der Auswertung zuvor verfügbarer Informationen.
         fr:
+          name: 'Réévaluation et reclassification des événements'
           description: "elles r\xE9\xE9valuent et reclassent les \xE9v\xE9nements\
             \ si de nouvelles informations deviennent disponibles ou apr\xE8s analyse\
             \ d\u2019informations qu\u2019elles poss\xE9daient d\xE9j\xE0."
@@ -9259,6 +9334,7 @@ objects:
             \ bewährte Praktiken, die berücksichtigt werden. \n• Playbooks oder Vorfallreaktionspläne für häufige Arten\
             \ von Vorfällen."
         fr:
+          name: 'Réponse aux incidents en temps utile selon des procédures documentées'
           description: "Les entit\xE9s concern\xE9es apportent une r\xE9ponse aux\
             \ incidents dans le respect de proc\xE9dures document\xE9es et en temps\
             \ utile."
@@ -9418,6 +9494,7 @@ objects:
             \ ist und wann eine Eskalation an Leitungsorgane (z. B. Chief Information Security Officer) usw. erforderlich\
             \ ist. \n• Aufzeichnungen über die Lösung widersprüchlicher Ziele während der Reaktion auf vergangene Vorfälle."
         fr:
+          name: 'Étapes des procédures de réponse aux incidents'
           description: "Les proc\xE9dures de r\xE9ponse aux incidents comprennent\
             \ les \xE9tapes suivantes:"
           annotation: "\u2022 Cr\xE9er des proc\xE9dures d\u2019intervention en cas\
@@ -9565,6 +9642,7 @@ objects:
         de:
           description: Eindämmung des Sicherheitsvorfalls, um zu verhindern, dass sich dessen Folgen ausbreiten;
         fr:
+          name: 'Confinement de l’incident'
           description: "endiguement, afin d\u2019\xE9viter que les cons\xE9quences\
             \ de l\u2019incident ne se propagent;"
         es:
@@ -9588,6 +9666,7 @@ objects:
         de:
           description: Beseitigung, um zu verhindern, dass der Sicherheitsvorfall andauert oder erneut auftritt;
         fr:
+          name: 'Éradication de l’incident'
           description: "\xE9radication, afin d\u2019\xE9viter que l\u2019incident\
             \ ne se poursuive ou se reproduise,"
         es:
@@ -9609,6 +9688,7 @@ objects:
         de:
           description: erforderlichenfalls Wiederherstellung nach dem Sicherheitsvorfall.
         fr:
+          name: 'Rétablissement après incident'
           description: "r\xE9tablissement apr\xE8s l\u2019incident, si n\xE9cessaire."
         es:
           description: "recuperaci\xF3n tras el incidente, cuando se requiera."
@@ -9645,6 +9725,7 @@ objects:
           typical_evidence: "• Verfahren zur Meldung des Vorfalls an die zuständigen Behörden und das CSIRT. \n• Verfahren,\
             \ wie der Vorfall den Kunden mitgeteilt wird oder wie und wann ein Lieferant einzubeziehen ist (falls zutreffend)."
         fr:
+          name: 'Plans de communication en cas d’incident'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent des plans et des\
             \ proc\xE9dures de communication:"
           annotation: "\u2022 Veiller \xE0 ce que le plan de communication (annexe\
@@ -9719,6 +9800,7 @@ objects:
           description: mit den Computer-Notfallteams (CSIRTs) oder – soweit anwendbar – mit den zuständigen Behörden im
             Zusammenhang mit der Meldung von Sicherheitsvorfällen;
         fr:
+          name: 'Communication avec les CSIRT et les autorités compétentes'
           description: "avec les centres de r\xE9ponse aux incidents de s\xE9curit\xE9\
             \ informatique (CSIRT) ou, s\u2019il y a lieu, avec les autorit\xE9s comp\xE9\
             tentes, en rapport avec la notification des incidents;"
@@ -9748,6 +9830,7 @@ objects:
           description: zwischen den Mitgliedern des Personals der betreffenden Einrichtung und mit einschlägigen Interessenträgern
             außerhalb der betreffenden Einrichtung.
         fr:
+          name: 'Communication avec le personnel et les parties prenantes externes'
           description: "pour la communication entre les membres du personnel de l\u2019\
             entit\xE9 concern\xE9e et pour la communication avec les parties prenantes\
             \ ext\xE9rieures \xE0 l\u2019entit\xE9 concern\xE9e."
@@ -9800,6 +9883,7 @@ objects:
           typical_evidence: "• Protokolle der Reaktion auf Vorfälle. \n• Nutzung eines Systems (z. B. SIEM, EDR/XDR oder\
             \ Ticketsystem)."
         fr:
+          name: 'Consignation des activités de réponse aux incidents et des preuves'
           description: "Les entit\xE9s concern\xE9es tiennent un journal des activit\xE9\
             s de r\xE9ponse aux incidents conform\xE9ment aux proc\xE9dures vis\xE9\
             es au point\_3.2.1 et en conservent des preuves."
@@ -9919,6 +10003,7 @@ objects:
             \ von Tests verschiedener Arten von Vorfällen.\n\n[TIPPS]\n\n• Aktuelle Verfahren zur Reaktion auf Vorfälle\
             \ basierend auf durchgeführten Tests und/oder Änderungsprotokollen."
         fr:
+          name: 'Test des procédures de réponse aux incidents'
           description: "Les entit\xE9s concern\xE9es testent leurs proc\xE9dures de\
             \ r\xE9ponse aux incidents \xE0 intervalles pr\xE9d\xE9finis."
           annotation: "\u2022 Tester les proc\xE9dures d\u2019intervention en cas\
@@ -10096,6 +10181,7 @@ objects:
           typical_evidence: "• Ergebnisse der Ursachenanalyse. \n• Individuelle Berichte über den Umgang mit bedeutenden\
             \ Vorfällen. \n• Dokumentierte Lehren aus Vorfällen."
         fr:
+          name: 'Retour d’expérience et analyse des causes racines'
           description: "Les entit\xE9s concern\xE9es proc\xE8dent, s\u2019il est besoin,\
             \ \xE0 des examens postincident apr\xE8s le r\xE9tablissement. Les examens\
             \ postincident servent \xE0 identifier, dans la mesure du possible, la\
@@ -10254,6 +10340,7 @@ objects:
             \ Lösungs- und Schadensbegrenzungsmaßnahmen ergriffen und allen relevanten Mitarbeitern mitgeteilt. \n• Aktualisierter\
             \ Risikobewertungs- und Risikobehandlungsplan, der die Ergebnisse der Überprüfungen nach dem Vorfall enthält."
         fr:
+          name: 'Exploitation des retours d’expérience pour l’amélioration'
           description: "Les entit\xE9s concern\xE9es veillent \xE0 ce que les examens\
             \ postincident contribuent \xE0 am\xE9liorer leur approche de la s\xE9\
             curit\xE9 des r\xE9seaux et de l\u2019information, du traitement des risques\
@@ -10394,6 +10481,7 @@ objects:
             \ des Post-Incident-Review-Teams. \n• Nachweis von Aktualisierungen der Netz- und Informationssicherheit oder\
             \ themenspezifischer Konzepte und Verfahren basierend auf den Erkenntnissen aus Überprüfungen nach Vorfällen."
         fr:
+          name: 'Vérification de la réalisation des retours d’expérience'
           description: "Les entit\xE9s concern\xE9es examinent \xE0 intervalles pr\xE9\
             d\xE9finis si des incidents ont donn\xE9 lieu \xE0 des examens postincident."
           annotation: "\u2022 Effectuer un examen annuel ou un examen apr\xE8s des\
@@ -10554,6 +10642,7 @@ objects:
             \ sowie eine Liste der Möglichkeiten zur Notfallwiederherstellung (entweder intern verfügbar oder von Dritten\
             \ bereitgestellt)."
         fr:
+          name: 'Mise en place d’un plan de continuité et de reprise d’activité (PCA/PRA)'
           description: "Aux fins de l\u2019article\_21, paragraphe\_2, point\_c),\
             \ de la directive (UE)\_2022/2555, les entit\xE9s concern\xE9es \xE9tablissent\
             \ et maintiennent un plan de continuit\xE9 de l'activit\xE9 et de r\xE9\
@@ -10727,6 +10816,7 @@ objects:
             \ wesentlich und/oder davon abhängig sind, sowie Notfallpläne zur Abmilderung der Auswirkungen im Zusammenhang\
             \ mit abhängigen und voneinander abhängigen Sektoren und Diensten."
         fr:
+          name: 'Rétablissement des opérations et contenu du plan'
           description: "Les entit\xE9s concern\xE9es r\xE9tablissent leurs op\xE9\
             rations conform\xE9ment au plan de continuit\xE9 de l'activit\xE9 et de\
             \ r\xE9tablissement. Le plan est fond\xE9 sur les r\xE9sultats de l\u2019\
@@ -10927,6 +11017,7 @@ objects:
         de:
           description: Zweck, Umfang und Zielgruppe;
         fr:
+          name: 'Objet, périmètre et destinataires du plan'
           description: "objet, champ d\u2019application et public;"
         es:
           description: "objetivos, \xE1mbito de aplicaci\xF3n y p\xFAblico destinatario;"
@@ -10945,6 +11036,7 @@ objects:
         de:
           description: Rollen und Verantwortlichkeiten;
         fr:
+          name: 'Rôles et responsabilités de continuité'
           description: "r\xF4les et responsabilit\xE9s;"
         es:
           description: roles y responsabilidades;
@@ -10963,6 +11055,7 @@ objects:
         de:
           description: wichtige Kontaktangaben und (interne und externe) Kommunikationskanäle;
         fr:
+          name: 'Contacts clés et canaux de communication'
           description: principales personnes de contact et canaux de communication
             (internes et externes);
         es:
@@ -10983,6 +11076,7 @@ objects:
         de:
           description: Bedingungen für die Aktivierung und die Deaktivierung des Plans;
         fr:
+          name: 'Conditions d’activation et de désactivation du plan'
           description: "conditions d\u2019activation et de d\xE9sactivation du plan;"
         es:
           description: "condiciones de activaci\xF3n y desactivaci\xF3n del plan;"
@@ -11001,6 +11095,7 @@ objects:
         de:
           description: Reihenfolge der Wiederherstellung der Betriebsabläufe;
         fr:
+          name: 'Ordre de reprise des opérations'
           description: "ordre de r\xE9tablissement des op\xE9rations;"
         es:
           description: "orden de recuperaci\xF3n de las operaciones;"
@@ -11019,6 +11114,7 @@ objects:
         de:
           description: Wiederherstellungspläne für bestimmte Betriebsabläufe, einschließlich der Wiederherstellungsziele;
         fr:
+          name: 'Plans et objectifs de reprise par opération'
           description: "plans de r\xE9tablissement pour les op\xE9rations sp\xE9cifiques,\
             \ y compris les objectifs de r\xE9tablissement;"
         es:
@@ -11041,6 +11137,7 @@ objects:
         de:
           description: erforderliche Ressourcen, einschließlich Sicherungen und Redundanzen;
         fr:
+          name: 'Ressources nécessaires, y compris sauvegardes et redondances'
           description: "ressources n\xE9cessaires, y compris les sauvegardes et les\
             \ ressources redondantes;"
         es:
@@ -11062,6 +11159,7 @@ objects:
         de:
           description: Wiederherstellung und Wiederaufnahme der Tätigkeiten nach vorübergehenden Maßnahmen.
         fr:
+          name: 'Restauration et reprise des activités à partir des mesures temporaires'
           description: "activit\xE9s restaur\xE9es et r\xE9tablies \xE0 partir de\
             \ mesures temporaires."
         es:
@@ -11167,6 +11265,7 @@ objects:
           typical_evidence: "• Dokumentierte BIA mit spezifischen Wiederherstellungszielen. \n• Prozesse, Verfahren und\
             \ Maßnahmen zur Sicherstellung der erforderlichen Kontinuität in Störsituationen."
         fr:
+          name: 'Analyse d’impact sur l’activité (BIA) et exigences de continuité'
           description: "Les entit\xE9s concern\xE9es effectuent un bilan d\u2019impact\
             \ sur l\u2019activit\xE9 afin d\u2019\xE9valuer l\u2019impact potentiel\
             \ de perturbations graves de leurs op\xE9rations et d\xE9finissent, sur\
@@ -11573,6 +11672,7 @@ objects:
             \ und definierter RTOs, RPOs und SDOs. \n• Protokolle der Aktivierung und Ausführung von Notfallplänen, einschließlich\
             \ getroffener Entscheidungen, befolgter Schritte und endgültiger Wiederherstellungszeit."
         fr:
+          name: 'Test et réexamen des plans de continuité et de reprise'
           description: "Le plan de continuit\xE9 de l'activit\xE9 et le plan de r\xE9\
             tablissement sont test\xE9s, r\xE9examin\xE9s et, s\u2019il est besoin,\
             \ mis \xE0 jour \xE0 intervalles pr\xE9d\xE9finis, ainsi qu\u2019en cas\
@@ -12008,6 +12108,7 @@ objects:
           typical_evidence: "• Backups sind physisch von den Systemen getrennt, die sie erstellt haben. \n• Wenn der Dienst\
             \ von einem Dritten angeboten wird, SLAs."
         fr:
+          name: 'Copies de sauvegarde et ressources redondantes'
           description: "Les entit\xE9s concern\xE9es conservent des copies de sauvegarde\
             \ des donn\xE9es et pr\xE9voient suffisamment de ressources disponibles,\
             \ y compris des installations, des r\xE9seaux et des syst\xE8mes d\u2019\
@@ -12100,6 +12201,7 @@ objects:
             \ Systeme und Dienste abdecken. \n• Gegebenenfalls Einstellungen des Cloud-Speicherdienstes, um sicherzustellen,\
             \ dass er für den Empfang und die Speicherung von Sicherungskopien konfiguriert ist."
         fr:
+          name: 'Plans de sauvegarde'
           description: "Sur la base des r\xE9sultats de l\u2019\xE9valuation des risques\
             \ effectu\xE9e conform\xE9ment au point\_2.1 et du plan de continuit\xE9\
             \ de l\u2019activit\xE9, les entit\xE9s concern\xE9es \xE9tablissent des\
@@ -12219,6 +12321,7 @@ objects:
         de:
           description: Wiederherstellungszeiten;
         fr:
+          name: 'Plans de sauvegarde : délais de reprise'
           description: "le d\xE9lai de r\xE9tablissement de l\u2019activit\xE9;"
         es:
           description: "plazos de recuperaci\xF3n;"
@@ -12239,6 +12342,7 @@ objects:
           description: Gewährleistung, dass Sicherungskopien vollständig und genau sind, einschließlich Konfigurationsdaten
             und Daten, die in der Umgebung von Cloud-Computing-Diensten gespeichert sind;
         fr:
+          name: 'Plans de sauvegarde : complétude et exactitude des sauvegardes'
           description: "la preuve que les copies de sauvegarde sont compl\xE8tes et\
             \ exactes, y compris les donn\xE9es de configuration et les donn\xE9es\
             \ stock\xE9es dans un environnement de services d\u2019informatique en\
@@ -12272,6 +12376,7 @@ objects:
             sich nicht im selben Netz wie das System sowie in ausreichend großer Entfernung befinden, um Schäden durch einen
             Notfall am Hauptstandort zu vermeiden;
         fr:
+          name: 'Plans de sauvegarde : stockage sûr et séparé des sauvegardes'
           description: "le stockage de copies de sauvegarde (en ligne ou hors ligne)\
             \ dans un ou plusieurs endroits s\xFBrs, qui ne se trouvent pas sur le\
             \ m\xEAme r\xE9seau que le syst\xE8me et qui sont situ\xE9s \xE0 une distance\
@@ -12307,6 +12412,7 @@ objects:
           description: geeignete physische und logische Zugangskontrollen zu Sicherungskopien entsprechend der Klassifizierungsstufe
             der Anlagen und Werte;
         fr:
+          name: 'Plans de sauvegarde : contrôle d’accès aux sauvegardes'
           description: "des contr\xF4les d\u2019acc\xE8s physiques et logiques appropri\xE9\
             s pour les copies de sauvegarde, conform\xE9ment au niveau de classification\
             \ des actifs;"
@@ -12332,6 +12438,7 @@ objects:
         de:
           description: Wiederherstellung von Daten aus Sicherungskopien;
         fr:
+          name: 'Plans de sauvegarde : restauration des données'
           description: "les donn\xE9es restaur\xE9es \xE0 partir de copies de sauvegarde;"
         es:
           description: "recuperaci\xF3n de datos de las copias de seguridad;"
@@ -12351,6 +12458,7 @@ objects:
         de:
           description: Aufbewahrungsfristen entsprechend geschäftlichen und regulatorischen Anforderungen.
         fr:
+          name: 'Plans de sauvegarde : durées de conservation'
           description: "les p\xE9riodes de conservation compte tenu des exigences\
             \ commerciales et r\xE9glementaires."
         es:
@@ -12407,6 +12515,7 @@ objects:
             \ Wiederherstellungsverfahren implementiert wurden (Anhang der Verordnung, Punkte 3.2 und 3.5). \n• Wenn der\
             \ Dienst von einem Dritten angeboten wird, SLAs."
         fr:
+          name: 'Contrôles d’intégrité des sauvegardes'
           description: "Les entit\xE9s concern\xE9es proc\xE8dent r\xE9guli\xE8rement\
             \ \xE0 des contr\xF4les d\u2019int\xE9grit\xE9 des copies de sauvegarde."
           annotation: "\u2022 V\xE9rifiez l\u2019int\xE9grit\xE9 des copies de sauvegarde.\
@@ -12572,6 +12681,7 @@ objects:
                 o mehrere Methoden zur Stromversorgung eines Standorts, entweder über mehrere Stromversorger oder mit einer Kombination aus Stromversorgern und Backup-Mechanismen, wie z. B. Generatoren.
           typical_evidence: • Einer oder mehrere der oben genannten Mechanismen sind vorhanden.
         fr:
+          name: 'Redondance des ressources'
           description: "Sur la base des r\xE9sultats de l\u2019\xE9valuation des risques\
             \ effectu\xE9e conform\xE9ment au point\_2.1 et du plan de continuit\xE9\
             \ de l\u2019activit\xE9, les entit\xE9s concern\xE9es veillent \xE0 ce\
@@ -12687,6 +12797,7 @@ objects:
         de:
           description: Netz- und Informationssysteme;
         fr:
+          name: 'Redondance des réseaux et des systèmes d’information'
           description: "r\xE9seaux et syst\xE8mes d\u2019information;"
         es:
           description: "los sistemas de redes y de informaci\xF3n;"
@@ -12705,6 +12816,7 @@ objects:
         de:
           description: Anlagen und Werte, einschließlich Betriebsstätten, Ausrüstung und Verbrauchsmaterial;
         fr:
+          name: 'Redondance des actifs, y compris installations, équipements et fournitures'
           description: "actifs, y compris les installations, les \xE9quipements et\
             \ les fournitures;"
         es:
@@ -12726,6 +12838,7 @@ objects:
         de:
           description: Personal mit der erforderlichen Verantwortlichkeit, Weisungsbefugnis und Kompetenz;
         fr:
+          name: 'Redondance du personnel'
           description: "personnel dot\xE9 des responsabilit\xE9s, des pouvoirs et\
             \ des comp\xE9tences n\xE9cessaires;"
         es:
@@ -12748,6 +12861,7 @@ objects:
         de:
           description: geeignete Kommunikationskanäle.
         fr:
+          name: 'Redondance des canaux de communication'
           description: "canaux de communication appropri\xE9s."
         es:
           description: "los canales de comunicaci\xF3n adecuados."
@@ -12789,6 +12903,7 @@ objects:
             \ aus regelmäßigen Simulationen und Sensibilisierungsmaßnahmen zur Beurteilung der Einsatzbereitschaft des Personals\
             \ und der Angemessenheit der Verfahren."
         fr:
+          name: 'Surveillance des ressources selon les exigences de sauvegarde et de redondance'
           description: "S\u2019il est besoin, les entit\xE9s concern\xE9es veillent\
             \ \xE0 ce que la surveillance et l\u2019adaptation des ressources, y compris\
             \ les installations, les syst\xE8mes et le personnel, soient d\xFBment\
@@ -12973,6 +13088,7 @@ objects:
             \ \n• Gegebenenfalls Einstellungen des Cloud-Speicherdienstes, um sicherzustellen, dass dieser für den Empfang\
             \ und die Speicherung von Sicherungskopien konfiguriert ist."
         fr:
+          name: 'Tests de restauration des sauvegardes et des redondances'
           description: "Les entit\xE9s concern\xE9es proc\xE8dent r\xE9guli\xE8rement\
             \ \xE0 des tests de r\xE9cup\xE9ration des copies de sauvegarde et des\
             \ ressources redondantes afin de s\u2019assurer que, dans des conditions\
@@ -13386,6 +13502,7 @@ objects:
           typical_evidence: • Der Krisenmanagementprozess steht im Einklang mit dokumentierten Standards und/oder bewährten
             Praktiken.
         fr:
+          name: 'Mise en place d’un processus de gestion de crise'
           description: "Les entit\xE9s concern\xE9es mettent en place une proc\xE9\
             dure de gestion des crises."
           annotation: "\u2022 Tenir compte des normes reconnues par l\u2019industrie\
@@ -13615,6 +13732,7 @@ objects:
           typical_evidence: "• Dokumentierter Krisenmanagementprozess. \n• Liste der Mitglieder des Krisenmanagementteams,\
             \ einschließlich ihrer Rollen, Kontaktinformationen und Alternativen."
         fr:
+          name: 'Éléments requis du processus de gestion de crise'
           description: "Les entit\xE9s concern\xE9es veillent \xE0 ce que la proc\xE9\
             dure de gestion des crises porte au moins sur les aspects suivants:"
           annotation: "\u2022 Pour la communication de crise, prendre en compte (liste\
@@ -13717,6 +13835,7 @@ objects:
             wobei die Zuweisung der Rollen in Krisensituationen, einschließlich spezifischer zu befolgender Schritte, festgelegt
             wird;
         fr:
+          name: 'Rôles et responsabilités en situation de crise'
           description: "les r\xF4les et responsabilit\xE9s du personnel et, s\u2019\
             il est besoin, des fournisseurs et des prestataires de services, en pr\xE9\
             cisant la r\xE9partition des r\xF4les dans les situations de crise, y\
@@ -13749,6 +13868,7 @@ objects:
           description: geeignete Kommunikationsmittel zwischen den betreffenden Einrichtungen und den jeweils zuständigen
             Behörden;
         fr:
+          name: 'Communication avec les autorités compétentes en situation de crise'
           description: "des moyens de communication appropri\xE9s entre les entit\xE9\
             s concern\xE9es et les autorit\xE9s comp\xE9tentes concern\xE9es;"
         es:
@@ -13773,6 +13893,7 @@ objects:
           description: Anwendung angemessener Maßnahmen zur Gewährleistung der Aufrechterhaltung der Sicherheit von Netz-
             und Informationssystemen in Krisensituationen.
         fr:
+          name: 'Maintien de la sécurité en situation de crise'
           description: "l\u2019application de mesures appropri\xE9es pour garantir\
             \ le maintien de la s\xE9curit\xE9 des r\xE9seaux et des syst\xE8mes d\u2019\
             information dans les situations de crise."
@@ -13803,6 +13924,7 @@ objects:
             und den jeweils zuständigen Behörden sowohl obligatorische Mitteilungen wie Meldungen von Sicherheitsvorfällen
             und entsprechende Fristen als auch fakultative Mitteilungen.
         fr:
+          name: 'Flux d’informations avec les autorités compétentes'
           description: "Aux fins du point\_b), le flux d\u2019informations entre les\
             \ entit\xE9s concern\xE9es et les autorit\xE9s comp\xE9tentes concern\xE9\
             es comprend tant les communications obligatoires, telles que les rapports\
@@ -13877,6 +13999,7 @@ objects:
             \ E-Mails, Korrespondenz und Sitzungsprotokolle. \n• Nachweise, dass die Kontaktstelle über ausreichende Kenntnisse\
             \ über Vorfälle und Bedrohungsinformationen verfügt."
         fr:
+          name: 'Exploitation des informations des CSIRT et des autorités compétentes'
           description: "Les entit\xE9s concern\xE9es appliquent une proc\xE9dure de\
             \ gestion et d\u2019utilisation des informations re\xE7ues des CSIRT ou,\
             \ s\u2019il y a lieu, des autorit\xE9s comp\xE9tentes, concernant les\
@@ -14110,6 +14233,7 @@ objects:
             \ von regelmäßigen Simulationen und Sensibilisierungsmaßnahmen zur Beurteilung der Bereitschaft des Personals\
             \ und der Angemessenheit der Verfahren zur Bewältigung einer Krise."
         fr:
+          name: 'Test et réexamen du plan de gestion de crise'
           description: "Les entit\xE9s concern\xE9es testent, r\xE9examinent et, s\u2019\
             il est besoin, mettent \xE0 jour le plan de gestion des crises de fa\xE7\
             on r\xE9guli\xE8re, \xE0 la suite d\u2019incidents importants ou lorsque\
@@ -14477,6 +14601,7 @@ objects:
             \ Standards und/oder guten Praktiken. \n• Nachweis (z. B. E-Mail, Vertrag oder Ankündigungen) über die Kommunikation\
             \ der Rolle des Unternehmens an die direkten Lieferanten und Dienstleister, sofern möglich."
         fr:
+          name: 'Mise en place de la politique de sécurité de la chaîne d’approvisionnement'
           description: "Aux fins de l\u2019article\_21, paragraphe\_2, point\_d),\
             \ de la directive (UE)\_2022/2555, les entit\xE9s concern\xE9es \xE9tablissent,\
             \ mettent en \u0153uvre et appliquent une politique de s\xE9curit\xE9\
@@ -14714,6 +14839,7 @@ objects:
                 o die Möglichkeit einer Lieferantenbindung, wenn der Lieferant oder Dienstleister ausgewählt wird. Zu berücksichtigende Parameter sind die Verwendung offener und interoperabler Standards, die Verwendung offener Datenformate, bestehende Verträge mit dem Lieferanten oder Dienstleister, die Verwendung proprietärer Softwarefunktionen usw.
           typical_evidence: • Ein Konzept, das die in Punkt 5.1.2 des Anhangs der Verordnung genannten Elemente enthält.
         fr:
+          name: 'Critères de sélection et de contractualisation des fournisseurs'
           description: "Dans le cadre de la politique vis\xE9e au point\_5.1.1, les\
             \ entit\xE9s concern\xE9es fixent des crit\xE8res pour la s\xE9lection\
             \ des fournisseurs et des prestataires de services et la passation de\
@@ -14873,6 +14999,7 @@ objects:
           description: die Cybersicherheitsverfahren der Anbieter und Diensteanbieter, einschließlich der Sicherheit ihrer
             Entwicklungsprozesse;
         fr:
+          name: 'Critères fournisseurs : pratiques de cybersécurité et développement sécurisé'
           description: "les pratiques des fournisseurs et des prestataires de services\
             \ en mati\xE8re de cybers\xE9curit\xE9, y compris leurs proc\xE9dures\
             \ de d\xE9veloppement s\xE9curis\xE9;"
@@ -14899,6 +15026,7 @@ objects:
           description: die Fähigkeit der Anbieter und Diensteanbieter, die von den betreffenden Einrichtungen festgelegten
             Cybersicherheitsspezifikationen zu erfüllen;
         fr:
+          name: 'Critères fournisseurs : capacité à respecter les exigences de cybersécurité'
           description: "la capacit\xE9 des fournisseurs et des prestataires de services\
             \ de se conformer aux sp\xE9cifications de cybers\xE9curit\xE9 d\xE9finies\
             \ par les entit\xE9s concern\xE9es;"
@@ -14929,6 +15057,7 @@ objects:
             im Bereich der Cybersicherheit, einschließlich der Risiken und der Klassifizierungsstufe der IKT-Produkte und
             -Dienste;
         fr:
+          name: 'Critères fournisseurs : qualité et résilience des produits et services TIC'
           description: "la qualit\xE9 et la r\xE9silience globales des produits TIC\
             \ et des services TIC et les mesures de gestion des risques en mati\xE8\
             re de cybers\xE9curit\xE9 qui y sont int\xE9gr\xE9es, y compris les risques\
@@ -14961,6 +15090,7 @@ objects:
           description: die Fähigkeit der betreffenden Einrichtungen, ihre Versorgungsquellen zu diversifizieren und – soweit
             anwendbar – ihre Abhängigkeit von bestimmten Anbietern zu begrenzen.
         fr:
+          name: 'Critères fournisseurs : diversification des sources et réduction de la dépendance fournisseur'
           description: "la capacit\xE9 des entit\xE9s concern\xE9es \xE0 diversifier\
             \ les sources d\u2019approvisionnement et \xE0 limiter l\u2019effet de\
             \ verrouillage, s\u2019il y a lieu."
@@ -15005,6 +15135,7 @@ objects:
           typical_evidence: • Nachweis, dass Szenarien und Empfehlungen der NIS-Kooperationsgruppe im Lieferkettenkonzept
             berücksichtigt wurden, die für die Geschäftsziele des Unternehmens relevant sind.
         fr:
+          name: 'Prise en compte des évaluations coordonnées des risques des chaînes d’approvisionnement critiques'
           description: "Lorsqu\u2019elles \xE9tablissent leur politique de s\xE9curit\xE9\
             \ de la cha\xEEne d\u2019approvisionnement, les entit\xE9s concern\xE9\
             es tiennent compte des r\xE9sultats des \xE9valuations coordonn\xE9es\
@@ -15127,6 +15258,7 @@ objects:
             \ abgestimmt sein."
           typical_evidence: • Verträge, die die in Punkt 5.1.4 des Anhangs der Verordnung genannten Elemente enthalten.
         fr:
+          name: 'Exigences contractuelles de sécurité pour les fournisseurs'
           description: "Sur la base de la politique de s\xE9curit\xE9 de la cha\xEE\
             ne d\u2019approvisionnement et compte tenu des r\xE9sultats de l\u2019\
             \xE9valuation des risques effectu\xE9e conform\xE9ment au point\_2.1 de\
@@ -15289,6 +15421,7 @@ objects:
           description: Cybersicherheitsanforderungen an die Anbieter oder Diensteanbieter, einschließlich der Anforderungen
             an die Sicherheit beim Erwerb von IKT-Diensten oder -Produkten gemäß Nummer 6.1;
         fr:
+          name: 'Contrats fournisseurs : exigences de cybersécurité'
           description: "les exigences en mati\xE8re de cybers\xE9curit\xE9 applicables\
             \ aux fournisseurs ou aux prestataires de services, y compris les exigences\
             \ relatives \xE0 la s\xE9curit\xE9 de l\u2019acquisition de services TIC\
@@ -15321,6 +15454,7 @@ objects:
           description: Sensibilisierungs-, Qualifikations- und Ausbildungsanforderungen sowie – soweit angemessen – Zertifizierungen,
             die von den Mitarbeitenden der Anbieter oder Diensteanbieter verlangt werden;
         fr:
+          name: 'Contrats fournisseurs : sensibilisation, compétences, formation et certifications'
           description: "les exigences en mati\xE8re de sensibilisation, de comp\xE9\
             tences et de formation et, s\u2019il est besoin, les certifications requises\
             \ \xE0 l\u2019\xE9gard du personnel des fournisseurs ou des prestataires\
@@ -15350,6 +15484,7 @@ objects:
         de:
           description: Anforderungen an die Zuverlässigkeitsüberprüfungen der Mitarbeitenden der Anbieter und Diensteanbieter;
         fr:
+          name: 'Contrats fournisseurs : vérification des antécédents du personnel'
           description: "les exigences relatives \xE0 la v\xE9rification des ant\xE9\
             c\xE9dents du personnel des fournisseurs et des prestataires de services;"
         es:
@@ -15377,6 +15512,7 @@ objects:
             die ein Risiko für die Sicherheit der Netz- und Informationssysteme dieser Einrichtungen darstellen, unverzüglich
             zu melden;
         fr:
+          name: 'Contrats fournisseurs : obligation de notification des incidents'
           description: "l\u2019obligation pour les fournisseurs et les prestataires\
             \ de services de notifier sans retard injustifi\xE9 aux entit\xE9s concern\xE9\
             es les incidents qui pr\xE9sentent un risque pour la s\xE9curit\xE9 des\
@@ -15408,6 +15544,7 @@ objects:
         de:
           description: das Recht auf Prüfung oder das Recht auf Erhalt von Prüfberichten;
         fr:
+          name: 'Contrats fournisseurs : droit d’audit ou de réception des rapports d’audit'
           description: "le droit d\u2019effectuer des audits ou le droit de recevoir\
             \ des rapports d\u2019audit;"
         es:
@@ -15433,6 +15570,7 @@ objects:
           description: eine Verpflichtung der Anbieter und Diensteanbieter zur Behebung von Schwachstellen, die ein Risiko
             für die Sicherheit der Netz- und Informationssysteme der betreffenden Einrichtungen darstellen;
         fr:
+          name: 'Contrats fournisseurs : obligation de gestion des vulnérabilités'
           description: "l\u2019obligation pour les fournisseurs et les prestataires\
             \ de services de g\xE9rer les vuln\xE9rabilit\xE9s qui pr\xE9sentent un\
             \ risque pour la s\xE9curit\xE9 des r\xE9seaux et des syst\xE8mes d\u2019\
@@ -15466,6 +15604,7 @@ objects:
             von Unteraufträgen zulassen – Cybersicherheitsanforderungen an Unterauftragnehmer im Einklang mit den unter
             Buchstabe a genannten Cybersicherheitsanforderungen;
         fr:
+          name: 'Contrats fournisseurs : exigences en matière de sous-traitance'
           description: "les exigences relatives \xE0 la sous-traitance et, si les\
             \ entit\xE9s concern\xE9es autorisent la sous-traitance, les exigences\
             \ en mati\xE8re de cybers\xE9curit\xE9 applicables aux sous-traitants\
@@ -15500,6 +15639,7 @@ objects:
           description: Pflichten der Anbieter und Diensteanbieter bei Vertragskündigung, z. B. Abruf und Entsorgung der
             Informationen, die die Anbieter und Diensteanbieter in Wahrnehmung ihrer Aufgaben erlangten.
         fr:
+          name: 'Contrats fournisseurs : obligations de fin de contrat et réversibilité'
           description: "les obligations incombant aux fournisseurs et aux prestataires\
             \ de services au terme du contrat, telles que la r\xE9cup\xE9ration et\
             \ la destruction des informations obtenues par les fournisseurs et les\
@@ -15555,6 +15695,7 @@ objects:
             \ -Produkten und -Dienstleistungsprozessen und insbesondere die in Punkt 6.1.2 des Anhangs der Verordnung genannten\
             \ Elemente berücksichtigt werden. \n• Ergebnisse der Risikoanalyse aus Lieferanten- und Dienstleisterbewertungen."
         fr:
+          name: 'Application des critères fournisseurs lors de la sélection et des achats'
           description: "Les entit\xE9s concern\xE9es tiennent compte des \xE9l\xE9\
             ments vis\xE9s aux points 5.1.2 et 5.1.3 dans le cadre de la proc\xE9\
             dure de s\xE9lection de nouveaux fournisseurs et prestataires de services,\
@@ -15676,6 +15817,7 @@ objects:
             \ der IKT-Produkte von Lieferanten und Dienstleistern. \n• Erkenntnisse aus Bewertungen von Lieferanten und\
             \ Dienstleistern."
         fr:
+          name: 'Réexamen de la politique et suivi des pratiques de sécurité des fournisseurs'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent la politique de\
             \ s\xE9curit\xE9 de la cha\xEEne d\u2019approvisionnement et elles surveillent,\
             \ \xE9valuent et, si n\xE9cessaire, r\xE9agissent \xE0 l\u2019\xE9volution\
@@ -16071,6 +16213,7 @@ objects:
             \ von Lieferanten und Dienstleistern belegen. \n• Für FOSS (beispielhafte, nicht abschließende Liste):\n   \
             \ o Ergebnisse aus Risikobewertungen des FOSS, o Abhängigkeitsüberwachungstools, o Dokumentation."
         fr:
+          name: 'Activités de suivi des fournisseurs'
           description: "Aux fins du point 5.1.6, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Mettre en place un examen r\xE9gulier (par exemple dans\
             \ le cadre d'une r\xE9union r\xE9guli\xE8re des fournisseurs) et assurer\
@@ -16934,6 +17077,7 @@ objects:
         de:
           description: die Berichte über die Umsetzung der Leistungsvereinbarungen regelmäßig verfolgen – soweit anwendbar;
         fr:
+          name: 'Suivi des rapports de niveau de service (SLA)'
           description: "passent r\xE9guli\xE8rement en revue les rapports sur la mise\
             \ en \u0153uvre des accords de niveau de service, s\u2019il y a lieu;"
         es:
@@ -16959,6 +17103,7 @@ objects:
           description: Sicherheitsvorfälle im Zusammenhang mit IKT-Produkten und -Diensten von Anbietern und Diensteanbietern
             überprüfen;
         fr:
+          name: 'Revue des incidents liés aux fournisseurs'
           description: "examinent les incidents li\xE9s aux produits TIC et aux services\
             \ TIC provenant de fournisseurs et de prestataires de services;"
         es:
@@ -16983,6 +17128,7 @@ objects:
         de:
           description: die Notwendigkeit außerplanmäßiger Überprüfungen prüfen und die Ergebnisse verständlich dokumentieren;
         fr:
+          name: 'Revues non programmées des fournisseurs'
           description: "\xE9valuent la n\xE9cessit\xE9 de r\xE9examens non programm\xE9\
             s et en consignent les conclusions de mani\xE8re compr\xE9hensible;"
         es:
@@ -17008,6 +17154,7 @@ objects:
           description: die Risiken, die sich aus Änderungen im Zusammenhang mit IKT-Produkten und -Diensten von Anbietern
             und Diensteanbietern ergeben, analysieren und – soweit angemessen – rechtzeitig Risikominderungsmaßnahmen ergreifen.
         fr:
+          name: 'Analyse des risques liés aux évolutions des produits et services TIC fournis'
           description: "analysent, en temps utile, les risques pr\xE9sent\xE9s par\
             \ les changements li\xE9s aux produits TIC et aux services TIC provenant\
             \ des fournisseurs et des prestataires de services et, s\u2019il est besoin,\
@@ -17263,6 +17410,7 @@ objects:
           description: 'Die betreffenden Einrichtungen führen ein Verzeichnis ihrer direkten Anbieter und Diensteanbieter,
             das Folgendes umfasst, und halten es auf dem neuesten Stand:'
         fr:
+          name: 'Registre des fournisseurs et prestataires de services directs'
           description: "Les entit\xE9s concern\xE9es conservent et tiennent \xE0 jour\
             \ un registre de leurs fournisseurs et prestataires de services directs\
             \ comprenant:"
@@ -17288,6 +17436,7 @@ objects:
         de:
           description: Kontaktstellen für jeden direkten Anbieter und Diensteanbieter;
         fr:
+          name: 'Registre des fournisseurs : points de contact'
           description: les points de contact pour chaque fournisseur et prestataire
             de services direct;
         es:
@@ -17312,6 +17461,7 @@ objects:
           description: eine Liste der IKT-Produkte, -Dienste und -Prozesse, die der direkte Anbieter oder Diensteanbieter
             für die betreffenden Einrichtungen bereitstellt.
         fr:
+          name: 'Registre des fournisseurs : produits, services et processus TIC fournis'
           description: "une liste des produits TIC, services TIC et processus TIC\
             \ fournis aux entit\xE9s concern\xE9es par le fournisseur ou le prestataire\
             \ de services direct."
@@ -17420,6 +17570,7 @@ objects:
             \ die sich mit der Cybersicherheit befassen. \n• Dokumentierter Prozess, der auf relevanten Standards und bewährten\
             \ Praktiken basiert."
         fr:
+          name: 'Gestion des risques lors de l’acquisition de services et produits TIC'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point e), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es d\xE9finissent\
             \ et utilisent des proc\xE9dures en vue de g\xE9rer, sur la base de l\u2019\
@@ -17618,6 +17769,7 @@ objects:
             \ vor dem Erwerb eines IKT-Systems oder -Produkts. \n• Zertifikate, Prüfberichte oder andere unterstützende\
             \ Informationen für die IKT-Produkte oder -Systeme von entsprechend akkreditierten Konformitätsbewertungsstellen."
         fr:
+          name: 'Contenu des processus d’acquisition TIC'
           description: "Aux fins du point\_6.1.1, les proc\xE9dures pr\xE9cit\xE9\
             es comprennent:"
           annotation: "\u2022 Les exigences de s\xE9curit\xE9 doivent inclure au moins\
@@ -17849,6 +18001,7 @@ objects:
         de:
           description: Sicherheitsanforderungen, die für die zu erwerbenden IKT-Dienste oder -Produkte gelten;
         fr:
+          name: 'Acquisition : exigences de sécurité'
           description: "les exigences de s\xE9curit\xE9 applicables aux services TIC\
             \ ou produits TIC \xE0 acqu\xE9rir;"
         es:
@@ -17874,6 +18027,7 @@ objects:
           description: Anforderungen an Sicherheitsaktualisierungen während der gesamten Lebensdauer der IKT-Dienste oder
             -Produkte oder deren Ersatz nach Ablauf des Unterstützungszeitraums;
         fr:
+          name: 'Acquisition : mises à jour de sécurité sur toute la durée de vie'
           description: "les exigences concernant les mises \xE0 jour de s\xE9curit\xE9\
             \ pendant toute la dur\xE9e de vie des services TIC ou des produits TIC,\
             \ ou leur remplacement au terme de la p\xE9riode d\u2019assistance;"
@@ -17902,6 +18056,7 @@ objects:
           description: Informationen zur Beschreibung der Hardware- und Softwarekomponenten, die in den IKT-Diensten oder
             -Produkten verwendet werden;
         fr:
+          name: 'Acquisition : description des composants matériels et logiciels'
           description: "les informations d\xE9crivant les composants mat\xE9riels\
             \ et logiciels utilis\xE9s dans les services TIC ou les produits TIC;"
         es:
@@ -17927,6 +18082,7 @@ objects:
           description: Informationen zur Beschreibung der umgesetzten Cybersicherheitsfunktionen der IKT-Dienste oder -Produkte
             und der Konfiguration, die für ihren sicheren Betrieb erforderlich ist;
         fr:
+          name: 'Acquisition : fonctions de cybersécurité et configuration sécurisée'
           description: "les informations d\xE9crivant les fonctions de cybers\xE9\
             curit\xE9 des services TIC ou des produits TIC mises en \u0153uvre et\
             \ la configuration n\xE9cessaire \xE0 leur fonctionnement s\xE9curis\xE9\
@@ -17956,6 +18112,7 @@ objects:
           description: die Zusicherung, dass die IKT-Dienste oder -Produkte die Sicherheitsanforderungen gemäß Buchstabe
             a erfüllen;
         fr:
+          name: 'Acquisition : garantie de conformité aux exigences de sécurité'
           description: "l\u2019assurance que les services TIC ou les produits TIC\
             \ sont conformes aux exigences de s\xE9curit\xE9 vis\xE9es au point\_\
             a);"
@@ -17983,6 +18140,7 @@ objects:
           description: Methoden zur Validierung, dass die bereitgestellten IKT-Dienste oder -Produkte die angegebenen Sicherheitsanforderungen
             erfüllen, sowie die Dokumentation der Ergebnisse der Validierung.
         fr:
+          name: 'Acquisition : vérification de la conformité aux exigences de sécurité'
           description: "les m\xE9thodes permettant de valider la conformit\xE9 des\
             \ services TIC ou des produits TIC fournis aux exigences de s\xE9curit\xE9\
             \ \xE9nonc\xE9es, ainsi que la consignation des r\xE9sultats de la validation."
@@ -18108,6 +18266,7 @@ objects:
             \ dass die Punkte 5.1.6 und 5.1.7 des Anhangs zur Verordnung umgesetzt werden. \n• Angebote, die über die in\
             \ Abschnitt 6.1.2 des Anhangs der Verordnung genannten Elemente hinausgehen."
         fr:
+          name: 'Réexamen des processus d’acquisition TIC'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour les proc\xE9dures \xE0 intervalles pr\xE9\
             d\xE9finis, ainsi qu\u2019en cas d\u2019incidents importants."
@@ -18462,6 +18621,7 @@ objects:
             den Konzepten und Normen des Unternehmens übereinstimmen und auf relevanten Standards und bewährten Praktiken
             basieren.
         fr:
+          name: 'Règles de développement sécurisé'
           description: "Avant de d\xE9velopper un r\xE9seau et un syst\xE8me d\u2019\
             information, y compris des logiciels, les entit\xE9s concern\xE9es \xE9\
             tablissent des r\xE8gles pour le d\xE9veloppement s\xE9curis\xE9 des r\xE9\
@@ -18625,6 +18785,7 @@ objects:
             \ Stand. \n• Prüfergebnisse werden aufrechterhalten und gegebenenfalls von den Leitungsorganen genehmigt. \n\
             • Nachweis, dass in jeder Phase des Softwareentwicklungslebenszyklus eine Softwaretestmethode ausgewählt wird."
         fr:
+          name: 'Activités de développement sécurisé'
           description: "Aux fins du point\_6.2.1, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Un processus s\xE9curis\xE9 de cycle de vie du d\xE9\
             veloppement logiciel (SSDLC) doit \xEAtre mis en \u0153uvre par toutes\
@@ -18816,6 +18977,7 @@ objects:
             oder Beschaffungsvorhabens vornehmen, das von den betreffenden Einrichtungen oder im Namen dieser Einrichtungen
             durchgeführt wird;
         fr:
+          name: 'Analyse des exigences de sécurité dès la spécification et la conception'
           description: "effectuent une analyse des exigences de s\xE9curit\xE9 au\
             \ cours des phases de sp\xE9cification et de conception de tout projet\
             \ de d\xE9veloppement ou d\u2019acquisition men\xE9 par elles-m\xEAmes\
@@ -18848,6 +19010,7 @@ objects:
             sicherer Systeme und für ein sicheres Programmieren wie etwa die Förderung von konzeptintegrierter Cybersicherheit
             und Null-Vertrauen-Architekturen anwenden;
         fr:
+          name: 'Principes d’ingénierie et de codage sécurisés'
           description: "appliquent les principes de l\u2019ing\xE9nierie des syst\xE8\
             mes s\xE9curis\xE9s et du codage s\xE9curis\xE9 \xE0 toute activit\xE9\
             \ de d\xE9veloppement de syst\xE8mes d\u2019information, tels que la promotion\
@@ -18880,6 +19043,7 @@ objects:
         de:
           description: Sicherheitsanforderungen in Bezug auf Entwicklungsumgebungen festlegen;
         fr:
+          name: 'Exigences de sécurité des environnements de développement'
           description: "\xE9noncent des exigences de s\xE9curit\xE9 en ce qui concerne\
             \ les environnements de d\xE9veloppement;"
         es:
@@ -18903,6 +19067,7 @@ objects:
         de:
           description: Sicherheitstestverfahren im Entwicklungszyklus einführen und umsetzen;
         fr:
+          name: 'Tests de sécurité dans le cycle de développement'
           description: "\xE9tablissent et utilisent des proc\xE9dures de tests de\
             \ s\xE9curit\xE9 au cours du cycle de vie du d\xE9veloppement;"
         es:
@@ -18925,6 +19090,7 @@ objects:
         de:
           description: Daten über Sicherheitstests angemessen auswählen, schützen und verwalten;
         fr:
+          name: 'Sélection, protection et gestion des données de test de sécurité'
           description: "s\xE9lectionnent, prot\xE8gent et g\xE8rent de mani\xE8re\
             \ appropri\xE9e les donn\xE9es relatives aux tests de s\xE9curit\xE9;"
         es:
@@ -18948,6 +19114,7 @@ objects:
         de:
           description: die Testdaten entsprechend der Risikobewertung gemäß Nummer 2.1 bereinigen und anonymisieren.
         fr:
+          name: 'Nettoyage et anonymisation des données de test'
           description: "nettoient et anonymisent les donn\xE9es relatives aux tests\
             \ conform\xE9ment \xE0 l\u2019\xE9valuation des risques effectu\xE9e conform\xE9\
             ment au point 2.1."
@@ -19001,6 +19168,7 @@ objects:
             \ Besprechungen, bei denen die Entwicklung eines Netz- und Informationssystems, einschließlich Software, besprochen\
             \ wurde."
         fr:
+          name: 'Exigences de sécurité pour le développement externalisé'
           description: "Lorsque le d\xE9veloppement des r\xE9seaux et des syst\xE8\
             mes d\u2019information est externalis\xE9, les entit\xE9s concern\xE9\
             es appliquent \xE9galement les politiques et proc\xE9dures vis\xE9es aux\
@@ -19163,6 +19331,7 @@ objects:
             \ die sichere Entwicklung überprüft und möglicherweise geändert wurden, nachdem sich die Technologie, der Betrieb\
             \ oder die Risiken erheblich geändert haben oder es zu erheblichen Vorfällen gekommen ist."
         fr:
+          name: 'Réexamen des règles de développement sécurisé'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, si n\xE9cessaire,\
             \ actualisent \xE0 intervalles pr\xE9d\xE9finis leurs r\xE8gles de d\xE9\
             veloppement s\xE9curis\xE9."
@@ -19476,6 +19645,7 @@ objects:
             \ mit den alternativen Maßnahmen zur Gewährleistung der Vertraulichkeit, Verfügbarkeit und Integrität des CI.\
             \ \n• Dokumentierte sichere Basiskonfiguration für Entwicklungs- und Testumgebungen."
         fr:
+          name: 'Mesures de gestion des configurations'
           description: "Les entit\xE9s concern\xE9es prennent les mesures appropri\xE9\
             es pour \xE9tablir, documenter, mettre en \u0153uvre et surveiller les\
             \ configurations, y compris les configurations de s\xE9curit\xE9 du mat\xE9\
@@ -19796,6 +19966,7 @@ objects:
             \ vorhanden. \n• Dokumentierte und genehmigte Ausnahmen von der Konfigurationsbasislinie mit den alternativen\
             \ Maßnahmen zur Gewährleistung der Vertraulichkeit, Verfügbarkeit und Integrität des CI."
         fr:
+          name: 'Activités de configuration sécurisée'
           description: "Aux fins du point 6.3.1, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Tenir compte des guides/meilleures pratiques de renforcement\
             \ et des principes g\xE9n\xE9raux de cybers\xE9curit\xE9 (par exemple,\
@@ -19930,6 +20101,7 @@ objects:
         de:
           description: Konfigurationen für ihre Hardware, Software, Dienste und Netze festlegen und deren Sicherheit gewährleisten;
         fr:
+          name: 'Configurations sécurisées du matériel, des logiciels, des services et des réseaux'
           description: "d\xE9finissent et appliquent des configurations de s\xE9curit\xE9\
             \ pour leur mat\xE9riel, leurs logiciels, leurs services et leurs r\xE9\
             seaux;"
@@ -19959,6 +20131,7 @@ objects:
             Software, Dienste und Netze, für neu installierte Systeme sowie für Systeme, die über ihre gesamte Lebensdauer
             in Betrieb sind, festlegen und umsetzen.
         fr:
+          name: 'Application des configurations sécurisées'
           description: "d\xE9finissent et utilisent des proc\xE9dures et des outils\
             \ pour assurer le respect des configurations s\xE9curis\xE9es d\xE9finies\
             \ pour le mat\xE9riel, les logiciels, les services et les r\xE9seaux,\
@@ -20044,6 +20217,7 @@ objects:
             \ auf dem neuesten Stand bleiben. \n• Vorfallreaktionsaufzeichnungen, die bestätigen, ob die Entität Vorfälle\
             \ im Zusammenhang mit den Konfigurationen berücksichtigt."
         fr:
+          name: 'Réexamen des configurations'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour les configurations \xE0 intervalles pr\xE9\
             d\xE9finis, ou en cas d\u2019incidents importants ou lorsque des changements\
@@ -20292,6 +20466,7 @@ objects:
             \    o Koordination zwischen verschiedenen Organisationseinheiten; und\n    o Compliance. \n• Protokolle, die\
             \ die Daten und Ergebnisse der regelmäßigen Überprüfungen der Änderungs-, Reparatur- und Wartungsverfahren aufzeichnen."
         fr:
+          name: 'Application des procédures de gestion des changements'
           description: "Les entit\xE9s concern\xE9es appliquent des proc\xE9dures\
             \ de gestion des changements pour encadrer les changements de r\xE9seaux\
             \ et de syst\xE8mes d\u2019information. S\u2019il y a lieu, les proc\xE9\
@@ -20530,6 +20705,7 @@ objects:
             \ Ressourcen erzwingen, und fordern Sie die Dokumentation jeder Änderung an. \n• Zugriffskontrolllisten (ACLs)\
             \ zur Überprüfung, ob der Zugriff auf die Tools mit dem Zugriffskontrollkonzept übereinstimmt."
         fr:
+          name: 'Périmètre, documentation et test des changements'
           description: "Les proc\xE9dures vis\xE9es au point 6.4.1 doivent \xEAtre\
             \ appliqu\xE9es pour les nouvelles versions, les modifications et les\
             \ changements urgents apport\xE9s \xE0 tout logiciel et mat\xE9riel en\
@@ -20716,6 +20892,7 @@ objects:
             \ frühere Stufe zurückgesetzt werden kann, wenn die Änderung fehlschlägt. \n• Protokolle und Aufzeichnungen\
             \ früherer Altsystem-Upgrades, die Risikobewertungen und die Begründung für die Änderung enthalten."
         fr:
+          name: 'Documentation des changements en urgence'
           description: "Dans le cas o\xF9 les proc\xE9dures habituelles de gestion\
             \ des changements n\u2019ont pas pu \xEAtre suivies en raison d\u2019\
             une urgence, les entit\xE9s concern\xE9es consignent le r\xE9sultat des\
@@ -20925,6 +21102,7 @@ objects:
             \ Mitarbeiter oder Rollen über Datum und Uhrzeit der geplanten Wartung. \n• Netzwerkarchitekturdiagramm, das\
             \ die Existenz von OOB-Verbindungen nachweist."
         fr:
+          name: 'Réexamen des procédures de gestion des changements'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour les proc\xE9dures \xE0 intervalles pr\xE9\
             d\xE9finis, ainsi qu\u2019en cas d\u2019incidents importants ou lorsque\
@@ -21254,6 +21432,7 @@ objects:
           typical_evidence: "• Dokumentierte Sicherheitstests und -verfahren basierend auf relevanten Standards und bewährten\
             \ Praktiken. \n• Leitlinien und Standards, die das Unternehmen bei der Durchführung von Sicherheitstests einhält."
         fr:
+          name: 'Politique et procédures de tests de sécurité'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent, mettent en \u0153\
             uvre et appliquent une politique et des proc\xE9dures en mati\xE8re de\
             \ tests de s\xE9curit\xE9."
@@ -21403,6 +21582,7 @@ objects:
             \ Arten von Tests abdecken (z. B. Schwachstellenbewertungen, Penetrationstests und Codeüberprüfungen). \n• Interne\
             \ oder externe Auditberichte."
         fr:
+          name: 'Activités de tests de sécurité'
           description: "Les entit\xE9s concern\xE9es :"
           annotation: "\u2022 S\u2019assurer que les r\xE9seaux et les syst\xE8mes\
             \ d\u2019information sont soumis \xE0 des tests continus, en particulier\
@@ -21622,6 +21802,7 @@ objects:
           description: legen auf der Grundlage der gemäß Nummer 2.1 durchgeführten Risikobewertung die Notwendigkeit, den
             Umfang, die Häufigkeit und die Art der Sicherheitsprüfungen fest;
         fr:
+          name: 'Besoin, périmètre, fréquence et type de tests de sécurité selon les risques'
           description: "d\xE9terminent, sur la base de l\u2019\xE9valuation des risques\
             \ effectu\xE9e conform\xE9ment au point 2.1, la n\xE9cessit\xE9, la port\xE9\
             e, la fr\xE9quence et le type de tests de s\xE9curit\xE9;"
@@ -21651,6 +21832,7 @@ objects:
           description: führen Sicherheitsprüfungen nach einer dokumentierten Prüfmethode durch, die sich auf die Komponenten
             erstrecken, die im Rahmen einer Risikoanalyse als für den sicheren Betrieb relevant eingestuft wurden;
         fr:
+          name: 'Tests de sécurité selon une méthodologie documentée'
           description: "effectuent, selon une m\xE9thode de test document\xE9e, des\
             \ tests de s\xE9curit\xE9 couvrant les composants identifi\xE9s dans le\
             \ cadre d\u2019une analyse des risques comme \xE9tant importants pour\
@@ -21680,6 +21862,7 @@ objects:
           description: dokumentieren die Art, den Umfang, den Zeitraum und die Ergebnisse der Prüfungen, einschließlich
             der Bewertung der Kritikalität und der Risikominderungsmaßnahmen für jede Feststellung;
         fr:
+          name: 'Documentation des résultats des tests de sécurité'
           description: "consignent le type, la port\xE9e, la date et les r\xE9sultats\
             \ des tests, y compris l\u2019\xE9valuation de la criticit\xE9 et des\
             \ mesures d\u2019att\xE9nuation pour chaque constat;"
@@ -21706,6 +21889,7 @@ objects:
         de:
           description: wenden im Falle kritischer Feststellungen Risikominderungsmaßnahmen an.
         fr:
+          name: 'Traitement des constats critiques'
           description: "appliquent des mesures d\u2019att\xE9nuation en cas de constats\
             \ critiques."
         es:
@@ -21779,6 +21963,7 @@ objects:
             \ Aktionen konfiguriert sind. \n• Aufzeichnungen über Aktualisierungen der Sicherheitskonzepte und -verfahren\
             \ basierend auf gewonnenen Erkenntnissen und neuen Bedrohungen."
         fr:
+          name: 'Réexamen des politiques de tests de sécurité'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour \xE0 intervalles pr\xE9d\xE9finis leur\
             \ politique en mati\xE8re de tests de s\xE9curit\xE9."
@@ -22109,6 +22294,7 @@ objects:
             \ beispielsweise digitale Zertifikate und digitale Signaturen. \n• Berichte aus internen und externen Audits\
             \ zur Bewertung der Wirksamkeit der Patch-Management-Prozesse."
         fr:
+          name: 'Procédures de gestion des correctifs de sécurité'
           description: "Les entit\xE9s concern\xE9es pr\xE9cisent et appliquent des\
             \ proc\xE9dures compatibles avec les proc\xE9dures de gestion des changements\
             \ vis\xE9es au point 6.4.1, ainsi qu\u2019avec la gestion des vuln\xE9\
@@ -22531,6 +22717,7 @@ objects:
         de:
           description: Sicherheitspatches innerhalb einer angemessenen Frist nach ihrer Verfügbarmachung angewendet werden;
         fr:
+          name: 'Application des correctifs de sécurité dans des délais raisonnables'
           description: "les correctifs de s\xE9curit\xE9 sont appliqu\xE9s dans un\
             \ d\xE9lai raisonnable apr\xE8s leur mise \xE0 disposition;"
         es:
@@ -22554,6 +22741,7 @@ objects:
         de:
           description: Sicherheitspatches getestet werden, bevor sie in Produktionssystemen angewendet werden;
         fr:
+          name: 'Test des correctifs avant mise en production'
           description: "les correctifs de s\xE9curit\xE9 sont test\xE9s avant d\u2019\
             \xEAtre appliqu\xE9s dans les syst\xE8mes de production;"
         es:
@@ -22577,6 +22765,7 @@ objects:
         de:
           description: Sicherheitspatches aus vertrauenswürdigen Quellen stammen und auf ihre Integrität geprüft werden;
         fr:
+          name: 'Sources fiables et contrôle d’intégrité des correctifs'
           description: "les correctifs de s\xE9curit\xE9 proviennent de sources fiables\
             \ et font l\u2019objet d\u2019un contr\xF4le d\u2019int\xE9grit\xE9;"
         es:
@@ -22601,6 +22790,7 @@ objects:
           description: zusätzliche Maßnahmen umgesetzt und Restrisiken akzeptiert werden, wenn ein Patch nicht verfügbar
             ist oder nicht gemäß Nummer 6.6.2 angewendet wird.
         fr:
+          name: 'Mesures complémentaires en l’absence de correctif ou en cas de non-application'
           description: "des mesures suppl\xE9mentaires sont mises en \u0153uvre et\
             \ que les risques r\xE9siduels sont accept\xE9s lorsqu\u2019un correctif\
             \ n\u2019est pas disponible ou n\u2019est pas appliqu\xE9 conform\xE9\
@@ -22717,6 +22907,7 @@ objects:
             \ Verwendung belegen. \n• Rollback-Plan. \n• Vertrags-, Angebots- und dokumentierte Bewertungs- und Auswahlkriterien\
             \ für neue Systeme, die die Patch-Management-Anforderungen und die Systemlebensdauer berücksichtigen."
         fr:
+          name: 'Décisions documentées de non-application des correctifs'
           description: "Par d\xE9rogation au point 6.6.1 a), les entit\xE9s concern\xE9\
             es peuvent choisir de ne pas appliquer de correctifs de s\xE9curit\xE9\
             \ lorsque les inconv\xE9nients de leur application l\u2019emportent sur\
@@ -23040,6 +23231,7 @@ objects:
           typical_evidence: • Dokumentierte Netzwerksicherheitsmaßnahmen, die auf relevanten Standards und bewährten Praktiken
             basieren.
         fr:
+          name: 'Protection des réseaux et des systèmes d’information contre les cybermenaces'
           description: "Les entit\xE9s concern\xE9es prennent les mesures appropri\xE9\
             es pour prot\xE9ger leurs r\xE9seaux et syst\xE8mes d\u2019information\
             \ contre les cybermenaces."
@@ -23216,6 +23408,7 @@ objects:
             \ der Netzwerksicherheitsregeln durchführt. \n• Übergang zum Plan der neuesten Generation zur Implementierung\
             \ von Kommunikationsprotokollen auf Netzwerkebene."
         fr:
+          name: 'Mesures de sécurité des réseaux'
           description: "Aux fins du point 6.7.1, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Mettre en \u0153uvre les principes de s\xE9curit\xE9\
             \ d\xE8s la conception en int\xE9grant la s\xE9curit\xE9 \xE0 chaque couche\
@@ -23556,6 +23749,7 @@ objects:
         de:
           description: die Architektur des Netzes verständlich und aktuell dokumentieren;
         fr:
+          name: 'Documentation de l’architecture réseau'
           description: "consignent des informations compr\xE9hensibles et actualis\xE9\
             es sur l\u2019architecture du r\xE9seau;"
         es:
@@ -23580,6 +23774,7 @@ objects:
           description: Kontrollen festlegen und durchführen, um die internen Netzdomänen der betreffenden Einrichtungen
             vor unbefugtem Zugriff zu schützen;
         fr:
+          name: 'Protection des domaines réseau internes contre les accès non autorisés'
           description: "d\xE9terminent et appliquent des contr\xF4les pour prot\xE9\
             ger les domaines de r\xE9seau internes des entit\xE9s concern\xE9es contre\
             \ tout acc\xE8s non autoris\xE9;"
@@ -23607,6 +23802,7 @@ objects:
           description: die Kontrollen so konfigurieren, dass Zugriffe und Netzkommunikation verhindert werden, wenn dies
             für den Betrieb der betreffenden Einrichtungen nicht erforderlich ist;
         fr:
+          name: 'Blocage des accès et communications réseau non nécessaires'
           description: "configurent les contr\xF4les pour emp\xEAcher les acc\xE8\
             s et la communication par r\xE9seau qui ne sont pas n\xE9cessaires au\
             \ fonctionnement des entit\xE9s concern\xE9es;"
@@ -23634,6 +23830,7 @@ objects:
           description: die Kontrollen für den Fernzugriff auf Netz- und Informationssysteme, einschließlich des Zugangs
             von Diensteanbietern, festlegen und durchführen;
         fr:
+          name: 'Contrôle des accès à distance, y compris par les prestataires'
           description: "d\xE9terminent et appliquent des contr\xF4les pour l\u2019\
             acc\xE8s \xE0 distance aux r\xE9seaux et aux syst\xE8mes d\u2019information,\
             \ y compris l\u2019acc\xE8s par des prestataires de services;"
@@ -23662,6 +23859,7 @@ objects:
           description: keine Systeme verwenden, die für die Verwaltung der Umsetzung der Sicherheitskonzepte für andere
             Zwecke verwendet werden;
         fr:
+          name: 'Systèmes dédiés à l’administration de la politique de sécurité'
           description: "n\u2019utilisent pas \xE0 d\u2019autres fins les syst\xE8\
             mes utilis\xE9s pour la gestion de la mise en \u0153uvre de la politique\
             \ de s\xE9curit\xE9;"
@@ -23686,6 +23884,7 @@ objects:
         de:
           description: nicht benötigte Verbindungen und Dienste ausdrücklich verbieten oder deaktivieren;
         fr:
+          name: 'Désactivation des connexions et services non nécessaires'
           description: "interdisent explicitement ou d\xE9sactivent les connexions\
             \ et les services non n\xE9cessaires;"
         es:
@@ -23710,6 +23909,7 @@ objects:
           description: – soweit angemessen – den Zugang zu ihren Netz- und Informationssystemen ausschließlich mit von den
             betreffenden Einrichtungen genehmigten Geräten gewähren;
         fr:
+          name: 'Restriction des accès aux équipements autorisés'
           description: "s\u2019il est besoin, autorisent exclusivement l\u2019acc\xE8\
             s aux r\xE9seaux et aux syst\xE8mes d\u2019information des entit\xE9s\
             \ concern\xE9es au moyen de dispositifs autoris\xE9s par ces entit\xE9\
@@ -23741,6 +23941,7 @@ objects:
           description: Verbindungen von Diensteanbietern nur nach einem Genehmigungsantrag und für einen bestimmten Zeitraum,
             z. B. für die Dauer von Wartungsarbeiten, zulassen;
         fr:
+          name: 'Connexions des prestataires autorisées et limitées dans le temps'
           description: "n\u2019autorisent les connexions de prestataires de services\
             \ qu\u2019\xE0 la suite d\u2019une demande d\u2019autorisation et pour\
             \ une dur\xE9e d\xE9termin\xE9e, telle que la dur\xE9e d\u2019une op\xE9\
@@ -23774,6 +23975,7 @@ objects:
             und eine sichere Identifizierung ihrer Endpunkte und den Schutz der Kanaldaten vor Änderung oder Offenlegung
             ermöglichen;
         fr:
+          name: 'Canaux de communication de confiance et isolés entre systèmes'
           description: "\xE9tablissent une communication entre des syst\xE8mes distincts\
             \ uniquement par des canaux de confiance isol\xE9s des autres canaux de\
             \ communication au moyen d\u2019une s\xE9paration logique, cryptographique\
@@ -23815,6 +24017,7 @@ objects:
             neuesten Generation der Kommunikationsprotokolle für die Netzwerkschicht annehmen und Maßnahmen zur Beschleunigung
             dieses Übergangs festlegen;
         fr:
+          name: 'Transition vers les protocoles réseau de dernière génération'
           description: "adoptent un plan de mise en \u0153uvre pour la transition\
             \ compl\xE8te vers des protocoles de communication de la derni\xE8re g\xE9\
             n\xE9ration au niveau de la couche r\xE9seau d\u2019une mani\xE8re s\xFB\
@@ -23852,6 +24055,7 @@ objects:
             E-Mail-Kommunikationsnormen annehmen, um die E-Mail-Kommunikation zur Minderung von Schwachstellen im Zusammenhang
             mit E-Mail-Bedrohungen zu sichern, und Maßnahmen zur Beschleunigung dieser Einführung festlegen;
         fr:
+          name: 'Déploiement des normes modernes de sécurité de la messagerie'
           description: "adoptent un plan de mise en \u0153uvre pour le d\xE9ploiement\
             \ de normes de communication par courrier \xE9lectronique modernes, reconnues\
             \ et interop\xE9rables au niveau international, afin de s\xE9curiser les\
@@ -23893,6 +24097,7 @@ objects:
           description: bewährte Verfahren für die Sicherheit des DNS sowie für die Sicherheit und Hygiene des Internet-Routings
             bei Verkehr, der aus dem Netz stammt und für das Netz bestimmt ist, anwenden.
         fr:
+          name: 'Sécurité du DNS et du routage Internet'
           description: "appliquent les meilleures pratiques en mati\xE8re de s\xE9\
             curit\xE9 du DNS, de s\xE9curit\xE9 du routage sur internet et d\u2019\
             hygi\xE8ne du routage pour le trafic en provenance et \xE0 destination\
@@ -23995,6 +24200,7 @@ objects:
             \ dokumentiert sind.\n\n[TIPPS]\n\n• Die korrekte Nutzung mobiler Geräte und anderer Fernzugriffe (z. B. Telearbeit\
             \ und VPN) wurde dem Personal kommuniziert. \n• Vorhandensein von IDS/IPS."
         fr:
+          name: 'Réexamen des mesures de sécurité des réseaux'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour ces mesures \xE0 intervalles pr\xE9d\xE9\
             finis, ainsi qu\u2019en cas d\u2019incidents importants ou lorsque des\
@@ -24275,6 +24481,7 @@ objects:
           typical_evidence: • Dokumentierte Netzwerksegmentierungsregeln basierend auf relevanten Standards und bewährten
             Praktiken.
         fr:
+          name: 'Segmentation des systèmes et des réseaux'
           description: "Les entit\xE9s concern\xE9es segmentent les syst\xE8mes en\
             \ r\xE9seaux ou en zones conform\xE9ment aux r\xE9sultats de l\u2019\xE9\
             valuation des risques vis\xE9e au point 2.1. Elles segmentent leurs syst\xE8\
@@ -24433,6 +24640,7 @@ objects:
             \ wie dem Internet trennt. Der Hauptzweck eines Perimeternetzwerks besteht darin, eine zusätzliche Sicherheitsebene\
             \ hinzuzufügen, indem nach außen gerichtete Dienste vom internen Netzwerk isoliert werden."
         fr:
+          name: 'Mesures de segmentation du réseau'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 S\u2019assurer que les segments sont conformes aux r\xE9\
             sultats de l\u2019\xE9valuation des risques (annexe du r\xE8glement, point\
@@ -24678,6 +24886,7 @@ objects:
           description: die funktionale, logische und physische Beziehung, einschließlich des Standorts, zwischen vertrauenswürdigen
             Systemen und Diensten berücksichtigen;
         fr:
+          name: 'Prise en compte des relations entre systèmes et services de confiance'
           description: "prennent en consid\xE9ration le lien fonctionnel, logique\
             \ et physique, y compris la localisation, entre syst\xE8mes et services\
             \ de confiance;"
@@ -24704,6 +24913,7 @@ objects:
           description: den Zugang zu einem Netz oder einer Zone auf der Grundlage einer Bewertung seiner/ihrer Sicherheitsanforderungen
             gewähren;
         fr:
+          name: 'Accès aux zones selon les exigences de sécurité'
           description: "accordent l\u2019acc\xE8s \xE0 un r\xE9seau ou \xE0 une zone\
             \ sur la base d\u2019une \xE9valuation de ses exigences en mati\xE8re\
             \ de s\xE9curit\xE9;"
@@ -24730,6 +24940,7 @@ objects:
           description: Systeme, die für den Betrieb der betreffenden Einrichtungen oder für die Sicherheit unverzichtbar
             sind, in gesicherten Zonen unterbringen;
         fr:
+          name: 'Hébergement des systèmes critiques en zones sécurisées'
           description: "conservent les syst\xE8mes critiques pour leur exploitation\
             \ ou pour la s\xE9curit\xE9 dans les zones s\xE9curis\xE9es;"
         es:
@@ -24756,6 +24967,7 @@ objects:
           description: eine demilitarisierte Zone innerhalb ihrer Kommunikationsnetze aufbauen, um die Sicherheit der Kommunikation,
             die aus ihren Netzen stammt oder für ihr Netz bestimmt ist, zu gewährleisten;
         fr:
+          name: 'Zone démilitarisée (DMZ)'
           description: "d\xE9ploient une zone d\xE9militaris\xE9e au sein de leurs\
             \ r\xE9seaux de communication pour assurer une communication s\xE9curis\xE9\
             e en provenance ou \xE0 destination de leurs r\xE9seaux;"
@@ -24785,6 +24997,7 @@ objects:
           description: den Zugang zu und die Kommunikation zwischen und innerhalb von Zonen auf diejenigen beschränken,
             die für den Betrieb der betreffenden Einrichtungen oder für die Sicherheit erforderlich sind;
         fr:
+          name: 'Restriction des communications entre zones et au sein des zones'
           description: "limitent l\u2019acc\xE8s et les communications entre les zones\
             \ et \xE0 l\u2019int\xE9rieur de celles-ci \xE0 ce qui est n\xE9cessaire\
             \ \xE0 leur fonctionnement ou \xE0 la s\xE9curit\xE9;"
@@ -24813,6 +25026,7 @@ objects:
           description: das spezielle Netz für die Verwaltung von Netz- und Informationssystemen vom operativen Netz der
             betreffenden Einrichtungen trennen;
         fr:
+          name: 'Réseau d’administration séparé'
           description: "s\xE9parent, d\u2019une part, le r\xE9seau consacr\xE9 \xE0\
             \ l\u2019administration des r\xE9seaux et des syst\xE8mes d\u2019information\
             \ et, d\u2019autre part, leur r\xE9seau op\xE9rationnel;"
@@ -24838,6 +25052,7 @@ objects:
         de:
           description: Netzverwaltungskanäle von anderem Netzverkehr trennen;
         fr:
+          name: 'Séparation des flux d’administration réseau'
           description: "s\xE9parent les canaux d\u2019administration du r\xE9seau\
             \ des autres types de trafic r\xE9seau;"
         es:
@@ -24862,6 +25077,7 @@ objects:
           description: die Produktionssysteme für die Dienste der betreffenden Einrichtungen von den Systemen trennen, die
             bei der Entwicklung und beim Testen, einschließlich der Sicherung, verwendet werden.
         fr:
+          name: 'Séparation de la production et des environnements de développement et de test'
           description: "s\xE9parent leurs syst\xE8mes de production de services des\
             \ syst\xE8mes utilis\xE9s pour le d\xE9veloppement et les tests, y compris\
             \ les sauvegardes."
@@ -24947,6 +25163,7 @@ objects:
             \ jede Zone aktiv. \n• Warnungen bei Verstößen gegen Segmentierungsregeln. \n• Bewertungen, die durch Warnungen\
             \ zu Segmentierungsverstößen ausgelöst werden."
         fr:
+          name: 'Réexamen de la segmentation réseau'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour la segmentation du r\xE9seau \xE0 intervalles\
             \ pr\xE9d\xE9finis, ainsi qu\u2019en cas d\u2019incidents importants ou\
@@ -25156,6 +25373,7 @@ objects:
           description: Die betreffenden Einrichtungen schützen ihre Netz- und Informationssysteme vor Schadsoftware und
             nicht genehmigter Software.
         fr:
+          name: 'Protection des systèmes contre les logiciels malveillants ou non autorisés'
           description: "Les entit\xE9s concern\xE9es prot\xE8gent leurs r\xE9seaux\
             \ et syst\xE8mes d\u2019information contre les logiciels malveillants\
             \ ou non autoris\xE9s."
@@ -25309,6 +25527,7 @@ objects:
             \ Schadsoftware-Vorfällen zu minimieren.\n    o Protokolle, die bestätigen, dass Administratorrechte kontrolliert\
             \ und überwacht werden. \n• Protokolle von E-Mail-Filtern."
         fr:
+          name: 'Détection et prévention des logiciels malveillants ou non autorisés'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es mettent notamment\
             \ en \u0153uvre des mesures qui permettent de d\xE9tecter ou d\u2019emp\xEA\
             cher l\u2019utilisation de logiciels malveillants ou non autoris\xE9s.\
@@ -25753,6 +25972,7 @@ objects:
           typical_evidence: • Dokumentation eines Risikobewertungsrahmens zur Bewertung der Schwere, Auswirkung und Wahrscheinlichkeit
             der Ausnutzung identifizierter Schwachstellen (z. B. CVSS-Scores).
         fr:
+          name: 'Gestion des vulnérabilités techniques'
           description: "Les entit\xE9s concern\xE9es obtiennent des informations sur\
             \ les vuln\xE9rabilit\xE9s techniques de leurs r\xE9seaux et syst\xE8\
             mes d\u2019information, \xE9valuent leur exposition \xE0 ces vuln\xE9\
@@ -25868,6 +26088,7 @@ objects:
             \   \n• Interview mit dem zentralen Ansprechpartner und den Kanälen für die Kommunikation mit Lieferanten und\
             \ Dienstleistern zu Fragen der Informationssicherheit."
         fr:
+          name: 'Activités de gestion des vulnérabilités'
           description: "Aux fins du point 6.10.1, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Au minimum, traiter les vuln\xE9rabilit\xE9s attribu\xE9\
             es \xE0 des classifications sup\xE9rieures (par exemple, \xAB critique\
@@ -26032,6 +26253,7 @@ objects:
           description: Informationen über Schwachstellen über geeignete Kanäle, wie z. B. Ankündigungen von CSIRTs oder
             zuständigen Behörden oder von Anbietern oder Diensteanbietern bereitgestellte Informationen, verfolgen;
         fr:
+          name: 'Veille sur les vulnérabilités'
           description: "surveillent les informations sur les vuln\xE9rabilit\xE9s\
             \ par des canaux appropri\xE9s, tels que les annonces des CSIRT ou des\
             \ autorit\xE9s comp\xE9tentes ou les informations fournies par les fournisseurs\
@@ -26063,8 +26285,8 @@ objects:
           description: – soweit angemessen – Schwachstellen-Scans durchführen und die Ergebnisse der Scans in geplanten
             Zeitabständen aufzeichnen;
         fr:
-          description: "rem\xE9dient, dans les meilleurs d\xE9lais, aux vuln\xE9rabilit\xE9\
-            s qu'elles identifient comme \xE9tant critiques pour leurs op\xE9rations;"
+          name: 'Scans de vulnérabilités'
+          description: 'effectuent, s’il est besoin, des analyses de vulnérabilité et consignent les résultats des analyses, à intervalles prédéfinis;'
         es:
           description: "realizar\xE1n, seg\xFAn proceda, exploraciones de vulnerabilidad\
             \ y registrar\xE1n pruebas de los resultados de las mismas, a intervalos\
@@ -26089,6 +26311,7 @@ objects:
           description: Schwachstellen, die von den betreffenden Einrichtungen als für ihren Betrieb kritisch eingestuft
             wurden, unverzüglich beheben;
         fr:
+          name: 'Remédiation dans les meilleurs délais des vulnérabilités critiques'
           description: "rem\xE9dient, dans les meilleurs d\xE9lais, aux vuln\xE9rabilit\xE9\
             s qu'elles identifient comme \xE9tant critiques pour leurs op\xE9rations;"
         es:
@@ -26116,6 +26339,7 @@ objects:
             das Sicherheitspatch-Management, das Risikomanagement und das Management von Sicherheitsvorfällen vereinbar
             ist;
         fr:
+          name: 'Articulation de la gestion des vulnérabilités avec les changements, les correctifs, les risques et les incidents'
           description: "veillent \xE0 ce que leur gestion des vuln\xE9rabilit\xE9\
             s soit compatible avec leurs proc\xE9dures de gestion des changements,\
             \ de gestion des correctifs de s\xE9curit\xE9, de gestion des risques\
@@ -26146,6 +26370,7 @@ objects:
           description: ein Verfahren für die Offenlegung von Schwachstellen im Einklang mit den geltenden nationalen Konzepten
             für die koordinierte Offenlegung von Schwachstellen festlegen.
         fr:
+          name: 'Procédure de divulgation coordonnée des vulnérabilités'
           description: "\xE9tablissent une proc\xE9dure de divulgation des vuln\xE9\
             rabilit\xE9s conform\xE9ment \xE0 la politique nationale applicable en\
             \ mati\xE8re de divulgation coordonn\xE9e des vuln\xE9rabilit\xE9s."
@@ -26199,6 +26424,7 @@ objects:
             \ \n• Aufzeichnungen über alle Schwachstellen, die nicht behoben wurden, und die Begründung dafür, dass sie\
             \ nicht behoben wurden."
         fr:
+          name: 'Plans d’atténuation des vulnérabilités et exceptions justifiées'
           description: "Lorsque l\u2019impact potentiel de la vuln\xE9rabilit\xE9\
             \ le justifie, les entit\xE9s concern\xE9es \xE9laborent et mettent en\
             \ \u0153uvre un plan visant \xE0 att\xE9nuer la vuln\xE9rabilit\xE9. Dans\
@@ -26369,6 +26595,7 @@ objects:
             \ durchgeführt werden. \n• Aufzeichnungen über interne Audits oder Überprüfungen der Verfahren zum Schwachstellenmanagement.\
             \ \n• Erkenntnisse und Korrekturmaßnahmen aus diesen Audits."
         fr:
+          name: 'Réexamen des canaux d’information sur les vulnérabilités'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour \xE0 intervalles pr\xE9d\xE9finis les\
             \ canaux qu\u2019elles utilisent pour surveiller les informations relatives\
@@ -26665,6 +26892,7 @@ objects:
 
             (73) Zum Beispiel NIST SP 800-53A, verfügbar unter: https://csrc.nist.gov/pubs/sp/800/53/a/r5/final.
         fr:
+          name: 'Politique et procédures d’évaluation de l’efficacité'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point f), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es \xE9tablissent,\
             \ mettent en \u0153uvre et appliquent une politique et des proc\xE9dures\
@@ -26853,6 +27081,7 @@ objects:
             \ früherer Wirksamkeitsbewertungen. \n• Pläne oder Zeitpläne für zukünftige Wirksamkeitsbewertungen. \n• Dokumentierte\
             \ Rollen und Verantwortlichkeiten."
         fr:
+          name: 'Périmètre de l’évaluation de l’efficacité'
           description: "La politique et les proc\xE9dures vis\xE9es au point 7.1 tiennent\
             \ compte des r\xE9sultats de l\u2019\xE9valuation des risques vis\xE9\
             e au point 2.1 et des incidents importants pass\xE9s. Les entit\xE9s concern\xE9\
@@ -27160,6 +27389,7 @@ objects:
           description: welche Risikomanagementmaßnahmen im Bereich der Cybersicherheit zu überwachen und zu messen sind,
             einschließlich Verfahren und Kontrollen;
         fr:
+          name: 'Mesures à suivre et à mesurer'
           description: "quelles mesures de gestion des risques en mati\xE8re de cybers\xE9\
             curit\xE9 doivent faire l\u2019objet d\u2019un suivi et d\u2019un mesurage,\
             \ y compris les proc\xE9dures et les contr\xF4les;"
@@ -27186,6 +27416,7 @@ objects:
           description: die Methoden zur Überwachung, Messung, Analyse und Bewertung, sofern zutreffend, um gültige Ergebnisse
             sicherzustellen;
         fr:
+          name: 'Méthodes de suivi, de mesure, d’analyse et d’évaluation'
           description: "quelles m\xE9thodes de suivi, de mesurage, d'analyse et d'\xE9\
             valuation, selon le cas, doivent assurer la validit\xE9 des r\xE9sultats;"
         es:
@@ -27210,6 +27441,7 @@ objects:
         de:
           description: wann die Überwachung und Messung durchzuführen ist;
         fr:
+          name: 'Calendrier du suivi et de la mesure'
           description: "quand le suivi et le mesurage doivent \xEAtre effectu\xE9\
             s;"
         es:
@@ -27233,6 +27465,7 @@ objects:
           description: wer für die Überwachung und die Messung der Wirksamkeit der Risikomanagementmaßnahmen im Bereich
             der Cybersicherheit zuständig ist;
         fr:
+          name: 'Responsable du suivi et de la mesure'
           description: "qui est responsable du suivi et du mesurage de l\u2019efficacit\xE9\
             \ des mesures de gestion des risques en mati\xE8re de cybers\xE9curit\xE9\
             ;"
@@ -27258,6 +27491,7 @@ objects:
         de:
           description: wann die Ergebnisse der Überwachung und der Messung zu analysieren und zu bewerten sind;
         fr:
+          name: 'Calendrier d’analyse et d’évaluation des résultats'
           description: "quand les r\xE9sultats du suivi et du mesurage doivent \xEA\
             tre analys\xE9s et \xE9valu\xE9s;"
         es:
@@ -27280,6 +27514,7 @@ objects:
         de:
           description: wer diese Ergebnisse analysieren und bewerten muss.
         fr:
+          name: 'Responsable de l’analyse et de l’évaluation des résultats'
           description: "qui doit analyser et \xE9valuer ces r\xE9sultats."
         es:
           description: "qui\xE9nes deben analizar y evaluar estos resultados."
@@ -27340,6 +27575,7 @@ objects:
             \ anderer Konzepte überprüft und auf der Grundlage dieser Ergebnisse Verbesserungen besprochen werden. \n• Aufzeichnungen\
             \ über Aktualisierungen anderer Konzepte und Verfahren im Hinblick auf die Bewertung ihrer Wirksamkeit."
         fr:
+          name: 'Réexamen de la politique et des procédures d’évaluation de l’efficacité'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour la politique et les proc\xE9dures \xE0\
             \ intervalles pr\xE9d\xE9finis, ainsi qu\u2019en cas d\u2019incidents\
@@ -27549,6 +27785,7 @@ objects:
           typical_evidence: • Sensibilisierungsprogramm, zum Beispiel ein umfassender Überblick über das Programm mit detaillierten
             Angaben zu Zielen, Inhalt, Häufigkeit, Lehrplan und Zeitplan.
         fr:
+          name: 'Sensibilisation à la cybersécurité et cyberhygiène'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point g), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es veillent \xE0\
             \ ce que leurs employ\xE9s, y compris les membres des organes de direction,\
@@ -27703,6 +27940,7 @@ objects:
             \ ausgehändigt werden und aus denen hervorgeht, welche Mitarbeiter am Sensibilisierungsprogramm teilgenommen\
             \ haben."
         fr:
+          name: 'Programme de sensibilisation'
           description: "Aux fins du point 8.1.1, les entit\xE9s concern\xE9es proposent\
             \ \xE0 leurs employ\xE9s, y compris aux membres des organes de direction,\
             \ ainsi qu\u2019aux fournisseurs et prestataires de services directs,\
@@ -27949,6 +28187,7 @@ objects:
         de:
           description: zeitlich so geplant ist, dass die Maßnahmen wiederholt werden und neue Mitarbeitende erreichen;
         fr:
+          name: 'Actions de sensibilisation récurrentes, y compris pour les nouveaux arrivants'
           description: "s'\xE9chelonne dans le temps de mani\xE8re \xE0 ce que les\
             \ activit\xE9s soient r\xE9p\xE9t\xE9es et s'adressent aux nouveaux salari\xE9\
             s;"
@@ -27975,6 +28214,7 @@ objects:
           description: mit dem Konzept für die Sicherheit von Netz- und Informationssystemen, den themenspezifischen Konzepten
             und den einschlägigen Verfahren für die Sicherheit von Netz- und Informationssystemen im Einklang steht;
         fr:
+          name: 'Alignement du programme de sensibilisation sur les politiques de sécurité'
           description: "est \xE9tabli conform\xE9ment \xE0 la politique de s\xE9curit\xE9\
             \ des r\xE9seaux et de l\u2019information, aux politiques concernant des\
             \ domaines sp\xE9cifiques et aux proc\xE9dures pertinentes en mati\xE8\
@@ -28009,6 +28249,7 @@ objects:
             Kontaktstellen und Ressourcen für zusätzliche Informationen und Beratung zu Cybersicherheitsfragen sowie Verfahren
             im Bereich der Cyberhygiene für Nutzer abdeckt.
         fr:
+          name: 'Contenu du programme de sensibilisation'
           description: "couvre les cybermenaces pertinentes, les mesures de gestion\
             \ des risques en mati\xE8re de cybers\xE9curit\xE9 en place, les points\
             \ de contact et les ressources pour obtenir des informations et des conseils\
@@ -28075,6 +28316,7 @@ objects:
             \ und aktualisierte Aufzeichnungen, aus denen hervorgeht, dass das Programm regelmäßig überprüft und bei Bedarf\
             \ aktualisiert wird."
         fr:
+          name: 'Mesure de l’efficacité et mise à jour du programme de sensibilisation'
           description: "S\u2019il est besoin, l\u2019efficacit\xE9 du programme de\
             \ sensibilisation est soumise \xE0 des tests. Le programme de sensibilisation\
             \ est mis \xE0 jour et propos\xE9 \xE0 intervalles pr\xE9d\xE9finis en\
@@ -28219,6 +28461,7 @@ objects:
           typical_evidence: • Ein umfassender Überblick über das Schulungsprogramm, in dem die Ziele für die verschiedenen
             Rollen und deren Erreichung sowie der Inhalt und die Häufigkeit der Schulung detailliert beschrieben werden.
         fr:
+          name: 'Formation régulière à la sécurité pour les rôles concernés'
           description: "Les entit\xE9s concern\xE9es identifient les employ\xE9s dont\
             \ les r\xF4les n\xE9cessitent des comp\xE9tences et une expertise pertinentes\
             \ en mati\xE8re de s\xE9curit\xE9, et veillent \xE0 ce qu\u2019ils re\xE7\
@@ -28318,6 +28561,7 @@ objects:
             \ Rollen und deren Erreichung sowie der Inhalt und die Häufigkeit der Schulung detailliert beschrieben werden.\
             \ \n• Wirkungsbeurteilung und Feedback aus Trainings."
         fr:
+          name: 'Programme de formation à la sécurité'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent, mettent en \u0153\
             uvre et appliquent un programme de formation conforme \xE0 la politique\
             \ de s\xE9curit\xE9 des r\xE9seaux et de l\u2019information, aux politiques\
@@ -28474,6 +28718,7 @@ objects:
             \ detailliert beschrieben werden. \n• Ergebnisse aller Tests oder Beurteilungen, die durchgeführt wurden, um\
             \ das Verständnis der Mitarbeiter für die behandelten Themen zu messen."
         fr:
+          name: 'Pertinence et contenu de la formation à la sécurité'
           description: "La formation vis\xE9e au point 8.2.1 est pertinente pour les\
             \ fonctions exerc\xE9es par l\u2019employ\xE9 et son efficacit\xE9 est\
             \ \xE9valu\xE9e. La formation prend en consid\xE9ration les mesures de\
@@ -28644,6 +28889,7 @@ objects:
           description: Anweisungen für die sichere Konfiguration und den sicheren Betrieb der Netz- und Informationssysteme,
             einschließlich mobiler Geräte;
         fr:
+          name: 'Formation : configuration et exploitation sécurisées des systèmes'
           description: "instructions concernant la configuration et le fonctionnement\
             \ s\xE9curis\xE9s du r\xE9seau et des syst\xE8mes d\u2019information,\
             \ y compris les dispositifs mobiles;"
@@ -28669,6 +28915,7 @@ objects:
         de:
           description: Unterrichtung über bekannte Cyberbedrohungen;
         fr:
+          name: 'Formation : cybermenaces connues'
           description: informations sur les cybermenaces connues;
         es:
           description: "informaci\xF3n sobre ciberamenazas conocidas;"
@@ -28688,6 +28935,7 @@ objects:
         de:
           description: Schulung in Bezug auf das Verhalten bei sicherheitsrelevanten Ereignissen.
         fr:
+          name: 'Formation : conduite à tenir en cas d’événement de sécurité'
           description: "formation sur le comportement \xE0 adopter en cas d\u2019\xE9\
             v\xE9nements touchant \xE0 la s\xE9curit\xE9."
         es:
@@ -28726,6 +28974,7 @@ objects:
             \ oder Rollen wechselten, an Schulungssitzungen teilgenommen haben, die für die neue Position oder Rolle relevant\
             \ sind. \n• Nachweis über die Aufrechterhaltung der erhaltenen Zertifizierungen."
         fr:
+          name: 'Formation lors d’un changement de poste'
           description: "Les entit\xE9s concern\xE9es dispensent des formations aux\
             \ membres du personnel qui assument de nouveaux postes ou de nouveaux\
             \ r\xF4les n\xE9cessitant des comp\xE9tences et une expertise pertinentes\
@@ -28817,6 +29066,7 @@ objects:
             \ zu den Schulungssitzungen, die Aufschluss über die Wirksamkeit der Schulung und Verbesserungsmöglichkeiten\
             \ geben können."
         fr:
+          name: 'Mise à jour périodique du programme de formation'
           description: "Le programme est mis \xE0 jour et organis\xE9 p\xE9riodiquement\
             \ en tenant compte des politiques et des r\xE8gles applicables, des r\xF4\
             les et responsabilit\xE9s assign\xE9s, ainsi que des cybermenaces connues\
@@ -28958,6 +29208,7 @@ objects:
             \ und Schlüssellängen“, Version: 2025-1, 31. Januar 2025."
           typical_evidence: • Dokumentierte Konzepte zur Kryptografie und Verfahren im Zusammenhang mit der Kryptografie.
         fr:
+          name: 'Politique et procédures cryptographiques'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point h), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es \xE9tablissent,\
             \ mettent en \u0153uvre et appliquent une politique et des proc\xE9dures\
@@ -29193,6 +29444,7 @@ objects:
             \ und RSA), (b) Identifizierung (z. B. Kerberos), (c) Nachrichtenauthentifizierung (z. B. Hash-basierter Nachrichtenauthentifizierungscode),\
             \ (d) Geheimaustausch (z. B. Shamir’s Secret Sharing) und (e) Zero-Knowledge-Proof-Protokolle (z. B. Schnorr)."
         fr:
+          name: 'Contenu de la politique cryptographique'
           description: "La politique et les proc\xE9dures vis\xE9es au point 9.1 \xE9\
             tablissent:"
           annotation: "\u2022 Veiller \xE0 ce que la politique et les proc\xE9dures\
@@ -29644,6 +29896,7 @@ objects:
             und Qualität der kryptografischen Maßnahmen, die zum Schutz der Anlagen und Werte der betreffenden Einrichtungen
             erforderlich sind, einschließlich der Daten, die gespeichert sind oder gerade übermittelt werden;
         fr:
+          name: 'Type, robustesse et qualité des mesures cryptographiques'
           description: "conform\xE9ment \xE0 la classification des actifs des entit\xE9\
             s concern\xE9es, le type, la solidit\xE9 et la qualit\xE9 des mesures\
             \ cryptographiques requises pour prot\xE9ger les actifs des entit\xE9\
@@ -29681,6 +29934,7 @@ objects:
             Algorithmen, Kryptierungsstärke, kryptografische Lösungen und Nutzungsverfahren, die zu genehmigen und für die
             Verwendung in den betreffenden Einrichtungen erforderlich sind, – soweit angemessen – nach einem Krypto-Agilitätsansatz;
         fr:
+          name: 'Protocoles, algorithmes et solutions cryptographiques approuvés'
           description: "sur la base du point a), les protocoles ou familles de protocoles\
             \ \xE0 adopter, ainsi que les algorithmes cryptographiques, la puissance\
             \ du chiffrement, les solutions cryptographiques et les pratiques d\u2019\
@@ -29720,6 +29974,7 @@ objects:
           description: 'der Ansatz der betreffenden Einrichtungen in Bezug auf das Schlüsselmanagement, – soweit angemessen
             – einschließlich der Methoden für:'
         fr:
+          name: 'Approche de gestion des clés'
           description: "l\u2019approche des entit\xE9s concern\xE9es en mati\xE8re\
             \ de gestion des cl\xE9s, y compris, le cas \xE9ch\xE9ant, les m\xE9thodes\
             \ destin\xE9es \xE0:"
@@ -29744,6 +29999,7 @@ objects:
         de:
           description: die Generierung verschiedener Schlüssel für kryptografische Systeme und Anwendungen;
         fr:
+          name: 'Gestion des clés : génération'
           description: "g\xE9n\xE9rer diff\xE9rentes cl\xE9s pour les syst\xE8mes\
             \ et applications cryptographiques;"
         es:
@@ -29765,6 +30021,7 @@ objects:
         de:
           description: die Ausstellung und Erlangung von Public-Key-Zertifikaten;
         fr:
+          name: 'Gestion des clés : émission et obtention de certificats à clé publique'
           description: "d\xE9livrer et obtenir des certificats \xE0 cl\xE9 publique;"
         es:
           description: "expedir y obtener certificados de clave p\xFAblica;"
@@ -29786,6 +30043,7 @@ objects:
           description: die Verteilung von Schlüsseln an die vorgesehenen Einrichtungen, einschließlich wie der Schlüssel
             nach Erhalt zu aktivieren ist;
         fr:
+          name: 'Gestion des clés : distribution et activation'
           description: "distribuer des cl\xE9s aux entit\xE9s pr\xE9vues, y compris\
             \ la mani\xE8re d\u2019activer les cl\xE9s lorsqu\u2019elles sont re\xE7\
             ues;"
@@ -29810,6 +30068,7 @@ objects:
         de:
           description: die Speicherung von Schlüsseln, einschließlich wie autorisierte Nutzer Zugang zu Schlüsseln erhalten;
         fr:
+          name: 'Gestion des clés : stockage et accès'
           description: "stocker les cl\xE9s, y compris la mani\xE8re dont les utilisateurs\
             \ autoris\xE9s obtiennent l\u2019acc\xE8s aux cl\xE9s;"
         es:
@@ -29835,6 +30094,7 @@ objects:
           description: die Änderung oder Aktualisierung von Schlüsseln, einschließlich Vorschriften darüber, wann und wie
             Schlüssel geändert werden können;
         fr:
+          name: 'Gestion des clés : changement et renouvellement'
           description: "modifier ou mettre \xE0 jour les cl\xE9s, y compris les r\xE8\
             gles relatives au moment et \xE0 la mani\xE8re de modifier les cl\xE9\
             s;"
@@ -29858,6 +30118,7 @@ objects:
         de:
           description: den Umgang mit beeinträchtigten Schlüsseln;
         fr:
+          name: 'Gestion des clés : clés compromises'
           description: "traiter les cl\xE9s compromises;"
         es:
           description: gestionar las claves en riesgo;
@@ -29876,6 +30137,7 @@ objects:
         de:
           description: den Widerruf von Schlüsseln, einschließlich wie Schlüssel zurückzuziehen oder zu deaktivieren sind;
         fr:
+          name: 'Gestion des clés : révocation'
           description: "r\xE9voquer les cl\xE9s, y compris la mani\xE8re de retirer\
             \ ou de d\xE9sactiver les cl\xE9s;"
         es:
@@ -29898,6 +30160,7 @@ objects:
         de:
           description: die Wiederherstellung verlorener oder beschädigter Schlüssel;
         fr:
+          name: 'Gestion des clés : récupération des clés perdues ou corrompues'
           description: "r\xE9cup\xE9rer les cl\xE9s perdues ou corrompues;"
         es:
           description: recuperar las claves perdidas o corrompidas;
@@ -29917,6 +30180,7 @@ objects:
         de:
           description: die Sicherung oder Archivierung von Schlüsseln;
         fr:
+          name: 'Gestion des clés : sauvegarde et archivage'
           description: "effectuer des copies de sauvegarde ou proc\xE9der \xE0 l\u2019\
             archivage des cl\xE9s;"
         es:
@@ -29936,6 +30200,7 @@ objects:
         de:
           description: die Vernichtung von Schlüsseln;
         fr:
+          name: 'Gestion des clés : destruction'
           description: "d\xE9truire les cl\xE9s;"
         es:
           description: destruir claves;
@@ -29954,6 +30219,7 @@ objects:
         de:
           description: die Protokollierung und Prüfung von Managementtätigkeiten im Zusammenhang mit Schlüsseln;
         fr:
+          name: 'Gestion des clés : journalisation et audit'
           description: "r\xE9aliser la journalisation et l\u2019audit des principales\
             \ activit\xE9s li\xE9es \xE0 la gestion;"
         es:
@@ -29981,6 +30247,7 @@ objects:
             für den angegebenen Zeitraum gemäß den Vorschriften der Organisation für das Schlüsselmanagement verwendet werden
             können.
         fr:
+          name: 'Gestion des clés : dates d’activation et de désactivation'
           description: "fixer des dates d\u2019activation et de d\xE9sactivation pour\
             \ les cl\xE9s, afin que celles-ci ne puissent \xEAtre utilis\xE9es que\
             \ pendant la p\xE9riode sp\xE9cifi\xE9e, conform\xE9ment aux r\xE8gles\
@@ -30066,6 +30333,7 @@ objects:
             \ umgehen, sind sich der Kryptografiekonzepte und -verfahren bewusst und verstehen diese. \n• Schlüsselverwaltungssystem\
             \ vorhanden."
         fr:
+          name: 'Réexamen de la politique et des procédures cryptographiques'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour leur politique et leurs proc\xE9dures\
             \ \xE0 des intervalles pr\xE9d\xE9finis, en tenant compte de l\u2019\xE9\
@@ -30365,6 +30633,7 @@ objects:
             \ akkreditierten Stellen, die bestätigen, dass eine Person bestimmte Anforderungen an Cybersicherheitskenntnisse\
             \ und -fähigkeiten erfüllt."
         fr:
+          name: 'Compréhension des responsabilités de sécurité et engagement'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point i), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es veillent \xE0\
             \ ce que leurs employ\xE9s et leurs fournisseurs et prestataires de services\
@@ -30714,6 +30983,7 @@ objects:
             \ Verwendung relevanter Cybersicherheits-Frameworks und -Standards zusammen mit weithin anerkannten Qualitätsmanagement-\
             \ und Fähigkeitsreifemodellen und -standards."
         fr:
+          name: 'Mécanismes de sécurité liés aux ressources humaines'
           description: "L\u2019exigence pr\xE9vue au point 10.1.1 comprend les \xE9\
             l\xE9ments suivants:"
           annotation: "\u2022 Mettre en \u0153uvre des campagnes de sensibilisation\
@@ -30964,6 +31234,7 @@ objects:
             gegebenenfalls die von den betreffenden Einrichtungen gemäß Nummer 8.1 angewandten Standardverfahren im Bereich
             der Cyberhygiene verstehen und befolgen;
         fr:
+          name: 'Mécanismes d’application des pratiques de cyberhygiène'
           description: "des m\xE9canismes garantissant que tous les employ\xE9s, fournisseurs\
             \ et prestataires de services directs, s\u2019il y a lieu, comprennent\
             \ et suivent les pratiques standard de cyberhygi\xE8ne que les entit\xE9\
@@ -30998,6 +31269,7 @@ objects:
           description: Mechanismen, mit denen sichergestellt wird, dass sich alle Nutzer mit administrativem oder privilegiertem
             Zugang ihrer Rollen, Verantwortlichkeiten und Weisungsbefugnisse bewusst sind und entsprechend handeln;
         fr:
+          name: 'Mécanismes de sensibilisation des utilisateurs à privilèges à leur rôle'
           description: "des m\xE9canismes visant \xE0 garantir que tous les utilisateurs\
             \ ayant un acc\xE8s d\u2019administration ou privil\xE9gi\xE9 connaissent\
             \ les r\xF4les, responsabilit\xE9s et pouvoirs qui leur sont confi\xE9\
@@ -31030,6 +31302,7 @@ objects:
             und Weisungsbefugnisse in Bezug auf die Sicherheit von Netz- und Informationssystemen verstehen und entsprechend
             handeln;
         fr:
+          name: 'Mécanismes de sensibilisation des organes de direction à leur rôle'
           description: "des m\xE9canismes garantissant que les membres des organes\
             \ de direction comprennent le r\xF4le, les responsabilit\xE9s et les pouvoirs\
             \ qui leur sont confi\xE9s en mati\xE8re de s\xE9curit\xE9 des r\xE9seaux\
@@ -31064,6 +31337,7 @@ objects:
           description: Mechanismen für die Einstellung von Personal, das für die jeweiligen Rollen qualifiziert ist, wie
             z. B. Überprüfung der Referenzen, Überprüfungsverfahren, Validierung von Zeugnissen oder schriftliche Prüfungen.
         fr:
+          name: 'Mécanismes de recrutement de personnel qualifié'
           description: "des m\xE9canismes de recrutement de personnel qualifi\xE9\
             \ pour les r\xF4les respectifs, tels que des contr\xF4les de r\xE9f\xE9\
             rence, des proc\xE9dures de v\xE9rification, une validation des certifications\
@@ -31107,6 +31381,7 @@ objects:
           typical_evidence: "• Aktuelle Liste der Mitarbeiter und deren Zuordnung zu Rollen. \n• Aufzeichnungen über den\
             \ Überprüfungsprozess, einschließlich der verwendeten Kriterien, der Ergebnisse und aller vorgenommenen Änderungen."
         fr:
+          name: 'Réexamen annuel de l’affectation du personnel aux rôles'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent l\u2019affectation\
             \ du personnel aux fonctions sp\xE9cifiques vis\xE9es au point 1.2, ainsi\
             \ que la mobilisation de leurs ressources humaines \xE0 cet \xE9gard,\
@@ -31204,6 +31479,7 @@ objects:
           typical_evidence: "• Dokumentierter Hintergrundüberprüfungsprozess. \n• Ergebnisse der Hintergrundüberprüfung\
             \ von Mitarbeitern und ggf. direkten Lieferanten und Dienstleistern gemäß Punkt 5.1.4 (c)."
         fr:
+          name: 'Vérification des antécédents des employés et des fournisseurs'
           description: "Les entit\xE9s concern\xE9es veillent dans la mesure du possible\
             \ \xE0 \xE9tendre la v\xE9rification des ant\xE9c\xE9dents de leurs employ\xE9\
             s et, le cas \xE9ch\xE9ant, des fournisseurs et prestataires de services\
@@ -31345,6 +31621,7 @@ objects:
             \ ergriffen wurden. \n• Vereinbarungen mit Drittanbietern, die ggf. Hintergrundüberprüfungsdienste durchführen,\
             \ um sicherzustellen, dass sie den gesetzlichen und politischen Anforderungen entsprechen."
         fr:
+          name: 'Activités de vérification des antécédents'
           description: "Aux fins du point 10.2.1, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Le cas \xE9ch\xE9ant, d\xE9finir des crit\xE8res pour\
             \ les r\xF4les, les responsabilit\xE9s et les pouvoirs qui ne seront exerc\xE9\
@@ -31548,6 +31825,7 @@ objects:
           description: Kriterien festlegen, in denen aufgeführt ist, welche Rollen, Verantwortlichkeiten und Weisungsbefugnisse
             nur von Personen wahrgenommen werden dürfen, deren Zuverlässigkeit überprüft wurde;
         fr:
+          name: 'Critères des rôles soumis à vérification des antécédents'
           description: "mettent en place des crit\xE8res d\xE9finissant les r\xF4\
             les, les responsabilit\xE9s et les pouvoirs qui ne peuvent \xEAtre exerc\xE9\
             s que par des personnes dont les ant\xE9c\xE9dents ont \xE9t\xE9 v\xE9\
@@ -31584,6 +31862,7 @@ objects:
             der Anlagen und Werte gemäß Nummer 12.1 und den Netz- und Informationssystemen, auf die zugegriffen werden soll,
             sowie den wahrgenommenen Risiken zu berücksichtigen sind.
         fr:
+          name: 'Vérification des antécédents avant la prise de fonction'
           description: "veillent \xE0 ce que ces personnes fassent l\u2019objet de\
             \ la v\xE9rification vis\xE9e au point 10.2.1 avant qu\u2019elles commencent\
             \ \xE0 exercer ces r\xF4les, responsabilit\xE9s et pouvoirs; ces v\xE9\
@@ -31637,6 +31916,7 @@ objects:
           typical_evidence: "• Aufzeichnungen über Hintergrundüberprüfungen für Rollen, die eine fortlaufende Freigabe erfordern.\
             \ \n• Überprüfen Sie Kommentare oder Änderungsprotokolle des Verfahrens."
         fr:
+          name: 'Réexamen de la politique de vérification des antécédents'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour leur politique \xE0 intervalles pr\xE9\
             d\xE9finis et lorsque cela est n\xE9cessaire."
@@ -31717,6 +31997,7 @@ objects:
           typical_evidence: • Dokumente wie Beschäftigungsbedingungen, Verträge oder Vereinbarungen, in denen Verantwortlichkeiten
             und Pflichten aufgeführt sind, die auch nach Beendigung des Arbeitsverhältnisses oder Vertrags gültig sind.
         fr:
+          name: 'Responsabilités de sécurité après départ ou changement de poste'
           description: "Les entit\xE9s concern\xE9es veillent \xE0 ce que les responsabilit\xE9\
             s et les t\xE2ches en mati\xE8re de s\xE9curit\xE9 des r\xE9seaux et des\
             \ syst\xE8mes d\u2019information qui restent valables apr\xE8s la cessation\
@@ -31849,6 +32130,7 @@ objects:
             \ und Schulung des Personals in neue Rollen (z. B. standardisierte Checklisten, die während des Kündigungsprozesses\
             \ verwendet werden, um sicherzustellen, dass alle erforderlichen Schritte unternommen werden)."
         fr:
+          name: 'Obligations post-emploi dans les conditions d’emploi'
           description: "Aux fins du point 10.3.1, les entit\xE9s concern\xE9es incluent\
             \ dans les conditions d'emploi, le contrat ou la convention conclus avec\
             \ la personne concern\xE9e les responsabilit\xE9s et les t\xE2ches qui\
@@ -32124,6 +32406,7 @@ objects:
             \ mit Mitarbeitern, Zeugenaussagen, E-Mails, Unterlagen, digitale Aufzeichnungen, Systemprotokolle und Telefonaufzeichnungen\
             \ sein."
         fr:
+          name: 'Procédure disciplinaire en cas de violation des politiques de sécurité'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent, communiquent\
             \ et maintiennent une proc\xE9dure disciplinaire pour le traitement des\
             \ violations des politiques de s\xE9curit\xE9 des r\xE9seaux et des syst\xE8\
@@ -32294,6 +32577,7 @@ objects:
 
             • Dokumentation des Disziplinarverfahrens, in der die Arten von Verstößen dargelegt werden, die Gegenstand von Disziplinarmaßnahmen sein können, und welche Schritte zu unternehmen sind, wenn ein Verstoß auftritt.
         fr:
+          name: 'Réexamen de la procédure disciplinaire'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour les proc\xE9dures disciplinaires \xE0\
             \ intervalles pr\xE9d\xE9finis, ainsi que lorsque des changements l\xE9\
@@ -32503,6 +32787,7 @@ objects:
           typical_evidence: • Konzeptdokument oder Dokumente zur Zugangskontrolle, in denen die Anforderungen, Verfahren
             und Verantwortlichkeiten der Zugangskontrolle dargelegt sind.
         fr:
+          name: 'Politiques de contrôle d’accès logique et physique'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point i), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es \xE9tablissent,\
             \ documentent et mettent en \u0153uvre des politiques de contr\xF4le de\
@@ -32645,6 +32930,7 @@ objects:
             • Protokolle, die dynamische Zugriffskontrollentscheidungen basierend auf Benutzerverhalten oder Umgebungsfaktoren\
             \ zeigen"
         fr:
+          name: 'Périmètre des politiques de contrôle d’accès'
           description: "Les politiques vis\xE9es au point 11.1.1:"
           annotation: "\u2022 Mettre en \u0153uvre des r\xE8gles de contr\xF4le d\u2019\
             acc\xE8s en d\xE9finissant et en cartographiant les droits et les restrictions\
@@ -32862,6 +33148,7 @@ objects:
           description: für den Zugang von Personen, einschließlich Personal, Besuchern und externen Einrichtungen wie Anbietern
             und Diensteanbietern, gelten;
         fr:
+          name: 'Accès des personnes, y compris visiteurs et fournisseurs'
           description: "couvrent l\u2019acc\xE8s par les personnes, y compris le personnel,\
             \ les visiteurs et les entit\xE9s externes telles que les fournisseurs\
             \ et les prestataires de services;"
@@ -32887,6 +33174,7 @@ objects:
         de:
           description: für den Zugang von Netz- und Informationssystemen gelten;
         fr:
+          name: 'Accès des réseaux et des systèmes d’information'
           description: "couvrent l\u2019acc\xE8s par les r\xE9seaux et les syst\xE8\
             mes d\u2019information;"
         es:
@@ -32909,6 +33197,7 @@ objects:
         de:
           description: sicherstellen, dass der Zugang nur Nutzern gewährt wird, die angemessen authentifiziert wurden.
         fr:
+          name: 'Accès réservé aux utilisateurs dûment authentifiés'
           description: "garantissent que l\u2019acc\xE8s ne soit accord\xE9 qu\u2019\
             aux utilisateurs d\xFBment authentifi\xE9s."
         es:
@@ -32998,6 +33287,7 @@ objects:
             \ vorgenommenen Änderungen, die die Einhaltung des Konzepts während der Änderungen belegen. \n• Zutrittskontrollsystemkonfigurationen,\
             \ die je nach Geschäftsanforderungen die Einführung von MAC, DAC, RBAC oder ABAC zeigen."
         fr:
+          name: 'Réexamen des politiques de contrôle d’accès'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour leurs politiques \xE0 intervalles pr\xE9\
             d\xE9finis, ainsi qu\u2019en cas d\u2019incidents importants ou lorsque\
@@ -33242,6 +33532,7 @@ objects:
           description: Die betreffenden Einrichtungen gewähren, ändern, löschen und dokumentieren Zugangs- und Zugriffsrechte
             für die Netz- und Informationssysteme im Einklang mit dem in Nummer 11.1 genannten Konzept für die Zugriffskontrolle.
         fr:
+          name: 'Attribution, modification et suppression des droits d’accès'
           description: "Les entit\xE9s concern\xE9es fournissent, modifient, suppriment\
             \ et documentent les droits d\u2019acc\xE8s aux r\xE9seaux et aux syst\xE8\
             mes d\u2019information conform\xE9ment \xE0 la politique de contr\xF4\
@@ -33387,6 +33678,7 @@ objects:
             \ die die Übereinstimmung mit dem Zugriffskontrollkonzept überprüfen. \n• Ergebnisse der physischen Inspektionen\
             \ von Zugangskontrollsystemen und deren Verwendung, falls zutreffend."
         fr:
+          name: 'Activités de gestion des droits d’accès'
           description: "Les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Veiller \xE0 ce que chaque utilisateur n'ait acc\xE8\
             s qu'aux informations n\xE9cessaires \xE0 son r\xF4le (\xAB besoin de\
@@ -33772,6 +34064,7 @@ objects:
             wenn nötig“ ( Need-to-know ), des Grundsatzes der Nutzungsnotwendigkeit ( Need-to-use ) und des Grundsatzes
             der Aufgabentrennung;
         fr:
+          name: 'Droits d’accès selon le besoin d’en connaître, le moindre privilège et la séparation des tâches'
           description: "accordent et r\xE9voquent les droits d\u2019acc\xE8s sur la\
             \ base des principes du besoin d\u2019en conna\xEEtre, du moindre privil\xE8\
             ge et de la s\xE9paration des fonctions;"
@@ -33800,6 +34093,7 @@ objects:
           description: stellen sicher, dass die Zugangs- und Zugriffsrechte bei Beendigung oder Änderung des Beschäftigungsverhältnisses
             entsprechend geändert werden;
         fr:
+          name: 'Modification des droits d’accès en cas de départ ou de changement de poste'
           description: "veillent \xE0 ce que les droits d\u2019acc\xE8s soient modifi\xE9\
             s en cons\xE9quence en cas de cessation ou de changement d\u2019emploi;"
         es:
@@ -33825,6 +34119,7 @@ objects:
           description: stellen sicher, dass der Zugang zu Netz- und Informationssystemen von den einschlägigen Personen
             genehmigt wird;
         fr:
+          name: 'Autorisation des accès'
           description: "veillent \xE0 ce que l\u2019acc\xE8s aux r\xE9seaux et aux\
             \ syst\xE8mes d\u2019information soit autoris\xE9 par les personnes concern\xE9\
             es;"
@@ -33853,6 +34148,7 @@ objects:
             Anbieter und Diensteanbieter, angemessen Rechnung tragen, insbesondere durch Beschränkung der Zugangs- und Zugriffsrechte
             in Bezug auf Umfang und Dauer;
         fr:
+          name: 'Limitation du périmètre et de la durée des accès des tiers'
           description: "veillent \xE0 ce que les droits d\u2019acc\xE8s couvrent ad\xE9\
             quatement l\u2019acc\xE8s des tiers, tels que les visiteurs, les fournisseurs\
             \ et les prestataires de services, notamment en limitant le champ d\u2019\
@@ -33884,6 +34180,7 @@ objects:
         de:
           description: führen ein Register der gewährten Zugangs- und Zugriffsrechte;
         fr:
+          name: 'Registre des droits d’accès accordés'
           description: "tiennent un registre des droits d\u2019acc\xE8s accord\xE9\
             s;"
         es:
@@ -33904,6 +34201,7 @@ objects:
         de:
           description: protokollieren das Management von Zugangs- und Zugriffsrechten.
         fr:
+          name: 'Journalisation de la gestion des droits d’accès'
           description: "appliquent la journalisation \xE0 la gestion des droits d\u2019\
             acc\xE8s."
         es:
@@ -33984,6 +34282,7 @@ objects:
             • Nachweis eines zentralen Verzeichnisdienstes oder SSO-Anbieters zur Verwaltung der Zugriffskontrolle, unterstützt\
             \ durch Dokumentation, Protokolle, Prüfberichte und Aufzeichnungen. \n• Aufgabentrennungsmatrix."
         fr:
+          name: 'Revue des droits d’accès'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent les droits d\u2019\
             acc\xE8s \xE0 intervalles pr\xE9d\xE9finis et les modifient en fonction\
             \ des changements organisationnels. Les entit\xE9s concern\xE9es documentent\
@@ -34249,6 +34548,7 @@ objects:
             \ Genehmigungsaufzeichnungen für die Gewährung privilegierter Zugriffe. \n• Protokolle oder Aufzeichnungen von\
             \ Zugriffsüberprüfungen und -sperren. \n• Rollenbasierte Zugriffsmatrix, die zeigt, wer welchen Zugriff benötigt."
         fr:
+          name: 'Politiques de gestion des comptes à privilèges et d’administration'
           description: "Les entit\xE9s concern\xE9es maintiennent des politiques de\
             \ gestion des comptes privil\xE9gi\xE9s et des comptes d\u2019administration\
             \ du syst\xE8me dans le cadre de la politique de contr\xF4le d\u2019acc\xE8\
@@ -34465,6 +34765,7 @@ objects:
             \ sind. \n• Audit-Trail- und Überwachungsprotokolle, die die Nutzung von Zugriffsrechten erfassen, einschließlich\
             \ aller unbefugten Zugriffsversuche und der als Reaktion darauf ergriffenen Maßnahmen."
         fr:
+          name: 'Contenu des politiques de gestion des comptes à privilèges'
           description: "Les politiques vis\xE9es au point 11.3.1:"
           annotation: "\u2022 Introduire des exigences d\u2019authentification plus\
             \ strictes pour les droits d\u2019acc\xE8s privil\xE9gi\xE9s, telles que\
@@ -34691,6 +34992,7 @@ objects:
           description: müssen starke Verfahren zur Identifizierung, Authentifizierung (z. B. Multifaktor-Authentifizierung)
             und Genehmigung für privilegierte Konten und Systemverwaltungskonten eingerichtet werden;
         fr:
+          name: 'Authentification et autorisation renforcées pour les comptes à privilèges'
           description: "\xE9tablissent des proc\xE9dures fortes d\u2019identification,\
             \ d\u2019authentification (telles que l\u2019authentification multifactorielle)\
             \ et d\u2019autorisation pour les comptes privil\xE9gi\xE9s et les comptes\
@@ -34722,6 +35024,7 @@ objects:
           description: müssen spezielle Konten eingerichtet werden, die ausschließlich für Systemverwaltungsvorgänge, wie
             Installation, Konfiguration, Verwaltung oder Wartung, zu verwenden sind;
         fr:
+          name: 'Comptes dédiés à l’administration des systèmes'
           description: "cr\xE9ent des comptes sp\xE9cifiques \xE0 utiliser exclusivement\
             \ pour les op\xE9rations d\u2019administration du syst\xE8me, telles que\
             \ l\u2019installation, la configuration, la gestion ou la maintenance;"
@@ -34750,6 +35053,7 @@ objects:
           description: müssen die Systemverwaltungsrechte so weit wie möglich individuell zugeschnitten und einschränkt
             werden;
         fr:
+          name: 'Privilèges d’administration individualisés et restreints'
           description: "individualisent et restreignent autant que possible les privil\xE8\
             ges d\u2019administration du syst\xE8me,"
         es:
@@ -34774,6 +35078,7 @@ objects:
           description: muss festgelegt werden, dass Systemverwaltungskonten ausschließlich zur Verbindung mit Systemverwaltungssystemen
             verwendet werden.
         fr:
+          name: 'Usage exclusif des comptes d’administration sur les systèmes d’administration'
           description: "pr\xE9voient que les comptes d\u2019administration du syst\xE8\
             me ne soient utilis\xE9s que pour se connecter aux syst\xE8mes d\u2019\
             administration du syst\xE8me."
@@ -34824,6 +35129,7 @@ objects:
             \ mit Berichten von internen oder externen Audits, die überprüfen, ob die Verwaltung der Zugriffsrechte mit\
             \ den Konzepten und behördlichen Anforderungen übereinstimmt."
         fr:
+          name: 'Revue des droits des comptes à privilèges'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent les droits d\u2019\
             acc\xE8s des comptes privil\xE9gi\xE9s et des comptes d\u2019administration\
             \ du syst\xE8me \xE0 intervalles pr\xE9d\xE9finis et les modifient en\
@@ -34979,6 +35285,7 @@ objects:
             \ Systemüberwachung, Konfigurationsverwaltung, Sicherheitsverwaltung, Benutzerverwaltung sowie Sicherung und\
             \ Wiederherstellung."
         fr:
+          name: 'Restriction et contrôle des systèmes d’administration'
           description: "Les entit\xE9s concern\xE9es restreignent et contr\xF4lent\
             \ l\u2019utilisation des syst\xE8mes d\u2019administration du syst\xE8\
             me conform\xE9ment \xE0 la politique de contr\xF4le d\u2019acc\xE8s vis\xE9\
@@ -35193,6 +35500,7 @@ objects:
             \ d. h. Nachweise dafür, dass das Personal in der ordnungsgemäßen Verwendung von Systemverwaltungssystemen geschult\
             \ wurde, beispielsweise Schulungsmaterialien, Anwesenheitslisten oder Abschlusszertifikate."
         fr:
+          name: 'Mesures relatives aux systèmes d’administration'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Mettre en place des contr\xF4les d\u2019acc\xE8s stricts\
             \ pour s\u2019assurer que les syst\xE8mes administratifs sont utilis\xE9\
@@ -35405,6 +35713,7 @@ objects:
           description: Systemverwaltungssysteme ausschließlich für die Zwecke der Systemverwaltung und nicht für andere
             Vorgänge verwenden;
         fr:
+          name: 'Usage exclusif des systèmes d’administration à des fins d’administration'
           description: "utilisent uniquement les syst\xE8mes d\u2019administration\
             \ du syst\xE8me \xE0 des fins d\u2019administration du syst\xE8me, et\
             \ non pour d\u2019autres op\xE9rations;"
@@ -35431,6 +35740,7 @@ objects:
           description: solche Systeme logisch von Anwendungssoftware, die nicht für Systemverwaltungszwecke verwendet wird,
             trennen;
         fr:
+          name: 'Séparation logique des systèmes d’administration'
           description: "s\xE9parent logiquement ces syst\xE8mes des logiciels d\u2019\
             application qui ne sont pas utilis\xE9s \xE0 des fins d\u2019administration\
             \ du syst\xE8me,"
@@ -35457,6 +35767,7 @@ objects:
         de:
           description: den Zugang zu Systemverwaltungssystemen durch Authentifizierung und Verschlüsselung schützen.
         fr:
+          name: 'Authentification et chiffrement des accès aux systèmes d’administration'
           description: "prot\xE8gent l\u2019acc\xE8s aux syst\xE8mes d\u2019administration\
             \ du syst\xE8me au moyen de l\u2019authentification et du cryptage."
         es:
@@ -35517,6 +35828,7 @@ objects:
             \ verfügbar. \n• Berichte von internen oder externen Audits, die bestätigen, dass die Verwaltung von Identitäten\
             \ mit den Konzepten und behördlichen Anforderungen übereinstimmt."
         fr:
+          name: 'Gestion du cycle de vie des identités'
           description: "Les entit\xE9s concern\xE9es g\xE8rent l\u2019ensemble du\
             \ cycle de vie des identit\xE9s des r\xE9seaux et syst\xE8mes d\u2019\
             information et de leurs utilisateurs."
@@ -35635,6 +35947,7 @@ objects:
             \ und deren Benutzer. \n• Protokolle oder Berichte im Zusammenhang mit der Identitätsverwaltung. \n• Nachweis\
             \ der vorhandenen Systeme, die die Zugangskontrolle durchsetzen, wie z. B. IAM-Lösungen."
         fr:
+          name: 'Activités de gestion des identités'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Consid\xE9rez que la fourniture ou la r\xE9vocation\
             \ de l\u2019acc\xE8s aux actifs est g\xE9n\xE9ralement une proc\xE9dure\
@@ -35757,6 +36070,7 @@ objects:
         de:
           description: eindeutige Kennungen für die Netz- und Informationssysteme und deren Nutzer einrichten;
         fr:
+          name: 'Identités uniques pour les systèmes et les utilisateurs'
           description: "mettent en place des identit\xE9s uniques pour les r\xE9seaux\
             \ et les syst\xE8mes d\u2019information et leurs utilisateurs;"
         es:
@@ -35779,6 +36093,7 @@ objects:
         de:
           description: die Nutzerkennung mit einer einzigen Person verknüpfen;
         fr:
+          name: 'Rattachement de chaque identité utilisateur à une seule personne'
           description: "lient l\u2019identit\xE9 des utilisateurs \xE0 une seule personne;"
         es:
           description: "asociar\xE1n la identidad de los usuarios a una sola persona;"
@@ -35797,6 +36112,7 @@ objects:
         de:
           description: die Überwachung der Kennungen der Netz- und Informationssysteme sicherstellen;
         fr:
+          name: 'Supervision des identités des systèmes'
           description: "assurent la supervision des identit\xE9s des r\xE9seaux et\
             \ des syst\xE8mes d\u2019information;"
         es:
@@ -35819,6 +36135,7 @@ objects:
         de:
           description: das Management von Identitäten (Kennungen) protokollieren.
         fr:
+          name: 'Journalisation de la gestion des identités'
           description: "appliquent la journalisation \xE0 la gestion des identit\xE9\
             s."
         es:
@@ -35892,6 +36209,7 @@ objects:
             \ es sei denn, eine technische oder betriebliche Einschränkung macht ihre Verwendung unvermeidbar."
           typical_evidence: • Genehmigungsaufzeichnungen für Ausnahmen.
         fr:
+          name: 'Approbation et documentation des identités partagées'
           description: "Les entit\xE9s concern\xE9es n\u2019autorisent l\u2019attribution\
             \ d\u2019identit\xE9s \xE0 plusieurs personnes, pouvant prendre la forme\
             \ d'identit\xE9s partag\xE9es, que lorsqu\u2019elle est n\xE9cessaire\
@@ -36094,6 +36412,7 @@ objects:
             \ alle Änderungen aufgrund von Rollenwechseln oder der Beendigung des Arbeitsverhältnisses oder der Inaktivität\
             \ widerspiegeln.\n\n[TIPPS]\n\n• Nachweis der vorhandenen Systeme, z. B. IAM-Lösungen."
         fr:
+          name: 'Revue et désactivation des identités'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent r\xE9guli\xE8\
             rement les identit\xE9s des r\xE9seaux et syst\xE8mes d\u2019information\
             \ et de leurs utilisateurs et, si elles ne sont plus n\xE9cessaires, les\
@@ -36247,6 +36566,7 @@ objects:
             \ \n• Dokumentation, die die Verwendung sicherer Authentifizierungs- und Autorisierungsprotokolle zeigt und\
             \ nachweist, dass diese getestet wurden, um zu bestätigen, dass sie auf sichere Weise implementiert sind."
         fr:
+          name: 'Procédures et technologies d’authentification sécurisées'
           description: "Les entit\xE9s concern\xE9es mettent en \u0153uvre des proc\xE9\
             dures et des technologies d\u2019authentification s\xE9curis\xE9es fond\xE9\
             es sur des restrictions d\u2019acc\xE8s et la politique de contr\xF4le\
@@ -36484,6 +36804,7 @@ objects:
             \ überprüft und bei Bedarf aktualisiert werden. \n• Aufzeichnungen über Identitätsänderungen, die alle Änderungen\
             \ aufgrund von Rollenwechseln oder Beendigung des Arbeitsverhältnisses widerspiegeln."
         fr:
+          name: 'Mesures d’authentification'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Utiliser des identifiants d'authentification uniques\
             \ pour tous les actifs de l'entit\xE9. La mise en \u0153uvre des meilleures\
@@ -36802,6 +37123,7 @@ objects:
           description: sicherstellen, dass die Stärke der Authentifizierung für die Klassifizierung der Anlage bzw. des
             Werts, auf die zugegriffen werden soll, angemessen ist;
         fr:
+          name: 'Niveau d’authentification adapté à la classification des actifs'
           description: "veillent \xE0 ce que la force de l\u2019authentification soit\
             \ adapt\xE9e \xE0 la classification de l\u2019actif auquel acc\xE9der;"
         es:
@@ -36829,6 +37151,7 @@ objects:
             Verfahren kontrollieren, das die Vertraulichkeit der Informationen gewährleistet, einschließlich Anweisungen
             an das Personal in Bezug auf den angemessenen Umgang mit Authentifizierungsinformationen;
         fr:
+          name: 'Gestion des secrets d’authentification'
           description: "contr\xF4lent l\u2019attribution aux utilisateurs et la gestion\
             \ des informations secr\xE8tes relatives \xE0 l\u2019authentification\
             \ par une proc\xE9dure garantissant la confidentialit\xE9 des informations,\
@@ -36865,6 +37188,7 @@ objects:
           description: die Änderung von Authentifizierungsdaten zu Beginn, sodann in vorab festgelegten Zeitabständen und
             immer dann verlangen, wenn der Verdacht besteht, dass die Authentifizierungsdaten beeinträchtigt wurden;
         fr:
+          name: 'Changement des identifiants d’authentification'
           description: "exigent la modification des identifiants d\u2019authentification\
             \ d\xE8s le d\xE9part, \xE0 des intervalles pr\xE9d\xE9finis et en cas\
             \ de soup\xE7on de compromission des identifiants;"
@@ -36894,6 +37218,7 @@ objects:
           description: das Zurücksetzen der Authentifizierungsdaten und die Sperrung von Nutzern nach einer vorab festgelegten
             Anzahl erfolgloser Anmeldeversuche verlangen;
         fr:
+          name: 'Verrouillage après échecs de connexion'
           description: "exigent la r\xE9initialisation des identifiants d\u2019authentification\
             \ et le blocage des utilisateurs apr\xE8s un nombre pr\xE9d\xE9fini de\
             \ tentatives de connexion infructueuses;"
@@ -36922,6 +37247,7 @@ objects:
         de:
           description: inaktive Sitzungen nach einem im Voraus festgelegten Zeitraum der Inaktivität beenden und
         fr:
+          name: 'Fermeture des sessions inactives'
           description: "mettent un terme aux sessions inactives apr\xE8s une p\xE9\
             riode d\u2019inactivit\xE9 pr\xE9d\xE9finie; et"
         es:
@@ -36946,6 +37272,7 @@ objects:
           description: für den Zugriff auf privilegierte Konten oder Verwaltungskonten gesonderte Authentifizierungsdaten
             verlangen.
         fr:
+          name: 'Identifiants distincts pour les comptes à privilèges et d’administration'
           description: "exigent des identifiants distincts pour obtenir un acc\xE8\
             s privil\xE9gi\xE9 ou acc\xE9der \xE0 des comptes d\u2019administration."
         es:
@@ -36989,6 +37316,7 @@ objects:
           typical_evidence: • Konzeptdokumente zur Zugriffskontrolle, in denen sichere Authentifizierungsverfahren und -technologien
             beschrieben werden.
         fr:
+          name: 'Méthodes d’authentification à l’état de l’art'
           description: "Les entit\xE9s concern\xE9es utilisent, dans la mesure du\
             \ possible, les m\xE9thodes d\u2019authentification les plus r\xE9centes,\
             \ en fonction du risque associ\xE9 \xE9valu\xE9 et de la classification\
@@ -37120,6 +37448,7 @@ objects:
             \ von Schulungen für Mitarbeiter zu sicheren Authentifizierungspraktiken und -technologien. \n• Aufzeichnungen\
             \ über Sensibilisierungsprogramme oder Mitteilungen an Mitarbeiter über die Bedeutung einer sicheren Authentifizierung."
         fr:
+          name: 'Réexamen des procédures et technologies d’authentification'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent les proc\xE9dures\
             \ et technologies d\u2019authentification \xE0 intervalles pr\xE9d\xE9\
             finis."
@@ -37365,6 +37694,7 @@ objects:
             \ das darlegt, wie verschiedene MFA-Methoden zugewiesen werden, einschließlich der Frage, ob Phishing-resistente\
             \ MFA verwendet wird."
         fr:
+          name: 'Authentification multifacteur ou continue'
           description: "Les entit\xE9s concern\xE9es veillent \xE0 ce que les utilisateurs\
             \ soient authentifi\xE9s par des facteurs d\u2019authentification multiples\
             \ ou des m\xE9canismes d\u2019authentification continue pour acc\xE9der\
@@ -37619,6 +37949,7 @@ objects:
             \ und alle erkannten verdächtigen Aktivitäten zeigen. \n• Konfigurationsdateien, die die Implementierung zusätzlicher\
             \ Authentifizierungsfaktoren basierend auf vordefinierten Regeln zeigen."
         fr:
+          name: 'Niveau d’authentification multifacteur adapté à la classification des actifs'
           description: "Les entit\xE9s concern\xE9es veillent \xE0 ce que la force\
             \ de l\u2019authentification soit adapt\xE9e \xE0 la classification de\
             \ l\u2019actif auquel acc\xE9der."
@@ -37929,6 +38260,7 @@ objects:
           annotation: • Erstellen und dokumentieren Sie Klassifizierungsebenen für die Assets, einschließlich Klassifizierungskonventionen.
           typical_evidence: • Dokumentierte Klassifizierungsstufen für die Assets.
         fr:
+          name: 'Niveaux de classification de tous les actifs'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point i), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es fixent les\
             \ niveaux de classification de tous les actifs, y compris l'information,\
@@ -38015,6 +38347,7 @@ objects:
           typical_evidence: • Die neueste, aktualisierte Aufzeichnung der Assets des Unternehmens und deren Klassifizierung
             basierend auf den identifizierten Klassifizierungsstufen.
         fr:
+          name: 'Activités de classification des actifs'
           description: "Aux fins du point 12.1.1, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Veiller \xE0 ce que les classifications et les mesures\
             \ de protection associ\xE9es pour les actifs tiennent compte des besoins\
@@ -38135,6 +38468,7 @@ objects:
         de:
           description: ein System von Klassifizierungsstufen für Anlagen und Werte festlegen;
         fr:
+          name: 'Système de niveaux de classification'
           description: "\xE9tablissent un syst\xE8me de niveaux de classification\
             \ des actifs;"
         es:
@@ -38160,6 +38494,7 @@ objects:
             Authentizitäts- und Verfügbarkeitsanforderungen beruht, um den entsprechend ihrer Sensibilität, ihrer Kritikalität,
             ihres Risikos und ihres Geschäftswerts erforderlichen Schutz anzugeben;
         fr:
+          name: 'Classification de tous les actifs'
           description: "associent tous les actifs \xE0 un niveau de classification,\
             \ sur la base des exigences de confidentialit\xE9, d\u2019int\xE9grit\xE9\
             , d\u2019authenticit\xE9 et de disponibilit\xE9, afin d\u2019indiquer\
@@ -38196,6 +38531,7 @@ objects:
             die Aufrechterhaltung und Wiederherstellung des Betriebs festgelegten Ziele für die Bereitstellung und Wiederherstellung
             anpassen.
         fr:
+          name: 'Alignement des exigences de disponibilité sur les objectifs de continuité'
           description: "alignent les exigences de disponibilit\xE9 des actifs sur\
             \ les objectifs de r\xE9sultats et de r\xE9tablissement fix\xE9s dans\
             \ leur plan de continuit\xE9 de l'activit\xE9 et leur plan de r\xE9tablissement."
@@ -38247,6 +38583,7 @@ objects:
             \ einschließlich Neuklassifizierungen und der Hinzufügung/Entfernung von Assets.\n\n[TIPPS]\n\n• Das Personal\
             \ kennt die Klassifizierungsstufen und Schutzanforderungen für jede Stufe."
         fr:
+          name: 'Réexamen des niveaux de classification des actifs'
           description: "Les entit\xE9s concern\xE9es proc\xE8dent \xE0 des r\xE9examens\
             \ p\xE9riodiques des niveaux de classification des actifs et les mettent\
             \ \xE0 jour, s\u2019il est besoin."
@@ -38385,6 +38722,7 @@ objects:
             \ die Mitarbeiter, direkte Lieferanten, Dienstleister und Dritte unterzeichnet haben, um zu bestätigen, dass\
             \ sie das Konzept gelesen und verstanden haben."
         fr:
+          name: 'Mise en place de la politique de gestion des actifs'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent, mettent en \u0153\
             uvre et appliquent une politique de gestion appropri\xE9e des actifs,\
             \ y compris l\u2019information, conform\xE9ment \xE0 leur politique de\
@@ -38553,6 +38891,7 @@ objects:
             \ und Genehmigungsaufzeichnungen. \n• Vorfallberichte im Zusammenhang mit der Handhabung von Assets (z. B. Verlust,\
             \ Diebstahl oder Beschädigung)."
         fr:
+          name: 'Contenu de la politique de gestion des actifs'
           description: 'Cette politique:'
           annotation: "\u2022 Identifier, documenter et mettre en \u0153uvre une politique\
             \ de gestion des actifs (103) tout au long de leur cycle de vie (acquisition,\
@@ -38699,6 +39038,7 @@ objects:
           description: den gesamten Lebenszyklus der Anlagen und Werte abdecken, einschließlich Erwerb, Verwendung, Speicherung,
             Transport und Entsorgung;
         fr:
+          name: 'Gestion des actifs sur l’ensemble du cycle de vie'
           description: "couvre l\u2019ensemble du cycle de vie des actifs, y compris\
             \ l\u2019acquisition, l\u2019utilisation, le stockage, le transport et\
             \ la destruction;"
@@ -38726,6 +39066,7 @@ objects:
           description: Vorschriften für die sichere Verwendung, die sichere Speicherung, den sicheren Transport und die
             unwiederbringliche Löschung und Vernichtung der Anlagen und Werte;
         fr:
+          name: 'Utilisation, stockage, transport, effacement et destruction sûrs des actifs'
           description: "pr\xE9voit des r\xE8gles concernant l\u2019utilisation s\xFB\
             re, le stockage en toute s\xE9curit\xE9, le transport en toute s\xE9curit\xE9\
             \ et la suppression et la destruction irr\xE9versibles des actifs;"
@@ -38754,6 +39095,7 @@ objects:
           description: vorsehen, dass die Übertragung unter Berücksichtigung der Art der zu übertragenden Anlage bzw. des
             zu übertragenden Werts sicher erfolgt.
         fr:
+          name: 'Transfert sécurisé des actifs'
           description: "pr\xE9voit que le transfert a lieu de mani\xE8re s\xE9curis\xE9\
             e, en fonction du type d\u2019actif \xE0 transf\xE9rer."
         es:
@@ -38786,6 +39128,7 @@ objects:
           annotation: • Überprüfen und aktualisieren Sie das Konzept für den Umgang mit Assets mindestens einmal jährlich.
           typical_evidence: "• Aktuelle Konzepte für den Umgang mit Assets \n• Aufzeichnungen über Überprüfungen oder Änderungshistorie."
         fr:
+          name: 'Réexamen de la politique de gestion des actifs'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour leur politique \xE0 intervalles pr\xE9\
             d\xE9finis, ainsi qu\u2019en cas d\u2019incidents importants ou lorsque\
@@ -38886,6 +39229,7 @@ objects:
             \ E-Mails oder Intranetbeiträge, die Mitarbeiter an die Risiken und Konzepte erinnern, die mit Wechselmedien\
             \ verbunden sind."
         fr:
+          name: 'Mise en place de la politique relative aux supports amovibles'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent, mettent en \u0153\
             uvre et appliquent une politique de gestion des supports de stockage amovibles\
             \ et la communiquent aux membres de leur personnel et aux tiers qui manipulent\
@@ -39053,6 +39397,7 @@ objects:
             \ die die Verwendung von Wechselmedien verfolgen, einschließlich Einfügungs-, Entfernungs- und Datenübertragungsaktivitäten.\
             \ \n• Berichte über Vorfälle mit Wechseldatenträgern, sofern vorhanden."
         fr:
+          name: 'Contenu de la politique relative aux supports amovibles'
           description: 'Cette politique:'
           annotation: "\u2022 Aligner la politique sur la classification des biens\
             \ (section 12.1) et inclure au moins les \xE9l\xE9ments suivants :\n \
@@ -39202,6 +39547,7 @@ objects:
           description: eine technische Sperrung von Verbindungen mit Wechseldatenträgern vorsehen, es sei denn, es liegen
             organisatorische Gründe für deren Nutzung vor;
         fr:
+          name: 'Interdiction technique des supports amovibles sauf justification'
           description: "pr\xE9voit une interdiction technique de connecter des supports\
             \ amovibles, \xE0 moins que leur utilisation ne soit justifi\xE9e par\
             \ une raison d\u2019organisation;"
@@ -39231,6 +39577,7 @@ objects:
             Datenträger auf Schadcodes gescannt werden, bevor sie in den Systemen der betreffenden Einrichtungen verwendet
             werden können;
         fr:
+          name: 'Blocage de l’exécution automatique et analyse des supports amovibles'
           description: "pr\xE9voit le blocage de l\u2019autoex\xE9cution \xE0 partir\
             \ de ces supports et la d\xE9tection de codes malveillants dans les supports\
             \ avant qu\u2019ils ne soient utilis\xE9s sur les syst\xE8mes des entit\xE9\
@@ -39262,6 +39609,7 @@ objects:
           description: Maßnahmen zur Kontrolle und zum Schutz von tragbaren Speichergeräten, die gespeicherte und gerade
             übermittelte Daten enthalten, vorsehen;
         fr:
+          name: 'Protection des supports de stockage portables en transit et au repos'
           description: "pr\xE9voit des mesures de contr\xF4le et de protection des\
             \ dispositifs de stockage portables contenant des donn\xE9es pendant le\
             \ transit et le stockage;"
@@ -39290,6 +39638,7 @@ objects:
           description: gegebenenfalls Maßnahmen für den Einsatz kryptografischer Verfahren zum Schutz von Daten auf Wechseldatenträgern
             vorsehen.
         fr:
+          name: 'Chiffrement des supports de stockage amovibles'
           description: "s\u2019il est besoin, pr\xE9voit des mesures pour l\u2019\
             utilisation de techniques cryptographiques pour prot\xE9ger les donn\xE9\
             es sur les supports de stockage amovibles."
@@ -39327,6 +39676,7 @@ objects:
             sicherzustellen.
           typical_evidence: "• Aktuelles Konzept für Wechselmedien. \n• Aufzeichnungen über Überprüfungen oder Änderungshistorie."
         fr:
+          name: 'Réexamen de la politique relative aux supports amovibles'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et, s\u2019il\
             \ est besoin, mettent \xE0 jour leur politique \xE0 intervalles pr\xE9\
             d\xE9finis, ainsi qu\u2019en cas d\u2019incidents importants ou lorsque\
@@ -39422,6 +39772,7 @@ objects:
             \ über Überprüfungen oder Änderungshistorie. \n• Aufzeichnungen der verfolgten Schlüsselmetriken, wie z. B.\
             \ Anzahl der Assets, Asset-Typen, Einhaltung von Bestandskonzepten und Aktualität von Aktualisierungen."
         fr:
+          name: 'Inventaire des actifs complet et à jour'
           description: "Les entit\xE9s concern\xE9es \xE9laborent et tiennent \xE0\
             \ jour un inventaire complet, pr\xE9cis, actualis\xE9 et coh\xE9rent de\
             \ leurs actifs. Elles enregistrent de mani\xE8re tra\xE7able les modifications\
@@ -39544,6 +39895,7 @@ objects:
             (106) Im Falle externer Anbieter ist auch ein Verweis auf das SLA, das diese Beziehung abdeckt, hilfreich.
           typical_evidence: • Konfiguration des Asset-Inventur-Tools, falls vorhanden.
         fr:
+          name: 'Granularité et contenu de l’inventaire des actifs'
           description: "Le niveau de d\xE9tail de l\u2019inventaire des actifs est\
             \ adapt\xE9 aux besoins des entit\xE9s concern\xE9es. L\u2019inventaire\
             \ comprend les \xE9l\xE9ments suivants:"
@@ -39647,6 +39999,7 @@ objects:
         de:
           description: die Liste der Betriebsabläufe und Dienste und ihre Beschreibung,
         fr:
+          name: 'Inventaire : opérations et services'
           description: "la liste des op\xE9rations et des services et leur description,"
         es:
           description: "la lista de operaciones y servicios y su descripci\xF3n;"
@@ -39667,6 +40020,7 @@ objects:
           description: die Liste der Netz- und Informationssysteme und anderer zugehöriger Anlagen und Werte, die die Abläufe
             und die Dienste der betreffenden Einrichtungen unterstützen.
         fr:
+          name: 'Inventaire : réseaux, systèmes d’information et actifs supports'
           description: "la liste des r\xE9seaux et syst\xE8mes d\u2019information\
             \ et des autres actifs associ\xE9s soutenant les activit\xE9s et les services\
             \ des entit\xE9s concern\xE9es."
@@ -39721,6 +40075,7 @@ objects:
           typical_evidence: "• Aktueller Asset-Bestand einschließlich Änderungshistorie. \n• Regelmäßige Berichte über den\
             \ Bestandsstatus, Änderungen und Prüfergebnisse.\n\n[TIPPS]\n\n• Konfigurationseinstellungen des Asset-Management-Tools."
         fr:
+          name: 'Réexamen et mise à jour de l’inventaire des actifs'
           description: "Les entit\xE9s concern\xE9es r\xE9examinent et mettent \xE0\
             \ jour r\xE9guli\xE8rement l\u2019inventaire et leurs actifs et documentent\
             \ l\u2019historique des changements."
@@ -40165,6 +40520,7 @@ objects:
             Einrichtungen sicher, dass die Anlagen und Werte gemäß Nummer 12.2.2 nicht mehr auf die Netz- und Informationssysteme
             der betreffenden Einrichtungen zugreifen können.
         fr:
+          name: 'Procédures de dépôt, de restitution ou de suppression des actifs'
           description: "Les entit\xE9s concern\xE9es \xE9tablissent, mettent en \u0153\
             uvre et appliquent des proc\xE9dures garantissant que leurs actifs qui\
             \ sont sous la garde de leur personnel sont d\xE9pos\xE9s, restitu\xE9\
@@ -40291,6 +40647,7 @@ objects:
           typical_evidence: "• Liste der unterstützenden Versorgungsunternehmen und zugehöriger Risikobewertungsergebnisse.\
             \ \n• Maßnahmen zum Schutz vor Ausfällen und Störungen unterstützender Versorgungseinrichtungen."
         fr:
+          name: 'Protection contre les défaillances des services d’utilité publique'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point c), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es pr\xE9viennent\
             \ la perte, la d\xE9t\xE9rioration ou la compromission des r\xE9seaux\
@@ -40448,6 +40805,7 @@ objects:
           typical_evidence: "• Beschreibung verschiedener Arten von unterstützenden Dienstprogrammen. \n• Maßnahmen zum\
             \ Schutz vor Ausfällen und Störungen unterstützender Versorgungseinrichtungen."
         fr:
+          name: 'Mesures relatives aux services d’utilité publique'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es, s\u2019il est\
             \ besoin:"
           annotation: "\u2022 Tenir compte de la disponibilit\xE9 des services publics\
@@ -40543,6 +40901,7 @@ objects:
             Versorgungsunternehmen z. B. für Strom, Telekommunikation, Wasser, Gas, Abwasser, Lüftung und Klimatisierung
             verursacht werden;
         fr:
+          name: 'Protection contre les coupures d’électricité et les perturbations des services'
           description: "prot\xE8gent les installations contre les pannes d\u2019\xE9\
             lectricit\xE9 et autres perturbations caus\xE9es par des d\xE9faillances\
             \ des services d\u2019utilit\xE9 publique tels que l\u2019\xE9lectricit\xE9\
@@ -40574,6 +40933,7 @@ objects:
         de:
           description: die Nutzung von Redundanzsystemen für Versorgungsleistungen in Erwägung ziehen;
         fr:
+          name: 'Redondance des services d’utilité publique'
           description: "envisagent le recours \xE0 la redondance dans les services\
             \ d\u2019utilit\xE9 publique;"
         es:
@@ -40599,6 +40959,7 @@ objects:
           description: Versorgungsleistungen, die Strom und Telekommunikationsdienste für den Transport von Daten oder für
             den Betrieb von Netz- und Informationssystemen bereitstellen, vor Abhörung und Beschädigung schützen;
         fr:
+          name: 'Protection des services d’utilité publique contre l’interception et les dommages'
           description: "prot\xE8gent les services d\u2019utilit\xE9 publique li\xE9\
             s \xE0 l\u2019\xE9lectricit\xE9 et aux t\xE9l\xE9communications, qui transportent\
             \ des donn\xE9es ou fournissent des r\xE9seaux et des syst\xE8mes d\u2019\
@@ -40632,6 +40993,7 @@ objects:
             externen Personal die Ereignisse melden, die außerhalb der in Nummer 13.2.2 Buchstabe b genannten Mindest- und
             Höchstkontrollwerteliegen und Auswirkungen auf die Versorgungsleistungen haben;
         fr:
+          name: 'Surveillance des services d’utilité publique et signalement des dépassements de seuils'
           description: "surveillent les services d\u2019utilit\xE9 publique vis\xE9\
             s au point c) et signalent aux membres comp\xE9tents du personnel interne\
             \ ou externe les \xE9v\xE9nements qui se situent au-dessous et au-dessus\
@@ -40667,6 +41029,7 @@ objects:
           description: Verträge über die Notversorgung mit entsprechenden Leistungen abschließen, z. B. für Brennstoff für
             die Notstromversorgung;
         fr:
+          name: 'Contrats d’approvisionnement d’urgence'
           description: "concluent des contrats d\u2019alimentation d\u2019urgence\
             \ avec les services correspondants, par exemple pour le carburant destin\xE9\
             \ \xE0 l\u2019alimentation \xE9lectrique de secours;"
@@ -40698,6 +41061,7 @@ objects:
             die für den Betrieb des angebotenen Dienstes erforderlich sind, gewährleisten, insbesondere Strom, Temperatur-
             und Feuchtigkeitsregelung, Telekommunikation und Internetverbindung.
         fr:
+          name: 'Surveillance, maintenance et test des alimentations essentielles'
           description: "veillent \xE0 l\u2019efficacit\xE9 ininterrompue, surveillent,\
             \ entretiennent et testent l\u2019alimentation du r\xE9seau et des syst\xE8\
             mes d\u2019information n\xE9cessaires au fonctionnement du service propos\xE9\
@@ -40766,6 +41130,7 @@ objects:
             \ Versorgungsunternehmen und deren Auswirkungen auf den Betrieb hervorheben.   \n• Protokolle, die die Erkennung\
             \ und Aufzeichnung von Versorgungsausfällen oder -unterbrechungen belegen."
         fr:
+          name: 'Test et réexamen des mesures de protection des services d’utilité publique'
           description: "Les entit\xE9s concern\xE9es testent, r\xE9examinent et, s\u2019\
             il est besoin, mettent \xE0 jour les mesures de protection de fa\xE7on\
             \ r\xE9guli\xE8re, \xE0 la suite d\u2019incidents importants ou lorsque\
@@ -40937,6 +41302,7 @@ objects:
             • Risikobewertungsbericht, der Folgendes enthält:
                 o Identifizierung und Bewertung physischer Standorte wie Rechenzentren, Büros und Serverräume, o Analyse potenzieller physischer und umweltbedingter Bedrohungen und o Zuordnung kritischer Assets zu physischen Standorten.
         fr:
+          name: 'Réduction des conséquences des menaces physiques et environnementales'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point e), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es pr\xE9viennent\
             \ ou r\xE9duisent les cons\xE9quences d\u2019\xE9v\xE9nements r\xE9sultant\
@@ -41137,6 +41503,7 @@ objects:
             \ von Vorfällen, bei denen die Parameter außerhalb der definierten Schwellenwerte lagen, einschließlich der\
             \ ergriffenen Maßnahmen und an das zuständige Personal gesendeten Benachrichtigungen."
         fr:
+          name: 'Mesures de protection physique et environnementale'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es, s\u2019il est\
             \ besoin:"
           annotation: "\u2022 Mettre en \u0153uvre des mesures contre les menaces\
@@ -41334,6 +41701,7 @@ objects:
         de:
           description: Schutzmaßnahmen gegen physische Bedrohungen und Bedrohungen des Umfelds konzipieren und umsetzen;
         fr:
+          name: 'Mesures de protection contre les menaces physiques et environnementales'
           description: "con\xE7oivent et mettent en \u0153uvre des mesures de protection\
             \ contre les menaces physiques et environnementales;"
         es:
@@ -41357,6 +41725,7 @@ objects:
         de:
           description: Mindest- und Höchstkontrollwerte für physische Bedrohungen und Bedrohungen des Umfelds bestimmen;
         fr:
+          name: 'Seuils de contrôle des menaces physiques et environnementales'
           description: "fixent des seuils de contr\xF4le minimaux et maximaux pour\
             \ les menaces physiques et environnementales;"
         es:
@@ -41382,6 +41751,7 @@ objects:
           description: die Umgebungsparameter überwachen und dem zuständigen internen oder externen Personal Ereignisse
             melden, die außerhalb der in Buchstabe b genannten Mindest- und Höchstkontrollwerte liegen.
         fr:
+          name: 'Surveillance des paramètres environnementaux et signalement des dépassements de seuils'
           description: "surveillent les param\xE8tres environnementaux et signalent\
             \ aux membres comp\xE9tents du personnel interne ou externe les \xE9v\xE9\
             nements qui se situent au-dessous et au-dessus des seuils de contr\xF4\
@@ -41442,6 +41812,7 @@ objects:
             \ Sicherheit, einschließlich einer Beschreibung der in den Geltungsbereich fallenden Einrichtungen sowie der\
             \ Netz- und Informationssysteme. \n• Ergebnisse regelmäßiger Simulationen und Sensibilisierungsmaßnahmen."
         fr:
+          name: 'Test et réexamen de la protection physique et environnementale'
           description: "Les entit\xE9s concern\xE9es testent, r\xE9examinent et, s\u2019\
             il est besoin, mettent \xE0 jour les mesures de protection contre les\
             \ menaces physiques et environnementales de fa\xE7on r\xE9guli\xE8re,\
@@ -41610,6 +41981,7 @@ objects:
           typical_evidence: • Dokumentiertes Konzept für physische Sicherheitsmaßnahmen, einschließlich einer Beschreibung
             der Einrichtungen sowie der Netz- und Informationssysteme im Geltungsbereich.
         fr:
+          name: 'Prévention et surveillance des accès physiques non autorisés'
           description: "Aux fins de l\u2019article 21, paragraphe 2, point i), de\
             \ la directive (UE) 2022/2555, les entit\xE9s concern\xE9es pr\xE9viennent\
             \ et surveillent l\u2019acc\xE8s physique non autoris\xE9, les dommages\
@@ -41811,6 +42183,7 @@ objects:
           typical_evidence: "• Ergebnisse der Risikobewertung \n• Vorhandensein physischer Sicherheitsmaßnahmen \n• Verfahren\
             \ zur Gewährung, Überprüfung und zum Widerruf physischer Zugangsrechte gemäß Punkt 11.2 im Anhang der Verordnung."
         fr:
+          name: 'Mesures de contrôle d’accès physique'
           description: "\xC0 cette fin, les entit\xE9s concern\xE9es:"
           annotation: "\u2022 Dans l\u2019\xE9valuation des risques, tenez compte\
             \ des risques associ\xE9s \xE0 l\u2019acc\xE8s physique non autoris\xE9\
@@ -41976,6 +42349,7 @@ objects:
             und nutzen, um Bereiche zu schützen, in denen sich Netz- und Informationssysteme und andere zugehörige Anlagen
             befinden;
         fr:
+          name: 'Périmètres de sécurité'
           description: "\xE9tablissent et utilisent, sur la base de l\u2019\xE9valuation\
             \ des risques effectu\xE9e conform\xE9ment au point 2.1, des p\xE9rim\xE8\
             tres de s\xE9curit\xE9 pour prot\xE9ger les zones o\xF9 sont situ\xE9\
@@ -42008,6 +42382,7 @@ objects:
         de:
           description: die unter Buchstabe a genannten Bereiche durch geeignete Zutrittskontrollen und Zugangspunkte schützen;
         fr:
+          name: 'Contrôles d’entrée et points d’accès'
           description: "prot\xE8gent les zones vis\xE9es au point a) par des contr\xF4\
             les \xE0 l\u2019entr\xE9e et des points d\u2019acc\xE8s appropri\xE9s;"
         es:
@@ -42030,6 +42405,7 @@ objects:
         de:
           description: Maßnahmen für die physische Sicherheit von Büros, Räumen und Betriebsstätten konzipieren und umsetzen;
         fr:
+          name: 'Sécurité physique des bureaux, salles et installations'
           description: "con\xE7oivent et mettent en \u0153uvre la s\xE9curit\xE9 physique\
             \ des bureaux, des salles et des installations;"
         es:
@@ -42052,6 +42428,7 @@ objects:
         de:
           description: ihrer Räumlichkeiten kontinuierlich in Bezug auf unbefugten physischen Zutritt überwachen.
         fr:
+          name: 'Surveillance continue des accès physiques non autorisés'
           description: "surveillent en permanence leurs locaux dans l'hypoth\xE8se\
             \ d\u2019un acc\xE8s physique non autoris\xE9."
         es:
@@ -42141,6 +42518,7 @@ objects:
             \ zu Einrichtungen.  \n\n[TIPPS]\n\n• Es sind Verfahren zur Reaktion auf Vorfälle am Perimeter vorhanden. \n\
             • Das Personal zeigt seinen Ausweis deutlich sichtbar an."
         fr:
+          name: 'Test et réexamen des mesures de contrôle d’accès physique'
           description: "Les entit\xE9s concern\xE9es testent, r\xE9examinent et, s\u2019\
             il est besoin, mettent \xE0 jour les mesures de contr\xF4le de l\u2019\
             acc\xE8s physique de fa\xE7on r\xE9guli\xE8re, \xE0 la suite d\u2019incidents\
