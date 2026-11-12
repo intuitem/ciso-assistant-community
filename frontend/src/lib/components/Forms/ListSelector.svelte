@@ -77,9 +77,8 @@
 	let isLoading = $state(false);
 	let query = $state('');
 	let isSearching = $derived(query.trim() !== '');
-	let displayedGroups = $derived(
-		isSearching ? createNestedGroups(filterOptions(options, query)) : nestedGroups
-	);
+	let matchingOptions = $derived(isSearching ? filterOptions(options, query) : options);
+	let displayedGroups = $derived(isSearching ? createNestedGroups(matchingOptions) : nestedGroups);
 
 	function attachFlatOptions(nested: NestedGroup): void {
 		Object.values(nested).forEach((group) => {
@@ -432,7 +431,7 @@
 				data-testid="list-selector-search"
 			/>
 		{/if}
-		{#if isSearching && Object.keys(displayedGroups).length === 0}
+		{#if isSearching && matchingOptions.length === 0}
 			<p class="text-sm text-surface-600-400">{m.noResultFound()}</p>
 		{:else}
 			<div class="space-y-3">
