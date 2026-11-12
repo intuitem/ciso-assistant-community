@@ -3963,5 +3963,6 @@
 	"commandKeywordSearch": "搜索",
 	"openAssistant": "AI 引擎（聊天）",
 	"viewAll": "查看全部",
-	"briefingOfAssessedRequirements": "共 {total} 项已评估要求"
+	"briefingOfAssessedRequirements": "共 {total} 项已评估要求",
+	"briefingPartialCount": "{count} 项部分符合"
 }

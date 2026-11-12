@@ -4854,5 +4854,6 @@
 	"commandKeywordAsk": "klausk",
 	"commandKeywordSearch": "ieškok",
 	"viewAll": "Rodyti viską",
-	"briefingOfAssessedRequirements": "iš {total} įvertintų reikalavimų"
+	"briefingOfAssessedRequirements": "iš {total} įvertintų reikalavimų",
+	"briefingPartialCount": "{count} iš dalies"
 }

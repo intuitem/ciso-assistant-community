@@ -5076,5 +5076,6 @@
 	"askAi": "Küsi tehisarult",
 	"commandKeywordAsk": "küsi",
 	"commandKeywordSearch": "otsi",
-	"briefingOfAssessedRequirements": "{total} hinnatud nõudest"
+	"briefingOfAssessedRequirements": "{total} hinnatud nõudest",
+	"briefingPartialCount": "{count} osaliselt"
 }

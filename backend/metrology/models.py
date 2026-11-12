@@ -1161,6 +1161,9 @@ class BuiltinMetricSample(AbstractBaseModel):
             "non_compliant_items": scope(RequirementAssessment.objects.all())
             .filter(result=RequirementAssessment.Result.NON_COMPLIANT)
             .count(),
+            "partially_compliant_items": scope(RequirementAssessment.objects.all())
+            .filter(result=RequirementAssessment.Result.PARTIALLY_COMPLIANT)
+            .count(),
             "total_risk_scenarios": summary_scenarios.count(),
             "risk_scenarios_high_current": filter_top_risk_levels(
                 summary_scenarios, "current_level"

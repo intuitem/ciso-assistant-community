@@ -320,15 +320,22 @@
 					{#if series('non_compliant_items').length}
 						<Sparkline values={series('non_compliant_items')} class="text-error-500" />
 					{:else}
-						<span class="meter meter-error" aria-hidden="true"
-							><span
-								style="width: {fill(
-									share(
-										metrics.compliance?.non_compliant_items ?? 0,
-										metrics.compliance?.assessed_items ?? 0
-									)
-								)}%"
-							></span></span
+						<span class="meter flex!" aria-hidden="true"
+							>{#each [['non_compliant', metrics.compliance?.non_compliant_items], ['partially_compliant', metrics.compliance?.partially_compliant_items]] as [key, count] (key)}<span
+									class="rounded-none!"
+									style="width: {fill(
+										share(count ?? 0, metrics.compliance?.assessed_items ?? 0)
+									)}%; background: {complianceResultColorMap[key]}"
+								></span>{/each}</span
+						>
+					{/if}
+					{#if metrics.compliance?.partially_compliant_items}
+						<a
+							href="/requirement-assessments?result=partially_compliant"
+							class="whitespace-nowrap rounded-full bg-warning-500/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-warning-800-200 hover:bg-warning-500/25"
+							>{m.briefingPartialCount({
+								count: fmt(metrics.compliance.partially_compliant_items)
+							})}</a
 						>
 					{/if}
 				</span>

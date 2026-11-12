@@ -3973,5 +3973,6 @@
 	"openAssistant": "Motor de IA (chat)",
 	"searchPagesAndObjects": "Buscar páginas y objetos...",
 	"viewAll": "Ver todo",
-	"briefingOfAssessedRequirements": "de {total} requisitos evaluados"
+	"briefingOfAssessedRequirements": "de {total} requisitos evaluados",
+	"briefingPartialCount": "{count} parciales"
 }

@@ -134,6 +134,10 @@ def test_snapshot_matches_summary_and_trends_are_gated(admin_client, domain):  #
     assert snapshot["incidents_open"] == summary["operations"]["open_incidents"]
     assert snapshot["findings_open"] == summary["operations"]["open_findings"]
     assert snapshot["total_risk_scenarios"] == summary["risk"]["scenarios"]
+    assert (
+        snapshot["partially_compliant_items"]
+        == summary["compliance"]["partially_compliant_items"]
+    )
     assert snapshot["risk_scenarios_high_current"] == summary["risk"]["high_current"]
 
     trends = summary["trends"]

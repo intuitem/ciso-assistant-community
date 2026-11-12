@@ -5563,5 +5563,6 @@
 	"openAssistant": "KI-motor (chat)",
 	"searchPagesAndObjects": "Søk i sider og objekter...",
 	"viewAll": "Vis alle",
-	"briefingOfAssessedRequirements": "av {total} vurderte krav"
+	"briefingOfAssessedRequirements": "av {total} vurderte krav",
+	"briefingPartialCount": "{count} delvis"
 }

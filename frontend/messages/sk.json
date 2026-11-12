@@ -5933,5 +5933,6 @@
 	"askAi": "Opýtať sa AI",
 	"commandKeywordAsk": "opýtaj",
 	"commandKeywordSearch": "hľadaj",
-	"briefingOfAssessedRequirements": "z {total} posúdených požiadaviek"
+	"briefingOfAssessedRequirements": "z {total} posúdených požiadaviek",
+	"briefingPartialCount": "{count} čiastočne"
 }

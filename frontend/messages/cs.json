@@ -6882,5 +6882,6 @@
 	"briefingOfAppliedControls": "z {total} aplikovaných opatření",
 	"briefingDeltaSince": "{delta} od {date}",
 	"briefingNoChangeSince": "Beze změny od {date}",
-	"briefingOfAssessedRequirements": "z {total} posouzených požadavků"
+	"briefingOfAssessedRequirements": "z {total} posouzených požadavků",
+	"briefingPartialCount": "{count} částečně"
 }

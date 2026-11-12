@@ -6364,5 +6364,6 @@
 	"askAi": "Vraag het AI",
 	"commandKeywordAsk": "vraag",
 	"commandKeywordSearch": "zoek",
-	"briefingOfAssessedRequirements": "van {total} beoordeelde eisen"
+	"briefingOfAssessedRequirements": "van {total} beoordeelde eisen",
+	"briefingPartialCount": "{count} gedeeltelijk"
 }

@@ -7648,5 +7648,6 @@
 	"briefingOfAppliedControls": "{total} alkalmazott kontrollból",
 	"briefingDeltaSince": "{delta} {date} óta",
 	"briefingNoChangeSince": "Nincs változás {date} óta",
-	"briefingOfAssessedRequirements": "{total} értékelt követelményből"
+	"briefingOfAssessedRequirements": "{total} értékelt követelményből",
+	"briefingPartialCount": "{count} részben"
 }

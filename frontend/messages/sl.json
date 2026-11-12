@@ -5837,5 +5837,6 @@
 	"askAi": "Vprašaj UI",
 	"commandKeywordAsk": "vprašaj",
 	"commandKeywordSearch": "išči",
-	"briefingOfAssessedRequirements": "od {total} ocenjenih zahtev"
+	"briefingOfAssessedRequirements": "od {total} ocenjenih zahtev",
+	"briefingPartialCount": "{count} delno"
 }

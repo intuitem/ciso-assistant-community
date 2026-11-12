@@ -7320,5 +7320,6 @@
 	"briefingOfAppliedControls": "з {total} застосованих контролів",
 	"briefingDeltaSince": "{delta} з {date}",
 	"briefingNoChangeSince": "Без змін з {date}",
-	"briefingOfAssessedRequirements": "з {total} оцінених вимог"
+	"briefingOfAssessedRequirements": "з {total} оцінених вимог",
+	"briefingPartialCount": "{count} частково"
 }

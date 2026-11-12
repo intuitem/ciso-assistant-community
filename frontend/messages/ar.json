@@ -6763,5 +6763,6 @@
 	"askAi": "اسأل الذكاء الاصطناعي",
 	"commandKeywordAsk": "اسأل",
 	"commandKeywordSearch": "ابحث",
-	"briefingOfAssessedRequirements": "من أصل {total} متطلبًا مُقيّمًا"
+	"briefingOfAssessedRequirements": "من أصل {total} متطلبًا مُقيّمًا",
+	"briefingPartialCount": "{count} جزئيًا"
 }

@@ -2373,5 +2373,6 @@
 	"searchPagesAndObjects": "Cari halaman dan objek...",
 	"sumpageExpiredEvidences": "Bukti kedaluwarsa",
 	"viewAll": "Lihat semua",
-	"briefingOfAssessedRequirements": "dari {total} persyaratan yang dinilai"
+	"briefingOfAssessedRequirements": "dari {total} persyaratan yang dinilai",
+	"briefingPartialCount": "{count} sebagian"
 }

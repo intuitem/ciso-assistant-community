@@ -269,6 +269,13 @@ BUILTIN_METRICS = {
             "type": METRIC_TYPE_NUMBER,
             "description": _("Requirement assessments with a non-compliant result"),
         },
+        "partially_compliant_items": {
+            "label": _("Partially Compliant Items"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Requirement assessments with a partially compliant result"
+            ),
+        },
         "total_risk_scenarios": {
             "label": _("Total Risk Scenarios"),
             "type": METRIC_TYPE_NUMBER,

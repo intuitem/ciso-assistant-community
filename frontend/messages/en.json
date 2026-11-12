@@ -7971,5 +7971,6 @@
 	"briefingOfAppliedControls": "of {total} applied controls",
 	"briefingDeltaSince": "{delta} since {date}",
 	"briefingNoChangeSince": "No change since {date}",
-	"briefingOfAssessedRequirements": "of {total} assessed requirements"
+	"briefingOfAssessedRequirements": "of {total} assessed requirements",
+	"briefingPartialCount": "{count} partial"
 }

@@ -7971,5 +7971,6 @@
 	"briefingOfAppliedControls": "sur {total} mesures appliquées",
 	"briefingDeltaSince": "{delta} depuis le {date}",
 	"briefingNoChangeSince": "Aucun changement depuis le {date}",
-	"briefingOfAssessedRequirements": "sur {total} exigences évaluées"
+	"briefingOfAssessedRequirements": "sur {total} exigences évaluées",
+	"briefingPartialCount": "{count} partielles"
 }

@@ -2244,5 +2244,6 @@
 	"sumpageExpiredEvidences": "Dovezi expirate",
 	"sumpageP1": "P1 în așteptare",
 	"viewAll": "Vezi tot",
-	"briefingOfAssessedRequirements": "din {total} cerințe evaluate"
+	"briefingOfAssessedRequirements": "din {total} cerințe evaluate",
+	"briefingPartialCount": "{count} parțial"
 }

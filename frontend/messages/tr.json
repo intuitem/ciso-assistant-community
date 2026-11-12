@@ -7802,5 +7802,6 @@
 	"briefingOfAppliedControls": "{total} uygulanan kontrolden",
 	"briefingDeltaSince": "{date} tarihinden bu yana {delta}",
 	"briefingNoChangeSince": "{date} tarihinden bu yana değişiklik yok",
-	"briefingOfAssessedRequirements": "değerlendirilen {total} gereklilikten"
+	"briefingOfAssessedRequirements": "değerlendirilen {total} gereklilikten",
+	"briefingPartialCount": "{count} kısmen"
 }

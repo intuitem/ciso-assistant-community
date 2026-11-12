@@ -1725,6 +1725,9 @@ def get_metrics(user: User, folder_id):
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
+            "partially_compliant_items": viewable_requirement_assessments.filter(
+                result="partially_compliant"
+            ).count(),
             # Requirements with a verdict: the base of the non-compliant share.
             "assessed_items": viewable_requirement_assessments.filter(
                 result__in=["compliant", "partially_compliant", "non_compliant"]
@@ -1755,6 +1758,7 @@ SUMMARY_TREND_DAYS = 30
 SUMMARY_TREND_KEYS = [
     "audits_avg_assessed",
     "non_compliant_items",
+    "partially_compliant_items",
     "total_risk_scenarios",
     "risk_scenarios_high_current",
     "risk_scenarios_high_residual",

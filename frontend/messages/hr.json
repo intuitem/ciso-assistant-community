@@ -4428,5 +4428,6 @@
 	"openAssistant": "AI pogon (chat)",
 	"searchPagesAndObjects": "Pretraži stranice i objekte...",
 	"viewAll": "Prikaži sve",
-	"briefingOfAssessedRequirements": "od {total} procijenjenih zahtjeva"
+	"briefingOfAssessedRequirements": "od {total} procijenjenih zahtjeva",
+	"briefingPartialCount": "{count} djelomično"
 }

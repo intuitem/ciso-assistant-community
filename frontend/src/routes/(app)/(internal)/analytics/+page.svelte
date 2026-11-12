@@ -847,9 +847,15 @@
 								<div
 									class="xl:col-span-1 bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 								>
-									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.tasksStatus()}
-									</h3>
+									<div class="flex items-baseline justify-between gap-3 mb-4">
+										<h3 class="text-lg font-semibold text-surface-900-100">
+											{m.tasksStatus()}
+										</h3>
+										<a
+											href="/task-templates/analytics"
+											class="text-[13px] text-primary-700-300 hover:underline">{m.viewAll()}</a
+										>
+									</div>
 									<div class="h-96">
 										{#await data.stream.taskTemplateStatus}
 											<div class="flex items-center justify-center h-full">

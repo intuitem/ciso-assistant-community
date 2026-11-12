@@ -2222,5 +2222,6 @@
 	"sumpageExpiredEvidences": "میعاد ختم ثبوت",
 	"sumpageP1": "زیر التوا P1",
 	"viewAll": "سب دیکھیں",
-	"briefingOfAssessedRequirements": "{total} جانچی گئی ضروریات میں سے"
+	"briefingOfAssessedRequirements": "{total} جانچی گئی ضروریات میں سے",
+	"briefingPartialCount": "{count} جزوی"
 }

@@ -2468,5 +2468,6 @@
 	"searchPagesAndObjects": "Søg i sider og objekter...",
 	"sumpageExpiredEvidences": "Udløbne beviser",
 	"viewAll": "Vis alle",
-	"briefingOfAssessedRequirements": "af {total} vurderede krav"
+	"briefingOfAssessedRequirements": "af {total} vurderede krav",
+	"briefingPartialCount": "{count} delvist"
 }

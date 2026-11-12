@@ -2239,5 +2239,6 @@
 	"sumpageExpiredEvidences": "Utgångna bevis",
 	"sumpageP1": "Väntande P1",
 	"viewAll": "Visa alla",
-	"briefingOfAssessedRequirements": "av {total} bedömda krav"
+	"briefingOfAssessedRequirements": "av {total} bedömda krav",
+	"briefingPartialCount": "{count} delvis"
 }
