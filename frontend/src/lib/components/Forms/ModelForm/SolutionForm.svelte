@@ -59,6 +59,13 @@
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
 />
+<Checkbox
+	{form}
+	field="is_active"
+	label={m.isActive()}
+	cacheLock={cacheLocks['is_active']}
+	bind:cachedValue={formDataCache['is_active']}
+/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint={`tiers?selectable=${object.tier?.id ?? object.tier ?? ''}`}

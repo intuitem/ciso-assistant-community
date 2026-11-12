@@ -28,6 +28,7 @@
 		sortRows,
 		yearWindow,
 		type Bucket,
+		type NamedRef,
 		type BucketStatus,
 		type Granularity,
 		type ColumnId,
@@ -49,6 +50,7 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+	import { countMasked } from '#lib/utils/related-visibility.js';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -608,6 +610,13 @@
 	);
 	const tableMinWidth = $derived(paneWidth + buckets.length * periodMinWidth);
 
+	/** The linked objects the user can see, then how many they cannot. */
+	function linkedLabels(refs: NamedRef[] | undefined): string {
+		const hidden = countMasked(refs ?? []);
+		const note = hidden ? m.objectsNotVisible({ count: hidden }) : '';
+		return [joinLabels(refs), note].filter(Boolean).join(' · ');
+	}
+
 	function cellValue(column: OptionalColumn, row: TaskRow): string {
 		switch (column) {
 			case 'ref':
@@ -615,9 +624,9 @@
 			case 'frequency':
 				return scheduleLabel(row.task.schedule) ?? '';
 			case 'assignee':
-				return joinLabels(row.task.assigned_to);
+				return linkedLabels(row.task.assigned_to);
 			case 'appliedControl':
-				return joinLabels(row.task.applied_controls);
+				return linkedLabels(row.task.applied_controls);
 			case 'nextDue':
 				return formatDateOrDateTime(row.task.next_occurrence ?? null, getLocale()) ?? '';
 			case 'domain':

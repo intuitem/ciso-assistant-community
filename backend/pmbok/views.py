@@ -295,10 +295,13 @@ class ResponsibilityMatrixActivityViewSet(BaseModelViewSet):
 
     def update(self, request, *args, **kwargs):
         # Return the Read shape so the frontend can rehydrate M2M links without
-        # re-fetching lookup pools (~7 fetches per matrix detail mount).
+        # re-fetching lookup pools (~7 fetches per matrix detail mount). Masked like
+        # `retrieve`: the activity may link objects the user cannot view.
         response = super().update(request, *args, **kwargs)
         instance = self.get_object()
-        response.data = ResponsibilityMatrixActivityReadSerializer(instance).data
+        response.data = self._mask_related_objects(
+            ResponsibilityMatrixActivityReadSerializer(instance)
+        )
         return response
 
 

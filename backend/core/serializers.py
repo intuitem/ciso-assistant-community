@@ -42,14 +42,6 @@ from integrations.models import IntegrationConfiguration, SyncMapping
 
 logger = structlog.get_logger(__name__)
 
-# library content any principal may link, even without view on Global
-GLOBAL_CATALOG_MODELS = (
-    ReferentialObjectMixin,
-    Question,
-    QuestionChoice,
-    Terminology,
-)
-
 
 class SerializerFactory:
     """Factory to get a serializer class from a list of modules.
@@ -251,7 +243,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     def _check_m2m_visibility(self, validated_data: dict) -> None:
         """A new link needs view on its target, or change for fields in
-        Meta.link_requires_change, whose save alters the target."""
+        Meta.link_requires_change, whose save alters the target.
+
+        For many-to-many links this is the whole rule, whichever model declares
+        the field: change on the edited object (update/create), view on each
+        object linked, nothing on an object unlinked."""
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return
@@ -289,8 +285,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
             hidden = new_ids - visible
             if related_model is User:
                 hidden.discard(str(user.pk))
-            if hidden and issubclass(related_model, GLOBAL_CATALOG_MODELS):
-                hidden -= self._global_ids(related_model, hidden)
             if hidden:
                 raise PermissionDenied(
                     {
@@ -310,67 +304,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
                             field_name: f"You do not have permission to change this {related_model._meta.model_name}"
                         }
                     )
-
-    @staticmethod
-    def _global_ids(model: type[models.Model], ids: set) -> set:
-        """Library content in Global is shared, even with users outside
-        builtin groups."""
-        try:
-            field = RoleAssignment.get_iam_folder_field(model)
-        except NotImplementedError:
-            return set()
-        shared = {"urn__gt": ""} if hasattr(model, "urn") else {"builtin": True}
-        return {
-            str(pk)
-            for pk in model.objects.filter(
-                pk__in=ids, **{field: Folder.get_root_folder().id}, **shared
-            ).values_list("pk", flat=True)
-        }
-
-    def _check_reverse_m2m_change(self, validated_data: dict) -> None:
-        """A reverse many-to-many (declared on the other model) edits the objects
-        on that side: adding or removing one needs change permission on it, not
-        just the visibility _check_m2m_visibility asks for."""
-        request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            return
-        model = self.Meta.model
-        for field_name, value in validated_data.items():
-            if not isinstance(value, list):
-                continue
-            try:
-                field = model._meta.get_field(field_name)
-            except FieldDoesNotExist:
-                continue
-            if not (field.many_to_many and field.auto_created and not field.concrete):
-                continue
-            current_ids: set = set()
-            if self.instance is not None and not isinstance(self.instance, list):
-                current_ids = {
-                    str(pk)
-                    for pk in getattr(self.instance, field_name).values_list(
-                        "pk", flat=True
-                    )
-                }
-            touched = {str(item.pk) for item in value} ^ current_ids
-            if not touched:
-                continue
-            related_model = field.related_model
-            try:
-                changeable = {
-                    str(pk)
-                    for pk in RoleAssignment.get_changeable_object_ids(
-                        request.user, related_model
-                    )
-                }
-            except NotImplementedError, Permission.DoesNotExist:
-                continue
-            if touched - changeable:
-                raise PermissionDenied(
-                    {
-                        field_name: f"You do not have permission to change this {related_model._meta.model_name}"
-                    }
-                )
 
     def _viewable_ids(self, model: type[models.Model]) -> models.QuerySet:
         cache = self.context.setdefault("viewable_ids", {})
@@ -681,11 +614,6 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
     )
-
-    def validate(self, data):
-        data = super().validate(data)
-        self._check_reverse_m2m_change(data)
-        return data
 
     def create(self, validated_data):
         owner_data = validated_data.get("owner", [])
@@ -1248,64 +1176,29 @@ class AssetWriteSerializer(
         return stage
 
     def validate(self, data):
-        self._check_linked_assets_changeable(data)
-        parent_assets = data.get("parent_assets", [])
-        support_assets = data.get("child_assets", [])
-        """
-        Check that the assets graph will not contain cycles
-        """
-        myset = set()
-        if self.instance:
-            myset = set([self.instance])
-        if parent_assets:
-            myset = myset | set(support_assets)
-
-            for asset in parent_assets:
-                if myset & set(asset.ancestors_plus_self()):
-                    raise serializers.ValidationError(
-                        "errorAssetGraphMustNotContainCycles"
-                    )
+        # Link checks first: the cycle walk below follows hidden assets, and its
+        # answer must not tell where a hidden asset sits in the graph.
         data = super().validate(data)
-        self._check_reverse_m2m_change(data)
-        return data
-
-    def _check_linked_assets_changeable(self, data):
-        request = self.context.get("request")
-        if request is None:
-            return
-        perm = Permission.objects.get(codename="change_asset")
-        for field, error_key in (
-            ("parent_assets", "parent_assets"),
-            ("child_assets", "support_assets"),
-        ):
-            if field not in data:
-                continue
-            proposed = {a.id: a for a in data[field] or []}
-            current = (
-                {a.id: a for a in getattr(self.instance, field).all()}
-                if self.instance is not None
-                else {}
+        parent_assets = data.get("parent_assets")
+        support_assets = data.get("child_assets", [])
+        if parent_assets is None:
+            # A request that only sets the supports keeps the asset's parents.
+            parent_assets = (
+                self.instance.parent_assets.all()
+                if self.instance and support_assets
+                else []
             )
-            removed = [current[i] for i in current.keys() - proposed.keys()]
-            unseen = [
-                a
-                for a in removed
-                if not RoleAssignment.is_object_readable(request.user, Asset, a.id)
-            ]
-            if unseen:
-                data[field] = [*proposed.values(), *unseen]
-            touched = [proposed[i] for i in proposed.keys() - current.keys()] + [
-                a for a in removed if a not in unseen
-            ]
-            for asset in touched:
-                if not RoleAssignment.is_access_allowed(
-                    user=request.user, perm=perm, folder=asset.folder
-                ):
-                    raise PermissionDenied(
-                        {
-                            error_key: "You do not have permission to change the linked asset"
-                        }
-                    )
+        # The graph has a cycle when the asset, or one it is put above, is also
+        # above it.
+        below = set(support_assets)
+        if self.instance:
+            if self.instance in below:
+                raise serializers.ValidationError("errorAssetGraphMustNotContainCycles")
+            below.add(self.instance)
+        for asset in parent_assets:
+            if below & asset.ancestors_plus_self():
+                raise serializers.ValidationError("errorAssetGraphMustNotContainCycles")
+        return data
 
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
@@ -1387,7 +1280,7 @@ class AssetReadSerializer(AssetWriteSerializer):
             return optimized_data.get("descendants", {}).get(obj.id, [])
 
         # Fallback for single object serialization
-        return obj.children_assets.annotate(str=F("name")).values("id", "str")
+        return list(obj.children_assets.annotate(str=F("name")).values("id", "str"))
 
     def get_security_objectives(self, obj):
         """
@@ -2418,7 +2311,10 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
 
     def get_evidence_attachments(self, obj):
         attachments = []
-        for evidence in obj.evidences.all():
+        evidences = obj.evidences.all()
+        if "viewable_evidences" in self.context:
+            evidences = evidences.filter(id__in=self.context["viewable_evidences"])
+        for evidence in evidences:
             filename = evidence.filename()
             if filename:
                 attachments.append(
@@ -3843,6 +3739,25 @@ class EvidenceReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
     link = serializers.SerializerMethodField()
+    latest_revision = serializers.SerializerMethodField()
+
+    def get_latest_revision(self, obj):
+        rev = obj.last_revision
+        if rev is None:
+            return None
+        return {
+            "id": rev.id,
+            "version": rev.version,
+            "review_status": rev.review_status,
+            "created_at": rev.created_at,
+            "uploaded_by": str(rev.uploaded_by)
+            if not self._is_third_party() and rev.uploaded_by
+            else None,
+        }
+
+    def _is_third_party(self):
+        request = self.context.get("request")
+        return getattr(getattr(request, "user", None), "is_third_party", False)
 
     def get_attachment(self, obj):
         last_revision = obj.last_revision
@@ -3925,12 +3840,14 @@ class EvidenceWriteSerializer(
         # something; a definition with no content stays revision-less until one
         # is filed against it.
         if attachment or link or observation:
+            request = self.context.get("request")
             EvidenceRevision.objects.get_or_create(
                 evidence=evidence,
                 defaults={
                     "link": link,
                     "attachment": attachment,
                     "observation": observation,
+                    "uploaded_by": getattr(request, "user", None),
                 },
             )
 
@@ -3959,7 +3876,23 @@ class EvidenceWriteSerializer(
                 Evidence.Status.APPROVED,
                 Evidence.Status.REJECTED,
             ):
+                # The status select is a review too: record it on the file it judged.
+                revision = instance.last_revision
+                request = self.context.get("request")
+                if revision is not None and request is not None:
+                    try:
+                        revision.record_review(request.user, instance.status)
+                    except DjangoValidationError as e:
+                        raise serializers.ValidationError(e.message_dict)
                 self._send_review_notification(instance)
+            elif instance.status != old_status:
+                # Leaving approved/rejected undoes the decision, so the file is queued again.
+                revision = instance.last_revision
+                if (
+                    revision is not None
+                    and revision.review_status != EvidenceRevision.ReviewStatus.PENDING
+                ):
+                    revision.clear_review()
 
         return instance
 
@@ -4025,17 +3958,44 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     str = serializers.CharField(source="__str__")
     task_node = FieldsRelatedField()
+    uploaded_by = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+    reviewed_by = FieldsRelatedField(["id", "email", "first_name", "last_name"])
 
     class Meta:
         model = EvidenceRevision
         fields = "__all__"
+
+    # Review deliberation is internal: third parties see the outcome, not who or why.
+    THIRD_PARTY_HIDDEN = ("uploaded_by", "reviewed_by", "review_comment")
+
+    def to_representation(self, instance):
+        return hide_review_details(self, super().to_representation(instance))
+
+
+def hide_review_details(serializer, data):
+    request = serializer.context.get("request")
+    if getattr(getattr(request, "user", None), "is_third_party", False):
+        for field in EvidenceRevisionReadSerializer.THIRD_PARTY_HIDDEN:
+            if field in data:
+                data[field] = None
+    return data
 
 
 class EvidenceRevisionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EvidenceRevision
         fields = "__all__"
-        read_only_fields = ["version"]
+        read_only_fields = [
+            "version",
+            "uploaded_by",
+            "review_status",
+            "reviewed_by",
+            "reviewed_at",
+            "review_comment",
+        ]
+
+    def to_representation(self, instance):
+        return hide_review_details(self, super().to_representation(instance))
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -4062,9 +4022,22 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
                 models.Max("version")
             )["version__max"]
             validated_data["version"] = (max_version or 0) + 1
+            user = getattr(self.context.get("request"), "user", None)
+            if user is not None and user.is_authenticated:
+                validated_data["uploaded_by"] = user
             evidence.status = Evidence.Status.IN_REVIEW
             evidence.save()
             return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # Four-eyes follows the content: whoever swaps the file or link is its uploader now.
+        if "attachment" in validated_data or (
+            "link" in validated_data and validated_data["link"] != instance.link
+        ):
+            user = getattr(self.context.get("request"), "user", None)
+            if user is not None and user.is_authenticated:
+                validated_data["uploaded_by"] = user
+        return super().update(instance, validated_data)
 
 
 class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
@@ -4088,6 +4061,9 @@ class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
             "updated_at",
             "size",
             "attachment_hash",
+            "review_status",
+            "reviewed_at",
+            "review_comment",
         ]
 
 
@@ -7627,7 +7603,9 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     task_template = FieldsRelatedField(["folder", "id", "description"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
-    assigned_to = FieldsRelatedField(many=True)
+    # Named through the template, like the fields below: the masking of related
+    # objects cannot resolve the node's `assigned_to` property to a model.
+    assigned_to = FieldsRelatedField(many=True, source="task_template.assigned_to")
     evidences = FieldsRelatedField(["folder", "id"], many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
     # These read off the template. The model exposes them as properties returning
