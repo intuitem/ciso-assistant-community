@@ -85,11 +85,13 @@ Before users can connect apps:
 
 - the backend needs a shared cache: set `memcached.enabled: true`. Sign-in keeps each authorization
   code in the cache until the app redeems it, possibly on another worker, and the `mcp` feature flag
-  cannot be turned on without it;
+  cannot be turned on without it. The bundled memcached runs in each backend pod, so it allows one
+  backend replica only: with more, set `memcached.enabled: false` and point every pod at one shared
+  memcached, or sign-in fails when the app's two requests reach different pods;
 - an administrator turns on the `mcp` feature flag, and `mcp_write` to let apps change data;
 - an administrator ticks "Can connect AI apps" on each user who may do so.
 
-The `/mcp` paths get their own ingress. Configure your ingress controller, through
+The `/mcp` paths get their own ingress, and the chart refuses to render it without these rules. Configure your ingress controller, through
 `backend.mcp.ingressAnnotations`, to strip the `Cookie` request header and the `Set-Cookie` and
 `Service-Worker-Allowed` response headers, and to add `Content-Security-Policy: sandbox` and
 `X-Content-Type-Options: nosniff`. Browser session cookies then never reach the MCP server, and its
@@ -120,6 +122,9 @@ backend:
     ingressAnnotations:
       traefik.ingress.kubernetes.io/router.middlewares: <namespace>-mcp-isolation@kubernetescrd
 ```
+
+If a gateway or mesh in front of the ingress applies these rules instead, set
+`backend.mcp.proxyRulesApplied: true`.
 
 Set `backend.mcp.dcr.allowedRedirectHosts` to the AI apps you support to limit which apps can
 register themselves.

@@ -14,7 +14,7 @@ from rest_framework.response import Response
 
 from core.context import mcp_access_var
 from iam.mcp_access import is_mcp_token, mcp_access
-from iam.mcp_inventory import is_inventoried
+from iam.mcp_inventory import effect, is_inventoried
 from iam.models import ConnectedAppUse
 
 BEARER = "bearer "
@@ -60,6 +60,8 @@ class MCPTokenMiddleware:
             return _refuse(404, "Not found.")
         if not is_inventoried(request.method, match):
             return _refuse(403, "This operation is not available to AI apps.")
+        if effect(request.method, match) not in access.actions:
+            return _refuse(403, "This app's connection does not allow this action.")
         mcp_access_var.set(access)
         # the request log names the app: reads stay traceable
         structlog.contextvars.bind_contextvars(mcp_app=access.client.id)

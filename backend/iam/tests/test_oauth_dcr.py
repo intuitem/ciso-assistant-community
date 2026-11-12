@@ -126,7 +126,14 @@ def test_https_and_loopback_redirects_are_accepted(uri):
 
 
 @pytest.mark.parametrize(
-    "uri", ["http://evil.example/cb", "javascript:alert(1)", "myapp://cb"]
+    "uri",
+    [
+        "http://evil.example/cb",
+        "javascript:alert(1)",
+        "myapp://cb",
+        "https://[invalid/cb",
+        "https:///callback",
+    ],
 )
 def test_other_redirects_are_rejected(uri):
     with pytest.raises(ValidationError):

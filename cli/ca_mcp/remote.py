@@ -32,6 +32,11 @@ def resource_url() -> str:
     return config.PUBLIC_URL + "/mcp"
 
 
+# every backend call, token checks included: any request with a made-up token
+# triggers one, and they share the backend's workers with the UI
+_backend_calls = threading.BoundedSemaphore(max(1, config.MAX_CONCURRENT_CALLS))
+
+
 class TokenVerifier:
     """Asks the backend what the token may do. Only an MCP token gets an
     answer: a PAT or any other token is refused. Each answer is reused for a
@@ -59,24 +64,32 @@ class TokenVerifier:
             # forget the expired answers now and then
             if len(self._cache) > 10_000:
                 self._cache = {k: v for k, v in self._cache.items() if v[0] > now}
-        access = self._ask(token)
-        with self._lock:
-            self._cache[key] = (now + self._ttl, access)
+        access, final = self._ask(token)
+        # a backend outage is not an answer: ask again on the next call
+        if final:
+            with self._lock:
+                self._cache[key] = (now + self._ttl, access)
         return access
 
-    def _ask(self, token: str) -> AccessToken | None:
+    def _ask(self, token: str) -> tuple[AccessToken | None, bool]:
+        """The backend's answer, and whether it is one: a refusal is, an error
+        or a timeout is not."""
         try:
-            res = self._http.get(
-                f"{config.API_URL.rstrip('/')}/iam/mcp/access/",
-                headers={"Authorization": f"Bearer {token}"},
-                verify=config.VERIFY_CERTIFICATE,
-                timeout=config.HTTP_TIMEOUT,
-            )
+            with _backend_calls:
+                res = self._http.get(
+                    f"{config.API_URL.rstrip('/')}/iam/mcp/access/",
+                    headers={"Authorization": f"Bearer {token}"},
+                    verify=config.VERIFY_CERTIFICATE,
+                    timeout=config.HTTP_TIMEOUT,
+                )
         except requests.RequestException as e:
             logger.warning("token check failed: %s", type(e).__name__)
-            return None
+            return None, False
+        if res.status_code in (401, 403):
+            return None, True
         if res.status_code != 200:
-            return None
+            logger.warning("token check failed: HTTP %s", res.status_code)
+            return None, False
         data = res.json()
         return AccessToken(
             token=token,
@@ -89,7 +102,7 @@ class TokenVerifier:
                 "profile": data.get("profile"),
                 "app": data.get("app"),
             },
-        )
+        ), True
 
 
 class _Refused:
@@ -114,9 +127,6 @@ def _with_params(endpoint, params) -> str:
         values = value if isinstance(value, (list, tuple)) else [value]
         query += [(key, v) for v in values]
     return parts.path + ("?" + urlencode(query) if query else "")
-
-
-_backend_calls = threading.BoundedSemaphore(max(1, config.MAX_CONCURRENT_CALLS))
 
 
 def forward(method, endpoint, *, params=None, json=None, data=None, headers=None):

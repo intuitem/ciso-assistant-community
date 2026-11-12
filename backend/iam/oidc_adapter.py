@@ -43,8 +43,13 @@ class CISOOIDCAdapter(DefaultOIDCAdapter):
         # allauth's DCR form only checks that redirect_uris is a list of strings.
         allowed_hosts = settings.OAUTH_DCR_ALLOWED_REDIRECT_HOSTS
         for uri in client.get_redirect_uris():
-            parts = urlsplit(uri)
-            host = (parts.hostname or "").lower()
+            try:
+                parts = urlsplit(uri)
+                host = (parts.hostname or "").lower()
+            except ValueError:
+                raise ValidationError(f"Invalid redirect URI: {uri}")
+            if not host:
+                raise ValidationError(f"Redirect URI has no host: {uri}")
             is_loopback = parts.scheme == "http" and host in LOOPBACK_HOSTS
             if parts.scheme != "https" and not is_loopback:
                 raise ValidationError(f"Redirect URI must use https: {uri}")

@@ -1,4 +1,4 @@
-"""The MCP server of an instance: tokens checked by introspection, calls made
+"""The MCP server of an instance: tokens checked with the backend, calls made
 with the caller's own token, a budget per connection, and every call logged."""
 
 import json
@@ -115,6 +115,51 @@ class TestTokenVerifier:
 
     def test_a_failing_instance_refuses(self):
         assert remote.TokenVerifier(_session(status=503)).verify("raw") is None
+
+    def test_an_outage_is_not_remembered(self):
+        # refused while the backend is down, accepted as soon as it is back
+        session = _session(status=503)
+        verifier = remote.TokenVerifier(session, cache_seconds=60)
+        assert verifier.verify("raw") is None
+
+        session.get.return_value = _response(json_data=ACCESS)
+        assert verifier.verify("raw").subject == "u1"
+
+    def test_an_unreachable_backend_is_not_remembered(self):
+        session = _session(ACCESS)
+        session.get.side_effect = [remote.requests.ConnectionError(), None]
+        verifier = remote.TokenVerifier(session, cache_seconds=60)
+        assert verifier.verify("raw") is None
+
+        session.get.side_effect = None
+        assert verifier.verify("raw").subject == "u1"
+
+    def test_a_refusal_is_remembered(self):
+        session = _session()
+        verifier = remote.TokenVerifier(session, cache_seconds=60)
+        verifier.verify("pat")
+        verifier.verify("pat")
+        assert session.get.call_count == 1
+
+
+def test_oauth_mode_serves_http_by_default(monkeypatch):
+    import importlib
+
+    monkeypatch.setenv("CA_MCP_AUTH", "oauth")
+    monkeypatch.delenv("CA_MCP_TRANSPORT", raising=False)
+    try:
+        assert importlib.reload(config).IS_HTTP
+    finally:
+        monkeypatch.delenv("CA_MCP_AUTH")
+        importlib.reload(config)
+
+
+def test_oauth_mode_refuses_stdio():
+    from ca_mcp import server
+
+    with patch.multiple(config, AUTH_MODE="oauth", IS_HTTP=False):
+        with pytest.raises(SystemExit, match="streamable-http"):
+            server.main()
 
 
 class TestForward:
@@ -337,4 +382,38 @@ def test_backend_calls_are_limited(connected):
             thread.start()
         for thread in threads:
             thread.join()
+    assert peak[0] <= config.MAX_CONCURRENT_CALLS
+
+
+def test_an_unknown_auth_mode_refuses_to_start():
+    from ca_mcp import server
+
+    with patch.multiple(config, AUTH_MODE="oauht"):
+        with pytest.raises(SystemExit, match="pat or oauth"):
+            server.main()
+
+
+def test_token_checks_share_the_backend_call_limit():
+    inflight, peak, lock = [0], [0], threading.Lock()
+
+    def slow_get(*args, **kwargs):
+        with lock:
+            inflight[0] += 1
+            peak[0] = max(peak[0], inflight[0])
+        time.sleep(0.05)
+        with lock:
+            inflight[0] -= 1
+        return _response(status_code=401)
+
+    session = Mock()
+    session.get.side_effect = slow_get
+    verifier = remote.TokenVerifier(session, cache_seconds=60)
+    threads = [
+        threading.Thread(target=verifier.verify, args=(f"made-up-{i}",))
+        for i in range(8)
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
     assert peak[0] <= config.MAX_CONCURRENT_CALLS

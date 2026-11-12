@@ -4,6 +4,7 @@ import json
 import sys
 from rich import print as rprint
 from ..client import make_get_request, get_paginated_results, found_line
+from ..resolvers import _is_uuid
 from ..utils.response_formatter import (
     success_response,
     error_response,
@@ -1490,6 +1491,8 @@ async def get_task_template_details(task_id: str):
     Args:
         task_id: Task template ID
     """
+    if not _is_uuid(task_id):
+        return f"Error: task template ID must be a UUID, got {task_id!r}"
     try:
         res = make_get_request(f"/task-templates/{task_id}/")
 

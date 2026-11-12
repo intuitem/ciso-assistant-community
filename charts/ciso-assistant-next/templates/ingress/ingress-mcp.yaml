@@ -1,4 +1,7 @@
 {{- if and .Values.ingress.enabled .Values.backend.mcp.enabled }}
+{{- if not (or .Values.backend.mcp.ingressAnnotations .Values.backend.mcp.proxyRulesApplied) }}
+{{- fail "backend.mcp: /mcp needs the proxy rules (strip Cookie and Set-Cookie, add Content-Security-Policy: sandbox): set backend.mcp.ingressAnnotations for your ingress controller (see the chart README), or backend.mcp.proxyRulesApplied=true if a gateway applies them" }}
+{{- end }}
 # apart from the main ingress, so that the MCP isolation annotations apply only here
 apiVersion: networking.k8s.io/v1
 kind: Ingress

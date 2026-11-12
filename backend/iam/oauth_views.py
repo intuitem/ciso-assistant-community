@@ -120,11 +120,15 @@ def _access_denied_url(info, error="access_denied") -> str | None:
     return urlunsplit(parts._replace(query=urlencode(query)))
 
 
-def _silent_without_consent(request, info, mcp_request) -> bool:
-    # allauth answers prompt=none from the user's tokens for any client, so a
-    # client the user never approved could get a code without asking
+def _silent_without_consent(request, scopes, info, mcp_request) -> bool:
+    # allauth answers prompt=none from all the user's tokens, whatever their
+    # client, so a client could get a code its user never approved for it
     if "none" not in (request.GET.get("prompt") or "").split():
         return False
+    # the consent page adds the mcp scope to a request for the MCP resource;
+    # silently it is skipped, and the code would not work for MCP
+    if mcp_request and not set(MCP_SCOPES) & set(scopes):
+        return True
     approvals = (
         AppGrant.objects.all()
         if mcp_request
@@ -133,17 +137,17 @@ def _silent_without_consent(request, info, mcp_request) -> bool:
     user, client_id = request.user, info.get("client_id")
     if not approvals.filter(user=user, client_id=client_id).exists():
         return True
-    # once all its tokens have expired (OAUTH_REFRESH_TOKEN_IDLE_DAYS), the
-    # connection has ended: its grant row stays, but the user approves it again
-    return not (
-        Token.objects.valid()
-        .filter(
-            user=user,
-            client_id=client_id,
-            type__in=(Token.Type.ACCESS_TOKEN, Token.Type.REFRESH_TOKEN),
-        )
-        .exists()
-    )
+    # only this client's live tokens count. Once they have all expired
+    # (OAUTH_REFRESH_TOKEN_IDLE_DAYS), the connection has ended: its grant row
+    # stays, but the user approves it again.
+    granted = set()
+    for token in Token.objects.valid().filter(
+        user=user,
+        client_id=client_id,
+        type__in=(Token.Type.ACCESS_TOKEN, Token.Type.REFRESH_TOKEN),
+    ):
+        granted |= set(token.get_scopes())
+    return not set(scopes) <= granted
 
 
 # Overriding dispatch drops the decorators allauth puts on it, so restate them.
@@ -209,7 +213,7 @@ class CISOAuthorizationView(AuthorizationView):
         mcp_request = is_mcp_request(scopes, info.get("resources"))
         reason = refusal_reason(request.user, mcp_request)
         if reason is None:
-            if _silent_without_consent(request, info, mcp_request):
+            if _silent_without_consent(request, scopes, info, mcp_request):
                 return HttpResponseRedirect(
                     _access_denied_url(info, error="consent_required")
                 )

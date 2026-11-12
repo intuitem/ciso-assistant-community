@@ -644,6 +644,10 @@ def run_http():
 
 def main():
     logging.basicConfig(level=logging.INFO)
+    if config.AUTH_MODE not in ("pat", "oauth"):
+        raise SystemExit(f"CA_MCP_AUTH must be pat or oauth, not {config.AUTH_MODE!r}")
+    if config.AUTH_MODE == "oauth" and not config.IS_HTTP:
+        raise SystemExit("CA_MCP_AUTH=oauth needs CA_MCP_TRANSPORT=streamable-http")
     if config.IS_HTTP:
         run_http()
     else:

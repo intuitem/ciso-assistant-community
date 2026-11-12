@@ -241,6 +241,9 @@
                         "name": {
                             "type": "string"
                         },
+                        "proxyRulesApplied": {
+                            "type": "boolean"
+                        },
                         "resources": {
                             "type": "object",
                             "additionalProperties": true

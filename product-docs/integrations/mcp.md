@@ -782,7 +782,7 @@ Additional variables for the HTTP transport:
 | Variable                 | Default     | Description                                                                                                                                               |
 | ------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CA_MCP_TRANSPORT`       | `stdio`     | Set to `http` for Streamable HTTP                                                                                                                         |
-| `CA_MCP_READ_ONLY`       | `true`      | Expose only read tools                                                                                                                                    |
+| `CA_MCP_READ_ONLY`       | `true`      | Expose only read tools. PAT mode only: with `CA_MCP_AUTH=oauth`, the backend decides writes (the `mcp_write` feature flag)                                                                                                                                    |
 | `CA_MCP_HOST`            | `127.0.0.1` | Listen address                                                                                                                                            |
 | `CA_MCP_PORT`            | `8001`      | Listen port                                                                                                                                               |
 | `CA_MCP_PATH`            | `/mcp`      | Endpoint path                                                                                                                                             |

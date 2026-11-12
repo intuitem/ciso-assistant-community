@@ -20,6 +20,7 @@ from core.context import mcp_access_var
 from core.models import AppliedControl, Vulnerability
 from core.permissions import IsGlobalAdmin
 from core.startup import startup
+from crq.models import QuantitativeRiskStudy
 from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
 from iam.mcp_access import mcp_access_for
@@ -223,6 +224,19 @@ class TestSinglePort:
             == 403
         )
         assert _call(_mcp_token(admin, "delete"), "delete", path).status_code == 204
+
+    def test_an_action_marked_update_needs_update(self, admin, mcp_write_on):
+        # the view checks add_ but updates: it needs both actions
+        study = QuantitativeRiskStudy.objects.create(
+            name="Study", folder=Folder.get_root_folder()
+        )
+        path = (
+            f"/api/crq/quantitative-risk-studies/{study.id}/retrigger-all-simulations/"
+        )
+        for actions in (("create",), ("update",)):
+            assert _call(_mcp_token(admin, *actions), "post", path).status_code == 403
+        allowed = _call(_mcp_token(admin, "create", "update"), "post", path)
+        assert allowed.status_code == 200
 
     def test_an_app_cannot_create_a_user_account(self, admin, mcp_write_on):
         entity = Entity.objects.create(name="Acme", folder=Folder.get_root_folder())

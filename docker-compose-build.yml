@@ -1,5 +1,6 @@
 services:
   backend:
+    networks: [default, mcp]
     container_name: backend
     build:
       context: ./backend
@@ -16,7 +17,6 @@ services:
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
-      - OAUTH_DCR_ENABLED=false
 
     read_only: true
     cap_drop:
@@ -106,9 +106,7 @@ services:
     ports:
       - 127.0.0.1:6333:6333
 
-  # MCP server for AI apps, with OAuth. Opt-in: `--profile mcp`. No `ports:`:
-  # reachable only through caddy at /mcp. It holds no secret: it forwards each
-  # app's own token to the backend, which decides what the app may do.
+  # see docker-compose.yml for the profile / no-ports / read-only rationale
   mcp:
     container_name: mcp
     build:
@@ -122,16 +120,14 @@ services:
       - mcp
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
     environment:
-      - CA_MCP_AUTH=oauth
-      - CISO_ASSISTANT_URL=https://localhost:8443
       - API_URL=http://backend:8000/api
       - CA_MCP_TRANSPORT=streamable-http
       - CA_MCP_HOST=0.0.0.0
       - CA_MCP_PORT=8001
-      # the public host, port included: change it with CISO_ASSISTANT_URL
+      - CA_MCP_READ_ONLY=true
       - CA_MCP_ALLOWED_HOSTS=localhost:8443
       - CA_MCP_ALLOW_ENV_TOKEN=false
       - HOME=/tmp
@@ -145,9 +141,12 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    user: "1001:1001"
+    user: "1002:1002"
+    networks:
+      - mcp
 
   caddy:
+    networks: [default, mcp]
     container_name: caddy
     image: ${CADDY_IMAGE:-caddy:2.11.4}
     environment:
@@ -160,9 +159,7 @@ services:
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
-      reverse_proxy /.well-known/oauth-authorization-server* backend:8000
-      @mcp path /mcp* /.well-known/oauth-protected-resource*
-      reverse_proxy @mcp mcp:8001 {
+      reverse_proxy /mcp* mcp:8001 {
         header_up -Cookie
         header_down -Set-Cookie
         header_down -Service-Worker-Allowed
@@ -171,6 +168,11 @@ services:
       }
       reverse_proxy /* frontend:3000
       }" > Caddyfile && caddy run'
+
+networks:
+  # the MCP server reaches the backend and the proxy only, never the data stores
+  mcp:
+    internal: true
 
 volumes:
   qdrant_data:

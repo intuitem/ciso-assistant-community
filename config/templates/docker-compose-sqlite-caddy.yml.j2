@@ -1,5 +1,8 @@
 services:
   backend:
+    {% if mcp.enabled %}
+    networks: [default, mcp]
+    {% endif %}
     {% if memcached.enabled %}
     depends_on:
       memcached:
@@ -176,10 +179,15 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    user: "1001:1001"
+    user: "1002:1002"
+    networks:
+      - mcp
   {% endif %}
 
   caddy:
+    {% if mcp.enabled %}
+    networks: [default, mcp]
+    {% endif %}
     container_name: caddy
     image: caddy:2.11.4
     environment:
@@ -256,4 +264,11 @@ volumes:
       type: tmpfs
       device: tmpfs
       o: "uid=1001,gid=1001,mode=0700,size=64k"
+{% endif %}
+
+{% if mcp.enabled %}
+networks:
+  # the MCP server reaches the backend and the proxy only, never the data stores
+  mcp:
+    internal: true
 {% endif %}

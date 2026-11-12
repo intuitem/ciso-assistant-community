@@ -52,6 +52,7 @@ services:
       start_period: 150s
     networks:
       - bw-services
+      {% if mcp.enabled %}- bw-mcp{% endif %}
 
   huey:
     container_name: huey
@@ -183,13 +184,13 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    user: "1001:1001"
+    user: "1002:1002"
     networks:
-      - bw-services
+      - bw-mcp
   {% endif %}
 
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.1
+    image: bunkerity/bunkerweb:1.6.17
     ports:
       {% if can_do_tls %}- "80:8080/tcp"{% endif %}
       - "{{ port }}:8443/tcp"
@@ -198,13 +199,14 @@ services:
     restart: unless-stopped
     networks:
       - bw-universe
+      {% if mcp.enabled %}- bw-mcp{% endif %}
       - bw-services
 
   bw-scheduler:
     depends_on:
       bw-db:
         condition: service_started
-    image: bunkerity/bunkerweb-scheduler:1.6.1
+    image: bunkerity/bunkerweb-scheduler:1.6.17
     environment:
       - "DATABASE_URI=mariadb+pymysql://{{ bunkerweb.db_username }}:{{ bunkerweb.db_password }}@bw-db:3306/{{ bunkerweb.db_name }}"
       - "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24"
@@ -227,10 +229,10 @@ services:
       - {{ fqdn }}_REVERSE_PROXY_HOST_5=http://backend:8000
       - {{ fqdn }}_REVERSE_PROXY_HEADERS_3=Cookie ''
       - {{ fqdn }}_REVERSE_PROXY_HIDE_HEADERS_3=Upgrade Set-Cookie Service-Worker-Allowed
-      - {{ fqdn }}_REVERSE_PROXY_HEADERS_CLIENT_3=Content-Security-Policy sandbox;X-Content-Type-Options nosniff
+      - {{ fqdn }}_REVERSE_PROXY_HEADERS_CLIENT_3=Content-Security-Policy sandbox always;X-Content-Type-Options nosniff always
       - {{ fqdn }}_REVERSE_PROXY_HEADERS_4=Cookie ''
       - {{ fqdn }}_REVERSE_PROXY_HIDE_HEADERS_4=Upgrade Set-Cookie Service-Worker-Allowed
-      - {{ fqdn }}_REVERSE_PROXY_HEADERS_CLIENT_4=Content-Security-Policy sandbox;X-Content-Type-Options nosniff
+      - {{ fqdn }}_REVERSE_PROXY_HEADERS_CLIENT_4=Content-Security-Policy sandbox always;X-Content-Type-Options nosniff always
       {% endif %}{% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
       - {{ fqdn }}_USE_CUSTOM_SSL=yes
       - {{ fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem
@@ -271,7 +273,7 @@ services:
       - bw-db
 
   {% if bunkerweb.use_ui %}bw-ui:
-    image: bunkerity/bunkerweb-ui:1.6.1
+    image: bunkerity/bunkerweb-ui:1.6.17
     depends_on:
       bw-db:
         condition: service_started
@@ -340,6 +342,11 @@ volumes:
   bw-data:
 
 networks:
+  {% if mcp.enabled %}
+  bw-mcp:
+    name: bw-mcp
+    internal: true
+  {% endif %}
   bw-universe:
     name: bw-universe
     ipam:

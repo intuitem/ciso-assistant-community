@@ -268,3 +268,10 @@ def _is_field_choices(method, match) -> bool:
 
 def is_inventoried(method, match) -> bool:
     return (method, match.url_name) in OPERATIONS or _is_field_choices(method, match)
+
+
+def effect(method, match) -> str:
+    """What an inventoried operation does. Some actions check a permission that
+    does not say it (a POST marked update checks add_), so the connection must
+    allow this effect too."""
+    return OPERATIONS.get((method, match.url_name), READ)

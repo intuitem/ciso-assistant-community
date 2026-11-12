@@ -209,6 +209,8 @@ backend:
   ## app's own OAuth token to the backend, which decides what the app may do.
   ## Users sign in with their own account. Sign-in needs a shared cache: set
   ## `memcached.enabled: true`, or the `mcp` feature flag cannot be turned on.
+  ## The bundled memcached runs in each backend pod, so it allows one backend
+  ## replica only; for more, point every pod at one shared memcached.
   ## Ref: https://intuitem.gitbook.io/ciso-assistant/integrations/mcp-oauth
   mcp:
     # -- Serve MCP at /mcp
@@ -243,6 +245,11 @@ backend:
     # header and the Set-Cookie response header, and to add
     # `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff` (see README)
     ingressAnnotations: {} # @schema additionalProperties: true
+
+    # -- Set to true when the /mcp rules are applied outside these annotations
+    # (a gateway, a mesh). With the ingress enabled, the chart refuses to render
+    # while both this and ingressAnnotations are empty.
+    proxyRulesApplied: false
 
     # -- Environment variables to pass to the MCP container
     env: []

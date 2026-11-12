@@ -20,6 +20,9 @@ services:
       start_period: 150s
 
   backend:
+    {% if mcp.enabled %}
+    networks: [default, mcp]
+    {% endif %}
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
@@ -224,7 +227,7 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    user: "1001:1001"
+    user: "1002:1002"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.mcp.rule=Host(`{{ fqdn }}`) && (PathPrefix(`/mcp`) || PathPrefix(`/.well-known/oauth-protected-resource`))"
@@ -239,9 +242,14 @@ services:
       - "traefik.http.routers.mcp.entrypoints=websecure"
       - "traefik.http.routers.mcp.tls=true"{% if can_do_tls %}
       - "traefik.http.routers.mcp.tls.certresolver=letsencrypt"{% endif %}
+    networks:
+      - mcp
   {% endif %}
 
   traefik:
+    {% if mcp.enabled %}
+    networks: [default, mcp]
+    {% endif %}
     container_name: traefik
     image: traefik:v3
     restart: unless-stopped
@@ -319,4 +327,11 @@ volumes:
       type: tmpfs
       device: tmpfs
       o: "uid=1001,gid=1001,mode=0700,size=64k"
+{% endif %}
+
+{% if mcp.enabled %}
+networks:
+  # the MCP server reaches the backend and the proxy only, never the data stores
+  mcp:
+    internal: true
 {% endif %}

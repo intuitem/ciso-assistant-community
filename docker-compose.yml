@@ -1,5 +1,6 @@
 services:
   backend:
+    networks: [default, mcp]
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
@@ -132,9 +133,12 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    user: "1001:1001"
+    user: "1002:1002"
+    networks:
+      - mcp
 
   caddy:
+    networks: [default, mcp]
     container_name: caddy
     image: caddy:2.11.4
     environment:
@@ -160,6 +164,11 @@ services:
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'
+
+networks:
+  # the MCP server reaches the backend and the proxy only, never the data stores
+  mcp:
+    internal: true
 
 volumes:
   qdrant_data:

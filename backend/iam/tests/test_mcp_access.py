@@ -84,7 +84,7 @@ def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp",)):
     return raw
 
 
-def _authorize(http, client, user, scope="openid mcp", prompt=None):
+def _authorize(http, client, user, scope="openid mcp", prompt=None, resource=None):
     challenge = (
         base64.urlsafe_b64encode(
             hashlib.sha256(secrets.token_urlsafe(48).encode()).digest()
@@ -103,6 +103,8 @@ def _authorize(http, client, user, scope="openid mcp", prompt=None):
     }
     if prompt:
         params["prompt"] = prompt
+    if resource:
+        params["resource"] = resource
     http.cookies["token"] = AuthToken.objects.create(user=user)[1]
     return http.get(AUTHORIZE_URL, params)
 
@@ -244,6 +246,37 @@ class TestLosingAccess:
         _token(_client(name="Other"), user, scopes=("openid", "mcp"))
 
         response = _authorize(client, expired, user, prompt="none")
+
+        query = parse_qs(urlsplit(response["Location"]).query)
+        assert "code" not in query
+        assert query["error"] == ["consent_required"]
+
+    def test_a_live_token_without_mcp_does_not_restore_the_connection(self, client):
+        # the app's MCP tokens expired, but it still holds a live openid token,
+        # and another app holds a live MCP token for the same user
+        user, app = _user("u@example.com"), _client(name="Expired")
+        _token(app, user, type=Token.Type.REFRESH_TOKEN)
+        Token.objects.filter(client=app).update(
+            expires_at=timezone.now() - timedelta(days=1)
+        )
+        _token(app, user, scopes=("openid",))
+        _token(_client(name="Other"), user, scopes=("openid", "mcp"))
+
+        response = _authorize(client, app, user, prompt="none")
+
+        query = parse_qs(urlsplit(response["Location"]).query)
+        assert "code" not in query
+        assert query["error"] == ["consent_required"]
+
+    def test_a_silent_request_for_mcp_without_the_scope_gets_no_code(self, client):
+        # approved before with the scope added by the consent page; silently,
+        # that page is skipped and the code would carry openid only
+        user, app = _user("u@example.com"), _client()
+        _token(app, user, scopes=("openid", "mcp"))
+
+        response = _authorize(
+            client, app, user, scope="openid", prompt="none", resource=mcp_resource()
+        )
 
         query = parse_qs(urlsplit(response["Location"]).query)
         assert "code" not in query

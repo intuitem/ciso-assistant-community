@@ -41,7 +41,13 @@ DEFAULT_PAGE_LIMIT = int(os.getenv("CA_MCP_PAGE_LIMIT", "100"))
 MAX_TOTAL_ITEMS = int(os.getenv("CA_MCP_MAX_ITEMS", "200"))
 MAX_RESPONSE_CHARS = int(os.getenv("CA_MCP_MAX_RESPONSE_CHARS", "20000"))
 
-TRANSPORT = os.getenv("CA_MCP_TRANSPORT", "stdio").lower()
+# Remote MCP server of an instance (the `mcp` service): "oauth" takes the
+# OAuth tokens of AI apps only, "pat" (default) takes a PAT.
+AUTH_MODE = os.getenv("CA_MCP_AUTH", "pat").lower()
+# OAuth sign-in only exists over HTTP
+TRANSPORT = os.getenv(
+    "CA_MCP_TRANSPORT", "streamable-http" if AUTH_MODE == "oauth" else "stdio"
+).lower()
 IS_HTTP = TRANSPORT in ("http", "streamable-http")
 # honoured on both transports; only the default differs (stdio is one local user)
 READ_ONLY = _flag("CA_MCP_READ_ONLY", "true" if IS_HTTP else "false")
@@ -58,9 +64,6 @@ JSON_RESPONSE = _flag("CA_MCP_JSON_RESPONSE", "false")
 # one identity; opt-in only.
 ALLOW_ENV_TOKEN = _flag("CA_MCP_ALLOW_ENV_TOKEN", "false")
 
-# Remote MCP server of an instance (the `mcp` service): "oauth" takes the
-# OAuth tokens of AI apps only, "pat" (default) takes a PAT.
-AUTH_MODE = os.getenv("CA_MCP_AUTH", "pat").lower()
 # The instance's public URL: the token issuer is <url>/api, this server <url>/mcp.
 PUBLIC_URL = os.getenv("CISO_ASSISTANT_URL", "").rstrip("/")
 # How long the backend's answer about a token is reused. Revoking a connection

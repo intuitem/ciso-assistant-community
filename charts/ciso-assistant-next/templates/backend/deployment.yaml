@@ -1,3 +1,6 @@
+{{- if and .Values.backend.mcp.enabled .Values.memcached.enabled (gt (int .Values.backend.replicas) 1) }}
+{{- fail "backend.mcp needs one cache for all backend pods, and the bundled memcached runs one per pod: keep backend.replicas at 1, or set memcached.enabled=false and point the backend at a shared memcached" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
