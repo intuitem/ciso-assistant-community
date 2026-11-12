@@ -12257,6 +12257,45 @@ class RequirementViewSet(BaseModelViewSet):
 
 class EvidenceFilterSet(GenericFilterSet):
     owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
+    review_status = df.MultipleChoiceFilter(
+        choices=EvidenceRevision.ReviewStatus.choices, method="filter_review_status"
+    )
+
+    def filter_review_status(self, queryset, name, value):
+        """Review state of the newest revision that holds a file or link."""
+        if not value:
+            return queryset
+        return queryset.filter(
+            revisions__in=EvidenceRevision.current_with_content().filter(
+                review_status__in=value
+            )
+        )
+
+    compliance_assessment = df.UUIDFilter(method="filter_compliance_assessment")
+
+    def filter_compliance_assessment(self, queryset, name, value):
+        """Same scope as the audit's evidences list: direct, via requirement
+        assessments, and via applied controls / task templates the caller can view."""
+        user = self.request.user
+        if not RoleAssignment.is_object_readable(user, ComplianceAssessment, value):
+            return queryset.none()
+        controls = AppliedControl.objects.filter(
+            requirement_assessments__compliance_assessment=value,
+            id__in=RoleAssignment.get_viewable_object_ids(user, AppliedControl),
+        )
+        tasks = TaskTemplate.objects.filter(
+            Q(compliance_assessments=value)
+            | Q(requirement_assessments__compliance_assessment=value),
+            id__in=RoleAssignment.get_viewable_object_ids(user, TaskTemplate),
+        )
+        return queryset.filter(
+            pk__in=Evidence.objects.filter(
+                Q(compliance_assessments=value)
+                | Q(requirement_assessments__compliance_assessment=value)
+                | Q(applied_controls__in=controls)
+                | Q(task_templates__in=tasks)
+            ).values("pk")
+        )
 
     class Meta:
         model = Evidence
@@ -12294,7 +12333,7 @@ class EvidenceViewSet(BaseModelViewSet):
             .get_queryset()
             .select_related("folder")
             .prefetch_related(
-                "revisions",
+                "revisions__uploaded_by",
                 "applied_controls",
                 "requirement_assessments",
                 "security_exceptions",
@@ -12525,7 +12564,7 @@ class EvidenceViewSet(BaseModelViewSet):
                 )
             elif strategy == self.BatchConflictStrategy.REPLACE:
                 self._batch_replace_revision(
-                    result, summary, existing, upload, rel_path
+                    result, summary, existing, upload, rel_path, request
                 )
             elif strategy == self.BatchConflictStrategy.RENAME:
                 new_name = self._batch_find_unique_name(name, folder)
@@ -12634,12 +12673,14 @@ class EvidenceViewSet(BaseModelViewSet):
         evidence: Evidence,
         upload: UploadedFile,
         rel_path: Optional[str],
+        request: HttpRequest,
     ):
         """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
         revision = evidence.last_revision
         if revision is None:
             revision = EvidenceRevision(evidence=evidence)
         superseded_name = revision.set_new_attachment(upload)
+        revision.uploaded_by = request.user
 
         if rel_path:
             revision.observation = f"path: {rel_path}"
@@ -12660,6 +12701,7 @@ class EvidenceViewSet(BaseModelViewSet):
             return
 
         revision.save()
+        revision.reopen_evidence_review()
         if superseded_name and superseded_name != revision.attachment.name:
             revision.attachment.storage.delete(superseded_name)
         result["outcome"] = "replaced"
@@ -12690,14 +12732,91 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
     """
 
     model = EvidenceRevision
-    filterset_fields = ["evidence"]
+    filterset_fields = ["evidence", "review_status"]
     ordering = ["-version"]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related("evidence", "evidence__folder", "folder", "task_node")
+            .select_related(
+                "evidence",
+                "evidence__folder",
+                "folder",
+                "task_node",
+                "uploaded_by",
+                "reviewed_by",
+            )
+        )
+
+    @action(methods=["post"], detail=True)
+    def review(self, request, pk):
+        """Approve or reject this revision: {"decision": "approved"|"rejected", "comment": str}.
+        "pending" undoes the caller's own decision.
+        "seen": {"attachment_hash", "link"} is the content the reviewer had on screen: the
+        decision is refused if the file or link was swapped in place since."""
+        from core.utils import get_respondent_scoped_folder_ids
+
+        revision = self.get_object()
+        if not RoleAssignment.is_object_accessible(
+            request.user, "change", Evidence, revision.evidence_id
+        ) or revision.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        decision = request.data.get("decision")
+        comment = str(request.data.get("comment") or "")
+        if decision == EvidenceRevision.ReviewStatus.REJECTED and not comment.strip():
+            return Response(
+                {"comment": "comment_required_on_reject"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            with transaction.atomic():
+                if decision == EvidenceRevision.ReviewStatus.PENDING:
+                    revision.undo_review(request.user)
+                else:
+                    # Same lock as revision creation: a decision can't land on a superseded file.
+                    evidence = Evidence.objects.select_for_update().get(
+                        pk=revision.evidence_id
+                    )
+                    if evidence.last_revision != revision:
+                        return Response(
+                            {"decision": "stale_revision"},
+                            status=status.HTTP_409_CONFLICT,
+                        )
+                    # In-place uploads keep the revision id: lock the row and compare content.
+                    current = (
+                        EvidenceRevision.objects.select_for_update()
+                        .filter(pk=revision.pk)
+                        .values("attachment_hash", "link")
+                        .get()
+                    )
+                    seen = request.data.get("seen")
+                    if seen is not None and (
+                        not isinstance(seen, dict)
+                        or (seen.get("attachment_hash") or None)
+                        != (current["attachment_hash"] or None)
+                        or (seen.get("link") or None) != (current["link"] or None)
+                    ):
+                        return Response(
+                            {"decision": "stale_revision"},
+                            status=status.HTTP_409_CONFLICT,
+                        )
+                    revision.record_review(request.user, decision, comment)
+        except ValidationError as e:
+            return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+        if decision == EvidenceRevision.ReviewStatus.PENDING:
+            return Response(
+                EvidenceRevisionReadSerializer(
+                    revision, context={"request": request}
+                ).data
+            )
+        evidence = revision.evidence
+        evidence.refresh_from_db(fields=["status"])
+        EvidenceWriteSerializer(context={"request": request})._send_review_notification(
+            evidence
+        )
+        return Response(
+            EvidenceRevisionReadSerializer(revision, context={"request": request}).data
         )
 
     @action(methods=["get"], detail=True)
@@ -12781,6 +12900,7 @@ class UploadAttachmentView(APIView):
             old_attachment = revision.attachment
             old_original_filename = revision.original_filename
             superseded_name = revision.set_new_attachment(attachment)
+            revision.uploaded_by = request.user
 
             try:
                 revision.full_clean()
@@ -12800,6 +12920,7 @@ class UploadAttachmentView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             revision.save()
+            revision.reopen_evidence_review()
             if superseded_name and superseded_name != revision.attachment.name:
                 revision.attachment.storage.delete(superseded_name)
 
