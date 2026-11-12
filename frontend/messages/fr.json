@@ -2150,6 +2150,7 @@
 	"retentionPolicy": "Politique de conservation",
 	"retention": "Conservation",
 	"isSensitive": "Est sensible",
+	"sensitiveCategoryHelpText": "Les catégories des articles 9 et 10 du RGPD sont toujours sensibles",
 	"legalBasis": "Base légale",
 	"article9Condition": "Condition Article 9",
 	"transferMechanism": "Mécanisme de transfert",
