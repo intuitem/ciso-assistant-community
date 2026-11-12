@@ -2145,6 +2145,7 @@
 	"retentionPolicy": "Retention Policy",
 	"retention": "Retention",
 	"isSensitive": "Is sensitive",
+	"sensitiveCategoryHelpText": "GDPR Art. 9 and 10 categories are always sensitive",
 	"legalBasis": "Legal Basis",
 	"article9Condition": "Article 9 Condition",
 	"transferMechanism": "Transfer Mechanism",
