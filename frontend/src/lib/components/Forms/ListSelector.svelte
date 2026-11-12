@@ -368,10 +368,12 @@
 									{disabled}
 									class="rounded border-surface-300-700 text-blue-600 focus:ring-blue-500"
 								/>
-								<span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
-								{#if opt.detail}
-									<span class="text-xs font-mono text-surface-500">{opt.detail}</span>
-								{/if}
+								<span class="flex items-baseline gap-2">
+									<span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
+									{#if opt.detail}
+										<span class="text-xs font-mono text-surface-500">{opt.detail}</span>
+									{/if}
+								</span>
 							</label>
 						{/each}
 					</div>

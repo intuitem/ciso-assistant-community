@@ -10,11 +10,11 @@ interface SearchableOption {
  * `query`, ignoring case and surrounding spaces. A blank query returns every option.
  */
 export function filterOptions<T extends SearchableOption>(options: T[], query: string): T[] {
-	const needle = query.trim().toLowerCase();
+	const needle = query.trim().toLocaleLowerCase();
 	if (!needle) return options;
 	return options.filter((option) =>
 		[option.translatedLabel ?? option.label, option.detail].some((text) =>
-			text?.toLowerCase().includes(needle)
+			text?.toLocaleLowerCase().includes(needle)
 		)
 	);
 }
