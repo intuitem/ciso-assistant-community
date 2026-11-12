@@ -29,8 +29,8 @@ description: 'This framework is based on 2 documents:
 
   Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance'
 copyright: EUROPEAN COMMISSION + ENISA
-version: 13
-publication_date: 2025-11-22
+version: 14
+publication_date: 2026-11-11
 provider: EUROPEAN COMMISSION + ENISA
 packager: intuitem
 labels:
@@ -299,6 +299,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1
       ref_id: 1.1.1
+      name: 'Required content of the security policy'
       description: 'For the purpose of Article 21(2), point (a) of Directive (EU)
         2022/2555, the policy on the security of network and information systems shall:'
       annotation: "\u2022 Set a policy on the security of network and information\
@@ -613,6 +614,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.a
+      name: 'Approach to managing network and information system security'
       description: "set out the relevant entities\u2019 approach to managing the security\
         \ of their network and information systems;"
       translations:
@@ -638,6 +640,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.b
+      name: 'Alignment with business strategy and objectives'
       description: "be appropriate to and complementary with the relevant entities\u2019\
         \ business strategy and objectives;"
       translations:
@@ -660,6 +663,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.c
+      name: 'Network and information security objectives'
       description: set out network and information security objectives;
       translations:
         de:
@@ -680,6 +684,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.d
+      name: 'Commitment to continual improvement'
       description: include a commitment to continual improvement of the security of
         network and information systems;
       translations:
@@ -703,6 +708,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.e
+      name: 'Commitment to provide necessary resources'
       description: include a commitment to provide the appropriate resources needed
         for its implementation, including the necessary staff, financial resources,
         processes, tools and technologies;
@@ -733,6 +739,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.f
+      name: 'Communication to employees and interested parties'
       description: be communicated to and acknowledged by relevant employees and relevant
         interested external parties;
       translations:
@@ -757,6 +764,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.g
+      name: 'Roles and responsibilities'
       description: lay down roles and responsibilities pursuant to point 1.2.;
       translations:
         de:
@@ -776,6 +784,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.h
+      name: 'Documentation and retention periods'
       description: list the documentation to be kept and the duration of retention
         of the documentation;
       translations:
@@ -798,6 +807,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.i
+      name: 'List of topic-specific policies'
       description: list the topic-specific policies;
       translations:
         de:
@@ -817,6 +827,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.j
+      name: 'Indicators to monitor implementation and maturity'
       description: "lay down indicators and measures to monitor its implementation\
         \ and the current status of relevant entities\u2019 maturity level of network\
         \ and information security;"
@@ -847,6 +858,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1.1
       ref_id: 1.1.1.k
+      name: 'Date of formal approval by management bodies'
       description: "indicate the date of the formal approval by the management bodies\
         \ of the relevant entities (the \u2018management bodies\u2019)."
       translations:
@@ -874,6 +886,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.1
       ref_id: 1.1.2
+      name: 'Annual review of the security policy'
       description: The network and information system security policy shall be reviewed
         and, where appropriate, updated by management bodies at least annually and
         when significant incidents or significant changes to operations or risks occur.
@@ -1378,6 +1391,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.2
       ref_id: 1.2.1
+      name: 'Assignment of security responsibilities and authorities'
       description: "As part of their policy on the security of network and information\
         \ systems referred to in point 1.1., the relevant entities shall lay down\
         \ responsibilities and authorities for network and information system security\
@@ -1536,6 +1550,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.2
       ref_id: 1.2.2
+      name: 'Application of security policies by personnel and third parties'
       description: The relevant entities shall require all personnel and third parties
         to apply network and information system security in accordance with the established
         network and information security policy, topic-specific policies and procedures
@@ -1746,6 +1761,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.2
       ref_id: 1.2.3
+      name: 'Direct reporting to management bodies'
       description: At least one person shall report directly to the management bodies
         on matters of network and information system security.
       annotation: "\u2022 Appoint a person (e.g. chief information security officer\
@@ -1826,6 +1842,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.2
       ref_id: 1.2.4
+      name: 'Dedicated or combined security roles'
       description: Depending on the size of the relevant entities, network and information
         system security shall be covered by dedicated roles or duties carried out
         in addition to existing roles.
@@ -1938,6 +1955,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.2
       ref_id: 1.2.5
+      name: 'Segregation of conflicting duties'
       description: Conflicting duties and conflicting areas of responsibility shall
         be segregated, where applicable.
       annotation: "\u2022 Consider segregating conflicting duties and areas of responsibility\
@@ -2022,6 +2040,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1.2
       ref_id: 1.2.6
+      name: 'Review of roles and responsibilities'
       description: Roles, responsibilities and authorities shall be reviewed and,
         where appropriate, updated by management bodies at planned intervals and when
         significant incidents or significant changes to operations or risks occur.
@@ -2266,6 +2285,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1
       ref_id: 2.1.1
+      name: 'Risk assessment, risk treatment plan and acceptance of residual risks'
       description: For the purpose of Article 21(2), point (a) of Directive (EU) 2022/2555,
         the relevant entities shall establish and maintain an appropriate risk management
         framework to identify and address the risks posed to the security of network
@@ -2571,6 +2591,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1
       ref_id: 2.1.2
+      name: 'Cybersecurity risk management process'
       description: "For the purpose of point 2.1.1., the relevant entities shall establish\
         \ procedures for identification, analysis, assessment and treatment of risks\
         \ (\u2018cybersecurity risk management process\u2019). The cybersecurity risk\
@@ -3373,6 +3394,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.a
+      name: 'Risk management methodology'
       description: follow a risk management methodology;
       translations:
         de:
@@ -3390,6 +3412,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.b
+      name: 'Risk tolerance level in line with risk appetite'
       description: establish the risk tolerance level in accordance with the risk
         appetite of the relevant entities;
       translations:
@@ -3413,6 +3436,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.c
+      name: 'Risk criteria'
       description: establish and maintain relevant risk criteria;
       translations:
         de:
@@ -3431,6 +3455,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.d
+      name: 'Risk identification using an all-hazards approach'
       description: in line with an all-hazards approach, identify and document the
         risks posed to the security of network and information systems, in particular
         in relation to third parties and risks that could lead to disruptions in the
@@ -3478,6 +3503,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.e
+      name: 'Risk analysis'
       description: analyse the risks posed to the security of network and information
         systems, including threat, likelihood, impact, and risk level, taking into
         account cyber threat intelligence and vulnerabilities;
@@ -3511,6 +3537,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.f
+      name: 'Risk evaluation against risk criteria'
       description: evaluate the identified risks based on the risk criteria;
       translations:
         de:
@@ -3531,6 +3558,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.g
+      name: 'Identification and prioritisation of risk treatment options'
       description: identify and prioritise appropriate risk treatment options and
         measures;
       translations:
@@ -3555,6 +3583,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.h
+      name: 'Monitoring of risk treatment implementation'
       description: continuously monitor the implementation of the risk treatment measures;
       translations:
         de:
@@ -3576,6 +3605,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.i
+      name: 'Responsibilities and timelines for risk treatment'
       description: identify who is responsible for implementing the risk treatment
         measures and when they should be implemented;
       translations:
@@ -3602,6 +3632,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
       ref_id: 2.1.2.j
+      name: 'Risk treatment plan and justification of residual risks'
       description: document the chosen risk treatment measures in a risk treatment
         plan and the reasons justifying the acceptance of residual risks in a comprehensible
         manner.
@@ -3630,6 +3661,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1
       ref_id: 2.1.3
+      name: 'Factors for prioritising risk treatment'
       description: When identifying and prioritising appropriate risk treatment options
         and measures, the relevant entities shall take into account the risk assessment
         results, the results of the procedure to assess the effectiveness of cybersecurity
@@ -3714,6 +3746,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1
       ref_id: 2.1.4
+      name: 'Review of risk assessment and risk treatment plan'
       description: The relevant entities shall review and, where appropriate, update
         the risk assessment results and the risk treatment plan at planned intervals
         and at least annually, and when significant changes to operations or risks
@@ -4105,6 +4138,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.2
       ref_id: 2.2.1
+      name: 'Regular compliance reviews and reporting to management bodies'
       description: The relevant entities shall regularly review the compliance with
         their policies on network and information system security, topic-specific
         policies, rules, and standards. The management bodies shall be informed of
@@ -4284,6 +4318,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.2
       ref_id: 2.2.2
+      name: 'Compliance reporting system'
       description: "The relevant entities shall put in place an effective compliance\
         \ reporting system which shall be appropriate to their structures, operating\
         \ environments and threat landscapes. The compliance reporting system shall\
@@ -4409,6 +4444,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.2
       ref_id: 2.2.3
+      name: 'Frequency of compliance monitoring'
       description: The relevant entities shall perform the compliance monitoring at
         planned intervals and when significant incidents or significant changes to
         operations or risks occur.
@@ -4542,6 +4578,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.3
       ref_id: 2.3.1
+      name: 'Independent review of security management'
       description: The relevant entities shall review independently their approach
         to managing network and information system security and its implementation
         including people, processes and technologies.
@@ -4676,6 +4713,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.3
       ref_id: 2.3.2
+      name: 'Competence and impartiality of independent reviewers'
       description: The relevant entities shall develop and maintain processes to conduct
         independent reviews which shall be carried out by individuals with appropriate
         audit competence. Where the independent review is conducted by staff members
@@ -4870,6 +4908,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.3
       ref_id: 2.3.3
+      name: 'Reporting and follow-up of independent review results'
       description: "The results of the independent reviews, including the results\
         \ from the compliance monitoring pursuant to point 2.2. and the monitoring\
         \ and measurement pursuant to point 7, shall be reported to the management\
@@ -5081,6 +5120,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.3
       ref_id: 2.3.4
+      name: 'Frequency of independent reviews'
       description: The independent reviews shall take place at planned intervals and
         when significant incidents or significant changes to operations or risks occur.
       annotation: "\u2022 Independent reviews should take place at least annually,\
@@ -5264,6 +5304,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.1
       ref_id: 3.1.1
+      name: 'Establishment of the incident handling policy'
       description: For the purpose of Article 21(2), point (b) of Directive (EU) 2022/2555,
         the relevant entities shall establish and implement an incident handling policy
         laying down the roles, responsibilities, and procedures for detecting, analysing,
@@ -5368,6 +5409,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.1
       ref_id: 3.1.2
+      name: 'Required content of the incident handling policy'
       description: 'The policy referred to in point 3.1.1 shall be coherent with the
         business continuity and disaster recovery plan referred to in point 4.1. The
         policy shall include:'
@@ -5877,6 +5919,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.1.2
       ref_id: 3.1.2.a
+      name: 'Incident categorisation system'
       description: a categorisation system for incidents that is consistent with the
         event assessment and classification carried out pursuant to point 3.4.1.;
       translations:
@@ -5904,6 +5947,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.1.2
       ref_id: 3.1.2.b
+      name: 'Communication plans for escalation and reporting'
       description: effective communication plans including for escalation and reporting;
       translations:
         de:
@@ -5926,6 +5970,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.1.2
       ref_id: 3.1.2.c
+      name: 'Assignment of incident detection and response roles'
       description: assignment of roles to detect and appropriately respond to incidents
         to competent employees;
       translations:
@@ -5951,6 +5996,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.1.2
       ref_id: 3.1.2.d
+      name: 'Incident response documentation and templates'
       description: documents to be used in the course of incident detection and response
         such as incident response manuals, escalation charts, contact lists and templates.
       translations:
@@ -5981,6 +6027,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.1
       ref_id: 3.1.3
+      name: 'Testing and review of the incident handling policy'
       description: The roles, responsibilities and procedures laid down in the policy
         shall be tested and reviewed and, where appropriate, updated at planned intervals
         and after significant incidents or significant changes to operations or risks.
@@ -6274,6 +6321,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2
       ref_id: 3.2.1
+      name: 'Monitoring and logging procedures and tools'
       description: The relevant entities shall lay down procedures and use tools to
         monitor and log activities on their network and information systems to detect
         events that could be considered as incidents and respond accordingly to mitigate
@@ -6465,6 +6513,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2
       ref_id: 3.2.2
+      name: 'Automated monitoring and minimisation of false positives and negatives'
       description: To the extent feasible, monitoring shall be automated and carried
         out either continuously or in periodic intervals, subject to business capabilities.
         The relevant entities shall implement their monitoring activities in a way
@@ -6637,6 +6686,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2
       ref_id: 3.2.3
+      name: 'Log maintenance and scope of logging'
       description: 'Based on the procedures referred to in point 3.2.1., the relevant
         entities shall maintain, document, and review logs. The relevant entities
         shall establish a list of assets to be subject to logging based on the results
@@ -6782,6 +6832,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.a
+      name: 'Logging of inbound and outbound network traffic'
       description: relevant outbound and inbound network traffic;
       translations:
         de:
@@ -6800,6 +6851,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.b
+      name: 'Logging of user account changes and extension of permissions'
       description: "creation, modification or deletion of users of the relevant entities\u2019\
         \ network and information systems and extension of the permissions;"
       translations:
@@ -6828,6 +6880,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.c
+      name: 'Logging of access to systems and applications'
       description: access to systems and applications;
       translations:
         de:
@@ -6845,6 +6898,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.d
+      name: 'Logging of authentication-related events'
       description: authentication-related events;
       translations:
         de:
@@ -6862,6 +6916,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.e
+      name: 'Logging of privileged access and administrative account activity'
       description: all privileged access to systems and applications, and activities
         performed by administrative accounts;
       translations:
@@ -6887,6 +6942,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.f
+      name: 'Logging of access to critical configuration and backup files'
       description: access or changes to critical configuration and backup files;
       translations:
         de:
@@ -6907,6 +6963,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.g
+      name: 'Event logs and security tool logs'
       description: event logs and logs from security tools, such as antivirus, intrusion
         detection systems or firewalls;
       translations:
@@ -6933,6 +6990,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.h
+      name: 'Logging of system resource use and performance'
       description: use of system resources, as well as their performance;
       translations:
         de:
@@ -6952,6 +7010,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.i
+      name: 'Logging of physical access to facilities'
       description: physical access to facilities;
       translations:
         de:
@@ -6969,6 +7028,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.j
+      name: 'Logging of access to and use of network equipment and devices'
       description: access to and use of their network equipment and devices;
       translations:
         de:
@@ -6990,6 +7050,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.k
+      name: 'Logging of activation, stopping and pausing of logs'
       description: activation, stopping and pausing of the various logs;
       translations:
         de:
@@ -7010,6 +7071,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2.3
       ref_id: 3.2.3.l
+      name: 'Logging of environmental events'
       description: environmental events.
       translations:
         de:
@@ -7027,6 +7089,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2
       ref_id: 3.2.4
+      name: 'Log review and alarm thresholds'
       description: The logs shall be regularly reviewed for any unusual or unwanted
         trends. Where appropriate, the relevant entities shall lay down appropriate
         values for alarm thresholds. If the laid down values for alarm threshold are
@@ -7305,6 +7368,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2
       ref_id: 3.2.5
+      name: 'Log retention, backup and protection'
       description: The relevant entities shall maintain and back up logs for a predefined
         period and shall protect them from unauthorised access or changes.
       annotation: "\u2022 Make sure that the log retention period is defined in accordance\
@@ -7468,6 +7532,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2
       ref_id: 3.2.6
+      name: 'Time synchronisation and redundancy of logging systems'
       description: To the extent feasible, the relevant entities shall ensure that
         all systems have synchronised time sources to be able to correlate logs between
         systems for event assessment. The relevant entities shall establish and keep
@@ -7728,6 +7793,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.2
       ref_id: 3.2.7
+      name: 'Review of logging procedures and logged assets'
       description: The procedures as well as the list of assets that are being logged
         shall be reviewed and, where appropriate, updated at regular intervals and
         after significant incidents.
@@ -8061,6 +8127,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.3
       ref_id: 3.3.1
+      name: 'Mechanism for reporting suspicious events'
       description: The relevant entities shall put in place a simple mechanism allowing
         their employees, suppliers, and customers to report suspicious events.
       annotation: "\u2022 Define what constitutes a suspicious event based on criteria\
@@ -8250,6 +8317,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.3
       ref_id: 3.3.2
+      name: 'Communication of and training on the reporting mechanism'
       description: The relevant entities shall, where appropriate, communicate the
         event reporting mechanism to their suppliers and customers, and shall regularly
         train their employees how to use the mechanism.
@@ -8506,6 +8574,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.4
       ref_id: 3.4.1
+      name: 'Assessment of suspicious events'
       description: The relevant entities shall assess suspicious events to determine
         whether they constitute incidents and, if so, determine their nature and severity.
       annotation: "\u2022 Use criteria to assess whether a suspicious event is an\
@@ -8579,6 +8648,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.4
       ref_id: 3.4.2
+      name: 'Event assessment activities'
       description: 'For the purpose of point 3.4.1, the relevant entities shall act
         in the following manner:'
       annotation: "\u2022 In the procedures defined in points 3.1.1 and 3.1.2 of the\
@@ -8997,6 +9067,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.4.2
       ref_id: 3.4.2.a
+      name: 'Assessment based on predefined criteria and triage'
       description: carry out the assessment based on predefined criteria laid down
         in advance, and on a triage to determine prioritisation of incident containment
         and eradication;
@@ -9027,6 +9098,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.4.2
       ref_id: 3.4.2.b
+      name: 'Quarterly assessment of recurring incidents'
       description: assess the existence of recurring incidents as referred to in Article
         4 of this Regulation on a quarterly basis;
       translations:
@@ -9052,6 +9124,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.4.2
       ref_id: 3.4.2.c
+      name: 'Log review for event assessment'
       description: review the appropriate logs for the purposes of event assessment
         and classification;
       translations:
@@ -9074,6 +9147,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.4.2
       ref_id: 3.4.2.d
+      name: 'Log correlation and analysis'
       description: put in place a process for log correlation and analysis, and
       translations:
         de:
@@ -9095,6 +9169,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.4.2
       ref_id: 3.4.2.e
+      name: 'Reassessment and reclassification of events'
       description: reassess and reclassify events in case of new information becoming
         available or after analysis of previously available information.
       translations:
@@ -9139,6 +9214,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5
       ref_id: 3.5.1
+      name: 'Timely incident response according to documented procedures'
       description: The relevant entities shall respond to incidents in accordance
         with documented procedures and in a timely manner.
       annotation: "\u2022 Establish a dedicated incident response team comprising\
@@ -9289,6 +9365,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5
       ref_id: 3.5.2
+      name: 'Stages of incident response procedures'
       description: 'The incident response procedures shall include the following stages:'
       annotation: "\u2022 Create incident response procedures outlining the steps\
         \ referred to in point 3.5.2 of the Annex to the regulation. \n\u2022 Ensure\
@@ -9476,6 +9553,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5.2
       ref_id: 3.5.2.a
+      name: 'Incident containment'
       description: incident containment, to prevent the consequences of the incident
         from spreading;
       translations:
@@ -9499,6 +9577,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5.2
       ref_id: 3.5.2.b
+      name: 'Incident eradication'
       description: eradication, to prevent the incident from continuing or reappearing,
       translations:
         de:
@@ -9519,6 +9598,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5.2
       ref_id: 3.5.2.c
+      name: 'Recovery from incidents'
       description: recovery from the incident, where necessary.
       translations:
         de:
@@ -9536,6 +9616,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5
       ref_id: 3.5.3
+      name: 'Incident communication plans'
       description: 'The relevant entities shall establish communication plans and
         procedures:'
       annotation: "\u2022 Ensure that the communication plan (Annex to the regulation,\
@@ -9625,6 +9706,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5.3
       ref_id: 3.5.3.a
+      name: 'Communication with CSIRTs and competent authorities'
       description: with the Computer Security Incident Response Teams (CSIRTs) or,
         where applicable, the competent authorities, related to incident notification;
       translations:
@@ -9653,6 +9735,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5.3
       ref_id: 3.5.3.b
+      name: 'Communication with staff and external stakeholders'
       description: for communication among staff members of the relevant entity, and
         for communication with relevant stakeholders external to the relevant entity.
       translations:
@@ -9680,6 +9763,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5
       ref_id: 3.5.4
+      name: 'Logging of incident response activities and evidence'
       description: The relevant entities shall log incident response activities in
         accordance with the procedures referred to in point 3.2.1., and record evidence.
       annotation: "\u2022 Log incident response information which contains (indicative,\
@@ -9787,6 +9871,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.5
       ref_id: 3.5.5
+      name: 'Testing of incident response procedures'
       description: The relevant entities shall test at planned intervals their incident
         response procedures.
       annotation: "\u2022 Test the entity\u2019s incident response procedures at least\
@@ -9964,6 +10049,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.6
       ref_id: 3.6.1
+      name: 'Post-incident reviews and root cause analysis'
       description: Where appropriate, the relevant entities shall carry out post-incident
         reviews after recovery from incidents. The post-incident reviews shall identify,
         where possible, the root cause of the incident and result in documented lessons
@@ -10125,6 +10211,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.6
       ref_id: 3.6.2
+      name: 'Use of post-incident reviews for improvement'
       description: The relevant entities shall ensure that post-incident reviews contribute
         to improving their approach to network and information security, to risk treatment
         measures, and to incident handling, detection and response procedures.
@@ -10273,6 +10360,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:3.6
       ref_id: 3.6.3
+      name: 'Review of whether incidents led to post-incident reviews'
       description: The relevant entities shall review at planned intervals if incidents
         led to post-incident reviews.
       annotation: "\u2022 Conduct an annual review or a review after significant incidents,\
@@ -10422,6 +10510,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1
       ref_id: 4.1.1
+      name: 'Establishment of a business continuity and disaster recovery plan'
       description: For the purpose of Article 21(2), point (c) of Directive (EU) 2022/2555,
         the relevant entities shall lay down and maintain a business continuity and
         disaster recovery plan to apply in the case of incidents.
@@ -10566,6 +10655,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1
       ref_id: 4.1.2
+      name: 'Restoration of operations and content of the plan'
       description: "The relevant entities\u2019 operations shall be restored according\
         \ to the business continuity and disaster recovery plan. The plan shall be\
         \ based on the results of the risk assessment carried out pursuant to point\
@@ -10826,6 +10916,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.a
+      name: 'Purpose, scope and audience of the plan'
       description: purpose, scope and audience;
       translations:
         de:
@@ -10843,6 +10934,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.b
+      name: 'Continuity roles and responsibilities'
       description: roles and responsibilities;
       translations:
         de:
@@ -10860,6 +10952,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.c
+      name: 'Key contacts and communication channels'
       description: key contacts and (internal and external) communication channels;
       translations:
         de:
@@ -10879,6 +10972,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.d
+      name: 'Conditions for plan activation and deactivation'
       description: conditions for plan activation and deactivation;
       translations:
         de:
@@ -10896,6 +10990,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.e
+      name: 'Order of recovery for operations'
       description: order of recovery for operations;
       translations:
         de:
@@ -10913,6 +11008,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.f
+      name: 'Recovery plans and objectives for specific operations'
       description: recovery plans for specific operations, including recovery objectives;
       translations:
         de:
@@ -10934,6 +11030,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.g
+      name: 'Required resources, including backups and redundancies'
       description: required resources, including backups and redundancies;
       translations:
         de:
@@ -10954,6 +11051,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1.2
       ref_id: 4.1.2.h
+      name: 'Restoring and resuming activities from temporary measures'
       description: restoring and resuming activities from temporary measures.
       translations:
         de:
@@ -10974,6 +11072,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1
       ref_id: 4.1.3
+      name: 'Business impact analysis and continuity requirements'
       description: The relevant entities shall carry out a business impact analysis
         to assess the potential impact of severe disruptions to their business operations
         and shall, based on the results of the business impact analysis, establish
@@ -11335,6 +11434,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.1
       ref_id: 4.1.4
+      name: 'Testing and review of continuity and recovery plans'
       description: The business continuity plan and disaster recovery plan shall be
         tested, reviewed and, where appropriate, updated at planned intervals and
         following significant incidents or significant changes to operations or risks.
@@ -11883,6 +11983,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2
       ref_id: 4.2.1
+      name: 'Backup copies and resources for redundancy'
       description: The relevant entities shall maintain backup copies of data and
         provide sufficient available resources, including facilities, network and
         information systems and staff, to ensure an appropriate level of redundancy.
@@ -11955,6 +12056,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2
       ref_id: 4.2.2
+      name: 'Backup plans'
       description: 'Based on the results of the risk assessment carried out pursuant
         to point 2.1 and the business continuity plan, the relevant entities shall
         lay down backup plans which include the following:'
@@ -12106,6 +12208,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.2
       ref_id: 4.2.2.a
+      name: 'Backup plans: recovery times'
       description: recovery times;
       translations:
         de:
@@ -12123,6 +12226,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.2
       ref_id: 4.2.2.b
+      name: 'Backup plans: completeness and accuracy of backup copies'
       description: assurance that backup copies are complete and accurate, including
         configuration data and data stored in cloud computing service environment;
       translations:
@@ -12153,6 +12257,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.2
       ref_id: 4.2.2.c
+      name: 'Backup plans: safe and separate storage of backup copies'
       description: storing backup copies (online or offline) in a safe location or
         locations, which are not in the same network as the system, and are at sufficient
         distance to escape any damage from a disaster at the main site;
@@ -12189,6 +12294,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.2
       ref_id: 4.2.2.d
+      name: 'Backup plans: access controls for backup copies'
       description: appropriate physical and logical access controls to backup copies,
         in accordance with the asset classification level;
       translations:
@@ -12215,6 +12321,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.2
       ref_id: 4.2.2.e
+      name: 'Backup plans: restoring data from backup copies'
       description: restoring data from backup copies;
       translations:
         de:
@@ -12233,6 +12340,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.2
       ref_id: 4.2.2.f
+      name: 'Backup plans: retention periods'
       description: retention periods based on business and regulatory requirements.
       translations:
         de:
@@ -12253,6 +12361,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2
       ref_id: 4.2.3
+      name: 'Integrity checks of backup copies'
       description: The relevant entities shall perform regular integrity checks on
         the backup copies.
       annotation: "\u2022 Check the integrity of the backup copies. An indicative,\
@@ -12420,6 +12529,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2
       ref_id: 4.2.4
+      name: 'Redundancy of resources'
       description: 'Based on the results of the risk assessment carried out pursuant
         to point 2.1 and the business continuity plan, the relevant entities shall
         ensure sufficient availability of resources by at least partial redundancy
@@ -12566,6 +12676,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.4
       ref_id: 4.2.4.a
+      name: 'Redundancy of network and information systems'
       description: network and information systems;
       translations:
         de:
@@ -12583,6 +12694,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.4
       ref_id: 4.2.4.b
+      name: 'Redundancy of assets, including facilities, equipment and supplies'
       description: assets, including facilities, equipment and supplies;
       translations:
         de:
@@ -12603,6 +12715,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.4
       ref_id: 4.2.4.c
+      name: 'Redundancy of personnel'
       description: personnel with the necessary responsibility, authority and competence;
       translations:
         de:
@@ -12624,6 +12737,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2.4
       ref_id: 4.2.4.d
+      name: 'Redundancy of communication channels'
       description: appropriate communication channels.
       translations:
         de:
@@ -12641,6 +12755,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2
       ref_id: 4.2.5
+      name: 'Resource monitoring informed by backup and redundancy requirements'
       description: Where appropriate, the relevant entities shall ensure that monitoring
         and adjustment of resources, including facilities, systems and personnel,
         is duly informed by backup and redundancy requirements.
@@ -12744,6 +12859,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.2
       ref_id: 4.2.6
+      name: 'Testing of backup recovery and redundancies'
       description: The relevant entities shall carry out regular testing of the recovery
         of backup copies and redundancies to ensure that, in recovery conditions,
         they can be relied upon and cover the copies, processes and knowledge to perform
@@ -13196,6 +13312,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3
       ref_id: 4.3.1
+      name: 'Establishment of a crisis management process'
       description: The relevant entities shall put in place a process for crisis management.
       annotation: "\u2022 Take into account industry-recognised standards when developing\
         \ the crisis management process (38).\n    o Be aware that each crisis may\
@@ -13459,6 +13576,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3
       ref_id: 4.3.2
+      name: 'Required elements of the crisis management process'
       description: 'The relevant entities shall ensure that the crisis management
         process addresses at least the following elements:'
       annotation: "\u2022 For crisis communication, consider (indicative, non-exhaustive\
@@ -13584,6 +13702,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3.2
       ref_id: 4.3.2.a
+      name: 'Crisis roles and responsibilities'
       description: roles and responsibilities for personnel and, where appropriate,
         suppliers and service providers, specifying the allocation of roles in crisis
         situations, including specific steps to follow;
@@ -13617,6 +13736,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3.2
       ref_id: 4.3.2.b
+      name: 'Communication with competent authorities in crisis situations'
       description: appropriate communication means between the relevant entities and
         relevant competent authorities;
       translations:
@@ -13640,6 +13760,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3.2
       ref_id: 4.3.2.c
+      name: 'Maintaining security in crisis situations'
       description: application of appropriate measures to ensure the maintenance of
         network and information system security in crisis situations.
       translations:
@@ -13666,6 +13787,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3.2
+      name: 'Information flow with competent authorities'
       description: For the purpose of point (b), the flow of information between the
         relevant entities and relevant competent authorities shall include both obligatory
         communications, such as incident reports and related timelines, and non- obligatory
@@ -13702,6 +13824,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3
       ref_id: 4.3.3
+      name: 'Use of information from CSIRTs and competent authorities'
       description: The relevant entities shall implement a process for managing and
         making use of information received from the CSIRTs or, where applicable, the
         competent authorities, concerning incidents, vulnerabilities, threats or possible
@@ -13889,6 +14012,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3
       ref_id: 4.3.4
+      name: 'Testing and review of the crisis management plan'
       description: The relevant entities shall test, review and, where appropriate,
         update the crisis management plan on a regular basis or following significant
         incidents or significant changes to operations or risks.
@@ -14285,6 +14409,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1
       ref_id: 5.1.1
+      name: 'Establishment of the supply chain security policy'
       description: For the purpose of Article 21(2), point (d) of Directive (EU) 2022/2555,
         the relevant entities shall establish, implement and apply a supply chain
         security policy which governs the relations with their direct suppliers and
@@ -14536,6 +14661,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1
       ref_id: 5.1.2
+      name: 'Criteria for selecting and contracting suppliers'
       description: 'As part of the supply chain security policy referred to in point
         5.1.1, the relevant entities shall lay down criteria to select and contract
         suppliers and service providers. Those criteria shall include the following:'
@@ -14734,6 +14860,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.2
       ref_id: 5.1.2.a
+      name: 'Supplier criteria: cybersecurity practices and secure development'
       description: the cybersecurity practices of the suppliers and service providers,
         including their secure development procedures;
       translations:
@@ -14759,6 +14886,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.2
       ref_id: 5.1.2.b
+      name: 'Supplier criteria: ability to meet cybersecurity specifications'
       description: the ability of the suppliers and service providers to meet cybersecurity
         specifications set by the relevant entities;
       translations:
@@ -14786,6 +14914,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.2
       ref_id: 5.1.2.c
+      name: 'Supplier criteria: quality and resilience of ICT products and services'
       description: the overall quality and resilience of ICT products and ICT services
         and the cybersecurity risk-management measures embedded in them, including
         the risks and classification level of the ICT products and ICT services;
@@ -14819,6 +14948,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.2
       ref_id: 5.1.2.d
+      name: 'Supplier criteria: diversification of supply and limitation of vendor lock-in'
       description: the ability of the relevant entities to diversify sources of supply
         and limit vendor lock-in, where applicable.
       translations:
@@ -14846,6 +14976,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1
       ref_id: 5.1.3
+      name: 'Consideration of coordinated risk assessments of critical supply chains'
       description: When establishing their supply chain security policy, relevant
         entities shall take into account the results of the coordinated security risk
         assessments of critical supply chains carried out in accordance with Article
@@ -14937,6 +15068,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1
       ref_id: 5.1.4
+      name: 'Contractual security requirements for suppliers'
       description: 'Based on the supply chain security policy and taking into account
         the results of the risk assessment carried out in accordance with point 2.1.
         of this Annex, the relevant entities shall ensure that their contracts with
@@ -15143,6 +15275,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.a
+      name: 'Supplier contracts: cybersecurity requirements'
       description: cybersecurity requirements for the suppliers or service providers,
         including requirements as regards the security in acquisition of ICT services
         or ICT products set out in point 6.1.;
@@ -15174,6 +15307,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.b
+      name: 'Supplier contracts: awareness, skills, training and certifications'
       description: "requirements regarding awareness, skills and training, and where\
         \ appropriate certifications, required from the suppliers\u2019 or service\
         \ providers\u2019 employees;"
@@ -15204,6 +15338,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.c
+      name: 'Supplier contracts: background verification of supplier employees'
       description: "requirements regarding the verification of the background of the\
         \ suppliers\u2019 and service providers\u2019 employees;"
       translations:
@@ -15227,6 +15362,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.d
+      name: 'Supplier contracts: incident notification obligation'
       description: an obligation on suppliers and service providers to notify, without
         undue delay, the relevant entities of incidents that present a risk to the
         security of the network and information systems of those entities;
@@ -15261,6 +15397,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.e
+      name: 'Supplier contracts: right to audit or to receive audit reports'
       description: the right to audit or right to receive audit reports;
       translations:
         de:
@@ -15282,6 +15419,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.f
+      name: 'Supplier contracts: vulnerability handling obligation'
       description: an obligation on suppliers and service providers to handle vulnerabilities
         that present a risk to the security of the network and information systems
         of the relevant entities;
@@ -15313,6 +15451,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.g
+      name: 'Supplier contracts: subcontracting requirements'
       description: requirements regarding subcontracting and, where the relevant entities
         allow subcontracting, cybersecurity requirements for subcontractors in accordance
         with the cybersecurity requirements referred to in point (a);
@@ -15347,6 +15486,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.4
       ref_id: 5.1.4.h
+      name: 'Supplier contracts: obligations at contract termination'
       description: obligations on the suppliers and service providers at the termination
         of the contract, such as retrieval and disposal of the information obtained
         by the suppliers and service providers in the exercise of their tasks.
@@ -15378,6 +15518,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1
       ref_id: 5.1.5
+      name: 'Application of supplier criteria in selection and procurement'
       description: The relevant entities shall take into account the elements referred
         to in point 5.1.2 and 5.1.3. as part of the selection process of new suppliers
         and service providers, as well as part of the procurement process referred
@@ -15495,6 +15636,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1
       ref_id: 5.1.6
+      name: 'Review of the policy and monitoring of supplier security practices'
       description: The relevant entities shall review the supply chain security policy,
         and monitor, evaluate and, where necessary, act upon changes in the cybersecurity
         practices of suppliers and service providers, at planned intervals and when
@@ -15629,6 +15771,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1
       ref_id: 5.1.7
+      name: 'Supplier monitoring activities'
       description: 'For the purpose of point 5.1.6., the relevant entities shall:'
       annotation: "\u2022 Set up a regular review (e.g. as part of a regular supplier\
         \ meeting) and follow up on deviations from the agreed SLAs. \n\u2022 Define\
@@ -16779,6 +16922,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.7
       ref_id: 5.1.7.a
+      name: 'Monitoring of service level agreement reports'
       description: regularly monitor reports on the implementation of the service
         level agreements, where applicable;
       translations:
@@ -16802,6 +16946,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.7
       ref_id: 5.1.7.b
+      name: 'Review of supplier-related incidents'
       description: review incidents related to ICT products and ICT services from
         suppliers and service providers;
       translations:
@@ -16826,6 +16971,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.7
       ref_id: 5.1.7.c
+      name: 'Unscheduled supplier reviews'
       description: assess the need for unscheduled reviews and document the findings
         in a comprehensible manner;
       translations:
@@ -16848,6 +16994,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.1.7
       ref_id: 5.1.7.d
+      name: 'Risk analysis of changes to supplier ICT products and services'
       description: analyse the risks presented by changes related to ICT products
         and ICT services from suppliers and service providers and, where appropriate,
         take mitigating measures in a timely manner.
@@ -17103,6 +17250,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2
+      name: 'Registry of direct suppliers and service providers'
       description: 'The relevant entities shall maintain and keep up to date a registry
         of their direct suppliers and service providers, including:'
       translations:
@@ -17129,6 +17277,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2:1
       ref_id: 5.2.a
+      name: 'Supplier registry: contact points'
       description: contact points for each direct supplier and service provider;
       translations:
         de:
@@ -17150,6 +17299,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2:1
       ref_id: 5.2.b
+      name: 'Supplier registry: ICT products, services and processes provided'
       description: a list of ICT products, ICT services, and ICT processes provided
         by the direct supplier or service provider to the relevant entities.
       translations:
@@ -17221,6 +17371,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1
       ref_id: 6.1.1
+      name: 'Risk management in acquisition of ICT services and products'
       description: "For the purpose of Article 21(2), point (e) of Directive (EU)\
         \ 2022/2555, the relevant entities shall set and implement processes to manage\
         \ risks stemming from the acquisition of ICT services or ICT products for\
@@ -17384,6 +17535,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1
       ref_id: 6.1.2
+      name: 'Content of ICT acquisition processes'
       description: 'For the purpose of point 6.1.1., the processes referred to in
         point 6.1.1. shall include:'
       annotation: "\u2022 The security requirements must include at least the means\
@@ -17685,6 +17837,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1.2
       ref_id: 6.1.2.a
+      name: 'Acquisition: security requirements'
       description: security requirements to apply to the ICT services or ICT products
         to be acquired;
       translations:
@@ -17707,6 +17860,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1.2
       ref_id: 6.1.2.b
+      name: 'Acquisition: security updates throughout the lifetime'
       description: requirements regarding security updates throughout the entire lifetime
         of the ICT services or ICT products, or replacement after the end of the support
         period;
@@ -17735,6 +17889,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1.2
       ref_id: 6.1.2.c
+      name: 'Acquisition: description of hardware and software components'
       description: information describing the hardware and software components used
         in the ICT services or ICT products;
       translations:
@@ -17758,6 +17913,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1.2
       ref_id: 6.1.2.d
+      name: 'Acquisition: cybersecurity functions and secure configuration'
       description: information describing the implemented cybersecurity functions
         of the ICT services or ICT products and the configuration required for their
         secure operation;
@@ -17787,6 +17943,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1.2
       ref_id: 6.1.2.e
+      name: 'Acquisition: assurance of compliance with security requirements'
       description: assurance that the ICT services or ICT products comply with the
         security requirements according to point (a);
       translations:
@@ -17812,6 +17969,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1.2
       ref_id: 6.1.2.f
+      name: 'Acquisition: validation of compliance with security requirements'
       description: methods for validating that the delivered ICT services or ICT products
         are compliant to the stated security requirements, as well as documentation
         of the results of the validation.
@@ -17842,6 +18000,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.1
       ref_id: 6.1.3
+      name: 'Review of ICT acquisition processes'
       description: The relevant entities shall review and, where appropriate, update
         the processes at planned intervals and when significant incidents occur.
       annotation: "\u2022 Review the processes for secure acquisition of ICT services,\
@@ -18260,6 +18419,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2
       ref_id: 6.2.1
+      name: 'Rules for secure development'
       description: Before developing a network and information system, including software,
         the relevant entities shall lay down rules for the secure development of network
         and information systems and apply them when developing network and information
@@ -18398,6 +18558,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2
       ref_id: 6.2.2
+      name: 'Secure development activities'
       description: 'For the purpose of point 6.2.1., the relevant entities shall:'
       annotation: "\u2022 A secure software development life cycle (SSDLC) process\
         \ should be implemented by all entities. However, smaller entities can use\
@@ -18640,6 +18801,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2.2
       ref_id: 6.2.2.a
+      name: 'Security requirements analysis in specification and design'
       description: carry out an analysis of security requirements at the specification
         and design phases of any development or acquisition project undertaken by
         the relevant entities or on behalf of those entities;
@@ -18671,6 +18833,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2.2
       ref_id: 6.2.2.b
+      name: 'Secure engineering and secure coding principles'
       description: apply principles for engineering secure systems and secure coding
         principles to any information system development activities such as promoting
         cybersecurity-by-design, zero-trust architectures;
@@ -18706,6 +18869,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2.2
       ref_id: 6.2.2.c
+      name: 'Security requirements for development environments'
       description: lay down security requirements regarding development environments;
       translations:
         de:
@@ -18727,6 +18891,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2.2
       ref_id: 6.2.2.d
+      name: 'Security testing in the development life cycle'
       description: establish and implement security testing processes in the development
         life cycle;
       translations:
@@ -18749,6 +18914,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2.2
       ref_id: 6.2.2.e
+      name: 'Selection, protection and management of security test data'
       description: appropriately select, protect and manage security test data;
       translations:
         de:
@@ -18770,6 +18936,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2.2
       ref_id: 6.2.2.f
+      name: 'Sanitisation and anonymisation of test data'
       description: sanitise and anonymise testing data according to the risk assessment
         carried out pursuant to point 2.1.
       translations:
@@ -18794,6 +18961,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2
       ref_id: 6.2.3
+      name: 'Security requirements for outsourced development'
       description: For outsourced development of network and information systems,
         the relevant entities shall also apply the policies and procedures referred
         to in points 5 and 6.1.
@@ -18920,6 +19088,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.2
       ref_id: 6.2.4
+      name: 'Review of secure development rules'
       description: The relevant entities shall review and, where necessary, update
         their secure development rules at planned intervals.
       annotation: "\u2022 Review the rules for the secure development of network and\
@@ -19209,6 +19378,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.3
       ref_id: 6.3.1
+      name: 'Configuration management measures'
       description: The relevant entities shall take the appropriate measures to establish,
         document, implement, and monitor configurations, including security configurations
         of hardware, software, services and networks.
@@ -19576,6 +19746,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.3
       ref_id: 6.3.2
+      name: 'Secure configuration activities'
       description: 'For the purpose of point 6.3.1., the relevant entities shall:'
       annotation: "\u2022 Consider hardening guides/best practices and general cybersecurity\
         \ principles (e.g. least functionality and least privilege) as a basis for\
@@ -19747,6 +19918,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.3.2
       ref_id: 6.3.2.a
+      name: 'Secure configurations for hardware, software, services and networks'
       description: lay down and ensure security in configurations for their hardware,
         software, services and networks;
       translations:
@@ -19771,6 +19943,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.3.2
       ref_id: 6.3.2.b
+      name: 'Enforcement of secure configurations'
       description: lay down and implement processes and tools to enforce the laid
         down secure configurations for hardware, software, services and networks,
         for newly installed systems as well as for systems in operation over their
@@ -19807,6 +19980,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.3
       ref_id: 6.3.3
+      name: 'Review of configurations'
       description: The relevant entities shall review and, where appropriate, update
         configurations at planned intervals or when significant incidents or significant
         changes to operations or risks occur.
@@ -20048,6 +20222,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.4
       ref_id: 6.4.1
+      name: 'Application of change management procedures'
       description: "The relevant entities shall apply change management procedures\
         \ to control changes of network and information systems. Where applicable,\
         \ the procedures shall be consistent with the relevant entities\u2019 general\
@@ -20297,6 +20472,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.4
       ref_id: 6.4.2
+      name: 'Scope, documentation and testing of changes'
       description: The procedures referred to in point 6.4.1. shall be applied for
         releases, modifications and emergency changes of any software and hardware
         in operation and changes to the configuration. The procedures shall ensure
@@ -20497,6 +20673,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.4
       ref_id: 6.4.3
+      name: 'Documentation of emergency changes'
       description: In the event that the regular change management procedures could
         not be followed due to an emergency, the relevant entities shall document
         the result of the change, and the explanation for why the procedures could
@@ -20646,6 +20823,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.4
       ref_id: 6.4.4
+      name: 'Review of change management procedures'
       description: The relevant entities shall review and, where appropriate, update
         the procedures at planned intervals and when significant incidents or significant
         changes to operations or risks.
@@ -21042,6 +21220,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.5
       ref_id: 6.5.1
+      name: 'Security testing policy and procedures'
       description: The relevant entities shall establish, implement and apply a policy
         and procedures for security testing.
       annotation: "\u2022 Take into account industry-recognised standards when developing\
@@ -21146,6 +21325,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.5
       ref_id: 6.5.2
+      name: 'Security testing activities'
       description: 'The relevant entities shall:'
       annotation: "\u2022 Make sure that network and information systems undergo continuous\
         \ testing, particularly in environments utilizing continuous integration /\
@@ -21429,6 +21609,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.5.2
       ref_id: 6.5.2.a
+      name: 'Risk-based need, scope, frequency and type of security tests'
       description: establish, based on the risk assessment carried out pursuant to
         point 2.1, the need, scope, frequency and type of security tests;
       translations:
@@ -21456,6 +21637,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.5.2
       ref_id: 6.5.2.b
+      name: 'Security testing according to a documented methodology'
       description: carry out security tests according to a documented test methodology,
         covering the components identified as relevant for secure operation in a risk
         analysis;
@@ -21485,6 +21667,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.5.2
       ref_id: 6.5.2.c
+      name: 'Documentation of security test results'
       description: document the type, scope, time and results of the tests, including
         assessment of criticality and mitigating actions for each finding;
       translations:
@@ -21512,6 +21695,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.5.2
       ref_id: 6.5.2.d
+      name: 'Mitigation of critical findings'
       description: apply mitigating actions in case of critical findings.
       translations:
         de:
@@ -21532,6 +21716,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.5
       ref_id: 6.5.3
+      name: 'Review of security testing policies'
       description: The relevant entities shall review and, where appropriate, update
         their security testing policies at planned intervals.
       annotation: "\u2022 Review the security testing policy and procedures at least\
@@ -21776,6 +21961,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.6
       ref_id: 6.6.1
+      name: 'Security patch management procedures'
       description: 'The relevant entities shall specify and apply procedures, coherent
         with the change management procedures referred to in point 6.4.1. as well
         as with vulnerability management, risk management and other relevant management
@@ -22333,6 +22519,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.6.1
       ref_id: 6.6.1.a
+      name: 'Timely application of security patches'
       description: security patches are applied within a reasonable time after they
         become available;
       translations:
@@ -22355,6 +22542,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.6.1
       ref_id: 6.6.1.b
+      name: 'Testing of security patches before production'
       description: security patches are tested before being applied in production
         systems;
       translations:
@@ -22377,6 +22565,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.6.1
       ref_id: 6.6.1.c
+      name: 'Trusted sources and integrity checks of security patches'
       description: security patches come from trusted sources and are checked for
         integrity;
       translations:
@@ -22399,6 +22588,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.6.1
       ref_id: 6.6.1.d
+      name: 'Additional measures where patches are not available or not applied'
       description: additional measures are implemented and residual risks are accepted
         in cases where a patch is not available or not applied pursuant to point 6.6.2.
       translations:
@@ -22427,6 +22617,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.6
       ref_id: 6.6.2
+      name: 'Documented decisions not to apply security patches'
       description: By way of derogation from point 6.6.1.(a), the relevant entities
         may choose not to apply security patches when the disadvantages of applying
         the security patches outweigh the cybersecurity benefits. The relevant entities
@@ -22822,6 +23013,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7
       ref_id: 6.7.1
+      name: 'Protection of network and information systems from cyber threats'
       description: The relevant entities shall take the appropriate measures to protect
         their network and information systems from cyber threats.
       annotation: "\u2022 Take into account well-known standards when implementing\
@@ -22900,6 +23092,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7
       ref_id: 6.7.2
+      name: 'Network security measures'
       description: 'For the purpose of point 6.7.1., the relevant entities shall:'
       annotation: "\u2022 Implement secure-by-design principles by integrating security\
         \ at every layer of network design including the physical, data link, network,\
@@ -23351,6 +23544,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.a
+      name: 'Documentation of network architecture'
       description: document the architecture of the network in a comprehensible and
         up to date manner;
       translations:
@@ -23373,6 +23567,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.b
+      name: 'Protection of internal network domains from unauthorised access'
       description: "determine and apply controls to protect the relevant entities\u2019\
         \ internal network domains from unauthorised access;"
       translations:
@@ -23399,6 +23594,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.c
+      name: 'Prevention of unnecessary access and network communication'
       description: configure controls to prevent accesses and network communication
         not required for the operation of the relevant entities;
       translations:
@@ -23425,6 +23621,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.d
+      name: 'Controls for remote access, including by service providers'
       description: determine and apply controls for remote access to network and information
         systems, including access by service providers;
       translations:
@@ -23452,6 +23649,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.e
+      name: 'Dedicated systems for security policy administration'
       description: not use systems used for administration of the security policy
         implementation for other purposes;
       translations:
@@ -23477,6 +23675,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.f
+      name: 'Deactivation of unneeded connections and services'
       description: explicitly forbid or deactivate unneeded connections and services;
       translations:
         de:
@@ -23498,6 +23697,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.g
+      name: 'Restriction of access to authorised devices'
       description: "where appropriate, exclusively allow access to the relevant entities\u2019\
         \ network and information systems by devices authorised by those entities;"
       translations:
@@ -23528,6 +23728,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.h
+      name: 'Time-limited, authorised connections for service providers'
       description: allow connections of service providers only after an authorisation
         request and for a set time period, such as the duration of a maintenance operation;
       translations:
@@ -23556,6 +23757,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.i
+      name: 'Trusted and isolated communication channels between systems'
       description: establish communication between distinct systems only through trusted
         channels that are isolated using logical, cryptographic or physical separation
         from other communication channels and provide assured identification of their
@@ -23598,6 +23800,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.j
+      name: 'Transition to latest generation network layer protocols'
       description: adopt an implementation plan for the full transition towards latest
         generation network layer communication protocols in a secure, appropriate
         and gradual way and establish measures to accelerate such transition;
@@ -23633,6 +23836,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.k
+      name: 'Deployment of modern e-mail security standards'
       description: adopt an implementation plan for the deployment of internationally
         agreed and interoperable modern e-mail communications standards to secure
         e-mail communications to mitigate vulnerabilities linked to e-mail-related
@@ -23675,6 +23879,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7.2
       ref_id: 6.7.2.l
+      name: 'DNS security and Internet routing security'
       description: apply best practices for the security of the DNS, and for Internet
         routing security and routing hygiene of traffic originating from and destined
         to the network.
@@ -23706,6 +23911,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.7
       ref_id: 6.7.3
+      name: 'Review of network security measures'
       description: The relevant entities shall review and, where appropriate, update
         these measures at planned intervals and when significant incidents or significant
         changes to operations or risks occur.
@@ -24034,6 +24240,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8
       ref_id: 6.8.1
+      name: 'Segmentation of systems and networks'
       description: "The relevant entities shall segment systems into networks or zones\
         \ in accordance with the results of the risk assessment referred to in point\
         \ 2.1. They shall segment their systems and networks from third parties\u2019\
@@ -24137,6 +24344,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8
       ref_id: 6.8.2
+      name: 'Network segmentation measures'
       description: 'For that purpose, the relevant entities shall:'
       annotation: "\u2022 Make sure that the segments are in line with the results\
         \ of the risk assessment (Annex to the regulation, point 2.1). \n\u2022 Apply\
@@ -24457,6 +24665,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.a
+      name: 'Consideration of relationships between trustworthy systems and services'
       description: consider the functional, logical and physical relationship, including
         location, between trustworthy systems and services;
       translations:
@@ -24482,6 +24691,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.b
+      name: 'Access to zones based on security requirements'
       description: grant access to a network or zone based on an assessment of its
         security requirements;
       translations:
@@ -24507,6 +24717,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.c
+      name: 'Critical systems in secured zones'
       description: keep systems that are critical to the relevant entities operation
         or to safety in secured zones;
       translations:
@@ -24532,6 +24743,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.d
+      name: 'Demilitarised zone'
       description: deploy a demilitarised zone within their communication networks
         to ensure secure communication originating from or destined to their networks;
       translations:
@@ -24560,6 +24772,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.e
+      name: 'Restriction of communication between and within zones'
       description: restrict access and communications between and within zones to
         those necessary for the operation of the relevant entities or for safety;
       translations:
@@ -24587,6 +24800,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.f
+      name: 'Separate network for system administration'
       description: "separate the dedicated network for administration of network and\
         \ information systems from the relevant entities\u2019 operational network;"
       translations:
@@ -24613,6 +24827,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.g
+      name: 'Segregation of network administration channels'
       description: segregate network administration channels from other network traffic;
       translations:
         de:
@@ -24634,6 +24849,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8.2
       ref_id: 6.8.2.h
+      name: 'Separation of production from development and testing'
       description: "separate the production systems for the relevant entities\u2019\
         \ services from systems used in development and testing, including backups."
       translations:
@@ -24661,6 +24877,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.8
       ref_id: 6.8.3
+      name: 'Review of network segmentation'
       description: The relevant entities shall review and, where appropriate, update
         network segmentation at planned intervals and when significant incidents or
         significant changes to operations or risks.
@@ -24926,6 +25143,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.9
       ref_id: 6.9.1
+      name: 'Protection of systems against malicious and unauthorised software'
       description: The relevant entities shall protect their network and information
         systems against malicious and unauthorised software.
       translations:
@@ -24952,6 +25170,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.9
       ref_id: 6.9.2
+      name: 'Detection and prevention of malicious and unauthorised software'
       description: For that purpose, the relevant entities shall in particular implement
         measures that detect or prevent the use of malicious or unauthorised software.
         The relevant entities shall, where appropriate, ensure that their network
@@ -25507,6 +25726,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10
       ref_id: 6.10.1
+      name: 'Management of technical vulnerabilities'
       description: The relevant entities shall obtain information about technical
         vulnerabilities in their network and information systems, evaluate their exposure
         to such vulnerabilities, and take appropriate measures to manage the vulnerabilities.
@@ -25590,6 +25810,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10
       ref_id: 6.10.2
+      name: 'Vulnerability handling activities'
       description: 'For the purpose of point 6.10.1., the relevant entities shall:'
       annotation: "\u2022 As a minimum, address vulnerabilities assigned to higher\
         \ classifications (e.g. \u2018critical\u2019 and \u2018high\u2019 in the CVSS)\
@@ -25797,6 +26018,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10.2
       ref_id: 6.10.2.a
+      name: 'Monitoring of vulnerability information'
       description: monitor information about vulnerabilities through appropriate channels,
         such as announcements of CSIRTs, competent authorities or information provided
         by suppliers or service providers;
@@ -25828,6 +26050,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10.2
       ref_id: 6.10.2.b
+      name: 'Vulnerability scanning'
       description: perform, where appropriate, vulnerability scans, and record evidence
         of the results of the scans, at planned intervals;
       translations:
@@ -25853,6 +26076,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10.2
       ref_id: 6.10.2.c
+      name: 'Remediation of critical vulnerabilities without undue delay'
       description: address, without undue delay, vulnerabilities identified by the
         relevant entities as critical to their operations;
       translations:
@@ -25877,6 +26101,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10.2
       ref_id: 6.10.2.d
+      name: 'Alignment of vulnerability handling with change, patch, risk and incident management'
       description: ensure that their vulnerability handling is compatible with their
         change management, security patch management, risk management and incident
         management procedures;
@@ -25908,6 +26133,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10.2
       ref_id: 6.10.2.e
+      name: 'Coordinated vulnerability disclosure procedure'
       description: lay down a procedure for disclosing vulnerabilities in accordance
         with the applicable national coordinated vulnerability disclosure policy.
       translations:
@@ -25935,6 +26161,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10
       ref_id: 6.10.3
+      name: 'Vulnerability mitigation plans and justified exceptions'
       description: When justified by the potential impact of the vulnerability, the
         relevant entities shall create and implement a plan to mitigate the vulnerability.
         In other cases, the relevant entities shall document and substantiate the
@@ -26059,6 +26286,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:6.10
       ref_id: 6.10.4
+      name: 'Review of vulnerability information channels'
       description: The relevant entities shall review and, where appropriate, update
         at planned intervals the channels they use for monitoring vulnerability information.
       annotation: "\u2022 Review the information from the technical-vulnerability-monitoring\
@@ -26397,6 +26625,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7
       ref_id: '7.1'
+      name: 'Policy and procedures to assess effectiveness'
       description: For the purpose of Article 21(2), point (f) of Directive (EU) 2022/2555,
         the relevant entities shall establish, implement and apply a policy and procedures
         to assess whether the cybersecurity risk-management measures taken by the
@@ -26523,6 +26752,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7
       ref_id: '7.2'
+      name: 'Scope of the effectiveness assessment'
       description: 'The policy and procedures referred to in point 7.1. shall take
         into account results of the risk assessment pursuant to point 2.1. and past
         significant incidents. The relevant entities shall determine:'
@@ -26917,6 +27147,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7.2
       ref_id: 7.2.a
+      name: 'Measures to be monitored and measured'
       description: what cybersecurity risk-management measures are to be monitored
         and measured, including processes and controls;
       translations:
@@ -26942,6 +27173,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7.2
       ref_id: 7.2.b
+      name: 'Methods for monitoring, measurement, analysis and evaluation'
       description: the methods for monitoring, measurement, analysis and evaluation,
         as applicable, to ensure valid results;
       translations:
@@ -26967,6 +27199,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7.2
       ref_id: 7.2.c
+      name: 'Timing of monitoring and measurement'
       description: when the monitoring and measuring is to be performed;
       translations:
         de:
@@ -26987,6 +27220,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7.2
       ref_id: 7.2.d
+      name: 'Responsibility for monitoring and measurement'
       description: who is responsible for monitoring and measuring the effectiveness
         of the cybersecurity risk-management measures;
       translations:
@@ -27012,6 +27246,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7.2
       ref_id: 7.2.e
+      name: 'Timing of analysis and evaluation of results'
       description: when the results from monitoring and measurement are to be analysed
         and evaluated;
       translations:
@@ -27034,6 +27269,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7.2
       ref_id: 7.2.f
+      name: 'Responsibility for analysis and evaluation of results'
       description: who has to analyse and evaluate these results.
       translations:
         de:
@@ -27051,6 +27287,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:7
       ref_id: '7.3'
+      name: 'Review of effectiveness assessment policy and procedures'
       description: The relevant entities shall review and, where appropriate, update
         the policy and procedures at planned intervals and when significant incidents
         or significant changes to operations or risks.
@@ -27280,6 +27517,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.1
       ref_id: 8.1.1
+      name: 'Cybersecurity awareness and cyber hygiene'
       description: For the purpose of Article 21(2), point (g) of Directive (EU) 2022/2555,
         the relevant entities shall ensure that their employees, including members
         of management bodies, as well as direct suppliers and service providers are
@@ -27378,6 +27616,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.1
       ref_id: 8.1.2
+      name: 'Awareness raising programme'
       description: 'For the purpose of point 8.1.1., the relevant entities shall offer
         to their employees, including members of management bodies, as well as to
         direct suppliers and service providers where appropriate in accordance with
@@ -27698,6 +27937,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.1.2
       ref_id: 8.1.2.a
+      name: 'Recurring awareness activities, including for new employees'
       description: be scheduled over time, so that the activities are repeated and
         cover new employees;
       translations:
@@ -27721,6 +27961,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.1.2
       ref_id: 8.1.2.b
+      name: 'Alignment of the awareness programme with security policies'
       description: be established in line with the network and information security
         policy, topic- specific policies and relevant procedures on network and information
         security;
@@ -27752,6 +27993,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.1.2
       ref_id: 8.1.2.c
+      name: 'Content of the awareness programme'
       description: cover relevant cyber threats, the cybersecurity risk-management
         measures in place, contact points and resources for additional information
         and advice on cybersecurity matters, as well as cyber hygiene practices for
@@ -27789,6 +28031,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.1
       ref_id: 8.1.3
+      name: 'Effectiveness testing and updating of the awareness programme'
       description: The awareness raising programme shall, where appropriate, be tested
         in terms of effectiveness. The awareness raising programme shall be updated
         and offered at planned intervals taking into account changes in cyber hygiene
@@ -27947,6 +28190,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2
       ref_id: 8.2.1
+      name: 'Regular security training for roles requiring security skills'
       description: The relevant entities shall identify employees, whose roles require
         security relevant skill sets and expertise, and ensure that they receive regular
         training on network and information system security.
@@ -28033,6 +28277,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2
       ref_id: 8.2.2
+      name: 'Security training programme'
       description: The relevant entities shall establish, implement and apply a training
         program in line with the network and information security policy, topic-specific
         policies and other relevant procedures on network and information security
@@ -28168,6 +28413,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2
       ref_id: 8.2.3
+      name: 'Relevance and content of security training'
       description: 'The training referred to in point 8.2.1. shall be relevant to
         the job function of the employee and its effectiveness shall be assessed.
         Training shall take into consideration security measures in place and cover
@@ -28385,6 +28631,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2.3
       ref_id: 8.2.3.a
+      name: 'Training: secure configuration and operation of systems'
       description: instructions regarding the secure configuration and operation of
         the network and information systems, including mobile devices;
       translations:
@@ -28411,6 +28658,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2.3
       ref_id: 8.2.3.b
+      name: 'Training: known cyber threats'
       description: briefing on known cyber threats;
       translations:
         de:
@@ -28429,6 +28677,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2.3
       ref_id: 8.2.3.c
+      name: 'Training: behaviour when security-relevant events occur'
       description: training of the behaviour when security-relevant events occur.
       translations:
         de:
@@ -28450,6 +28699,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2
       ref_id: 8.2.4
+      name: 'Training for staff transferring to new roles'
       description: The relevant entities shall apply training to staff members who
         transfer to new positions or roles which require security relevant skill sets
         and expertise.
@@ -28530,6 +28780,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:8.2
       ref_id: 8.2.5
+      name: 'Periodic update of the training programme'
       description: The program shall be updated and run periodically taking into account
         applicable policies and rules, assigned roles, responsibilities, as well as
         known cyber threats and technological developments.
@@ -28672,6 +28923,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9
       ref_id: '9.1'
+      name: 'Cryptography policy and procedures'
       description: "For the purpose of Article 21(2), point (h) of Directive (EU)\
         \ 2022/2555, the relevant entities shall establish, implement and apply a\
         \ policy and procedures related to cryptography, with a view to ensuring adequate\
@@ -28785,6 +29037,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9
       ref_id: '9.2'
+      name: 'Content of the cryptography policy'
       description: 'The policy and procedures referred to in point 9.1 shall establish:'
       annotation: "\u2022 Ensure that the policy and procedures cover cryptographic\
         \ mechanisms, such as digital signatures (84) and hashes (85), to:\n    o\
@@ -29375,6 +29628,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2
       ref_id: 9.2.a
+      name: 'Type, strength and quality of cryptographic measures'
       description: "in accordance with the relevant entities\u2019 classification\
         \ of assets, the type, strength and quality of the cryptographic measures\
         \ required to protect the relevant entities\u2019 assets, including data at\
@@ -29411,6 +29665,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2
       ref_id: 9.2.b
+      name: 'Approved protocols, algorithms and cryptographic solutions'
       description: based on point (a), the protocols or families of protocols to be
         adopted, as well as cryptographic algorithms, cipher strength, cryptographic
         solutions and usage practices to be approved and required for use in the relevant
@@ -29452,6 +29707,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2
       ref_id: 9.2.c
+      name: 'Key management approach'
       description: "the relevant entities\u2019 approach to key management, including,\
         \ where appropriate, methods for the following:"
       translations:
@@ -29477,6 +29733,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.i
+      name: 'Key management: key generation'
       description: generating different keys for cryptographic systems and applications;
       translations:
         de:
@@ -29497,6 +29754,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.ii
+      name: 'Key management: issuing and obtaining public key certificates'
       description: issuing and obtaining public key certificates;
       translations:
         de:
@@ -29515,6 +29773,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.iii
+      name: 'Key management: key distribution and activation'
       description: distributing keys to intended entities, including how to activate
         keys when received;
       translations:
@@ -29540,6 +29799,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.iv
+      name: 'Key management: key storage and access'
       description: storing keys, including how authorised users obtain access to keys;
       translations:
         de:
@@ -29562,6 +29822,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.v
+      name: 'Key management: changing and updating keys'
       description: changing or updating keys, including rules on when and how to change
         keys;
       translations:
@@ -29586,6 +29847,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.vi
+      name: 'Key management: compromised keys'
       description: dealing with compromised keys;
       translations:
         de:
@@ -29603,6 +29865,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.vii
+      name: 'Key management: key revocation'
       description: revoking keys including how to withdraw or deactivate keys;
       translations:
         de:
@@ -29624,6 +29887,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.viii
+      name: 'Key management: recovery of lost or corrupted keys'
       description: recovering lost or corrupted keys;
       translations:
         de:
@@ -29642,6 +29906,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.ix
+      name: 'Key management: key backup and archiving'
       description: backing up or archiving keys;
       translations:
         de:
@@ -29660,6 +29925,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.x
+      name: 'Key management: key destruction'
       description: destroying keys;
       translations:
         de:
@@ -29677,6 +29943,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.xi
+      name: 'Key management: logging and auditing'
       description: logging and auditing of key management-related activities;
       translations:
         de:
@@ -29699,6 +29966,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9.2.c
       ref_id: 9.2.c.xii
+      name: 'Key management: activation and deactivation dates'
       description: setting activation and deactivation dates for keys ensuring that
         the keys can only be used for the specified period of time according to the
         organization's rules on key management.
@@ -29732,6 +30000,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:9
       ref_id: '9.3'
+      name: 'Review of cryptography policy and procedures'
       description: The relevant entities shall review and, where appropriate, update
         their policy and procedures at planned intervals, taking into account the
         state of the art in cryptography.
@@ -30002,6 +30271,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.1
       ref_id: 10.1.1
+      name: 'Understanding of and commitment to security responsibilities'
       description: "For the purpose of Article 21(2), point (i) of Directive (EU)\
         \ 2022/2555, the relevant entities shall ensure that their employees and direct\
         \ suppliers and service providers, wherever applicable, understand and commit\
@@ -30358,6 +30628,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.1
       ref_id: 10.1.2
+      name: 'Human resources security mechanisms'
       description: 'The requirement referred to in point 10.1.1. shall include the
         following:'
       annotation: "\u2022 Implement regular awareness raising on cyber hygiene practices\
@@ -30678,6 +30949,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.1.2
       ref_id: 10.1.2.a
+      name: 'Mechanisms for applying cyber hygiene practices'
       description: mechanisms to ensure that all employees, direct suppliers and service
         providers, wherever applicable, understand and follow the standard cyber hygiene
         practices that the relevant entities apply pursuant to point 8.1.;
@@ -30712,6 +30984,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.1.2
       ref_id: 10.1.2.b
+      name: 'Mechanisms for privileged users'' awareness of their roles'
       description: mechanisms to ensure that all users with administrative or privileged
         access are aware of and act in accordance with their roles, responsibilities
         and authorities;
@@ -30742,6 +31015,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.1.2
       ref_id: 10.1.2.c
+      name: 'Mechanisms for management bodies'' awareness of their roles'
       description: mechanisms to ensure that members of management bodies understand
         and act in accordance with their role, responsibilities and authorities regarding
         network and information system security;
@@ -30776,6 +31050,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.1.2
       ref_id: 10.1.2.d
+      name: 'Mechanisms for hiring qualified personnel'
       description: mechanisms for hiring personnel qualified for the respective roles,
         such as reference checks, vetting procedures, validation of certifications,
         or written tests.
@@ -30807,6 +31082,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.1
       ref_id: 10.1.3
+      name: 'Annual review of the assignment of personnel to roles'
       description: The relevant entities shall review the assignment of personnel
         to specific roles as referred to in point 1.2., as well as their commitment
         of human resources in that regard, at planned intervals and at least annually.
@@ -30881,7 +31157,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10
       ref_id: '10.2'
-      name: Vulnerability handling and disclosure
+      name: Verification of background
       translations:
         de:
           name: Umgang mit und Offenlegung von Sicherheitslücken
@@ -30898,6 +31174,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.2
       ref_id: 10.2.1
+      name: 'Background verification of employees and suppliers'
       description: The relevant entities shall ensure to the extent feasible verification
         of the background of their employees, and where applicable of direct suppliers
         and service providers in accordance with point 5.1.4, if necessary for their
@@ -30995,6 +31272,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.2
       ref_id: 10.2.2
+      name: 'Background verification activities'
       description: 'For the purpose of point 10.2.1., the relevant entities shall:'
       annotation: "\u2022 Where applicable, define criteria for roles, responsibilities\
         \ and authorities that will be exercised only by persons who have undergone\
@@ -31256,6 +31534,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.2.2
       ref_id: 10.2.2.a
+      name: 'Criteria for roles requiring background verification'
       description: put in place criteria, which set out which roles, responsibilities
         and authorities shall only be exercised by persons whose background has been
         verified;
@@ -31285,6 +31564,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.2.2
       ref_id: 10.2.2.b
+      name: 'Background verification before assuming roles'
       description: ensure that verification referred to in point 10.2.1 is performed
         on these persons before they start exercising these roles, responsibilities
         and authorities, which shall take into consideration the applicable laws,
@@ -31336,6 +31616,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.2
       ref_id: 10.2.3
+      name: 'Review of the background verification policy'
       description: The relevant entities shall review and, where appropriate, update
         the policy at planned intervals and update it where necessary.
       annotation: "\u2022 Where necessary, review and update background verification\
@@ -31411,6 +31692,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.3
       ref_id: 10.3.1
+      name: 'Security responsibilities after termination or change of employment'
       description: The relevant entities shall ensure that network and information
         system security responsibilities and duties that remain valid after termination
         or change of employment of their employees are contractually defined and enforced.
@@ -31487,6 +31769,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.3
       ref_id: 10.3.2
+      name: 'Post-employment duties in terms and conditions of employment'
       description: "For the purpose of point 10.3.1., the relevant entities shall\
         \ include in the individual\u2019s terms and conditions of employment, contract\
         \ or agreement the responsibilities and duties that are still valid after\
@@ -31793,6 +32076,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.4
       ref_id: 10.4.1
+      name: 'Disciplinary process for security policy violations'
       description: The relevant entities shall establish, communicate and maintain
         a disciplinary process for handling violations of network and information
         system security policies. The process shall take into consideration relevant
@@ -31952,6 +32236,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:10.4
       ref_id: 10.4.2
+      name: 'Review of the disciplinary process'
       description: The relevant entities shall review and, where appropriate, update
         the disciplinary process at planned intervals, and when necessary due to legal
         changes or significant changes to operations or risks.
@@ -32187,6 +32472,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.1
       ref_id: 11.1.1
+      name: 'Logical and physical access control policies'
       description: For the purpose of Article 21(2), point (i) of Directive (EU) 2022/2555,
         the relevant entities shall establish, document and implement logical and
         physical access control policies for the access to their network and information
@@ -32285,6 +32571,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.1
       ref_id: 11.1.2
+      name: 'Scope of access control policies'
       description: 'The policies referred to in point 11.1.1. shall:'
       annotation: "\u2022 Implement access control rules by defining and mapping appropriate\
         \ access rights and restrictions to human users or network and information\
@@ -32562,6 +32849,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.1.2
       ref_id: 11.1.2.a
+      name: 'Access by persons, including visitors and suppliers'
       description: address access by persons, including staff, visitors, and external
         entities such as suppliers and service providers;
       translations:
@@ -32588,6 +32876,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.1.2
       ref_id: 11.1.2.b
+      name: 'Access by network and information systems'
       description: address access by network and information systems;
       translations:
         de:
@@ -32608,6 +32897,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.1.2
       ref_id: 11.1.2.c
+      name: 'Access only for adequately authenticated users'
       description: ensure that access is only granted to users that have been adequately
         authenticated.
       translations:
@@ -32630,6 +32920,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.1
       ref_id: 11.1.3
+      name: 'Review of access control policies'
       description: The relevant entities shall review and, where appropriate, update
         the policies at planned intervals and when significant incidents or significant
         changes to operations or risks occur.
@@ -32937,6 +33228,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2
       ref_id: 11.2.1
+      name: 'Provision, modification and removal of access rights'
       description: The relevant entities shall provide, modify, remove and document
         access rights to network and information systems in accordance with the access
         control policy referred to in point 11.1.
@@ -32968,6 +33260,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2
       ref_id: 11.2.2
+      name: 'Access rights management activities'
       description: 'The relevant entities shall:'
       annotation: "\u2022 Ensure each user only has access to information necessary\
         \ for their role (\u2018need-to-know\u2019). \n\u2022 Restrict user permissions\
@@ -33465,6 +33758,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2.2
       ref_id: 11.2.2.a
+      name: 'Access rights based on need-to-know, least privilege and separation of duties'
       description: assign and revoke access rights based on the principles of need-to-know,
         least privilege and separation of duties;
       translations:
@@ -33493,6 +33787,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2.2
       ref_id: 11.2.2.b
+      name: 'Modification of access rights upon termination or change of employment'
       description: ensure that access rights are modified accordingly upon termination
         or change of employment;
       translations:
@@ -33517,6 +33812,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2.2
       ref_id: 11.2.2.c
+      name: 'Authorisation of access'
       description: ensure that access to network and information systems is authorised
         by the relevant persons;
       translations:
@@ -33542,6 +33838,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2.2
       ref_id: 11.2.2.d
+      name: 'Limitation of third-party access rights in scope and duration'
       description: ensure that access rights appropriately address third-party access,
         such as visitors, suppliers and service providers, in particular by limiting
         access rights in scope and in duration;
@@ -33576,6 +33873,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2.2
       ref_id: 11.2.2.e
+      name: 'Register of granted access rights'
       description: maintain a register of access rights granted;
       translations:
         de:
@@ -33595,6 +33893,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2.2
       ref_id: 11.2.2.f
+      name: 'Logging of access rights management'
       description: apply logging to the management of access rights.
       translations:
         de:
@@ -33615,6 +33914,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.2
       ref_id: 11.2.3
+      name: 'Review of access rights'
       description: The relevant entities shall review access rights at planned intervals
         and shall modify them based on organisational changes. The relevant entities
         shall document the results of the review including the necessary changes of
@@ -33896,6 +34196,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.3
       ref_id: 11.3.1
+      name: 'Policies for privileged and system administration accounts'
       description: The relevant entities shall maintain policies for management of
         privileged accounts and system administration accounts as part of the access
         control policy referred to in point 11.1.
@@ -34089,6 +34390,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.3
       ref_id: 11.3.2
+      name: 'Content of privileged account policies'
       description: 'The policies referred to in point 11.3.1. shall:'
       annotation: "\u2022 Introduce higher authentication requirements for privileged\
         \ access rights, such as re-authentication or authentication step-up before\
@@ -34375,6 +34677,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.3.2
       ref_id: 11.3.2.a
+      name: 'Strong authentication and authorisation for privileged accounts'
       description: establish strong identification, authentication such as multi-factor
         authentication, and authorisation procedures for privileged accounts and system
         administration accounts;
@@ -34406,6 +34709,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.3.2
       ref_id: 11.3.2.b
+      name: 'Dedicated accounts for system administration'
       description: set up specific accounts to be used for system administration operations
         exclusively, such as installation, configuration, management or maintenance;
       translations:
@@ -34433,6 +34737,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.3.2
       ref_id: 11.3.2.c
+      name: 'Individualised and restricted administration privileges'
       description: individualise and restrict system administration privileges to
         the highest extent possible,
       translations:
@@ -34456,6 +34761,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.3.2
       ref_id: 11.3.2.d
+      name: 'Exclusive use of administration accounts for administration systems'
       description: provide that system administration accounts are only used to connect
         to system administration systems.
       translations:
@@ -34482,6 +34788,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.3
       ref_id: 11.3.3
+      name: 'Review of privileged account access rights'
       description: The relevant entities shall review access rights of privileged
         accounts and system administration accounts at planned intervals and be modified
         based on organisational changes, and shall document the results of the review,
@@ -34617,6 +34924,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.4
       ref_id: 11.4.1
+      name: 'Restriction and control of system administration systems'
       description: The relevant entities shall restrict and control the use of system
         administration systems in accordance with the access control policy referred
         to in point 11.1.
@@ -34816,6 +35124,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.4
       ref_id: 11.4.2
+      name: 'Administration system measures'
       description: 'For that purpose, the relevant entities shall:'
       annotation: "\u2022 Implement strict access controls to ensure that administrative\
         \ systems are used exclusively for their intended purpose. For instance, only\
@@ -35083,6 +35392,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.4.2
       ref_id: 11.4.2.a
+      name: 'Exclusive use of administration systems for administration purposes'
       description: only use system administration systems for system administration
         purposes, and not for any other operations;
       translations:
@@ -35108,6 +35418,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.4.2
       ref_id: 11.4.2.b
+      name: 'Logical separation of administration systems'
       description: separate logically such systems from application software not used
         for system administrative purposes,
       translations:
@@ -35134,6 +35445,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.4.2
       ref_id: 11.4.2.c
+      name: 'Authentication and encryption for administration system access'
       description: protect access to system administration systems through authentication
         and encryption.
       translations:
@@ -35173,6 +35485,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5
       ref_id: 11.5.1
+      name: 'Identity life cycle management'
       description: The relevant entities shall manage the full life cycle of identities
         of network and information systems and their users.
       annotation: "\u2022 Establish and maintain an inventory of all identities managed\
@@ -35277,6 +35590,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5
       ref_id: 11.5.2
+      name: 'Identity management activities'
       description: 'For that purpose, the relevant entities shall:'
       annotation: "\u2022 Consider that providing or revoking access to assets is\
         \ usually a multi-step procedure:\n    o confirming the business requirements\
@@ -35431,6 +35745,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5.2
       ref_id: 11.5.2.a
+      name: 'Unique identities for systems and users'
       description: set up unique identities for network and information systems and
         their users;
       translations:
@@ -35453,6 +35768,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5.2
       ref_id: 11.5.2.b
+      name: 'Linking of user identities to a single person'
       description: link the identity of users to a single person;
       translations:
         de:
@@ -35470,6 +35786,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5.2
       ref_id: 11.5.2.c
+      name: 'Oversight of system identities'
       description: ensure oversight of identities of network and information systems;
       translations:
         de:
@@ -35491,6 +35808,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5.2
       ref_id: 11.5.2.d
+      name: 'Logging of identity management'
       description: apply logging to the management of identities.
       translations:
         de:
@@ -35511,6 +35829,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5
       ref_id: 11.5.3
+      name: 'Approval and documentation of shared identities'
       description: The relevant entities shall only permit identities assigned to
         multiple persons, such as shared identities, where they are necessary for
         business or operational reasons and are subject to an explicit approval process
@@ -35736,6 +36055,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.5
       ref_id: 11.5.4
+      name: 'Review and deactivation of identities'
       description: The relevant entities shall regularly review the identities for
         network and information systems and their users and, if no longer needed,
         deactivate them without delay.
@@ -35881,6 +36201,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6
       ref_id: 11.6.1
+      name: 'Secure authentication procedures and technologies'
       description: The relevant entities shall implement secure authentication procedures
         and technologies based on access restrictions and the policy on access control.
       annotation: "\u2022 Authentication technologies are methods used to verify the\
@@ -36057,6 +36378,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6
       ref_id: 11.6.2
+      name: 'Authentication measures'
       description: 'For that purpose, the relevant entities shall:'
       annotation: "\u2022 Use unique authentication credentials for all the entity\u2019\
         s assets. Best-practice implementation includes, as a minimum, an 8-character\
@@ -36467,6 +36789,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6.2
       ref_id: 11.6.2.a
+      name: 'Authentication strength appropriate to asset classification'
       description: ensure the strength of authentication is appropriate to the classification
         of the asset to be accessed;
       translations:
@@ -36491,6 +36814,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6.2
       ref_id: 11.6.2.b
+      name: 'Management of secret authentication information'
       description: control the allocation to users and management of secret authentication
         information by a process that ensures the confidentiality of the information,
         including advising personnel on appropriate handling of authentication information;
@@ -36528,6 +36852,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6.2
       ref_id: 11.6.2.c
+      name: 'Change of authentication credentials'
       description: require the change of authentication credentials initially, at
         predefined intervals and upon suspicion that the credentials were compromised;
       translations:
@@ -36556,6 +36881,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6.2
       ref_id: 11.6.2.d
+      name: 'Blocking after unsuccessful log-in attempts'
       description: require the reset of authentication credentials and the blocking
         of users after a predefined number of unsuccessful log-in attempts;
       translations:
@@ -36584,6 +36910,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6.2
       ref_id: 11.6.2.e
+      name: 'Termination of inactive sessions'
       description: terminate inactive sessions after a predefined period of inactivity;
         and
       translations:
@@ -36606,6 +36933,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6.2
       ref_id: 11.6.2.f
+      name: 'Separate credentials for privileged and administrative accounts'
       description: require separate credentials to access privileged access or administrative
         accounts.
       translations:
@@ -36630,6 +36958,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6
       ref_id: 11.6.3
+      name: 'State-of-the-art authentication methods'
       description: The relevant entities shall to the extent feasible use state-of-the-art
         authentication methods, in accordance with the associated assessed risk and
         the classification of the asset to be accessed, and unique authentication
@@ -36728,6 +37057,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.6
       ref_id: 11.6.4
+      name: 'Review of authentication procedures and technologies'
       description: The relevant entities shall review the authentication procedures
         and technologies at planned intervals.
       annotation: "\u2022 Conduct periodic audits of authentication procedures and\
@@ -36972,6 +37302,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.7
       ref_id: 11.7.1
+      name: 'Multi-factor or continuous authentication'
       description: "The relevant entities shall ensure that users are authenticated\
         \ by multiple authentication factors or continuous authentication mechanisms\
         \ for accessing the relevant entities\u2019 network and information systems,\
@@ -37197,6 +37528,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:11.7
       ref_id: 11.7.2
+      name: 'Multi-factor authentication strength appropriate to asset classification'
       description: The relevant entities shall ensure that the strength of authentication
         is appropriate for the classification of the asset to be accessed.
       annotation: "\u2022 Determine which network and information systems require\
@@ -37576,6 +37908,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.1
       ref_id: 12.1.1
+      name: 'Classification levels for all assets'
       description: For the purpose of Article 21(2), point (i) of Directive (EU) 2022/2555,
         the relevant entities shall lay down classification levels of all assets,
         including information, in scope of their network and information systems for
@@ -37635,6 +37968,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.1
       ref_id: 12.1.2
+      name: 'Asset classification activities'
       description: 'For the purpose of point 12.1.1., the relevant entities shall:'
       annotation: "\u2022 Ensure that classifications and associated protective measures\
         \ for assets consider business needs, including:\n    o sharing or restricting\
@@ -37790,6 +38124,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.1.2
       ref_id: 12.1.2.a
+      name: 'System of classification levels'
       description: lay down a system of classification levels for assets;
       translations:
         de:
@@ -37810,6 +38145,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.1.2
       ref_id: 12.1.2.b
+      name: 'Classification of all assets'
       description: associate all assets with a classification level, based on confidentiality,
         integrity, authenticity and availability requirements, to indicate the protection
         required according to their sensitivity, criticality, risk and business value;
@@ -37845,6 +38181,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.1.2
       ref_id: 12.1.2.c
+      name: 'Alignment of availability requirements with continuity objectives'
       description: align the availability requirements of the assets with the delivery
         and recovery objectives set out in their business continuity and disaster
         recovery plans.
@@ -37875,6 +38212,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.1
       ref_id: 12.1.3
+      name: 'Review of asset classification levels'
       description: The relevant entities shall conduct periodic reviews of the classification
         levels of assets and update them, where appropriate.
       annotation: "\u2022 Define criteria for reviewing the classification over time.\
@@ -37999,6 +38337,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.2
       ref_id: 12.2.1
+      name: 'Establishment of the asset handling policy'
       description: The relevant entities shall establish, implement and apply a policy
         for the proper handling of assets, including information, in accordance with
         their network and information security policy, and shall communicate the policy
@@ -38161,6 +38500,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.2
       ref_id: 12.2.2
+      name: 'Content of the asset handling policy'
       description: 'The policy shall:'
       annotation: "\u2022 Identify, document and implement a policy for handling assets\
         \ (103) throughout their life cycle (acquisition, use, storage, transportation\
@@ -38346,6 +38686,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.2.2
       ref_id: 12.2.2.a
+      name: 'Asset handling across the entire life cycle'
       description: cover the entire life cycle of the assets, including acquisition,
         use, storage, transportation and disposal;
       translations:
@@ -38372,6 +38713,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.2.2
       ref_id: 12.2.2.b
+      name: 'Safe use, storage, transport, deletion and destruction of assets'
       description: provide rules on the safe use, safe storage, safe transport, and
         the irretrievable deletion and destruction of the assets;
       translations:
@@ -38399,6 +38741,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.2.2
       ref_id: 12.2.2.c
+      name: 'Secure transfer of assets'
       description: provide that the transfer shall take place in a secure manner,
         in accordance with the type of asset to be transferred.
       translations:
@@ -38422,6 +38765,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.2
       ref_id: 12.2.3
+      name: 'Review of the asset handling policy'
       description: The relevant entities shall review and, where appropriate, update
         the policy at planned intervals and when significant incidents or significant
         changes to operations or risks occur.
@@ -38494,6 +38838,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.3
       ref_id: 12.3.1
+      name: 'Establishment of the removable media policy'
       description: "The relevant entities shall establish, implement and apply a policy\
         \ on the management of removable storage media and communicate it to their\
         \ employees and third parties who handle removable storage media at the relevant\
@@ -38657,6 +39002,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.3
       ref_id: 12.3.2
+      name: 'Content of the removable media policy'
       description: 'The policy shall:'
       annotation: "\u2022 Align the policy with the asset classification (section\
         \ 12.1) and include at least the following:\n    o definitions and scope of\
@@ -38843,6 +39189,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.3.2
       ref_id: 12.3.2.a
+      name: 'Technical prohibition of removable media unless justified'
       description: provide for a technical prohibition of the connection of removable
         media unless there is an organisational reason for their use;
       translations:
@@ -38869,6 +39216,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.3.2
       ref_id: 12.3.2.b
+      name: 'Disabling self-execution and scanning of removable media'
       description: "provide for disabling self-execution from such media and scanning\
         \ the media for malicious code before they are used on the relevant entities\u2019\
         \ systems;"
@@ -38901,6 +39249,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.3.2
       ref_id: 12.3.2.c
+      name: 'Protection of portable storage devices in transit and storage'
       description: provide measures for controlling and protecting portable storage
         devices containing data while in transit and in storage;
       translations:
@@ -38928,6 +39277,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.3.2
       ref_id: 12.3.2.d
+      name: 'Encryption of removable storage media'
       description: where appropriate, provide measures for the use of cryptographic
         techniques to protect data on removable storage media.
       translations:
@@ -38955,6 +39305,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.3
       ref_id: 12.3.3
+      name: 'Review of the removable media policy'
       description: The relevant entities shall review and, where appropriate, update
         the policy at planned intervals and when significant incidents or significant
         changes to operations or risks occur.
@@ -39031,6 +39382,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4
       ref_id: 12.4.1
+      name: 'Complete and up-to-date asset inventory'
       description: The relevant entities shall develop and maintain a complete, accurate,
         up-to-date and consistent inventory of their assets. They shall record changes
         to the entries in the inventory in a traceable manner.
@@ -39158,6 +39510,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4
       ref_id: 12.4.2
+      name: 'Granularity and content of the asset inventory'
       description: 'The granularity of the inventory of the assets shall be at a level
         appropriate for the needs of the relevant entities. The inventory shall include
         the following:'
@@ -39283,6 +39636,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4.2
       ref_id: 12.4.2.a
+      name: 'Inventory: operations and services'
       description: the list of operations and services and their description,
       translations:
         de:
@@ -39300,6 +39654,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4.2
       ref_id: 12.4.2.b
+      name: 'Inventory: network and information systems and supporting assets'
       description: "the list of network and information systems and other associated\
         \ assets supporting the relevant entities\u2019 operations and services."
       translations:
@@ -39326,6 +39681,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4
       ref_id: 12.4.3
+      name: 'Review and update of the asset inventory'
       description: The relevant entities shall regularly review and update the inventory
         and their assets and document the history of changes.
       annotation: "\u2022 Conduct regular reviews to verify the accuracy and completeness\
@@ -39787,6 +40143,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5
       ref_id: 12.5.1
+      name: 'Procedures for deposit, return or deletion of assets'
       description: "The relevant entities shall establish, implement and apply procedures\
         \ which ensure that their assets which are under custody of personnel are\
         \ deposited, returned or deleted upon termination of employment, and shall\
@@ -39886,6 +40243,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1
       ref_id: 13.1.1
+      name: 'Protection against failure of supporting utilities'
       description: For the purpose of Article 21(2)(c) of Directive (EU) 2022/2555,
         the relevant entities shall prevent loss, damage or compromise of network
         and information systems or interruption to their operations due to the failure
@@ -40055,6 +40413,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1
       ref_id: 13.1.2
+      name: 'Supporting utility measures'
       description: 'For that purpose, the relevant entities shall, where appropriate:'
       annotation: "\u2022 Consider the availability of supporting utilities in the\
         \ business continuity plan (section 4.1). \n\u2022 Consider the availability\
@@ -40169,6 +40528,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.2
       ref_id: 13.1.2.a
+      name: 'Protection against power failures and utility disruptions'
       description: protect facilities from power failures and other disruptions caused
         by failures in supporting utilities such as electricity, telecommunications,
         water supply, gas, sewage, ventilation and air conditioning;
@@ -40203,6 +40563,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.2
       ref_id: 13.1.2.b
+      name: 'Redundancy in utility services'
       description: consider the use of redundancy in utilities services;
       translations:
         de:
@@ -40224,6 +40585,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.2
       ref_id: 13.1.2.c
+      name: 'Protection of utility services against interception and damage'
       description: protect utility services for electricity and telecommunications,
         which transport data or supply network and information systems, against interception
         and damage;
@@ -40254,6 +40616,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.2
       ref_id: 13.1.2.d
+      name: 'Monitoring of utility services and reporting of threshold events'
       description: monitor the utility services referred to in point (c) and report
         to the competent internal or external personnel events outside the minimum
         and maximum control thresholds referred to in point 13.2.2(b) affecting the
@@ -40291,6 +40654,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.2
       ref_id: 13.1.2.e
+      name: 'Contracts for emergency supply'
       description: conclude contracts for the emergency supply with corresponding
         services, such as for the fuel for emergency power supply;
       translations:
@@ -40318,6 +40682,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.2
       ref_id: 13.1.2.f
+      name: 'Monitoring, maintenance and testing of essential supplies'
       description: ensure continuous effectiveness, monitor, maintain and test the
         supply of the network and information systems necessary for the operation
         of the service offered, in particular the electricity, temperature and humidity
@@ -40357,6 +40722,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1
       ref_id: 13.1.3
+      name: 'Testing and review of utility protection measures'
       description: The relevant entities shall test, review and, where appropriate,
         update the protection measures on a regular basis or following significant
         incidents or significant changes to operations or risks.
@@ -40518,6 +40884,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.2
       ref_id: 13.2.1
+      name: 'Reduction of consequences of physical and environmental threats'
       description: For the purpose of Article 21(2)(e) of Directive (EU) 2022/2555,
         the relevant entities shall prevent or reduce the consequences of events originating
         from physical and environmental threats, such as natural disasters and other
@@ -40702,6 +41069,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.2
       ref_id: 13.2.2
+      name: 'Physical and environmental protection measures'
       description: 'For that purpose, the relevant entities shall, where appropriate:'
       annotation: "\u2022 Implement measures against physical and environmental threats.\
         \ Parameters to consider are (indicative, non-exhaustive list):\n    o purpose\
@@ -40954,6 +41322,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.2.2
       ref_id: 13.2.2.a
+      name: 'Protection measures against physical and environmental threats'
       description: design and implement protection measures against physical and environmental
         threats;
       translations:
@@ -40976,6 +41345,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.2.2
       ref_id: 13.2.2.b
+      name: 'Control thresholds for physical and environmental threats'
       description: determine minimum and maximum control thresholds for physical and
         environmental threats;
       translations:
@@ -40998,6 +41368,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.2.2
       ref_id: 13.2.2.c
+      name: 'Monitoring of environmental parameters and reporting of threshold events'
       description: monitor environmental parameters and report to the competent internal
         or external personnel events outside the minimum and maximum control thresholds
         referred to in point (b).
@@ -41029,6 +41400,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.2
       ref_id: 13.2.3
+      name: 'Testing and review of physical and environmental protection'
       description: The relevant entities shall test, review and, where appropriate,
         update the protection measures against physical and environmental threats
         on a regular basis or following significant incidents or significant changes
@@ -41184,6 +41556,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.3
       ref_id: 13.3.1
+      name: 'Prevention and monitoring of unauthorised physical access'
       description: For the purpose of Article 21(2)(i) of Directive (EU) 2022/2555,
         the relevant entities shall prevent and monitor unauthorised physical access,
         damage and interference to their network and information systems.
@@ -41380,6 +41753,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.3
       ref_id: 13.3.2
+      name: 'Physical access control measures'
       description: 'For that purpose, the relevant entities shall:'
       annotation: "\u2022 In the risk assessment, consider risks associated with unauthorised\
         \ physical access to, damage to and interference with network and information\
@@ -41587,6 +41961,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.3.2
       ref_id: 13.3.2.a
+      name: 'Security perimeters'
       description: on the basis of the risk assessment carried out pursuant to point
         2.1, lay down and use security perimeters to protect areas where network and
         information systems and other associated assets are located;
@@ -41621,6 +41996,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.3.2
       ref_id: 13.3.2.b
+      name: 'Entry controls and access points'
       description: protect the areas referred to in point (a) by appropriate entry
         controls and access points;
       translations:
@@ -41643,6 +42019,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.3.2
       ref_id: 13.3.2.c
+      name: 'Physical security for offices, rooms and facilities'
       description: design and implement physical security for offices, rooms and facilities,
       translations:
         de:
@@ -41664,6 +42041,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.3.2
       ref_id: 13.3.2.d
+      name: 'Continuous monitoring for unauthorised physical access'
       description: continuously monitor their premises for unauthorised physical access.
       translations:
         de:
@@ -41686,6 +42064,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.3
       ref_id: 13.3.3
+      name: 'Testing and review of physical access control measures'
       description: The relevant entities shall test, review and, where appropriate,
         update the physical access control measures on a regular basis or following
         significant incidents or significant changes to operations or risks.
