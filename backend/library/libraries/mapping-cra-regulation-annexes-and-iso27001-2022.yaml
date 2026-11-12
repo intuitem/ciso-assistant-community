@@ -486,10 +486,6 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
       relationship: intersect
       rationale: semantic
-    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.e
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
-      relationship: intersect
-      rationale: semantic
     - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.f
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
       relationship: intersect
