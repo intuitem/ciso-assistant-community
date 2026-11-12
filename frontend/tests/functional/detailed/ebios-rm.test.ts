@@ -48,8 +48,6 @@ const ebiosRmStudy = {
 	modelName: 'ebiosrmstudy',
 	dependency: vars.matrix,
 	build: {
-		// Unique per run: a retry reuses the DB, and `.first()` on a shared name would open the
-		// previous attempt's study, whose steps are already done ("Mark as in progress").
 		name: getUniqueValue('Test EBIOS RM Study'),
 		risk_matrix: vars.matrix.displayName,
 		folder: vars.folderName
