@@ -7,6 +7,7 @@ services:
     environment:
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      {% if mcp.enabled %}- OAUTH_DCR_ENABLED=True{% endif %}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
       - HOME=/tmp
@@ -118,7 +119,8 @@ services:
       - CA_MCP_TRANSPORT=streamable-http
       - CA_MCP_HOST=0.0.0.0
       - CA_MCP_PORT=8001
-      - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
+      - CA_MCP_AUTH=oauth
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       # matched against the Host header; both forms, since the port is dropped for 443
       - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
       - CA_MCP_ALLOW_ENV_TOKEN=false
@@ -155,7 +157,15 @@ services:
     command: |
       sh -c 'echo "$$CISO_ASSISTANT_URL {
         reverse_proxy /api/* backend:8000{% if mcp.enabled %}
-        reverse_proxy /mcp* mcp:8001{% endif %}
+        reverse_proxy /.well-known/oauth-authorization-server* backend:8000
+        @mcp path /mcp* /.well-known/oauth-protected-resource*
+        reverse_proxy @mcp mcp:8001 {
+          header_up -Cookie
+          header_down -Set-Cookie
+          header_down -Service-Worker-Allowed
+          header_down Content-Security-Policy sandbox
+          header_down X-Content-Type-Options nosniff
+        }{% endif %}
         reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
         tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
         tls internal{% endif %}{% endif %}

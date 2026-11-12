@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.13.7](https://img.shields.io/badge/Version-0.13.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.2.1](https://img.shields.io/badge/AppVersion-v4.2.1-informational?style=flat-square)
+![Version: 0.14.0](https://img.shields.io/badge/Version-0.14.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.2.1](https://img.shields.io/badge/AppVersion-v4.2.1-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -78,6 +78,54 @@ qdrant:
 Any other key from the Qdrant chart values (`nodeSelector`, `securityContext`, `service`, `ingress`, ...)
 can be set under `qdrant` and is kept across `helm upgrade`.
 
+### MCP server for AI apps
+
+`backend.mcp.enabled` runs the MCP server as a sidecar in the backend pod and serves it at `/mcp`, so
+users can connect AI apps (Claude, Copilot Studio, ChatGPT...) by entering `https://<domain>/mcp` and
+signing in with their own account. The sidecar holds no secret: it passes each app's own token to the
+backend next to it, which decides what the app may do.
+
+Before users can connect apps:
+
+- the backend needs a shared cache (memcached): sign-in keeps each authorization code in the cache
+  until the app redeems it, possibly on another worker, and the `mcp` feature flag cannot be turned
+  on without it;
+- an administrator turns on the `mcp` feature flag, and `mcp_write` to let apps change data;
+- an administrator ticks "Can connect AI apps" on each user who may do so.
+
+The `/mcp` paths get their own ingress. Configure your ingress controller, through
+`backend.mcp.ingressAnnotations`, to strip the `Cookie` request header and the `Set-Cookie` and
+`Service-Worker-Allowed` response headers, and to add `Content-Security-Policy: sandbox` and
+`X-Content-Type-Options: nosniff`. Browser session cookies then never reach the MCP server, and its
+answers cannot run as pages of the app. With Traefik:
+
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: mcp-isolation
+spec:
+  headers:
+    customRequestHeaders:
+      Cookie: ""
+    customResponseHeaders:
+      Set-Cookie: ""
+      Service-Worker-Allowed: ""
+      Content-Security-Policy: sandbox
+      X-Content-Type-Options: nosniff
+```
+
+```yaml
+backend:
+  mcp:
+    enabled: true
+    ingressAnnotations:
+      traefik.ingress.kubernetes.io/router.middlewares: <namespace>-mcp-isolation@kubernetescrd
+```
+
+Set `backend.mcp.dcr.allowedRedirectHosts` to the AI apps you support to limit which apps can
+register themselves.
+
 ### OIDC signing key (service accounts)
 
 The backend signs the tokens issued to service accounts with an RSA key. The chart generates one on
@@ -146,6 +194,18 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | backend.image.repository | string | `"intuitem/ciso-assistant-community/backend"` | Repository to use for the backend |
 | backend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the backend |
 | backend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
+| backend.mcp.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1002,"runAsNonRoot":true,"runAsUser":1002}` | Security context of the MCP container: its own user, apart from the backend's |
+| backend.mcp.dcr.allowedRedirectHosts | string | `""` | Comma-separated hosts a self-registered app may send users back to (empty: any) |
+| backend.mcp.dcr.enabled | bool | `true` | Let AI apps register themselves |
+| backend.mcp.enabled | bool | `false` | Serve MCP at /mcp |
+| backend.mcp.env | list | `[]` | Environment variables to pass to the MCP container |
+| backend.mcp.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the MCP server |
+| backend.mcp.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the MCP server |
+| backend.mcp.image.repository | string | `"intuitem/ciso-assistant-community/mcp"` | Repository to use for the MCP server |
+| backend.mcp.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the MCP server |
+| backend.mcp.ingressAnnotations | object | `{}` | Annotations of the ingress for /mcp. Use them to strip the Cookie request header and the Set-Cookie response header, and to add `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff` (see README) |
+| backend.mcp.name | string | `"mcp"` | MCP container name |
+| backend.mcp.resources | object | `{}` | Resources for the MCP container |
 | backend.name | string | `"backend"` | Backend container name |
 | backend.nodeSelector | object | `{}` | Default node selector for backend |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |

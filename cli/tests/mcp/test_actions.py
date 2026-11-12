@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parents[2]))
 from ca_mcp import actions, server  # noqa: E402
 
 
-def _access(granted=None, profile=None, scopes=("mcp:read",)):
+def _access(granted=None, profile=None, scopes=("mcp",)):
     claims = {k: v for k, v in {"actions": granted, "profile": profile}.items() if v}
     return AccessToken(
         token="t", client_id="c", scopes=list(scopes), claims=claims or None
@@ -62,12 +62,27 @@ def test_the_guard_refuses_an_action_not_granted(connected):
 
     guarded = server._require_action(tool, {actions.CREATE})
 
-    connected(_access(granted=["read", "update"], profile="Read and update"))
+    connected(_access(granted=["read"], profile="Read"))
     refused = asyncio.run(guarded())
-    assert 'uses the "Read and update" profile' in refused
+    assert 'uses the "Read" profile' in refused
     assert "creating data" in refused
 
     connected(_access(granted=["read", "create"]))
+    assert asyncio.run(guarded()) == "ran"
+
+
+def test_delete_is_its_own_action(connected):
+    async def tool():
+        return "ran"
+
+    name = server.delete_vulnerability.__name__
+    assert server.needed_actions(name) == {actions.DELETE}
+    guarded = server._require_action(tool, server.needed_actions(name))
+
+    connected(_access(granted=["read", "create", "update"]))
+    assert "deleting data" in asyncio.run(guarded())
+
+    connected(_access(granted=["read", "delete"]))
     assert asyncio.run(guarded()) == "ran"
 
 
@@ -85,13 +100,24 @@ def test_the_ebios_sync_needs_create_and_update(connected):
     assert asyncio.run(guarded()) == "ran"
 
 
+def _tool_names(remote):
+    app = server.ActionFilteredServer("test")
+    server._register_on(app, read_only=False, remote=remote)
+    return {tool.name for tool in app._tool_manager.list_tools()}
+
+
 def test_the_oauth_server_never_offers_create_evidence(monkeypatch):
     monkeypatch.setattr(server.config, "IS_HTTP", False)
-    app = server.ActionFilteredServer("test")
-    server._register_on(app, read_only=False, remote=True)
-    names = {tool.name for tool in app._tool_manager.list_tools()}
+    names = _tool_names(remote=True)
     assert "create_evidence" not in names
-    assert "create_folder" in names
+    assert "create_applied_control" in names
+
+
+def test_admin_tools_are_only_offered_locally(monkeypatch):
+    monkeypatch.setattr(server.config, "IS_HTTP", False)
+    admin = {"create_folder", "update_folder", "update_user"}
+    assert not admin & _tool_names(remote=True)
+    assert admin <= _tool_names(remote=False)
 
 
 def test_the_tool_list_hides_tools_not_granted(connected):
@@ -107,25 +133,25 @@ def test_the_tool_list_hides_tools_not_granted(connected):
 
 
 def test_get_my_access_says_what_is_missing(connected):
-    connected(_access(granted=["read"], profile="Read only"))
+    connected(_access(granted=["read"], profile="Read"))
     text = asyncio.run(server.get_my_access())
     assert text == (
-        'Profile "Read only". This connection can read data in CISO Assistant. '
-        "It does not allow creating data or changing or deleting data."
+        'Profile "Read". This connection can read data in CISO Assistant. '
+        "It does not allow creating, changing or deleting data."
     )
 
     connected(_access(granted=["read", "create", "update"]))
+    text = asyncio.run(server.get_my_access())
+    assert text == (
+        "This connection can read, create and change data in CISO Assistant. "
+        "It does not allow deleting data."
+    )
+
+    connected(_access(granted=["read", "create", "update", "delete"]))
     text = asyncio.run(server.get_my_access())
     assert text == (
         "This connection can read, create, change and delete data in CISO Assistant."
     )
-
-
-def test_get_my_access_on_a_read_only_server(connected, monkeypatch):
-    monkeypatch.setattr(server.config, "READ_ONLY", True)
-    connected(_access(granted=["read", "create", "update"]))
-    text = asyncio.run(server.get_my_access())
-    assert text.startswith("This connection can read data in CISO Assistant.")
 
 
 def test_a_cancelled_call_is_recorded(connected):

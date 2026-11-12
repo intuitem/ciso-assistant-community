@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 # One scope to use MCP at all; what the app may do comes from its profile.
-MCP_SCOPES = ["mcp:read"]
+MCP_SCOPES = ["mcp"]
 LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
 
 
@@ -17,7 +17,7 @@ def mcp_resource() -> str:
 class CISOOIDCAdapter(DefaultOIDCAdapter):
     scope_display = {
         **DefaultOIDCAdapter.scope_display,
-        "mcp:read": _("Use CISO Assistant through MCP"),
+        "mcp": _("Use CISO Assistant through MCP"),
     }
 
     def get_issuer(self) -> str:

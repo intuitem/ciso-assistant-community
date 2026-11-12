@@ -54,6 +54,7 @@ from auditlog.registry import auditlog
 from auditlog.signals import pre_log
 from allauth.idp.oidc.models import Client, Token
 from core.context import focus_folder_id_var
+from iam.delegation import delegation_allows
 
 ALLOWED_PERMISSION_APPS = (
     "core",
@@ -1562,6 +1563,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if not isinstance(user, User):
             return False
 
+        if not delegation_allows(perm.codename):
+            return False
+
         model = perm.content_type.model_class()
         perm_prefix = perm.codename.split("_")[0]
 
@@ -1755,6 +1759,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return GrantFolderSet.none()
 
         permission = RoleAssignment._resolve_permission(permission)
+        if not delegation_allows(permission.codename):
+            return GrantFolderSet.none()
 
         role_assignments, default_role_folders = (
             RoleAssignment._get_permission_grant_sources(user, permission)
@@ -2143,6 +2149,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Or return `False` otherwise.
         """
         if not isinstance(principal, (User, UserGroup)):
+            return False
+        if not delegation_allows(codename):
             return False
 
         permission = Permission.objects.get(codename=codename)
@@ -2556,17 +2564,11 @@ class ConnectedAppUse(models.Model):
 
 
 class ConnectionProfile(models.Model):
-    """What an AI app may do once connected: read always, plus create and update
-    (which includes delete). It only narrows: the app never gets more than the
-    user who connects it."""
+    """What an AI app may do once connected: read always, plus any of create,
+    update and delete. It only narrows: the app never gets more than the user
+    who connects it, and never the control plane."""
 
-    # (name, can_create, can_update, is_default): one per combination
-    BUILTIN = (
-        ("Read only", False, False, True),
-        ("Read and create", True, False, False),
-        ("Read and update", False, True, False),
-        ("Read, create and update", True, True, False),
-    )
+    ACTIONS = ("read", "create", "update", "delete")
 
     IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
@@ -2575,6 +2577,7 @@ class ConnectionProfile(models.Model):
     description = models.TextField(blank=True, default="")
     can_create = models.BooleanField(default=False)
     can_update = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
     builtin = models.BooleanField(default=False)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2588,32 +2591,53 @@ class ConnectionProfile(models.Model):
 
     @property
     def actions(self) -> list[str]:
-        return (
-            ["read"]
-            + (["create"] if self.can_create else [])
-            + (["update"] if self.can_update else [])
-        )
+        allowed = {
+            "read": True,
+            "create": self.can_create,
+            "update": self.can_update,
+            "delete": self.can_delete,
+        }
+        return [action for action in self.ACTIONS if allowed[action]]
 
     @property
-    def rank(self) -> tuple[int, bool]:
-        return (self.can_create + self.can_update, self.can_update)
+    def rank(self) -> tuple[int, ...]:
+        return (len(self.actions), self.can_delete, self.can_update)
+
+    @staticmethod
+    def builtin_name(create: bool, update: bool, delete: bool) -> str:
+        words = ["create"] * create + ["update"] * update + ["delete"] * delete
+        if not words:
+            return "Read only"
+        if len(words) == 1:
+            return f"Read and {words[0]}"
+        return "Read, " + ", ".join(words[:-1]) + f" and {words[-1]}"
 
     @classmethod
     def default(cls) -> "ConnectionProfile | None":
         return cls.objects.filter(is_default=True).first()
 
     @classmethod
+    def matching(cls, create: bool, update: bool, delete: bool):
+        return cls.objects.filter(
+            builtin=True, can_create=create, can_update=update, can_delete=delete
+        ).first()
+
+    @classmethod
     def sync_builtin(cls) -> None:
-        for name, can_create, can_update, is_default in cls.BUILTIN:
-            cls.objects.update_or_create(
-                name=name,
-                defaults={
-                    "can_create": can_create,
-                    "can_update": can_update,
-                    "is_default": is_default,
-                    "builtin": True,
-                },
-            )
+        """One built-in profile per combination of create, update and delete."""
+        for create in (False, True):
+            for update in (False, True):
+                for delete in (False, True):
+                    cls.objects.update_or_create(
+                        name=cls.builtin_name(create, update, delete),
+                        defaults={
+                            "can_create": create,
+                            "can_update": update,
+                            "can_delete": delete,
+                            "is_default": not (create or update or delete),
+                            "builtin": True,
+                        },
+                    )
 
 
 class AppGrant(models.Model):
@@ -2629,12 +2653,24 @@ class AppGrant(models.Model):
     profile = models.ForeignKey(
         ConnectionProfile, on_delete=models.PROTECT, related_name="grants"
     )
+    # {folder id: ["read", "update", ...]}: the nearest one wins over the
+    # profile. Stored now, read once domain overrides ship.
+    folder_overrides = models.JSONField(default=dict, blank=True)
     granted_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["user", "client"], name="unique_app_grant")
         ]
+
+    @classmethod
+    def consent(cls, user_id, client_id, profile) -> "AppGrant":
+        grant, _ = cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"profile": profile, "granted_at": timezone.now()},
+        )
+        return grant
 
 
 common_exclude = ["created_at", "updated_at"]
@@ -2688,22 +2724,31 @@ _APP_ACCESS_FIELDS = ("can_connect_apps", "is_active")
 def _note_lost_app_access(sender, instance, update_fields=None, **kwargs):
     # unticking the flag or deactivating is a decision about this person: their
     # connections must not come back if it is reverted, so the tokens go
+    instance._lost_app_access = None
     if instance._state.adding or (
         update_fields is not None and not set(update_fields) & set(_APP_ACCESS_FIELDS)
     ):
         return
     before = User.objects.filter(pk=instance.pk).values(*_APP_ACCESS_FIELDS).first()
-    instance._lost_app_access = bool(before) and any(
-        before[field] and not getattr(instance, field) for field in _APP_ACCESS_FIELDS
-    )
+    if not before:
+        return
+    if before["is_active"] and not instance.is_active:
+        instance._lost_app_access = "all"
+    elif before["can_connect_apps"] and not instance.can_connect_apps:
+        instance._lost_app_access = "mcp"
 
 
 def _revoke_lost_app_access(sender, instance, **kwargs):
-    if getattr(instance, "_lost_app_access", False):
+    lost = getattr(instance, "_lost_app_access", None)
+    instance._lost_app_access = None
+    if lost == "all":
         from iam.mcp_access import revoke_app_tokens
 
-        instance._lost_app_access = False
         revoke_app_tokens([instance.pk])
+    elif lost == "mcp":
+        from iam.mcp_access import revoke_mcp_connections
+
+        revoke_mcp_connections(instance.pk)
 
 
 models.signals.pre_save.connect(_note_lost_app_access, sender=User)

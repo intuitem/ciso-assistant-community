@@ -483,8 +483,8 @@ only through the proxy.
 
 {% hint style="info" %}
 The service defaults to **read-only**. To allow an assistant to create or modify
-records, set `CA_MCP_READ_ONLY=false` in the `mcp` service environment
-(`backend-mcp` in `docker-compose-build.yml`) and recreate it. See [Read-only by default](#read-only-by-default) before you do.
+records, set `CA_MCP_READ_ONLY=false` in the `mcp` service environment and
+recreate it. See [Read-only by default](#read-only-by-default) before you do.
 {% endhint %}
 
 If you generated your deployment with `config/make_config.py`, answer yes to the

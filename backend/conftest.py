@@ -25,13 +25,11 @@ def mcp_on(db):
 
 
 @pytest.fixture
-def app_profile(db):
-    """A profile for the connections a test makes: a transactional test flushes
-    the built-in ones startup creates."""
-    from iam.models import ConnectionProfile
+def mcp_write_on(mcp_on):
+    from global_settings.models import GlobalSettings
+    from global_settings.utils import clear_feature_flags_cache
 
-    profile, _ = ConnectionProfile.objects.get_or_create(
-        name="Read, create and update",
-        defaults={"can_create": True, "can_update": True, "is_default": True},
-    )
-    return profile
+    settings_row = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
+    settings_row.value = {**settings_row.value, "mcp_write": True}
+    settings_row.save()
+    clear_feature_flags_cache()

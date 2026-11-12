@@ -7,6 +7,7 @@ services:
     environment:
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      {% if mcp.enabled %}- OAUTH_DCR_ENABLED=True{% endif %}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
       - HOME=/tmp
@@ -39,7 +40,7 @@ services:
       start_period: 150s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`{{ fqdn }}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`{{ fqdn }}`) && (PathPrefix(`/api`){% if mcp.enabled %} || PathPrefix(`/.well-known/oauth-authorization-server`){% endif %})"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"{% if can_do_tls %}
@@ -129,7 +130,8 @@ services:
       - CA_MCP_TRANSPORT=streamable-http
       - CA_MCP_HOST=0.0.0.0
       - CA_MCP_PORT=8001
-      - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
+      - CA_MCP_AUTH=oauth
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       # matched against the Host header; both forms, since the port is dropped for 443
       - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
       - CA_MCP_ALLOW_ENV_TOKEN=false
@@ -147,7 +149,14 @@ services:
     user: "1001:1001"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mcp.rule=Host(`{{ fqdn }}`) && PathPrefix(`/mcp`)"
+      - "traefik.http.routers.mcp.rule=Host(`{{ fqdn }}`) && (PathPrefix(`/mcp`) || PathPrefix(`/.well-known/oauth-protected-resource`))"
+      # no session cookie reaches the MCP server, and its answers cannot act as the app's pages
+      - "traefik.http.routers.mcp.middlewares=mcp-isolation"
+      - "traefik.http.middlewares.mcp-isolation.headers.customrequestheaders.Cookie="
+      - "traefik.http.middlewares.mcp-isolation.headers.customresponseheaders.Set-Cookie="
+      - "traefik.http.middlewares.mcp-isolation.headers.customresponseheaders.Service-Worker-Allowed="
+      - "traefik.http.middlewares.mcp-isolation.headers.customresponseheaders.Content-Security-Policy=sandbox"
+      - "traefik.http.middlewares.mcp-isolation.headers.customresponseheaders.X-Content-Type-Options=nosniff"
       - "traefik.http.services.mcp.loadbalancer.server.port=8001"
       - "traefik.http.routers.mcp.entrypoints=websecure"
       - "traefik.http.routers.mcp.tls=true"{% if can_do_tls %}

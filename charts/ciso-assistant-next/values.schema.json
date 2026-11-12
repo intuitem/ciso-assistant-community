@@ -162,6 +162,63 @@
                 "imagePullSecrets": {
                     "type": "array"
                 },
+                "mcp": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "dcr": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "allowedRedirectHosts": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "ingressAnnotations": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "env": {
+                            "type": "array"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "name": {
                     "type": "string"
                 },

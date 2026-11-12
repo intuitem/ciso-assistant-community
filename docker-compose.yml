@@ -148,7 +148,13 @@ services:
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
-      reverse_proxy /mcp* mcp:8001
+      reverse_proxy /mcp* mcp:8001 {
+        header_up -Cookie
+        header_down -Set-Cookie
+        header_down -Service-Worker-Allowed
+        header_down Content-Security-Policy sandbox
+        header_down X-Content-Type-Options nosniff
+      }
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'

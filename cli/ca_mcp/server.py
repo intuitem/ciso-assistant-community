@@ -276,7 +276,6 @@ UPDATE_TOOLS = [
     sync_risk_assessment_from_ebios_rm,
     refresh_quantitative_risk_study_simulations,
     update_vulnerability,
-    delete_vulnerability,
     update_finding,
     update_evidence,
     update_incident,
@@ -292,7 +291,6 @@ UPDATE_TOOLS = [
     update_quantitative_risk_scenario,
     update_quantitative_risk_hypothesis,
     update_task_template,
-    delete_task_template,
     update_entity,
     update_entity_assessment,
     update_representative,
@@ -309,12 +307,15 @@ UPDATE_TOOLS = [
     update_kill_chain_step,
 ]
 
-WRITE_TOOLS = CREATE_TOOLS + UPDATE_TOOLS
+DELETE_TOOLS = [delete_task_template, delete_vulnerability]
+
+WRITE_TOOLS = CREATE_TOOLS + UPDATE_TOOLS + DELETE_TOOLS
 
 TOOL_ACTIONS = {
     **{tool.__name__: actions.READ for tool in READ_TOOLS},
     **{tool.__name__: actions.CREATE for tool in CREATE_TOOLS},
     **{tool.__name__: actions.UPDATE for tool in UPDATE_TOOLS},
+    **{tool.__name__: actions.DELETE for tool in DELETE_TOOLS},
 }
 
 # Tools that do more than their action says.
@@ -333,7 +334,7 @@ LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"
 
 _registered = False
 
-READ_SCOPE = "mcp:read"
+READ_SCOPE = "mcp"
 
 
 def _annotations(fn, is_read):
@@ -382,6 +383,11 @@ def _offload(fn):
     return runner
 
 
+# Change users or domains: an injected agent could change an email and take
+# the account over through a password reset. Only a local user with a PAT gets them.
+ADMIN_TOOLS = (create_folder, update_folder, update_user)
+
+
 def _register_on(server, read_only, guard_write=None, hooks=None, remote=False):
     def add(tool, runner, is_read):
         if hooks:
@@ -395,6 +401,8 @@ def _register_on(server, read_only, guard_write=None, hooks=None, remote=False):
     for tool in WRITE_TOOLS:
         # reads files from the server's disk: only for a local stdio user
         if (remote or config.IS_HTTP) and tool is create_evidence:
+            continue
+        if remote and tool in ADMIN_TOOLS:
             continue
         runner = _offload(tool)
         if guard_write:
@@ -557,7 +565,7 @@ async def get_my_access() -> str:
     delete), and which profile it uses. Call it before planning changes."""
     from mcp.server.auth.middleware.auth_context import get_access_token
 
-    return actions.summary(get_access_token(), read_only=config.READ_ONLY)
+    return actions.summary(get_access_token())
 
 
 def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
@@ -568,7 +576,8 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
     from mcp.server.auth.settings import AuthSettings
     from starlette.responses import JSONResponse
 
-    read_only = config.READ_ONLY
+    # what a connection may do comes from the backend, which enforces it too
+    read_only = False
     server = ActionFilteredServer(
         "ciso-assistant",
         instructions="Call get_my_access to see what this connection may do.",
@@ -624,7 +633,13 @@ def run_http():
     """Run the MCP server over Streamable HTTP"""
     import uvicorn
 
-    uvicorn.run(build_http_app(), host=config.HTTP_HOST, port=config.HTTP_PORT)
+    if config.AUTH_MODE == "oauth":
+        from .remote import build_app
+
+        app = build_app()
+    else:
+        app = build_http_app()
+    uvicorn.run(app, host=config.HTTP_HOST, port=config.HTTP_PORT)
 
 
 def main():

@@ -204,6 +204,64 @@ backend:
       #     subPath: ca.crt
       #     readOnly: true
 
+  ## MCP server for AI apps (Claude, Copilot Studio, ChatGPT...), served at /mcp.
+  ## It runs as a sidecar in the backend pod and holds no secret: it passes each
+  ## app's own OAuth token to the backend, which decides what the app may do.
+  ## Users sign in with their own account. Turning on the `mcp` feature flag needs
+  ## a shared cache (memcached).
+  ## Ref: https://intuitem.gitbook.io/ciso-assistant/integrations/mcp-oauth
+  mcp:
+    # -- Serve MCP at /mcp
+    enabled: false
+
+    # -- MCP container name
+    name: mcp
+
+    ## MCP image
+    image:
+      # -- Registry to use for the MCP server
+      # @default -- `""` (defaults to global.image.registry)
+      registry: ""
+      # -- Repository to use for the MCP server
+      repository: intuitem/ciso-assistant-community/mcp
+      # -- Tag to use for the MCP server
+      # @default -- `""` (defaults to global.image.tag)
+      tag: ""
+      # -- Image pull policy for the MCP server
+      # @default -- `""` (defaults to global.image.imagePullPolicy)
+      imagePullPolicy: ""
+
+    ## Dynamic Client Registration: lets AI apps register themselves before the
+    ## user signs in. A registered app gets nothing until a user approves it.
+    dcr:
+      # -- Let AI apps register themselves
+      enabled: true
+      # -- Comma-separated hosts a self-registered app may send users back to (empty: any)
+      allowedRedirectHosts: ""
+
+    # -- Annotations of the ingress for /mcp. Use them to strip the Cookie request
+    # header and the Set-Cookie response header, and to add
+    # `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff` (see README)
+    ingressAnnotations: {} # @schema additionalProperties: true
+
+    # -- Environment variables to pass to the MCP container
+    env: []
+
+    # -- Resources for the MCP container
+    resources: {} # @schema additionalProperties: true
+      #   requests:
+      #     memory: 256Mi
+
+    # -- Security context of the MCP container: its own user, apart from the backend's
+    containerSecurityContext: # @schema additionalProperties: true
+      runAsUser: 1002
+      runAsGroup: 1002
+      runAsNonRoot: true
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+
   ## Backend persistence configuration (used for sqlite DBs and local storage)
   persistence:
     sqlite:

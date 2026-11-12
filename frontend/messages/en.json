@@ -3056,6 +3056,8 @@
 	"connectedAppRevoked": "Access revoked",
 	"mcpConnections": "AI app connections (MCP)",
 	"mcpConnectionsDescription": "Let users connect AI assistants such as Copilot or Claude to CISO Assistant with their account. Only users allowed in their profile can connect. Turning this off blocks every connection at once; existing connections come back when you turn it on again.",
+	"mcpWrite": "AI apps may change data (MCP)",
+	"mcpWriteDescription": "Lets users allow a connected AI app to create, change or delete data, within their own rights. Off, apps can only read. AI apps can be misled by text they read, so turn this on only if you need it.",
 	"canConnectApps": "Can connect AI apps (MCP)",
 	"canConnectAppsHelpText": "Lets this user connect assistants such as Copilot or Claude with their account. Unticking it disconnects all their apps right away.",
 	"connectAppsRequiresAdmin": "Only an administrator can change who may connect AI apps.",

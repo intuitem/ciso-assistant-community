@@ -369,6 +369,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					description: m.mcpConnectionsDescription()
 				},
 				{
+					field: 'mcp_write',
+					label: m.mcpWrite(),
+					description: m.mcpWriteDescription()
+				},
+				{
 					field: 'service_accounts',
 					label: m.serviceAccounts(),
 					description: m.serviceAccountsDescription()

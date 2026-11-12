@@ -20,15 +20,25 @@ class KnoxTokenAuthentication(TokenAuthentication):
 
 class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):
     def authenticate(self, request):
+        from core.context import mcp_access_var
+        from iam.mcp_access import is_mcp_token
+
+        # MCPTokenMiddleware checked the MCP token of this request
+        access = mcp_access_var.get()
+        if access is not None:
+            return (access.user, access.token)
         result = super().authenticate(request)
         if result is None:
             # No/invalid bearer token: fall through to the next authenticator.
             return None
         user, token = result
         client = getattr(token, "client", None)
+        if is_mcp_token(token):
+            raise exceptions.AuthenticationFailed(
+                "This AI app connection is not allowed."
+            )
         if user is not None and getattr(user, "is_authenticated", False):
-            # Nobody vetted a self-registered client: the user only consented to
-            # MCP scopes, and /api checks no scopes, so keep it off /api entirely.
+            # Nobody vetted a self-registered client: it gets nothing but MCP.
             if client is not None and is_self_registered(client):
                 raise exceptions.AuthenticationFailed(
                     "This client can only access the MCP endpoint."
@@ -36,10 +46,6 @@ class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):
             if client is not None:
                 from iam.models import ConnectedAppUse
 
-                if not user.can_connect_apps:
-                    raise exceptions.AuthenticationFailed(
-                        "Connecting apps is not allowed for this user."
-                    )
                 ConnectedAppUse.record(user.pk, client.pk)
             return (user, token)
         service_account = (

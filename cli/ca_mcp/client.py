@@ -17,8 +17,8 @@ from .config import (
 
 API_PATH = urlsplit(API_URL).path.rstrip("/")
 
-# An embedding host (backend-mcp) dispatches in-process instead of over HTTP: it
-# already knows the caller from its OAuth token, and must not forward that token.
+# The MCP server of an instance (ca_mcp.remote) sends each call with the caller's
+# own token, to the backend listener that token is valid on.
 # Called as transport(method, endpoint, params=, json=, data=, headers=) and must
 # return an object with status_code, text and json().
 _transport = None

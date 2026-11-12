@@ -996,6 +996,14 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
         self._ensure_immutable("entity", value)
         return value
 
+    def validate_create_user(self, value):
+        from iam.delegation import is_delegated
+
+        # creates a user account and emails an invitation: control plane
+        if value and is_delegated():
+            raise serializers.ValidationError("AI apps cannot create user accounts.")
+        return value
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["language"] = (

@@ -13,7 +13,8 @@ from rest_framework.test import APIClient
 
 from core.startup import startup
 from iam.models import AppGrant, ConnectionProfile, User, UserGroup
-from mcp_server.oauth import verify
+from iam.mcp_access import mcp_access_for as verify
+from iam.oidc_adapter import mcp_resource
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
 
@@ -24,18 +25,11 @@ REDIRECT_URI = "http://localhost:9999/callback"
 @pytest.fixture(autouse=True)
 def _clean():
     cache.clear()
-    # start from no profile: each test sets up the ones it needs
-    ConnectionProfile.objects.all().delete()
+    ConnectionProfile.sync_builtin()
 
 
-def _profile(name="Read only", create=False, update=False, is_default=False):
-    return ConnectionProfile.objects.create(
-        name=name,
-        can_create=create,
-        can_update=update,
-        is_default=is_default,
-        builtin=True,
-    )
+def _profile(create=False, update=False, delete=False):
+    return ConnectionProfile.matching(create, update, delete)
 
 
 def _user(email="u@example.com"):
@@ -56,12 +50,12 @@ def _client(skip_consent=False):
         data={"dcr": True},
     )
     client.set_redirect_uris([REDIRECT_URI])
-    client.set_scopes(["openid", "mcp:read"])
+    client.set_scopes(["openid", "mcp"])
     client.save()
     return client
 
 
-def _token(client, user, profile=None, scopes=("mcp:read",)):
+def _token(client, user, profile=None, scopes=("mcp",)):
     raw = secrets.token_urlsafe(32)
     token = Token(
         type=Token.Type.ACCESS_TOKEN,
@@ -73,11 +67,11 @@ def _token(client, user, profile=None, scopes=("mcp:read",)):
     token.set_scopes(list(scopes))
     token.save()
     if profile is not None:
-        AppGrant.objects.create(user=user, client=client, profile=profile)
+        AppGrant.consent(user.pk, client.pk, profile)
     return raw
 
 
-def _authorize(http, client, user, scope="openid mcp:read", **extra):
+def _authorize(http, client, user, scope="openid mcp", **extra):
     challenge = (
         base64.urlsafe_b64encode(
             hashlib.sha256(secrets.token_urlsafe(48).encode()).digest()
@@ -101,11 +95,15 @@ def _authorize(http, client, user, scope="openid mcp:read", **extra):
     )
 
 
-def _consent(http, page, profile_id):
+def _consent(http, page, *actions):
     signed = page.context["form"]["request"].value()
     return http.post(
         AUTHORIZE_URL,
-        {"request": signed, "action": "grant", "profile": profile_id},
+        {
+            "request": signed,
+            "action": "grant",
+            **{f"can_{action}": "on" for action in actions},
+        },
     )
 
 
@@ -129,75 +127,56 @@ def admin_api():
 
 
 class TestConsent:
-    def test_lists_profiles_lowest_first_with_the_default_checked(self, client):
-        _profile("Full", create=True, update=True)
-        _profile("Update", update=True)
-        _profile("Create", create=True)
-        default = _profile("Read only", is_default=True)
+    def test_reads_only_while_writes_are_off(self, client):
+        user, app = _user(), _client()
 
-        page = _authorize(client, _client(), _user())
+        page = _authorize(client, app, user)
 
         assert page.status_code == 200
-        items = page.context["profiles"]
-        assert [item["profile"].name for item in items] == [
-            "Read only",
-            "Create",
-            "Update",
-            "Full",
-        ]
-        assert [item["checked"] for item in items] == [True, False, False, False]
-        assert items[2]["summary"] == (
-            "This app will be able to read, change and delete data in CISO Assistant."
-        )
-        assert b"turned on the write tools" in page.content
         assert "scopes" not in page.context["form"].fields
-        assert str(default.pk) in page.content.decode()
+        assert "write_choices" not in page.context
+        assert b"allows apps to read only" in page.content
+        response = _consent(client, page, "create", "delete")
+        assert _code(response)
+        assert AppGrant.objects.get(user=user, client=app).profile == _profile()
 
-    def test_the_chosen_profile_becomes_the_grant(self, client):
-        _profile("Read only", is_default=True)
-        full = _profile("Full", create=True, update=True)
+    @pytest.mark.usefixtures("mcp_write_on")
+    def test_offers_create_update_and_delete_once_allowed(self, client):
+        page = _authorize(client, _client(), _user())
+
+        fields = [field.name for field, label in page.context["write_choices"]]
+        assert fields == ["can_create", "can_update", "can_delete"]
+        assert b'name="can_delete"' in page.content
+
+    @pytest.mark.usefixtures("mcp_write_on")
+    def test_the_ticked_actions_choose_the_profile(self, client):
         user, app = _user(), _client()
 
-        response = _consent(client, _authorize(client, app, user), full.pk)
+        response = _consent(client, _authorize(client, app, user), "create", "delete")
 
         assert _code(response)
-        assert AppGrant.objects.get(user=user, client=app).profile == full
+        grant = AppGrant.objects.get(user=user, client=app)
+        assert grant.profile.actions == ["read", "create", "delete"]
 
+    @pytest.mark.usefixtures("mcp_write_on")
     def test_consenting_again_replaces_the_grant(self, client):
-        read = _profile("Read only", is_default=True)
-        full = _profile("Full", create=True, update=True)
         user, app = _user(), _client()
-        _consent(client, _authorize(client, app, user), full.pk)
+        _consent(client, _authorize(client, app, user), "create", "update", "delete")
 
-        _consent(client, _authorize(client, app, user), read.pk)
+        _consent(client, _authorize(client, app, user))
 
-        assert AppGrant.objects.get(user=user, client=app).profile == read
+        assert AppGrant.objects.get(user=user, client=app).profile == _profile()
 
-    def test_a_tampered_profile_is_refused(self, client):
-        _profile(is_default=True)
-        user, app = _user(), _client()
-
-        response = _consent(
-            client,
-            _authorize(client, app, user),
-            "00000000-0000-0000-0000-000000000000",
-        )
-
-        assert not _code(response)
-        assert not AppGrant.objects.exists()
-
-    def test_skip_consent_uses_the_default(self, client):
-        _profile("Full", create=True, update=True)
-        default = _profile("Read only", is_default=True)
+    @pytest.mark.usefixtures("mcp_write_on")
+    def test_skip_consent_gets_read_only(self, client):
         user, app = _user(), _client(skip_consent=True)
 
         response = _authorize(client, app, user)
 
         assert _code(response)
-        assert AppGrant.objects.get(user=user, client=app).profile == default
+        assert AppGrant.objects.get(user=user, client=app).profile == _profile()
 
     def test_a_silent_request_without_a_grant_gets_no_code(self, client):
-        _profile(is_default=True)
         response = _authorize(client, _client(), _user(), prompt="none")
 
         assert not _code(response)
@@ -205,6 +184,7 @@ class TestConsent:
         assert not AppGrant.objects.exists()
 
     def test_no_profile_at_all_is_refused(self, client):
+        ConnectionProfile.objects.all().delete()
         response = _authorize(client, _client(skip_consent=True), _user())
 
         assert response.status_code == 403
@@ -217,29 +197,43 @@ class TestConsent:
         assert not AppGrant.objects.exists()
 
 
-class TestBackendMcp:
+class TestTokens:
     def test_a_token_without_grant_is_refused(self):
-        _profile(is_default=True)
         assert verify(_token(_client(), _user())) is None
 
-    def test_the_actions_come_from_the_profile(self):
-        profile = _profile("Read and update", update=True)
-        access = verify(_token(_client(), _user(), profile))
-        assert access.claims == {
-            "actions": ["read", "update"],
-            "profile": "Read and update",
+    def test_reads_only_while_writes_are_off(self):
+        access = verify(_token(_client(), _user(), _profile(True, True, False)))
+        assert access.claims() == {
+            "actions": ["read"],
+            "profile": "Read, create and update",
             "app": "Claude Code",
         }
 
-    def test_a_personal_access_token_keeps_full_rights(self):
-        user = _user()
-        raw = AuthToken.objects.create(user=user)[1]
-        assert verify(raw).claims["actions"] == ["read", "create", "update"]
+    @pytest.mark.usefixtures("mcp_write_on")
+    def test_the_actions_come_from_the_profile(self):
+        access = verify(_token(_client(), _user(), _profile(True, True, False)))
+        assert access.actions == ["read", "create", "update"]
+
+    def test_a_token_bound_to_another_resource_is_refused(self):
+        user, app = _user(), _client()
+        raw = _token(app, user, _profile())
+        token = Token.objects.by_value(raw).get()
+        token.set_resources(["https://elsewhere.example.com/mcp"])
+        token.save()
+        assert verify(raw) is None
+
+    def test_a_token_bound_to_mcp_is_accepted(self):
+        user, app = _user(), _client()
+        raw = _token(app, user, _profile())
+        token = Token.objects.by_value(raw).get()
+        token.set_resources([mcp_resource()])
+        token.save()
+        assert verify(raw) is not None
 
 
 class TestConnectionsList:
     def test_connections_show_their_profile(self, admin_api):
-        profile = _profile("Read and create", create=True)
+        profile = _profile(create=True)
         _token(_client(), _user(), profile)
 
         row = admin_api.get("/api/iam/connected-apps/all/").json()["results"][0]

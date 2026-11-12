@@ -1,0 +1,426 @@
+import secrets
+import uuid
+from datetime import timedelta
+from types import SimpleNamespace
+
+import pytest
+import structlog
+from allauth.idp.oidc.models import Client, Token
+from auditlog.models import LogEntry
+from django.contrib.auth.models import Permission
+from django.core.cache import cache
+from django.http import HttpResponse
+from django.test import RequestFactory
+from django.urls import Resolver404, resolve
+from django.utils import timezone
+from knox.models import AuthToken
+from rest_framework.test import APIClient
+
+from core.context import mcp_access_var
+from core.models import AppliedControl, Vulnerability
+from core.permissions import IsGlobalAdmin
+from core.startup import startup
+from global_settings.models import GlobalSettings
+from global_settings.serializers import FeatureFlagsSerializer
+from iam.mcp_access import mcp_access_for
+from iam.mcp_inventory import OPERATIONS, SERVER_OPERATIONS, is_inventoried
+from iam.mcp_tokens import MCPTokenMiddleware
+from iam.models import (
+    AppGrant,
+    ConnectionProfile,
+    Folder,
+    RoleAssignment,
+    User,
+    UserGroup,
+)
+from iam.oidc_adapter import mcp_resource
+from iam.tests.mcp_tool_calls import ANY, tool_calls
+from tprm.models import Entity, Representative
+from webhooks.ocsf import log_entry_to_ocsf, log_entry_to_raw
+
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
+
+MEMCACHED = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": "memcached:11211",
+    }
+}
+
+
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    cache.clear()
+
+
+@pytest.fixture
+def admin():
+    """A global administrator: RBAC allows everything, so whatever is refused
+    below is refused by the MCP rules."""
+    startup(sender=None)
+    user = User.objects.create_superuser("admin@example.com")
+    group = UserGroup.objects.get(name="BI-UG-ADM")
+    user.folder = group.folder
+    user.can_connect_apps = True
+    user.save()
+    group.user_set.add(user)
+    return user
+
+
+def _client(name="Claude Code"):
+    client = Client(name=name, type=Client.Type.PUBLIC, data={"dcr": True})
+    client.set_redirect_uris(["http://localhost:9999/callback"])
+    client.set_scopes(["openid", "mcp"])
+    client.save()
+    return client
+
+
+def _mcp_token(user, *actions, resources=None, scopes=("mcp",)) -> str:
+    client = _client()
+    raw = secrets.token_urlsafe(32)
+    token = Token(
+        type=Token.Type.ACCESS_TOKEN,
+        client=client,
+        user=user,
+        expires_at=timezone.now() + timedelta(hours=1),
+    )
+    token.set_value(raw)
+    token.set_scopes(list(scopes))
+    token.set_resources([mcp_resource()] if resources is None else resources)
+    token.save()
+    profile = ConnectionProfile.matching(
+        "create" in actions, "update" in actions, "delete" in actions
+    )
+    AppGrant.consent(user.pk, client.pk, profile)
+    return raw
+
+
+def _call(raw, method="get", path="/api/folders/", **kwargs):
+    return getattr(APIClient(), method)(
+        path, HTTP_AUTHORIZATION=f"Bearer {raw}", format="json", **kwargs
+    )
+
+
+def _new_control(name):
+    return {"name": name, "folder": str(Folder.get_root_folder().id)}
+
+
+class TestTokens:
+    def test_a_bound_token_with_a_grant_is_accepted(self, admin):
+        access = mcp_access_for(_mcp_token(admin))
+        assert access.user == admin
+        assert access.actions == ["read"]
+
+    def test_an_unbound_token_is_accepted(self, admin):
+        assert mcp_access_for(_mcp_token(admin, resources=[])) is not None
+
+    def test_a_token_for_another_resource_is_refused(self, admin):
+        raw = _mcp_token(admin, resources=["https://elsewhere.example/mcp"])
+        assert mcp_access_for(raw) is None
+
+    def test_a_token_without_the_mcp_scope_is_not_an_mcp_token(self, admin):
+        assert mcp_access_for(_mcp_token(admin, scopes=("openid",))) is None
+
+    def test_an_expired_token_is_refused(self, admin):
+        raw = _mcp_token(admin)
+        Token.objects.update(expires_at=timezone.now() - timedelta(seconds=1))
+        assert mcp_access_for(raw) is None
+
+    def test_a_user_who_may_no_longer_connect_apps_is_refused(self, admin):
+        raw = _mcp_token(admin)
+        User.objects.filter(pk=admin.pk).update(can_connect_apps=False)
+        assert mcp_access_for(raw) is None
+
+    def test_a_token_without_a_grant_is_refused(self, admin):
+        raw = _mcp_token(admin)
+        AppGrant.objects.all().delete()
+        assert mcp_access_for(raw) is None
+
+    def test_mcp_turned_off_refuses_every_token(self, admin):
+        from global_settings.utils import clear_feature_flags_cache
+
+        raw = _mcp_token(admin)
+        flags = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
+        flags.value = {**flags.value, "mcp": False}
+        flags.save()
+        clear_feature_flags_cache()
+        assert mcp_access_for(raw) is None
+
+    def test_writes_wait_for_the_write_flag(self, admin, request):
+        raw = _mcp_token(admin, "create", "update")
+        assert mcp_access_for(raw).actions == ["read"]
+        request.getfixturevalue("mcp_write_on")
+        assert mcp_access_for(raw).actions == ["read", "create", "update"]
+
+    def test_garbage_is_refused(self):
+        assert mcp_access_for("not-a-token") is None
+
+
+class TestSinglePort:
+    def test_an_mcp_token_works_on_the_api(self, admin):
+        response = _call(_mcp_token(admin))
+        assert response.status_code == 200, response.content
+        assert "results" in response.json()
+
+    def test_a_refused_mcp_token_gets_401(self, admin):
+        raw = _mcp_token(admin)
+        AppGrant.objects.all().delete()
+        assert _call(raw).status_code == 401
+
+    def test_a_token_for_another_resource_gets_401(self, admin):
+        raw = _mcp_token(admin, resources=["https://elsewhere.example/mcp"])
+        assert _call(raw).status_code == 401
+
+    def test_an_operation_outside_the_inventory_is_refused(self, admin):
+        assert _call(_mcp_token(admin), path="/api/iam/auth-tokens/").status_code == 403
+
+    def test_an_unknown_path_is_not_found(self, admin):
+        assert _call(_mcp_token(admin), path="/api/nothing-here/").status_code == 404
+
+    def test_a_get_that_writes_is_refused(self, admin, mcp_write_on):
+        response = _call(
+            _mcp_token(admin, "create", "update", "delete"),
+            path=f"/api/loaded-libraries/{uuid.uuid4()}/update/",
+        )
+        assert response.status_code == 403
+
+    def test_field_choices_of_a_collection_tools_read(self, admin):
+        response = _call(_mcp_token(admin), path="/api/applied-controls/status/")
+        assert response.status_code == 200
+
+    def test_other_credentials_are_unaffected(self, admin):
+        api = APIClient()
+        api.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=admin)[1]}"
+        )
+        assert api.get("/api/iam/auth-tokens/").status_code == 200
+
+    def test_the_profile_holds_in_the_backend(self, admin, mcp_write_on):
+        path = "/api/applied-controls/"
+        refused = _call(_mcp_token(admin), "post", path, data=_new_control("A"))
+        allowed = _call(
+            _mcp_token(admin, "create"), "post", path, data=_new_control("B")
+        )
+        assert refused.status_code == 403
+        assert allowed.status_code == 201
+
+    def test_the_write_flag_holds_in_the_backend(self, admin):
+        response = _call(
+            _mcp_token(admin, "create"),
+            "post",
+            "/api/applied-controls/",
+            data=_new_control("A"),
+        )
+        assert response.status_code == 403
+
+    def test_delete_needs_its_own_action(self, admin, mcp_write_on):
+        doomed = Vulnerability.objects.create(
+            name="Doomed", folder=Folder.get_root_folder()
+        )
+        path = f"/api/vulnerabilities/{doomed.id}/"
+        assert (
+            _call(_mcp_token(admin, "create", "update"), "delete", path).status_code
+            == 403
+        )
+        assert _call(_mcp_token(admin, "delete"), "delete", path).status_code == 204
+
+    def test_an_app_cannot_create_a_user_account(self, admin, mcp_write_on):
+        entity = Entity.objects.create(name="Acme", folder=Folder.get_root_folder())
+        raw = _mcp_token(admin, "create")
+        payload = {"entity": str(entity.id), "email": "rep@acme.example"}
+
+        refused = _call(
+            raw,
+            "post",
+            "/api/representatives/",
+            data={**payload, "create_user": True},
+        )
+        allowed = _call(raw, "post", "/api/representatives/", data=payload)
+
+        assert refused.status_code == 400
+        assert not User.objects.filter(email="rep@acme.example").exists()
+        assert allowed.status_code == 201, allowed.content
+        assert Representative.objects.get(email="rep@acme.example").user is None
+
+    def test_changes_made_through_an_app_name_it(self, admin, mcp_write_on):
+        _call(
+            _mcp_token(admin, "create"),
+            "post",
+            "/api/applied-controls/",
+            data=_new_control("Tagged"),
+        )
+        control = AppliedControl.objects.get(name="Tagged")
+        entry = LogEntry.objects.get_for_object(control).latest("timestamp")
+        via = entry.additional_data["via_app"]
+        assert via["name"] == "Claude Code"
+        assert via["profile"] == "Read and create"
+        entry.actor_email = admin.email
+        assert log_entry_to_ocsf(entry)["actor"]["app_name"] == "Claude Code"
+        assert log_entry_to_raw(entry)["via_app"] == via
+
+    def test_the_next_request_does_not_keep_the_app(self, admin):
+        _call(_mcp_token(admin))
+        api = APIClient()
+        api.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=admin)[1]}"
+        )
+        api.post("/api/applied-controls/", _new_control("By hand"), format="json")
+        control = AppliedControl.objects.get(name="By hand")
+        entry = LogEntry.objects.get_for_object(control).latest("timestamp")
+        assert "via_app" not in (entry.additional_data or {})
+
+    def test_the_request_log_names_the_app(self, admin):
+        seen = {}
+
+        def view(request):
+            seen.update(structlog.contextvars.get_contextvars())
+            return HttpResponse()
+
+        raw = _mcp_token(admin)
+        request = RequestFactory().get(
+            "/api/folders/", HTTP_AUTHORIZATION=f"Bearer {raw}"
+        )
+        structlog.contextvars.clear_contextvars()
+        try:
+            MCPTokenMiddleware(view)(request)
+        finally:
+            structlog.contextvars.clear_contextvars()
+        assert seen["mcp_app"] == Client.objects.get().id
+
+
+class TestAccessLookup:
+    PATH = "/api/iam/mcp/access/"
+
+    def test_the_mcp_server_learns_the_connection(self, admin, mcp_write_on):
+        response = _call(_mcp_token(admin, "create"), path=self.PATH)
+        assert response.status_code == 200
+        assert response.json() == {
+            "user": str(admin.pk),
+            "client_id": Client.objects.get().id,
+            "actions": ["read", "create"],
+            "profile": "Read and create",
+            "app": "Claude Code",
+        }
+
+    def test_it_says_read_only_while_writes_are_off(self, admin):
+        response = _call(_mcp_token(admin, "create"), path=self.PATH)
+        assert response.json()["actions"] == ["read"]
+
+    def test_a_personal_access_token_learns_nothing(self, admin):
+        api = APIClient()
+        api.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=admin)[1]}"
+        )
+        assert api.get(self.PATH).status_code == 403
+
+    def test_a_token_without_a_grant_learns_nothing(self, admin):
+        raw = _mcp_token(admin)
+        AppGrant.objects.all().delete()
+        assert _call(raw, path=self.PATH).status_code == 401
+
+
+class TestBackstop:
+    """With an MCP token, administration and credentials are refused whatever
+    the user's role, and data follows the connection's actions."""
+
+    def _allowed(self, user, codename, *actions):
+        access = SimpleNamespace(actions=["read", *actions])
+        token = mcp_access_var.set(access)
+        try:
+            return RoleAssignment.is_access_allowed(
+                user,
+                Permission.objects.get(codename=codename),
+                Folder.get_root_folder(),
+            )
+        finally:
+            mcp_access_var.reset(token)
+
+    def test_data_follows_the_actions(self, admin):
+        assert self._allowed(admin, "view_appliedcontrol")
+        assert not self._allowed(admin, "add_appliedcontrol")
+        assert self._allowed(admin, "add_appliedcontrol", "create")
+        assert not self._allowed(admin, "delete_appliedcontrol", "create", "update")
+        assert self._allowed(admin, "delete_appliedcontrol", "delete")
+
+    @pytest.mark.parametrize(
+        "codename",
+        ["add_user", "change_user", "add_folder", "change_role", "add_roleassignment"],
+    )
+    def test_administration_is_refused(self, admin, codename):
+        assert not self._allowed(admin, codename, "create", "update", "delete")
+
+    def test_reading_users_and_domains_is_allowed(self, admin):
+        assert self._allowed(admin, "view_user")
+        assert self._allowed(admin, "view_folder")
+
+    @pytest.mark.parametrize(
+        "codename",
+        ["view_personalaccesstoken", "add_personalaccesstoken", "view_ssosettings"],
+    )
+    def test_credentials_and_secrets_are_refused(self, admin, codename):
+        assert not self._allowed(admin, codename, "create", "update", "delete")
+
+    def test_custom_permissions_are_refused(self, admin):
+        custom = (
+            Permission.objects.exclude(codename__regex=r"^(view|add|change|delete)_")
+            .values_list("codename", flat=True)
+            .first()
+        )
+        assert custom is not None
+        assert not self._allowed(admin, custom, "create", "update", "delete")
+
+    def test_the_admin_endpoints_are_refused(self, admin):
+        request = SimpleNamespace(user=admin)
+        token = mcp_access_var.set(SimpleNamespace(actions=["read"]))
+        try:
+            assert not IsGlobalAdmin().has_permission(request, None)
+        finally:
+            mcp_access_var.reset(token)
+        assert IsGlobalAdmin().has_permission(request, None)
+
+
+class TestSharedCache:
+    def _valid(self, **flags):
+        row, _ = GlobalSettings.objects.get_or_create(
+            name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+        )
+        return FeatureFlagsSerializer(row, data=flags, partial=True).is_valid()
+
+    @pytest.mark.parametrize("flag", ["mcp", "mcp_write"])
+    def test_mcp_needs_a_shared_cache(self, flag):
+        assert not self._valid(**{flag: True})
+
+    @pytest.mark.parametrize("flag", ["mcp", "mcp_write"])
+    def test_mcp_can_be_turned_on_with_memcached(self, settings, flag):
+        settings.CACHES = MEMCACHED
+        assert self._valid(**{flag: True})
+
+    def test_other_flags_do_not_need_it(self):
+        assert self._valid(mcp=False, incidents=True)
+
+
+class TestInventory:
+    def test_it_covers_every_call_the_tools_make(self):
+        missing = []
+        for method, path in sorted(tool_calls()):
+            match = resolve("/api" + path.replace(ANY, str(uuid.uuid4())))
+            if not is_inventoried(method, match):
+                missing.append((method, path, match.url_name))
+        assert not missing, "add these to iam/mcp_inventory.py"
+
+    def test_it_lists_nothing_the_tools_do_not_call(self):
+        used = set(SERVER_OPERATIONS)
+        for method, path in tool_calls():
+            try:
+                match = resolve("/api" + path.replace(ANY, str(uuid.uuid4())))
+            except Resolver404:
+                continue
+            used.add((method, match.url_name))
+        assert set(OPERATIONS) - used == set()
+
+
+def test_authorization_server_metadata_at_the_rfc8414_address(client):
+    response = client.get("/.well-known/oauth-authorization-server/api")
+    assert response.status_code == 200
+    assert response["Access-Control-Allow-Origin"] == "*"
+    assert response.json()["issuer"].endswith("/api")

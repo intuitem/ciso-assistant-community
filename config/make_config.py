@@ -201,17 +201,8 @@ def get_config():
         default=False,
     ).ask()
 
-    if enable_mcp:
-        config["mcp"] = {
-            "enabled": True,
-            "read_only": questionary.confirm(
-                "Restrict the MCP server to read-only tools? "
-                "(recommended; answer No to also allow create/update/delete)",
-                default=True,
-            ).ask(),
-        }
-    else:
-        config["mcp"] = {"enabled": False}
+    # what apps may do is set in the app: the mcp and mcp_write feature flags
+    config["mcp"] = {"enabled": bool(enable_mcp)}
 
     # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(

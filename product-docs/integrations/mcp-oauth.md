@@ -17,8 +17,8 @@ or paste a Personal Access Token (PAT).
 - **Each user approves the app themselves**, on a consent page in CISO Assistant.
 - **The app gets that user's permissions.** It sees the same domains and objects
   as the user in the UI, no more.
-- **The app can get less than the user.** When they approve, the user picks a
-  profile, for example "Read only".
+- **The app can get less than the user.** When they approve, the user chooses
+  what the app may do: read only, or also create, update or delete.
 - **The user can revoke the app at any time** from their profile settings.
 
 This page covers the OAuth setup. For the MCP server itself, the tools and the
@@ -34,46 +34,49 @@ stdio setup, see the [MCP setup guide](mcp.md).
    Client Registration (DCR).
 4. A browser opens on the CISO Assistant login page. The user signs in as usual,
    including MFA or SSO.
-5. CISO Assistant shows a consent page. The user picks a profile and clicks
-   **Authorize**.
+5. CISO Assistant shows a consent page. The user chooses what the app may do
+   and clicks **Authorize**.
 6. The client gets a token and uses it for every MCP call, until the user
    revokes it.
 
 <figure><img src="../.gitbook/assets/mcp-oauth-login.png" alt=""><figcaption><p>Step 4: the usual CISO Assistant login page. A user who is already signed in skips it</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/mcp-oauth-consent.png" alt=""><figcaption><p>Step 5: the consent page for Claude Code. The yellow box warns that the user is adding a new app nobody checked, and shows where it sends the user back. The user picks a profile; Read only is preselected</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/mcp-oauth-consent.png" alt=""><figcaption><p>Step 5: the consent page for Claude Code. The yellow box warns that the user is adding a new app nobody checked, and shows where it sends the user back. Read is always on; Create, Update and Delete appear once an administrator allows apps to change data</p></figcaption></figure>
 
-The MCP server runs as its own service, `backend-mcp`, next to the backend. It
-shares the backend's database and checks each token there. Tool calls run inside
-CISO Assistant as the signed-in user, with the same permission checks as the UI.
+The MCP server runs as its own service, `mcp`, next to the backend. It has no
+access to the database and holds no secret. For each tool call, it calls the
+backend API with the app's own token. On every call, the backend checks the
+token, the user's permissions and what the user allowed the app to do, as for
+the UI. An app's token only works for the operations the MCP tools use, whether
+it goes through `/mcp` or calls `/api` directly.
 
 ### Profiles
 
 A profile says what an app may do once connected. An app can always read. On
-top of that, it may create data, update data (which includes deleting), both,
-or neither. There is one built-in profile for each choice:
+top of that, the user may allow it to **create**, **update** and **delete**
+data, in any combination. Each combination is a built-in profile, from
+**Read only** to **Read, create, update and delete**.
 
-| Profile                 | Read | Create | Update and delete |
-| ----------------------- | ---- | ------ | ----------------- |
-| Read only (the default) | yes  | no     | no                |
-| Read and create         | yes  | yes    | no                |
-| Read and update         | yes  | no     | yes               |
-| Read, create and update | yes  | yes    | yes               |
-
-- On the consent page, the user picks one of the profiles. **Read only** is
-  preselected.
+- On the consent page, the user ticks what the app may do on top of reading.
+  Nothing is ticked by default, which gives **Read only**.
+- Create, Update and Delete are offered only when an administrator turned on
+  **AI apps may change data (MCP)**. While it is off, every app is read only,
+  whatever its profile, and gets its profile back when the flag is turned on.
 - A profile only removes access. A user who can't edit a folder in the UI can't
   edit it through MCP either, whatever the profile.
-- Apps that skip the consent page get **Read only**.
+- Apps that skip the consent page get **Read**.
 - The app only sees the tools its profile allows. It can call `get_my_access`
-  to learn what it may do.
-- To give an app more, the user connects it again and picks another profile.
+  to learn what it may do. The backend refuses the rest anyway.
+- To give an app more, the user connects it again and ticks more actions.
+- An app never administers the instance, whatever the profile and the user's
+  role: it cannot create or change users, teams, roles or domains, read
+  settings that hold secrets, or manage tokens. The tools that would
+  (`update_user`, `create_folder`, `update_folder`) are not offered over OAuth.
 
 The profiles are built in and can't be changed for now. Every profile is
-offered to every app.
-
-If the server runs read-only (`CA_MCP_READ_ONLY=true`), the write tools are
-hidden whatever the profile.
+offered to every app. The backend applies the profile in its access checks, so
+it holds even for an app that calls `/api` directly. Approving, and other
+actions beyond create, update and delete, are never available to apps.
 
 ### Enable it (administrators)
 
@@ -83,21 +86,46 @@ hidden whatever the profile.
 #### Start the MCP service
 
 The service is off by default. For now it ships in `docker-compose-build.yml`
-only, built from source. Start it with the `mcp` profile:
+only, built from source. Start the services with the `mcp` profile:
 
 ```bash
 docker compose -f docker-compose-build.yml --profile mcp up -d --build
 ```
 
-The proxy sends these paths to `backend-mcp`, so it is served on your existing
-certificate:
+The `mcp` service needs no secret: it passes each app's own token to the
+backend, on the backend's usual port.
 
-- `/mcp`
-- `/.well-known/oauth-protected-resource/mcp`
-- `/.well-known/oauth-authorization-server/api`
+The proxy routes these paths, so MCP is served on your existing certificate:
 
-If you run your own reverse proxy, add these three routes. Everything else stays
-as before.
+| Path                                          | Service   |
+| --------------------------------------------- | --------- |
+| `/mcp`                                        | `mcp`     |
+| `/.well-known/oauth-protected-resource/mcp`   | `mcp`     |
+| `/.well-known/oauth-authorization-server/api` | `backend` |
+
+On the two paths to `mcp`, the proxy must also keep the app's cookies away from
+the MCP server and stop its answers from acting on the app's site. The proxy
+configurations we ship (compose files, `make_config.py` templates for Caddy,
+Traefik and BunkerWeb, Helm chart) do it:
+
+- remove the `Cookie` request header;
+- remove the `Set-Cookie` and `Service-Worker-Allowed` response headers;
+- add the response headers `Content-Security-Policy: sandbox` and
+  `X-Content-Type-Options: nosniff`.
+
+If you run your own reverse proxy, add these routes and rules. Everything else
+stays as before.
+{% endstep %}
+
+{% step %}
+
+#### Use a shared cache
+
+During sign-in, CISO Assistant keeps each authorization code in its cache until
+the app redeems it. The backend runs several workers, so the cache must be
+shared between them, or sign-in fails about two times out of three. Set up
+memcached as described in [Shared cache](../installation/shared-cache.md).
+CISO Assistant refuses to turn on AI app connections without it.
 {% endstep %}
 
 {% step %}
@@ -106,7 +134,7 @@ as before.
 
 `CISO_ASSISTANT_URL` must be the URL users and AI clients use to reach CISO
 Assistant, for example `https://grc.example.com`. Set the same value on the
-backend and on `backend-mcp`.
+backend and on `mcp`.
 
 The login redirects, the token issuer and the MCP resource are all built from
 it. A wrong value makes sign-in fail.
@@ -117,7 +145,7 @@ it. A wrong value makes sign-in fail.
 #### Turn on self-registration
 
 Clients like Copilot Studio and Claude Code register themselves. This is off by
-default. Turn it on, on the backend **and** on `backend-mcp`:
+default. Turn it on, on the backend:
 
 ```env
 OAUTH_DCR_ENABLED=true
@@ -138,33 +166,22 @@ to accept any host. Redirects must use HTTPS, except for loopback addresses.
 
 {% step %}
 
-#### Allow the write tools
-
-`backend-mcp` is read-only by default: the write tools are hidden whatever the
-profile. To make them available to the profiles that allow creating or
-updating:
-
-```env
-CA_MCP_READ_ONLY=false
-```
-{% endstep %}
-
-{% step %}
-
 #### Turn MCP on and choose who may connect
 
 Both are **off by default**: an instance does not accept any AI app until an
 administrator decides so.
 
 1. Go to **Extra** > **Settings** > **Feature flags** and turn on **AI app
-   connections (MCP)**.
+   connections (MCP)**. To let users allow apps to create, update or delete
+   data, also turn on **AI apps may change data (MCP)**.
 2. Allow the users who may connect an app: in **Organization** > **Users**,
    edit a user and tick **Can connect AI apps (MCP)**. The users list has a
    column showing who can connect.
 
 Unticking a user, or deactivating them, disconnects all their apps at once.
 Turning the feature flag off blocks every connection but keeps them: they work
-again when you turn it back on.
+again when you turn it back on. Turning **AI apps may change data (MCP)** off
+makes every app read only at once, and leaves the choices users made.
 {% endstep %}
 
 {% step %}
@@ -182,14 +199,15 @@ for p in /.well-known/oauth-protected-resource/mcp \
 done
 ```
 
-`/mcp` without a token must return `401` (`403` means the feature flag is off).
+`/mcp` without a token must return `401`.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="warning" %}
 **Apps that register themselves are not checked by anyone.** The consent page
-says so, and shows where the app will send the user back. They can only reach
-`/mcp`. Their tokens are refused on the REST API (`/api`).
+says so, and shows where the app will send the user back. Their tokens only work
+for the operations the MCP tools use, within what the user allowed, and never
+for administration: users, teams, roles, domains, settings or tokens.
 {% endhint %}
 
 ### Connect a client
@@ -257,7 +275,7 @@ again.
 {% hint style="info" %}
 An app whose profile doesn't allow what you need will not fix itself. Revoke
 it, or clear its sign-in in the client (in Claude Code: `/mcp` > **Clear
-authentication**), then connect again and pick another profile.
+authentication**), then connect again and tick other actions.
 {% endhint %}
 
 ### Manage connections (administrators)
@@ -282,11 +300,14 @@ name, its client ID and the profile used (`via_app` in the entry). Audit events
 forwarded to a SIEM carry it too: as `actor.app_name` and `actor.app_uid` in
 OCSF, and as `via_app` in the raw format.
 
-**Every tool call is logged**, reads included, in the `backend-mcp` logs. Each
+**Every request an app makes is logged by the backend**, reads included: the
+request log line carries the app's client ID (`mcp_app`), even when the app
+calls `/api` directly. This is the record to use for security.
+
+**Every tool call is also logged** in the `mcp` service logs. Each
 `mcp tool call` line has the user, the app, the profile and its actions, the tool, the
 outcome (`ok`, `refused`, `limited` or `error`), the duration and the size of
-the answer. Collect these logs like the other service logs to see what an app
-read, not only what it changed.
+the answer. Use them to follow usage and tune the limits below.
 
 **Each connection has a budget**, on top of the size limit of a single answer:
 
@@ -299,17 +320,17 @@ an error that tells the agent to wait, and the call is logged as `limited`. Set
 a variable to `0` to turn that limit off.
 
 The limits are soft. The data budget is checked before a call, so the call that
-crosses it still completes. The counters are kept in the cache. With the
-default in-memory cache, each worker counts on its own and the counters reset
-on restart; use a shared cache for exact limits.
+crosses it still completes. The MCP server counts in its own memory: the
+counters reset when it restarts, and if you run several MCP server processes,
+each one counts on its own.
 
-### Personal Access Tokens still work
+### Personal Access Tokens
 
-`backend-mcp` also accepts a PAT, sent as `Authorization: Bearer <PAT>`, so
-setups that use **API key** authentication can keep working. After an upgrade,
-an administrator must first turn on the **AI app connections (MCP)** feature flag
-and tick **Can connect AI apps (MCP)** for the PAT's user: both are off by
-default. Profiles don't apply to a PAT: it gets the user's full permissions.
+The instance's `mcp` service accepts only tokens from app connections. A
+Personal Access Token sent to `/mcp` is refused. To use the MCP server with a
+PAT, run it yourself, over stdio or as your own HTTP server, as described in
+the [MCP setup guide](mcp.md). It then gets the user's full permissions, as
+with the REST API.
 
 ### Troubleshooting
 
@@ -321,14 +342,20 @@ the whole instance. The page says which. See
 
 <figure><img src="../.gitbook/assets/mcp-oauth-refused.png" alt=""><figcaption><p>The refusal page when AI app connections are off for the instance. <strong>Back to the app</strong> tells the app the user refused</p></figcaption></figure>
 
-#### `/mcp` answers `403` "MCP is disabled by your administrator."
+#### The app keeps asking to sign in again
 
-The **AI app connections (MCP)** feature flag is off.
+Its connection was revoked, the user may no longer connect apps, or the
+**AI app connections (MCP)** feature flag is off. The sign-in page says which.
+
+#### The `mcp` service stops at startup with "CA_MCP_AUTH=oauth needs: ..."
+
+A variable it needs is missing: `CISO_ASSISTANT_URL` or `API_URL`. Set it on
+`mcp` and recreate the service.
 
 #### The client says the server has no registration endpoint
 
-`OAUTH_DCR_ENABLED` is not `true` on both the backend and `backend-mcp`. Set it
-on both and recreate the two services.
+`OAUTH_DCR_ENABLED` is not `true` on the backend. Set it and recreate the
+backend.
 
 #### Sign-in loops back to the login page, or fails with a redirect error
 
@@ -344,18 +371,23 @@ or leave the variable empty.
 
 The connection went over one of the limits in [Audit and limits](#audit-and-limits).
 The agent can wait and continue. If normal use hits it, raise
-`MCP_MAX_CALLS_PER_MINUTE` or `MCP_MAX_RESPONSE_CHARS_PER_HOUR` on `backend-mcp`.
+`MCP_MAX_CALLS_PER_MINUTE` or `MCP_MAX_RESPONSE_CHARS_PER_HOUR` on `mcp`.
 
 #### A tool says the connection's profile does not allow it
 
-The user picked a profile that doesn't allow that action. They can reconnect
-the app and pick another profile. If the
-write tools are missing entirely, check that `CA_MCP_READ_ONLY=false`.
+The user did not allow that action when they approved the app. They can
+reconnect the app and tick it. If the write tools are missing for every app,
+check that **AI apps may change data (MCP)** is on.
 
-#### `/api` answers "This client can only access the MCP endpoint."
+#### `/api` refuses an app's token
 
-This is expected. Tokens of apps that registered themselves only work on `/mcp`.
-For REST API access, use a [PAT](pat.md) or a [service account](service-accounts.md).
+This is expected for operations the MCP tools don't use, and for administration.
+An app's token only works for what the tools do. For wider REST API access, use
+a [PAT](pat.md) or a [service account](service-accounts.md).
+
+#### "AI app connections need a shared cache" when turning on the feature flag
+
+The backend has no shared cache. See [Use a shared cache](#use-a-shared-cache).
 
 #### `421 Misdirected Request`
 
@@ -370,13 +402,16 @@ or remove the `Link` header at your proxy. It's only a speed hint.
 
 ### Environment variables
 
-| Variable                           | Service              | Default                      | Description                                                                     |
-| ---------------------------------- | -------------------- | ---------------------------- | ------------------------------------------------------------------------------- |
-| `CISO_ASSISTANT_URL`               | backend, backend-mcp | -                            | Public URL of the instance. Must be the same on both services                   |
-| `OAUTH_DCR_ENABLED`                | backend, backend-mcp | `false`                      | Let MCP clients register themselves                                             |
-| `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` | backend              | -                            | Comma-separated hosts a self-registered client may redirect to. Empty means any |
-| `OAUTH_REFRESH_TOKEN_IDLE_DAYS`    | backend              | `30`                         | Days without use after which an app must be approved again. `0` means never     |
-| `CA_MCP_READ_ONLY`                 | backend-mcp          | `true`                       | Hide the write tools                                                            |
-| `CA_MCP_ALLOWED_HOSTS`             | backend-mcp          | host of `CISO_ASSISTANT_URL` | Accepted `Host` headers, port included                                          |
-| `MCP_MAX_CALLS_PER_MINUTE`         | backend-mcp          | `60`                         | Tool calls allowed per connection per minute. `0` means no limit                |
-| `MCP_MAX_RESPONSE_CHARS_PER_HOUR`  | backend-mcp          | `2000000`                    | Characters returned per connection per hour. `0` means no limit                 |
+| Variable                           | Service      | Default                      | Description                                                                         |
+| ---------------------------------- | ------------ | ---------------------------- | ----------------------------------------------------------------------------------- |
+| `CISO_ASSISTANT_URL`               | backend, mcp | -                            | Public URL of the instance. Must be the same on both services                       |
+| `OAUTH_DCR_ENABLED`                | backend      | `false`                      | Let MCP clients register themselves                                                 |
+| `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` | backend      | -                            | Comma-separated hosts a self-registered client may redirect to. Empty means any     |
+| `OAUTH_REFRESH_TOKEN_IDLE_DAYS`    | backend      | `30`                         | Days without use after which an app must be approved again. `0` means never         |
+| `CA_MCP_AUTH`                      | mcp          | `pat`                        | `oauth` for the instance's MCP server: it then accepts only app connections         |
+| `API_URL`                          | mcp          | -                            | Backend API, e.g. `http://backend:8000/api`                                         |
+| `CA_MCP_ALLOWED_HOSTS`             | mcp          | host of `CISO_ASSISTANT_URL` | Accepted `Host` headers, port included                                              |
+| `CA_MCP_TOKEN_CACHE_SECONDS`       | mcp          | `60`                         | How long the backend's answer about a token is reused. Revoking still applies at once |
+| `CA_MCP_MAX_CONCURRENT_CALLS`      | mcp          | `2`                          | Backend calls the MCP server makes at the same time                                 |
+| `MCP_MAX_CALLS_PER_MINUTE`         | mcp          | `60`                         | Tool calls allowed per connection per minute. `0` means no limit                    |
+| `MCP_MAX_RESPONSE_CHARS_PER_HOUR`  | mcp          | `2000000`                    | Characters returned per connection per hour. `0` means no limit                     |

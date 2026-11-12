@@ -540,6 +540,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "iam.mcp_tokens.MCPTokenMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -921,12 +922,12 @@ OAUTH_REFRESH_TOKEN_IDLE_DAYS = int(
 )
 IDP_OIDC_REFRESH_TOKEN_EXPIRES_IN = OAUTH_REFRESH_TOKEN_IDLE_DAYS * 24 * 3600 or None
 
-# Per-connection budget on the MCP server (backend-mcp), on top of the per-call
-# caps in ca_mcp: an agent could otherwise page through everything. 0 = no limit.
-MCP_MAX_CALLS_PER_MINUTE = int(os.environ.get("MCP_MAX_CALLS_PER_MINUTE", "60"))
-MCP_MAX_RESPONSE_CHARS_PER_HOUR = int(
-    os.environ.get("MCP_MAX_RESPONSE_CHARS_PER_HOUR", "2000000")
-)
+# An app's access token is what an MCP server sees; the app refreshes it at
+# the authorization server.
+IDP_OIDC_ACCESS_TOKEN_EXPIRES_IN = 3600
+# Client ID Metadata Documents make the backend fetch a URL the client chooses:
+# off until reviewed.
+IDP_OIDC_CIMD_ENABLED = False
 
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]

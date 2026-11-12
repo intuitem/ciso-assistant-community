@@ -74,6 +74,54 @@ qdrant:
 Any other key from the Qdrant chart values (`nodeSelector`, `securityContext`, `service`, `ingress`, ...)
 can be set under `qdrant` and is kept across `helm upgrade`.
 
+### MCP server for AI apps
+
+`backend.mcp.enabled` runs the MCP server as a sidecar in the backend pod and serves it at `/mcp`, so
+users can connect AI apps (Claude, Copilot Studio, ChatGPT...) by entering `https://<domain>/mcp` and
+signing in with their own account. The sidecar holds no secret: it passes each app's own token to the
+backend next to it, which decides what the app may do.
+
+Before users can connect apps:
+
+- the backend needs a shared cache (memcached): sign-in keeps each authorization code in the cache
+  until the app redeems it, possibly on another worker, and the `mcp` feature flag cannot be turned
+  on without it;
+- an administrator turns on the `mcp` feature flag, and `mcp_write` to let apps change data;
+- an administrator ticks "Can connect AI apps" on each user who may do so.
+
+The `/mcp` paths get their own ingress. Configure your ingress controller, through
+`backend.mcp.ingressAnnotations`, to strip the `Cookie` request header and the `Set-Cookie` and
+`Service-Worker-Allowed` response headers, and to add `Content-Security-Policy: sandbox` and
+`X-Content-Type-Options: nosniff`. Browser session cookies then never reach the MCP server, and its
+answers cannot run as pages of the app. With Traefik:
+
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: mcp-isolation
+spec:
+  headers:
+    customRequestHeaders:
+      Cookie: ""
+    customResponseHeaders:
+      Set-Cookie: ""
+      Service-Worker-Allowed: ""
+      Content-Security-Policy: sandbox
+      X-Content-Type-Options: nosniff
+```
+
+```yaml
+backend:
+  mcp:
+    enabled: true
+    ingressAnnotations:
+      traefik.ingress.kubernetes.io/router.middlewares: <namespace>-mcp-isolation@kubernetescrd
+```
+
+Set `backend.mcp.dcr.allowedRedirectHosts` to the AI apps you support to limit which apps can
+register themselves.
+
 ### OIDC signing key (service accounts)
 
 The backend signs the tokens issued to service accounts with an RSA key. The chart generates one on

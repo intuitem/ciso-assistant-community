@@ -1,0 +1,41 @@
+{{- if and .Values.ingress.enabled .Values.backend.mcp.enabled }}
+# apart from the main ingress, so that the MCP isolation annotations apply only here
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}-mcp
+  namespace: {{ .Release.Namespace }}
+  {{- with merge (deepCopy .Values.backend.mcp.ingressAnnotations) .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" .) | nindent 4 }}
+spec:
+  {{- with .Values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.global.domain }}
+    http:
+      paths:
+      {{- range list "/mcp" "/.well-known/oauth-protected-resource" }}
+      - backend:
+          service:
+            name: {{ include "ciso-assistant.fullname" $ }}-backend
+            port:
+              name: mcp
+        path: {{ . }}
+        pathType: Prefix
+      {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+      - {{ .Values.global.domain }}
+      {{- if .Values.ingress.tls.existingSecret }}
+      secretName: {{ .Values.ingress.tls.existingSecret }}
+      {{- else }}
+      secretName: {{ include "ciso-assistant.fullname" . }}-tls
+      {{- end }}
+  {{- end }}
+{{- end }}

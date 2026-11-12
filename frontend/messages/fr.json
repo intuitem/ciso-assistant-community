@@ -3052,6 +3052,8 @@
 	"connectedAppRevoked": "Accès révoqué",
 	"mcpConnections": "Connexions d'applications IA (MCP)",
 	"mcpConnectionsDescription": "Permet aux utilisateurs de connecter des assistants IA comme Copilot ou Claude à CISO Assistant avec leur compte. Seuls les utilisateurs autorisés dans leur profil peuvent se connecter. Désactiver cette option bloque toutes les connexions d'un coup ; les connexions existantes reviennent quand vous la réactivez.",
+	"mcpWrite": "Les applications IA peuvent modifier les données (MCP)",
+	"mcpWriteDescription": "Permet aux utilisateurs d'autoriser une application IA connectée à créer, modifier ou supprimer des données, dans la limite de leurs propres droits. Désactivé, les applications peuvent seulement lire. Une application IA peut être trompée par un texte qu'elle lit : activez cette option seulement si vous en avez besoin.",
 	"canConnectApps": "Peut connecter des applications IA (MCP)",
 	"canConnectAppsHelpText": "Permet à cet utilisateur de connecter des assistants comme Copilot ou Claude avec son compte. Décocher cette case déconnecte immédiatement toutes ses applications.",
 	"connectAppsRequiresAdmin": "Seul un administrateur peut modifier qui peut connecter des applications IA.",

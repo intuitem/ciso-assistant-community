@@ -8,13 +8,13 @@ from allauth.idp.oidc.internal.oauthlib.utils import extract_params
 from allauth.idp.oidc.internal.resources import get_resources
 from allauth.idp.oidc.models import Client, Token
 from allauth.idp.oidc.views import AuthorizationView
+from allauth.idp.oidc.views import configuration as oidc_configuration
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_deny
@@ -23,66 +23,47 @@ from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from rest_framework.exceptions import AuthenticationFailed
 
 from iam.authentication import KnoxTokenAuthentication, is_self_registered
-from iam.mcp_access import is_mcp_request, refusal_reason
+from iam.mcp_access import is_mcp_request, mcp_writes_enabled, refusal_reason
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
 from iam.oidc_adapter import MCP_SCOPES
 
-PROFILE_SUMMARY = {
-    (False, False): _("This app will be able to read your CISO Assistant data."),
-    (True, False): _(
-        "This app will be able to read and create data in CISO Assistant."
-    ),
-    (False, True): _(
-        "This app will be able to read, change and delete data in CISO Assistant."
-    ),
-    (True, True): _(
-        "This app will be able to read, create, change and delete data in "
-        "CISO Assistant."
-    ),
-}
+WRITE_ACTIONS = ("create", "update", "delete")
 
 
-def profile_summary(profile) -> str:
-    return PROFILE_SUMMARY[(profile.can_create, profile.can_update)]
-
-
-def profile_scopes(profile, requested, allowed) -> list[str]:
-    """MCP access is one scope; the profile, not the scope, is what backend-mcp
-    enforces."""
+def profile_scopes(requested, allowed) -> list[str]:
+    """MCP access is one scope; what the app may do comes from its profile."""
     scopes = {s for s in requested if s not in MCP_SCOPES} | set(MCP_SCOPES)
     return sorted(scopes & set(allowed))
 
 
 class CISOAuthorizationForm(AuthorizationForm):
-    """For MCP requests the user picks a profile instead of ticking scopes."""
+    """For MCP requests the user ticks what the app may do instead of scopes:
+    read always, plus any of create, update and delete once the organization
+    allows writes. A skip-consent client posts nothing and gets read only."""
 
-    def __init__(self, *args, mcp_request=False, client_scopes=(), **kwargs):
+    def __init__(
+        self, *args, mcp_request=False, client_scopes=(), writes=False, **kwargs
+    ):
         self._requested = kwargs["requested_scopes"]
         self._client_scopes = client_scopes
         super().__init__(*args, **kwargs)
         self.mcp_request = mcp_request
+        self.writes = writes
         if mcp_request:
             del self.fields["scopes"]
-            default = ConnectionProfile.default()
-            # not required: a skip-consent client posts no profile and gets the default
-            self.fields["profile"] = forms.ModelChoiceField(
-                queryset=ConnectionProfile.objects.all(),
-                widget=forms.RadioSelect,
-                empty_label=None,
-                initial=default.pk if default else None,
-                required=False,
-            )
+            if writes:
+                for action in WRITE_ACTIONS:
+                    self.fields[f"can_{action}"] = forms.BooleanField(required=False)
 
     def clean(self):
         data = super().clean()
         if self.mcp_request and not self.errors:
-            profile = data.get("profile") or ConnectionProfile.default()
+            chosen = [bool(data.get(f"can_{action}")) for action in WRITE_ACTIONS]
+            profile = ConnectionProfile.matching(*chosen)
             if profile is None:
                 raise forms.ValidationError(_("No profile is available."))
             data["profile"] = profile
-            data["scopes"] = profile_scopes(
-                profile, self._requested, self._client_scopes
-            )
+            data["scopes"] = profile_scopes(self._requested, self._client_scopes)
         return data
 
 
@@ -186,29 +167,22 @@ class CISOAuthorizationView(AuthorizationView):
         client = Client.objects.filter(id=self._request_info.get("client_id")).first()
         kwargs["mcp_request"] = self._is_mcp_request()
         kwargs["client_scopes"] = client.get_scopes() if client else []
+        kwargs["writes"] = mcp_writes_enabled()
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["self_registered"] = is_self_registered(context["client"])
         form = context["form"]
-        if form.mcp_request:
-            selected = form["profile"].value()
-            context["profiles"] = [
-                {
-                    "profile": profile,
-                    "summary": profile_summary(profile),
-                    "checked": str(profile.pk) == str(selected),
-                }
-                for profile in sorted(
-                    ConnectionProfile.objects.all(), key=lambda p: p.rank
+        if form.mcp_request and form.writes:
+            context["write_choices"] = [
+                (form[f"can_{action}"], label)
+                for action, label in (
+                    ("create", _("Create data")),
+                    ("update", _("Change data")),
+                    ("delete", _("Delete data")),
                 )
             ]
-            # backend-mcp may run read-only; this process cannot tell
-            context["offers_writes"] = any(
-                item["profile"].can_create or item["profile"].can_update
-                for item in context["profiles"]
-            )
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -219,9 +193,11 @@ class CISOAuthorizationView(AuthorizationView):
         # before allauth: prompt=none and skip-consent clients get a code without
         # ever showing the consent page
         if request.user.is_authenticated:
-            refusal = self._refusal(request)
-            if refusal is not None:
-                return refusal
+            pending = _pending_request(request)
+            if pending is not None:
+                refusal = self._refusal(request, *pending)
+                if refusal is not None:
+                    return refusal
         response = super().dispatch(request, *args, **kwargs)
         location = response.get("Location") if response.status_code == 302 else None
         # absolute Location = going back to the client (RFC 9207)
@@ -229,11 +205,7 @@ class CISOAuthorizationView(AuthorizationView):
             response["Location"] = _with_iss(location, get_adapter().get_issuer())
         return response
 
-    def _refusal(self, request):
-        pending = _pending_request(request)
-        if pending is None:
-            return None
-        scopes, info = pending
+    def _refusal(self, request, scopes, info):
         mcp_request = is_mcp_request(scopes, info.get("resources"))
         reason = refusal_reason(request.user, mcp_request)
         if reason is None:
@@ -260,14 +232,7 @@ class CISOAuthorizationView(AuthorizationView):
             user_id, client_id = self.request.user.pk, self._request_info["client_id"]
             ConnectedAppUse.record_authorization(user_id, client_id)
             if form.mcp_request:
-                AppGrant.objects.update_or_create(
-                    user_id=user_id,
-                    client_id=client_id,
-                    defaults={
-                        "profile": form.cleaned_data["profile"],
-                        "granted_at": timezone.now(),
-                    },
-                )
+                AppGrant.consent(user_id, client_id, form.cleaned_data["profile"])
         return response
 
     def _login_required(self, request):
@@ -281,3 +246,12 @@ class CISOAuthorizationView(AuthorizationView):
         return HttpResponseRedirect(
             f"{login_url}?{urlencode({'next': request.get_full_path()})}"
         )
+
+
+def authorization_server_metadata(request):
+    """RFC 8414 puts the metadata of the issuer <url>/api at
+    /.well-known/oauth-authorization-server/api, outside /api. Some clients
+    (Copilot Studio) try no other address."""
+    response = oidc_configuration(request)
+    response["Access-Control-Allow-Origin"] = "*"
+    return response

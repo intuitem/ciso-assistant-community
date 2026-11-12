@@ -163,7 +163,7 @@ def test_metadata_advertises_issuer_and_iss_support(client):
     data = client.get("/api/.well-known/openid-configuration").json()
     assert data["issuer"] == ISSUER
     assert data["authorization_response_iss_parameter_supported"] is True
-    assert "mcp:read" in data["scopes_supported"]
+    assert "mcp" in data["scopes_supported"]
 
 
 def test_knox_cookie_is_not_accepted_by_the_rest_api(client, knox_token):

@@ -49,14 +49,14 @@ def _connections(tokens, with_user=False) -> list[dict]:
         )
     }
     grants = {
-        (grant.user_id, grant.client_id): grant.profile
+        (grant.user_id, grant.client_id): grant
         for grant in AppGrant.objects.filter(
             user_id__in=users, client_id__in=clients
         ).select_related("profile")
     }
     rows = []
     for key, row in grouped.items():
-        token, use, profile = row["token"], uses.get(key), grants.get(key)
+        token, use, grant = row["token"], uses.get(key), grants.get(key)
         item = {
             "client_id": token.client_id,
             "name": token.client.name,
@@ -68,8 +68,12 @@ def _connections(tokens, with_user=False) -> list[dict]:
             "authorized_at": use.authorized_at if use else None,
             "last_used_at": use.last_used_at if use else None,
             "profile": (
-                {"id": profile.id, "name": profile.name, "actions": profile.actions}
-                if profile
+                {
+                    "id": grant.profile.id,
+                    "name": grant.profile.name,
+                    "actions": grant.profile.actions,
+                }
+                if grant
                 else None
             ),
         }

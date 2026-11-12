@@ -17,9 +17,9 @@ from rest_framework.test import APIClient
 
 from core.serializers import UserWriteSerializer
 from core.startup import startup
+from iam.mcp_access import mcp_access_for as verify
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile, User, UserGroup
-from iam.oidc_adapter import CISOOIDCAdapter
-from mcp_server.oauth import verify
+from iam.oidc_adapter import CISOOIDCAdapter, mcp_resource
 
 pytestmark = pytest.mark.django_db
 
@@ -58,12 +58,12 @@ def _client(
         data={"dcr": True} if self_registered else None,
     )
     client.set_redirect_uris([redirect])
-    client.set_scopes(["openid", "mcp:read"])
+    client.set_scopes(["openid", "mcp"])
     client.save()
     return client
 
 
-def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",)):
+def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp",)):
     raw = secrets.token_urlsafe(32)
     token = Token(
         type=type,
@@ -73,19 +73,18 @@ def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",)):
     )
     token.set_value(raw)
     token.set_scopes(list(scopes))
+    if "mcp" in scopes:
+        token.set_resources([mcp_resource()])
     token.save()
-    if user is not None:
-        profile, _ = ConnectionProfile.objects.get_or_create(
-            name="Read, create and update",
-            defaults={"can_create": True, "can_update": True},
-        )
-        AppGrant.objects.get_or_create(
-            user=user, client=client, defaults={"profile": profile}
+    if user is not None and "mcp" in scopes:
+        ConnectionProfile.sync_builtin()
+        AppGrant.consent(
+            user.pk, client.pk, ConnectionProfile.matching(True, True, True)
         )
     return raw
 
 
-def _authorize(http, client, user, scope="openid mcp:read", prompt=None):
+def _authorize(http, client, user, scope="openid mcp", prompt=None):
     challenge = (
         base64.urlsafe_b64encode(
             hashlib.sha256(secrets.token_urlsafe(48).encode()).digest()
@@ -165,14 +164,22 @@ class TestUserNotAllowed:
         assert "code" not in query
         assert not Token.objects.filter(type=Token.Type.AUTHORIZATION_CODE).exists()
 
-    def test_tokens_are_refused_on_mcp_and_api(self):
+    def test_mcp_tokens_are_refused(self):
         user = _user("no@example.com", False)
         assert verify(_token(_client(), user)) is None
         api = APIClient()
-        api.credentials(
-            HTTP_AUTHORIZATION=f"Bearer {_token(_client(self_registered=False), user)}"
-        )
+        api.credentials(HTTP_AUTHORIZATION=f"Bearer {_token(_client(), user)}")
         assert api.get("/api/folders/").status_code == 401
+
+    def test_other_apps_do_not_need_it(self, client):
+        # existing admin-registered apps keep working without the flag
+        user = _user("no@example.com", False)
+        raw = _token(_client(self_registered=False), user, scopes=("openid",))
+        api = APIClient()
+        api.credentials(HTTP_AUTHORIZATION=f"Bearer {raw}")
+        assert api.get("/api/folders/").status_code == 200
+        response = _authorize(client, _client(self_registered=False), user, "openid")
+        assert "code" in parse_qs(urlsplit(response["Location"]).query)
 
     def test_other_users_are_unaffected(self):
         _user("no@example.com", False)
@@ -187,19 +194,21 @@ class TestUserNotAllowed:
 
 @pytest.mark.usefixtures("mcp_on")
 class TestLosingAccess:
-    def test_unticking_deletes_every_token(self):
+    def test_unticking_deletes_the_mcp_connections(self):
         user = _user("u@example.com")
-        app = _client()
+        app, other = _client(), _client(name="Internal tool", self_registered=False)
         raw = _token(app, user)
         _token(app, user, type=Token.Type.REFRESH_TOKEN)
         _token(app, user, type=Token.Type.AUTHORIZATION_CODE)
         ConnectedAppUse.record(user.pk, app.pk)
+        _token(other, user, scopes=("openid",))
 
         user.can_connect_apps = False
         user.save()
 
-        assert not Token.objects.filter(user=user).exists()
-        assert not ConnectedAppUse.objects.filter(user=user).exists()
+        assert not Token.objects.filter(user=user, client=app).exists()
+        assert not ConnectedAppUse.objects.filter(user=user, client=app).exists()
+        assert Token.objects.filter(user=user, client=other).exists()
         user.can_connect_apps = True
         user.save()
         assert verify(raw) is None
@@ -207,6 +216,11 @@ class TestLosingAccess:
     def test_deactivating_deletes_every_token(self):
         user = _user("u@example.com")
         _token(_client(), user)
+        _token(
+            _client(name="Internal tool", self_registered=False),
+            user,
+            scopes=("openid",),
+        )
         user.is_active = False
         user.save()
         assert not Token.objects.filter(user=user).exists()
@@ -227,7 +241,7 @@ class TestLosingAccess:
             expires_at=timezone.now() - timedelta(days=1)
         )
         # a live connection to another app, which allauth alone would accept
-        _token(_client(name="Other"), user, scopes=("openid", "mcp:read"))
+        _token(_client(name="Other"), user, scopes=("openid", "mcp"))
 
         response = _authorize(client, expired, user, prompt="none")
 

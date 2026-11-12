@@ -8,6 +8,7 @@ from .connected_apps import (
     ConnectedAppsView,
     UserConnectedAppView,
 )
+from .mcp_tokens import MCPAccessView
 from .views import (
     AuthTokenDetailView,
     PersonalAccessTokenViewSet,
@@ -51,6 +52,7 @@ urlpatterns = [
         name="auth-token-detail",
     ),
     path("connected-apps/", ConnectedAppsView.as_view(), name="connected-apps"),
+    path("mcp/access/", MCPAccessView.as_view(), name="mcp-access"),
     path(
         "connected-apps/all/",
         AllConnectedAppsView.as_view(),

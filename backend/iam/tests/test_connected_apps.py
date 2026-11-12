@@ -3,11 +3,13 @@ from datetime import timedelta
 
 import pytest
 from allauth.idp.oidc.models import Client, Token
+from django.test import override_settings
 from django.utils import timezone
 from knox.models import AuthToken
 
+from iam.mcp_access import mcp_access_for as verify
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile, User
-from mcp_server.oauth import verify
+from iam.oidc_adapter import mcp_resource
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mcp_on")]
 
@@ -36,7 +38,7 @@ def _client(name="Credential Manager", self_registered=True):
     return client
 
 
-def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",), **kw):
+def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp",), **kw):
     raw = secrets.token_urlsafe(32)
     token = Token(
         type=type,
@@ -46,14 +48,13 @@ def _token(client, user, type=Token.Type.ACCESS_TOKEN, scopes=("mcp:read",), **k
     )
     token.set_value(raw)
     token.set_scopes(list(scopes))
+    if "mcp" in scopes:
+        token.set_resources([mcp_resource()])
     token.save()
-    if user is not None:
-        profile, _ = ConnectionProfile.objects.get_or_create(
-            name="Read, create and update",
-            defaults={"can_create": True, "can_update": True},
-        )
-        AppGrant.objects.get_or_create(
-            user=user, client=client, defaults={"profile": profile}
+    if user is not None and "mcp" in scopes:
+        ConnectionProfile.sync_builtin()
+        AppGrant.consent(
+            user.pk, client.pk, ConnectionProfile.matching(True, True, True)
         )
     return raw
 
@@ -73,7 +74,7 @@ def api(client, me):
 
 def test_lists_apps_with_live_tokens(api, me):
     copilot = _client()
-    _token(copilot, me, scopes=("openid", "mcp:read"))
+    _token(copilot, me, scopes=("openid", "mcp"))
     _token(copilot, me, type=Token.Type.REFRESH_TOKEN, scopes=("email",))
 
     apps = api.get(LIST_URL).json()
@@ -82,15 +83,16 @@ def test_lists_apps_with_live_tokens(api, me):
     assert apps[0]["client_id"] == copilot.id
     assert apps[0]["self_registered"] is True
     assert apps[0]["redirect_hosts"] == ["global.consent.azure-apim.net"]
-    assert apps[0]["scopes"] == ["email", "mcp:read", "openid"]
+    assert apps[0]["scopes"] == ["email", "mcp", "openid"]
 
 
+@override_settings(MCP_LISTENER_PORT=8100)
 def test_last_used_is_set_by_an_mcp_call(api, me):
     copilot = _client()
     raw = _token(copilot, me)
     assert api.get(LIST_URL).json()[0]["last_used_at"] is None
 
-    verify(raw)
+    api.get("/api/folders/", HTTP_AUTHORIZATION=f"Bearer {raw}", SERVER_PORT="8100")
 
     assert api.get(LIST_URL).json()[0]["last_used_at"] is not None
 

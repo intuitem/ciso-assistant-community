@@ -8,6 +8,7 @@ services:
     environment:
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      {% if mcp.enabled %}- OAUTH_DCR_ENABLED=True{% endif %}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
       - HOME=/tmp
@@ -125,7 +126,8 @@ services:
       - CA_MCP_TRANSPORT=streamable-http
       - CA_MCP_HOST=0.0.0.0
       - CA_MCP_PORT=8001
-      - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
+      - CA_MCP_AUTH=oauth
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       # matched against the Host header; both forms, since the port is dropped for 443
       - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
       - CA_MCP_ALLOW_ENV_TOKEN=false
@@ -178,6 +180,16 @@ services:
       - {{ fqdn }}_REVERSE_PROXY_HOST_2=http://backend:8000
       {% if mcp.enabled %}- {{ fqdn }}_REVERSE_PROXY_URL_3=/mcp
       - {{ fqdn }}_REVERSE_PROXY_HOST_3=http://mcp:8001
+      - {{ fqdn }}_REVERSE_PROXY_URL_4=/.well-known/oauth-protected-resource
+      - {{ fqdn }}_REVERSE_PROXY_HOST_4=http://mcp:8001
+      - {{ fqdn }}_REVERSE_PROXY_URL_5=/.well-known/oauth-authorization-server
+      - {{ fqdn }}_REVERSE_PROXY_HOST_5=http://backend:8000
+      - {{ fqdn }}_REVERSE_PROXY_HEADERS_3=Cookie ''
+      - {{ fqdn }}_REVERSE_PROXY_HIDE_HEADERS_3=Upgrade Set-Cookie Service-Worker-Allowed
+      - {{ fqdn }}_REVERSE_PROXY_HEADERS_CLIENT_3=Content-Security-Policy sandbox;X-Content-Type-Options nosniff
+      - {{ fqdn }}_REVERSE_PROXY_HEADERS_4=Cookie ''
+      - {{ fqdn }}_REVERSE_PROXY_HIDE_HEADERS_4=Upgrade Set-Cookie Service-Worker-Allowed
+      - {{ fqdn }}_REVERSE_PROXY_HEADERS_CLIENT_4=Content-Security-Policy sandbox;X-Content-Type-Options nosniff
       {% endif %}{% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
       - {{ fqdn }}_USE_CUSTOM_SSL=yes
       - {{ fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem

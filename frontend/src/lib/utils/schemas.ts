@@ -821,6 +821,7 @@ export const FeatureFlagsSchema = z.object({
 	focus_mode: z.boolean().optional(),
 	idp_groups: z.boolean().optional(),
 	mcp: z.boolean().optional(),
+	mcp_write: z.boolean().optional(),
 	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	workflows: z.boolean().optional(),

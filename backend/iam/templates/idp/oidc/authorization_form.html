@@ -45,34 +45,19 @@
         {% if form.email %}<p>{{ form.email.label_tag }} {{ form.email }}</p>{% endif %}
         <fieldset>
           <legend>{% translate "What this app may do" %}</legend>
-          {% if profiles|length == 1 %}
-            {% with item=profiles.0 %}
-              <input type="hidden" name="profile" value="{{ item.profile.pk }}">
-              <div class="profile">
-                <div>
-                  <strong>{{ item.profile.name }}</strong>
-                  <p>{{ item.summary }}</p>
-                  {% if item.profile.description %}<p>{{ item.profile.description }}</p>{% endif %}
-                </div>
-              </div>
-            {% endwith %}
-          {% else %}
-            {% for item in profiles %}
-              <label class="profile">
-                <input type="radio" name="profile" value="{{ item.profile.pk }}"{% if item.checked %} checked{% endif %} required>
-                <div>
-                  <strong>{{ item.profile.name }}</strong>
-                  <p>{{ item.summary }}</p>
-                  {% if item.profile.description %}<p>{{ item.profile.description }}</p>{% endif %}
-                </div>
-              </label>
-            {% endfor %}
-          {% endif %}
-          {% if offers_writes %}
-            <p class="note">{% translate "Creating, changing and deleting data only work if your administrator has turned on the write tools." %}</p>
-          {% endif %}
+          <label class="profile"><input type="checkbox" checked disabled> <strong>{% translate "Read your data" %}</strong></label>
+          {% for field, label in write_choices %}
+            <label class="profile">{{ field }} <strong>{{ label }}</strong></label>
+          {% endfor %}
+          <p class="note">
+            {% if write_choices %}
+              {% translate "Only within what you can do yourself. The app never administers users, domains or settings." %}
+            {% else %}
+              {% translate "Your administrator allows apps to read only. The app never administers users, domains or settings." %}
+            {% endif %}
+          </p>
         </fieldset>
-        {% if form.errors %}<div class="errors">{{ form.non_field_errors }}{{ form.profile.errors }}</div>{% endif %}
+        {% if form.errors %}<div class="errors">{{ form.non_field_errors }}</div>{% endif %}
       {% else %}
         {{ form }}
       {% endif %}

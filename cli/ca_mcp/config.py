@@ -57,3 +57,20 @@ JSON_RESPONSE = _flag("CA_MCP_JSON_RESPONSE", "false")
 # Serving every HTTP caller with the server's own TOKEN collapses all users into
 # one identity; opt-in only.
 ALLOW_ENV_TOKEN = _flag("CA_MCP_ALLOW_ENV_TOKEN", "false")
+
+# Remote MCP server of an instance (the `mcp` service): "oauth" takes the
+# OAuth tokens of AI apps only, "pat" (default) takes a PAT.
+AUTH_MODE = os.getenv("CA_MCP_AUTH", "pat").lower()
+# The instance's public URL: the token issuer is <url>/api, this server <url>/mcp.
+PUBLIC_URL = os.getenv("CISO_ASSISTANT_URL", "").rstrip("/")
+# How long the backend's answer about a token is reused. Revoking a connection
+# still takes effect at once: the backend checks the token on every call.
+TOKEN_CACHE_SECONDS = int(os.getenv("CA_MCP_TOKEN_CACHE_SECONDS", "60"))
+# Backend calls run at once: they share the backend's workers with the UI.
+MAX_CONCURRENT_CALLS = int(os.getenv("CA_MCP_MAX_CONCURRENT_CALLS", "2"))
+# Budget per connection (one user with one app), counted by this process.
+# 0 = no limit.
+MAX_CALLS_PER_MINUTE = int(os.getenv("MCP_MAX_CALLS_PER_MINUTE", "60"))
+MAX_RESPONSE_CHARS_PER_HOUR = int(
+    os.getenv("MCP_MAX_RESPONSE_CHARS_PER_HOUR", "2000000")
+)

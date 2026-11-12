@@ -1,22 +1,25 @@
-"""What a connection may do. Read is always allowed; create and update are
-granted separately. The host puts the actions in the access token's claims; a
+"""What a connection may do. Read is always allowed; create, update and delete
+are granted separately. The host puts the actions in the access token's claims; a
 token without them may only read."""
 
 READ = "read"
 CREATE = "create"
 UPDATE = "update"
+DELETE = "delete"
 
-ACTIONS = (READ, CREATE, UPDATE)
+ACTIONS = (READ, CREATE, UPDATE, DELETE)
 
 _REFUSED_ACTION = {
-    CREATE: "creating data",
-    UPDATE: "changing or deleting data",
+    CREATE: "creating",
+    UPDATE: "changing",
+    DELETE: "deleting",
 }
 
 _ALLOWED_VERBS = {
     READ: ["read"],
     CREATE: ["create"],
-    UPDATE: ["change", "delete"],
+    UPDATE: ["change"],
+    DELETE: ["delete"],
 }
 
 
@@ -37,22 +40,25 @@ def refusal(access, needed: str) -> str:
     if profile:
         who += f' uses the "{profile}" profile, which'
     return (
-        f"Error: {who} does not allow {_REFUSED_ACTION[needed]}. "
-        "Reconnect the app and pick a profile that does."
+        f"Error: {who} does not allow {_REFUSED_ACTION[needed]} data. "
+        "The user can reconnect the app and allow it, if their administrator "
+        "lets AI apps change data."
     )
 
 
-def _join(words: list[str]) -> str:
-    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+def _join(words: list[str], last: str = "and") -> str:
+    if len(words) == 1:
+        return words[0]
+    return ", ".join(words[:-1]) + f" {last} " + words[-1]
 
 
-def summary(access, read_only: bool = False) -> str:
-    granted = {READ} if read_only else granted_actions(access)
+def summary(access) -> str:
+    granted = granted_actions(access)
     allowed = [verb for a in ACTIONS if a in granted for verb in _ALLOWED_VERBS[a]]
     text = f"This connection can {_join(allowed)} data in CISO Assistant."
     missing = [_REFUSED_ACTION[a] for a in ACTIONS if a != READ and a not in granted]
     if missing:
-        text += " It does not allow " + " or ".join(missing) + "."
+        text += f" It does not allow {_join(missing, 'or')} data."
     profile = profile_name(access)
     if profile:
         text = f'Profile "{profile}". ' + text
