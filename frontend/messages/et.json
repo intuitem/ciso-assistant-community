@@ -5075,5 +5075,6 @@
 	"commandPaletteArgumentHint": "kirjuta, millega tegutseda…",
 	"askAi": "Küsi tehisarult",
 	"commandKeywordAsk": "küsi",
-	"commandKeywordSearch": "otsi"
+	"commandKeywordSearch": "otsi",
+	"briefingOfAssessedRequirements": "{total} hinnatud nõudest"
 }

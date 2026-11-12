@@ -5836,5 +5836,6 @@
 	"commandPaletteArgumentHint": "vpišite, na kaj se nanaša…",
 	"askAi": "Vprašaj UI",
 	"commandKeywordAsk": "vprašaj",
-	"commandKeywordSearch": "išči"
+	"commandKeywordSearch": "išči",
+	"briefingOfAssessedRequirements": "od {total} ocenjenih zahtev"
 }

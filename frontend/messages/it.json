@@ -5148,5 +5148,6 @@
 	"commandKeywordSearch": "cerca",
 	"openAssistant": "Motore IA (chat)",
 	"searchPagesAndObjects": "Cerca pagine e oggetti...",
-	"viewAll": "Mostra tutto"
+	"viewAll": "Mostra tutto",
+	"briefingOfAssessedRequirements": "su {total} requisiti valutati"
 }

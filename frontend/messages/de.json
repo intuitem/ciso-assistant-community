@@ -7872,5 +7872,6 @@
 	"briefingAfterTreatment": "Nach Behandlung",
 	"briefingOfAppliedControls": "von {total} Maßnahmen",
 	"briefingDeltaSince": "{delta} seit {date}",
-	"briefingNoChangeSince": "Keine Änderung seit {date}"
+	"briefingNoChangeSince": "Keine Änderung seit {date}",
+	"briefingOfAssessedRequirements": "von {total} bewerteten Anforderungen"
 }

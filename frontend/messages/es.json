@@ -3972,5 +3972,6 @@
 	"commandKeywordSearch": "buscar",
 	"openAssistant": "Motor de IA (chat)",
 	"searchPagesAndObjects": "Buscar páginas y objetos...",
-	"viewAll": "Ver todo"
+	"viewAll": "Ver todo",
+	"briefingOfAssessedRequirements": "de {total} requisitos evaluados"
 }

@@ -7647,5 +7647,6 @@
 	"briefingAfterTreatment": "Kezelés után",
 	"briefingOfAppliedControls": "{total} alkalmazott kontrollból",
 	"briefingDeltaSince": "{delta} {date} óta",
-	"briefingNoChangeSince": "Nincs változás {date} óta"
+	"briefingNoChangeSince": "Nincs változás {date} óta",
+	"briefingOfAssessedRequirements": "{total} értékelt követelményből"
 }

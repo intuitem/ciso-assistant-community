@@ -4427,5 +4427,6 @@
 	"commandKeywordSearch": "traži",
 	"openAssistant": "AI pogon (chat)",
 	"searchPagesAndObjects": "Pretraži stranice i objekte...",
-	"viewAll": "Prikaži sve"
+	"viewAll": "Prikaži sve",
+	"briefingOfAssessedRequirements": "od {total} procijenjenih zahtjeva"
 }

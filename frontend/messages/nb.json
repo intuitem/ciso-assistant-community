@@ -5562,5 +5562,6 @@
 	"commandKeywordSearch": "søk",
 	"openAssistant": "KI-motor (chat)",
 	"searchPagesAndObjects": "Søk i sider og objekter...",
-	"viewAll": "Vis alle"
+	"viewAll": "Vis alle",
+	"briefingOfAssessedRequirements": "av {total} vurderte krav"
 }

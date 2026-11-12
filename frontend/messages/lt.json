@@ -4853,5 +4853,6 @@
 	"askAi": "Klausti DI",
 	"commandKeywordAsk": "klausk",
 	"commandKeywordSearch": "ieškok",
-	"viewAll": "Rodyti viską"
+	"viewAll": "Rodyti viską",
+	"briefingOfAssessedRequirements": "iš {total} įvertintų reikalavimų"
 }

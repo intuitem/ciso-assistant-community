@@ -5932,5 +5932,6 @@
 	"commandPaletteArgumentHint": "napíšte, s čím pracovať…",
 	"askAi": "Opýtať sa AI",
 	"commandKeywordAsk": "opýtaj",
-	"commandKeywordSearch": "hľadaj"
+	"commandKeywordSearch": "hľadaj",
+	"briefingOfAssessedRequirements": "z {total} posúdených požiadaviek"
 }

@@ -6363,5 +6363,6 @@
 	"commandPaletteArgumentHint": "typ waarop je wilt handelen…",
 	"askAi": "Vraag het AI",
 	"commandKeywordAsk": "vraag",
-	"commandKeywordSearch": "zoek"
+	"commandKeywordSearch": "zoek",
+	"briefingOfAssessedRequirements": "van {total} beoordeelde eisen"
 }

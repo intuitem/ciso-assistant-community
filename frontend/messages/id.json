@@ -2372,5 +2372,6 @@
 	"recentlyUpdatedAudits": "Audit yang baru diperbarui",
 	"searchPagesAndObjects": "Cari halaman dan objek...",
 	"sumpageExpiredEvidences": "Bukti kedaluwarsa",
-	"viewAll": "Lihat semua"
+	"viewAll": "Lihat semua",
+	"briefingOfAssessedRequirements": "dari {total} persyaratan yang dinilai"
 }

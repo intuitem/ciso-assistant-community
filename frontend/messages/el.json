@@ -2797,5 +2797,6 @@
 	"recentlyUpdatedAudits": "Πρόσφατα ενημερωμένες επιθεωρήσεις",
 	"searchPagesAndObjects": "Αναζήτηση σε σελίδες και αντικείμενα...",
 	"sumpageExpiredEvidences": "Ληγμένα αποδεικτικά",
-	"viewAll": "Προβολή όλων"
+	"viewAll": "Προβολή όλων",
+	"briefingOfAssessedRequirements": "από {total} αξιολογημένες απαιτήσεις"
 }

@@ -93,6 +93,7 @@ def test_get_metrics_exposes_briefing_counts(admin_client, domain):  # noqa: F81
     data = res.json()["results"]
     assert data["controls"]["no_status"] == 1
     assert data["risk"]["high_current"] == 0
+    assert data["compliance"]["assessed_items"] == 0
     assert data["operations"] == {
         "open_incidents": 1,
         "open_findings": 1,

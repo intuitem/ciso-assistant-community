@@ -3962,5 +3962,6 @@
 	"commandKeywordAsk": "询问",
 	"commandKeywordSearch": "搜索",
 	"openAssistant": "AI 引擎（聊天）",
-	"viewAll": "查看全部"
+	"viewAll": "查看全部",
+	"briefingOfAssessedRequirements": "共 {total} 项已评估要求"
 }

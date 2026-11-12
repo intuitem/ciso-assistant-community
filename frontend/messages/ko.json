@@ -4571,5 +4571,6 @@
 	"commandKeywordAsk": "질문",
 	"commandKeywordSearch": "검색",
 	"openAssistant": "AI 엔진(채팅)",
-	"viewAll": "모두 보기"
+	"viewAll": "모두 보기",
+	"briefingOfAssessedRequirements": "평가된 요구사항 {total}개 중"
 }

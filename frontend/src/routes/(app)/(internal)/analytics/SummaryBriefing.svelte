@@ -293,6 +293,11 @@
 							>
 						</span>
 					</a>
+					{#if series('audits_avg_assessed').length}
+						<span class="stat-foot"
+							><Sparkline values={series('audits_avg_assessed')} class="text-primary-500" /></span
+						>
+					{/if}
 				{:catch}
 					<span class="stat-number">–</span>
 				{/await}
@@ -305,12 +310,28 @@
 					<span class="stat-number"
 						><AnimatedNumber value={metrics.compliance?.non_compliant_items ?? 0} countUp /></span
 					>
-				</a>
-				{#if series('non_compliant_items').length}
-					<span class="stat-foot"
-						><Sparkline values={series('non_compliant_items')} class="text-error-500" /></span
+					<span class="stat-context"
+						>{m.briefingOfAssessedRequirements({
+							total: fmt(metrics.compliance?.assessed_items)
+						})}</span
 					>
-				{/if}
+				</a>
+				<span class="stat-foot">
+					{#if series('non_compliant_items').length}
+						<Sparkline values={series('non_compliant_items')} class="text-error-500" />
+					{:else}
+						<span class="meter meter-error" aria-hidden="true"
+							><span
+								style="width: {fill(
+									share(
+										metrics.compliance?.non_compliant_items ?? 0,
+										metrics.compliance?.assessed_items ?? 0
+									)
+								)}%"
+							></span></span
+						>
+					{/if}
+				</span>
 			</dd>
 		</div>
 		<div class="stat">
@@ -322,11 +343,23 @@
 						>{m.briefingInAssessments({ count: fmt(metrics.risk?.assessments) })}</span
 					>
 				</a>
-				{#if series('total_risk_scenarios').length}
-					<span class="stat-foot"
-						><Sparkline values={series('total_risk_scenarios')} class="text-primary-500" /></span
-					>
-				{/if}
+				<span class="stat-foot">
+					{#if series('total_risk_scenarios').length}
+						<Sparkline values={series('total_risk_scenarios')} class="text-primary-500" />
+					{:else}
+						<span class="meter meter-error" aria-hidden="true"
+							><span style="width: {fill(share(metrics.risk?.high_current ?? 0, scenarios))}%"
+							></span></span
+						>
+					{/if}
+					{#if metrics.risk?.high_current}
+						<a
+							href="/risk-scenarios?top_level=current"
+							class="whitespace-nowrap rounded-full bg-error-500/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-error-700-300 hover:bg-error-500/20"
+							>{fmt(metrics.risk.high_current)} {m.briefingHighRisks()}</a
+						>
+					{/if}
+				</span>
 			</dd>
 		</div>
 	</dl>
@@ -614,6 +647,9 @@
 		gap: 0.625rem;
 		margin-top: 0.75rem;
 		min-height: 28px;
+	}
+	.meter-error > span {
+		background: var(--color-error-500);
 	}
 	.stat-foot .meter {
 		margin-top: 0;

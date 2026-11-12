@@ -2467,5 +2467,6 @@
 	"recentlyUpdatedAudits": "Senest opdaterede revisioner",
 	"searchPagesAndObjects": "Søg i sider og objekter...",
 	"sumpageExpiredEvidences": "Udløbne beviser",
-	"viewAll": "Vis alle"
+	"viewAll": "Vis alle",
+	"briefingOfAssessedRequirements": "af {total} vurderede krav"
 }

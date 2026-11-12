@@ -6762,5 +6762,6 @@
 	"commandPaletteArgumentHint": "اكتب ما تريد التعامل معه…",
 	"askAi": "اسأل الذكاء الاصطناعي",
 	"commandKeywordAsk": "اسأل",
-	"commandKeywordSearch": "ابحث"
+	"commandKeywordSearch": "ابحث",
+	"briefingOfAssessedRequirements": "من أصل {total} متطلبًا مُقيّمًا"
 }

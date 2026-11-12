@@ -1725,6 +1725,10 @@ def get_metrics(user: User, folder_id):
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
+            # Requirements with a verdict: the base of the non-compliant share.
+            "assessed_items": viewable_requirement_assessments.filter(
+                result__in=["compliant", "partially_compliant", "non_compliant"]
+            ).count(),
         },
         "operations": {
             "open_incidents": viewable_items(Incident, folder_id)

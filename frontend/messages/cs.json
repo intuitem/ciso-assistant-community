@@ -6881,5 +6881,6 @@
 	"briefingAfterTreatment": "Po ošetření",
 	"briefingOfAppliedControls": "z {total} aplikovaných opatření",
 	"briefingDeltaSince": "{delta} od {date}",
-	"briefingNoChangeSince": "Beze změny od {date}"
+	"briefingNoChangeSince": "Beze změny od {date}",
+	"briefingOfAssessedRequirements": "z {total} posouzených požadavků"
 }
