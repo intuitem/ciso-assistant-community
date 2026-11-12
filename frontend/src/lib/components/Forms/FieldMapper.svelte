@@ -6,6 +6,7 @@
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { withSavedOptions, type SelectOption } from '#lib/components/Forms/savedOptions.js';
 
 	const toastStore = getToastStore();
 
@@ -106,9 +107,20 @@
 	let fieldMap = $state(initialConfig?.field_map || {});
 	let valueMap = $state(initialConfig?.value_map || {});
 
+	// The table and maps saved when the page loaded. While that table is still
+	// selected, saved values the remote metadata doesn't list (a legacy issue
+	// type name, incomplete metadata, a failed lookup) are kept as extra
+	// options: the pickers would otherwise clear them, and saving would wipe
+	// the table or its mappings. Picking another table drops them.
+	const savedTable: string = initialConfig?.table_name || '';
+	const savedFieldMap: Record<string, any> = initialConfig?.field_map || {};
+	const savedValueMap: Record<string, Record<string, any>> = initialConfig?.value_map || {};
+	const isSavedTable = (tableName: string) => Boolean(savedTable) && tableName === savedTable;
+	const unverifiedLabel = (value: string) => m.unverifiedOption({ value });
+
 	// Data sourced from RPC
-	let tables = $state([]);
-	let columns = $state([]);
+	let tables = $state<SelectOption[]>([]);
+	let columns = $state<SelectOption[]>([]);
 	let choicesCache = $state({}); // Key: "table:field", Value: Option[]
 	let isLoadingColumns = $state(false);
 	let isRefreshing = $state(false);
@@ -162,10 +174,14 @@
 	async function loadTables() {
 		const rawTables = (await fetchRpc('get_tables')) ?? [];
 		// Transform to Autocomplete options format
-		tables = rawTables.map((t: Record<string, any>) => ({
-			value: t.name,
-			label: `${t.label} [${t.name}]`
-		}));
+		tables = withSavedOptions(
+			rawTables.map((t: Record<string, any>) => ({
+				value: t.name,
+				label: `${t.label} [${t.name}]`
+			})),
+			isSavedTable(selectedTable) ? [savedTable] : [],
+			unverifiedLabel
+		);
 	}
 
 	async function loadColumns(tableName: string) {
@@ -173,13 +189,17 @@
 		isLoadingColumns = true;
 		const rawCols = (await fetchRpc('get_columns', { table_name: tableName })) ?? [];
 
-		columns = rawCols.map((c: Record<string, any>) => ({
-			value: c.name,
-			label: c.label,
-			// We can pass extra info to help filtering or UI
-			infoString: { string: c.readonly ? '(Read Only)' : c.name, position: 'suffix' },
-			original: c // Keep ref for choice logic
-		}));
+		columns = withSavedOptions(
+			rawCols.map((c: Record<string, any>) => ({
+				value: c.name,
+				label: c.label,
+				// We can pass extra info to help filtering or UI
+				infoString: { string: c.readonly ? '(Read Only)' : c.name, position: 'suffix' },
+				original: c // Keep ref for choice logic
+			})),
+			isSavedTable(tableName) ? Object.values(savedFieldMap) : [],
+			unverifiedLabel
+		);
 		isLoadingColumns = false;
 	}
 
@@ -192,7 +212,17 @@
 			field_name: fieldName
 		});
 		if (rawChoices === null) return; // RPC failed — don't cache an empty list as success
-		choicesCache[cacheKey] = rawChoices.map((c) => ({ value: c.value, label: c.label }));
+		// Saved values of every local field mapped to this remote field.
+		const savedChoices = isSavedTable(tableName)
+			? localFields
+					.filter((f) => savedFieldMap[f.key] === fieldName)
+					.flatMap((f) => Object.values(savedValueMap[f.key] ?? {}))
+			: [];
+		choicesCache[cacheKey] = withSavedOptions(
+			rawChoices.map((c) => ({ value: c.value, label: c.label })),
+			savedChoices,
+			unverifiedLabel
+		);
 	}
 
 	// Force the backend to re-pull the remote schema (tables/columns/choices)
