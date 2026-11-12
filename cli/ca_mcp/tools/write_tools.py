@@ -5,8 +5,10 @@ from pathlib import Path
 from ..client import (
     make_post_request,
     make_get_request,
+    make_patch_request,
     make_upload_request,
     make_delete_request,
+    get_paginated_results,
 )
 from ..resolvers import (
     resolve_ebios_rm_study_id,
@@ -1420,6 +1422,81 @@ async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
         return f"Error in refresh_quantitative_risk_study_simulations: {str(e)}"
 
 
+SCHEDULE_FREQUENCIES = ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+SCHEDULE_OVERDUE_BEHAVIORS = ["DELAY_NEXT", "NO_IMPACT"]
+
+
+def _build_schedule(
+    frequency=None,
+    interval=None,
+    days_of_week=None,
+    weeks_of_month=None,
+    months_of_year=None,
+    end_date=None,
+    occurrences=None,
+    overdue_behavior=None,
+):
+    """Build a TaskTemplate.schedule object from individual fields.
+
+    Mirrors the backend's SCHEDULE_JSONSCHEMA (interval/frequency required
+    together, everything else optional). Returns (schedule_dict, error) -
+    schedule_dict is None when no schedule_* field was given at all, and
+    error is a user-facing message when the given fields are invalid.
+    """
+    given = any(
+        v is not None
+        for v in (
+            frequency,
+            interval,
+            days_of_week,
+            weeks_of_month,
+            months_of_year,
+            end_date,
+            occurrences,
+            overdue_behavior,
+        )
+    )
+    if not given:
+        return None, None
+
+    if frequency is None or interval is None:
+        return (
+            None,
+            "Error: schedule_frequency and schedule_interval are both required "
+            "to set a schedule",
+        )
+    if frequency not in SCHEDULE_FREQUENCIES:
+        return (
+            None,
+            f"Error: Invalid schedule_frequency '{frequency}'. Must be one of: "
+            f"{', '.join(SCHEDULE_FREQUENCIES)}",
+        )
+    if (
+        overdue_behavior is not None
+        and overdue_behavior not in SCHEDULE_OVERDUE_BEHAVIORS
+    ):
+        return (
+            None,
+            f"Error: Invalid schedule_overdue_behavior '{overdue_behavior}'. "
+            f"Must be one of: {', '.join(SCHEDULE_OVERDUE_BEHAVIORS)}",
+        )
+
+    schedule = {"interval": interval, "frequency": frequency}
+    if days_of_week is not None:
+        schedule["days_of_week"] = days_of_week
+    if weeks_of_month is not None:
+        schedule["weeks_of_month"] = weeks_of_month
+    if months_of_year is not None:
+        schedule["months_of_year"] = months_of_year
+    if end_date is not None:
+        schedule["end_date"] = end_date
+    if occurrences is not None:
+        schedule["occurrences"] = occurrences
+    if overdue_behavior is not None:
+        schedule["overdue_behavior"] = overdue_behavior
+    return schedule, None
+
+
 async def create_task_template(
     name: str,
     folder_id: str,
@@ -1428,9 +1505,16 @@ async def create_task_template(
     observation: str = None,
     evidences: list = None,
     task_date: str = None,
-    is_recurrent: bool = False,
+    is_recurrent: bool = None,
     ref_id: str = None,
-    schedule: str = None,
+    schedule_frequency: str = None,
+    schedule_interval: int = None,
+    schedule_days_of_week: list = None,
+    schedule_weeks_of_month: list = None,
+    schedule_months_of_year: list = None,
+    schedule_end_date: str = None,
+    schedule_occurrences: int = None,
+    schedule_overdue_behavior: str = None,
     enabled: bool = True,
     link: str = None,
     assigned_to: list = None,
@@ -1443,6 +1527,11 @@ async def create_task_template(
 ) -> str:
     """Create task template
 
+    A task template is either a single occurrence (give task_date) or a
+    recurring one (give the schedule_* fields): setting any schedule_* field
+    makes the template recurrent automatically unless is_recurrent is passed
+    explicitly.
+
     Args:
         name: Task template name (required)
         folder_id: Folder ID/name (required)
@@ -1451,9 +1540,21 @@ async def create_task_template(
         observation: Observation text
         evidences: Array of evidence UUIDs
         task_date: Task date (YYYY-MM-DD)
-        is_recurrent: Recurrent flag
+        is_recurrent: Recurrent flag (defaults to True when a schedule is
+            given, False otherwise)
         ref_id: Reference ID
-        schedule: Schedule definition
+        schedule_frequency: DAILY | WEEKLY | MONTHLY | YEARLY (required to set
+            a schedule)
+        schedule_interval: Number of periods between occurrences, e.g. 2 for
+            "every 2 weeks" (required to set a schedule)
+        schedule_days_of_week: Days of the week the task repeats on (Monday=1
+            .. Sunday=7)
+        schedule_weeks_of_month: Which week(s) of the month, for a given
+            weekday (1=first .. 4=fourth, -1=last)
+        schedule_months_of_year: Months of the year (1=January .. 12=December)
+        schedule_end_date: Date the recurrence ends (YYYY-MM-DD)
+        schedule_occurrences: Number of occurrences before the recurrence stops
+        schedule_overdue_behavior: DELAY_NEXT | NO_IMPACT (default NO_IMPACT)
         enabled: Enabled flag
         link: Link to evidence (e.g. Jira ticket)
         assigned_to: List of assignees as actor UUIDs, emails or names
@@ -1467,6 +1568,22 @@ async def create_task_template(
     try:
         # Resolve folder name to ID if needed
         folder_id = resolve_folder_id(folder_id)
+
+        schedule, schedule_error = _build_schedule(
+            schedule_frequency,
+            schedule_interval,
+            schedule_days_of_week,
+            schedule_weeks_of_month,
+            schedule_months_of_year,
+            schedule_end_date,
+            schedule_occurrences,
+            schedule_overdue_behavior,
+        )
+        if schedule_error:
+            return schedule_error
+
+        if is_recurrent is None:
+            is_recurrent = schedule is not None
 
         payload = {
             "name": name,
@@ -1975,6 +2092,260 @@ async def create_evidence(
             return created
     except Exception as e:
         return f"Error in create_evidence: {str(e)}"
+
+
+DOCUMENT_TYPES = [
+    "policy",
+    "procedure",
+    "charter",
+    "record",
+    "meeting_minutes",
+    "other",
+]
+
+
+async def create_document(
+    name: str,
+    document_type: str = "policy",
+    description: str = "",
+    folder_id: str = None,
+    content: str = None,
+    locale: str = None,
+    template_used: str = None,
+    policy: str = None,
+) -> str:
+    """Create a managed document (a markdown policy, procedure, charter, record...)
+
+    This creates the document and its first (draft) revision in one call. The
+    content can be edited later with update_document as long as the revision
+    stays a draft (or has changes requested) — once submitted for review or
+    published, a new draft must be created first (not yet exposed via MCP).
+
+    Args:
+        name: Document name
+        document_type: policy | procedure | charter | record | meeting_minutes | other
+        description: Description
+        folder_id: Folder ID/name
+        content: Markdown content for the initial draft revision
+        locale: Locale code, e.g. "en", "fr" (defaults to your preferred language)
+        template_used: Reference ID of a document template to seed the content from
+            (ignored if content is also given)
+        policy: Existing Policy ID/name to link this document to (groups it under
+            that policy's document container instead of creating a new one)
+    """
+    try:
+        from ..resolvers import resolve_id_or_name
+
+        if document_type not in DOCUMENT_TYPES:
+            return f"Error: Invalid document_type '{document_type}'. Must be one of: {', '.join(DOCUMENT_TYPES)}"
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {
+            "name": name,
+            "description": description,
+            "document_type": document_type,
+        }
+
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if locale is not None:
+            payload["locale"] = locale
+        if template_used is not None:
+            payload["template_used"] = template_used
+        if policy is not None:
+            payload["policy"] = resolve_id_or_name(policy, "/policies/")
+
+        res = make_post_request("/managed-documents/", payload)
+
+        if res.status_code != 201:
+            return f"Error creating document: {res.status_code} - {res.text}"
+
+        document = res.json()
+        document_id = document.get("id")
+        label = document.get("display_name") or document.get("name") or name
+        revision = document.get("current_revision") or {}
+        revision_id = revision.get("id") if isinstance(revision, dict) else None
+        version = revision.get("version_number", 1) if isinstance(revision, dict) else 1
+
+        if content is not None and revision_id:
+            rev_res = make_patch_request(
+                f"/document-revisions/{revision_id}/", {"content": content}
+            )
+            if rev_res.status_code != 200:
+                return (
+                    f"Created document: {label} (ID: {document_id}) but failed to "
+                    f"set content: {rev_res.status_code} - {rev_res.text}"
+                )
+
+        return f"Created document: {label} (ID: {document_id}, revision: {version})"
+    except Exception as e:
+        return f"Error in create_document: {str(e)}"
+
+
+def _get_latest_revision(document_id: str):
+    """Return (revision_dict, error) for a document's most recent revision.
+
+    This is the one any edit/submit/approve/publish action targets.
+    `current_revision` is NOT safe for this: it tracks the *published*
+    revision and only moves on publish(), so it goes stale as soon as a new
+    draft is created after a publish cycle. DocumentRevision's default
+    ordering is -version_number, so the first result here is always correct.
+    """
+    res = make_get_request("/document-revisions/", params={"document": document_id})
+    if res.status_code != 200:
+        return (
+            None,
+            f"Error fetching document revisions: {res.status_code} - {res.text}",
+        )
+
+    revisions = get_paginated_results(res.json())
+    if not revisions:
+        return None, "Error: Document has no revisions"
+
+    return revisions[0], None
+
+
+async def submit_document_for_review(document_id: str) -> str:
+    """Submit a document's draft (or change-requested) revision for review
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(
+            f"/document-revisions/{revision['id']}/submit-for-review/", {}
+        )
+        if res.status_code != 200:
+            return (
+                f"Error submitting document for review: {res.status_code} - {res.text}"
+            )
+
+        return (
+            f"Submitted for review: revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in submit_document_for_review: {str(e)}"
+
+
+async def approve_document(document_id: str) -> str:
+    """Approve (validate) a document's in-review revision
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(f"/document-revisions/{revision['id']}/approve/", {})
+        if res.status_code != 200:
+            return f"Error approving document: {res.status_code} - {res.text}"
+
+        return (
+            f"Approved (validated): revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in approve_document: {str(e)}"
+
+
+async def request_document_changes(document_id: str, comments: str = None) -> str:
+    """Send a document's in-review revision back to the author for changes
+
+    Args:
+        document_id: Document ID or name
+        comments: Reviewer comments explaining what needs to change
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        payload = {"reviewer_comments": comments} if comments is not None else {}
+        res = make_post_request(
+            f"/document-revisions/{revision['id']}/request-changes/", payload
+        )
+        if res.status_code != 200:
+            return f"Error requesting changes: {res.status_code} - {res.text}"
+
+        return (
+            f"Requested changes on revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in request_document_changes: {str(e)}"
+
+
+async def publish_document(document_id: str) -> str:
+    """Publish a document's validated revision, making it the current one
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(f"/document-revisions/{revision['id']}/publish/", {})
+        if res.status_code != 200:
+            return f"Error publishing document: {res.status_code} - {res.text}"
+
+        return (
+            f"Published: revision {revision.get('version_number', '?')} of document "
+            f"(ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in publish_document: {str(e)}"
+
+
+async def create_document_draft(document_id: str) -> str:
+    """Create a new draft revision for a document, cloned from its latest content
+
+    Needed to edit a document again once it has been published (a published
+    revision is locked). Fails if a draft already exists for the document.
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+
+        res = make_post_request(
+            f"/managed-documents/{resolved_id}/create-new-draft/", {}
+        )
+        if res.status_code != 201:
+            return f"Error creating draft: {res.status_code} - {res.text}"
+
+        draft = res.json()
+        return (
+            f"Created draft: revision {draft.get('version_number')} "
+            f"(ID: {draft.get('id')}) of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in create_document_draft: {str(e)}"
 
 
 async def create_incident(

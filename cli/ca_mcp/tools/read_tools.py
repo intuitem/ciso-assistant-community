@@ -1421,6 +1421,40 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         return f"Error in get_quantitative_risk_hypotheses: {str(e)}"
 
 
+_WEEKDAY_NAMES = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Sun"}
+
+
+def _format_schedule(schedule):
+    """Render a TaskTemplate.schedule object as a short human-readable phrase."""
+    if not schedule:
+        return "N/A"
+
+    interval = schedule.get("interval")
+    frequency = (schedule.get("frequency") or "").capitalize()
+    parts = [f"Every {interval} {frequency}" if interval else frequency]
+
+    days = schedule.get("days_of_week")
+    if days:
+        parts.append("on " + ", ".join(_WEEKDAY_NAMES.get(d, str(d)) for d in days))
+    weeks = schedule.get("weeks_of_month")
+    if weeks:
+        parts.append("week(s) " + ", ".join(str(w) for w in weeks))
+    months = schedule.get("months_of_year")
+    if months:
+        parts.append("in month(s) " + ", ".join(str(m) for m in months))
+    end_date = schedule.get("end_date")
+    if end_date:
+        parts.append(f"until {end_date}")
+    occurrences = schedule.get("occurrences")
+    if occurrences:
+        parts.append(f"for {occurrences} occurrence(s)")
+    overdue = schedule.get("overdue_behavior")
+    if overdue and overdue != "NO_IMPACT":
+        parts.append(f"(overdue: {overdue})")
+
+    return "; ".join(parts)
+
+
 async def get_task_templates(
     limit: int = None, offset: int = None, ordering: str = None, search: str = None
 ):
@@ -1461,8 +1495,8 @@ async def get_task_templates(
         result = (
             found_line(tasks, "task templates", paginated=True, offset=offset) + "\n\n"
         )
-        result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|\n"
-        result += "|---|---|---|---|---|---|---|---|\n"
+        result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|Next Occurrence|\n"
+        result += "|---|---|---|---|---|---|---|---|---|\n"
 
         for task in tasks:
             task_id = task.get("id", "N/A")
@@ -1473,8 +1507,12 @@ async def get_task_templates(
             is_recurrent = "Yes" if task.get("is_recurrent") else "No"
             enabled = "Yes" if task.get("enabled") else "No"
             task_date = task.get("task_date", "N/A")
+            next_occurrence = task.get("next_occurrence") or "N/A"
 
-            result += f"|{task_id}|{name}|{description}|{ref_id}|{status}|{is_recurrent}|{enabled}|{task_date}|\n"
+            result += (
+                f"|{task_id}|{name}|{description}|{ref_id}|{status}|{is_recurrent}"
+                f"|{enabled}|{task_date}|{next_occurrence}|\n"
+            )
 
         return result
     except Exception as e:
@@ -1499,8 +1537,13 @@ async def get_task_template_details(task_id: str):
         task = res.json()
 
         # Create result
-        result = f"|ID|Name|Description|Ref ID|Status|Task Date|Recurrent|Enabled|Published|Link|Folder|Path|Observation|Evidences|Created|Updated|Assets|Applied Controls|Compliance Assessment|Risk Assessment|Assign To|\n"
-        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        result = (
+            "|ID|Name|Description|Ref ID|Status|Task Date|Recurrent|Enabled"
+            "|Schedule|Next Occurrence|Last Occurrence Status|Next Occurrence Status"
+            "|Link|Folder|Path|Observation|Evidences|Created|Updated|Assets"
+            "|Applied Controls|Compliance Assessment|Risk Assessment|Assign To|\n"
+        )
+        result += "|---" * 24 + "|\n"
         result += f"|{task.get('id', 'N/A')}|{task.get('name', 'N/A')}"
         result += f"|{task.get('description', 'N/A')}"
         result += f"|{task.get('ref_id', 'N/A')}"
@@ -1508,6 +1551,10 @@ async def get_task_template_details(task_id: str):
         result += f"|{task.get('task_date', 'N/A')}"
         result += f"|{'Yes' if task.get('is_recurrent') else 'No'}"
         result += f"|{'Yes' if task.get('enabled') else 'No'}"
+        result += f"|{_format_schedule(task.get('schedule'))}"
+        result += f"|{task.get('next_occurrence') or 'N/A'}"
+        result += f"|{task.get('last_occurrence_status') or 'N/A'}"
+        result += f"|{task.get('next_occurrence_status') or 'N/A'}"
         result += f"|{task.get('link', 'N/A')}"
         result += f"|{task.get('folder', 'N/A')}"
         result += f"|{task.get('path', 'N/A')}"
@@ -1525,6 +1572,120 @@ async def get_task_template_details(task_id: str):
         return result
     except Exception as e:
         return f"Error in get_task_template_details: {str(e)}"
+
+
+TASK_NODE_STATUSES = ["pending", "in_progress", "completed", "cancelled"]
+
+
+async def get_task_nodes(
+    task_template: str = None,
+    status: str = None,
+    due_date: str = None,
+    folder: str = None,
+    past: bool = None,
+    search: str = None,
+    limit: int = None,
+    offset: int = None,
+):
+    """List task occurrences (one per due date) generated from recurring task
+    templates - e.g. the January and February instances of a monthly control.
+
+    Use update_task_node to mark one as pending/in_progress/completed/cancelled
+    or attach an observation.
+
+    Args:
+        task_template: Task template ID/name
+        status: pending | in_progress | completed | cancelled
+        due_date: Exact due date YYYY-MM-DD, or YYYY-MM to match a whole month
+        folder: Folder ID/name
+        past: True for overdue occurrences only, False for upcoming/today only
+        search: Search term (matches observation)
+        limit: Max rows to return
+        offset: Row to start from, for paging
+    """
+    try:
+        from ..resolvers import resolve_folder_id, resolve_task_template_id
+
+        params = {}
+        filters = {}
+
+        if task_template:
+            params["task_template"] = resolve_task_template_id(task_template)
+            filters["task_template"] = task_template
+        if status:
+            if status not in TASK_NODE_STATUSES:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(TASK_NODE_STATUSES)}"
+            params["status"] = status
+            filters["status"] = status
+        if due_date:
+            if len(due_date) == 7:
+                year, month = due_date.split("-")
+                params["due_date__year"] = year
+                params["due_date__month"] = month
+            else:
+                params["due_date"] = due_date
+            filters["due_date"] = due_date
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+        if past is not None:
+            params["past"] = past
+            filters["past"] = past
+        if search:
+            params["search"] = search
+            filters["search"] = search
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
+
+        res = make_get_request("/task-nodes/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        nodes = get_paginated_results(data)
+
+        if not nodes:
+            return empty_response("task occurrences", filters)
+
+        result = found_line(nodes, "task occurrences")
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|ID|Task Template|Due Date|Scheduled Date|Status|Observation|\n"
+        result += "|---|---|---|---|---|---|\n"
+
+        for node in nodes:
+            node_id = node.get("id", "N/A")
+            template = node.get("task_template") or {}
+            template_name = (
+                template.get("str", "N/A") if isinstance(template, dict) else "N/A"
+            )
+            due_date_val = node.get("due_date", "N/A")
+            scheduled_date_val = node.get("scheduled_date", "N/A")
+            status_val = node.get("status", "N/A")
+            observation = (node.get("observation") or "")[:60]
+
+            result += (
+                f"|{node_id}|{template_name}|{due_date_val}|{scheduled_date_val}"
+                f"|{status_val}|{observation}|\n"
+            )
+
+        return success_response(
+            result,
+            "get_task_nodes",
+            "Use update_task_node (task_node_id, or task_template + due_date) "
+            "to set status/observation",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 SEVERITY_LABELS = {
@@ -1967,6 +2128,101 @@ async def get_teams(
             "get_teams",
             "These are Team ids, not Actor ids. To set owner/assigned_to/default_assignee, "
             "pass the team name directly, or get Actor UUIDs with list_objects('actors')",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def get_documents(
+    folder: str = None,
+    document_type: str = None,
+    locale: str = None,
+    policy: str = None,
+    search: str = None,
+):
+    """List managed documents - markdown policies, procedures, charters, records...
+
+    Args:
+        folder: Folder ID/name
+        document_type: policy | procedure | charter | record | meeting_minutes | other
+        locale: Locale code, e.g. "en", "fr"
+        policy: Policy ID/name this document is linked to
+        search: Search term (matches document name or description)
+    """
+    try:
+        from ..resolvers import resolve_folder_id, resolve_id_or_name
+
+        params = {}
+        filters = {}
+
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+        if document_type:
+            params["container__document_type"] = document_type
+            filters["document_type"] = document_type
+        if locale:
+            params["locale"] = locale
+            filters["locale"] = locale
+        if policy:
+            params["container__policies"] = resolve_id_or_name(policy, "/policies/")
+            filters["policy"] = policy
+        if search:
+            params["search"] = search
+            filters["search"] = search
+
+        res = make_get_request("/managed-documents/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        documents = get_paginated_results(data)
+
+        if not documents:
+            return empty_response("documents", filters)
+
+        result = found_line(documents, "documents")
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|UUID|Name|Type|Locale|Status|Version|Folder|\n"
+        result += "|---|---|---|---|---|---|---|\n"
+
+        for doc in documents:
+            doc_id = doc.get("id", "N/A")
+            name = doc.get("display_name") or doc.get("name") or "N/A"
+            doc_type = doc.get("document_type") or "N/A"
+            locale_val = doc.get("locale", "N/A")
+            revision = doc.get("current_revision") or {}
+            status_val = (
+                revision.get("status", "N/A") if isinstance(revision, dict) else "N/A"
+            )
+            version = (
+                revision.get("version_number", "N/A")
+                if isinstance(revision, dict)
+                else "N/A"
+            )
+            folder_obj = doc.get("folder") or {}
+            folder_name = (
+                folder_obj.get("str", "N/A") if isinstance(folder_obj, dict) else "N/A"
+            )
+
+            result += (
+                f"|{doc_id}|{name}|{doc_type}|{locale_val}|{status_val}|{version}"
+                f"|{folder_name}|\n"
+            )
+
+        return success_response(
+            result,
+            "get_documents",
+            "Use update_document to edit metadata or markdown content, "
+            "or create_document for a new one",
         )
     except Exception as e:
         return error_response(

@@ -606,6 +606,34 @@ def resolve_incident_id(incident_name_or_id: str) -> str:
     return matches[0]["id"]
 
 
+def resolve_managed_document_id(document_name_or_id: str) -> str:
+    """Resolve a managed document's name or UUID to its UUID.
+
+    The managed-documents endpoint has no `name` filter, so names are looked
+    up via `search` and then matched exactly (case-sensitive) on
+    `display_name` (the document's own name, falling back to its container's).
+    """
+    if _is_uuid(document_name_or_id):
+        return document_name_or_id
+
+    results, error = fetch_all_results(
+        "/managed-documents/",
+        params={"search": document_name_or_id},
+        max_items=None,
+    )
+    if error:
+        raise ValueError(f"Document '{document_name_or_id}' API error: {error}")
+
+    matches = [r for r in results if r.get("display_name") == document_name_or_id]
+    if not matches:
+        raise ValueError(f"Document '{document_name_or_id}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous document name '{document_name_or_id}', found {len(matches)}"
+        )
+    return matches[0]["id"]
+
+
 def resolve_team_id(team_name_or_id: str) -> str:
     """Helper function to resolve team name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
