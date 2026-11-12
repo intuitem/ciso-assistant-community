@@ -170,7 +170,8 @@ services:
       - CA_MCP_PORT=8001
       - CA_MCP_AUTH=oauth
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
-      # matched against the Host header; both forms, since the port is dropped for 443
+      # matched against the Host header; both forms: some proxies (nginx $host, so
+      # BunkerWeb) forward the host without the port, whatever the port
       - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
       - CA_MCP_ALLOW_ENV_TOKEN=false
       - HOME=/tmp
@@ -233,6 +234,9 @@ services:
       - {{ fqdn }}_REVERSE_PROXY_HEADERS_4=Cookie ''
       - {{ fqdn }}_REVERSE_PROXY_HIDE_HEADERS_4=Upgrade Set-Cookie Service-Worker-Allowed
       - {{ fqdn }}_REVERSE_PROXY_HEADERS_CLIENT_4=Content-Security-Policy sandbox always;X-Content-Type-Options nosniff always
+      # AI apps sign in with loopback redirect URIs (http://127.0.0.1:port/...): the CRS reads them as
+      # remote file inclusion and SSRF. The backend only stores and checks them, never fetches them.
+      - '{{ fqdn }}_CUSTOM_CONF_MODSEC_CRS_mcp-oauth-redirects=SecRule REQUEST_FILENAME "@rx ^/api/identity/o/(authorize|api/clients|api/token)$" "id:1000101,phase:1,pass,nolog,ctl:ruleRemoveById=931100,ctl:ruleRemoveById=934110"'
       {% endif %}{% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
       - {{ fqdn }}_USE_CUSTOM_SSL=yes
       - {{ fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem

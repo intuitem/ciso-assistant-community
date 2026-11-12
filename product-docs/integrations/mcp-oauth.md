@@ -127,6 +127,15 @@ controller, and it refuses to render `/mcp` without them: set
 
 If you run your own reverse proxy, add these routes and rules. Everything else
 stays as before.
+
+If a web application firewall with the OWASP Core Rule Set sits in front of
+the instance (BunkerWeb includes one), it blocks sign-in for apps that run on
+the user's machine: their return address, such as
+`http://127.0.0.1:6274/oauth/callback`, matches rules 931100 (remote file
+inclusion) and 934110 (SSRF). Remove these two rules on
+`/api/identity/o/authorize`, `/api/identity/o/api/clients` and
+`/api/identity/o/api/token` only; CISO Assistant checks these addresses and
+never fetches them. The BunkerWeb templates of `make_config.py` do it.
 {% endstep %}
 
 {% step %}

@@ -2,6 +2,7 @@ import secrets
 import uuid
 from datetime import timedelta
 from types import SimpleNamespace
+from urllib.parse import urlsplit
 
 import pytest
 import structlog
@@ -457,6 +458,7 @@ def test_metadata_endpoints_follow_the_public_url_not_the_host(
     metadata = client.get(path, HTTP_HOST=host).json()
     urls = {k: v for k, v in metadata.items() if k.endswith(("_endpoint", "_uri"))}
     assert metadata["issuer"] == "https://grc.example.com:8443/api"
+    public = [urlsplit(v) for v in urls.values()]
     assert urls and all(
-        v.startswith("https://grc.example.com:8443/") for v in urls.values()
+        (url.scheme, url.netloc) == ("https", "grc.example.com:8443") for url in public
     ), urls

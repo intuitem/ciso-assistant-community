@@ -176,7 +176,8 @@ services:
       - CA_MCP_PORT=8001
       - CA_MCP_AUTH=oauth
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
-      # matched against the Host header; both forms, since the port is dropped for 443
+      # matched against the Host header; both forms: some proxies (nginx $host, so
+      # BunkerWeb) forward the host without the port, whatever the port
       - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
       - CA_MCP_ALLOW_ENV_TOKEN=false
       - HOME=/tmp
