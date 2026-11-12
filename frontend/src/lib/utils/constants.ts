@@ -272,6 +272,7 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'reported_at',
 	'requested_on',
 	'resolved_at',
+	'reviewed_at',
 	'revoked_at',
 	'start_date',
 	'subjects_notified_on',

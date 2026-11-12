@@ -366,6 +366,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 114. China: Personal Information Protection Law (PIPL) and CAC Personal Information Protection Compliance Audit Measures 🇨🇳
 115. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 116. Australian Information Security Manual (ASD ISM) (September 2026) 🇦🇺
+117. ITSP.10.033 - Security and privacy controls and assurance activities catalogue, with the medium impact profile (ITSP.10.033-01) 🇨🇦
 
 ### Community contributions
 
@@ -899,6 +900,7 @@ The following recommendations apply for production:
 - Use non-root deployment, as explained below.
 - Use a valid certificate for the reverse proxy
 - If the reverse proxy is not running on the same host as the backend and frontend, use a VPN like wireguard between the nodes.
+- Ensure the reverse proxy sets the `X-Forwarded-For` header (it is trusted by the login rate limiting).
 - Use an encrypted volume for the database, and manage the encryption key cautiously.
 - Manage secrets in environment variables instead of putting them directly in the docker-compose.yml file.
 

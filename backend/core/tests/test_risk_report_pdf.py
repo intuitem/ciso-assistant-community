@@ -80,7 +80,17 @@ class FakeM2M:
 
     def all(self):
         return [
-            type("C", (), {"name": n, "get_name_translated": n})() for n in self._names
+            type(
+                "C",
+                (),
+                {
+                    "name": n,
+                    "get_name_translated": n,
+                    "get_status_display": lambda self: "Active",
+                    "__str__": lambda self: self.name,
+                },
+            )()
+            for n in self._names
         ]
 
 
@@ -98,6 +108,7 @@ class FakeScenario:
         self.qualifications = FakeM2M(["Availability"])
         self.existing_applied_controls = FakeM2M(existing)
         self.applied_controls = FakeM2M(extra)
+        self.owner = FakeM2M(["Risk owner"])
 
     def get_inherent_risk(self):
         return {"name": "High", "hexcolor": "#ef4444"}
@@ -220,12 +231,14 @@ def test_existing_and_extra_controls_are_both_listed(lang):
     pdf, payload = _render(_clusters(), lang=lang, scenarios=[scenario])
 
     row = payload["scenarios"][0]
-    assert row["existing_controls"] == ["Backup power"]
-    assert row["controls"] == ["Second supplier"]
+    assert row["existing_controls"] == ["Backup power (Active)"]
+    assert row["controls"] == ["Second supplier (Active)"]
+    assert row["owners"] == ["Risk owner"]
 
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
-    assert "Backup power" in text
-    assert "Second supplier" in text
+    assert "Backup power (Active)" in text
+    assert "Second supplier (Active)" in text
+    assert "Risk owner" in text
 
 
 def test_control_rows_are_omitted_when_empty():
