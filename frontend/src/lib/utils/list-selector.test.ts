@@ -1,10 +1,27 @@
 import { describe, it, expect } from 'vitest';
 import { filterOptions } from '#lib/utils/list-selector.js';
 
+const chatSession = ['Assistant IA', "Conversation avec l'assistant IA"];
+
 const options = [
-	{ label: 'permissionView', translatedLabel: 'Consulter', detail: 'view_chatsession' },
-	{ label: 'permissionAdd', translatedLabel: 'Ajouter', detail: 'add_chatsession' },
-	{ label: 'permissionView', translatedLabel: 'Consulter', detail: 'view_complianceassessment' },
+	{
+		label: 'permissionView',
+		translatedLabel: 'Consulter',
+		detail: 'view_chatsession',
+		groupLabels: chatSession
+	},
+	{
+		label: 'permissionAdd',
+		translatedLabel: 'Ajouter',
+		detail: 'add_chatsession',
+		groupLabels: chatSession
+	},
+	{
+		label: 'permissionView',
+		translatedLabel: 'Consulter',
+		detail: 'view_complianceassessment',
+		groupLabels: ['Général', 'Audit']
+	},
 	{ label: 'Domain' }
 ];
 
@@ -37,6 +54,17 @@ describe('filterOptions', () => {
 
 	it('falls back to the raw label when there is no translation', () => {
 		expect(filterOptions(options, 'domain')).toEqual([{ label: 'Domain' }]);
+	});
+
+	it('finds every option of a group by its heading', () => {
+		expect(details(filterOptions(options, 'assistant ia'))).toEqual([
+			'view_chatsession',
+			'add_chatsession'
+		]);
+	});
+
+	it('finds options by the heading of their model', () => {
+		expect(details(filterOptions(options, 'AUDIT'))).toEqual(['view_complianceassessment']);
 	});
 
 	it('ignores spaces around the query', () => {

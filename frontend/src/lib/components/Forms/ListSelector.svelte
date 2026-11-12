@@ -14,6 +14,7 @@
 		groupsList?: string[];
 		translatedLabel?: string;
 		detail?: string;
+		groupLabels?: string[];
 	}
 
 	interface NestedGroup {
@@ -191,7 +192,9 @@
 						value: option.id,
 						groupsList,
 						translatedLabel: translateOptions ? safeTranslate(label) : label,
-						detail: optionsDetailField ? option[optionsDetailField] : undefined
+						detail: optionsDetailField ? option[optionsDetailField] : undefined,
+						// Group headers are always shown translated, so search what they show.
+						groupLabels: groupsList.map((group) => safeTranslate(group))
 					};
 				});
 
