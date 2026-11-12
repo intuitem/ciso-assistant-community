@@ -322,6 +322,8 @@ TOOL_ACTIONS = {
 ALSO_NEEDS = {
     # creates the risk scenarios that are missing
     sync_risk_assessment_from_ebios_rm.__name__: {actions.CREATE},
+    # the backend checks add_ on this action, though it updates the study
+    refresh_quantitative_risk_study_simulations.__name__: {actions.CREATE},
 }
 
 

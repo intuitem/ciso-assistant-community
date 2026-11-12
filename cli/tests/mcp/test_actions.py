@@ -100,6 +100,21 @@ def test_the_ebios_sync_needs_create_and_update(connected):
     assert asyncio.run(guarded()) == "ran"
 
 
+def test_the_simulation_refresh_needs_create_and_update(connected):
+    # the backend checks add_ on this action and marks it as an update
+    async def tool():
+        return "ran"
+
+    name = server.refresh_quantitative_risk_study_simulations.__name__
+    guarded = server._require_action(tool, server.needed_actions(name))
+
+    connected(_access(granted=["read", "update"]))
+    assert "creating data" in asyncio.run(guarded())
+
+    connected(_access(granted=["read", "create", "update"]))
+    assert asyncio.run(guarded()) == "ran"
+
+
 def _tool_names(remote):
     app = server.ActionFilteredServer("test")
     server._register_on(app, read_only=False, remote=remote)

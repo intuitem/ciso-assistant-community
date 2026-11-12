@@ -57,7 +57,6 @@
 		const body = [
 			m.connectedAppRevokeGroupConfirm({
 				users: group.users,
-				registrations: group.registrations,
 				hosts: group.redirect_hosts.join(', ')
 			}),
 			group.self_registered ? m.connectedAppRevokeGroupDeletes() : ''

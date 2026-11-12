@@ -133,6 +133,9 @@ def test_https_and_loopback_redirects_are_accepted(uri):
         "myapp://cb",
         "https://[invalid/cb",
         "https:///callback",
+        # browsers read \ as a path separator: the code would go to evil.example
+        "http://evil.example\\@localhost/cb",
+        "https://evil.example\\@app.example.com/cb",
     ],
 )
 def test_other_redirects_are_rejected(uri):
@@ -145,6 +148,10 @@ def test_redirect_host_allowlist_is_enforced():
     _register(_unsaved_client("https://global.consent.azure-apim.net/redirect"))
     with pytest.raises(ValidationError):
         _register(_unsaved_client("https://app.example.com/cb"))
+    with pytest.raises(ValidationError):
+        _register(
+            _unsaved_client("https://evil.example\\@global.consent.azure-apim.net/cb")
+        )
 
 
 def test_registration_forces_mcp_scopes():

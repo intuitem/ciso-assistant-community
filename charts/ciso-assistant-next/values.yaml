@@ -210,7 +210,8 @@ backend:
   ## Users sign in with their own account. Sign-in needs a shared cache: set
   ## `memcached.enabled: true`, or the `mcp` feature flag cannot be turned on.
   ## The bundled memcached runs in each backend pod, so it allows one backend
-  ## replica only; for more, point every pod at one shared memcached.
+  ## replica only; for more, use PostgreSQL and point every pod at one shared
+  ## memcached that only the backend pods can reach (see README).
   ## Ref: https://intuitem.gitbook.io/ciso-assistant/integrations/mcp-oauth
   mcp:
     # -- Serve MCP at /mcp

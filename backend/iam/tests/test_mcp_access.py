@@ -391,31 +391,34 @@ class TestAdminList:
 
 @pytest.mark.usefixtures("mcp_on")
 class TestRevokeForEveryone:
-    def test_groups_the_registrations_of_one_app(self, admin_api):
-        first = _client(redirect=COPILOT_REDIRECT)
-        second = _client(redirect=COPILOT_REDIRECT)
-        _client(redirect="https://other.example.com/cb")  # same name, other host
-        _token(first, _user("alice@example.com"))
-        _token(second, _user("bruno@example.com"))
+    def test_counts_the_users_of_the_selected_app_only(self, admin_api):
+        # a registration with the same name and host is not the same app: the
+        # name is chosen by the app itself
+        selected = _client(redirect=COPILOT_REDIRECT)
+        same_name = _client(redirect=COPILOT_REDIRECT)
+        alice = _user("alice@example.com")
+        _token(selected, alice)
+        _token(selected, _user("bruno@example.com"))
+        _token(same_name, alice)
 
-        summary = admin_api.get(f"{APPS_URL}apps/{first.id}/").json()
+        summary = admin_api.get(f"{APPS_URL}apps/{selected.id}/").json()
 
-        assert summary["registrations"] == 2
         assert summary["users"] == 2
+        assert "registrations" not in summary
 
-    def test_deletes_tokens_and_self_registered_clients(self, admin_api):
-        first = _client(redirect=COPILOT_REDIRECT)
-        second = _client(redirect=COPILOT_REDIRECT)
-        lookalike = _client(redirect="https://other.example.com/cb")
+    def test_revokes_and_deletes_the_selected_app_only(self, admin_api):
+        selected = _client(redirect=COPILOT_REDIRECT)
+        same_name = _client(redirect=COPILOT_REDIRECT)
         alice, bruno = _user("alice@example.com"), _user("bruno@example.com")
-        _token(first, alice)
-        _token(second, bruno)
-        kept = _token(lookalike, alice)
+        cut = [_token(selected, alice), _token(selected, bruno)]
+        kept = _token(same_name, alice)
 
-        response = admin_api.delete(f"{APPS_URL}apps/{first.id}/")
+        response = admin_api.delete(f"{APPS_URL}apps/{selected.id}/")
 
-        assert response.json() == {"registrations": 2, "users": 2}
-        assert not Client.objects.filter(id__in=[first.id, second.id]).exists()
+        assert response.json() == {"users": 2}
+        assert not Client.objects.filter(id=selected.id).exists()
+        assert Client.objects.filter(id=same_name.id).exists()
+        assert all(verify(raw) is None for raw in cut)
         assert verify(kept) is not None
 
     def test_keeps_an_admin_registered_client(self, admin_api):

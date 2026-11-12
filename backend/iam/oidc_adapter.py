@@ -43,6 +43,8 @@ class CISOOIDCAdapter(DefaultOIDCAdapter):
         # allauth's DCR form only checks that redirect_uris is a list of strings.
         allowed_hosts = settings.OAUTH_DCR_ALLOWED_REDIRECT_HOSTS
         for uri in client.get_redirect_uris():
+            if "\\" in uri:
+                raise ValidationError(f"Invalid redirect URI: {uri}")
             try:
                 parts = urlsplit(uri)
                 host = (parts.hostname or "").lower()

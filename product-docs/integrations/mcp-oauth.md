@@ -99,8 +99,11 @@ read-only MCP service with a Personal Access Token, without OAuth sign-in: they
 ship without memcached, which sign-in needs.
 
 The `mcp` service needs no secret: it passes each app's own token to the
-backend, on the backend's usual port. It runs on its own network with the
-backend and the proxy only, apart from the database and the other data stores.
+backend, on the backend's usual port. In the generated compose deployments
+it runs on its own network with the backend and the proxy only, apart from the
+database and the other data stores. In Kubernetes it runs in the backend's pod
+and shares its network: it can reach what the backend reaches, including
+Qdrant, which has no authentication.
 
 The proxy routes these paths, so MCP is served on your existing certificate:
 
@@ -294,12 +297,13 @@ every user: user, app, where it sends users back, allowed actions, the date it w
 authorized and when it was last used. Search by user or app.
 
 - The **trash icon** revokes one user's connection to one app.
-- The **revoke for everyone** icon cuts an app for all its users, for example
-  after an incident. Copilot Studio registers again for each connection, so
-  CISO Assistant groups the registrations that share the same name and the same
-  return address, and tells you how many users and registrations are affected
-  before you confirm. An app that registered itself is also deleted; it can
-  register again later, and users have to approve it again.
+- The **revoke for everyone** icon cuts one app registration for all its
+  users, for example after an incident, and tells you how many users are
+  affected before you confirm. An app that registered itself is also deleted;
+  it can register again later, and users have to approve it again.
+- Some apps register again for each connection, Copilot Studio for example.
+  Each registration then shows as its own row: revoke each one. Registrations
+  with the same name are not grouped, because an app chooses its own name.
 
 ### Audit and limits
 

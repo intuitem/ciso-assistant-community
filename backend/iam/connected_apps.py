@@ -88,20 +88,6 @@ def _connections(tokens, with_user=False) -> list[dict]:
     return used + [row for row in rows if not row["last_used_at"]]
 
 
-def _app_group(client) -> list[Client]:
-    """The registrations revoked together. A self-registered app registers anew
-    for each connection (Copilot Studio does), so those sharing its name and
-    redirect hosts are one app; an admin-registered client stands alone."""
-    if not is_self_registered(client):
-        return [client]
-    hosts = _redirect_hosts(client)
-    return [
-        other
-        for other in Client.objects.filter(name=client.name)
-        if is_self_registered(other) and _redirect_hosts(other) == hosts
-    ]
-
-
 class ConnectedAppsView(views.APIView):
     """OAuth apps the current user has authorized and still holds tokens for."""
 
@@ -166,21 +152,19 @@ class UserConnectedAppView(views.APIView):
 
 
 class ConnectedAppGroupView(views.APIView):
-    """An app across all its registrations and users: what "revoke for
-    everyone" would cut, then the revocation itself."""
+    """One app across all its users: what "revoke for everyone" would cut, then
+    the revocation itself. Only the selected registration: a self-registered
+    app chooses its own name, so registrations that look alike are not proven
+    to be the same app."""
 
     permission_classes = [IsGlobalAdmin]
 
-    def _group(self, client_id):
-        client = Client.objects.filter(id=client_id).first()
-        return (client, _app_group(client)) if client else (None, [])
-
     def get(self, request, client_id, *args, **kwargs):
-        client, group = self._group(client_id)
+        client = Client.objects.filter(id=client_id).first()
         if client is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         users = (
-            Token.objects.filter(client__in=group, user__isnull=False)
+            Token.objects.filter(client=client, user__isnull=False)
             .values("user_id")
             .distinct()
             .count()
@@ -190,38 +174,33 @@ class ConnectedAppGroupView(views.APIView):
                 "name": client.name,
                 "self_registered": is_self_registered(client),
                 "redirect_hosts": _redirect_hosts(client),
-                "registrations": len(group),
                 "users": users,
             }
         )
 
     def delete(self, request, client_id, *args, **kwargs):
-        client, group = self._group(client_id)
+        client = Client.objects.filter(id=client_id).first()
         if client is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        client_ids = [c.id for c in group]
         with transaction.atomic():
             users = (
-                Token.objects.filter(client_id__in=client_ids, user__isnull=False)
+                Token.objects.filter(client=client, user__isnull=False)
                 .values("user_id")
                 .distinct()
                 .count()
             )
             # by client, not by a list read beforehand: a token issued meanwhile
             # must go too
-            revoke_app_tokens(None, client_ids)
+            revoke_app_tokens(None, [client.id])
             # deleting a self-registered client stops its ID being reused; an
             # admin-registered one is configuration and stays
             if is_self_registered(client):
-                Client.objects.filter(id__in=client_ids).delete()
+                client.delete()
         logger.info(
             "connected app revoked for everyone",
             admin=request.user.id,
             name=client.name,
-            clients=client_ids,
+            client=client_id,
             users=users,
         )
-        return Response(
-            {"registrations": len(client_ids), "users": users},
-            status=status.HTTP_200_OK,
-        )
+        return Response({"users": users}, status=status.HTTP_200_OK)
