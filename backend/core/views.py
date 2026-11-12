@@ -19522,16 +19522,20 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         return Response(dict(Incident.Answer.choices))
 
     def perform_update(self, serializer):
-        previous_instance = self.get_object()
-        previous_status = previous_instance.status
-        previous_severity = previous_instance.severity
+        # snapshot before save() mutates the instance; no get_object(): batch-action has no pk kwarg
+        old = serializer.instance
+        previous_status, previous_status_display = old.status, old.get_status_display()
+        previous_severity, previous_severity_display = (
+            old.severity,
+            old.get_severity_display(),
+        )
 
         instance = serializer.save()
 
         if previous_status != instance.status and previous_status is not None:
             TimelineEntry.objects.create(
                 incident=instance,
-                entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
+                entry=f"{previous_status_display}->{instance.get_status_display()}",
                 entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
                 author=self.request.user.actor,
                 timestamp=now(),
@@ -19540,7 +19544,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         if previous_severity != instance.severity and previous_severity is not None:
             TimelineEntry.objects.create(
                 incident=instance,
-                entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
+                entry=f"{previous_severity_display}->{instance.get_severity_display()}",
                 entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
                 author=self.request.user.actor,
                 timestamp=now(),
