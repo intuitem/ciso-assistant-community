@@ -8042,5 +8042,6 @@
 	"reviewStatusRejected": "Rejetée",
 	"reviewToastApproved": "Approuvée : {name}",
 	"reviewToastRejected": "Rejetée : {name}",
-	"reviewUndoError": "La décision n'a pas pu être annulée."
+	"reviewUndoError": "La décision n'a pas pu être annulée.",
+	"evidenceExportTooLarge": "La sélection représente {size} Mo de fichiers, au-delà de la limite de {max} Mo. Réduisez la sélection et relancez l'export."
 }

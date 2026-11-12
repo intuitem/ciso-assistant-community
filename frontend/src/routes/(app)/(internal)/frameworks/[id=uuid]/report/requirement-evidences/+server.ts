@@ -18,6 +18,11 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 		body: JSON.stringify(selection)
 	});
 	if (res.status === 204) return new Response(null, { status: 204 });
+	if (res.status === 413)
+		return new Response(await res.text(), {
+			status: 413,
+			headers: { 'Content-Type': 'application/json' }
+		});
 	if (!res.ok || !res.body) throw error(res.status, 'Error fetching the ZIP file');
 	const fileName =
 		parseContentDispositionFilename(res.headers.get('Content-Disposition') ?? '') ??

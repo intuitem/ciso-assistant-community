@@ -1022,6 +1022,14 @@
 				toastStore.trigger({ message: m.noEvidenceToExport() });
 				return;
 			}
+			if (res.status === 413) {
+				const { size_mb, max_size_mb } = await res.json();
+				toastStore.trigger({
+					message: m.evidenceExportTooLarge({ size: size_mb, max: max_size_mb }),
+					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
 			if (!res.ok) throw new Error(`${res.status}`);
 			const url = URL.createObjectURL(await res.blob());
 			const link = document.createElement('a');

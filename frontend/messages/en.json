@@ -8042,5 +8042,6 @@
 	"reviewStatusRejected": "Rejected",
 	"reviewToastApproved": "Approved: {name}",
 	"reviewToastRejected": "Rejected: {name}",
-	"reviewUndoError": "The decision could not be undone."
+	"reviewUndoError": "The decision could not be undone.",
+	"evidenceExportTooLarge": "The selection holds {size} MB of files, above the {max} MB limit. Narrow the selection and export again."
 }

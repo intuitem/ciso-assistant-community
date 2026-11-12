@@ -7,6 +7,7 @@ from pathlib import Path
 import openpyxl
 import pytest
 from django.contrib.auth.models import Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -179,3 +180,27 @@ def test_unreadable_controls_and_evidences_are_left_out(setup):
     exported = _exported(_client(_reader(domain)), framework, [first, second])
 
     assert exported == {"first-direct", "second-direct", "via-control"}
+
+
+@pytest.mark.django_db
+def test_export_over_the_size_limit_is_refused(setup, settings):
+    framework, domain, _other, _audit, first, second = setup
+    evidence = Evidence.objects.create(name="big-file", folder=domain)
+    revision = EvidenceRevision.objects.create(evidence=evidence, folder=domain)
+    revision.attachment = SimpleUploadedFile(
+        "big.pdf", b"x" * 2_000, content_type="application/pdf"
+    )
+    revision.save()
+    first.evidences.add(evidence)
+    settings.EVIDENCE_EXPORT_MAX_SIZE_MB = 0.001
+    url = reverse("frameworks-requirement-evidences", kwargs={"pk": str(framework.pk)})
+    body = {"requirement_assessments": [str(first.id), str(second.id)]}
+    client = _client(_reader(domain))
+
+    response = client.post(url, body, format="json")
+
+    assert response.status_code == 413
+    assert response.json()["error"] == "evidence_export_too_large"
+
+    settings.EVIDENCE_EXPORT_MAX_SIZE_MB = 0
+    assert client.post(url, body, format="json").status_code == 200

@@ -55,6 +55,7 @@ from itertools import chain, cycle
 import django_filters as df
 
 import magic
+import math
 import shutil
 from pathlib import Path
 import humanize
@@ -12025,92 +12026,107 @@ class FrameworkViewSet(BaseModelViewSet):
             ]
         )
         domain_paths: dict = {}
+        # (ra, evidence, carrying controls) per index row; files per audit.
+        rows: list = []
+        audit_evidences: dict = {}
+        for ra in ras:
+            ca = ra.compliance_assessment
+            if ca.folder_id not in domain_paths:
+                domain_paths[ca.folder_id] = (
+                    " / ".join(f.name for f in ca.folder.get_folder_full_path())
+                    if ca.folder
+                    else ""
+                )
+            role = audit_roles[ca.id]
+            evidences_visible = is_field_visible_to(ca, "evidences", role)
+            direct = {e.id: e for e in ra.evidences.all()} if evidences_visible else {}
+            controls = (
+                [ac for ac in ra.applied_controls.all() if ac.id in viewable_controls]
+                if evidences_visible
+                and is_field_visible_to(ca, "applied_controls", role)
+                else []
+            )
+            carriers: dict = {}
+            for ac in controls:
+                for e in ac.evidences.all():
+                    carriers.setdefault(e.id, []).append(ac.name)
+            indirect = {
+                e.id: e
+                for ac in controls
+                for e in ac.evidences.all()
+                if e.id not in direct
+            }
+            for evidence_id, evidence in {**direct, **indirect}.items():
+                if evidence_id not in viewable_evidences:
+                    continue
+                audit_evidences.setdefault(ca.id, (ca, {}))[1][evidence_id] = evidence
+                rows.append(
+                    (
+                        ra,
+                        evidence,
+                        ""
+                        if evidence_id in direct
+                        else ", ".join(carriers.get(evidence_id, [])),
+                    )
+                )
+
+        # Each file once per audit; the index rows of every requirement point to it.
+        to_write: list = []
+        taken_dirs: set = set()
+        for ca, evidences in audit_evidences.values():
+            base_dir = (
+                f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
+            )
+            directory, counter = base_dir, 1
+            while directory.lower() in taken_dirs:
+                counter += 1
+                directory = f"{base_dir} ({counter})"
+            taken_dirs.add(directory.lower())
+            names = build_evidence_archive_names(list(evidences.values()))
+            for evidence in evidences.values():
+                entry = names.get(evidence.id)
+                revision = evidence.last_revision
+                if not entry or not revision or not revision.attachment:
+                    continue
+                try:
+                    size = revision.attachment.size
+                except Exception:
+                    logger.warning(
+                        "evidence file unreadable, omitted from archive",
+                        evidence_id=evidence.id,
+                    )
+                    continue
+                to_write.append((ca, evidence, revision, f"{directory}/{entry}", size))
+
+        max_mb = settings.EVIDENCE_EXPORT_MAX_SIZE_MB
+        total = sum(item[4] for item in to_write)
+        if max_mb and total > max_mb * 1_000_000:
+            return Response(
+                {
+                    "error": "evidence_export_too_large",
+                    "size_mb": math.ceil(total / 1_000_000),
+                    "max_size_mb": max_mb,
+                },
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            )
+
         temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
         try:
             with zipfile.ZipFile(temp_file, "w") as zipf:
-                # (ra, evidence, carrying controls) per index row; files per audit.
-                rows: list = []
-                audit_evidences: dict = {}
-                for ra in ras:
-                    ca = ra.compliance_assessment
-                    if ca.folder_id not in domain_paths:
-                        domain_paths[ca.folder_id] = (
-                            " / ".join(f.name for f in ca.folder.get_folder_full_path())
-                            if ca.folder
-                            else ""
-                        )
-                    role = audit_roles[ca.id]
-                    evidences_visible = is_field_visible_to(ca, "evidences", role)
-                    direct = (
-                        {e.id: e for e in ra.evidences.all()}
-                        if evidences_visible
-                        else {}
-                    )
-                    controls = (
-                        [
-                            ac
-                            for ac in ra.applied_controls.all()
-                            if ac.id in viewable_controls
-                        ]
-                        if evidences_visible
-                        and is_field_visible_to(ca, "applied_controls", role)
-                        else []
-                    )
-                    carriers: dict = {}
-                    for ac in controls:
-                        for e in ac.evidences.all():
-                            carriers.setdefault(e.id, []).append(ac.name)
-                    indirect = {
-                        e.id: e
-                        for ac in controls
-                        for e in ac.evidences.all()
-                        if e.id not in direct
-                    }
-                    for evidence_id, evidence in {**direct, **indirect}.items():
-                        if evidence_id not in viewable_evidences:
-                            continue
-                        audit_evidences.setdefault(ca.id, (ca, {}))[1][evidence_id] = (
-                            evidence
-                        )
-                        rows.append(
-                            (
-                                ra,
-                                evidence,
-                                ""
-                                if evidence_id in direct
-                                else ", ".join(carriers.get(evidence_id, [])),
-                            )
-                        )
-
-                # Each file once per audit; the index rows of every requirement point to it.
                 written_paths: dict = {}
-                taken_dirs: set = set()
-                for ca, evidences in audit_evidences.values():
-                    base_dir = f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
-                    directory, counter = base_dir, 1
-                    while directory.lower() in taken_dirs:
-                        counter += 1
-                        directory = f"{base_dir} ({counter})"
-                    taken_dirs.add(directory.lower())
-                    names = build_evidence_archive_names(list(evidences.values()))
-                    for evidence in evidences.values():
-                        entry = names.get(evidence.id)
-                        revision = evidence.last_revision
-                        if not entry or not revision or not revision.attachment:
-                            continue
-                        try:
-                            with default_storage.open(
-                                revision.attachment.name
-                            ) as attachment_file:
-                                zipf.writestr(
-                                    f"{directory}/{entry}", attachment_file.read()
-                                )
-                            written_paths[(ca.id, evidence.id)] = f"{directory}/{entry}"
-                        except Exception:
-                            logger.warning(
-                                "evidence file unreadable, omitted from archive",
-                                evidence_id=evidence.id,
-                            )
+                for ca, evidence, revision, path, size in to_write:
+                    try:
+                        with default_storage.open(revision.attachment.name) as source:
+                            with zipf.open(
+                                path, "w", force_zip64=size > 2**31
+                            ) as entry_file:
+                                shutil.copyfileobj(source, entry_file, 1024 * 1024)
+                        written_paths[(ca.id, evidence.id)] = path
+                    except Exception:
+                        logger.warning(
+                            "evidence file unreadable, omitted from archive",
+                            evidence_id=evidence.id,
+                        )
 
                 for ra, evidence, carried_by in rows:
                     ca = ra.compliance_assessment
