@@ -470,7 +470,13 @@ def _checked_action(method, match) -> str | None:
     one of its method, unless the view overrides it for this action."""
     codename = RBACPermissions.perms_map[method][0].split(".")[1]
     view_action = getattr(match.func, "actions", {}).get(method.lower())
-    overrides = getattr(getattr(match.func, "cls", None), "permission_overrides", {})
+    cls = getattr(match.func, "cls", None)
+    overrides = getattr(cls, "permission_overrides", {})
+    if isinstance(overrides, property):
+        # some views choose their overrides from the request's method
+        view = cls()
+        view.request = SimpleNamespace(method=method)
+        overrides = view.permission_overrides
     codename = overrides.get(view_action, codename)
     return ACTION_OF_PREFIX.get(codename.partition("_")[0])
 
