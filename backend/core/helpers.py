@@ -1680,7 +1680,9 @@ def get_metrics(user: User, folder_id):
     )
 
     overdue_tasks = viewable_items(TaskNode, folder_id).filter(
-        due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        due_date__lt=date.today(),
+        status__in=TaskNode.OPEN_STATUSES,
+        task_template__enabled=True,
     )
 
     data = {
@@ -1765,7 +1767,7 @@ SUMMARY_TREND_KEYS = [
     "incidents_open",
     "controls_eta_missed",
     "controls_p1_pending",
-    "tasks_overdue",
+    "tasks_overdue_recent",
     "findings_open",
     "evidence_expired",
     "controls_no_status",
@@ -1792,6 +1794,10 @@ def get_summary_trends(user: User):
     from django.contrib.contenttypes.models import ContentType
     from metrology.models import BuiltinMetricSample
 
+    from core.utils import get_respondent_scoped_folder_ids
+
+    if get_respondent_scoped_folder_ids(user):
+        return None
     root = Folder.get_root_folder()
     for model in SUMMARY_TREND_MODELS:
         grants = RoleAssignment._get_grant_folder_set(user, ("view", model))

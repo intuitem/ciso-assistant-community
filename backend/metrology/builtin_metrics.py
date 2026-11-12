@@ -310,13 +310,20 @@ BUILTIN_METRICS = {
         "evidence_expired": {
             "label": _("Expired Evidence"),
             "type": METRIC_TYPE_NUMBER,
-            "description": _("Evidence past its validity date"),
+            "description": _("Evidence marked as expired"),
         },
         "tasks_overdue": {
             "label": _("Tasks Overdue"),
             "type": METRIC_TYPE_NUMBER,
             "description": _(
                 "Task occurrences whose due date is in the past and that are not completed or cancelled"
+            ),
+        },
+        "tasks_overdue_recent": {
+            "label": _("Recently Overdue Tasks"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Open task occurrences of enabled tasks that fell due in the last 30 days"
             ),
         },
         "tasks_due_7d": {

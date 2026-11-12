@@ -30,7 +30,6 @@
 		? 'opacity-0'
 		: 'opacity-100'} {className}"
 	dir="ltr"
-	aria-hidden="true"
 >
 	{#each keys as key, i (i)}
 		<kbd

@@ -50,7 +50,7 @@
 					count: metrics.controls?.eta_missed,
 					label: m.sumpageEtaMissed(),
 					hint: m.briefingEtaMissedHint(),
-					href: `/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte=${today}`,
+					href: `/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&status=degraded&eta__lt=${today}`,
 					trend: 'controls_eta_missed'
 				},
 				{
@@ -67,7 +67,7 @@
 					label: m.briefingOverdueTasks(),
 					hint: m.briefingOverdueTasksHint(),
 					href: `/task-nodes?past=true&status=pending&status=in_progress&due_date__gte=${overdueSince}`,
-					trend: 'tasks_overdue',
+					trend: 'tasks_overdue_recent',
 					show: metrics.operations?.overdue_tasks_total > 0,
 					secondary: {
 						label: m.briefingOverdueTasksTotal({
@@ -201,7 +201,11 @@
 	type Point = [string, number];
 	const activeSeries: Point[] = $derived(metrics.trends?.active_controls ?? []);
 	const shortDate = (iso: string) =>
-		new Date(iso).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
+		new Date(iso).toLocaleDateString(getLocale(), {
+			day: 'numeric',
+			month: 'short',
+			timeZone: 'UTC'
+		});
 	const activeDelta = $derived.by(() => {
 		if (activeSeries.length < 2) return '';
 		const delta = activeSeries.at(-1)![1] - activeSeries[0][1];

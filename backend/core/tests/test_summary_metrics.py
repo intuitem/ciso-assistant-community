@@ -87,6 +87,8 @@ def test_get_metrics_exposes_briefing_counts(admin_client, domain):  # noqa: F81
         folder=domain,
         due_date=date.today() - timedelta(days=45),
     )
+    disabled = TaskTemplate.objects.create(name="off", folder=domain, enabled=False)
+    TaskNode.objects.create(task_template=disabled, folder=domain, due_date=yesterday)
 
     res = admin_client.get("/api/get_metrics/")
     assert res.status_code == 200
@@ -113,7 +115,9 @@ def test_top_level_filter_matches_the_count(admin_client, domain):  # noqa: F811
 
 
 @pytest.mark.django_db
-def test_snapshot_matches_summary_and_trends_are_gated(admin_client, domain):  # noqa: F811
+def test_snapshot_matches_summary_and_trends_are_gated(
+    admin_client, domain, monkeypatch
+):  # noqa: F811
     from core.helpers import get_summary_trends
     from iam.models import User
     from metrology.models import BuiltinMetricSample
@@ -124,6 +128,13 @@ def test_snapshot_matches_summary_and_trends_are_gated(admin_client, domain):  #
     fa = FindingsAssessment.objects.create(name="fa", folder=domain)
     Finding.objects.create(name="open", folder=domain, findings_assessment=fa)
     _scenarios(domain, RISK_MATRIX_JSON_DEFINITION, [(2, 0), (1, 1)])
+    template = TaskTemplate.objects.create(name="t", folder=domain)
+    for days in (1, 45):
+        TaskNode.objects.create(
+            task_template=template,
+            folder=domain,
+            due_date=date.today() - timedelta(days=days),
+        )
 
     root = Folder.get_root_folder()
     snapshot = BuiltinMetricSample.compute_metrics(root)
@@ -139,6 +150,7 @@ def test_snapshot_matches_summary_and_trends_are_gated(admin_client, domain):  #
         == summary["compliance"]["partially_compliant_items"]
     )
     assert snapshot["risk_scenarios_high_current"] == summary["risk"]["high_current"]
+    assert snapshot["tasks_overdue_recent"] == summary["operations"]["overdue_tasks"]
 
     trends = summary["trends"]
     assert trends["active_controls"][-1][1] == summary["controls"]["active"]
@@ -146,3 +158,11 @@ def test_snapshot_matches_summary_and_trends_are_gated(admin_client, domain):  #
 
     nobody = User.objects.create_user(email="no-global-view@tests.local")
     assert get_summary_trends(nobody) is None
+
+    assert admin_client.get("/api/analytics/export/xlsx/").status_code == 200
+
+    admin = User.objects.get(email="admin@breach-tests.local")
+    monkeypatch.setattr(
+        "core.utils.get_respondent_scoped_folder_ids", lambda user: {root.id}
+    )
+    assert get_summary_trends(admin) is None

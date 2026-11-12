@@ -11074,6 +11074,8 @@ def get_analytics_export_xlsx(request):
     ws1.append(["Category", "Metric", "Value"])
     style_header_row(ws1)
     for category, values in metrics.items():
+        if category == "trends":
+            continue
         if isinstance(values, dict):
             for key, val in values.items():
                 ws1.append([category, key, val])

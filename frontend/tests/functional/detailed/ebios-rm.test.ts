@@ -110,7 +110,7 @@ test('ebios rm study', async ({
 			name: ebiosRmStudy.build.name,
 			folder: vars.folderName
 		});
-		await page.getByRole('cell', { name: ebiosRmStudy.build.name }).first().click();
+		await expect(page).toHaveURL(/\/ebios-rm\/[0-9a-f-]+$/);
 	});
 
 	await test.step('workshop 1', async () => {
