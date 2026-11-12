@@ -1,0 +1,1060 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility Mode}'
+urn: urn:intuitem:risk:library:mapping-cra-regulation-annexes-and-iso27001-2022
+locale: en
+ref_id: mapping-cra-regulation-annexes-and-iso27001-2022
+name: Cyber Resilience Act (EU) 2024/2847 Annexes <-> ISO/IEC 27001:2022
+description: Non-official, selective mapping of related security and documentation objectives between the annexes
+  to Regulation (EU) 2024/2847 and ISO/IEC 27001:2022. Based on the CRA consolidated text of 20 November 2024 (https://eur-lex.europa.eu/eli/reg/2024/2847/2024-11-20)
+  and the existing ISO library identifiers. Created and reviewed with AI assistance; no independent human validation
+  is claimed. Every link denotes partial semantic overlap (intersect), not equivalence or full coverage. ISO controls
+  concern the organisation and its ISMS; CRA requirements concern products and manufacturers. Links to documentation
+  controls cover only information management, not the legal content or retention period. CE marking, declaration
+  formalities, notified-body duties and other requirements without a sufficiently direct counterpart are intentionally
+  unmapped. An absent link does not remove a CRA obligation. This mapping is neither official legal guidance nor
+  evidence of certification or CRA conformity.
+copyright: 'Community-authored, non-official mapping. CRA legal text: European Union law. ISO/IEC 27001 is referenced
+  by identifier only.'
+version: 2
+publication_date: '2026-11-12'
+provider: community
+packager: community
+translations:
+  de:
+    name: Cyberresilienz-Verordnung (EU) 2024/2847 - ISO/IEC 27001:2022
+    description: Nicht amtliche, selektive Zuordnung verwandter Sicherheits- und Dokumentationsziele zwischen den
+      Anhängen der Verordnung (EU) 2024/2847 und ISO/IEC 27001:2022. Grundlage sind der konsolidierte CRA-Rechtstext
+      vom 20. November 2024 (https://eur-lex.europa.eu/eli/reg/2024/2847/2024-11-20) und die Kennungen der vorhandenen
+      ISO-Bibliothek. Mit KI-Unterstützung erstellt und geprüft; eine unabhängige menschliche Validierung wird nicht
+      behauptet. Jede Zuordnung bezeichnet eine teilweise inhaltliche Überschneidung (intersect), keine Gleichwertigkeit
+      oder vollständige Abdeckung. ISO-Maßnahmen betreffen die Organisation und ihr ISMS; CRA-Anforderungen betreffen
+      Produkte und Hersteller. Zuordnungen zu Dokumentationsanforderungen erfassen nur den Umgang mit Informationen,
+      nicht den rechtlich vorgeschriebenen Inhalt oder die Aufbewahrungsfrist. CE-Kennzeichnung, Formalitäten der
+      Konformitätserklärung, Pflichten benannter Stellen und weitere Anforderungen ohne hinreichend direkte Entsprechung
+      bleiben bewusst ohne Zuordnung. Eine fehlende Zuordnung hebt keine CRA-Pflicht auf. Das Mapping ist weder
+      eine amtliche Rechtsauslegung noch ein Nachweis einer Zertifizierung oder CRA-Konformität.
+    copyright: 'Von der Community erstelltes, nicht amtliches Mapping. CRA-Rechtstext: Recht der Europäischen Union.
+      ISO/IEC 27001 wird nur über Kennungen referenziert.'
+  fr:
+    name: Règlement (UE) 2024/2847 sur la cyberrésilience - ISO/IEC 27001:2022
+    description: Correspondance non officielle et sélective entre des objectifs connexes de sécurité et de documentation
+      des annexes du règlement (UE) 2024/2847 et de l'ISO/IEC 27001:2022. Fondée sur le texte consolidé du CRA du
+      20 novembre 2024 (https://eur-lex.europa.eu/eli/reg/2024/2847/2024-11-20) et les identifiants de la bibliothèque
+      ISO existante. Créée et vérifiée avec l'assistance de l'IA, sans revendication de validation humaine indépendante.
+      Chaque lien indique un recoupement sémantique partiel (intersect), et non une équivalence ou une couverture
+      complète. Les mesures ISO concernent l'organisme et son SMSI ; les exigences du CRA concernent les produits
+      et les fabricants. Les liens documentaires couvrent uniquement la gestion des informations, pas leur contenu
+      légal ni leur durée de conservation. Le marquage CE, les formalités de déclaration de conformité, les obligations
+      des organismes notifiés et les autres exigences sans correspondance suffisamment directe sont volontairement
+      exclus. L'absence de lien ne supprime aucune obligation du CRA. Cette correspondance ne constitue ni une interprétation
+      juridique officielle ni une preuve de certification ou de conformité au CRA.
+    copyright: 'Correspondance non officielle créée par la communauté. Texte juridique du CRA: droit de l''Union
+      européenne. L''ISO/IEC 27001 est uniquement référencée par ses identifiants.'
+dependencies:
+- urn:intuitem:risk:library:cra-resolution-annexes
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cra-regulation-annexes-and-iso27001-2022
+    ref_id: mapping-cra-regulation-annexes-and-iso27001-2022
+    name: Cyber Resilience Act (EU) 2024/2847 Annexes <-> ISO/IEC 27001:2022
+    description: Non-official, selective mapping of related security and documentation objectives between the annexes
+      to Regulation (EU) 2024/2847 and ISO/IEC 27001:2022. Based on the CRA consolidated text of 20 November 2024
+      (https://eur-lex.europa.eu/eli/reg/2024/2847/2024-11-20) and the existing ISO library identifiers. Created
+      and reviewed with AI assistance; no independent human validation is claimed. Every link denotes partial semantic
+      overlap (intersect), not equivalence or full coverage. ISO controls concern the organisation and its ISMS;
+      CRA requirements concern products and manufacturers. Links to documentation controls cover only information
+      management, not the legal content or retention period. CE marking, declaration formalities, notified-body
+      duties and other requirements without a sufficiently direct counterpart are intentionally unmapped. An absent
+      link does not remove a CRA obligation. This mapping is neither official legal guidance nor evidence of certification
+      or CRA conformity.
+    translations:
+      de:
+        name: Cyberresilienz-Verordnung (EU) 2024/2847 - ISO/IEC 27001:2022
+        description: Nicht amtliche, selektive Zuordnung verwandter Sicherheits- und Dokumentationsziele zwischen
+          den Anhängen der Verordnung (EU) 2024/2847 und ISO/IEC 27001:2022. Grundlage sind der konsolidierte CRA-Rechtstext
+          vom 20. November 2024 (https://eur-lex.europa.eu/eli/reg/2024/2847/2024-11-20) und die Kennungen der vorhandenen
+          ISO-Bibliothek. Mit KI-Unterstützung erstellt und geprüft; eine unabhängige menschliche Validierung wird
+          nicht behauptet. Jede Zuordnung bezeichnet eine teilweise inhaltliche Überschneidung (intersect), keine
+          Gleichwertigkeit oder vollständige Abdeckung. ISO-Maßnahmen betreffen die Organisation und ihr ISMS; CRA-Anforderungen
+          betreffen Produkte und Hersteller. Zuordnungen zu Dokumentationsanforderungen erfassen nur den Umgang
+          mit Informationen, nicht den rechtlich vorgeschriebenen Inhalt oder die Aufbewahrungsfrist. CE-Kennzeichnung,
+          Formalitäten der Konformitätserklärung, Pflichten benannter Stellen und weitere Anforderungen ohne hinreichend
+          direkte Entsprechung bleiben bewusst ohne Zuordnung. Eine fehlende Zuordnung hebt keine CRA-Pflicht auf.
+          Das Mapping ist weder eine amtliche Rechtsauslegung noch ein Nachweis einer Zertifizierung oder CRA-Konformität.
+      fr:
+        name: Règlement (UE) 2024/2847 sur la cyberrésilience - ISO/IEC 27001:2022
+        description: Correspondance non officielle et sélective entre des objectifs connexes de sécurité et de documentation
+          des annexes du règlement (UE) 2024/2847 et de l'ISO/IEC 27001:2022. Fondée sur le texte consolidé du CRA
+          du 20 novembre 2024 (https://eur-lex.europa.eu/eli/reg/2024/2847/2024-11-20) et les identifiants de la
+          bibliothèque ISO existante. Créée et vérifiée avec l'assistance de l'IA, sans revendication de validation
+          humaine indépendante. Chaque lien indique un recoupement sémantique partiel (intersect), et non une équivalence
+          ou une couverture complète. Les mesures ISO concernent l'organisme et son SMSI ; les exigences du CRA
+          concernent les produits et les fabricants. Les liens documentaires couvrent uniquement la gestion des
+          informations, pas leur contenu légal ni leur durée de conservation. Le marquage CE, les formalités de
+          déclaration de conformité, les obligations des organismes notifiés et les autres exigences sans correspondance
+          suffisamment directe sont volontairement exclus. L'absence de lien ne supprime aucune obligation du CRA.
+          Cette correspondance ne constitue ni une interprétation juridique officielle ni une preuve de certification
+          ou de conformité au CRA.
+    source_framework_urn: urn:intuitem:risk:framework:cra-resolution-annexes
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to personal information. The CRA requirement also covers non-personal data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to personal information. The CRA requirement also covers non-personal data.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.i
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.i
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.i
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.j
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.j
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.j
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.j
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.l
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.l
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.m
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.m
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Shared objective: receiving, assessing and addressing technical vulnerability information. The
+        CRA additionally specifies coordinated disclosure and/or a public reporting contact.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Shared objective: receiving, assessing and addressing technical vulnerability information. The
+        CRA additionally specifies coordinated disclosure and/or a public reporting contact.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Shared objective: receiving, assessing and addressing technical vulnerability information. The
+        CRA additionally specifies coordinated disclosure and/or a public reporting contact.'
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying and addressing applicable legal requirements; this control is
+        not a substitute for the specified CRA conformity evidence.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+      rationale: semantic
+      annotation: Security-support commitments can inform supplier agreements from the customer perspective; this
+        does not establish the manufacturer's CRA support-period obligations.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying and addressing applicable legal requirements; this control is
+        not a substitute for the specified CRA conformity evidence.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying and addressing applicable legal requirements; this control is
+        not a substitute for the specified CRA conformity evidence.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying and addressing applicable legal requirements; this control is
+        not a substitute for the specified CRA conformity evidence.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying and addressing applicable legal requirements; this control is
+        not a substitute for the specified CRA conformity evidence.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to the information-security aspects of the manufacturer's quality-system activity.
+        ISO/IEC 27001 does not establish the CRA quality-system approval or notified-body surveillance requirements.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
+    - source_requirement_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: intersect
+      rationale: semantic
+      annotation: Overlap is limited to identifying, maintaining, protecting or making documented information available.
+        It does not cover the CRA-specific document content, conformity procedure or statutory retention period.
