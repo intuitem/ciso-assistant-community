@@ -7,9 +7,12 @@
 | `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek.xlsx` | az elemi követelmények könyvtárának forrása v2 Excel formátumban / the source of the elementary-requirements library in the v2 Excel format |
 | `hu-7-2024-mk-rendelet.xlsx` | a védelmi intézkedések katalógusának forrása v2 Excel formátumban / the source of the protective-measures catalogue in the v2 Excel format |
 | `hu-7-2024-mk-rendelet-fenyegetesek.xlsx` | a fenyegetéskatalógus forrása v2 Excel formátumban / the source of the threat catalogue in the v2 Excel format |
+| `hu-7-2024-mk-rendelet-kockazati-matrix.xlsx` | a kockázati mátrix forrása v2 Excel formátumban / the source of the risk matrix in the v2 Excel format |
 | `../../../backend/library/libraries/hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek.yaml` | a konvertált könyvtár (`convert_library_v2.py`) / the converted library |
 | `../../../backend/library/libraries/hu-7-2024-mk-rendelet.yaml` | a konvertált védelmiintézkedés-katalógus / the converted protective-measures catalogue |
 | `../../../backend/library/libraries/hu-7-2024-mk-rendelet-fenyegetesek.yaml` | a konvertált fenyegetéskatalógus / the converted threat catalogue |
+| `../../../backend/library/libraries/hu-7-2024-mk-rendelet-kockazati-matrix.yaml` | a konvertált kockázati mátrix / the converted risk matrix |
+| `../../../backend/library/libraries/preset-hungarian-nis2.yaml` | a „Magyar NIS2-megfelelés” útiterv (preset; kézzel írt YAML, nincs Excel-forrása) / the "Hungarian NIS2 compliance" preset (hand-written YAML, no Excel source) |
 
 ---
 
@@ -27,6 +30,8 @@ védelmi intézkedések katalógusa, 3. melléklet: fenyegetéskatalógus) és a
 | `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | kész | az SZTFH rendelet 7. melléklete szerinti 2 148 elemi követelmény a 7/2024. MK rendelet 2. mellékletének szerkezetében (19 követelménycsalád, 914 követelménycsoport), a 6. melléklet audit-jellemzőivel | az SZTFH-audit nézete: auditfelkészülés; az értékelés egysége az elemi követelmény |
 | `hu-7-2024-mk-rendelet-fenyegetesek` | kész | a 7/2024. MK rendelet 3. mellékletének 47 fenyegetése | fenyegetéskatalógus a kockázatértékeléshez, mindkét keretrendszer mellé |
 | `hu-7-2024-mk-rendelet` | kész | ugyanaz a 914 követelménycsoport elemi szint nélkül, értékelhető követelménycsoportokkal, ugyanazzal a 7 megvalósítási csoporttal | a jogszabályi kötelezettség követelménycsoport-szinten: kontrollkezelés |
+| `hu-7-2024-mk-rendelet-kockazati-matrix` | kész | 4×4-es kockázati mátrix az 1. melléklet 5.1.1.5. pontja szerinti négy kockázati kategóriával | a kockázatelemzés mércéje, a fenyegetéskatalógus mellé |
+| `preset-hungarian-nis2` | kész | „Magyar NIS2-megfelelés” útiterv (preset) | bevezetés: betölti a könyvtárakat, létrehozza a kiinduló objektumokat, és 13 lépésen vezet végig |
 | `mapping-hu-7-2024-mk-rendelet-and-hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | tervezett | minden elemi követelmény a szülő követelménycsoportjához rendelve (`superset`; a fordított irány generált) | átjárhatóság a két keretrendszer között, például a másik keretrendszer auditját baseline-ként használó audit előtöltése |
 
 A két keretrendszer csomópontjainak `ref_id`-ja azonos (`1.1`, `K01.001_P1` …), csak az URN-előtag
@@ -166,6 +171,61 @@ Jelenleg egyik keretrendszer sem hivatkozik a fenyegetésekre. A fenyegetések U
 
 Ellenőrzés: a YAML 47 fenyegetést tartalmaz. Betöltési teszt (CISO Assistant 4.1.1, dátum: 2026. 10. 15.).
 
+### `hu-7-2024-mk-rendelet-kockazati-matrix` – kockázati mátrix
+
+Az 1. melléklet 5.1.1.5. pontja legalább négy kockázati kategóriát ír elő („alacsony”, „közepes”,
+„magas”, „kritikus”), kockázati mátrixot azonban nem határoz meg. A könyvtár egy 4×4-es mátrix
+(`urn:aafeher:risk:matrix:hu-7-2024-mk-rendelet`):
+
+* **hatás** (`H1`–`H4`): elhanyagolható, csekély, közepes, nagy. Az utóbbi három az 1. melléklet
+  2.2.2–2.2.4. pontja szerinti káreseményszint (a leírások a rendelet szempontjait foglalják össze), így
+  az osztályba sorolás hatáselemzése és a kockázatelemzés ugyanazt a mércét használja.
+* **valószínűség** (`V1`–`V4`): ritka, lehetséges, valószínű, szinte biztos. A rendelet nem ad skálát,
+  a leírások kiindulópontok.
+* **kockázat** (`1`–`4`): alacsony, közepes, magas, kritikus. A leírások az 5.1.2.2. pont szerinti
+  felvállalási szabályt rögzítik: részletes indoklás nélkül csak az „alacsony” kategóriában.
+
+| valószínűség \ hatás | H1 | H2 | H3 | H4 |
+|---|---|---|---|---|
+| V4 szinte biztos | közepes | magas | kritikus | kritikus |
+| V3 valószínű | alacsony | közepes | magas | kritikus |
+| V2 lehetséges | alacsony | közepes | közepes | magas |
+| V1 ritka | alacsony | alacsony | közepes | magas |
+
+A színeket a konverter az Excel-cellák kitöltéséből veszi át. A könyvtárcsalád többi tagjához hasonlóan
+csak magyar nyelvű.
+
+Ellenőrzés: a `check_library_v2.py` hibát nem jelez. Betöltési teszt a `preset-hungarian-nis2`
+útitervvel (CISO Assistant 4.1.5, dátum: 2026. 11. 06.).
+
+### `preset-hungarian-nis2` – Magyar NIS2-megfelelés (útiterv)
+
+Útiterv (preset) az SZTFH felügyelete alá tartozó alapvető és fontos szervezeteknek (Kiberbiztonsági tv.
+1. § (1) d) és e) pont). Függőségei a `hu-7-2024-mk-rendelet`, a `hu-7-2024-mk-rendelet-fenyegetesek`, a
+`hu-7-2024-mk-rendelet-kockazati-matrix` és a `vendor-due-diligence`. Alkalmazáskor létrehozza:
+
+* a szervezeti és egy minta EIR-szintű értékelést a `hu-7-2024-mk-rendelet` keretrendszerrel,
+  megvalósítási csoport nélkül (a csoportot a fenti útmutató szerint a felhasználó választja);
+* a kockázatelemzést a magyar mátrixszal és 7 kockázati forgatókönyvet a 3. melléklet fenyegetéseivel;
+* a szervezeti kötelezettségeket alkalmazott intézkedésként (nyilvántartásba vétel, felelős személy,
+  osztályba sorolás, képzés), az információbiztonsági szabályzatot és a biztonsági eseménykezelési
+  tervet szabályzatként;
+* a visszatérő kötelezettségeket ütemezett feladatként (kétévenkénti felülvizsgálat, audit, felügyeleti
+  díj, továbbképzés, gyakorlat);
+* tipikus beszállítókat, eszközöket és egy megállapítás-nyilvántartást.
+
+A 13 lépés rövid jogszabályi hivatkozásokkal vezet végig a folyamaton. Bekapcsolt funkciók: `compliance`,
+`risk_management`, `tprm`, `incidents`, `nis2`, `follow_up`, `policy_documents`, `exceptions`, `risk_acceptances`,
+`tasks`, `control_plan`, `comments`, `xrays`, `terminologies`; ha az alkalmazáskor a funkciók beállítását is kéri, a fel nem sorolt funkciókat a CISO Assistant
+kikapcsolja. A szövegek angol fordítással is szerepelnek.
+
+Korlátok: a biztonsági osztálynak nincs külön mezője, a lépés leírása az eszközök biztonsági céljait
+javasolja (FIPS-199 skálával), más skála esetén címkét; az útiterv nem rendel intézkedést követelményhez,
+eszközt értékeléshez, és nem kapcsolja össze az eszközöket, ezeket a lépések leírása kéri; a
+használatbavételi döntéshez (Kiberbiztonsági tv. 6. § (3) 12.) nem hoz létre kockázatelfogadást, mert a
+CISO Assistant ahhoz kockázati forgatókönyvet követel meg, a lépés a Kockázatelfogadásokra mutat; a VMI-t
+az alkalmazáson kívül kell számolni; az elemi követelmények könyvtára nem függőség.
+
 ### Források és szövegállapot
 
 * 7/2024. (VI. 24.) MK rendelet: az njt.hu szerinti egységes szerkezet 2025. 01. 02-i állapota
@@ -179,8 +239,9 @@ Ellenőrzés: a YAML 47 fenyegetést tartalmaz. Betöltési teszt (CISO Assistan
 
 ### Nem tartalmazza
 
-Az 1. mellékletet (osztályba sorolás), a Kibertv. és a 418/2024. (XII. 23.) Korm. rendelet szervezeti
-kötelezettségeit, az NKI táblázat hivatkozásait (41/2015. BM r., ISO 27001, NIST SP 800-53) és az
+Az 1. mellékletet (osztályba sorolás; a kockázati mátrix csak a káreseményszinteket és a kockázati
+kategóriákat veszi át), a Kibertv. és a 418/2024. (XII. 23.) Korm. rendelet szervezeti kötelezettségeit
+(ezek közül a legfontosabbakat a `preset-hungarian-nis2` útiterv hozza létre), az NKI táblázat hivatkozásait (41/2015. BM r., ISO 27001, NIST SP 800-53) és az
 SZTFH 5. melléklet szerinti VMI / SZEKI pontozást (nincs pontszám-definíció, a CISO Assistant
 alapértelmezett skálája érvényes).
 
@@ -200,6 +261,8 @@ packager `aafeher`.
 | `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | done | the 2,148 elemi követelmény (elementary requirements) of SZTFH annex 7 in the structure of annex 2 of 7/2024. MK rendelet (19 families, 914 protective measures), with the annex 6 audit metadata | the view of the SZTFH audit: audit preparation; the unit of assessment is the elementary requirement |
 | `hu-7-2024-mk-rendelet-fenyegetesek` | done | the 47 threats of annex 3 of 7/2024. MK rendelet | threat catalogue for risk assessments, alongside both frameworks |
 | `hu-7-2024-mk-rendelet` | done | the same 914 measures without the elementary level, with assessable measures and the same 7 implementation groups | the legal obligation at measure level: control management |
+| `hu-7-2024-mk-rendelet-kockazati-matrix` | done | 4×4 risk matrix with the four risk categories of annex 1 point 5.1.1.5 | the scale of the risk analysis, alongside the threat catalogue |
+| `preset-hungarian-nis2` | done | the "Hungarian NIS2 compliance" preset | onboarding: loads the libraries, creates the starting objects and guides through 13 steps |
 | `mapping-hu-7-2024-mk-rendelet-and-hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | planned | every elementary requirement mapped to its parent measure (`superset`; the reverse direction is generated) | interoperability between the two frameworks, for example pre-filling an audit created with an audit of the other framework as its baseline |
 
 The nodes of the two frameworks share their `ref_id` (`1.1`, `K01.001_P1` …); only the URN prefix differs.
@@ -335,6 +398,62 @@ links to the threats at the moment. The URN prefix of the threats is
 
 Verification: the YAML holds 47 threats. Load test (CISO Assistant 4.1.1, date: 2026-10-15).
 
+### `hu-7-2024-mk-rendelet-kockazati-matrix` – risk matrix
+
+Annex 1 point 5.1.1.5 requires at least four risk categories ("alacsony", "közepes", "magas",
+"kritikus": low, medium, high, critical) but defines no risk matrix. The library is a 4×4 matrix
+(`urn:aafeher:risk:matrix:hu-7-2024-mk-rendelet`):
+
+* **impact** (`H1`–`H4`): negligible, minor, moderate, major. The last three are the damage levels of
+  annex 1 points 2.2.2–2.2.4 (the descriptions summarise the criteria of the decree), so the impact
+  analysis of the security classification and the risk analysis use the same scale.
+* **probability** (`V1`–`V4`): rare, possible, likely, almost certain. The decree gives no scale; the
+  descriptions are a starting point.
+* **risk** (`1`–`4`): low, medium, high, critical. The descriptions carry the acceptance rule of point
+  5.1.2.2: without detailed justification only in the "alacsony" (low) category.
+
+| probability \ impact | H1 | H2 | H3 | H4 |
+|---|---|---|---|---|
+| V4 almost certain | medium | high | critical | critical |
+| V3 likely | low | medium | high | critical |
+| V2 possible | low | medium | medium | high |
+| V1 rare | low | low | medium | high |
+
+The converter takes the colours from the fill of the Excel cells. Like the rest of the library family,
+the matrix is in Hungarian only.
+
+Verification: `check_library_v2.py` reports no error. Load test with the `preset-hungarian-nis2` preset
+(CISO Assistant 4.1.5, date: 2026-11-06).
+
+### `preset-hungarian-nis2` – Hungarian NIS2 compliance (preset)
+
+A preset for essential and important entities supervised by the SZTFH (Cybersecurity Act, Section
+1(1)(d) and (e)). Its dependencies are `hu-7-2024-mk-rendelet`, `hu-7-2024-mk-rendelet-fenyegetesek`,
+`hu-7-2024-mk-rendelet-kockazati-matrix` and `vendor-due-diligence`. When applied, it creates:
+
+* the organisational and a sample system-level assessment on the `hu-7-2024-mk-rendelet` framework,
+  with no implementation group selected (the user picks it as described above);
+* the risk assessment on the Hungarian matrix and 7 risk scenarios with the threats of annex 3;
+* the organisational obligations as applied controls (registration, responsible person,
+  classification, training), and the information security policy and the security incident
+  management plan as policies;
+* the recurring obligations as scheduled tasks (biennial review, audit, supervision fee, further
+  training, exercise);
+* typical suppliers, assets and a findings register.
+
+The 13 steps guide through the process with short legal references. Enabled features: `compliance`,
+`risk_management`, `tprm`, `incidents`, `nis2`, `follow_up`, `policy_documents`, `exceptions`,
+`risk_acceptances`, `tasks`, `control_plan`, `comments`, `xrays`, `terminologies`; when the feature settings are applied too, CISO Assistant turns the
+features not listed off. The texts include an English translation.
+
+Limitations: the security class has no field of its own, the step description suggests the security
+objectives of the assets (on the FIPS-199 scale), or a label with another scale; the preset does not link
+controls to requirements or assets to assessments, nor assets to each other, the step descriptions ask
+the user to do so; it creates no risk acceptance for the decision on putting a system into use
+(Cybersecurity Act, Section 6(3) point 12), since CISO Assistant requires risk scenarios for one, the
+step points to the risk acceptances; the VMI has to be computed outside the application; the
+elementary-requirements library is not a dependency.
+
 ### Sources and text state
 
 * 7/2024. (VI. 24.) MK rendelet: the consolidated text on njt.hu as of 2025-01-02 (18/2024. (XII. 30.)
@@ -348,7 +467,8 @@ Verification: the YAML holds 47 threats. Load test (CISO Assistant 4.1.1, date: 
 
 ### Not included
 
-Annex 1 (classification method), the organisational obligations of the Kibertv. and of 418/2024.
-(XII. 23.) Korm. rendelet, the NKI cross-references (41/2015. BM r., ISO 27001, NIST SP 800-53) and
+Annex 1 (classification method; the risk matrix only takes over the damage levels and the risk
+categories), the organisational obligations of the Kibertv. and of 418/2024. (XII. 23.) Korm. rendelet
+(the `preset-hungarian-nis2` preset creates the main ones), the NKI cross-references (41/2015. BM r., ISO 27001, NIST SP 800-53) and
 the VMI / SZEKI audit scoring of SZTFH annex 5 (no scores definition; CISO Assistant's default scale
 applies).

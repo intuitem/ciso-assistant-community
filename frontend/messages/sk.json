@@ -2756,10 +2756,10 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objekt je skrytý. Pri úprave môže dôjsť k strate odkazu.",
-				"countPlural=few": "{count} objekty sú skryté. Odkazy sa môžu pri úprave stratiť.",
-				"countPlural=many": "{count} objekty sú skryté. Odkazy sa môžu pri úprave stratiť.",
-				"countPlural=other": "{count} objekty sú skryté. Odkazy sa môžu pri úprave stratiť."
+				"countPlural=one": "{count} objekt je skrytý.",
+				"countPlural=few": "{count} objekty sú skryté.",
+				"countPlural=many": "{count} objekty sú skryté.",
+				"countPlural=other": "{count} objekty sú skryté."
 			}
 		}
 	],

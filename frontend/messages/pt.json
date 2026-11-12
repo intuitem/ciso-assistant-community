@@ -3377,8 +3377,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objeto está oculto. O vínculo pode ser perdido ao editar.",
-				"countPlural=other": "{count} objetos estão ocultos. Os vínculos podem ser perdidos ao editar."
+				"countPlural=one": "{count} objeto está oculto.",
+				"countPlural=other": "{count} objetos estão ocultos."
 			}
 		}
 	],

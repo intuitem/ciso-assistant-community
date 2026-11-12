@@ -3399,10 +3399,10 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} obiekt jest ukryty. Powiązanie może zostać utracone podczas edycji.",
-				"countPlural=few": "{count} obiekty są ukryte. Powiązania mogą zostać utracone podczas edycji.",
-				"countPlural=many": "{count} obiektów jest ukrytych. Powiązania mogą zostać utracone podczas edycji.",
-				"countPlural=other": "Ukryte obiekty: {count}. Powiązania mogą zostać utracone podczas edycji."
+				"countPlural=one": "{count} obiekt jest ukryty.",
+				"countPlural=few": "{count} obiekty są ukryte.",
+				"countPlural=many": "{count} obiektów jest ukrytych.",
+				"countPlural=other": "Ukryte obiekty: {count}."
 			}
 		}
 	],

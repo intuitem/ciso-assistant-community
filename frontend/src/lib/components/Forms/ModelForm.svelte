@@ -224,6 +224,9 @@
 	const defaultFolderWritePermission =
 		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
 	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
+	// Pickers keep links to objects the user cannot see only when this form edits an
+	// existing object: on a create, clone or duplicate every id is a new link.
+	setContext('formKeepsHiddenLinks', Boolean(object?.id) && context !== 'clone' && !duplicate);
 
 	function cancel(): void {
 		if (browser) {

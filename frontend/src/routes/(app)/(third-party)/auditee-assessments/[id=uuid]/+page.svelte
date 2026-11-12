@@ -19,6 +19,7 @@
 		type ModalStore
 	} from '#lib/components/Modals/stores.js';
 	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import {
 		complianceResultColorMap,
 		complianceResultTailwindColorMap
@@ -690,6 +691,10 @@
 	// --- Modals ---
 	const modalStore: ModalStore = getModalStore();
 
+	// Linked objects the viewer can see; the others come masked and are only counted.
+	const visibleLinks = (items: any[] | undefined): any[] =>
+		(items ?? []).filter((item) => !isMaskedPlaceholder(item));
+
 	function modalMeasureCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -1017,6 +1022,16 @@
 		};
 	});
 </script>
+
+<!-- Linked objects the viewer cannot see: counted, never named. -->
+{#snippet hiddenLinksNote(items: any[] | undefined)}
+	{@const hidden = countMasked(items ?? [])}
+	{#if hidden > 0}
+		<span class="text-xs text-yellow-700" data-testid="hidden-links-note">
+			{m.objectsNotVisible({ count: hidden })}
+		</span>
+	{/if}
+{/snippet}
 
 <div class="flex flex-col p-4">
 	<div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg w-full h-full space-y-3">
@@ -1808,7 +1823,7 @@
 														</div>
 													{/if}
 													<div class="flex flex-wrap space-x-2 items-center">
-														{#each requirementAssessment.applied_controls ?? [] as ac}
+														{#each visibleLinks(requirementAssessment.applied_controls) as ac}
 															<p class="p-2">
 																<Anchor
 																	class="anchor"
@@ -1819,6 +1834,7 @@
 																</Anchor>
 															</p>
 														{/each}
+														{@render hiddenLinksNote(requirementAssessment.applied_controls)}
 													</div>
 												</Accordion.ItemContent>
 											</Accordion.Item>
@@ -1893,7 +1909,7 @@
 																</tr>
 															</thead>
 															<tbody>
-																{#each requirementAssessment.task_templates ?? [] as task}
+																{#each visibleLinks(requirementAssessment.task_templates) as task}
 																	<tr
 																		id="task-{task.id}"
 																		class="border-b border-surface-100-900"
@@ -1966,6 +1982,7 @@
 																{/each}
 															</tbody>
 														</table>
+														{@render hiddenLinksNote(requirementAssessment.task_templates)}
 													{/if}
 												</Accordion.ItemContent>
 											</Accordion.Item>
@@ -2036,7 +2053,7 @@
 														</div>
 													{/if}
 													<div class="flex flex-wrap space-x-2 items-center">
-														{#each requirementAssessment.evidences ?? [] as evidence}
+														{#each visibleLinks(requirementAssessment.evidences) as evidence}
 															<p class="p-2">
 																<Anchor
 																	class="anchor"
@@ -2048,6 +2065,7 @@
 																</Anchor>
 															</p>
 														{/each}
+														{@render hiddenLinksNote(requirementAssessment.evidences)}
 													</div>
 												</Accordion.ItemContent>
 											</Accordion.Item>

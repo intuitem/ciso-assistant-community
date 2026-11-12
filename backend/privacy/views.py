@@ -5,8 +5,7 @@ import uuid
 import pandas as pd
 
 from core.constants import COUNTRY_CHOICES, EU_COUNTRIES_SET
-from core.models import Actor, Terminology, ValidationFlow
-from core.serializers import ActorReadSerializer
+from core.models import Terminology, ValidationFlow
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -30,6 +29,7 @@ from core.generators import breach_notification_context
 from core.typst_render import render_pdf
 from django.utils.text import slugify
 from iam.models import Folder, RoleAssignment
+from iam.utils import ViewableFilter
 from tprm.models import Entity
 
 from .models import (
@@ -639,12 +639,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get all processing assigned_to actors")
     def assigned_to(self, request):
-        return Response(
-            ActorReadSerializer(
-                Actor.objects.filter(assigned_processings__isnull=False).distinct(),
-                many=True,
-            ).data
-        )
+        return Response(self._viewable_actors(assigned_processings__isnull=False))
 
     @action(detail=False, name="Get DPIA requirement choices")
     def dpia_required(self, request):
@@ -1123,12 +1118,7 @@ class RightRequestViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get all right request owners")
     def owner(self, request):
-        return Response(
-            ActorReadSerializer(
-                Actor.objects.filter(assigned_right_requests__isnull=False).distinct(),
-                many=True,
-            ).data
-        )
+        return Response(self._viewable_actors(assigned_right_requests__isnull=False))
 
 
 class DataBreachViewSet(BaseModelViewSet):
@@ -1175,9 +1165,7 @@ class DataBreachViewSet(BaseModelViewSet):
             breach,
             lang,
             tz=get_report_timezone(),
-            readable=lambda obj: RoleAssignment.is_object_readable(
-                request.user, type(obj), obj.id
-            ),
+            readable=ViewableFilter(request.user).allows,
         )
         response = HttpResponse(
             render_pdf("breach_notification.typ", payload),
