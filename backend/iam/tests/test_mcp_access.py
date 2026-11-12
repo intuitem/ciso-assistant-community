@@ -421,6 +421,24 @@ class TestRevokeForEveryone:
         assert all(verify(raw) is None for raw in cut)
         assert verify(kept) is not None
 
+    def test_counts_only_users_still_connected(self, admin_api):
+        # Bruno's connection has ended: the listing does not show him, so the
+        # confirmation must not count him
+        app = _client(redirect=COPILOT_REDIRECT)
+        _token(app, _user("alice@example.com"))
+        bruno = _user("bruno@example.com")
+        _token(app, bruno)
+        Token.objects.filter(client=app, user=bruno).update(
+            expires_at=timezone.now() - timedelta(days=1)
+        )
+
+        summary = admin_api.get(f"{APPS_URL}apps/{app.id}/").json()
+        response = admin_api.delete(f"{APPS_URL}apps/{app.id}/")
+
+        assert summary["users"] == 1
+        assert response.json() == {"users": 1}
+        assert not Token.objects.filter(client_id=app.id).exists()
+
     def test_keeps_an_admin_registered_client(self, admin_api):
         internal = _client(name="Internal tool", self_registered=False)
         _token(internal, _user("alice@example.com"))

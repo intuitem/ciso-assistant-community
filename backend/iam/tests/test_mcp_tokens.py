@@ -438,3 +438,25 @@ def test_authorization_server_metadata_at_the_rfc8414_address(client):
     assert response.status_code == 200
     assert response["Access-Control-Allow-Origin"] == "*"
     assert response.json()["issuer"].endswith("/api")
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/.well-known/oauth-authorization-server/api",
+        "/api/.well-known/openid-configuration",
+    ],
+)
+@pytest.mark.parametrize("host", ["localhost", "internal-proxy-name:8080"])
+def test_metadata_endpoints_follow_the_public_url_not_the_host(
+    client, settings, path, host
+):
+    # a proxy may send Host without the public port (nginx's $host does)
+    settings.CISO_ASSISTANT_URL = "https://grc.example.com:8443"
+    settings.ALLOWED_HOSTS = ["*"]
+    metadata = client.get(path, HTTP_HOST=host).json()
+    urls = {k: v for k, v in metadata.items() if k.endswith(("_endpoint", "_uri"))}
+    assert metadata["issuer"] == "https://grc.example.com:8443/api"
+    assert urls and all(
+        v.startswith("https://grc.example.com:8443/") for v in urls.values()
+    ), urls

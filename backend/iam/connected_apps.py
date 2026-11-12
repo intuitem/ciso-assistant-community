@@ -151,6 +151,20 @@ class UserConnectedAppView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+def _connected_users(client) -> int:
+    """The users the listing shows for this app: those still holding a valid
+    access or refresh token."""
+    return (
+        Token.objects.filter(
+            client=client, user__isnull=False, type__in=GRANT_TOKEN_TYPES
+        )
+        .valid()
+        .values("user_id")
+        .distinct()
+        .count()
+    )
+
+
 class ConnectedAppGroupView(views.APIView):
     """One app across all its users: what "revoke for everyone" would cut, then
     the revocation itself. Only the selected registration: a self-registered
@@ -163,12 +177,7 @@ class ConnectedAppGroupView(views.APIView):
         client = Client.objects.filter(id=client_id).first()
         if client is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        users = (
-            Token.objects.filter(client=client, user__isnull=False)
-            .values("user_id")
-            .distinct()
-            .count()
-        )
+        users = _connected_users(client)
         return Response(
             {
                 "name": client.name,
@@ -183,12 +192,7 @@ class ConnectedAppGroupView(views.APIView):
         if client is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         with transaction.atomic():
-            users = (
-                Token.objects.filter(client=client, user__isnull=False)
-                .values("user_id")
-                .distinct()
-                .count()
-            )
+            users = _connected_users(client)
             # by client, not by a list read beforehand: a token issued meanwhile
             # must go too
             revoke_app_tokens(None, [client.id])

@@ -23,7 +23,11 @@ from drf_spectacular.views import (
 )
 from core.views import metrics_view
 from django.conf import settings
-from iam.oauth_views import CISOAuthorizationView, authorization_server_metadata
+from iam.oauth_views import (
+    CISOAuthorizationView,
+    authorization_server_metadata,
+    openid_configuration,
+)
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
@@ -50,6 +54,11 @@ urlpatterns = [
         ".well-known/oauth-authorization-server/api",
         authorization_server_metadata,
         name="oauth-authorization-server-metadata",
+    ),
+    path(
+        "api/.well-known/openid-configuration",
+        openid_configuration,
+        name="ciso-openid-configuration",
     ),
     path("api/", include("allauth.idp.urls")),
     path("api/", include("core.urls")),

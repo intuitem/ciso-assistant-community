@@ -1188,10 +1188,7 @@ async def get_requirement_assessments(
         # If compliance assessment specified, resolve it
         if compliance_assessment_id_or_name:
             # Try to resolve as compliance assessment name/ID
-            if (
-                "-" in compliance_assessment_id_or_name
-                and len(compliance_assessment_id_or_name) == 36
-            ):
+            if _is_uuid(compliance_assessment_id_or_name):
                 params["compliance_assessment"] = compliance_assessment_id_or_name
             else:
                 # Look up compliance assessment by name
@@ -1310,7 +1307,7 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
 
         # If study specified, resolve it
         if study_id_or_name:
-            if "-" in study_id_or_name and len(study_id_or_name) == 36:
+            if _is_uuid(study_id_or_name):
                 params["quantitative_risk_study"] = study_id_or_name
             else:
                 # Look up study by name
@@ -1372,7 +1369,7 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
 
         # If scenario specified, resolve it
         if scenario_id_or_name:
-            if "-" in scenario_id_or_name and len(scenario_id_or_name) == 36:
+            if _is_uuid(scenario_id_or_name):
                 params["quantitative_risk_scenario"] = scenario_id_or_name
             else:
                 # Look up scenario by name

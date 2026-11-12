@@ -1,3 +1,4 @@
+import json
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from allauth.account.internal.decorators import login_not_required
@@ -252,10 +253,32 @@ class CISOAuthorizationView(AuthorizationView):
         )
 
 
+def _on_public_url(response):
+    """allauth builds the endpoints from the request's Host, the issuer from
+    CISO_ASSISTANT_URL. A proxy may forward Host without the public port
+    (nginx's $host does): put every endpoint on the public URL too."""
+    public = urlsplit(settings.CISO_ASSISTANT_URL)
+    data = json.loads(response.content)
+    for key, value in data.items():
+        if key.endswith(("_endpoint", "_uri")) and isinstance(value, str):
+            url = urlsplit(value)
+            if url.scheme in ("http", "https") and url.netloc:
+                data[key] = urlunsplit(
+                    url._replace(scheme=public.scheme, netloc=public.netloc)
+                )
+    response.content = json.dumps(data)
+    return response
+
+
+@login_not_required
+def openid_configuration(request):
+    return _on_public_url(oidc_configuration(request))
+
+
 def authorization_server_metadata(request):
     """RFC 8414 puts the metadata of the issuer <url>/api at
     /.well-known/oauth-authorization-server/api, outside /api. Some clients
     (Copilot Studio) try no other address."""
-    response = oidc_configuration(request)
+    response = _on_public_url(oidc_configuration(request))
     response["Access-Control-Allow-Origin"] = "*"
     return response
