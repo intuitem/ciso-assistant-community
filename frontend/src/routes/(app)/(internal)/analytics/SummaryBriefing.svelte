@@ -4,6 +4,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import AnimatedNumber from '#lib/components/utils/AnimatedNumber.svelte';
+	import Sparkline from './Sparkline.svelte';
 
 	interface Props {
 		metrics: any;
@@ -27,6 +28,8 @@
 		hint: string;
 		href: string;
 		show?: boolean;
+		/** Key of its daily series in `metrics.trends`. */
+		trend?: string;
 		secondary?: { label: string; href: string };
 	};
 
@@ -39,21 +42,24 @@
 					count: metrics.operations?.open_incidents,
 					label: m.openIncidents(),
 					hint: m.briefingOpenIncidentsHint(),
-					href: '/incidents?status=new&status=ongoing&status=resolved'
+					href: '/incidents?status=new&status=ongoing&status=resolved',
+					trend: 'incidents_open'
 				},
 				{
 					tier: 'now',
 					count: metrics.controls?.eta_missed,
 					label: m.sumpageEtaMissed(),
 					hint: m.briefingEtaMissedHint(),
-					href: `/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte=${today}`
+					href: `/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte=${today}`,
+					trend: 'controls_eta_missed'
 				},
 				{
 					tier: 'now',
 					count: metrics.controls?.p1,
 					label: m.sumpageP1(),
 					hint: m.briefingP1Hint(),
-					href: '/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--'
+					href: '/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--',
+					trend: 'controls_p1_pending'
 				},
 				featureflags.tasks !== false && {
 					tier: 'late',
@@ -61,6 +67,7 @@
 					label: m.briefingOverdueTasks(),
 					hint: m.briefingOverdueTasksHint(),
 					href: `/task-nodes?past=true&status=pending&status=in_progress&due_date__gte=${overdueSince}`,
+					trend: 'tasks_overdue',
 					show: metrics.operations?.overdue_tasks_total > 0,
 					secondary: {
 						label: m.briefingOverdueTasksTotal({
@@ -74,21 +81,24 @@
 					count: metrics.operations?.open_findings,
 					label: m.briefingOpenFindings(),
 					hint: m.briefingOpenFindingsHint(),
-					href: '/findings?status=--&status=identified&status=confirmed&status=assigned&status=in_progress'
+					href: '/findings?status=--&status=identified&status=confirmed&status=assigned&status=in_progress',
+					trend: 'findings_open'
 				},
 				{
 					tier: 'late',
 					count: metrics.compliance?.expired_evidences,
 					label: m.sumpageExpiredEvidences(),
 					hint: m.briefingExpiredEvidencesHint(),
-					href: '/evidences/?status=expired'
+					href: '/evidences/?status=expired',
+					trend: 'evidence_expired'
 				},
 				{
 					tier: 'housekeeping',
 					count: metrics.controls?.no_status,
 					label: m.briefingControlsWithoutStatus(),
 					hint: m.briefingControlsWithoutStatusHint(),
-					href: '/applied-controls/?status=--'
+					href: '/applied-controls/?status=--',
+					trend: 'controls_no_status'
 				},
 				{
 					tier: 'housekeeping',
@@ -110,6 +120,8 @@
 			card: string;
 			band: string;
 			heading: string;
+			tile: string;
+			spark: string;
 		}
 	> = {
 		now: {
@@ -118,7 +130,9 @@
 			number: 'text-error-600-400',
 			card: 'border-error-500/30',
 			band: 'bg-error-500/10 border-error-500/20',
-			heading: 'text-error-700-300'
+			heading: 'text-error-700-300',
+			tile: 'bg-error-500/10',
+			spark: 'text-error-500'
 		},
 		late: {
 			label: m.briefingTierLate,
@@ -126,7 +140,9 @@
 			number: 'text-warning-700-300',
 			card: 'border-warning-500/35',
 			band: 'bg-warning-500/12 border-warning-500/25',
-			heading: 'text-warning-800-200'
+			heading: 'text-warning-800-200',
+			tile: 'bg-warning-500/15',
+			spark: 'text-warning-500'
 		},
 		housekeeping: {
 			label: m.briefingTierHousekeeping,
@@ -134,7 +150,9 @@
 			number: 'text-surface-800-200',
 			card: 'border-surface-300-700',
 			band: 'bg-surface-100-900 border-surface-200-800',
-			heading: 'text-surface-700-300'
+			heading: 'text-surface-700-300',
+			tile: 'bg-surface-100-900',
+			spark: 'text-surface-400-600'
 		}
 	};
 
@@ -195,6 +213,15 @@
 					date: since
 				});
 	});
+	// A line needs a few days of snapshots before it says anything.
+	const series = (key?: string): number[] => {
+		const points: Point[] = (key && metrics.trends?.[key]) || [];
+		return points.length >= 3 ? points.map((p) => p[1]) : [];
+	};
+	const highDrop = $derived.by(() => {
+		const [current, residual] = highRiskRows.map((r) => r.count);
+		return current ? Math.round(((residual - current) / current) * 100) : 0;
+	});
 	// Meters fill once on first paint; the CSS transition is skipped under reduced motion.
 	let filled = $state(false);
 	onMount(() => requestAnimationFrame(() => (filled = true)));
@@ -202,79 +229,104 @@
 </script>
 
 <section class="pt-3 pb-2">
-	<dl class="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-5 border-b border-surface-200-800 pb-6">
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.briefingActiveControls()}</dt>
-			<dd class="mt-1">
+	<dl class="strip grid grid-cols-2 lg:grid-cols-4 rounded-2xl border border-primary-500/15">
+		<div class="stat">
+			<dt>{m.briefingActiveControls()}</dt>
+			<dd>
 				<a href="/applied-controls/?status=active" class="stat-link">
 					<span class="stat-number"
 						><AnimatedNumber value={metrics.controls?.active ?? 0} countUp /></span
 					>
-					<span class="ml-1 text-sm text-surface-600-400"
+					<span class="stat-context"
 						>{m.briefingOfAppliedControls({ total: fmt(metrics.controls?.total) })}</span
 					>
 				</a>
-				{#if activeDelta}
-					<span
-						class="mt-2.5 inline-block rounded-full bg-primary-500/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-primary-700-300"
-						>{activeDelta}</span
-					>
-				{:else}
-					<span class="meter" aria-hidden="true"
-						><span
-							style="width: {fill(
-								share(metrics.controls?.active ?? 0, metrics.controls?.total ?? 0)
-							)}%"
-						></span></span
-					>
-				{/if}
+				<span class="stat-foot">
+					{#if series('active_controls').length}
+						<Sparkline values={series('active_controls')} class="text-primary-500" />
+					{:else}
+						<span class="meter" aria-hidden="true"
+							><span
+								style="width: {fill(
+									share(metrics.controls?.active ?? 0, metrics.controls?.total ?? 0)
+								)}%"
+							></span></span
+						>
+					{/if}
+					{#if activeDelta}
+						<span
+							class="whitespace-nowrap rounded-full bg-primary-500/12 px-2 py-0.5 text-xs font-semibold tabular-nums text-primary-700-300"
+							>{activeDelta}</span
+						>
+					{/if}
+				</span>
 			</dd>
 		</div>
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.sumpageAvgProgress()}</dt>
-			<dd class="mt-1">
+		<div class="stat">
+			<dt>{m.sumpageAvgProgress()}</dt>
+			<dd>
 				{#await auditsMetrics}
 					<span class="stat-number text-surface-400">–</span>
 				{:then a}
-					<a href="/compliance-assessments/" class="stat-link">
-						<span class="stat-number"
-							><AnimatedNumber
-								value={(a?.progress_avg ?? 0) / 100}
-								format={{ style: 'percent' }}
-								countUp
-							/></span
-						>
-						<span class="ml-1 text-sm text-surface-600-400"
-							>{m.briefingAcrossAudits({ count: fmt(metrics.compliance?.active_audits) })}</span
-						>
+					<a href="/compliance-assessments/" class="stat-link flex-row! items-center! gap-3">
+						<svg viewBox="0 0 44 44" class="gauge size-11 shrink-0 -rotate-90" aria-hidden="true">
+							<circle cx="22" cy="22" r="18" pathLength="100" class="gauge-track" />
+							<circle
+								cx="22"
+								cy="22"
+								r="18"
+								pathLength="100"
+								class="gauge-value"
+								style="stroke-dashoffset: {100 - fill(a?.progress_avg ?? 0)}"
+							/>
+						</svg>
+						<span>
+							<span class="stat-number block"
+								><AnimatedNumber
+									value={(a?.progress_avg ?? 0) / 100}
+									format={{ style: 'percent' }}
+									countUp
+								/></span
+							>
+							<span class="stat-context"
+								>{m.briefingAcrossAudits({ count: fmt(metrics.compliance?.active_audits) })}</span
+							>
+						</span>
 					</a>
-					<span class="meter" aria-hidden="true"
-						><span style="width: {fill(a?.progress_avg ?? 0)}%"></span></span
-					>
 				{:catch}
 					<span class="stat-number">–</span>
 				{/await}
 			</dd>
 		</div>
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.sumpageNonCompliantItems()}</dt>
-			<dd class="mt-1">
+		<div class="stat">
+			<dt>{m.sumpageNonCompliantItems()}</dt>
+			<dd>
 				<a href="/requirement-assessments?result=non_compliant" class="stat-link">
 					<span class="stat-number"
 						><AnimatedNumber value={metrics.compliance?.non_compliant_items ?? 0} countUp /></span
 					>
 				</a>
+				{#if series('non_compliant_items').length}
+					<span class="stat-foot"
+						><Sparkline values={series('non_compliant_items')} class="text-error-500" /></span
+					>
+				{/if}
 			</dd>
 		</div>
-		<div>
-			<dt class="text-[13px] text-surface-600-400">{m.riskScenarios()}</dt>
-			<dd class="mt-1">
+		<div class="stat">
+			<dt>{m.riskScenarios()}</dt>
+			<dd>
 				<a href="/risk-scenarios/" class="stat-link">
 					<span class="stat-number"><AnimatedNumber value={scenarios} countUp /></span>
-					<span class="ml-1 text-sm text-surface-600-400"
+					<span class="stat-context"
 						>{m.briefingInAssessments({ count: fmt(metrics.risk?.assessments) })}</span
 					>
 				</a>
+				{#if series('total_risk_scenarios').length}
+					<span class="stat-foot"
+						><Sparkline values={series('total_risk_scenarios')} class="text-primary-500" /></span
+					>
+				{/if}
 			</dd>
 		</div>
 	</dl>
@@ -300,7 +352,7 @@
 									<li class={i > 0 ? 'border-t border-surface-100-900' : ''}>
 										<a href={item.href} class="row group">
 											<span
-												class="text-right text-[1.375rem] leading-none font-semibold tabular-nums {style.number}"
+												class="count-tile text-[1.25rem] leading-none font-bold tabular-nums {style.tile} {style.number}"
 												>{fmt(item.count)}</span
 											>
 											<span class="min-w-0">
@@ -308,6 +360,16 @@
 												<span class="block text-[13px] text-surface-600-400 mt-0.5"
 													>{item.hint}</span
 												>
+											</span>
+											<span class="hidden sm:block">
+												{#if series(item.trend).length}
+													<Sparkline
+														values={series(item.trend)}
+														width={72}
+														height={24}
+														class={style.spark}
+													/>
+												{/if}
 											</span>
 											<i
 												class="fa-solid fa-chevron-right text-xs text-surface-400-600 transition-colors group-hover:text-primary-600-400 group-focus-visible:text-primary-600-400"
@@ -317,7 +379,7 @@
 										{#if item.secondary}
 											<a
 												href={item.secondary.href}
-												class="ml-[4rem] -mt-1 mb-2 inline-block text-[13px] text-primary-700-300 underline decoration-primary-300-700 underline-offset-2 hover:decoration-current"
+												class="ml-[4.75rem] -mt-1 mb-2 inline-block text-[13px] text-primary-700-300 underline decoration-primary-300-700 underline-offset-2 hover:decoration-current"
 												>{item.secondary.label}</a
 											>
 										{/if}
@@ -387,28 +449,47 @@
 			<div>
 				<h3 class="text-[15px] font-semibold mb-3">{m.briefingHighRisks()}</h3>
 				{#if scenarios}
-					<ul class="space-y-1 text-sm">
+					<div class="flex items-stretch gap-2">
 						{#each highRiskRows as row, i (row.key)}
-							<li>
-								<a
-									href="/risk-scenarios?top_level={row.key}"
-									class="grid grid-cols-[8.5rem_minmax(0,1fr)_2.5rem] items-center gap-x-3 py-1.5 px-2 -mx-2 rounded-md hover:bg-surface-100-900 focus-visible:outline-2 focus-visible:outline-primary-500"
+							{#if i}
+								<span class="flex flex-col items-center justify-center px-1 text-surface-400-600">
+									<i class="fa-solid fa-arrow-right rtl:rotate-180 text-sm" aria-hidden="true"></i>
+									{#if highDrop < 0}
+										<span
+											class="mt-1 rounded-full bg-success-500/12 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-success-700-300"
+											>{(highDrop / 100).toLocaleString(getLocale(), {
+												style: 'percent',
+												signDisplay: 'exceptZero'
+											})}</span
+										>
+									{/if}
+								</span>
+							{/if}
+							<a
+								href="/risk-scenarios?top_level={row.key}"
+								class="risk-box flex-1 rounded-xl border px-3.5 py-3 {i === 0
+									? 'border-error-500/25 bg-error-500/8'
+									: 'border-warning-500/30 bg-warning-500/10'}"
+							>
+								<span class="block text-[13px] text-surface-700-300">{row.label}</span>
+								<span
+									class="mt-1 block text-[2rem] leading-none font-bold tabular-nums tracking-tight {i ===
+									0
+										? 'text-error-600-400'
+										: 'text-warning-700-300'}"><AnimatedNumber value={row.count} countUp /></span
 								>
-									<span class="text-surface-700-300">{row.label}</span>
-									<span class="h-2 rounded-full bg-surface-200-800 overflow-hidden"
-										><span
-											class="block h-full rounded-full motion-safe:transition-[width] motion-safe:duration-700 {i ===
-											0
-												? 'bg-error-500'
-												: 'bg-warning-500'}"
-											style="width: {fill(share(row.count, scenarios))}%"
-										></span></span
-									>
-									<span class="tabular-nums text-right font-semibold">{fmt(row.count)}</span>
-								</a>
-							</li>
+								<span class="mt-2.5 block h-1.5 rounded-full bg-surface-50-950/70 overflow-hidden"
+									><span
+										class="block h-full rounded-full motion-safe:transition-[width] motion-safe:duration-700 {i ===
+										0
+											? 'bg-error-500'
+											: 'bg-warning-500'}"
+										style="width: {fill(share(row.count, scenarios))}%"
+									></span></span
+								>
+							</a>
 						{/each}
-					</ul>
+					</div>
 					<p class="mt-2 text-xs text-surface-600-400">
 						{m.briefingHighRisksHint({ count: fmt(scenarios) })}
 					</p>
@@ -423,7 +504,7 @@
 <style>
 	.row {
 		display: grid;
-		grid-template-columns: 3rem minmax(0, 1fr) auto;
+		grid-template-columns: auto minmax(0, 1fr) auto auto;
 		align-items: center;
 		gap: 0.5rem 1rem;
 		padding: 0.625rem 0.75rem 0.625rem 0.5rem;
@@ -475,21 +556,116 @@
 			transition: width 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
 		}
 	}
+	.strip {
+		background:
+			radial-gradient(120% 140% at 0% 0%, rgb(124 58 237 / 0.09), transparent 55%),
+			radial-gradient(90% 120% at 100% 100%, rgb(79 70 229 / 0.06), transparent 60%), white;
+		box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+	}
+	:global(.dark) .strip {
+		background:
+			radial-gradient(120% 140% at 0% 0%, rgb(139 92 246 / 0.16), transparent 55%),
+			var(--color-surface-900);
+	}
+	.stat {
+		padding: 1.125rem 1.5rem 1.25rem;
+	}
+	.stat + .stat {
+		border-inline-start: 1px solid rgb(124 58 237 / 0.12);
+	}
+	@media (max-width: 1023px) {
+		.stat:nth-child(3) {
+			border-inline-start: 0;
+		}
+		.stat:nth-child(n + 3) {
+			border-top: 1px solid rgb(124 58 237 / 0.12);
+		}
+	}
+	.stat dt {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--color-surface-600);
+	}
+	:global(.dark) .stat dt {
+		color: var(--color-surface-400);
+	}
+	.stat dd {
+		margin-top: 0.375rem;
+	}
 	.stat-number {
-		font-size: 1.75rem;
+		font-size: 2.25rem;
 		line-height: 1;
-		font-weight: 600;
-		letter-spacing: -0.02em;
+		font-weight: 700;
+		letter-spacing: -0.03em;
 		font-variant-numeric: tabular-nums;
+	}
+	.stat-context {
+		display: block;
+		margin-top: 0.375rem;
+		font-size: 0.875rem;
+		color: var(--color-surface-600);
+	}
+	:global(.dark) .stat-context {
+		color: var(--color-surface-400);
+	}
+	.stat-foot {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		margin-top: 0.75rem;
+		min-height: 28px;
+	}
+	.stat-foot .meter {
+		margin-top: 0;
+		width: 6rem;
 	}
 	.stat-link {
 		display: inline-flex;
-		align-items: baseline;
+		flex-direction: column;
+		align-items: flex-start;
 		border-radius: 0.25rem;
 	}
 	.stat-link:hover .stat-number {
 		text-decoration: underline;
 		text-decoration-thickness: 2px;
-		text-underline-offset: 4px;
+		text-underline-offset: 5px;
+	}
+	.gauge-track,
+	.gauge-value {
+		fill: none;
+		stroke-width: 5;
+	}
+	.gauge-track {
+		stroke: rgb(124 58 237 / 0.14);
+	}
+	.gauge-value {
+		stroke: var(--color-primary-500);
+		stroke-linecap: round;
+		stroke-dasharray: 100;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.gauge-value {
+			transition: stroke-dashoffset 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+		}
+	}
+	.count-tile {
+		display: grid;
+		place-items: center;
+		min-width: 3.75rem;
+		height: 2.75rem;
+		padding-inline: 0.5rem;
+		border-radius: 0.625rem;
+	}
+	.risk-box {
+		transition:
+			transform 150ms ease,
+			box-shadow 150ms ease;
+	}
+	.risk-box:hover {
+		box-shadow: 0 4px 14px -6px rgb(15 23 42 / 0.2);
+	}
+	.risk-box:focus-visible {
+		outline: 2px solid var(--color-primary-500);
+		outline-offset: 2px;
 	}
 </style>
