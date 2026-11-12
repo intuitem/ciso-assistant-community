@@ -1011,6 +1011,22 @@ def test_unmatched_legacy_issue_type_lists_by_quoted_name(mock_jira, configurati
 
 
 @patch("integrations.itsm.jira.client.JIRA")
+def test_failed_issue_type_lookup_creates_by_name_and_retries(mock_jira, configuration):
+    """A failed project lookup isn't a miss: create by name, retry next time."""
+    configuration.settings = {"project_key": "PROJ", "issue_type": "Task"}
+    mock_jira.return_value.project.side_effect = JIRAError(status_code=503)
+    mock_jira.return_value.create_issue.return_value = MagicMock(key="PROJ-1")
+
+    client = JiraClient(configuration)
+    client.create_remote_object(AppliedControl(folder_id=None, name="Control"))
+    client.create_remote_object(AppliedControl(folder_id=None, name="Other"))
+
+    fields = mock_jira.return_value.create_issue.call_args.kwargs["fields"]
+    assert fields["issuetype"] == {"name": "Task"}
+    assert mock_jira.return_value.project.call_count == 2
+
+
+@patch("integrations.itsm.jira.client.JIRA")
 def test_unmatched_legacy_issue_type_columns_filter_by_name(mock_jira, configuration):
     mock_jira.return_value.project.return_value = SimpleNamespace(
         issueTypes=[SimpleNamespace(id="10001", name="Tâche")]

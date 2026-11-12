@@ -114,8 +114,19 @@ class JiraClient(BaseIntegrationClient):
 
         cache_key = (project_key, issue_type)
         if cache_key not in self._resolved_issue_types:
+            try:
+                project = self.jira.project(project_key)
+            except Exception:
+                # A failed lookup isn't a miss: use the name as before, without
+                # caching it, so the next call retries the lookup.
+                logger.warning(
+                    "Failed to look up Jira issue types, referencing it by name",
+                    project_key=project_key,
+                    issue_type=issue_type,
+                    exc_info=True,
+                )
+                return issue_type
             wanted = issue_type.casefold()
-            project = self.jira.project(project_key)
             resolved = issue_type
             for it in getattr(project, "issueTypes", []) or []:
                 names = (
