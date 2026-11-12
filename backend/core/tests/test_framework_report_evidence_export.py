@@ -6,7 +6,6 @@ from pathlib import Path
 
 import openpyxl
 import pytest
-from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -24,7 +23,7 @@ from core.models import (
     StoredLibrary,
 )
 from core.startup import startup
-from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+from iam.models import Folder, User, UserGroup
 
 FIXTURE = Path(__file__).parent / "fixtures" / "test-mixed-scoring.yaml"
 HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
@@ -56,27 +55,9 @@ def _client(user):
 
 
 def _reader(domain):
-    """Auditor-side reader of `domain` only."""
+    """Builtin reader of `domain` only."""
     user = User.objects.create_user(f"reader@{domain.name.lower()}.test")
-    role = Role.objects.create(name=f"Reader-{domain.name}", folder=domain)
-    role.permissions.set(
-        Permission.objects.filter(
-            codename__in=[
-                "view_folder",
-                "view_framework",
-                "view_complianceassessment",
-                "view_compliance_assessment_full",
-                "view_requirementassessment",
-                "view_appliedcontrol",
-                "view_evidence",
-            ]
-        )
-    )
-    group = UserGroup.objects.create(name=f"Readers-{domain.name}", folder=domain)
-    group.user_set.add(user)
-    RoleAssignment.objects.create(
-        user_group=group, role=role, folder=domain, is_recursive=True
-    ).perimeter_folders.add(domain)
+    UserGroup.objects.get(name="BI-UG-AUD", folder=domain).user_set.add(user)
     return user
 
 
