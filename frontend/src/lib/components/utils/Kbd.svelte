@@ -25,9 +25,11 @@
 </script>
 
 <span
-	class="inline-flex items-center gap-0.5 transition-opacity {isApple === undefined
+	class="inline-flex items-center gap-0.5 transition-opacity {keys.includes('mod') &&
+	isApple === undefined
 		? 'opacity-0'
 		: 'opacity-100'} {className}"
+	dir="ltr"
 	aria-hidden="true"
 >
 	{#each keys as key, i (i)}
