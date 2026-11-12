@@ -98,29 +98,7 @@ export async function handleErrorResponse({
 	return message(form, { status: response.status, data: res });
 }
 
-// Models whose detail page is where the work happens: creating one opens it.
-// threat-models stays out: the quantitative risk scenario form creates them inline.
-export const REDIRECT_AFTER_CREATE = new Set<string>([
-	'compliance-assessments',
-	'risk-assessments',
-	'entity-assessments',
-	'quantitative-risk-studies',
-	'quantitative-risk-scenarios',
-	'quantitative-risk-hypotheses',
-	'document-containers',
-	'metric-instances',
-	'ebios-rm',
-	'business-impact-analysis',
-	'campaigns',
-	'findings-assessments',
-	'posture-assessments',
-	'responsibility-matrices',
-	'dashboards',
-	'workflows',
-	'processings',
-	'projects',
-	'incidents'
-]);
+export { REDIRECT_AFTER_CREATE } from './redirect-after-create';
 
 export async function defaultWriteFormAction({
 	event,

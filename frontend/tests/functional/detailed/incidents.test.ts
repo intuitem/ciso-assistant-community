@@ -68,7 +68,7 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 	});
 
 	await test.step('Incidents detail view & second edit creating 1st incident', async () => {
-		await page.getByText('incidents-test').click();
+		await expect(page.locator('#page-title')).toHaveText('incidents-test');
 		await page.getByTestId('edit-button').click();
 
 		await page.getByTestId('form-input-detection').waitFor({ state: 'visible' });

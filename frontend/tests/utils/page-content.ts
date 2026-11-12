@@ -2,6 +2,7 @@ import { expect, type Locator, type Page } from './test-utils.js';
 import { FormContent, FormFieldType } from './form-content.js';
 import { BasePage } from './base-page.js';
 import { PageDetail } from './page-detail.js';
+import { REDIRECT_AFTER_CREATE } from '#lib/utils/redirect-after-create.js';
 
 interface Filter {
 	has?: Locator | undefined;
@@ -100,6 +101,10 @@ export class PageContent extends BasePage {
 
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
+		// Let the redirect to the new object's page land before the caller's next click.
+		if (REDIRECT_AFTER_CREATE.has(this.url.split(/[/?]/)[1])) {
+			await this.page.waitForURL(new RegExp(`${this.url}/[0-9a-f-]{36}`));
+		}
 		if (typeof this.name == 'string') {
 			await this.isToastVisible(
 				'The ' +
