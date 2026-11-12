@@ -43,10 +43,14 @@ const schema = z
 		}
 	});
 
+// The page waits for this call, and the backend's Jira client can take 30s+
+// with retries when Jira is slow or unreachable.
+const RESOLVE_TABLE_TIMEOUT_MS = 5000;
+
 // Configs saved before issue types were referenced by id hold the issue type
 // name ("KAN:Tâche"). It matches none of the picker's "<KEY>:<id>" options, so
 // the picker would clear the table and its maps: resolve it to its id form
-// before the form is built. On failure the value is kept as is.
+// before the form is built. On failure or timeout the value is kept as is.
 async function resolveTableName(
 	fetch: typeof globalThis.fetch,
 	configId: string,
@@ -63,7 +67,8 @@ async function resolveTableName(
 			body: JSON.stringify({
 				action: 'resolve_table',
 				params: { table_name: tableName, model_key: modelKey }
-			})
+			}),
+			signal: AbortSignal.timeout(RESOLVE_TABLE_TIMEOUT_MS)
 		});
 		if (!response.ok) return tableName;
 		const data = await response.json();
