@@ -21412,6 +21412,7 @@ class TaskNodeFilterSet(GenericFilterSet):
             "folder": ["exact"],
             "status": ["exact"],
             "task_template": ["exact"],
+            "task_template__enabled": ["exact"],
             "due_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
         }
 

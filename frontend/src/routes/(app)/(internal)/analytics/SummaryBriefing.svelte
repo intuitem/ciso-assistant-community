@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import {
+		complianceResultColorMap,
+		complianceResultTailwindColorMap
+	} from '#lib/utils/constants.js';
 	import { m } from '#paraglide/messages.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import AnimatedNumber from '#lib/components/utils/AnimatedNumber.svelte';
@@ -66,14 +69,14 @@
 					count: metrics.operations?.overdue_tasks,
 					label: m.briefingOverdueTasks(),
 					hint: m.briefingOverdueTasksHint(),
-					href: `/task-nodes?past=true&status=pending&status=in_progress&due_date__gte=${overdueSince}`,
+					href: `/task-nodes?past=true&status=pending&status=in_progress&due_date__gte=${overdueSince}&task_template__enabled=true`,
 					trend: 'tasks_overdue_recent',
 					show: metrics.operations?.overdue_tasks_total > 0,
 					secondary: {
 						label: m.briefingOverdueTasksTotal({
 							count: fmt(metrics.operations?.overdue_tasks_total)
 						}),
-						href: '/task-nodes?past=true&status=pending&status=in_progress'
+						href: '/task-nodes?past=true&status=pending&status=in_progress&task_template__enabled=true'
 					}
 				},
 				featureflags.follow_up !== false && {
@@ -464,7 +467,9 @@
 										</span>
 										<span class="flex h-1.5 rounded-full overflow-hidden bg-surface-200-800">
 											{#each row.segments as s (s.key)}
-												<span style="width: {s.pct}%; background: {complianceResultColorMap[s.key]}"
+												<span
+													class={complianceResultTailwindColorMap[s.key]}
+													style="width: {s.pct}%"
 												></span>
 											{/each}
 										</span>
@@ -475,9 +480,7 @@
 						<ul class="flex flex-wrap gap-x-3 gap-y-1 mt-3 text-xs text-surface-600-400">
 							{#each results as key, j (key)}
 								<li class="inline-flex items-center gap-1.5">
-									<span
-										class="size-2 rounded-full"
-										style="background: {complianceResultColorMap[key]}"
+									<span class="size-2 rounded-full {complianceResultTailwindColorMap[key]}"
 									></span>{resultLabels[j]}
 								</li>
 							{/each}
