@@ -101,9 +101,7 @@ def setup(db):
     stored, err = StoredLibrary.store_library_content(FIXTURE.read_bytes())
     assert err is None
     assert stored.load() is None
-    framework = Framework.objects.get(
-        urn="urn:intuitem:test:framework:mixed-scoring"
-    )
+    framework = Framework.objects.get(urn="urn:intuitem:test:framework:mixed-scoring")
     domain, other = _domain("ExportDomain"), _domain("OtherDomain")
     audit = ComplianceAssessment.objects.create(
         name="Audit",
