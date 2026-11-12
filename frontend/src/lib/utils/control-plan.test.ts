@@ -14,6 +14,7 @@ import {
 	isGranularity,
 	localIsoDate,
 	monthBands,
+	orderWindow,
 	rollingWindow,
 	sameWindow,
 	yearWindow
@@ -141,23 +142,54 @@ describe('isGranularity', () => {
 
 describe('isOutstanding', () => {
 	const bucket = (status: string | null, overdue: boolean) => ({ status, node_ids: [], overdue });
+	const task = (bucket_status: Record<string, ReturnType<typeof bucket>>) => ({ bucket_status });
 
 	it('flags an overdue occurrence in any period', () => {
-		expect(isOutstanding({ '2026-09': bucket('pending', true) }, '2026-11')).toBe(true);
-		expect(isOutstanding({ '2026-09': bucket('in_progress', true) }, null)).toBe(true);
+		expect(isOutstanding(task({ '2026-09': bucket('pending', true) }), '2026-11')).toBe(true);
+		expect(isOutstanding(task({ '2026-09': bucket('in_progress', true) }), null)).toBe(true);
+	});
+
+	it('flags an occurrence overdue since before the displayed period', () => {
+		const earlier_overdue = { count: 2, node_id: 'oldest' };
+		expect(isOutstanding({ bucket_status: {}, earlier_overdue }, '2026-11')).toBe(true);
+		expect(
+			isOutstanding({ bucket_status: {}, earlier_overdue: { count: 0, node_id: null } }, '2026-11')
+		).toBe(false);
 	});
 
 	it('flags open work in the current period', () => {
-		expect(isOutstanding({ '2026-11': bucket('pending', false) }, '2026-11')).toBe(true);
-		expect(isOutstanding({ '2026-11': bucket('in_progress', false) }, '2026-11')).toBe(true);
+		expect(isOutstanding(task({ '2026-11': bucket('pending', false) }), '2026-11')).toBe(true);
+		expect(isOutstanding(task({ '2026-11': bucket('in_progress', false) }), '2026-11')).toBe(true);
 	});
 
 	it('ignores future, closed and empty periods', () => {
-		expect(isOutstanding({ '2026-12': bucket('pending', false) }, '2026-11')).toBe(false);
-		expect(isOutstanding({ '2026-11': bucket('completed', false) }, '2026-11')).toBe(false);
-		expect(isOutstanding({ '2026-11': bucket('cancelled', false) }, '2026-11')).toBe(false);
-		expect(isOutstanding({ '2026-11': bucket(null, false) }, '2026-11')).toBe(false);
-		expect(isOutstanding(undefined, '2026-11')).toBe(false);
+		expect(isOutstanding(task({ '2026-12': bucket('pending', false) }), '2026-11')).toBe(false);
+		expect(isOutstanding(task({ '2026-11': bucket('completed', false) }), '2026-11')).toBe(false);
+		expect(isOutstanding(task({ '2026-11': bucket('cancelled', false) }), '2026-11')).toBe(false);
+		expect(isOutstanding(task({ '2026-11': bucket(null, false) }), '2026-11')).toBe(false);
+		expect(isOutstanding({}, '2026-11')).toBe(false);
+	});
+});
+
+describe('orderWindow', () => {
+	it('keeps an ordered window as it is', () => {
+		const window = { startYear: 2026, startMonth: 9, endYear: 2027, endMonth: 8 };
+		expect(orderWindow(window)).toEqual(window);
+		expect(orderWindow({ ...window, endYear: 2026, endMonth: 9 })).toEqual({
+			...window,
+			endYear: 2026,
+			endMonth: 9
+		});
+	});
+
+	it('collapses a window that starts after its end onto its start', () => {
+		// ?start_year=2028 alone, on top of a default window ending in 2027.
+		expect(orderWindow({ startYear: 2028, startMonth: 9, endYear: 2027, endMonth: 8 })).toEqual({
+			startYear: 2028,
+			startMonth: 9,
+			endYear: 2028,
+			endMonth: 9
+		});
 	});
 });
 

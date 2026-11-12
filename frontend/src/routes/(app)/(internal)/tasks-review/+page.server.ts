@@ -1,5 +1,10 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { isGranularity, rollingWindow, type Granularity } from '#lib/utils/control-plan.js';
+import {
+	isGranularity,
+	orderWindow,
+	rollingWindow,
+	type Granularity
+} from '#lib/utils/control-plan.js';
 import { fetchAllPages } from '#lib/utils/pagination.js';
 import { m } from '#paraglide/messages.js';
 import type { PageServerLoad } from './$types';
@@ -34,10 +39,14 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const fallback = rollingWindow(new Date(), granularity);
 
 	// Validate and clamp numeric params
-	const startMonth = clampInt(url.searchParams.get('start_month'), fallback.startMonth, 1, 12);
-	const startYear = clampInt(url.searchParams.get('start_year'), fallback.startYear, 1900, 2100);
-	const endMonth = clampInt(url.searchParams.get('end_month'), fallback.endMonth, 1, 12);
-	const endYear = clampInt(url.searchParams.get('end_year'), fallback.endYear, 1900, 2100);
+	// A bound given alone can land past the fallback of the other one: keep
+	// the range ordered, or the grid would have rows and no period.
+	const { startMonth, startYear, endMonth, endYear } = orderWindow({
+		startMonth: clampInt(url.searchParams.get('start_month'), fallback.startMonth, 1, 12),
+		startYear: clampInt(url.searchParams.get('start_year'), fallback.startYear, 1900, 2100),
+		endMonth: clampInt(url.searchParams.get('end_month'), fallback.endMonth, 1, 12),
+		endYear: clampInt(url.searchParams.get('end_year'), fallback.endYear, 1900, 2100)
+	});
 
 	// Several statuses may be selected: ?status=overdue&status=pending
 	const requested = new Set(url.searchParams.getAll('status'));

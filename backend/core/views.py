@@ -21106,6 +21106,19 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             due_date__gte=year_start, due_date__lte=year_end
         ).order_by("due_date")
 
+        today = timezone.localdate()
+
+        # Open occurrences that fell due before the displayed range: still late,
+        # whatever the range shows.
+        earlier_overdue_qs = (
+            TaskNode.objects.filter(
+                status__in=TaskNode.OPEN_STATUSES,
+                due_date__lt=min(year_start, today),
+            )
+            .only("id", "task_template_id", "due_date")
+            .order_by("due_date")
+        )
+
         # get_queryset already joins folder and the serializer's related columns.
         task_templates = queryset.prefetch_related(
             Prefetch(
@@ -21113,9 +21126,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 queryset=filtered_nodes_qs,
                 to_attr="filtered_nodes",
             ),
+            Prefetch(
+                "tasknode_set",
+                queryset=earlier_overdue_qs,
+                to_attr="earlier_overdue_nodes",
+            ),
         )
-
-        today = timezone.localdate()
 
         # Group by folder
         folders_dict = {}
@@ -21135,19 +21151,31 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
             # Build bucket_status for each bucket
             bucket_status = {}
-            has_any_matching_status = False
+            earlier_overdue = template.earlier_overdue_nodes
+            has_any_matching_status = (
+                bool(earlier_overdue) and "overdue" in status_filters
+            )
             for key in bucket_keys:
                 bucket_nodes = nodes_by_bucket.get(key, [])
                 status, node_ids = self._aggregate_status(bucket_nodes)
                 # An open occurrence past its due date makes the whole bucket late.
-                overdue = any(
-                    node.status in TaskNode.OPEN_STATUSES and node.due_date < today
-                    for node in bucket_nodes
+                # The oldest one is named, so the cell can lead to it rather than
+                # to an earlier occurrence of the bucket that is already closed.
+                overdue_node_id = next(
+                    (
+                        str(node.id)
+                        for node in bucket_nodes
+                        if node.status in TaskNode.OPEN_STATUSES
+                        and node.due_date < today
+                    ),
+                    None,
                 )
+                overdue = overdue_node_id is not None
                 bucket_status[key] = {
                     "status": status,
                     "node_ids": node_ids,
                     "overdue": overdue,
+                    "overdue_node_id": overdue_node_id,
                 }
                 matches = (overdue and "overdue" in status_filters) or (
                     bool(status) and (not status_filters or status in status_filters)
@@ -21160,6 +21188,10 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 continue
 
             template_data["bucket_status"] = bucket_status
+            template_data["earlier_overdue"] = {
+                "count": len(earlier_overdue),
+                "node_id": str(earlier_overdue[0].id) if earlier_overdue else None,
+            }
 
             if tpl_folder_id not in folders_dict:
                 folders_dict[tpl_folder_id] = {
@@ -21181,6 +21213,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "start_year": start_year,
                 "end_month": end_month,
                 "end_year": end_year,
+                # The day the overdue flags were worked out for.
+                "today": today.isoformat(),
             }
         )
 

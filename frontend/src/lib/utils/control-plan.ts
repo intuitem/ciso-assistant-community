@@ -86,6 +86,17 @@ export function yearWindow(year: number): MonthWindow {
 	return { startYear: year, startMonth: 1, endYear: year, endMonth: 12 };
 }
 
+/**
+ * A window read from partial input can start after it ends (a start year past
+ * the default end, say): it then covers its starting month alone.
+ */
+export function orderWindow(window: MonthWindow): MonthWindow {
+	const start = window.startYear * 12 + window.startMonth;
+	const end = window.endYear * 12 + window.endMonth;
+	if (start <= end) return window;
+	return { ...window, endYear: window.startYear, endMonth: window.startMonth };
+}
+
 export function sameWindow(a: MonthWindow, b: MonthWindow): boolean {
 	return (
 		a.startYear === b.startYear &&
@@ -136,19 +147,30 @@ export interface BucketStatus {
 	status: string | null;
 	node_ids: string[];
 	overdue?: boolean;
+	/** The oldest late occurrence of the bucket, when it is overdue. */
+	overdue_node_id?: string | null;
+}
+
+/** Open occurrences that fell due before the displayed period. */
+export interface EarlierOverdue {
+	count: number;
+	/** The oldest of them. */
+	node_id: string | null;
 }
 
 const OPEN_STATUSES = ['pending', 'in_progress'];
 
 /**
- * A task is outstanding when it needs action now: an occurrence is overdue, or
- * the current period still has open work.
+ * A task is outstanding when it needs action now: an occurrence is overdue,
+ * within the displayed period or before it, or the current period still has
+ * open work.
  */
 export function isOutstanding(
-	bucketStatus: Record<string, BucketStatus> | undefined,
+	task: { bucket_status?: Record<string, BucketStatus>; earlier_overdue?: EarlierOverdue },
 	currentKey: string | null
 ): boolean {
-	return Object.entries(bucketStatus ?? {}).some(
+	if ((task.earlier_overdue?.count ?? 0) > 0) return true;
+	return Object.entries(task.bucket_status ?? {}).some(
 		([key, bucket]) =>
 			bucket.overdue === true ||
 			(key === currentKey && bucket.status !== null && OPEN_STATUSES.includes(bucket.status))
@@ -173,6 +195,7 @@ export interface ReviewTask {
 	assigned_to?: NamedRef[];
 	applied_controls?: NamedRef[];
 	bucket_status?: Record<string, BucketStatus>;
+	earlier_overdue?: EarlierOverdue;
 }
 
 export interface ReviewFolder {

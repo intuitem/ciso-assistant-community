@@ -197,12 +197,7 @@
 		<div class="flex items-center justify-between gap-4" data-testid="occurrence-navigation">
 			{@render occurrenceLink(data.previousOccurrence, m.previous(), 'fa-chevron-left', true)}
 			<div class="min-w-0 space-y-1">
-				<OccurrenceHistory
-					occurrences={history}
-					markedId={taskNode.id}
-					markedLabel={null}
-					stackBreadcrumb={false}
-				/>
+				<OccurrenceHistory occurrences={history} markedId={taskNode.id} markedLabel={null} />
 			</div>
 			{@render occurrenceLink(data.nextOccurrence, m.next(), 'fa-chevron-right', false)}
 		</div>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
@@ -18,14 +17,9 @@
 		markedId: string | null;
 		/** Added to the marked square's tooltip, to say what the ring means. */
 		markedLabel: string | null;
-		/**
-		 * Whether opening an occurrence adds a breadcrumb. Not from another
-		 * occurrence: the crumb is then swapped rather than stacked per click.
-		 */
-		stackBreadcrumb: boolean;
 	}
 
-	let { occurrences, markedId, markedLabel, stackBreadcrumb }: Props = $props();
+	let { occurrences, markedId, markedLabel }: Props = $props();
 
 	// Statuses a real occurrence can hold; '_unset' is an analytics-only bucket.
 	const HISTORY_STATUSES = ['pending', 'in_progress', 'completed', 'cancelled'];
@@ -83,18 +77,15 @@
 					{@const title = `${formatDate(occurrence.due_date)} — ${safeTranslate(occurrence.status)}${
 						isMarked && markedLabel ? ` (${markedLabel})` : ''
 					}`}
-					{#if stackBreadcrumb}
-						<Anchor {href} class={squareClass} {style} {title} />
-					{:else}
-						<a
-							{href}
-							class={squareClass}
-							{style}
-							{title}
-							aria-label={title}
-							aria-current={isMarked ? 'true' : undefined}
-						></a>
-					{/if}
+					<!-- A plain link: no breadcrumb is stacked per occurrence opened. -->
+					<a
+						{href}
+						class={squareClass}
+						{style}
+						{title}
+						aria-label={title}
+						aria-current={isMarked ? 'true' : undefined}
+					></a>
 				{/each}
 			</div>
 		</div>

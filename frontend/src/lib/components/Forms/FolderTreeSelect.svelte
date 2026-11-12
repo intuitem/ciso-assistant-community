@@ -155,9 +155,9 @@
 	}
 
 	// What the tree draws: Global as the root with the domains under it, or the
-	// domains alone when Global is not accepted.
+	// domains alone when Global is not accepted or is the excluded node.
 	const rootNode = $derived(
-		shownTree && showRoot
+		shownTree && showRoot && shownTree.uuid !== excludedId
 			? { ...shownTree, children: pruneExcluded(shownTree.children ?? []) }
 			: null
 	);

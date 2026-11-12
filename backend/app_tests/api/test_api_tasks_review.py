@@ -164,15 +164,38 @@ class TestOverdue:
 
         late_bucket = status[f"{late.year}-{late.month:02d}"]
         upcoming_bucket = status[f"{upcoming.year}-{upcoming.month:02d}"]
+        late_ids = [str(n.id) for n in template.tasknode_set.filter(due_date=late)]
         assert late_bucket == {
             "status": "pending",
-            "node_ids": [
-                str(n.id) for n in template.tasknode_set.filter(due_date=late)
-            ],
+            "node_ids": late_ids,
             "overdue": True,
+            "overdue_node_id": late_ids[0],
         }
+        assert upcoming_bucket["overdue_node_id"] is None
+        assert payload["today"] == today.isoformat()
         assert upcoming_bucket["status"] == "pending"
         assert upcoming_bucket["overdue"] is False
+
+    def test_overdue_bucket_names_its_late_occurrence(self, authenticated_client):
+        # A quarter whose first occurrence is closed and a later one is late:
+        # the cell must lead to the late one.
+        today = timezone.localdate()
+        quarter_start = date(today.year - 1, 1, 1)
+        template = _make_template()
+        _make_node(template, quarter_start + timedelta(days=5), status="completed")
+        late = _make_node(template, quarter_start + timedelta(days=40))
+        _make_node(template, quarter_start + timedelta(days=70))
+
+        payload = _review(
+            authenticated_client,
+            **_window(quarter_start, quarter_start + timedelta(days=70)),
+            granularity="quarterly",
+        )
+        bucket = _task(payload, template)["bucket_status"][f"{quarter_start.year}-Q1"]
+
+        assert bucket["overdue"] is True
+        assert bucket["overdue_node_id"] == str(late.id)
+        assert bucket["node_ids"][0] != str(late.id)
 
     def test_in_progress_past_due_is_overdue(self, authenticated_client):
         late = timezone.localdate() - timedelta(days=40)
@@ -223,6 +246,71 @@ class TestOverdue:
         )
         ids = {task["id"] for folder in payload["folders"] for task in folder["tasks"]}
         assert ids == {str(late_template.id)}
+
+
+@pytest.mark.django_db
+class TestOverdueBeforeThePeriod:
+    """Open occurrences that fell due before the displayed range are still late."""
+
+    def test_counted_with_the_oldest_named(self, authenticated_client):
+        today = timezone.localdate()
+        template = _make_template()
+        oldest = _make_node(template, today - timedelta(days=400))
+        _make_node(template, today - timedelta(days=370), status="in_progress")
+        # Closed, or inside the displayed range: neither counts here.
+        _make_node(template, today - timedelta(days=380), status="completed")
+        _make_node(template, today - timedelta(days=390), status="cancelled")
+        _make_node(template, today)
+
+        payload = _review(authenticated_client, **_window(today))
+
+        assert _task(payload, template)["earlier_overdue"] == {
+            "count": 2,
+            "node_id": str(oldest.id),
+        }
+
+    def test_none_when_nothing_is_late(self, authenticated_client):
+        today = timezone.localdate()
+        template = _make_template()
+        _make_node(template, today)
+
+        payload = _review(authenticated_client, **_window(today))
+
+        assert _task(payload, template)["earlier_overdue"] == {
+            "count": 0,
+            "node_id": None,
+        }
+
+    def test_a_range_in_the_future_does_not_make_upcoming_work_late(
+        self, authenticated_client
+    ):
+        today = timezone.localdate()
+        template = _make_template()
+        _make_node(template, today + timedelta(days=10))
+        shown = today + timedelta(days=200)
+        _make_node(template, shown)
+
+        payload = _review(authenticated_client, **_window(shown))
+
+        assert _task(payload, template)["earlier_overdue"]["count"] == 0
+
+    def test_overdue_filter_keeps_a_task_late_only_before_the_period(
+        self, authenticated_client
+    ):
+        today = timezone.localdate()
+        late_before = _make_template(name="Late before the period")
+        _make_node(late_before, today - timedelta(days=400))
+        on_time = _make_template(name="On time")
+        _make_node(on_time, today + timedelta(days=1))
+
+        payload = _review(
+            authenticated_client,
+            **_window(today, today + timedelta(days=1)),
+            status="overdue",
+        )
+        names = [task["name"] for f in payload["folders"] for task in f["tasks"]]
+
+        assert names == ["Late before the period"]
 
 
 @pytest.mark.django_db

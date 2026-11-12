@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
+	import { get } from 'svelte/store';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { m } from '#paraglide/messages.js';
 	import { getLocale } from '#paraglide/runtime.js';
@@ -51,6 +52,8 @@
 		folders: ReviewFolder[];
 		buckets: Bucket[];
 		granularity: Granularity;
+		/** The day the API worked the overdue flags out for. */
+		today?: string;
 	}
 
 	let { data }: Props = $props();
@@ -68,12 +71,22 @@
 	let view: ViewSettings = $state(defaultViewSettings());
 
 	// Read after hydration, so the server and the first client render agree.
+	// Storage can be unavailable (blocked, private window, full): the view then
+	// keeps its defaults, or its changes for as long as the page stays open.
 	onMount(() => {
-		view = parseViewSettings(localStorage.getItem(VIEW_STORAGE_KEY));
+		try {
+			view = parseViewSettings(localStorage.getItem(VIEW_STORAGE_KEY));
+		} catch {
+			// Defaults stay.
+		}
 	});
 
 	function saveView() {
-		localStorage.setItem(VIEW_STORAGE_KEY, JSON.stringify(view));
+		try {
+			localStorage.setItem(VIEW_STORAGE_KEY, JSON.stringify(view));
+		} catch {
+			// Not remembered, still applied.
+		}
 	}
 
 	function updateView(patch: Partial<ViewSettings>) {
@@ -191,7 +204,6 @@
 	}
 
 	const now = new Date();
-	const today = localIsoDate(now);
 	const currentYear = now.getFullYear();
 
 	function getMonthName(monthIndex: number): string {
@@ -276,7 +288,7 @@
 		endMonth: data.endMonth
 	});
 
-	const filters: Filters = $derived({
+	const urlFilters: Filters = $derived({
 		period: data.rolling ? null : shownWindow,
 		granularity: data.selectedGranularity,
 		folder: data.selectedFolder,
@@ -285,6 +297,12 @@
 		applied_controls: data.selectedAppliedControls,
 		statuses: data.selectedStatuses
 	});
+
+	// A change is shown at once and the next one builds on it: two statuses
+	// ticked in quick succession would otherwise both start from the URL as it
+	// was, and the second would undo the first.
+	let pendingFilters = $state.raw<Filters | null>(null);
+	const filters: Filters = $derived(pendingFilters ?? urlFilters);
 
 	function buildUrl(next: Filters): string {
 		const params = new URLSearchParams();
@@ -306,8 +324,14 @@
 	}
 
 	function applyFilters(next: Filters) {
+		pendingFilters = next;
 		// Stay where we are: same history entry, same scroll position, same focus.
-		goto(buildUrl(next), { replace: true, reset: false });
+		goto(buildUrl(next), { replace: true, reset: false })
+			.catch(() => {})
+			.finally(() => {
+				// The URL has caught up, unless a later change took over meanwhile.
+				if (pendingFilters === next) pendingFilters = null;
+			});
 	}
 
 	function setFilter(name: ScalarFilter, value: string) {
@@ -348,7 +372,7 @@
 	function setPeriodBound(bound: 'start' | 'end', value: string) {
 		const parsed = parseMonthFormat(value);
 		if (!parsed) return;
-		const period = { ...shownWindow };
+		const period = { ...(filters.period ?? shownWindow) };
 		if (bound === 'start') {
 			period.startYear = parsed.year;
 			period.startMonth = parsed.month;
@@ -411,6 +435,31 @@
 		}
 	);
 
+	// The pickers hold their own value. When the URL changes behind their back
+	// (the sidebar link back to the unfiltered plan, say), bring them in line.
+	// The applied control picker reads its value when it mounts, so it is
+	// remounted when its value had to be corrected.
+	let pickerEpoch = $state(0);
+	$effect(() => {
+		const domain = data.selectedFolder || null;
+		const appliedControl = data.selectedAppliedControls;
+		untrack(() => {
+			const current = get(pickerFilterForm.form);
+			const domainMoved = (current.domain || null) !== domain;
+			const controlMoved = (current.applied_controls?.[0] ?? '') !== appliedControl;
+			if (!domainMoved && !controlMoved) return;
+			pickerFilterForm.form.update(
+				(formData) => {
+					formData.domain = domain;
+					formData.applied_controls = appliedControl ? [appliedControl] : [];
+					return formData;
+				},
+				{ taint: false }
+			);
+			if (controlMoved) pickerEpoch += 1;
+		});
+	});
+
 	function resetFilters() {
 		pickerFilterForm.form.update((formData) => {
 			formData.domain = null;
@@ -418,6 +467,7 @@
 			return formData;
 		});
 		outstandingOnly = false;
+		pendingFilters = null;
 		goto('/tasks-review', { replace: true, reset: false });
 	}
 
@@ -453,6 +503,9 @@
 
 	const buckets = $derived(review?.buckets ?? []);
 	const granularity: Granularity = $derived(review?.granularity ?? 'monthly');
+	// The API's day, so the current period and what is outstanding agree with its
+	// overdue flags when the browser and the server are on either side of midnight.
+	const today = $derived(review?.today ?? localIsoDate(now));
 	const currentBucketKey = $derived(
 		buckets.find((bucket) => isCurrentBucket(bucket, today))?.key ?? null
 	);
@@ -466,7 +519,7 @@
 
 	const allRows = $derived(flattenTasks(review?.folders ?? []));
 	const outstandingRows = $derived(
-		allRows.filter((row) => isOutstanding(row.task.bucket_status, currentBucketKey))
+		allRows.filter((row) => isOutstanding(row.task, currentBucketKey))
 	);
 	const outstandingCount = $derived(outstandingRows.length);
 
@@ -885,7 +938,7 @@
 				<div class="col-span-2">
 					<!-- With a domain selected, offer only the controls its plan covers;
 					     the picker loads its options once, so remount it on change -->
-					{#key `${filters.folder}:${filters.include_subfolders}`}
+					{#key `${filters.folder}:${filters.include_subfolders}:${pickerEpoch}`}
 						<AutocompleteSelect
 							form={pickerFilterForm}
 							field="applied_controls"
@@ -1124,6 +1177,24 @@
 																>
 																	{task.name}
 																</Anchor>
+																{#if task.earlier_overdue?.node_id}
+																	{@const earlier = m.controlPlanEarlierOverdue({
+																		count: task.earlier_overdue.count
+																	})}
+																	<!-- Late since before the first column: nothing in the
+																	     grid would otherwise show why the task is outstanding. -->
+																	<Anchor
+																		href="/task-nodes/{task.earlier_overdue.node_id}"
+																		label={task.name}
+																		class="inline-flex shrink-0 items-center gap-0.5 rounded-sm border border-red-400 bg-red-100 px-1 text-[10px] font-medium leading-4 text-red-700 hover:opacity-80 dark:border-red-500 dark:bg-red-900/70 dark:text-red-200"
+																		title={earlier}
+																		aria-label={earlier}
+																		data-testid="control-plan-earlier-overdue"
+																	>
+																		<i class="fa-solid fa-clock-rotate-left text-[8px]"></i>
+																		{task.earlier_overdue.count}
+																	</Anchor>
+																{/if}
 																{#if task.link}
 																	<a
 																		href={task.link}
@@ -1152,7 +1223,12 @@
 												{@const bucketData = task.bucket_status?.[bucket.key]}
 												{@const state = cellState(bucketData)}
 												{@const nodeIds = bucketData?.node_ids ?? []}
-												{@const firstNodeId = nodeIds.length > 0 ? nodeIds[0] : null}
+												<!-- A late cell leads to its late occurrence, not to an earlier
+												     one of the same period that is already closed. -->
+												{@const firstNodeId =
+													(state === 'overdue' && bucketData?.overdue_node_id) ||
+													nodeIds[0] ||
+													null}
 												{@const cellShape = view.compact ? 'mx-px h-3' : 'mx-0.5 h-5'}
 												<td
 													class="p-0 border-b border-surface-100-900 group-hover/row:bg-surface-100-900

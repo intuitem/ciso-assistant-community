@@ -161,7 +161,6 @@
 					occurrences={timeline}
 					markedId={next?.id ?? null}
 					markedLabel={m.nextOccurrence()}
-					stackBreadcrumb={true}
 				/>
 			{:else}
 				<p class="text-sm text-surface-600-400">{m.noOccurrenceHistory()}</p>
