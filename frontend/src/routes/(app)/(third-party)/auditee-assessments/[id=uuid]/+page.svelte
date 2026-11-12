@@ -6,6 +6,7 @@
 	import Question from '#lib/components/Forms/Question.svelte';
 	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
 	import Score from '#lib/components/Forms/Score.svelte';
+	import ScoreControl from '#lib/components/Forms/ScoreControl.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import SplashCard from '#lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
@@ -18,6 +19,7 @@
 		type ModalStore
 	} from '#lib/components/Modals/stores.js';
 	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import {
 		complianceResultColorMap,
 		complianceResultTailwindColorMap
@@ -30,6 +32,9 @@
 		hasComputedScore,
 		resultBadgeStyle,
 		isFieldEditable as isFieldEditableHelper,
+		showApplicabilityToggle,
+		maturityScore,
+		roundScore,
 		shouldShowAutoQuestion,
 		buildAutoAlignmentQuestion,
 		alignmentValueFromChoiceUrn,
@@ -41,6 +46,8 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import ApplicabilityToggle from '#lib/components/ComplianceAssessment/ApplicabilityToggle.svelte';
+	import NotApplicableScores from '#lib/components/ComplianceAssessment/NotApplicableScores.svelte';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDate } from '#lib/utils/datetime.js';
 	import { Accordion, Popover, Progress } from '@skeletonlabs/skeleton-svelte';
@@ -54,7 +61,12 @@
 		form: ActionData;
 	}
 
-	let { data, form }: Props = $props();
+	let { data: incoming, form }: Props = $props();
+	// SvelteKit hands the next page's data to this page before unmounting it.
+	let lastData = incoming;
+	const data = $derived.by(() =>
+		incoming.compliance_assessment ? (lastData = incoming) : lastData
+	);
 
 	// Full list, used for the ToC result counts; the input radio filters per-row.
 	const result_options = requirementResultOptions();
@@ -137,6 +149,21 @@
 	const canEditResult = $derived(isFieldEditable('result'));
 	const canEditScore = $derived(isFieldEditable('score'));
 	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
+	// Score-only audits mark N/A through the applicability toggle.
+	const applicabilityToggle = $derived(
+		Boolean(complianceAssessment.scoring_enabled) &&
+			showApplicabilityToggle(complianceAssessment, viewerRole)
+	);
+	// Applicability whether compliance is shown or not: a score-only audit hides
+	// `result` and reads `not_applicable`; the toggle keeps both in step.
+	function isNotApplicable(ra: Record<string, any>): boolean {
+		return 'result' in ra ? ra.result === 'not_applicable' : Boolean(ra.not_applicable);
+	}
+	function setApplicability(ra: Record<string, any>, result: 'not_assessed' | 'not_applicable') {
+		ra.result = result;
+		ra.not_applicable = result === 'not_applicable';
+		update(ra, 'result');
+	}
 	const canEditObservation = $derived(isFieldEditable('observation'));
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
 	const canEditTaskTemplates = $derived(isFieldEditable('task_templates'));
@@ -462,7 +489,16 @@
 		navItems.filter((item): item is NavItem & { type: 'assessment' } => item.type === 'assessment')
 	);
 
-	let currentIndex = $state(0);
+	const focusRa = page.url.searchParams.get('ra');
+	const focusTask = page.url.searchParams.get('task');
+	let currentIndex = $state(
+		untrack(() =>
+			Math.max(
+				0,
+				navItems.findIndex((item) => item.data?.id === focusRa)
+			)
+		)
+	);
 	const currentNavItem = $derived(navItems[currentIndex]);
 	const currentItem = $derived(currentNavItem?.type === 'assessment' ? currentNavItem.data : null);
 	const currentSplashNode = $derived(
@@ -494,11 +530,30 @@
 			return sum + visible;
 		}, 0)
 	);
+	// A requirement without questions is done as the backend's respondent_progress_counts
+	// counts it: through the respondent's alignment answer when that field is in use,
+	// else through the audit's own content rule (contentDone).
+	const alignmentInUse = $derived(
+		getFieldVisibility(complianceAssessment, 'respondent').showRespondentAlignment
+	);
+	const scoreOnlyAudit = $derived(!getFieldVisibility(complianceAssessment, 'auditor').showResult);
+	// Compliance when the audit shows it; in a score-only audit, N/A or a score
+	// above the minimum. A verdict hidden from this viewer never counts as done.
+	function contentDone(ra: Record<string, any>): boolean {
+		if (scoreOnlyAudit) {
+			const min = ra.effective_min_score ?? complianceAssessment.min_score ?? 0;
+			return Boolean(ra.not_applicable) || (ra.score != null && ra.score > min);
+		}
+		return ra.result != null && ra.result !== 'not_assessed';
+	}
+	function isUnitDone(ra: Record<string, any>): boolean {
+		return alignmentInUse ? Boolean(ra.respondent_alignment) : contentDone(ra);
+	}
 	const answeredQuestions = $derived(
 		assessableItems.reduce((sum, item) => {
 			const answered = item.data.answered_questions ?? 0;
 			if (isFrameworklessAssessableItem(item)) {
-				return sum + (item.data.respondent_alignment ? 1 : 0);
+				return sum + (isUnitDone(item.data) ? 1 : 0);
 			}
 			return sum + answered;
 		}, 0)
@@ -518,17 +573,16 @@
 
 	const totalAssessable = $derived(assessableItems.length);
 	// Per-item completion, mirroring the backend auditee-dashboard rules.
-	// This page is respondent-oriented ON PURPOSE: the audit-level progress
-	// mode (status-driven / score above minimum) does NOT apply here, since
-	// respondents can neither see nor edit those fields. A question-bearing
+	// This page is respondent-oriented ON PURPOSE: status never drives it,
+	// since respondents can neither see nor edit it. A question-bearing
 	// requirement completes through its answers (whether or not they compute
 	// a result), alignment-driven ones through the respondent's alignment
-	// answer, the rest through the result.
+	// answer, the rest through the audit's content rule (contentDone).
 	function isItemDone(item: { data: Record<string, any> }): boolean {
 		const visible = item.data.visible_questions ?? 0;
 		if (visible > 0) return (item.data.answered_questions ?? 0) >= visible;
 		if (useAlignmentProgress) return Boolean(item.data.respondent_alignment);
-		return item.data.result !== 'not_assessed';
+		return contentDone(item.data);
 	}
 	const assessedCount = $derived(assessableItems.filter(isItemDone).length);
 	const progressPercent = $derived(
@@ -559,10 +613,10 @@
 		const answered = item.data.answered_questions ?? 0;
 		// An owed evidence keeps the dot amber: submission would be refused.
 		const complete = owesEvidence(item.data) ? '#f59e0b' : '#22c55e';
-		// Framework-less assessable RA: reflect respondent_alignment state
+		// Framework-less assessable RA: the same unit rule as the progress (isUnitDone)
 		// for both respondent and auditor views so the ToC is accurate for everyone.
 		if (isFrameworklessAssessableItem(item)) {
-			return item.data.respondent_alignment ? complete : '#ef4444';
+			return isUnitDone(item.data) ? complete : '#ef4444';
 		}
 		if (visible === 0) return complete; // no questions = complete
 		if (answered >= visible) return complete; // all answered
@@ -628,12 +682,18 @@
 					score: score,
 					documentation_score: documentationScore
 				});
+				// Progress and maturity read the saved scores
+				await refreshAll();
 			}
 		}, 500);
 	}
 
 	// --- Modals ---
 	const modalStore: ModalStore = getModalStore();
+
+	// Linked objects the viewer can see; the others come masked and are only counted.
+	const visibleLinks = (items: any[] | undefined): any[] =>
+		(items ?? []).filter((item) => !isMaskedPlaceholder(item));
 
 	function modalMeasureCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
@@ -656,7 +716,7 @@
 
 	// Which task's commitment panel is open: the table stays scannable and the
 	// promise is one click away.
-	let expandedTask = $state<string | null>(null);
+	let expandedTask = $state<string | null>(focusTask);
 
 	const REVIEW_STATES = [
 		{ id: 'changes_requested', label: m.reviewChangesRequested(), color: '#ef4444' },
@@ -809,7 +869,11 @@
 		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce(
 			(acc, requirementAssessment) => {
-				return { ...acc, [requirementAssessment.id]: [] };
+				return {
+					...acc,
+					[requirementAssessment.id]:
+						focusTask && requirementAssessment.id === focusRa ? ['taskTemplates'] : []
+				};
 			},
 			{} as Record<string, string[]>
 		)
@@ -927,13 +991,18 @@
 	import { page } from '$app/state';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 	import CommitmentPanel from '#lib/components/CommitmentPanel/CommitmentPanel.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	// Where the sticky header parks, and how tall it is: the ToC column hangs below it.
 	let stickyTop = $state(0);
 	let headerHeight = $state(0);
 
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);
+		if (focusTask) {
+			setTimeout(() =>
+				document.getElementById(`task-${focusTask}`)?.scrollIntoView({ block: 'center' })
+			);
+		}
 		const appbar = document.querySelector('.sticky.top-0.z-50') as HTMLElement | null;
 		let cleanupAppbar: (() => void) | undefined;
 		if (appbar) {
@@ -953,6 +1022,16 @@
 		};
 	});
 </script>
+
+<!-- Linked objects the viewer cannot see: counted, never named. -->
+{#snippet hiddenLinksNote(items: any[] | undefined)}
+	{@const hidden = countMasked(items ?? [])}
+	{#if hidden > 0}
+		<span class="text-xs text-yellow-700" data-testid="hidden-links-note">
+			{m.objectsNotVisible({ count: hidden })}
+		</span>
+	{/if}
+{/snippet}
 
 <div class="flex flex-col p-4">
 	<div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg w-full h-full space-y-3">
@@ -1530,6 +1609,17 @@
 										</div>
 									{/if}
 
+									<!-- Applicability (score-only audits) -->
+									{#if applicabilityToggle}
+										<div class="flex justify-center w-full my-2">
+											<ApplicabilityToggle
+												applicable={!isNotApplicable(requirementAssessment)}
+												disabled={!canEditScore}
+												onChange={(result) => setApplicability(requirementAssessment, result)}
+											/>
+										</div>
+									{/if}
+
 									<!-- Extended result -->
 									{#if showExtendedResult}
 										<div class="flex flex-col items-center w-full my-2">
@@ -1556,7 +1646,23 @@
 									<!-- Score -->
 									{#if showScore}
 										<div class="flex flex-col w-full place-items-center">
-											{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
+											{#if complianceAssessment.scoring_enabled && isNotApplicable(requirementAssessment)}
+												<!-- Not applicable, computed score or not: what it counts for, greyed. -->
+												<NotApplicableScores
+													value={requirementAssessment.anchored_score}
+													min={requirementAssessment.effective_min_score ??
+														complianceAssessment.min_score}
+													max={requirementAssessment.effective_max_score ??
+														complianceAssessment.max_score}
+													scoresDefinition={requirementAssessment.effective_scores_definition ??
+														complianceAssessment.scores_definition}
+													showImplementation
+													showDocumentation={showDocumentationScore}
+													implementationLabel={complianceAssessment.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+												/>
+											{:else if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
 												{@const raMin =
 													requirementAssessment.effective_min_score ??
 													complianceAssessment.min_score}
@@ -1593,7 +1699,7 @@
 														</Progress>
 													</div>
 												</div>
-											{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
+											{:else if complianceAssessment.scoring_enabled}
 												{@const raMin =
 													requirementAssessment.effective_min_score ??
 													complianceAssessment.min_score}
@@ -1644,6 +1750,21 @@
 														{/if}
 													{/snippet}
 												</ScorePair>
+												{#if showDocumentationScore && requirementAssessment.is_scored && requirementAssessment.score != null}
+													<ScoreControl
+														editable={false}
+														value={roundScore(
+															maturityScore(
+																requirementAssessment.score,
+																requirementAssessment.documentation_score,
+																raMin
+															)
+														)}
+														min={raMin}
+														max={raMax}
+														label={m.maturity()}
+													/>
+												{/if}
 											{/if}
 										</div>
 									{/if}
@@ -1702,7 +1823,7 @@
 														</div>
 													{/if}
 													<div class="flex flex-wrap space-x-2 items-center">
-														{#each requirementAssessment.applied_controls ?? [] as ac}
+														{#each visibleLinks(requirementAssessment.applied_controls) as ac}
 															<p class="p-2">
 																<Anchor
 																	class="anchor"
@@ -1713,6 +1834,7 @@
 																</Anchor>
 															</p>
 														{/each}
+														{@render hiddenLinksNote(requirementAssessment.applied_controls)}
 													</div>
 												</Accordion.ItemContent>
 											</Accordion.Item>
@@ -1787,8 +1909,12 @@
 																</tr>
 															</thead>
 															<tbody>
-																{#each requirementAssessment.task_templates ?? [] as task}
-																	<tr class="border-b border-surface-100-900">
+																{#each visibleLinks(requirementAssessment.task_templates) as task}
+																	<tr
+																		id="task-{task.id}"
+																		class="border-b border-surface-100-900"
+																		class:bg-primary-100-900={task.id === focusTask}
+																	>
 																		<td class="py-2">
 																			<i class="fa-solid fa-list-check mr-2 text-surface-500"
 																			></i>{task.str}
@@ -1856,6 +1982,7 @@
 																{/each}
 															</tbody>
 														</table>
+														{@render hiddenLinksNote(requirementAssessment.task_templates)}
 													{/if}
 												</Accordion.ItemContent>
 											</Accordion.Item>
@@ -1926,7 +2053,7 @@
 														</div>
 													{/if}
 													<div class="flex flex-wrap space-x-2 items-center">
-														{#each requirementAssessment.evidences ?? [] as evidence}
+														{#each visibleLinks(requirementAssessment.evidences) as evidence}
 															<p class="p-2">
 																<Anchor
 																	class="anchor"
@@ -1938,6 +2065,7 @@
 																</Anchor>
 															</p>
 														{/each}
+														{@render hiddenLinksNote(requirementAssessment.evidences)}
 													</div>
 												</Accordion.ItemContent>
 											</Accordion.Item>

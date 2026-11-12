@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.13.7](https://img.shields.io/badge/Version-0.13.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.2.1](https://img.shields.io/badge/AppVersion-v4.2.1-informational?style=flat-square)
+![Version: 0.13.9](https://img.shields.io/badge/Version-0.13.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.2.3](https://img.shields.io/badge/AppVersion-v4.2.3-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -177,6 +177,7 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | frontend.args | list | `[]` (image arguments) | Override the frontend container arguments |
 | frontend.command | list | `[]` (image entrypoint) | Override the frontend container entrypoint |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
+| frontend.config.xffDepth | int | `1` | Number of reverse proxies in front of the frontend (used to pick the real client address for login rate limiting; only used when `ingress.enabled`). |
 | frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
 | frontend.extraVolumeMounts | list | `[]` | Set extra volume mounts for frontend container |
@@ -223,6 +224,14 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | ingress.tls.certificateSecret | object | `{}` | Custom TLS certificate as secret # Note: 'key' and 'certificate' are expected in PEM format |
 | ingress.tls.enabled | bool | `false` | Enable TLS for the ingress |
 | ingress.tls.existingSecret | string | `""` | Use existing TLS secret |
+| memcached.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001}` | Container-level security context for memcached |
+| memcached.enabled | bool | `false` | Run a memcached container in the backend pod, reached by the backend and Huey through a unix socket (sets ENABLE_MEMCACHED). Optional: whoever enables it runs it |
+| memcached.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for memcached |
+| memcached.image.registry | string | `"docker.io"` | Registry to use for memcached |
+| memcached.image.repository | string | `"library/memcached"` | Repository to use for memcached |
+| memcached.image.tag | string | `"1.6-alpine"` | Tag to use for memcached |
+| memcached.memoryLimit | int | `16` | Memory memcached may use for items, in megabytes |
+| memcached.resources | object | `{}` | Resources for memcached |
 | nameOverride | string | `"ciso-assistant"` | Provide a name in place of `ciso-assistant` |
 | networkPolicy.egress | list | `[]` | Egress rules (raw Kubernetes NetworkPolicy `egress` entries) |
 | networkPolicy.enabled | bool | `false` | Create a NetworkPolicy for CISO Assistant pods |

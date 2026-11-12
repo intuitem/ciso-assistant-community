@@ -55,10 +55,18 @@ Each widget can also carry a custom title, an **aggregation** (avg, sum, min, ma
 1. Open **Metrology → Dashboards** and click **Create a dashboard**.
 2. Set the name, domain, optional ref ID, optional labels.
 3. From the new dashboard's detail page, open the **Widgets** layout view.
-4. **Add a widget** — pick a chart type, then bind a data source (custom metric, built-in metric, or text block). Give it a title.
+4. **Add a widget** — pick a chart type, then bind a data source (custom metric, built-in metric, or text block). Give it a title. For a custom metric, the **Preview** at the bottom of the form draws the widget from the metric's recent values as you change the chart type, the time range or the target.
+
+<figure><img src="../.gitbook/assets/metrics-widget-preview.png" alt="The Add custom metric form with Training coverage picked, Line Chart and All Time selected, Show target ticked, and a Preview box drawing the line chart with its target line"><figcaption><p>The Preview draws the widget before it is saved</p></figcaption></figure>
 5. Drag widgets to reorder, resize for emphasis. Layout changes save in place.
 
 A dashboard with no widgets shows _"No widgets configured for this dashboard yet."_ on every viewing surface, with a shortcut back to the layout editor.
+
+## From a widget to its source
+
+Every widget's title is a link: a custom metric widget opens the metric's page, a built-in widget opens the object it reads (the audit, the asset, the domain). Nothing to configure on the widget.
+
+<figure><img src="../.gitbook/assets/metrics-widget-link.png" alt="A dashboard widget titled Training coverage · ACME Spain, the title underlined as a link with a small open-in-new-tab icon, above a line chart with a target line"><figcaption><p>The title opens the metric behind the widget</p></figcaption></figure>
 
 ## Embedding a dashboard on the Analytics page
 

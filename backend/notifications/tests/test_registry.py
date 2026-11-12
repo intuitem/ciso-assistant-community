@@ -37,6 +37,8 @@ def test_email_template_is_present_exactly_when_email_is_a_channel(key, meta):
     not silently coexist with an email channel."""
     if "email" in meta["channels"]:
         assert meta["email_template"], f"{key} has an email channel but no template"
+        # the settings switch disables email by type key, delivery checks the template
+        assert meta["email_template"] == key, f"{key} -> {meta['email_template']}"
         for locale in LOCALES:
             path = Path(TEMPLATE_BASE_PATH) / locale / f"{meta['email_template']}.yaml"
             assert path.exists(), f"{key} -> missing {path}"
@@ -66,7 +68,7 @@ def test_condition_mode_matches_the_deadlines_category():
         k for k, v in NOTIFICATION_REGISTRY.items() if v["category"] == "deadlines"
     }
     assert conditions == deadlines
-    assert len(conditions) == 10
+    assert len(conditions) == 14
 
 
 def _catalog(locale: str):
@@ -97,6 +99,23 @@ def test_every_in_app_type_has_a_title_message(locale):
         not in catalog
     ]
     assert not missing, f"{locale}: no title message for {missing}"
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_every_type_has_a_settings_label(locale):
+    """The notification and email template settings pages build
+    `template<Type>Name` from the type key: a near miss shows the raw key."""
+    catalog = _catalog(locale)
+    if catalog is None:
+        pytest.skip("frontend messages not present in this checkout")
+
+    missing = [
+        key
+        for key in NOTIFICATION_REGISTRY
+        if f"template{''.join(w.capitalize() for w in key.split('_'))}Name"
+        not in catalog
+    ]
+    assert not missing, f"{locale}: no settings label for {missing}"
 
 
 @pytest.mark.parametrize("locale", LOCALES)

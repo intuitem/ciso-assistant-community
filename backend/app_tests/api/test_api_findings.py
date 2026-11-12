@@ -757,3 +757,24 @@ class TestFindingsAssessmentPdf:
         )
         assert res.status_code == 200
         assert res["Content-Type"] == "application/pdf"
+
+
+class TestDueDateFilter:
+    """The calendar asks for the findings due in one month (due_date__year/__month)."""
+
+    def test_filters_by_due_date_year_and_month(self, setup):
+        client, binder = setup["client"], setup["binder"]
+        for name, due_date in [
+            ("due in november", "2026-11-15"),
+            ("due in december", "2026-12-15"),
+            ("due a year earlier", "2025-11-15"),
+            ("no due date", None),
+        ]:
+            payload = {"name": name, "findings_assessment": str(binder.id)}
+            if due_date:
+                payload["due_date"] = due_date
+            assert create_finding(client, **payload).status_code == 201
+
+        res = client.get("/api/findings/?due_date__year=2026&due_date__month=11")
+        assert res.status_code == 200
+        assert [f["name"] for f in res.json()["results"]] == ["due in november"]

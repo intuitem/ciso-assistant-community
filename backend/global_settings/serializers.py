@@ -88,6 +88,7 @@ GENERAL_SETTINGS_KEYS = [
     "daily_rate",
     "mapping_max_depth",
     "allow_self_validation",
+    "evidence_four_eyes",
     "show_warning_external_links",
     "show_get_started",
     "builtin_metrics_retention_days",
@@ -576,6 +577,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.findings_from_requirements", required=False, default=False
     )
     dora = serializers.BooleanField(source="value.dora", required=False, default=True)
+    nis2 = serializers.BooleanField(source="value.nis2", required=False, default=False)
     external_ratings = serializers.BooleanField(
         source="value.external_ratings", required=False, default=False
     )
