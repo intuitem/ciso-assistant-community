@@ -99,10 +99,13 @@ export class PageContent extends BasePage {
 			}
 		}
 
+		// Created from its own list, the object opens: let that redirect land before the caller's next click.
+		const redirects =
+			REDIRECT_AFTER_CREATE.has(this.url.split(/[/?]/)[1]) &&
+			new URL(this.page.url()).pathname === this.url;
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
-		// Let the redirect to the new object's page land before the caller's next click.
-		if (REDIRECT_AFTER_CREATE.has(this.url.split(/[/?]/)[1])) {
+		if (redirects) {
 			await this.page.waitForURL(new RegExp(`${this.url}/[0-9a-f-]{36}`));
 		}
 		if (typeof this.name == 'string') {
