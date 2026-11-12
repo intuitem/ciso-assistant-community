@@ -206,3 +206,24 @@ def test_consent_page_warns_about_self_registered_clients(client, knox_token):
     assert response.status_code == 200
     assert b"You are adding a new app." in response.content
     assert REDIRECT_URI.encode() in response.content
+
+
+@pytest.mark.parametrize(
+    "configured, sent",
+    [
+        # clients drop the default port: WHATWG URL and pydantic both do
+        ("https://grc.example.com:443", "https://grc.example.com/mcp"),
+        ("http://grc.example.com:80", "http://grc.example.com/mcp"),
+        ("https://grc.example.com", "https://grc.example.com:443/mcp"),
+        ("https://GRC.example.com/", "https://grc.example.com/mcp"),
+    ],
+)
+def test_the_mcp_resource_ignores_the_default_port(
+    client, knox_token, settings, configured, sent
+):
+    settings.CISO_ASSISTANT_URL = configured
+    token = _access_token(
+        client, _make_client(self_registered=True), knox_token, resource=sent
+    )
+    response = client.get("/api/folders/", HTTP_AUTHORIZATION=f"Bearer {token}")
+    assert response.status_code == 200

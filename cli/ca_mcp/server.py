@@ -628,7 +628,46 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
             return
         await app(scope, receive, send)
 
-    return with_metadata
+    return isolated(with_metadata)
+
+
+# set by this server only, whatever the upstream sent
+_REPLACED_HEADERS = {
+    b"set-cookie",
+    b"service-worker-allowed",
+    b"content-security-policy",
+    b"x-content-type-options",
+}
+
+
+def isolated(app):
+    """The proxy rules of /mcp, applied here too so they hold behind any
+    ingress: the instance's session cookie never reaches this server, and no
+    response can act as a page or a service worker of the instance's origin."""
+
+    async def wrapped(scope, receive, send):
+        if scope["type"] != "http":
+            await app(scope, receive, send)
+            return
+        headers = [(k, v) for k, v in scope["headers"] if k.lower() != b"cookie"]
+
+        async def send_isolated(message):
+            if message["type"] == "http.response.start":
+                kept = [
+                    (k, v)
+                    for k, v in message.get("headers", [])
+                    if k.lower() not in _REPLACED_HEADERS
+                ]
+                kept += [
+                    (b"content-security-policy", b"sandbox"),
+                    (b"x-content-type-options", b"nosniff"),
+                ]
+                message = {**message, "headers": kept}
+            await send(message)
+
+        await app({**scope, "headers": headers}, receive, send_isolated)
+
+    return wrapped
 
 
 def run_http():

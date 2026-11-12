@@ -1,6 +1,8 @@
 """Configuration module for CISO Assistant MCP server"""
 
 import os
+from urllib.parse import urlsplit, urlunsplit
+
 from dotenv import load_dotenv
 
 # Load environment variables from .mcp.env file
@@ -12,6 +14,23 @@ auth_data = dict()
 GLOBAL_FOLDER_ID = None
 
 _TRUTHY = ("true", "1", "yes", "on")
+
+
+def canonical_url(url: str) -> str:
+    """The URL as clients write it: lowercase host, no default port. Clients
+    send https://host/mcp even when the instance is set to https://host:443,
+    and the backend compares against this same form."""
+    if not url:
+        return ""
+    parts = urlsplit(url.strip())
+    scheme = parts.scheme.lower()
+    host = parts.hostname or ""
+    if ":" in host:
+        host = f"[{host}]"
+    port = parts.port
+    default = {"http": 80, "https": 443}.get(scheme)
+    netloc = host if port in (None, default) else f"{host}:{port}"
+    return urlunsplit((scheme, netloc, parts.path.rstrip("/"), parts.query, ""))
 
 
 def _flag(name: str, default: str) -> bool:
@@ -65,7 +84,7 @@ JSON_RESPONSE = _flag("CA_MCP_JSON_RESPONSE", "false")
 ALLOW_ENV_TOKEN = _flag("CA_MCP_ALLOW_ENV_TOKEN", "false")
 
 # The instance's public URL: the token issuer is <url>/api, this server <url>/mcp.
-PUBLIC_URL = os.getenv("CISO_ASSISTANT_URL", "").rstrip("/")
+PUBLIC_URL = canonical_url(os.getenv("CISO_ASSISTANT_URL", ""))
 # How long the backend's answer about a token is reused. Revoking a connection
 # still takes effect at once: the backend checks the token on every call.
 TOKEN_CACHE_SECONDS = int(os.getenv("CA_MCP_TOKEN_CACHE_SECONDS", "60"))

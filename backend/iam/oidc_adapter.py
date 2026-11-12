@@ -1,4 +1,4 @@
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from allauth.idp.oidc.adapter import DefaultOIDCAdapter
 from django.conf import settings
@@ -8,10 +8,35 @@ from django.utils.translation import gettext_lazy as _
 # One scope to use MCP at all; what the app may do comes from its profile.
 MCP_SCOPES = ["mcp"]
 LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
+DEFAULT_PORTS = {"http": 80, "https": 443}
+
+
+def canonical_url(url: str) -> str:
+    """The URL as clients write it: lowercase host, no default port. Clients
+    send https://host/mcp even when the instance is set to https://host:443."""
+    parts = urlsplit(url.strip())
+    scheme = parts.scheme.lower()
+    host = parts.hostname or ""
+    if ":" in host:
+        host = f"[{host}]"
+    port = parts.port
+    netloc = host if port in (None, DEFAULT_PORTS.get(scheme)) else f"{host}:{port}"
+    return urlunsplit((scheme, netloc, parts.path.rstrip("/"), parts.query, ""))
+
+
+def public_url() -> str:
+    return canonical_url(settings.CISO_ASSISTANT_URL)
 
 
 def mcp_resource() -> str:
-    return settings.CISO_ASSISTANT_URL.rstrip("/") + "/mcp"
+    return public_url() + "/mcp"
+
+
+def is_mcp_resource(uri: str) -> bool:
+    try:
+        return canonical_url(uri) == mcp_resource()
+    except ValueError:
+        return False
 
 
 class CISOOIDCAdapter(DefaultOIDCAdapter):
@@ -24,7 +49,7 @@ class CISOOIDCAdapter(DefaultOIDCAdapter):
         # allauth serves its metadata under /api/.well-known/, so the issuer must
         # carry /api for standard discovery to find it; and it must not follow the
         # Host header.
-        return settings.CISO_ASSISTANT_URL.rstrip("/") + "/api"
+        return public_url() + "/api"
 
     def populate_server_metadata(self, data) -> None:
         data["authorization_response_iss_parameter_supported"] = True
@@ -32,7 +57,7 @@ class CISOOIDCAdapter(DefaultOIDCAdapter):
 
     def validate_resource_uris(self, *, uris, **kwargs) -> None:
         for uri in uris:
-            if uri != mcp_resource():
+            if not is_mcp_resource(uri):
                 raise ValidationError(f"Unknown resource: {uri}")
 
     def validate_client_registration(self, *, client, **kwargs) -> None:

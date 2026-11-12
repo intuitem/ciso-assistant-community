@@ -100,43 +100,12 @@ Before users can connect apps:
 - an administrator turns on the `mcp` feature flag, and `mcp_write` to let apps change data;
 - an administrator ticks "Can connect AI apps" on each user who may do so.
 
-The `/mcp` paths get their own ingress, and the chart refuses to render it while
-`backend.mcp.ingressAnnotations` is empty and `backend.mcp.proxyRulesApplied` is false. The chart
-only checks that something is set, not what it does: check the rules yourself, for example with
-`curl -I https://<domain>/mcp`, which must show the sandbox header. Configure your ingress controller, through
-`backend.mcp.ingressAnnotations`, to strip the `Cookie` request header and the `Set-Cookie` and
-`Service-Worker-Allowed` response headers, and to add `Content-Security-Policy: sandbox` and
-`X-Content-Type-Options: nosniff`. Browser session cookies then never reach the MCP server, and its
-answers cannot run as pages of the app. With Traefik:
-
-```yaml
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: mcp-isolation
-spec:
-  headers:
-    customRequestHeaders:
-      Cookie: ""
-    customResponseHeaders:
-      Set-Cookie: ""
-      Service-Worker-Allowed: ""
-      Content-Security-Policy: sandbox
-      X-Content-Type-Options: nosniff
-```
-
-```yaml
-memcached:
-  enabled: true
-backend:
-  mcp:
-    enabled: true
-    ingressAnnotations:
-      traefik.ingress.kubernetes.io/router.middlewares: <namespace>-mcp-isolation@kubernetescrd
-```
-
-If a gateway or mesh in front of the ingress applies these rules instead, set
-`backend.mcp.proxyRulesApplied: true`.
+The `/mcp` paths are added to the chart's one ingress. The MCP server applies their isolation rules
+itself, so they hold behind any ingress controller: it drops the `Cookie` request header, never
+sends `Set-Cookie` or `Service-Worker-Allowed`, and adds `Content-Security-Policy: sandbox` and
+`X-Content-Type-Options: nosniff` to every answer. Check them with `curl -I https://<domain>/mcp`,
+which must show the sandbox header. The browser still sends the session cookie up to the pod, where
+the MCP server drops it: if your ingress controller can strip it on `/mcp` only, do so as well.
 
 Set `backend.mcp.dcr.allowedRedirectHosts` to the AI apps you support to limit which apps can
 register themselves.
@@ -218,9 +187,7 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | backend.mcp.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the MCP server |
 | backend.mcp.image.repository | string | `"intuitem/ciso-assistant-community/mcp"` | Repository to use for the MCP server |
 | backend.mcp.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the MCP server |
-| backend.mcp.ingressAnnotations | object | `{}` | Annotations of the ingress for /mcp. Use them to strip the Cookie request header and the Set-Cookie response header, and to add `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff` (see README) |
 | backend.mcp.name | string | `"mcp"` | MCP container name |
-| backend.mcp.proxyRulesApplied | bool | `false` | Set to true when the /mcp rules are applied outside these annotations (a gateway, a mesh). With the ingress enabled, the chart refuses to render while both this and ingressAnnotations are empty. |
 | backend.mcp.resources | object | `{}` | Resources for the MCP container |
 | backend.name | string | `"backend"` | Backend container name |
 | backend.nodeSelector | object | `{}` | Default node selector for backend |

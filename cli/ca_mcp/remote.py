@@ -240,7 +240,9 @@ def build_app():
     from .server import build_oauth_http_app
 
     if not config.ALLOWED_HOSTS:
-        config.ALLOWED_HOSTS = [urlsplit(config.PUBLIC_URL).netloc]
+        # with or without a port: some proxies change it in Host
+        public = urlsplit(config.PUBLIC_URL)
+        config.ALLOWED_HOSTS = [public.netloc, f"{public.hostname}:*"]
     client.set_transport(forward)
     return build_oauth_http_app(
         token_verifier=TokenVerifier(),

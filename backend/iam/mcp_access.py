@@ -6,7 +6,7 @@ import structlog
 from allauth.idp.oidc.models import Token
 from django.db import transaction
 
-from iam.oidc_adapter import MCP_SCOPES, mcp_resource
+from iam.oidc_adapter import MCP_SCOPES, is_mcp_resource
 
 logger = structlog.get_logger(__name__)
 
@@ -38,8 +38,8 @@ def mcp_writes_enabled() -> bool:
 
 
 def is_mcp_request(scopes, resources=()) -> bool:
-    return bool(set(MCP_SCOPES) & set(scopes or ())) or mcp_resource() in (
-        resources or ()
+    return bool(set(MCP_SCOPES) & set(scopes or ())) or any(
+        is_mcp_resource(resource) for resource in resources or ()
     )
 
 
@@ -90,7 +90,7 @@ def mcp_access(token) -> MCPAccess | None:
         or not user.can_connect_apps
         or not is_mcp_token(token)
         # a resource indicator, when there is one, must name the MCP resource
-        or any(resource != mcp_resource() for resource in token.get_resources())
+        or not all(is_mcp_resource(r) for r in token.get_resources())
         or not mcp_enabled()
     ):
         return None

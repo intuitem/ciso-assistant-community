@@ -33,7 +33,6 @@ spec:
         path: /api/
         pathType: {{ .Values.ingress.pathType }}
       {{- if .Values.backend.mcp.enabled }}
-      # AI apps look for the sign-in server metadata here (RFC 8414)
       - backend:
           service:
             name: {{ include "ciso-assistant.fullname" . }}-backend
@@ -41,6 +40,15 @@ spec:
               number: {{ .Values.backend.service.port }}
         path: /.well-known/oauth-authorization-server
         pathType: Prefix
+      {{- range list "/mcp" "/.well-known/oauth-protected-resource" }}
+      - backend:
+          service:
+            name: {{ include "ciso-assistant.fullname" $ }}-backend
+            port:
+              name: mcp
+        path: {{ . }}
+        pathType: Prefix
+      {{- end }}
       {{- end }}
   {{- if .Values.ingress.tls.enabled }}
   tls:

@@ -417,3 +417,48 @@ def test_token_checks_share_the_backend_call_limit():
     for thread in threads:
         thread.join()
     assert peak[0] <= config.MAX_CONCURRENT_CALLS
+
+
+@pytest.mark.parametrize(
+    "configured, expected",
+    [
+        ("https://ca.example.com:443", "https://ca.example.com"),
+        ("https://CA.example.com/", "https://ca.example.com"),
+        ("http://ca.example.com:80", "http://ca.example.com"),
+        ("https://ca.example.com:8443", "https://ca.example.com:8443"),
+        ("", ""),
+    ],
+)
+def test_the_public_url_drops_the_default_port(configured, expected):
+    # the backend expects the resource as clients send it, without :443
+    assert config.canonical_url(configured) == expected
+
+
+def test_the_server_applies_the_proxy_rules_itself():
+    # behind an ingress that applies none of them (one Ingress for the whole app)
+    from ca_mcp.server import isolated
+    from starlette.responses import PlainTextResponse
+
+    async def upstream(scope, receive, send):
+        cookie = dict(scope["headers"]).get(b"cookie", b"none").decode()
+        response = PlainTextResponse(cookie)
+        response.set_cookie("session", "x")
+        response.headers["Service-Worker-Allowed"] = "/"
+        response.headers["Content-Security-Policy"] = "default-src *"
+        await response(scope, receive, send)
+
+    # no lifespan: the fake upstream only speaks http
+    http = TestClient(isolated(upstream))
+    response = http.get("/mcp", headers={"Cookie": "token=secret"})
+    assert response.text == "none"
+    assert "set-cookie" not in response.headers
+    assert "service-worker-allowed" not in response.headers
+    assert response.headers["content-security-policy"] == "sandbox"
+    assert response.headers["x-content-type-options"] == "nosniff"
+
+
+def test_the_metadata_is_served_isolated(app):
+    with TestClient(app, base_url="http://localhost:8001") as http:
+        response = http.get(METADATA_PATH)
+    assert response.status_code == 200
+    assert response.headers["content-security-policy"] == "sandbox"

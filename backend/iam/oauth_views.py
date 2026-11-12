@@ -26,7 +26,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from iam.authentication import KnoxTokenAuthentication, is_self_registered
 from iam.mcp_access import is_mcp_request, mcp_writes_enabled, refusal_reason
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
-from iam.oidc_adapter import MCP_SCOPES
+from iam.oidc_adapter import MCP_SCOPES, public_url
 
 WRITE_ACTIONS = ("create", "update", "delete")
 
@@ -257,7 +257,7 @@ def _on_public_url(response):
     """allauth builds the endpoints from the request's Host, the issuer from
     CISO_ASSISTANT_URL. A proxy may forward Host without the public port
     (nginx's $host does): put every endpoint on the public URL too."""
-    public = urlsplit(settings.CISO_ASSISTANT_URL)
+    public = urlsplit(public_url())
     data = json.loads(response.content)
     for key, value in data.items():
         if key.endswith(("_endpoint", "_uri")) and isinstance(value, str):

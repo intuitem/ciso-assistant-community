@@ -545,3 +545,12 @@ def test_metadata_endpoints_follow_the_public_url_not_the_host(
     assert urls and all(
         (url.scheme, url.netloc) == ("https", "grc.example.com:8443") for url in public
     ), urls
+
+
+def test_metadata_never_shows_the_default_port(client, settings):
+    # clients drop :443, and the issuer must match what they fetched exactly
+    settings.CISO_ASSISTANT_URL = "https://grc.example.com:443"
+    metadata = client.get("/.well-known/oauth-authorization-server/api").json()
+    assert metadata["issuer"] == "https://grc.example.com/api"
+    urls = [v for k, v in metadata.items() if k.endswith(("_endpoint", "_uri"))]
+    assert urls and all(urlsplit(v).netloc == "grc.example.com" for v in urls), urls

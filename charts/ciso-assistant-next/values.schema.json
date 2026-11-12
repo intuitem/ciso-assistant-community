@@ -234,15 +234,8 @@
                             },
                             "additionalProperties": false
                         },
-                        "ingressAnnotations": {
-                            "type": "object",
-                            "additionalProperties": true
-                        },
                         "name": {
                             "type": "string"
-                        },
-                        "proxyRulesApplied": {
-                            "type": "boolean"
                         },
                         "resources": {
                             "type": "object",

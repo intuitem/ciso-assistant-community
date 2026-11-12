@@ -404,7 +404,8 @@ spec:
           - name: CA_MCP_PORT
             value: "8001"
           - name: CA_MCP_ALLOWED_HOSTS
-            value: {{ $.Values.global.domain | quote }}
+            # with or without a port: some ingresses keep it in Host
+            value: {{ printf "%s,%s:*" $.Values.global.domain $.Values.global.domain | quote }}
           - name: HOME
             value: /tmp
         ports:

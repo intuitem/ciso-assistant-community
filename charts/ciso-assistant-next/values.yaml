@@ -242,16 +242,6 @@ backend:
       # -- Comma-separated hosts a self-registered app may send users back to (empty: any)
       allowedRedirectHosts: ""
 
-    # -- Annotations of the ingress for /mcp. Use them to strip the Cookie request
-    # header and the Set-Cookie response header, and to add
-    # `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff` (see README)
-    ingressAnnotations: {} # @schema additionalProperties: true
-
-    # -- Set to true when the /mcp rules are applied outside these annotations
-    # (a gateway, a mesh). With the ingress enabled, the chart refuses to render
-    # while both this and ingressAnnotations are empty.
-    proxyRulesApplied: false
-
     # -- Environment variables to pass to the MCP container
     env: []
 
