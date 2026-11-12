@@ -54,11 +54,27 @@ NON_DELEGABLE = {
 }
 
 
+# Custom permissions that stand for an action on data. Every other custom
+# permission is refused, whatever its name: `view_user_full` shows sign-in and
+# administration details, and the audit log permissions are administration.
+CUSTOM_ACTIONS = {
+    # the auditor view of an audit: without it, an app would read as a respondent
+    "view_compliance_assessment_full": "read",
+    # documents in force only: less than `view_documentcontainer`
+    "view_published_documentcontainer": "read",
+}
+
+
 def allows(codename: str, access) -> bool:
+    if codename in CUSTOM_ACTIONS:
+        return CUSTOM_ACTIONS[codename] in access.actions
     prefix, _, model = codename.partition("_")
-    # a custom permission (approve_*, ...) is not mapped yet: refused
     action = ACTION_OF_PREFIX.get(prefix)
-    if action is None or model in NON_DELEGABLE or model in SENSITIVE_READS:
+    # a model name has no underscore: `view_user_full` is a custom permission,
+    # like `approve_riskacceptance`, and is refused until CUSTOM_ACTIONS maps it
+    if action is None or "_" in model:
+        return False
+    if model in NON_DELEGABLE or model in SENSITIVE_READS:
         return False
     if model in CONTROL_PLANE and action != "read":
         return False

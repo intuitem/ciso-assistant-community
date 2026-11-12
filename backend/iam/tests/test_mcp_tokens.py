@@ -8,6 +8,7 @@ import pytest
 import structlog
 from allauth.idp.oidc.models import Client, Token
 from auditlog.models import LogEntry
+from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.http import HttpResponse
@@ -19,13 +20,20 @@ from rest_framework.test import APIClient
 
 from core.context import mcp_access_var
 from core.models import AppliedControl, Vulnerability
-from core.permissions import IsGlobalAdmin
+from core.permissions import IsGlobalAdmin, RBACPermissions
 from core.startup import startup
 from crq.models import QuantitativeRiskStudy
 from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
+from iam.delegation import ACTION_OF_PREFIX, CUSTOM_ACTIONS, allows
 from iam.mcp_access import mcp_access_for
-from iam.mcp_inventory import OPERATIONS, SERVER_OPERATIONS, is_inventoried
+from iam.mcp_inventory import (
+    OPERATIONS,
+    READ,
+    SERVER_OPERATIONS,
+    effect,
+    is_inventoried,
+)
 from iam.mcp_tokens import MCPTokenMiddleware
 from iam.models import (
     AppGrant,
@@ -36,7 +44,7 @@ from iam.models import (
     UserGroup,
 )
 from iam.oidc_adapter import mcp_resource
-from iam.tests.mcp_tool_calls import ANY, tool_calls
+from iam.tests.mcp_tool_calls import ANY, calls_by_tool, tool_actions, tool_calls
 from tprm.models import Entity, Representative
 from webhooks.ocsf import log_entry_to_ocsf, log_entry_to_raw
 
@@ -302,6 +310,21 @@ class TestSinglePort:
             structlog.contextvars.clear_contextvars()
         assert seen["mcp_app"] == Client.objects.get().id
 
+    def test_the_request_log_names_the_app_of_a_refused_request(self, admin):
+        raw = _mcp_token(admin)
+        # not an operation the tools use: refused before any view runs
+        request = RequestFactory().delete(
+            "/api/folders/", HTTP_AUTHORIZATION=f"Bearer {raw}"
+        )
+        structlog.contextvars.clear_contextvars()
+        try:
+            response = MCPTokenMiddleware(lambda request: HttpResponse())(request)
+            seen = structlog.contextvars.get_contextvars()
+        finally:
+            structlog.contextvars.clear_contextvars()
+        assert response.status_code == 403
+        assert seen["mcp_app"] == Client.objects.get().id
+
 
 class TestAccessLookup:
     PATH = "/api/iam/mcp/access/"
@@ -384,6 +407,28 @@ class TestBackstop:
         assert custom is not None
         assert not self._allowed(admin, custom, "create", "update", "delete")
 
+    def test_a_custom_permission_passes_only_when_mapped(self):
+        everything = SimpleNamespace(actions=["read", "create", "update", "delete"])
+        # named like a read, but not mapped: refused
+        assert not allows("view_user_full", everything)
+        assert not allows("view_central_auditlog", everything)
+        # mapped to read: follows the connection's actions
+        assert allows("view_compliance_assessment_full", everything)
+        nothing = SimpleNamespace(actions=[])
+        assert not allows("view_compliance_assessment_full", nothing)
+
+    def test_no_custom_permission_passes_by_its_name(self):
+        """A new custom permission is refused until CUSTOM_ACTIONS maps it,
+        even when it is named like a model permission."""
+        everything = SimpleNamespace(actions=["read", "create", "update", "delete"])
+        declared = {
+            codename
+            for model in apps.get_models()
+            for codename, _ in model._meta.permissions
+        }
+        passing = {codename for codename in declared if allows(codename, everything)}
+        assert passing == set(CUSTOM_ACTIONS)
+
     def test_the_admin_endpoints_are_refused(self, admin):
         request = SimpleNamespace(user=admin)
         token = mcp_access_var.set(SimpleNamespace(actions=["read"]))
@@ -414,6 +459,16 @@ class TestSharedCache:
         assert self._valid(mcp=False, incidents=True)
 
 
+def _checked_action(method, match) -> str | None:
+    """The action of the permission RBACPermissions checks for this call: the
+    one of its method, unless the view overrides it for this action."""
+    codename = RBACPermissions.perms_map[method][0].split(".")[1]
+    view_action = getattr(match.func, "actions", {}).get(method.lower())
+    overrides = getattr(getattr(match.func, "cls", None), "permission_overrides", {})
+    codename = overrides.get(view_action, codename)
+    return ACTION_OF_PREFIX.get(codename.partition("_")[0])
+
+
 class TestInventory:
     def test_it_covers_every_call_the_tools_make(self):
         missing = []
@@ -432,6 +487,34 @@ class TestInventory:
                 continue
             used.add((method, match.url_name))
         assert set(OPERATIONS) - used == set()
+
+    def test_a_tool_is_refused_nothing_its_actions_cover(self):
+        """A connection that holds a tool's actions is refused none of the
+        tool's calls, so the MCP server and the backend cannot disagree. A call
+        needs the effect the inventory marks and the action of the permission
+        its view checks."""
+        needed = tool_actions()
+        refused = []
+        for tool, calls in sorted(calls_by_tool().items()):
+            held = needed[tool] | {READ}
+            for method, path in sorted(calls):
+                match = resolve("/api" + path.replace(ANY, str(uuid.uuid4())))
+                required = {effect(method, match), _checked_action(method, match)}
+                if not required <= held:
+                    refused.append((tool, method, path, required - held))
+        assert not refused, "declare these actions in ca_mcp (ALSO_NEEDS)"
+
+    def test_every_write_tool_has_its_write_call(self):
+        # the test above proves nothing for a tool whose calls are not found
+        calls = calls_by_tool()
+        silent = [
+            tool
+            for tool, actions in tool_actions().items()
+            if tool in calls
+            and actions != {READ}
+            and all(method == "GET" for method, _ in calls[tool])
+        ]
+        assert not silent
 
 
 def test_authorization_server_metadata_at_the_rfc8414_address(client):

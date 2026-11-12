@@ -83,38 +83,115 @@ def _is_api_path(text: str) -> bool:
     return text.startswith("/") and text.endswith("/") and len(text) > 2
 
 
-def tool_calls() -> set[tuple[str, str]]:
-    """(method, path) pairs, with "{}" wherever the path takes a value."""
-    calls = set()
+def _functions():
+    """Every function of ca_mcp, nested ones included."""
     for source in sorted(CA_MCP.rglob("*.py")):
-        tree = ast.parse(source.read_text())
-        for function in ast.walk(tree):
-            if not isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                continue
-            if function.name in LOCAL_ONLY:
-                continue
-            strings = _local_strings(function)
-            for node in ast.walk(function):
-                if not isinstance(node, ast.Call):
-                    continue
-                name = getattr(node.func, "id", None) or getattr(
-                    node.func, "attr", None
-                )
-                if name in METHOD_OF:
-                    for path in _path(node.args[0], strings) if node.args else []:
-                        calls.add((METHOD_OF[name], path))
-                    continue
-                # resolvers take the collection to search as an argument
-                for arg in node.args:
-                    for path in _path(arg, {}):
-                        if _is_api_path(path) and not path.startswith("/" + ANY):
-                            calls.add(("GET", path))
-    for collection in _objects_registry():
-        calls.add(("GET", f"/{collection}/"))
-        calls.add(("GET", f"/{collection}/{ANY}/"))
-    # generic placeholders are expanded above
+        for node in ast.walk(ast.parse(source.read_text())):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                yield node
+
+
+def _called(node) -> str | None:
+    return getattr(node.func, "id", None) or getattr(node.func, "attr", None)
+
+
+def _calls_in(function) -> set[tuple[str, str]]:
+    """The API calls written in one function."""
+    calls = set()
+    strings = _local_strings(function)
+    for node in ast.walk(function):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _called(node)
+        if name in METHOD_OF:
+            for path in _path(node.args[0], strings) if node.args else []:
+                calls.add((METHOD_OF[name], path))
+            continue
+        # resolvers take the collection to search as an argument
+        for arg in node.args:
+            for path in _path(arg, {}):
+                if _is_api_path(path) and not path.startswith("/" + ANY):
+                    calls.add(("GET", path))
+    return calls
+
+
+def _concrete(calls) -> set[tuple[str, str]]:
+    # generic placeholders ("/{}/") are expanded from the objects registry
     return {
         (method, path)
         for method, path in calls
         if _is_api_path(path) and not path.startswith("/" + ANY)
+    }
+
+
+def tool_calls() -> set[tuple[str, str]]:
+    """(method, path) pairs, with "{}" wherever the path takes a value."""
+    calls = set()
+    for function in _functions():
+        if function.name not in LOCAL_ONLY:
+            calls |= _calls_in(function)
+    for collection in _objects_registry():
+        calls.add(("GET", f"/{collection}/"))
+        calls.add(("GET", f"/{collection}/{ANY}/"))
+    return _concrete(calls)
+
+
+TOOL_LISTS = {
+    "READ_TOOLS": "read",
+    "CREATE_TOOLS": "create",
+    "UPDATE_TOOLS": "update",
+    "DELETE_TOOLS": "delete",
+}
+
+
+def tool_actions() -> dict[str, set[str]]:
+    """The actions each tool needs, as cli/ca_mcp/server.py declares them: the
+    one of its list, plus what ALSO_NEEDS adds."""
+    tree = ast.parse((CA_MCP / "server.py").read_text())
+    assigned = {
+        node.targets[0].id: node.value
+        for node in tree.body
+        if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
+    }
+    needed = {
+        tool.id: {action}
+        for constant, action in TOOL_LISTS.items()
+        for tool in assigned[constant].elts
+    }
+    # ALSO_NEEDS = {tool.__name__: {actions.CREATE}}
+    also = assigned["ALSO_NEEDS"]
+    for tool, extra in zip(also.keys, also.values):
+        needed[tool.value.id] |= {action.attr.lower() for action in extra.elts}
+    return needed
+
+
+def calls_by_tool() -> dict[str, set[tuple[str, str]]]:
+    """The calls of each tool the MCP server offers: its own, and those of the
+    ca_mcp functions it calls by name (resolvers, helpers)."""
+    functions: dict[str, list] = {}
+    for function in _functions():
+        functions.setdefault(function.name, []).append(function)
+
+    def reach(name, seen):
+        if name in seen or name in LOCAL_ONLY:
+            return set()
+        seen.add(name)
+        calls = set()
+        for function in functions.get(name, []):
+            calls |= _calls_in(function)
+            for node in ast.walk(function):
+                # plain names only: `.json()` or `.add()` on an object is not
+                # the ca_mcp function of that name
+                if (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id in functions
+                ):
+                    calls |= reach(node.func.id, seen)
+        return calls
+
+    return {
+        tool: _concrete(reach(tool, set()))
+        for tool in tool_actions()
+        if tool not in LOCAL_ONLY
     }

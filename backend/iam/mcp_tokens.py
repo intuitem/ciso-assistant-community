@@ -51,6 +51,9 @@ class MCPTokenMiddleware:
         )
         if token is None or not is_mcp_token(token):
             return self.get_response(request)
+        # the request log names the app, for a refused request too: reads and
+        # refusals stay traceable
+        structlog.contextvars.bind_contextvars(mcp_app=token.client_id)
         access = mcp_access(token)
         if access is None:
             return _refuse(401, "This AI app connection is not allowed.")
@@ -63,8 +66,6 @@ class MCPTokenMiddleware:
         if effect(request.method, match) not in access.actions:
             return _refuse(403, "This app's connection does not allow this action.")
         mcp_access_var.set(access)
-        # the request log names the app: reads stay traceable
-        structlog.contextvars.bind_contextvars(mcp_app=access.client.id)
         ConnectedAppUse.record(access.user.pk, access.client.pk)
         return self.get_response(request)
 
