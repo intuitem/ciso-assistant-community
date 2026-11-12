@@ -2857,8 +2857,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objekt on peidetud. Redigeerimisel võib link kaduda.",
-				"countPlural=other": "{count} objekti on peidetud. Redigeerimisel võivad lingid kaduda."
+				"countPlural=one": "{count} objekt on peidetud.",
+				"countPlural=other": "{count} objekti on peidetud."
 			}
 		}
 	],
