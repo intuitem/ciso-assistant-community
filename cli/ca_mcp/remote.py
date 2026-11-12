@@ -42,6 +42,8 @@ class TokenVerifier:
     answer: a PAT or any other token is refused. Each answer is reused for a
     short while, a refusal too."""
 
+    MAX_ENTRIES = 10_000
+
     def __init__(self, session=None, cache_seconds=None, clock=time.monotonic):
         self._http = session or requests.Session()
         self._ttl = (
@@ -61,9 +63,13 @@ class TokenVerifier:
             hit = self._cache.get(key)
             if hit and hit[0] > now:
                 return hit[1]
-            # forget the expired answers now and then
-            if len(self._cache) > 10_000:
+            # forget the expired answers now and then; a flood of made-up
+            # tokens that are all still fresh empties it, rather than make every
+            # call copy it again
+            if len(self._cache) > self.MAX_ENTRIES:
                 self._cache = {k: v for k, v in self._cache.items() if v[0] > now}
+                if len(self._cache) > self.MAX_ENTRIES:
+                    self._cache = {}
         access, final = self._ask(token)
         # a backend outage is not an answer: ask again on the next call
         if final:

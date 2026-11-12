@@ -227,3 +227,31 @@ def test_the_mcp_resource_ignores_the_default_port(
     )
     response = client.get("/api/folders/", HTTP_AUTHORIZATION=f"Bearer {token}")
     assert response.status_code == 200
+
+
+@pytest.mark.parametrize(
+    "resource",
+    [
+        # a resource has no user and no fragment (RFC 8707): refused, not cleaned
+        "https://evil@{host}/mcp",
+        "https://user:pass@{host}/mcp",
+        "https://@{host}/mcp",
+        "https://{host}/mcp#x",
+        "https://{host}\\@other.example/mcp",
+        "https://{host}/mcp?x=1",
+    ],
+)
+def test_a_lookalike_mcp_resource_does_not_issue_a_code(
+    client, knox_token, settings, resource
+):
+    settings.CISO_ASSISTANT_URL = "https://grc.example.com:443"
+    client.cookies["token"] = knox_token
+    response = client.get(
+        AUTHORIZE_URL,
+        _authorize_params(
+            _make_client(self_registered=True),
+            "x" * 43,
+            resource.format(host="grc.example.com"),
+        ),
+    )
+    assert "code=" not in response.get("Location", "")

@@ -12,7 +12,8 @@ def _cold_feature_flags_cache():
 
 
 @pytest.fixture
-def mcp_on(db):
+def mcp_on(db, monkeypatch):
+    monkeypatch.setattr("iam.mcp_access.has_shared_cache", lambda: True)
     from global_settings.models import GlobalSettings
     from global_settings.utils import clear_feature_flags_cache
 

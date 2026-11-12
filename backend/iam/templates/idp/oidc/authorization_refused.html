@@ -27,6 +27,8 @@
     <div class="reason">
       {% if reason == "mcp_disabled" %}
         {% translate "Your administrator has not enabled AI app connections on this instance." %}
+      {% elif reason == "no_shared_cache" %}
+        {% translate "This instance is not set up for AI app connections: it needs a shared cache. Contact your administrator." %}
       {% elif reason == "no_profile" %}
         {% translate "Your administrator has not set up what AI apps may do yet. Contact them if you need it." %}
       {% else %}

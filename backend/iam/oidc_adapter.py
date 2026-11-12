@@ -33,7 +33,11 @@ def mcp_resource() -> str:
 
 
 def is_mcp_resource(uri: str) -> bool:
+    # refused, not normalised away: a resource has no user and no fragment
     try:
+        parts = urlsplit(uri.strip())
+        if parts.username is not None or parts.fragment or "\\" in uri:
+            return False
         return canonical_url(uri) == mcp_resource()
     except ValueError:
         return False

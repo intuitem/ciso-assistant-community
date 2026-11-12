@@ -16,6 +16,7 @@ MCP_WRITE_FLAG = "mcp_write"
 MCP_DISABLED = "mcp_disabled"
 NOT_ALLOWED = "not_allowed"
 NO_PROFILE = "no_profile"
+NO_SHARED_CACHE = "no_shared_cache"
 
 
 def mcp_enabled() -> bool:
@@ -121,6 +122,8 @@ def refusal_reason(user, mcp_request: bool) -> str | None:
         return None
     if not mcp_enabled():
         return MCP_DISABLED
+    if not has_shared_cache():
+        return NO_SHARED_CACHE
     if not user.can_connect_apps:
         return NOT_ALLOWED
     from iam.models import ConnectionProfile

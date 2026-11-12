@@ -26,6 +26,7 @@ from crq.models import QuantitativeRiskStudy
 from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
 from iam.delegation import ACTION_OF_PREFIX, CUSTOM_ACTIONS, allows
+from iam.mcp_access import has_shared_cache
 from iam.mcp_access import mcp_access_for
 from iam.mcp_inventory import (
     OPERATIONS,
@@ -440,6 +441,11 @@ class TestBackstop:
 
 
 class TestSharedCache:
+    @pytest.fixture(autouse=True)
+    def _real_check(self, mcp_on, monkeypatch):
+        # mcp_on stands in a shared cache; these tests check the real answer
+        monkeypatch.setattr("iam.mcp_access.has_shared_cache", has_shared_cache)
+
     def _valid(self, **flags):
         row, _ = GlobalSettings.objects.get_or_create(
             name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}

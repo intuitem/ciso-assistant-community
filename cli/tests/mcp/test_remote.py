@@ -141,6 +141,13 @@ class TestTokenVerifier:
         verifier.verify("pat")
         assert session.get.call_count == 1
 
+    def test_a_flood_of_fresh_refusals_does_not_grow_the_cache(self, monkeypatch):
+        monkeypatch.setattr(remote.TokenVerifier, "MAX_ENTRIES", 3)
+        verifier = remote.TokenVerifier(_session(), cache_seconds=60)
+        for i in range(10):
+            verifier.verify(f"made-up-{i}")
+        assert len(verifier._cache) <= 4
+
 
 def test_oauth_mode_serves_http_by_default(monkeypatch):
     import importlib

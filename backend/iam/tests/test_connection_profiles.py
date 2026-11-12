@@ -190,6 +190,17 @@ class TestConsent:
         assert response.status_code == 403
         assert b"has not set up what AI apps may do" in response.content
 
+    def test_sign_in_is_refused_once_the_shared_cache_is_gone(
+        self, client, monkeypatch
+    ):
+        # the flag was turned on with memcached, which was removed afterwards
+        monkeypatch.setattr("iam.mcp_access.has_shared_cache", lambda: False)
+        response = _authorize(client, _client(skip_consent=True), _user())
+
+        assert response.status_code == 403
+        assert b"it needs a shared cache" in response.content
+        assert not AppGrant.objects.exists()
+
     def test_a_plain_sign_in_is_not_affected(self, client):
         response = _authorize(client, _client(skip_consent=True), _user(), "openid")
 
