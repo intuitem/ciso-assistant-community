@@ -16,6 +16,7 @@ from rest_framework.status import (
     HTTP_409_CONFLICT,
 )
 from iam.models import Folder, Permission, RoleAssignment, User
+from iam.utils import ViewableFilter
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ComplianceAssessmentViewSet,
@@ -240,8 +241,15 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                 "escape": True,
             },
             "domain": {"source": "folder.name", "label": "domain", "escape": True},
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(lbl.label for lbl in qs.all()),
+                "escape": True,
+            },
         },
         "select_related": ["folder", "parent_entity"],
+        "prefetch_related": ["filtering_labels"],
         "wrap_columns": ["name", "description", "mission"],
     }
     filterset_class = EntityFilterSet
@@ -816,6 +824,11 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         viewable_entity_ids = RoleAssignment.get_viewable_object_ids(
             request.user, Entity
         )
+        viewable = ViewableFilter(request.user)
+
+        def visible_entity(entity):
+            return entity if entity and viewable.allows(entity) else None
+
         viewable_solution_ids = RoleAssignment.get_viewable_object_ids(
             request.user, Solution
         )
@@ -868,7 +881,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "country": esc(entity.country),
                     "currency": esc(entity.currency),
                     "parent_entity_ref_id": (
-                        esc(entity.parent_entity.ref_id) if entity.parent_entity else ""
+                        esc(parent.ref_id)
+                        if (parent := visible_entity(entity.parent_entity))
+                        else ""
                     ),
                     "dependency": entity.default_dependency,
                     "penetration": entity.default_penetration,
@@ -885,13 +900,14 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # --- Solutions sheet ---
         solutions_rows = []
         for solution in solutions:
+            provider = visible_entity(solution.provider_entity)
             solutions_rows.append(
                 {
                     "ref_id": esc(solution.ref_id),
                     "name": esc(solution.name),
                     "description": esc(solution.description),
-                    "provider_entity_ref_id": esc(solution.provider_entity.ref_id),
-                    "provider": esc(solution.provider_entity.name),
+                    "provider_entity_ref_id": esc(provider.ref_id) if provider else "",
+                    "provider": esc(provider.name) if provider else "",
                     "criticality": solution.criticality,
                 }
             )
@@ -899,6 +915,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # --- Contracts sheet ---
         contracts_rows = []
         for contract in contracts:
+            provider = visible_entity(contract.provider_entity)
             contract_solutions = list(contract.solutions.all())
             solution_ref_ids = "\n".join(
                 esc(s.ref_id) for s in contract_solutions if s.ref_id
@@ -911,16 +928,8 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "ref_id": esc(contract.ref_id),
                     "name": esc(contract.name),
                     "description": esc(contract.description),
-                    "provider_entity_ref_id": (
-                        esc(contract.provider_entity.ref_id)
-                        if contract.provider_entity
-                        else ""
-                    ),
-                    "provider": (
-                        esc(contract.provider_entity.name)
-                        if contract.provider_entity
-                        else ""
-                    ),
+                    "provider_entity_ref_id": esc(provider.ref_id) if provider else "",
+                    "provider": esc(provider.name) if provider else "",
                     "solution_ref_id": solution_ref_ids,
                     "solution": solution_names,
                     "status": contract.status,

@@ -223,6 +223,9 @@
 	const defaultFolderWritePermission =
 		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
 	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
+	// Pickers keep links to objects the user cannot see only when this form edits an
+	// existing object: on a create, clone or duplicate every id is a new link.
+	setContext('formKeepsHiddenLinks', Boolean(object?.id) && context !== 'clone' && !duplicate);
 
 	function cancel(): void {
 		if (browser) {
@@ -473,7 +476,8 @@
 					cacheLock={cacheLocks['folder']}
 					bind:cachedValue={formDataCache['folder']}
 					label={m.domain()}
-					hidden={HIDDEN_FOLDER_MODELS.has(URLModel)}
+					hidden={HIDDEN_FOLDER_MODELS.has(URLModel) ||
+						(['evidences', 'task-templates'].includes(URLModel) && page.data?.user?.is_third_party)}
 					disabled={(URLModel === 'entities' && object?.builtin) ||
 						(URLModel === 'perimeters' && !!initialData?.folder)}
 					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)

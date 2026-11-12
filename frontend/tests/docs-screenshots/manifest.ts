@@ -44,6 +44,61 @@ function openDetail(model: string, refId: string) {
 	};
 }
 
+/** Tick one option of a scenario selection filter, the way a reader would. */
+async function pickScenarios(page: Page, filter: string, option: string) {
+	await page.getByTestId(`selection-filter-${filter}`).click();
+	await page.getByTestId('selection-option').filter({ hasText: option }).first().click();
+	await page.keyboard.press('Escape');
+	await page.waitForLoadState('networkidle');
+	// Closing hands focus back to the filter: drop its focus ring from the shot.
+	await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+}
+
+const HEADER_CLEARANCE = 176;
+
+/**
+ * The app scrolls an inner container, not the document, so a viewport shot
+ * stays on the page header unless that container is moved. Brings `target`
+ * just under the sticky header.
+ */
+async function scrollUnderHeader(target: Locator, top = HEADER_CLEARANCE) {
+	await target.waitFor();
+	await target.evaluate((el, top) => {
+		let scroller = el.parentElement;
+		while (
+			scroller &&
+			!(
+				scroller.scrollHeight > scroller.clientHeight + 4 &&
+				/auto|scroll/.test(getComputedStyle(scroller).overflowY)
+			)
+		) {
+			scroller = scroller.parentElement;
+		}
+		const box = scroller ?? document.scrollingElement;
+		if (box) box.scrollTop += el.getBoundingClientRect().top - top;
+	}, top);
+}
+
+/**
+ * A clip taller than the viewport is stitched from several scrolls, and the
+ * sticky page header lands in the middle of it. Grow the viewport until
+ * `target` fits under that header in one piece.
+ */
+async function fitUnderHeader(page: Page, target: Locator) {
+	await target.waitFor();
+	const { width, height } = page.viewportSize() ?? { width: 1440, height: 900 };
+	const needed = Math.ceil((await target.boundingBox())?.height ?? 0) + 2 * HEADER_CLEARANCE;
+	if (needed > height) await page.setViewportSize({ width, height: needed });
+	await scrollUnderHeader(target);
+}
+
+/** RA.2026.01 with its scenarios narrowed to one current risk level. */
+async function openSelection(page: Page) {
+	await openDetail('risk-assessments', 'RA.2026.01')(page);
+	// The full label: "high" alone also matches "5 - very high".
+	await pickScenarios(page, 'current_level', '4 - high');
+}
+
 export const shots: Shot[] = [
 	{
 		slug: 'analytics-overview',
@@ -93,7 +148,15 @@ export const shots: Shot[] = [
 		slug: 'risk-scenarios-table',
 		url: '/risk-assessments',
 		usedBy: ['concepts/risk-assessments.md'],
-		act: openDetail('risk-assessments', 'RA.2026.01'),
+		act: async (page) => {
+			await openDetail('risk-assessments', 'RA.2026.01')(page);
+			await fitUnderHeader(
+				page,
+				page
+					.getByRole('heading', { name: 'Associated risk scenarios' })
+					.locator('xpath=ancestor::div[contains(@class,"card")][1]')
+			);
+		},
 		clip: (page) =>
 			page
 				.getByRole('heading', { name: 'Associated risk scenarios' })
@@ -110,6 +173,66 @@ export const shots: Shot[] = [
 			{ at: page.getByRole('link', { name: 'Action plan' }).first(), label: '1' },
 			{ at: page.getByRole('button', { name: 'Add risk scenario' }).first(), label: '2' }
 		]
+	},
+	{
+		// Selection applied: the bar, its counter and the narrowed table.
+		slug: 'scenario-selection-bar',
+		url: '/risk-assessments',
+		usedBy: ['features/scenario-selection.md'],
+		act: async (page) => {
+			await openSelection(page);
+			await scrollUnderHeader(page.getByTestId('scenario-selection-bar'));
+		}
+	},
+	{
+		// A filter open, for the per-option counts.
+		slug: 'scenario-selection-filter',
+		url: '/risk-assessments',
+		usedBy: ['features/scenario-selection.md'],
+		act: async (page) => {
+			await openSelection(page);
+			await scrollUnderHeader(page.getByTestId('scenario-selection-bar'));
+			await page.getByTestId('selection-filter-treatment').click();
+			await page.getByTestId('selection-option').first().waitFor();
+		}
+	},
+	{
+		slug: 'scenario-selection-matrix',
+		url: '/risk-assessments',
+		usedBy: ['features/scenario-selection.md'],
+		// The badge and the current risk matrix: the residual one sits below.
+		act: async (page) => {
+			await openSelection(page);
+			await scrollUnderHeader(
+				page
+					.getByTestId('matrix-selection-badge')
+					.locator('xpath=ancestor::div[contains(@class,"card")][1]')
+			);
+		}
+	},
+	{
+		slug: 'scenario-selection-export',
+		url: '/risk-assessments',
+		usedBy: ['features/scenario-selection.md'],
+		act: async (page) => {
+			await openSelection(page);
+			await page.getByTestId('export-button').click();
+			await page.getByTestId('export-apply-selection').waitFor();
+		},
+		clip: (page) => page.getByTestId('export-modal')
+	},
+	{
+		// Reached through the button, which is what carries the selection over.
+		slug: 'scenario-selection-action-plan',
+		url: '/risk-assessments',
+		usedBy: ['features/scenario-selection.md', 'features/action-plans.md'],
+		act: async (page) => {
+			await openSelection(page);
+			await page.getByTestId('action-plan-button').click();
+			await page.getByTestId('link-type-toggle').waitFor();
+			// Folded, the budget overview leaves room for the measures table.
+			await page.getByRole('button', { name: 'Budget overview' }).click();
+		}
 	},
 	{
 		slug: 'applied-controls-full',

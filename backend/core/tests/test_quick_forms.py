@@ -1070,6 +1070,15 @@ def test_answer_endpoint_honours_the_requester_rule(app_config):
     requester, requester_client = _role_client(
         "qf-door@test.local", "BI-RL-ANA", folder
     )
+    # Linking the library question needs view on it: members get Global's
+    # baseline reader through its default role, a custom group does not.
+    from iam.models import Role, RoleAssignment
+
+    RoleAssignment.objects.create(
+        user=requester,
+        role=Role.objects.get(name="BI-RL-BSL"),
+        folder=Folder.get_root_folder(),
+    ).perimeter_folders.add(Folder.get_root_folder())
     response = QuickFormResponse.objects.create(
         name="theirs",
         quick_form=form,
