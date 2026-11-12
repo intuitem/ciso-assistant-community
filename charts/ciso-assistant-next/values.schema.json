@@ -165,15 +165,63 @@
                 "mcp": {
                     "type": "object",
                     "properties": {
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "type": "boolean"
+                                },
+                                "capabilities": {
+                                    "type": "object",
+                                    "properties": {
+                                        "drop": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "readOnlyRootFilesystem": {
+                                    "type": "boolean"
+                                },
+                                "runAsGroup": {
+                                    "type": "integer"
+                                },
+                                "runAsNonRoot": {
+                                    "type": "boolean"
+                                },
+                                "runAsUser": {
+                                    "type": "integer"
+                                }
+                            },
+                            "additionalProperties": true
+                        },
+                        "dcr": {
+                            "type": "object",
+                            "properties": {
+                                "allowedRedirectHosts": {
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
-                        "name": {
-                            "type": "string"
+                        "env": {
+                            "type": "array"
                         },
                         "image": {
                             "type": "object",
                             "properties": {
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
                                 "registry": {
                                     "type": "string"
                                 },
@@ -181,21 +229,6 @@
                                     "type": "string"
                                 },
                                 "tag": {
-                                    "type": "string"
-                                },
-                                "imagePullPolicy": {
-                                    "type": "string"
-                                }
-                            },
-                            "additionalProperties": false
-                        },
-                        "dcr": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean"
-                                },
-                                "allowedRedirectHosts": {
                                     "type": "string"
                                 }
                             },
@@ -205,14 +238,10 @@
                             "type": "object",
                             "additionalProperties": true
                         },
-                        "env": {
-                            "type": "array"
+                        "name": {
+                            "type": "string"
                         },
                         "resources": {
-                            "type": "object",
-                            "additionalProperties": true
-                        },
-                        "containerSecurityContext": {
                             "type": "object",
                             "additionalProperties": true
                         }
