@@ -695,9 +695,12 @@
 													: (safeTranslate(value) ?? m.undefined())}
 												{stringifiedSeverity}
 											{:else if key === 'children_assets'}
-												{#if Object.keys(value).length > 0}
+												{@const visibleChildren = Array.isArray(value)
+													? value.filter((item) => !isMaskedPlaceholder(item))
+													: []}
+												{#if visibleChildren.length > 0}
 													<ul class="inline-flex flex-wrap space-x-4">
-														{#each value as val}
+														{#each visibleChildren as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if val.str && val.id}
 																	{@const itemHref = `/${
@@ -715,8 +718,13 @@
 															</li>
 														{/each}
 													</ul>
-												{:else}
+												{:else if hiddenCountForValue === 0}
 													<span class="text-surface-400-600">--</span>
+												{/if}
+												{#if hiddenCountForValue > 0}
+													<p class="mt-1 text-xs text-yellow-700">
+														{m.objectsNotVisible({ count: hiddenCountForValue })}
+													</p>
 												{/if}
 											{:else if key === 'translations'}
 												{#if Object.keys(value).length > 0}

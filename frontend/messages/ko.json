@@ -2461,8 +2461,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count}개의 객체가 숨겨져 있습니다. 편집 시 링크가 손실될 수 있습니다.",
-				"countPlural=other": "{count}개의 객체가 숨겨져 있습니다. 편집 시 링크가 손실될 수 있습니다."
+				"countPlural=one": "{count}개의 객체가 숨겨져 있습니다.",
+				"countPlural=other": "{count}개의 객체가 숨겨져 있습니다."
 			}
 		}
 	],

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0205_cyfun_enablers"),
+        ("core", "0206_evidencerevision_review"),
     ]
 
     operations = [

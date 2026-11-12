@@ -33,6 +33,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://cool-vm:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
 
     image: ghcr.io/intuitem/ciso-assistant-enterprise/frontend:latest
     depends_on:
