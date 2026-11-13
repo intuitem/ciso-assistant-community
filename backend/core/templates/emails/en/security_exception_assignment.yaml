@@ -5,14 +5,20 @@ body: |
   You have been assigned to the following Security Exception:
 
   - Name: ${exception_name}
-  - Description: ${exception_description}
   - Reference ID: ${exception_ref_id}
   - Severity: ${exception_severity}
   - Status: ${exception_status}
   - Expiration date: ${expiration_date}
   - Domain: ${folder_name}
   - URL: <${exception_url}>
-  - Observation: ${exception_observation}
+
+  Description:
+
+  ${exception_description}
+
+  Observation:
+
+  ${exception_observation}
 
   Log in to your CISO Assistant portal to view and manage this security exception: [Go to CISO Assistant](${ciso_assistant_url})
 

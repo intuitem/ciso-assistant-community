@@ -9,6 +9,11 @@ body: |
   - Nieuwe status: ${new_status}
   - Bijgewerkt door: ${actor_name}
   - Domein: ${folder_name}
+  - URL: <${exception_url}>
+
+  Observatie:
+
+  ${exception_observation}
 
   Meld u aan op uw CISO Assistant-portaal om deze uitzondering te bekijken: [Naar CISO Assistant](${ciso_assistant_url})
 

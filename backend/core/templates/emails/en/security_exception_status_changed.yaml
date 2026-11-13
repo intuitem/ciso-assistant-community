@@ -10,7 +10,10 @@ body: |
   - Updated by: ${actor_name}
   - Domain: ${folder_name}
   - URL: <${exception_url}>
-  - Observation: ${exception_observation}
+
+  Observation:
+
+  ${exception_observation}
 
   Log in to your CISO Assistant portal to view this security exception: [Go to CISO Assistant](${ciso_assistant_url})
 
