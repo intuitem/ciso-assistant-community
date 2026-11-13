@@ -55,6 +55,7 @@ from itertools import chain, cycle
 import django_filters as df
 
 import magic
+import math
 import shutil
 from pathlib import Path
 import humanize
@@ -11514,11 +11515,9 @@ class FrameworkViewSet(BaseModelViewSet):
         field_visibility for the viewer's role) come back as null so the
         row still contributes to domain/section counts.
 
-        Only "live" CAs participate by default: status in (in_progress,
-        in_review, done). This excludes planned (not yet started) and
-        deprecated (superseded by a newer audit on the same folder),
-        which would otherwise double-count requirements when multiple
-        audit cycles coexist on the same folder.
+        Every CA but deprecated ones participates by default; deprecated CAs
+        are superseded by a newer audit on the same folder and would otherwise
+        double-count requirements. Planned CAs count but carry no verdicts.
 
         Query params:
           - implementation_group (str): narrow to a single IG.
@@ -11526,27 +11525,38 @@ class FrameworkViewSet(BaseModelViewSet):
           - campaign (uuid): narrow to one campaign's audits. A campaign is
             already an explicit scope, so planned audits are kept — they are the
             normal state right after a launch and cannot double-count here.
+          - statuses ("live"): count only live audits (LIVE_STATUSES below).
+            Default counts every status but deprecated.
         """
         framework = self.get_object()  # checks read permission
 
         ig_filter = request.query_params.get("implementation_group") or None
         campaign_id = request.query_params.get("campaign") or None
+        live_only = request.query_params.get("statuses") == "live"
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
 
-        # Statuses considered "live" for cross-CA rollups. Planned and
-        # deprecated CAs are intentionally excluded; surface them via the
-        # standard CA list page if needed.
+        # Statuses considered "live" when `statuses=live`: planned and
+        # deprecated CAs are then excluded from the rollups.
         LIVE_STATUSES = ("in_progress", "in_review", "done")
         if campaign_id:
             LIVE_STATUSES = LIVE_STATUSES + ("planned",)
 
-        visible_cas_qs = ComplianceAssessment.objects.filter(
-            framework=framework,
-            id__in=viewable_ca_ids,
-        ).select_related("folder")
+        visible_cas_qs = (
+            ComplianceAssessment.objects.filter(
+                framework=framework,
+                id__in=viewable_ca_ids,
+            )
+            .select_related("folder")
+            .prefetch_related(
+                "filtering_labels",
+                "authors__user",
+                "authors__team",
+                "authors__entity",
+            )
+        )
         campaign_scope = None
         if campaign_id:
             visible_cas_qs = visible_cas_qs.filter(campaign_id=campaign_id)
@@ -11565,7 +11575,12 @@ class FrameworkViewSet(BaseModelViewSet):
             key = ca.status or "unknown"
             ca_status_counts[key] = ca_status_counts.get(key, 0) + 1
 
-        cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
+        def is_counted(ca) -> bool:
+            if live_only:
+                return ca.status in LIVE_STATUSES
+            return ca.status != "deprecated"
+
+        cas = [ca for ca in all_visible_cas if is_counted(ca)]
 
         # Per-CA viewer role: respondent unless the user holds the full auditor
         # view (view_compliance_assessment_full) on the CA's folder. Computed once per CA.
@@ -11630,16 +11645,17 @@ class FrameworkViewSet(BaseModelViewSet):
         )
 
         # Cache folder paths so we don't walk ancestry twice for the same folder.
-        folder_path_cache: Dict[Any, List[str]] = {}
+        folder_path_cache: Dict[Any, List[Any]] = {}
 
-        def folder_path_for(folder) -> List[str]:
+        def folder_chain_for(folder) -> List[Any]:
             if folder is None:
                 return []
-            if folder.id in folder_path_cache:
-                return folder_path_cache[folder.id]
-            path = [f.name for f in folder.get_folder_full_path()]
-            folder_path_cache[folder.id] = path
-            return path
+            if folder.id not in folder_path_cache:
+                folder_path_cache[folder.id] = list(folder.get_folder_full_path())
+            return folder_path_cache[folder.id]
+
+        def folder_path_for(folder) -> List[str]:
+            return [f.name for f in folder_chain_for(folder)]
 
         # Non-assessable nodes that act as sections (the immediate parents of
         # assessable requirements). The frontend uses this to render the
@@ -11829,6 +11845,43 @@ class FrameworkViewSet(BaseModelViewSet):
                 else None,
             }
 
+        from core.cel_service import applicable_rules, is_numeric_rule
+
+        def outcomes_of(ca) -> List[Dict[str, Any]] | None:
+            """The audit's outcome verdicts and numbers the viewer may read."""
+            role = ca_viewer_roles[ca.id]
+            score_visible = is_field_visible_to(ca, "score", role)
+            score_only = not is_field_visible_to(ca, "result", "auditor")
+            verdict_visible = is_field_visible_to(ca, "result", role) or (
+                score_only and score_visible
+            )
+            fired = ca.computed_outcome or {}
+            values = ca.computed_values or {}
+            failed = set(ca.outcome_errors or [])
+            out = []
+            for rule in applicable_rules(framework, ca.selected_implementation_groups):
+                if rule.get("kind") in ("staircase", "weakest_link"):
+                    continue
+                ref_id = rule.get("ref_id")
+                visible = score_visible if is_numeric_rule(rule) else verdict_visible
+                if not visible:
+                    continue
+                if ref_id in failed:
+                    out.append({"ref_id": ref_id, "error": True})
+                elif is_numeric_rule(rule):
+                    if values.get(ref_id) is not None:
+                        out.append({"ref_id": ref_id, "value": values[ref_id]})
+                else:
+                    out.append({"ref_id": ref_id, "met": ref_id in fired})
+            return out or None
+
+        viewable_label_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, FilteringLabel)
+        )
+        viewable_actor_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Actor)
+        )
+
         # Per-CA summary used by the frontend "detected assessments" drawer.
         # Includes every visible CA, counted or not, so users can see what
         # the live-status filter excluded. Only counted CAs carry scores.
@@ -11840,7 +11893,24 @@ class FrameworkViewSet(BaseModelViewSet):
                 "folder_id": str(ca.folder_id) if ca.folder_id else None,
                 "folder_path": folder_path_for(ca.folder),
                 "folder_path_str": " / ".join(folder_path_for(ca.folder)),
-                "is_counted": ca.status in LIVE_STATUSES,
+                "folder_path_ids": [str(f.id) for f in folder_chain_for(ca.folder)],
+                "eta": ca.eta,
+                "due_date": ca.due_date,
+                "labels": [
+                    {"id": str(label.id), "name": label.label}
+                    for label in ca.filtering_labels.all()
+                    if label.id in viewable_label_ids
+                ],
+                "authors": [
+                    {"id": str(actor.id), "name": str(actor)}
+                    for actor in ca.authors.all()
+                    if actor.id in viewable_actor_ids
+                ],
+                # A planned audit has not started: its verdicts would all read as not met.
+                "outcomes": outcomes_of(ca)
+                if ca.id in audits_by_id and ca.status != "planned"
+                else None,
+                "is_counted": is_counted(ca),
                 **(
                     scores_of(audits_by_id[ca.id])
                     if ca.id in audits_by_id
@@ -11865,17 +11935,290 @@ class FrameworkViewSet(BaseModelViewSet):
                     "max_score": framework.max_score,
                     "scores_definition": framework.scores_definition,
                     "implementation_groups_definition": framework.get_implementation_groups_definition_translated(),
+                    "outcomes_definition": [
+                        {
+                            key: rule.get(key)
+                            for key in (
+                                "ref_id",
+                                "kind",
+                                "annotation",
+                                "label",
+                                "implementation_groups",
+                            )
+                        }
+                        | {
+                            "translations": {
+                                lang: {
+                                    k: v
+                                    for k, v in (t or {}).items()
+                                    if k in ("annotation", "label")
+                                }
+                                for lang, t in (rule.get("translations") or {}).items()
+                            }
+                        }
+                        for rule in framework.outcomes_definition or []
+                        if rule.get("kind") not in ("staircase", "weakest_link")
+                    ],
                     "sections": sections,
                 },
                 "rows": rows,
                 "compliance_assessments": compliance_assessments,
                 "ca_status_counts": ca_status_counts,
                 "live_statuses": list(LIVE_STATUSES),
+                "live_only": live_only,
                 "aggregation_strategy": aggregation_strategy,
                 "campaign": campaign_scope,
                 "generated_at": timezone.now().isoformat(),
             }
         )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="requirement_evidences",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def requirement_evidences(self, request, pk):
+        """Zip of the evidences of picked requirement assessments of this framework.
+
+        JSON body:
+          - requirement_assessments (uuids, required): the selection to export.
+          - implementation_group (str): keep requirements of this group only.
+        Each picked assessment is also checked against what the caller may see.
+        """
+        framework = self.get_object()
+        if not RoleAssignment.is_object_readable(request.user, Framework, framework.id):
+            raise NotFound()
+
+        raw_ids = request.data.get("requirement_assessments")
+        if not isinstance(raw_ids, list) or not raw_ids:
+            return Response(
+                {"error": "requirement_assessments is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            picked = {UUID(str(i)) for i in raw_ids}
+        except ValueError:
+            return Response(
+                {"error": "invalid requirement assessment id"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        ig_filter = request.data.get("implementation_group") or None
+
+        audits = ComplianceAssessment.objects.filter(
+            framework=framework,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                request.user, ComplianceAssessment
+            ),
+            requirement_assessments__id__in=picked,
+        ).distinct()
+        viewable_evidences = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Evidence)
+        )
+        viewable_controls = set(
+            RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+        )
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        audit_roles = {}
+        allowed_ra_ids: set = set()
+        for audit in audits.select_related("folder"):
+            audit_roles[audit.id] = (
+                "respondent"
+                if respondent_folders and audit.folder_id in respondent_folders
+                else "auditor"
+            )
+            scoped, _hidden = scoped_requirement_assessments(
+                audit, request.user, include_non_assessable=False
+            )
+            allowed_ra_ids.update(
+                ra.id
+                for ra in scoped
+                if ra.id in picked
+                and (
+                    not ig_filter
+                    or ig_filter in (ra.requirement.implementation_groups or [])
+                )
+            )
+        ras = (
+            RequirementAssessment.objects.filter(id__in=allowed_ra_ids)
+            .select_related("compliance_assessment__folder", "requirement")
+            .prefetch_related(
+                "evidences__revisions",
+                "applied_controls__evidences__revisions",
+            )
+            .order_by(
+                "compliance_assessment__folder__name",
+                "compliance_assessment__name",
+                "requirement__urn",
+            )
+        )
+        requirements = {ra.requirement for ra in ras}
+
+        def sanitize(name: str) -> str:
+            return (
+                sanitize_file_name((name or "").replace("/", "-").replace("\\", "-"))
+                or "_"
+            )
+
+        from django.utils.translation import gettext
+
+        index_wb = Workbook()
+        index_ws = index_wb.active
+        index_ws.title = gettext("Evidence")
+        index_ws.append(
+            [
+                gettext("Domain"),
+                gettext("Audit"),
+                gettext("Requirement"),
+                gettext("Evidence"),
+                gettext("Applied control"),
+                gettext("Link"),
+            ]
+        )
+        domain_paths: dict = {}
+        # (ra, evidence, carrying controls) per index row; files per audit.
+        rows: list = []
+        audit_evidences: dict = {}
+        for ra in ras:
+            ca = ra.compliance_assessment
+            if ca.folder_id not in domain_paths:
+                domain_paths[ca.folder_id] = (
+                    " / ".join(f.name for f in ca.folder.get_folder_full_path())
+                    if ca.folder
+                    else ""
+                )
+            role = audit_roles[ca.id]
+            evidences_visible = is_field_visible_to(ca, "evidences", role)
+            direct = {e.id: e for e in ra.evidences.all()} if evidences_visible else {}
+            controls = (
+                [ac for ac in ra.applied_controls.all() if ac.id in viewable_controls]
+                if evidences_visible
+                and is_field_visible_to(ca, "applied_controls", role)
+                else []
+            )
+            carriers: dict = {}
+            for ac in controls:
+                for e in ac.evidences.all():
+                    carriers.setdefault(e.id, []).append(ac.name)
+            indirect = {
+                e.id: e
+                for ac in controls
+                for e in ac.evidences.all()
+                if e.id not in direct
+            }
+            for evidence_id, evidence in {**direct, **indirect}.items():
+                if evidence_id not in viewable_evidences:
+                    continue
+                audit_evidences.setdefault(ca.id, (ca, {}))[1][evidence_id] = evidence
+                rows.append(
+                    (
+                        ra,
+                        evidence,
+                        ""
+                        if evidence_id in direct
+                        else ", ".join(carriers.get(evidence_id, [])),
+                    )
+                )
+
+        # Each file once per audit; the index rows of every requirement point to it.
+        to_write: list = []
+        taken_dirs: set = set()
+        for ca, evidences in audit_evidences.values():
+            base_dir = (
+                f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
+            )
+            directory, counter = base_dir, 1
+            while directory.lower() in taken_dirs:
+                counter += 1
+                directory = f"{base_dir} ({counter})"
+            taken_dirs.add(directory.lower())
+            names = build_evidence_archive_names(list(evidences.values()))
+            for evidence in evidences.values():
+                entry = names.get(evidence.id)
+                revision = evidence.last_revision
+                if not entry or not revision or not revision.attachment:
+                    continue
+                try:
+                    size = revision.attachment.size
+                except Exception:
+                    logger.warning(
+                        "evidence file unreadable, omitted from archive",
+                        evidence_id=evidence.id,
+                    )
+                    continue
+                to_write.append((ca, evidence, revision, f"{directory}/{entry}", size))
+
+        max_mb = settings.EVIDENCE_EXPORT_MAX_SIZE_MB
+        total = sum(item[4] for item in to_write)
+        if max_mb and total > max_mb * 1_000_000:
+            return Response(
+                {
+                    "error": "evidence_export_too_large",
+                    "size_mb": math.ceil(total / 1_000_000),
+                    "max_size_mb": max_mb,
+                },
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            )
+
+        temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
+        try:
+            with zipfile.ZipFile(temp_file, "w") as zipf:
+                written_paths: dict = {}
+                for ca, evidence, revision, path, size in to_write:
+                    try:
+                        with default_storage.open(revision.attachment.name) as source:
+                            with zipf.open(
+                                path, "w", force_zip64=size > 2**31
+                            ) as entry_file:
+                                shutil.copyfileobj(source, entry_file, 1024 * 1024)
+                        written_paths[(ca.id, evidence.id)] = path
+                    except Exception:
+                        logger.warning(
+                            "evidence file unreadable, omitted from archive",
+                            evidence_id=evidence.id,
+                        )
+
+                for ra, evidence, carried_by in rows:
+                    ca = ra.compliance_assessment
+                    written = written_paths.get((ca.id, evidence.id), "")
+                    revision = evidence.last_revision
+                    target = written or (revision.link if revision else "") or ""
+                    index_ws.append(
+                        [
+                            escape_excel_formula(sanitize_xlsx_value(value))
+                            for value in (
+                                domain_paths[ca.folder_id],
+                                ca.name,
+                                ra.requirement.ref_id or ra.requirement.urn,
+                                evidence.name,
+                                carried_by,
+                                target,
+                            )
+                        ]
+                    )
+                    if written or target.startswith(("http://", "https://")):
+                        index_ws.cell(row=index_ws.max_row, column=6).hyperlink = target
+                index_ws.freeze_panes = "A2"
+                for cell in index_ws[1]:
+                    cell.font = Font(bold=True)
+                for column, width in zip("ABCDEF", (30, 30, 14, 40, 30, 60)):
+                    index_ws.column_dimensions[column].width = width
+                index_buffer = io.BytesIO()
+                index_wb.save(index_buffer)
+                zipf.writestr("index.xlsx", index_buffer.getvalue())
+            if index_ws.max_row == 1:  # header only: nothing to export
+                temp_file.close()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            temp_file.seek(0)
+            if len(requirements) == 1:
+                label = next(iter(requirements)).ref_id or "requirement"
+                filename = f"{sanitize(framework.name)}-{sanitize(label)}-evidences.zip"
+            else:
+                filename = f"{sanitize(framework.name)}-evidences.zip"
+            return FileResponse(temp_file, as_attachment=True, filename=filename)
+        except Exception:
+            temp_file.close()
+            raise
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
