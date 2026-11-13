@@ -15,6 +15,7 @@
 		type ModalStore
 	} from '#lib/components/Modals/stores.js';
 	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import TerminologyBadge from '#lib/components/TerminologyBadge.svelte';
 	import { refreshAll } from '$app/navigation';
 
 	interface Props {
@@ -197,17 +198,21 @@
 				<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide"
 					>{m.status()}</span
 				>
-				<span class="badge text-xs font-medium px-2.5 py-0.5 rounded-full preset-tonal-primary">
-					{safeTranslate(accreditation.status)}
-				</span>
+				<TerminologyBadge
+					name={accreditation.status}
+					hexcolor={accreditation.status_hexcolor}
+					class="text-xs font-medium px-2.5 py-0.5 rounded-full"
+				/>
 			</div>
 			<div class="flex items-center justify-between">
 				<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide"
 					>{m.category()}</span
 				>
-				<span class="badge text-xs font-medium px-2.5 py-0.5 rounded-full preset-tonal-secondary">
-					{safeTranslate(accreditation.category)}
-				</span>
+				<TerminologyBadge
+					name={accreditation.category}
+					hexcolor={accreditation.category_hexcolor}
+					class="text-xs font-medium px-2.5 py-0.5 rounded-full"
+				/>
 			</div>
 		</div>
 
