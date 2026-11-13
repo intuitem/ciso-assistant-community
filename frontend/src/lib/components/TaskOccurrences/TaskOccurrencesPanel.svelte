@@ -80,15 +80,17 @@
 		     list: the eye button below already reaches its single occurrence. -->
 		<p class="font-semibold">{m.dueDate()}</p>
 		{#if only}
+			{@const late = isOccurrenceLate(only)}
 			<div class="flex flex-wrap items-center gap-x-6 gap-y-2">
 				<span class="text-2xl font-semibold">{formatDate(only.due_date)}</span>
 				<span class="badge preset-tonal inline-flex items-center gap-1.5">
 					<span
 						class="inline-block h-3 w-3 rounded-sm {OCCURRENCE_STYLES[
-							occurrenceState(only.status, isOccurrenceLate(only))
+							occurrenceState(only.status, late)
 						]}"
 					></span>
-					{safeTranslate(only.status)}
+					<!-- In words too: the red square alone does not say late to everyone. -->
+					{safeTranslate(only.status)}{late ? ` · ${m.overdue()}` : ''}
 				</span>
 				<Anchor
 					href="/task-nodes/{only.id}"

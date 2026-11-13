@@ -51,10 +51,10 @@
 		const thisYear = String(new Date().getFullYear());
 		const yearOf = (occurrence: Occurrence) => occurrence.due_date?.slice(0, 4);
 
-		if (upcoming && (!lastDue || yearOf(upcoming) === thisYear || yearOf(lastDue) !== thisYear)) {
-			return { before: upcoming.id };
-		}
-		return lastDue ? { after: lastDue.id } : null;
+		// Only a row of the current year can carry it: elsewhere it would mislabel that year.
+		if (upcoming && yearOf(upcoming) === thisYear) return { before: upcoming.id };
+		if (lastDue && yearOf(lastDue) === thisYear) return { after: lastDue.id };
+		return null;
 	});
 	// Squares are occurrences, not months: naming the first and last month of each
 	// row says which part of the year it covers.

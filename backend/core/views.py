@@ -21514,7 +21514,10 @@ class TaskNodeFilterSet(GenericFilterSet):
         if value is True:
             return queryset.filter(due_date__lt=date.today()).order_by("due_date")
         elif value is False:
-            return queryset.filter(due_date__gte=date.today()).order_by("due_date")
+            # Undated (a one-time task without a date) is not past: listed here.
+            return queryset.filter(
+                Q(due_date__gte=date.today()) | Q(due_date__isnull=True)
+            ).order_by("due_date")
         return queryset
 
     class Meta:

@@ -526,7 +526,10 @@
 		untrack(() => {
 			const current = get(pickerFilterForm.form);
 			const domainMoved = (current.domain || null) !== domain;
-			const controlMoved = (current.applied_controls?.[0] ?? '') !== appliedControl;
+			// The picker writes a bare id in single-select mode, the seed an array.
+			const control = current.applied_controls;
+			const currentControl = (Array.isArray(control) ? control[0] : control) ?? '';
+			const controlMoved = currentControl !== appliedControl;
 			if (!domainMoved && !controlMoved) return;
 			pickerFilterForm.form.update(
 				(formData) => {
@@ -582,17 +585,20 @@
 	});
 
 	const buckets = $derived(review?.buckets ?? []);
-	// The backend widens quarters and semesters to whole ones: name what the grid shows.
-	// ISO weeks can start in the month before, so weekly keeps the requested months.
+	// The backend widens quarters and semesters to whole ones and caps weeks at a
+	// year: name what the grid shows. ISO weeks spill into the months around the
+	// range, so weekly keeps the requested months unless the cap cut the end short.
 	const shownPeriod = $derived.by(() => {
 		const first = buckets[0];
 		const last = buckets[buckets.length - 1];
-		if (!first || !last || granularity === 'weekly') {
-			return [data.startMonth, data.startYear, data.endMonth, data.endYear];
-		}
+		if (!first || !last) return [data.startMonth, data.startYear, data.endMonth, data.endYear];
 		const [startYear, startMonth] = first.start.split('-').map(Number);
 		const [endYear, endMonth] = last.end.split('-').map(Number);
-		return [startMonth, startYear, endMonth, endYear];
+		if (granularity !== 'weekly') return [startMonth, startYear, endMonth, endYear];
+		const capped = endYear * 12 + endMonth < data.endYear * 12 + data.endMonth;
+		return capped
+			? [data.startMonth, data.startYear, endMonth, endYear]
+			: [data.startMonth, data.startYear, data.endMonth, data.endYear];
 	});
 	const granularity: Granularity = $derived(review?.granularity ?? 'monthly');
 	// The API's day, so the current period and what is outstanding agree with its
