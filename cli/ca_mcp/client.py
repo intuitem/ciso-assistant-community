@@ -17,6 +17,18 @@ from .config import (
 
 API_PATH = urlsplit(API_URL).path.rstrip("/")
 
+# The MCP server of an instance (ca_mcp.remote) sends each call with the caller's
+# own token, to the backend listener that token is valid on.
+# Called as transport(method, endpoint, params=, json=, data=, headers=) and must
+# return an object with status_code, text and json(). fetch_bytes also passes
+# stream=True and uses the answer as a context manager with iter_content().
+_transport = None
+
+
+def set_transport(transport):
+    global _transport
+    _transport = transport
+
 
 def get_headers():
     """Get common headers for API requests"""
@@ -57,8 +69,10 @@ def make_get_request(endpoint, params=None):
     try:
         requested = int(params["limit"])
         params["limit"] = max(1, min(requested, MAX_TOTAL_ITEMS))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         params["limit"] = DEFAULT_PAGE_LIMIT
+    if _transport:
+        return _transport("GET", endpoint, params=params)
     return requests.get(
         url,
         headers=get_headers(),
@@ -124,13 +138,17 @@ def fetch_bytes(endpoint, max_bytes):
 
     Stops reading at the cap, so an oversized file is never held in memory.
     """
-    with requests.get(
-        f"{API_URL}{endpoint}",
-        headers=get_headers(),
-        verify=VERIFY_CERTIFICATE,
-        timeout=HTTP_TIMEOUT,
-        stream=True,
-    ) as res:
+    if _transport:
+        res = _transport("GET", endpoint, stream=True)
+    else:
+        res = requests.get(
+            f"{API_URL}{endpoint}",
+            headers=get_headers(),
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+            stream=True,
+        )
+    with res:
         if res.status_code != 200:
             return res.status_code, None
         data = bytearray()
@@ -152,6 +170,8 @@ def make_post_request(endpoint, payload):
     Returns:
         Response object
     """
+    if _transport:
+        return _transport("POST", endpoint, json=payload)
     url = f"{API_URL}{endpoint}"
     return requests.post(
         url,
@@ -173,6 +193,8 @@ def make_patch_request(endpoint, payload):
     Returns:
         Response object
     """
+    if _transport:
+        return _transport("PATCH", endpoint, json=payload)
     url = f"{API_URL}{endpoint}"
     return requests.patch(
         url,
@@ -210,6 +232,13 @@ def make_upload_request(endpoint, filename, data):
     Returns:
         Response object
     """
+    if _transport:
+        return _transport(
+            "POST",
+            endpoint,
+            data=data,
+            headers={"Content-Disposition": content_disposition_header(filename)},
+        )
     url = f"{API_URL}{endpoint}"
     headers = get_headers()
     headers["Content-Disposition"] = content_disposition_header(filename)
@@ -232,6 +261,8 @@ def make_delete_request(endpoint):
     Returns:
         Response object
     """
+    if _transport:
+        return _transport("DELETE", endpoint)
     url = f"{API_URL}{endpoint}"
     return requests.delete(
         url,

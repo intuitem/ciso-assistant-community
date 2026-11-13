@@ -17,6 +17,9 @@ from ca_mcp import server  # noqa: E402
 from ca_mcp.tools import evidence_review_tools as t  # noqa: E402
 from tests.mcp.helpers import UUID_A, UUID_B, UUID_C, _response, run  # noqa: E402
 
+# the files_on fixture replaces it in every test
+_real_caller = t._caller
+
 EVIDENCE = {
     "id": UUID_A,
     "name": "Firewall rules",
@@ -281,6 +284,23 @@ def test_history_says_when_versions_are_cut():
 
 def test_review_is_annotated_destructive():
     assert server._annotations(t.review_evidence, is_read=False).destructive_hint
+
+
+def test_the_caller_is_the_oauth_connection_when_there_is_one():
+    def digest(token):
+        return t.hashlib.sha256(token.encode()).hexdigest()
+
+    # on the instance's MCP server there is no PAT to read
+    with (
+        patch.object(t, "get_access_token", return_value=Mock(token="oauth")),
+        patch.object(t, "get_request_token", side_effect=AssertionError),
+    ):
+        assert _real_caller() == digest("oauth")
+    with (
+        patch.object(t, "get_access_token", return_value=None),
+        patch.object(t, "get_request_token", return_value="pat"),
+    ):
+        assert _real_caller() == digest("pat")
 
 
 def test_fetch_bytes_stops_at_cap():

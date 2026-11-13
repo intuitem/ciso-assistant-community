@@ -4,11 +4,13 @@ import asyncio
 import contextvars
 import functools
 import logging
+import time
+from urllib.parse import urlsplit
 
 import anyio.to_thread
 from mcp.server.mcpserver import MCPServer
 
-from . import config
+from . import actions, config
 from .auth import capture_headers
 from .utils.response_formatter import _cap
 
@@ -233,39 +235,58 @@ READ_TOOLS = [
     get_operating_mode_quotation,
 ]
 
-WRITE_TOOLS = [
+# Each write tool's action is declared here, not guessed from its name: a tool
+# missing from both lists fails tests/mcp/test_actions.py.
+CREATE_TOOLS = [
     import_stored_library,
     create_folder,
-    update_folder,
     create_team,
-    update_team,
-    update_user,
     create_perimeter,
     create_asset,
     create_threat,
     create_applied_control,
     create_risk_assessment,
-    sync_risk_assessment_from_ebios_rm,
     create_risk_scenario,
     create_business_impact_analysis,
     create_compliance_assessment,
     create_quantitative_risk_study,
     create_quantitative_risk_scenario,
     create_quantitative_risk_hypothesis,
-    refresh_quantitative_risk_study_simulations,
     create_task_template,
     create_vulnerability,
-    update_vulnerability,
-    delete_vulnerability,
     create_findings_assessment,
     create_finding,
-    update_finding,
     create_evidence,
+    create_incident,
+    create_timeline_entry,
+    create_entity,
+    create_entity_assessment,
+    create_representative,
+    create_solution,
+    create_contract,
+    create_ebios_rm_study,
+    create_feared_event,
+    create_ro_to_couple,
+    create_stakeholder,
+    create_strategic_scenario,
+    create_attack_path,
+    create_operational_scenario,
+    create_elementary_action,
+    create_operating_mode,
+    create_kill_chain_step,
+]
+
+UPDATE_TOOLS = [
+    update_folder,
+    update_team,
+    update_user,
+    sync_risk_assessment_from_ebios_rm,
+    refresh_quantitative_risk_study_simulations,
+    update_vulnerability,
+    update_finding,
     update_evidence,
     review_evidence,
-    create_incident,
     update_incident,
-    create_timeline_entry,
     update_timeline_entry,
     update_asset,
     update_risk_scenario,
@@ -278,27 +299,11 @@ WRITE_TOOLS = [
     update_quantitative_risk_scenario,
     update_quantitative_risk_hypothesis,
     update_task_template,
-    delete_task_template,
-    create_entity,
-    create_entity_assessment,
-    create_representative,
-    create_solution,
-    create_contract,
     update_entity,
     update_entity_assessment,
     update_representative,
     update_solution,
     update_contract,
-    create_ebios_rm_study,
-    create_feared_event,
-    create_ro_to_couple,
-    create_stakeholder,
-    create_strategic_scenario,
-    create_attack_path,
-    create_operational_scenario,
-    create_elementary_action,
-    create_operating_mode,
-    create_kill_chain_step,
     update_ebios_rm_study,
     update_feared_event,
     update_ro_to_couple,
@@ -310,11 +315,38 @@ WRITE_TOOLS = [
     update_kill_chain_step,
 ]
 
+DELETE_TOOLS = [delete_task_template, delete_vulnerability]
+
+WRITE_TOOLS = CREATE_TOOLS + UPDATE_TOOLS + DELETE_TOOLS
+
+TOOL_ACTIONS = {
+    **{tool.__name__: actions.READ for tool in READ_TOOLS},
+    **{tool.__name__: actions.CREATE for tool in CREATE_TOOLS},
+    **{tool.__name__: actions.UPDATE for tool in UPDATE_TOOLS},
+    **{tool.__name__: actions.DELETE for tool in DELETE_TOOLS},
+}
+
+# Tools that do more than their action says.
+ALSO_NEEDS = {
+    # creates the risk scenarios that are missing
+    sync_risk_assessment_from_ebios_rm.__name__: {actions.CREATE},
+    # the backend checks add_ on this action, though it updates the study
+    refresh_quantitative_risk_study_simulations.__name__: {actions.CREATE},
+    # same: the decision is a POST on the version
+    review_evidence.__name__: {actions.CREATE},
+}
+
+
+def needed_actions(name: str) -> set[str]:
+    return {TOOL_ACTIONS.get(name, actions.READ)} | ALSO_NEEDS.get(name, set())
+
 
 LOOPBACK_HOSTS = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
 LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
 
 _registered = False
+
+READ_SCOPE = "mcp"
 
 
 def _annotations(fn, is_read):
@@ -364,18 +396,74 @@ def _offload(fn):
     return runner
 
 
+# Change users or domains: an injected agent could change an email and take
+# the account over through a password reset. Only a local user with a PAT gets them.
+ADMIN_TOOLS = (create_folder, update_folder, update_user)
+
+
+def _register_on(server, read_only, guard_write=None, hooks=None, remote=False):
+    def add(tool, runner, is_read):
+        if hooks:
+            runner = _with_hooks(runner, tool.__name__, hooks)
+        server.tool(annotations=_annotations(tool, is_read=is_read))(runner)
+
+    for tool in READ_TOOLS:
+        add(tool, _offload(tool), is_read=True)
+    if read_only:
+        return
+    for tool in WRITE_TOOLS:
+        # reads files from the server's disk: only for a local stdio user
+        if (remote or config.IS_HTTP) and tool is create_evidence:
+            continue
+        if remote and tool in ADMIN_TOOLS:
+            continue
+        runner = _offload(tool)
+        if guard_write:
+            runner = guard_write(runner, needed_actions(tool.__name__))
+        add(tool, runner, is_read=False)
+
+
+def _with_hooks(runner, name, hooks):
+    """Let the host refuse a call before it runs (limits) and record it after
+    (logging). Outermost, so refusals by the action guard are recorded too. The
+    hooks may block (database, cache): they run in a thread."""
+    from mcp.server.auth.middleware.auth_context import get_access_token
+
+    @functools.wraps(runner)
+    async def hooked(*args, **kwargs):
+        access = get_access_token()
+        refusal = await anyio.to_thread.run_sync(hooks.before, name, access)
+        if refusal:
+            await anyio.to_thread.run_sync(
+                lambda: hooks.after(name, access, refusal, 0.0, "limited")
+            )
+            return refusal
+        start = time.monotonic()
+        try:
+            result = await runner(*args, **kwargs)
+        except BaseException as e:
+            failure = type(e).__name__ if isinstance(e, Exception) else "cancelled"
+            elapsed = time.monotonic() - start
+            # a cancelled call is recorded too: shield the hook from the cancel
+            with anyio.CancelScope(shield=True):
+                await anyio.to_thread.run_sync(
+                    lambda: hooks.after(name, access, None, elapsed, failure)
+                )
+            raise
+        await anyio.to_thread.run_sync(
+            lambda: hooks.after(name, access, result, time.monotonic() - start, None)
+        )
+        return result
+
+    return hooked
+
+
 def register_tools(read_only: bool = False):
     """Register tools with the MCP server, optionally omitting writes."""
     global _registered
     if _registered:
         return
-    for tool in READ_TOOLS:
-        mcp.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
-    if not read_only:
-        for tool in WRITE_TOOLS:
-            if config.IS_HTTP and tool is create_evidence:
-                continue
-            mcp.tool(annotations=_annotations(tool, is_read=False))(_offload(tool))
+    _register_on(mcp, read_only)
     _registered = True
 
 
@@ -396,11 +484,8 @@ def run_server():
     mcp.run(transport="stdio")
 
 
-def build_http_app():
-    """Streamable HTTP ASGI app, configured from the environment."""
+def _transport_security():
     from mcp.server.transport_security import TransportSecuritySettings
-
-    register_tools(read_only=config.READ_ONLY)
 
     if config.ALLOWED_HOSTS == ["*"]:
         security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
@@ -433,6 +518,12 @@ def build_http_app():
             "CA_MCP_ALLOWED_HOSTS unset: only loopback hosts are accepted. "
             "Set it to the public hostname before exposing this server."
         )
+    return security
+
+
+def build_http_app():
+    register_tools(read_only=config.READ_ONLY)
+    security = _transport_security()
 
     _log_startup(
         f"MCP Streamable HTTP on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
@@ -452,15 +543,166 @@ def build_http_app():
     )
 
 
+def _require_action(runner, needed):
+    from mcp.server.auth.middleware.auth_context import get_access_token
+
+    @functools.wraps(runner)
+    async def guarded(*args, **kwargs):
+        access = get_access_token()
+        missing = needed - actions.granted_actions(access)
+        if missing:
+            first = min(missing, key=actions.ACTIONS.index)
+            return actions.refusal(access, first)
+        return await runner(*args, **kwargs)
+
+    return guarded
+
+
+class ActionFilteredServer(MCPServer):
+    """Lists only the tools the connection's actions allow, so the agent does not
+    try the others. The guard on each tool is the boundary; this is for the agent."""
+
+    async def list_tools(self):
+        from mcp.server.auth.middleware.auth_context import get_access_token
+
+        granted = actions.granted_actions(get_access_token())
+        return [
+            tool
+            for tool in await super().list_tools()
+            if needed_actions(tool.name) <= granted
+        ]
+
+
+async def get_my_access() -> str:
+    """What this connection may do in CISO Assistant (read, create, change and
+    delete), and which profile it uses. Call it before planning changes."""
+    from mcp.server.auth.middleware.auth_context import get_access_token
+
+    return actions.summary(get_access_token())
+
+
+def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
+    """Streamable HTTP app for a host that authenticates callers with OAuth.
+
+    `hooks`, if given, has `before(tool, access) -> refusal or None` and
+    `after(tool, access, result, seconds, error)`, called around every tool."""
+    from mcp.server.auth.settings import AuthSettings
+    from starlette.responses import JSONResponse
+
+    # what a connection may do comes from the backend, which enforces it too;
+    # CA_MCP_READ_ONLY narrows every connection to the read tools
+    read_only = config.READ_ONLY
+    server = ActionFilteredServer(
+        "ciso-assistant",
+        instructions="Call get_my_access to see what this connection may do.",
+        token_verifier=token_verifier,
+        auth=AuthSettings(
+            issuer_url=issuer_url,
+            resource_server_url=resource_url,
+            required_scopes=[READ_SCOPE],
+            validate_token_resource=True,
+        ),
+    )
+    _register_on(
+        server, read_only, guard_write=_require_action, hooks=hooks, remote=True
+    )
+    runner = (
+        _with_hooks(get_my_access, "get_my_access", hooks) if hooks else get_my_access
+    )
+    server.tool(annotations=_annotations(get_my_access, is_read=True))(runner)
+    _log_startup(
+        f"MCP Streamable HTTP (OAuth) on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
+    )
+    app = server.streamable_http_app(
+        streamable_http_path=config.HTTP_PATH,
+        json_response=config.JSON_RESPONSE,
+        stateless_http=config.STATELESS,
+        transport_security=_transport_security(),
+        host=config.HTTP_HOST,
+    )
+
+    metadata_path = (
+        "/.well-known/oauth-protected-resource" + urlsplit(resource_url).path
+    )
+    metadata = {
+        "resource": resource_url,
+        "authorization_servers": [issuer_url],
+        "scopes_supported": [READ_SCOPE],
+        "bearer_methods_supported": ["header"],
+    }
+
+    async def with_metadata(scope, receive, send):
+        if scope["type"] == "http" and scope["path"] == metadata_path:
+            response = JSONResponse(
+                metadata, headers={"Access-Control-Allow-Origin": "*"}
+            )
+            await response(scope, receive, send)
+            return
+        await app(scope, receive, send)
+
+    return isolated(with_metadata)
+
+
+# set by this server only, whatever the upstream sent
+_REPLACED_HEADERS = {
+    b"set-cookie",
+    b"service-worker-allowed",
+    b"content-security-policy",
+    b"x-content-type-options",
+}
+
+
+def isolated(app):
+    """The proxy rules of /mcp, applied here too, against this server's own
+    mistakes: its responses cannot act as a page or a service worker of the
+    instance's origin, and the session cookie, which still reaches this process
+    when the ingress does not strip it, is dropped before any of its code sees
+    it. A compromised server can undo all of this; only the proxy cannot be."""
+
+    async def wrapped(scope, receive, send):
+        if scope["type"] != "http":
+            await app(scope, receive, send)
+            return
+        headers = [(k, v) for k, v in scope["headers"] if k.lower() != b"cookie"]
+
+        async def send_isolated(message):
+            if message["type"] == "http.response.start":
+                kept = [
+                    (k, v)
+                    for k, v in message.get("headers", [])
+                    if k.lower() not in _REPLACED_HEADERS
+                ]
+                kept += [
+                    (b"content-security-policy", b"sandbox"),
+                    (b"x-content-type-options", b"nosniff"),
+                ]
+                message = {**message, "headers": kept}
+            await send(message)
+
+        await app({**scope, "headers": headers}, receive, send_isolated)
+
+    return wrapped
+
+
 def run_http():
     """Run the MCP server over Streamable HTTP"""
     import uvicorn
 
-    uvicorn.run(build_http_app(), host=config.HTTP_HOST, port=config.HTTP_PORT)
+    if config.AUTH_MODE == "oauth":
+        from .remote import build_app
+
+        app = build_app()
+    else:
+        app = build_http_app()
+    uvicorn.run(app, host=config.HTTP_HOST, port=config.HTTP_PORT)
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
+    if config.AUTH_MODE not in ("pat", "oauth"):
+        raise SystemExit(f"CA_MCP_AUTH must be pat or oauth, not {config.AUTH_MODE!r}")
+    if config.AUTH_MODE == "oauth" and not config.IS_HTTP:
+        raise SystemExit("CA_MCP_AUTH=oauth needs CA_MCP_TRANSPORT=streamable-http")
     if config.IS_HTTP:
         run_http()
     else:

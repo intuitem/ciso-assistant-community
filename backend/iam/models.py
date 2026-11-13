@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
+from django.core.cache import cache
 from django.utils import timezone
 from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
@@ -54,6 +55,7 @@ from auditlog.signals import pre_log
 from allauth.idp.oidc.models import Client, Token
 from allauth.socialaccount.models import SocialApp
 from core.context import focus_folder_id_var
+from iam.delegation import delegation_allows
 
 ALLOWED_PERMISSION_APPS = (
     "core",
@@ -928,6 +930,7 @@ class UserManager(BaseUserManager):
                 observation=extra_fields.get("observation"),
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
+                can_connect_apps=extra_fields.get("can_connect_apps", False),
                 expiry_date=extra_fields.get("expiry_date"),
                 is_jit_provisioned=extra_fields.get("is_jit_provisioned", False),
             ),
@@ -1026,6 +1029,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         default=False,
         help_text=_(
             "If True allow the user to log in using the normal login form even with SSO forced."
+        ),
+    )
+    can_connect_apps = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True allow the user to connect AI apps (MCP) with their account."
         ),
     )
     is_third_party = models.BooleanField(default=False)
@@ -1560,6 +1569,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if not isinstance(user, User):
             return False
 
+        if not delegation_allows(perm.codename):
+            return False
+
         model = perm.content_type.model_class()
         perm_prefix = perm.codename.split("_")[0]
 
@@ -1753,6 +1765,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return GrantFolderSet.none()
 
         permission = RoleAssignment._resolve_permission(permission)
+        if not delegation_allows(permission.codename):
+            return GrantFolderSet.none()
 
         role_assignments, default_role_folders = (
             RoleAssignment._get_permission_grant_sources(user, permission)
@@ -2141,6 +2155,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Or return `False` otherwise.
         """
         if not isinstance(principal, (User, UserGroup)):
+            return False
+        if not delegation_allows(codename):
             return False
 
         permission = Permission.objects.get(codename=codename)
@@ -2531,6 +2547,163 @@ class ServiceAccount(AbstractBaseModel):
         return self.name
 
 
+class ConnectedAppUse(models.Model):
+    """When a user authorized an app, and when its tokens were last accepted.
+
+    Kept apart from allauth's Token rows: access tokens are replaced every hour,
+    and the date would go with them.
+    """
+
+    THROTTLE = timedelta(minutes=1)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="connected_app_uses"
+    )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    authorized_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "client"], name="unique_connected_app_use"
+            )
+        ]
+
+    @classmethod
+    def record(cls, user_id, client_id) -> None:
+        # this runs on every call: within THROTTLE, the cache answers and the
+        # database is not touched
+        key = f"connected-app-use:{user_id}:{client_id}"
+        if not cache.add(key, True, cls.THROTTLE.total_seconds()):
+            return
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"last_used_at": timezone.now()},
+        )
+
+    @classmethod
+    def record_authorization(cls, user_id, client_id) -> None:
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"authorized_at": timezone.now()},
+        )
+
+
+class ConnectionProfile(models.Model):
+    """What an AI app may do once connected: read always, plus any of create,
+    update and delete. It only narrows: the app never gets more than the user
+    who connects it, and never the control plane."""
+
+    ACTIONS = ("read", "create", "update", "delete")
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, default="")
+    can_create = models.BooleanField(default=False)
+    can_update = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
+    builtin = models.BooleanField(default=False)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def actions(self) -> list[str]:
+        allowed = {
+            "read": True,
+            "create": self.can_create,
+            "update": self.can_update,
+            "delete": self.can_delete,
+        }
+        return [action for action in self.ACTIONS if allowed[action]]
+
+    @property
+    def rank(self) -> tuple[int, ...]:
+        return (len(self.actions), self.can_delete, self.can_update)
+
+    @staticmethod
+    def builtin_name(create: bool, update: bool, delete: bool) -> str:
+        words = ["create"] * create + ["update"] * update + ["delete"] * delete
+        if not words:
+            return "Read only"
+        if len(words) == 1:
+            return f"Read and {words[0]}"
+        return "Read, " + ", ".join(words[:-1]) + f" and {words[-1]}"
+
+    @classmethod
+    def default(cls) -> "ConnectionProfile | None":
+        return cls.objects.filter(is_default=True).first()
+
+    @classmethod
+    def matching(cls, create: bool, update: bool, delete: bool):
+        return cls.objects.filter(
+            builtin=True, can_create=create, can_update=update, can_delete=delete
+        ).first()
+
+    @classmethod
+    def sync_builtin(cls) -> None:
+        """One built-in profile per combination of create, update and delete."""
+        for create in (False, True):
+            for update in (False, True):
+                for delete in (False, True):
+                    cls.objects.update_or_create(
+                        name=cls.builtin_name(create, update, delete),
+                        defaults={
+                            "can_create": create,
+                            "can_update": update,
+                            "can_delete": delete,
+                            "is_default": not (create or update or delete),
+                            "builtin": True,
+                        },
+                    )
+
+
+class AppGrant(models.Model):
+    """Which profile a connection uses. Keyed by user and client, not by token:
+    allauth issues new tokens at each refresh and copies no data across."""
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="app_grants")
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    # deleting a profile must go through revoking its connections, or their
+    # tokens would outlive the grant
+    profile = models.ForeignKey(
+        ConnectionProfile, on_delete=models.PROTECT, related_name="grants"
+    )
+    # {folder id: ["read", "update", ...]}: the nearest one wins over the
+    # profile. Stored now, read once domain overrides ship.
+    folder_overrides = models.JSONField(default=dict, blank=True)
+    granted_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "client"], name="unique_app_grant")
+        ]
+
+    @classmethod
+    def consent(cls, user_id, client_id, profile) -> "AppGrant":
+        grant, _ = cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"profile": profile, "granted_at": timezone.now()},
+        )
+        return grant
+
+
 common_exclude = ["created_at", "updated_at"]
 # `preferences` is personal UI state (language, theme, date format, hidden
 # modules) with no security meaning, and every toggle would otherwise log the
@@ -2559,6 +2732,7 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(Role, exclude_fields=common_exclude)
+auditlog.register(ConnectionProfile, exclude_fields=common_exclude)
 auditlog.register(UserGroup, exclude_fields=common_exclude)
 auditlog.register(PersonalAccessToken)
 auditlog.register(SCIMToken)
@@ -2579,3 +2753,40 @@ def _skip_builtin_rbac(sender, instance, **kwargs):
 
 for _rbac_model in (RoleAssignment, Role, UserGroup):
     pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)
+
+
+_APP_ACCESS_FIELDS = ("can_connect_apps", "is_active")
+
+
+def _note_lost_app_access(sender, instance, update_fields=None, **kwargs):
+    # unticking the flag or deactivating is a decision about this person: their
+    # connections must not come back if it is reverted, so the tokens go
+    instance._lost_app_access = None
+    if instance._state.adding or (
+        update_fields is not None and not set(update_fields) & set(_APP_ACCESS_FIELDS)
+    ):
+        return
+    before = User.objects.filter(pk=instance.pk).values(*_APP_ACCESS_FIELDS).first()
+    if not before:
+        return
+    if before["is_active"] and not instance.is_active:
+        instance._lost_app_access = "all"
+    elif before["can_connect_apps"] and not instance.can_connect_apps:
+        instance._lost_app_access = "mcp"
+
+
+def _revoke_lost_app_access(sender, instance, **kwargs):
+    lost = getattr(instance, "_lost_app_access", None)
+    instance._lost_app_access = None
+    if lost == "all":
+        from iam.mcp_access import revoke_app_tokens
+
+        revoke_app_tokens([instance.pk])
+    elif lost == "mcp":
+        from iam.mcp_access import revoke_mcp_connections
+
+        revoke_mcp_connections(instance.pk)
+
+
+models.signals.pre_save.connect(_note_lost_app_access, sender=User)
+models.signals.post_save.connect(_revoke_lost_app_access, sender=User)

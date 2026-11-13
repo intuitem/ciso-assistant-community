@@ -543,6 +543,7 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
+	can_connect_apps: z.boolean().optional(),
 	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
@@ -552,6 +553,7 @@ export const UserEditSchema = z.object({
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
 	language: z.string().optional().default(''),
+	can_connect_apps: z.boolean().optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.iso.date()])
@@ -819,6 +821,8 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	idp_groups: z.boolean().optional(),
+	mcp: z.boolean().optional(),
+	mcp_write: z.boolean().optional(),
 	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	workflows: z.boolean().optional(),

@@ -67,6 +67,10 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
 
 class IsGlobalAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
+        from iam.delegation import is_delegated
+
+        if is_delegated():
+            return False
         user = request.user
         return bool(user and user.is_authenticated and user.is_admin())
 
