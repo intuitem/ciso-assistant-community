@@ -1401,6 +1401,7 @@ def send_object_assignment_notification(
     from .email_utils import (
         get_locale_for_email,
         localize_model_name,
+        object_url,
         paraglide_model_key,
     )
 
@@ -1426,6 +1427,7 @@ def send_object_assignment_notification(
     context = {
         "object_name": object_name,
         "folder_name": folder.name if folder else "Default",
+        "object_url": object_url(obj),
     }
     for email in emails:
         if check_email_configuration(email):
@@ -1744,7 +1746,7 @@ def send_security_exception_assignment_notification(exception_id, assigned_user_
         logger.error(f"SecurityException with id {exception_id} not found")
         return
 
-    from .email_utils import render_email_template
+    from .email_utils import object_url, render_email_template
 
     context = {
         "exception_name": security_exception.name,
@@ -1759,6 +1761,8 @@ def send_security_exception_assignment_notification(exception_id, assigned_user_
         "folder_name": security_exception.folder.name
         if security_exception.folder
         else "Default",
+        "exception_url": object_url(security_exception),
+        "exception_observation": security_exception.observation or "N/A",
     }
 
     notify(
@@ -1839,7 +1843,7 @@ def send_security_exception_status_notification(
         logger.error(f"SecurityException with id {exception_id} not found")
         return
 
-    from .email_utils import render_email_template
+    from .email_utils import object_url, render_email_template
 
     context = {
         "exception_name": security_exception.name,
@@ -1849,6 +1853,8 @@ def send_security_exception_status_notification(
         "folder_name": security_exception.folder.name
         if security_exception.folder
         else "Default",
+        "exception_url": object_url(security_exception),
+        "exception_observation": security_exception.observation or "N/A",
     }
 
     notify(

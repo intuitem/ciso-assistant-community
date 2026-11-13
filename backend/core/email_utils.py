@@ -328,6 +328,38 @@ def paraglide_model_key(model) -> str:
     return next((k for k in _MODEL_LABELS["en"] if k.lower() == name), name)
 
 
+MODEL_NAME_TO_FRONTEND_ROUTE: dict[str, str] = {
+    "asset": "assets",
+    "businessimpactanalysis": "business-impact-analysis",
+    "contract": "contracts",
+    "databreach": "data-breaches",
+    "documentcontainer": "document-containers",
+    "ebiosrmstudy": "ebios-rm",
+    "entityassessment": "entity-assessments",
+    "evidence": "evidences",
+    "finding": "findings",
+    "findingsassessment": "findings-assessments",
+    "metricinstance": "metric-instances",
+    "organisationobjective": "organisation-objectives",
+    "postureassessment": "posture-assessments",
+    "processing": "processings",
+    "quantitativeriskscenario": "quantitative-risk-scenarios",
+    "quantitativeriskstudy": "quantitative-risk-studies",
+    "riskassessment": "risk-assessments",
+    "rightrequest": "right-requests",
+    "securityexception": "security-exceptions",
+    "solution": "solutions",
+}
+"""Maps a django `model_name` to a frontend (SvelteKit) route."""
+
+
+def object_url(obj) -> str:
+    """Deep link to *obj*'s detail page, or the app root if its route is unknown."""
+    base = settings.CISO_ASSISTANT_URL
+    route = MODEL_NAME_TO_FRONTEND_ROUTE.get(obj._meta.model_name)
+    return f"{base}/{route}/{obj.pk}" if route else base
+
+
 def localize_model_name(key: str, locale: Optional[str]) -> str:
     return _MODEL_LABELS[_language_code(locale)].get(key, key)
 
