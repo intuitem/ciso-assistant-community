@@ -1,6 +1,7 @@
-from core.serializers import BaseModelSerializer
+from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
 from django.db import transaction
 from django.utils.translation import gettext as _
+from dateutil.relativedelta import relativedelta
 from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from .models import (
@@ -119,7 +120,9 @@ class DataTransferReadSerializer(BaseModelSerializer):
 
 
 # Processing Serializers
-class ProcessingWriteSerializer(BaseModelSerializer):
+class ProcessingWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"assigned_to": "object_assignment"}
+
     # Not a model field: the reason given for a DPIA requirement change, kept
     # on its history row.
     dpia_required_note = serializers.CharField(
@@ -240,10 +243,22 @@ class ProcessingReadSerializer(BaseModelSerializer):
 
 
 # RightRequest Serializers
-class RightRequestWriteSerializer(BaseModelSerializer):
+class RightRequestWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     class Meta:
         model = RightRequest
         fields = "__all__"
+
+    def validate(self, attrs):
+        # GDPR art. 12(3): answer within one month of receipt, unless set otherwise
+        if (
+            not attrs.get("due_date")
+            and attrs.get("requested_on")
+            and not (self.instance and self.instance.due_date)
+        ):
+            attrs["due_date"] = attrs["requested_on"] + relativedelta(months=1)
+        return super().validate(attrs)
 
 
 class RightRequestReadSerializer(BaseModelSerializer):
@@ -257,7 +272,9 @@ class RightRequestReadSerializer(BaseModelSerializer):
 
 
 # DataBreach Serializers
-class DataBreachWriteSerializer(BaseModelSerializer):
+class DataBreachWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"assigned_to": "object_assignment"}
+
     class Meta:
         model = DataBreach
         fields = "__all__"
@@ -272,6 +289,8 @@ class DataBreachReadSerializer(BaseModelSerializer):
     remediation_measures = FieldsRelatedField(["id", "name"], many=True)
     incident = FieldsRelatedField()
     evidences = FieldsRelatedField(many=True)
+    authority_notification_due = serializers.DateTimeField(read_only=True)
+    authority_notification_overdue = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = DataBreach

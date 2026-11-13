@@ -16,7 +16,7 @@ from core import tasks
 from core.email_utils import TEMPLATE_BASE_PATH
 from notifications.registry import NOTIFICATION_REGISTRY
 
-LOCALES = ("en", "fr")
+LOCALES = ("en", "fr", "de", "nl")
 CATEGORIES = {"assignments", "approvals", "deadlines", "updates", "account"}
 MODES = {"condition", "event"}
 CHANNELS = {"in_app", "email"}
@@ -37,6 +37,8 @@ def test_email_template_is_present_exactly_when_email_is_a_channel(key, meta):
     not silently coexist with an email channel."""
     if "email" in meta["channels"]:
         assert meta["email_template"], f"{key} has an email channel but no template"
+        # the settings switch disables email by type key, delivery checks the template
+        assert meta["email_template"] == key, f"{key} -> {meta['email_template']}"
         for locale in LOCALES:
             path = Path(TEMPLATE_BASE_PATH) / locale / f"{meta['email_template']}.yaml"
             assert path.exists(), f"{key} -> missing {path}"
@@ -66,7 +68,7 @@ def test_condition_mode_matches_the_deadlines_category():
         k for k, v in NOTIFICATION_REGISTRY.items() if v["category"] == "deadlines"
     }
     assert conditions == deadlines
-    assert len(conditions) == 10
+    assert len(conditions) == 14
 
 
 def _catalog(locale: str):
@@ -100,6 +102,23 @@ def test_every_in_app_type_has_a_title_message(locale):
 
 
 @pytest.mark.parametrize("locale", LOCALES)
+def test_every_type_has_a_settings_label(locale):
+    """The notification and email template settings pages build
+    `template<Type>Name` from the type key: a near miss shows the raw key."""
+    catalog = _catalog(locale)
+    if catalog is None:
+        pytest.skip("frontend messages not present in this checkout")
+
+    missing = [
+        key
+        for key in NOTIFICATION_REGISTRY
+        if f"template{''.join(w.capitalize() for w in key.split('_'))}Name"
+        not in catalog
+    ]
+    assert not missing, f"{locale}: no settings label for {missing}"
+
+
+@pytest.mark.parametrize("locale", LOCALES)
 def test_title_messages_only_use_declared_context(locale):
     """A message referencing a variable the producer never sends would render the
     parameter name to the user."""
@@ -113,8 +132,12 @@ def test_title_messages_only_use_declared_context(locale):
         if not message:
             continue
         used = set(re.findall(r"\{([a-z_]+)\}", message))
-        assert used <= set(meta["context"]), (
-            f"{locale}/{key} uses undeclared {sorted(used - set(meta['context']))}"
+        # `x_key` in the context is resolved to `{x}` by the frontend (NotificationTitle).
+        declared = set(meta["context"]) | {
+            c.removesuffix("_key") for c in meta["context"] if c.endswith("_key")
+        }
+        assert used <= declared, (
+            f"{locale}/{key} uses undeclared {sorted(used - declared)}"
         )
 
 

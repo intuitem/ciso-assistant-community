@@ -77,6 +77,42 @@ IGNORED_PERMISSION_MODELS = (
     "idpgroup",
     "scimtoken",
     "serviceaccount",
+    # Internal: access is gated through the parent object, never by these permissions
+    "answerattachment",
+    "demomanifest",
+    "flowevent",
+    "producedobjectlink",
+    "quickformapplication",
+    "quickformoutcome",
+    "requirementassignmentevent",
+    "requirementnodeattachment",
+    # Stale content types of removed models
+    "cacheversion",
+    "processingnature",
+    # Never checked; mail settings are gated by *_mailerconfiguration
+    "mailer",
+    "mailerhealth",
+)
+
+# System-written, served read-only: only view (and custom rights) are ever checked
+READ_ONLY_PERMISSION_MODELS = (
+    "actor",
+    "assetcapability",
+    "commitment",
+    "dpiarequirementchange",
+    "entitytierchange",
+    "quickformpage",
+    "responsibilityassignment",
+    "responsibilityrole",
+    "solutiontierchange",
+)
+
+IGNORED_PERMISSIONS = Q(content_type__model__in=IGNORED_PERMISSION_MODELS) | Q(
+    codename__in=[
+        f"{action}_{model}"
+        for model in READ_ONLY_PERMISSION_MODELS
+        for action in ("add", "change", "delete")
+    ]
 )
 
 type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
@@ -640,6 +676,7 @@ class Folder(NameDescriptionMixin):
             ["journey", "folder"],
             ["questionnaire_run", "folder"],
             ["agent_run", "folder"],
+            ["collection", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -1072,7 +1109,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name = _("user")
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
-        permissions = (("backup", "backup"), ("restore", "restore"))
+        permissions = (
+            ("backup", "backup"),
+            ("restore", "restore"),
+            # See the full-view-permissions ADR.
+            ("view_user_full", "Can view users' full record"),
+        )
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
@@ -1926,7 +1968,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             Permission.objects.filter(
                 content_type__app_label__in=ALLOWED_PERMISSION_APPS
             )
-            .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+            .exclude(IGNORED_PERMISSIONS)
             .values_list("id", flat=True)
         )
 

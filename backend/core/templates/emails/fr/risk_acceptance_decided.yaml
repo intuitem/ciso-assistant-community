@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Acceptation de risque '${acceptance_name}' : ${decision}"
+body: |
+  Bonjour,
+
+  Une acceptation de risque portant sur des scénarios de risque dont vous êtes responsable a changé d'état :
+
+  - Nom : ${acceptance_name}
+  - État : ${decision}
+  - Décidé par : ${actor_name}
+  - Justification : ${justification}
+  - Scénarios de risque : ${risk_scenarios}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour la consulter : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

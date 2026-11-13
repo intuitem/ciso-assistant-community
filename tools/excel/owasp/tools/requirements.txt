@@ -1,0 +1,3 @@
+openpyxl
+requests
+tqdm

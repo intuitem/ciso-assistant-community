@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${deadline_count} regulatory notification deadline(s)"
+body: |
+  Hello,
+
+  The following regulatory notification deadlines need your attention:
+
+  ${deadline_list}
+
+  Once a notification is sent to the authority, record its date on the incident or the data breach: [Open CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

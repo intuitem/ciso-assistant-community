@@ -668,6 +668,7 @@ export type VisibilityField = (typeof VISIBILITY_FIELDS)[number];
 
 export type RoleAccess = 'edit' | 'read' | 'hidden';
 export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
+export type VisibilityMap = Record<string, VisibilityPair>;
 
 const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
 
@@ -735,7 +736,11 @@ export function getFieldVisibility(
 		showResult: isFieldVisible(complianceAssessment, 'result', viewerRole),
 		showStatus: isFieldVisible(complianceAssessment, 'status', viewerRole),
 		showScore: isFieldVisible(complianceAssessment, 'score', viewerRole),
-		showDocumentationScore: isFieldVisible(complianceAssessment, 'documentation_score', viewerRole),
+		// Hidden from the auditor means documentation scoring is off (show_documentation_score),
+		// whatever a map saved before the auditor >= respondent rule says for the respondent.
+		showDocumentationScore:
+			isFieldVisible(complianceAssessment, 'documentation_score', viewerRole) &&
+			isFieldVisible(complianceAssessment, 'documentation_score', 'auditor'),
 		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
 		showTaskTemplates: isFieldVisible(complianceAssessment, 'task_templates', viewerRole),
@@ -748,6 +753,37 @@ export function getFieldVisibility(
 		showComments: isFieldVisible(complianceAssessment, 'comments', viewerRole),
 		showExtendedResult: isFieldVisible(complianceAssessment, 'extended_result', viewerRole)
 	};
+}
+
+/**
+ * Whether the viewer gets the applicability toggle: in a score-only audit
+ * (compliance hidden from the auditor too) a requirement is marked not
+ * applicable through it, since compliance is the only place N/A lives.
+ * Editable for a role that edits scores (mirrors the backend's
+ * `is_applicability_write`).
+ */
+export function showApplicabilityToggle(
+	complianceAssessment: Record<string, any> | null | undefined,
+	viewerRole: 'respondent' | 'auditor'
+): boolean {
+	return (
+		isFieldVisible(complianceAssessment, 'score', viewerRole) &&
+		!isFieldVisible(complianceAssessment, 'result', 'auditor')
+	);
+}
+
+/**
+ * Maturity (the "overall" score of CyFun): the average of the implementation and
+ * documentation scores, a missing documentation score counting at the bottom of
+ * the scale, as the backend counts it (ComplianceAssessment.requirement_layer_scores
+ * for a requirement, the average of the two aggregates for a section).
+ */
+export function maturityScore(
+	implementation: number,
+	documentation: number | null | undefined,
+	minScore: number
+): number {
+	return (implementation + (documentation ?? minScore)) / 2;
 }
 
 /**

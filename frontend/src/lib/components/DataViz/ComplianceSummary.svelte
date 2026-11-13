@@ -3,6 +3,7 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 	import type { ComplianceOverview } from '#lib/utils/types.js';
+	import { complianceShare } from '#lib/utils/vendor-posture.js';
 
 	interface Props {
 		overview: ComplianceOverview | null | undefined;
@@ -20,16 +21,7 @@
 	const showScore = $derived(Boolean(overview?.show_score && score && score.maturity_score >= 0));
 	const showResult = $derived(Boolean(overview?.show_result) && assessed > 0);
 	const share = (value: number) => Math.round((value / assessed) * 100);
-	const applicable = $derived(
-		assessed - (slices.find((slice) => slice.name === 'not_applicable')?.value ?? 0)
-	);
-	const compliantShare = $derived(
-		applicable > 0
-			? Math.round(
-					((slices.find((slice) => slice.name === 'compliant')?.value ?? 0) / applicable) * 100
-				)
-			: 0
-	);
+	const compliantShare = $derived((overview && complianceShare(overview)) ?? 0);
 	// The tooltip's content, for readers that never see it.
 	const breakdownLabel = $derived(
 		`${m.compliance()}: ` +

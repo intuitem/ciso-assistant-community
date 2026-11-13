@@ -69,6 +69,7 @@ READER_PERMISSIONS_LIST = [
     "view_cwe",
     "view_vulnerability",
     "view_user",
+    "view_user_full",
     "view_actor",
     "view_team",
     "view_usergroup",
@@ -229,6 +230,7 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_entitytierchange",
     "view_solutiontierchange",
     "view_documenttemplate",
+    "view_published_documentcontainer",
     "view_customfielddefinition",
     "view_requirementmapping",
     "view_requirementmappingset",
@@ -1412,6 +1414,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_object_audittrail",
     "add_user",
     "view_user",
+    "view_user_full",
     "view_actor",
     "add_team",
     "view_team",
@@ -1523,6 +1526,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     # document management
     "add_documentcontainer",
     "view_documentcontainer",
+    "view_published_documentcontainer",
     "change_documentcontainer",
     "delete_documentcontainer",
     "add_documenttemplate",
@@ -2495,6 +2499,11 @@ def startup(sender=None, **kwargs):
         Terminology.create_default_metric_units()
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
+
+    try:
+        Terminology.create_default_asset_lifecycle_stages()
+    except Exception as e:
+        logger.error("Error creating default Asset Lifecycle Stages", exc_info=True)
 
     try:
         Terminology.create_default_project_statuses()

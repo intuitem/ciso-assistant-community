@@ -26,7 +26,7 @@ export const complianceResultColorMap: { [key: string]: string } = {
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
 	compliant: '#86efac',
-	not_applicable: '#000000'
+	not_applicable: '#475569'
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
@@ -34,14 +34,14 @@ export const complianceResultTailwindColorMap: { [key: string]: string } = {
 	partially_compliant: 'bg-yellow-300 dark:bg-yellow-600',
 	non_compliant: 'bg-red-300 dark:bg-red-800',
 	compliant: 'bg-green-300 dark:bg-green-700',
-	not_applicable: 'bg-black text-white'
+	not_applicable: 'bg-slate-600 text-white'
 };
 
 export const postureResultTailwindColorMap: { [key: string]: string } = {
 	pass: 'bg-green-300 dark:bg-green-700',
 	fail: 'bg-red-300 dark:bg-red-800',
 	error: 'bg-amber-300 dark:bg-amber-600',
-	not_applicable: 'bg-black text-white',
+	not_applicable: 'bg-slate-600 text-white',
 	not_checked: 'bg-surface-300-700'
 };
 
@@ -77,7 +77,7 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
 	compliant: '#86efac',
-	not_applicable: '#1f2937',
+	not_applicable: '#475569',
 	// Compliance / task / generic statuses
 	to_do: '#9ca3af',
 	in_progress: '#f59e0b',
@@ -232,7 +232,8 @@ export const LOCALE_DISPLAY_MAP = {
 	ko: '🇰🇷 한국어',
 	et: '🇪🇪 Eesti',
 	sk: '🇸🇰 Slovenčina',
-	sl: '🇸🇮 Slovenščina'
+	sl: '🇸🇮 Slovenščina',
+	nb: '🇳🇴 Norsk bokmål'
 };
 
 export const ISO_8601_REGEX =
@@ -260,6 +261,9 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'expiry_date',
 	'exploited_date_added',
 	'last_assessment_date',
+	'nis2_early_warning_at',
+	'nis2_final_report_at',
+	'nis2_notification_at',
 	'occurred_at',
 	'published_date',
 	'read_at',

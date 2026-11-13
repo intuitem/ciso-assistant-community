@@ -1,9 +1,10 @@
 from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
     BaseModelSerializer,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.models import RiskMatrix
-from pmbok.models import GenericCollection
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -19,13 +20,14 @@ from .models import (
 from rest_framework import serializers
 
 
-class EbiosRMStudyWriteSerializer(BaseModelSerializer):
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
+class EbiosRMStudyWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     risk_matrix = serializers.PrimaryKeyRelatedField(
         queryset=RiskMatrix.objects.all(), required=False
     )
@@ -40,6 +42,13 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
                 "This likelihood method is not available yet."
             )
         return value
+
+
+class EbiosRMStudyDuplicateSerializer(BaseModelSerializer):
+    # `folder` is the destination domain; it defaults to the source's folder
+    class Meta:
+        model = EbiosRMStudy
+        fields = ["name", "ref_id", "version", "description", "folder"]
 
 
 class EbiosRMStudyReadSerializer(BaseModelSerializer):

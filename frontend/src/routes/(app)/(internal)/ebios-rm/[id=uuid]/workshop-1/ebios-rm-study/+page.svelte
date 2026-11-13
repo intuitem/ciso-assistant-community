@@ -270,7 +270,7 @@
 					{#if ebiosRmStudy.authors?.length}
 						{#each ebiosRmStudy.authors as author}
 							{#if author.id && author.str}
-								<li><Anchor class="anchor" href="/users/{author.id}">{author.str}</Anchor></li>
+								<li><Anchor class="anchor" href="/actors/{author.id}">{author.str}</Anchor></li>
 							{/if}
 						{/each}
 					{:else}
@@ -293,7 +293,7 @@
 					{#if ebiosRmStudy.reviewers?.length}
 						{#each ebiosRmStudy.reviewers as reviewer}
 							{#if reviewer.id && reviewer.str}
-								<li><Anchor class="anchor" href="/users/{reviewer.id}">{reviewer.str}</Anchor></li>
+								<li><Anchor class="anchor" href="/actors/{reviewer.id}">{reviewer.str}</Anchor></li>
 							{/if}
 						{/each}
 					{:else}

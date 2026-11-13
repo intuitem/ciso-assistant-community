@@ -4,7 +4,7 @@ import uuid
 import django_filters as df
 import pandas as pd
 from django.db import transaction
-from django.db.models import Case, F, FloatField, Value, When
+from django.db.models import Case, F, FloatField, Prefetch, Q, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import (
@@ -12,13 +12,21 @@ from core.views import (
     GenericFilterSet,
     SmartOrderingFilter,
     actor_prefetch,
+    check_folder_add_permission,
+    check_folder_view_permission,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from core.models import Asset, Terminology
+from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
+from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
-from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
+from .helpers import (
+    ecosystem_radar_chart_data,
+    ebios_rm_visual_analysis,
+    duplicate_ebios_rm_study,
+)
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -31,7 +39,10 @@ from .models import (
     OperatingMode,
     KillChain,
 )
-from .serializers import EbiosRMStudyReadSerializer
+from .serializers import (
+    EbiosRMStudyReadSerializer,
+    EbiosRMStudyDuplicateSerializer,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -58,7 +69,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     filterset_fields = [
         "folder",
         "assets",
-        "genericcollection",
         "classification",
         "filtering_labels",
     ]
@@ -141,6 +151,60 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         with transaction.atomic():
             self._process_responsibility_matrix(request)
             return super().update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Duplicate EBIOS RM study",
+        serializer_class=EbiosRMStudyDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        source = self.get_object()  # 404s when the study is not viewable
+        serializer = EbiosRMStudyDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # the user picks the destination domain; default to the source's folder
+        target_folder = data.get("folder") or source.folder
+        # Objects are created in the target folder, so add permission is checked
+        # there. Only require the permission for the owned types the source
+        # actually has records of (an empty study must stay duplicable), like
+        # RiskAssessment duplication does.
+        owned = [
+            (FearedEvent, {"ebios_rm_study": source}),
+            (RoTo, {"ebios_rm_study": source}),
+            (Stakeholder, {"ebios_rm_study": source}),
+            (StrategicScenario, {"ebios_rm_study": source}),
+            (AttackPath, {"ebios_rm_study": source}),
+            (OperationalScenario, {"ebios_rm_study": source}),
+            (OperatingMode, {"operational_scenario__ebios_rm_study": source}),
+            (
+                KillChain,
+                {"operating_mode__operational_scenario__ebios_rm_study": source},
+            ),
+        ]
+        present = [
+            model for model, flt in owned if model.objects.filter(**flt).exists()
+        ]
+        # clone copies source children -> require view on each in the source folder
+        check_folder_view_permission(request.user, source.folder, *present)
+        check_folder_add_permission(request.user, target_folder, EbiosRMStudy, *present)
+
+        clone = duplicate_ebios_rm_study(
+            source,
+            name=data["name"],
+            description=data.get("description", source.description),
+            ref_id=data.get("ref_id", source.ref_id),
+            version=data.get("version", source.version),
+            folder=target_folder,
+            # a cross-domain clone copies the shared objects (assets, threats,
+            # controls, elementary actions, entities) the target cannot see into
+            # it: check the add permission for each type it actually creates
+            before_copy=lambda model: check_folder_add_permission(
+                request.user, target_folder, model
+            ),
+        )
+        return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -528,15 +592,40 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         """Export EBIOS RM study data to Excel with multiple sheets."""
 
         study = self.get_object()
+        from core.models import (
+            AppliedControl,
+            ComplianceAssessment,
+            RiskAssessment,
+            RiskScenario,
+            Threat,
+        )
+        from iam.models import RoleAssignment
+        from tprm.models import Entity
+
+        # Study access doesn't imply access to the objects it links outside its
+        # domain (controls, assets, threats, audits, entities, elementary actions)
+        def viewable(model):
+            return model.objects.filter(
+                id__in=RoleAssignment.get_viewable_object_ids(request.user, model)
+            )
+
+        viewable_controls = viewable(AppliedControl)
+        viewable_assets = viewable(Asset)
+        viewable_ea_ids = set(viewable(ElementaryAction).values_list("id", flat=True))
         # Get all related data
         feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
         ro_to_couples = RoTo.objects.filter(ebios_rm_study=study)
-        stakeholders = Stakeholder.objects.filter(ebios_rm_study=study)
+        stakeholders = Stakeholder.objects.filter(
+            ebios_rm_study=study, entity__in=viewable(Entity)
+        )
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
 
         buffer = io.BytesIO()
+
+        def esc(value):
+            return escape_excel_formula(value) if isinstance(value, str) else value
 
         # Sheet names prefixed with workshop.activity for i18n and organization
         SHEET_NAMES = {
@@ -551,6 +640,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             "elementary_actions": "4.0 Elementary Actions",
             "operational_scenarios": "4.1.1 Operational Scenarios",
             "operating_modes": "4.1.2 Operating Modes",
+            "risk_assessment": "5.1 Risk Assessment",
+            "risk_scenarios": "5.2 Risk Scenarios",
+            "security_measures": "5.3 Security Measures",
         }
 
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
@@ -576,25 +668,28 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 }
             ]
             df_study = pd.DataFrame(study_data)
-            df_study.to_excel(writer, sheet_name=SHEET_NAMES["study"], index=False)
+            df_study.map(esc).to_excel(
+                writer, sheet_name=SHEET_NAMES["study"], index=False
+            )
 
             # 1.2 Assets sheet
             assets_data = []
-            for asset in study.assets.all():
+            for asset in study.assets.filter(id__in=viewable_assets):
+                parent_asset = asset.parent_assets.filter(
+                    id__in=viewable_assets
+                ).first()
                 assets_data.append(
                     {
                         "ref_id": asset.ref_id or "",
                         "name": asset.name,
                         "description": asset.description or "",
                         "type": asset.type or "",
-                        "parent_asset": asset.parent_assets.first().name
-                        if asset.parent_assets.exists()
-                        else "",
+                        "parent_asset": parent_asset.name if parent_asset else "",
                     }
                 )
             if assets_data:
                 df_assets = pd.DataFrame(assets_data)
-                df_assets.to_excel(
+                df_assets.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["assets"], index=False
                 )
 
@@ -609,21 +704,30 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "gravity": fe.get_gravity_display().get("name", ""),
                         "is_selected": fe.is_selected,
                         "justification": fe.justification or "",
-                        "assets": "\n".join([a.name for a in fe.assets.all()]),
+                        "assets": "\n".join(
+                            a.name for a in fe.assets.filter(id__in=viewable_assets)
+                        ),
                     }
                 )
             if fe_data:
                 df_fe = pd.DataFrame(fe_data)
-                df_fe.to_excel(
+                df_fe.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["feared_events"], index=False
                 )
 
             # 1.4.x Compliance Assessment sheets
-            for idx, ca in enumerate(study.compliance_assessments.all(), start=1):
+            for idx, ca in enumerate(
+                study.compliance_assessments.filter(
+                    id__in=viewable(ComplianceAssessment)
+                ),
+                start=1,
+            ):
                 ca_data = []
                 for ra in (
                     ca.requirement_assessments.select_related("requirement")
-                    .prefetch_related("applied_controls")
+                    .prefetch_related(
+                        Prefetch("applied_controls", queryset=viewable_controls)
+                    )
                     .order_by("requirement__order_id")
                 ):
                     req = ra.requirement
@@ -645,9 +749,11 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     )
                 if ca_data:
                     # Sheet name: "1.4.1 AuditName" (max 31 chars for Excel)
-                    sheet_name = f"1.4.{idx} {ca.name}"[:31]
+                    sheet_name = INVALID_TITLE_REGEX.sub("_", f"1.4.{idx} {ca.name}")[
+                        :31
+                    ]
                     df_ca = pd.DataFrame(ca_data)
-                    df_ca.to_excel(writer, sheet_name=sheet_name, index=False)
+                    df_ca.map(esc).to_excel(writer, sheet_name=sheet_name, index=False)
 
             # 2.1 RO/TO Couples sheet
             roto_data = []
@@ -674,7 +780,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if roto_data:
                 df_roto = pd.DataFrame(roto_data)
-                df_roto.to_excel(writer, sheet_name=SHEET_NAMES["ro_to"], index=False)
+                df_roto.map(esc).to_excel(
+                    writer, sheet_name=SHEET_NAMES["ro_to"], index=False
+                )
 
             # 3.1 Stakeholders sheet
             sh_data = []
@@ -701,7 +809,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if sh_data:
                 df_sh = pd.DataFrame(sh_data)
-                df_sh.to_excel(
+                df_sh.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["stakeholders"], index=False
                 )
 
@@ -723,7 +831,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ss_data:
                 df_ss = pd.DataFrame(ss_data)
-                df_ss.to_excel(
+                df_ss.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["strategic_scenarios"], index=False
                 )
 
@@ -739,7 +847,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         if ap.strategic_scenario
                         else "",
                         "stakeholders": "\n".join(
-                            [str(s) for s in ap.stakeholders.all()]
+                            str(s) for s in ap.stakeholders.filter(id__in=stakeholders)
                         ),
                         "is_selected": ap.is_selected,
                         "justification": ap.justification or "",
@@ -747,15 +855,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ap_data:
                 df_ap = pd.DataFrame(ap_data)
-                df_ap.to_excel(
+                df_ap.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["attack_paths"], index=False
                 )
 
             # 3.3 Stakeholder Controls sheet
-            from core.models import AppliedControl
-
-            stakeholder_controls = AppliedControl.objects.filter(
-                stakeholders__ebios_rm_study=study
+            stakeholder_controls = viewable_controls.filter(
+                stakeholders__in=stakeholders
             ).distinct()
             sc_data = []
             for ac in stakeholder_controls:
@@ -768,20 +874,21 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "stakeholders": "\n".join(
                             [
                                 str(s)
-                                for s in ac.stakeholders.filter(ebios_rm_study=study)
+                                for s in ac.stakeholders.filter(id__in=stakeholders)
                             ]
                         ),
                     }
                 )
             if sc_data:
                 df_sc = pd.DataFrame(sc_data)
-                df_sc.to_excel(
+                df_sc.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["stakeholder_controls"], index=False
                 )
 
             # 4.0 Elementary Actions sheet
             elementary_actions = ElementaryAction.objects.filter(
-                as_kill_chain__operating_mode__operational_scenario__ebios_rm_study=study
+                as_kill_chain__operating_mode__operational_scenario__ebios_rm_study=study,
+                id__in=viewable_ea_ids,
             ).distinct()
             ea_data = []
             for ea in elementary_actions:
@@ -796,11 +903,18 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if ea_data:
                 df_ea = pd.DataFrame(ea_data)
-                df_ea.to_excel(
+                df_ea.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["elementary_actions"], index=False
                 )
 
             # 4.1.1 Operational Scenarios sheet
+            visible_step_ids = {
+                str(step_id)
+                for step_id in KillChain.objects.filter(
+                    operating_mode__operational_scenario__ebios_rm_study=study,
+                    elementary_action__in=viewable_ea_ids,
+                ).values_list("id", flat=True)
+            }
             os_data = []
             for os in operational_scenarios:
                 most_likely = os.most_likely_operating_mode() or {}
@@ -818,6 +932,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "critical_steps": " → ".join(
                             step["name"]
                             for step in most_likely.get("critical_steps", [])
+                            if step["id"] in visible_step_ids
                         ),
                         "is_selected": os.is_selected,
                         "justification": os.justification or "",
@@ -825,7 +940,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
             if os_data:
                 df_os = pd.DataFrame(os_data)
-                df_os.to_excel(
+                df_os.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["operational_scenarios"], index=False
                 )
 
@@ -845,20 +960,119 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         else "",
                         "likelihood": om.get_likelihood_display().get("name", ""),
                         "elementary_actions": "\n".join(
-                            [
-                                f"{step.elementary_action.name} ({', '.join(asset.name for asset in step.assets.all())})"
-                                if step.assets.all()
-                                else step.elementary_action.name
-                                for step in om.kill_chain_steps.all()
+                            f"{step.elementary_action.name} ({', '.join(asset.name for asset in step_assets)})"
+                            if step_assets
+                            else step.elementary_action.name
+                            for step in om.kill_chain_steps.filter(
+                                elementary_action__in=viewable_ea_ids
+                            )
+                            for step_assets in [
+                                list(step.assets.filter(id__in=viewable_assets))
                             ]
                         ),
                     }
                 )
             if om_data:
                 df_om = pd.DataFrame(om_data)
-                df_om.to_excel(
+                df_om.map(esc).to_excel(
                     writer, sheet_name=SHEET_NAMES["operating_modes"], index=False
                 )
+
+            # 5.x Risk treatment, from the study's current risk assessment.
+            # Column names match the risk assessment / applied control imports.
+            risk_assessment = study.last_risk_assessment
+            if (
+                risk_assessment
+                and viewable(RiskAssessment).filter(id=risk_assessment.id).exists()
+            ):
+                pd.DataFrame(
+                    [
+                        {
+                            "ref_id": risk_assessment.ref_id or "",
+                            "name": risk_assessment.name,
+                            "version": risk_assessment.version or "",
+                            "description": risk_assessment.description or "",
+                        }
+                    ]
+                ).map(esc).to_excel(
+                    writer, sheet_name=SHEET_NAMES["risk_assessment"], index=False
+                )
+
+                # Risk assessment access doesn't imply scenario access
+                scenarios = (
+                    risk_assessment.risk_scenarios.filter(id__in=viewable(RiskScenario))
+                    .select_related("operational_scenario")
+                    .prefetch_related(
+                        Prefetch("assets", queryset=viewable_assets),
+                        Prefetch("threats", queryset=viewable(Threat)),
+                        Prefetch("applied_controls", queryset=viewable_controls),
+                        Prefetch(
+                            "existing_applied_controls", queryset=viewable_controls
+                        ),
+                    )
+                )
+                rs_data = []
+                for rs in scenarios:
+                    rs_data.append(
+                        {
+                            "ref_id": rs.ref_id or "",
+                            "name": rs.name,
+                            "description": rs.description or "",
+                            "operational_scenario": rs.operational_scenario.name
+                            if rs.operational_scenario
+                            else "",
+                            "assets": "\n".join(a.name for a in rs.assets.all()),
+                            "threats": "\n".join(
+                                t.ref_id or t.name for t in rs.threats.all()
+                            ),
+                            "existing_applied_controls": "\n".join(
+                                c.name for c in rs.existing_applied_controls.all()
+                            ),
+                            "inherent_proba": rs.get_inherent_proba()["name"],
+                            "inherent_impact": rs.get_inherent_impact()["name"],
+                            "inherent_risk": rs.get_inherent_risk()["name"],
+                            "current_proba": rs.get_current_proba()["name"],
+                            "current_impact": rs.get_current_impact()["name"],
+                            "current_risk": rs.get_current_risk()["name"],
+                            "treatment": rs.treatment,
+                            "applied_controls": "\n".join(
+                                c.name for c in rs.applied_controls.all()
+                            ),
+                            "residual_proba": rs.get_residual_proba()["name"],
+                            "residual_impact": rs.get_residual_impact()["name"],
+                            "residual_risk": rs.get_residual_risk()["name"],
+                            "justification": rs.justification or "",
+                        }
+                    )
+                if rs_data:
+                    pd.DataFrame(rs_data).map(esc).to_excel(
+                        writer, sheet_name=SHEET_NAMES["risk_scenarios"], index=False
+                    )
+
+                measures = viewable_controls.filter(
+                    Q(risk_scenarios__in=scenarios) | Q(risk_scenarios_e__in=scenarios)
+                ).distinct()
+                measures_data = [
+                    {
+                        "ref_id": ac.ref_id or "",
+                        "name": ac.name,
+                        "description": ac.description or "",
+                        "category": ac.category or "",
+                        "csf_function": ac.csf_function or "",
+                        "status": ac.status or "",
+                        "priority": ac.priority,
+                        "effort": ac.effort or "",
+                        "start_date": ac.start_date,
+                        "eta": ac.eta,
+                        "expiry_date": ac.expiry_date,
+                        "link": ac.link or "",
+                    }
+                    for ac in measures
+                ]
+                if measures_data:
+                    pd.DataFrame(measures_data).map(esc).to_excel(
+                        writer, sheet_name=SHEET_NAMES["security_measures"], index=False
+                    )
 
             # Apply styling to all sheets
             for sheet_name in writer.sheets:

@@ -6,6 +6,8 @@ description: "The ready-made workflows that ship as libraries, by domain, and wh
 
 CISO Assistant ships ready-made workflows as libraries. Install one from the library catalog and it becomes a normal workflow in the domain you choose: a draft you can inspect, adjust and publish. Nothing syncs back to the library afterwards, so you can change anything.
 
+Quick reference: [cheat sheet](cheat-sheet.md#export-import-and-templates).
+
 Every template follows the same rules:
 
 - It never renders a judgment. Templates notify, file, link and record facts (a date passed, a control opened). Approvals, results and severities stay with people.
@@ -26,6 +28,7 @@ Every template follows the same rules:
 | Non-compliant requirement, open and link a remediation control | Requirement assessment updated | Creates an applied control, links it to the requirement, notifies the owner. Never touches the result. |
 | Validation decided, route the outcome | Validation flow updated | Branches on the decision and sends a different email per outcome. The reference example for branches. |
 | Validation requested, notify the approver | Validation flow created | Emails the approver with the deadline. |
+| Assignment actors become respondents | Actors added to a requirement assignment | For audits of the frameworks listed in `framework_urns`, adds everyone behind the assignment's actors to the Respondent group of the audit's domain, each time an actor is added: someone removed from the group by hand while still an actor comes back. Third-party accounts are skipped, nobody is removed, and the run fails on the first grant that fails, or past 500 users (`WORKFLOW_LOOP_MAX_ITEMS`). Left empty, `framework_urns` does nothing. Representatives are only seen by a publisher with `view_representative` on the entity's domain. |
 | Audit, AI evidence challenge | Manual, or an audit moving to **in review** | Walks every requirement the audit calls compliant, partially compliant or not applicable — the three answers that assert something. The platform's own quality rules judge each one first, and only the ones they pass reach the configured AI provider, which is asked the single thing a rule cannot decide: whether what is written and attached answers what the requirement asks for. The findings and the answers are assembled into a Record document, and the audit's reviewers get a dated task to read it. Results and scores are never touched — no workflow can write them. `WORKFLOW_AI_MAX_CALLS_PER_RUN` (50 by default) is what bounds a run. Needs the `chat_mode` flag and a provider. Set `audit_id`, or enable the trigger. |
 
 ## Risk

@@ -4,10 +4,13 @@
 		ruleIdFromLabel,
 		ruleIdProblem,
 		withTranslation,
+		type BuilderNode,
 		type OutcomeRule,
 		type Scale
 	} from './builder-state';
 	import RatingRuleEditor from './RatingRuleEditor.svelte';
+	import StaircaseRuleEditor from './StaircaseRuleEditor.svelte';
+	import WeakestLinkRuleEditor from './WeakestLinkRuleEditor.svelte';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
@@ -29,6 +32,8 @@
 		catalog?: CelCatalog;
 		/** Frameworks: implementation groups a rule can be limited to. */
 		groups?: { id: string; label: string }[];
+		/** Frameworks: the requirement tree, for what a maturity level covers. */
+		nodes?: BuilderNode[];
 		/** Quick forms: the scales a rating can measure. */
 		scales?: Scale[];
 		measured?: string[];
@@ -43,6 +48,7 @@
 		pages = [],
 		catalog = { mode: 'framework', nodes: [], questions: [] },
 		groups = [],
+		nodes = [],
 		scales = [],
 		measured = [],
 		onaddscales = () => {}
@@ -146,11 +152,14 @@
 		};
 	}
 
-	type Kind = 'boolean' | 'number' | 'rating';
+	type Kind = 'boolean' | 'number' | 'rating' | 'staircase' | 'weakest_link';
 	const kindOf = (rule: OutcomeRule): Kind => rule.kind ?? 'boolean';
+	// Ratings, staircases and weakest links carry their own settings, not an expression.
+	const structured = (kind: Kind) =>
+		kind === 'rating' || kind === 'staircase' || kind === 'weakest_link';
 	const discards = (rule: OutcomeRule, kind: Kind) =>
 		kind !== kindOf(rule) &&
-		(kindOf(rule) === 'rating' || (kind === 'rating' && !!rule.expression?.trim()));
+		(structured(kindOf(rule)) || (structured(kind) && !!rule.expression?.trim()));
 	let pendingKind: { index: number; kind: Kind } | null = $state(null);
 
 	function setKind(index: number, kind: Kind) {
@@ -158,12 +167,43 @@
 		pendingKind = null;
 		if (kind === 'rating') {
 			rules[index] = asRating(rule);
+		} else if (kind === 'staircase') {
+			// Starts with every group as a level, one level per top-level section.
+			rules[index] = {
+				ref_id: rule.ref_id,
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'staircase',
+				label: rule.annotation || m.builderRuleKindStaircase(),
+				staircase_levels: groups.map((g) => g.id),
+				per: 'depth_1',
+				...(rule.implementation_groups
+					? { implementation_groups: rule.implementation_groups }
+					: {}),
+				...(rule.translations ? { translations: rule.translations } : {})
+			};
+		} else if (kind === 'weakest_link') {
+			rules[index] = {
+				ref_id: rule.ref_id,
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'weakest_link',
+				label: rule.annotation || m.builderRuleKindWeakestLink(),
+				rated_depth: 2,
+				per: 'depth_1',
+				...(rule.implementation_groups
+					? { implementation_groups: rule.implementation_groups }
+					: {}),
+				...(rule.translations ? { translations: rule.translations } : {})
+			};
 		} else {
 			const next: OutcomeRule = {
 				ref_id: rule.ref_id,
 				annotation: rule.annotation || rule.label || '',
 				color: kind === 'number' ? null : rule.color,
-				expression: kindOf(rule) === 'rating' ? '' : rule.expression,
+				expression: structured(kindOf(rule)) ? '' : rule.expression,
 				...(rule.implementation_groups
 					? { implementation_groups: rule.implementation_groups }
 					: {}),
@@ -368,6 +408,11 @@
 				<option value="number">{m.builderRuleKindNumber()}</option>
 				{#if mode === 'quick_form'}
 					<option value="rating">{m.builderRatingDefaultLabel()}</option>
+				{:else if groups.length || rule.kind === 'staircase'}
+					<option value="staircase">{m.builderRuleKindStaircase()}</option>
+				{/if}
+				{#if mode === 'framework'}
+					<option value="weakest_link">{m.builderRuleKindWeakestLink()}</option>
 				{/if}
 			</select>
 			{#if pendingKind?.index === index}
@@ -385,7 +430,56 @@
 					>
 				</span>
 			{/if}
-			<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+			{#if rule.kind !== 'staircase' && rule.kind !== 'weakest_link'}
+				<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+			{/if}
+		</label>
+	{/snippet}
+
+	{#snippet groupsField(rule: OutcomeRule, index: number)}
+		{#if mode === 'framework' && groups.length}
+			<div class="block" role="group" aria-label={m.builderRuleGroups()}>
+				<span class="text-xs text-surface-600-400">{m.builderRuleGroups()}</span>
+				<div class="flex flex-wrap gap-1 mt-0.5" data-testid="outcome-rule-groups">
+					{#each groups as group (group.id)}
+						{@const on = (rule.implementation_groups ?? []).includes(group.id)}
+						<button
+							type="button"
+							aria-pressed={on}
+							title={group.label}
+							class="text-xs px-2 py-0.5 rounded-full border {on
+								? 'border-primary-500 bg-primary-100-900 text-primary-800-200'
+								: 'border-surface-200-800 text-surface-600-400 hover:bg-surface-100-900'}"
+							onclick={() => toggleGroup(index, group.id)}>{group.id}</button
+						>
+					{/each}
+					{#if !rule.implementation_groups?.length}
+						<span class="text-xs text-surface-500 self-center">({m.builderRuleGroupsAll()})</span>
+					{/if}
+				</div>
+				<span class="text-xs text-surface-500">{m.builderRuleGroupsHint()}</span>
+			</div>
+		{/if}
+	{/snippet}
+
+	{#snippet idField(rule: OutcomeRule, index: number)}
+		{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
+		<label class="block">
+			<span class="text-xs text-surface-600-400">{m.frameworkRefId()}</span>
+			<input
+				type="text"
+				value={rule.ref_id}
+				aria-invalid={!!idProblem}
+				data-testid="outcome-rule-id"
+				class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+				onblur={(e) => {
+					rules[index].ref_id = e.currentTarget.value.trim();
+					persist();
+				}}
+			/>
+			{#if idProblem}
+				<span class="text-xs text-error-600 dark:text-error-400">{safeTranslate(idProblem)}</span>
+			{/if}
 		</label>
 	{/snippet}
 
@@ -419,6 +513,16 @@
 						class="fa-solid fa-table-cells text-xs text-surface-600-400"
 						title={m.builderRuleKindRating()}
 					></i>
+				{:else if rule.kind === 'staircase'}
+					<i
+						class="fa-solid fa-stairs text-xs text-surface-600-400"
+						title={m.builderRuleKindStaircase()}
+					></i>
+				{:else if rule.kind === 'weakest_link'}
+					<i
+						class="fa-solid fa-link text-xs text-surface-600-400"
+						title={m.builderRuleKindWeakestLink()}
+					></i>
 				{:else if rule.color}
 					<span
 						class="w-3 h-3 rounded-full shrink-0 border border-surface-200-800"
@@ -444,7 +548,13 @@
 				{/each}
 
 				<span class="ml-auto text-xs text-surface-500 font-mono truncate max-w-[200px]">
-					{rule.kind === 'rating' ? (rule.dimensions ?? []).join(' × ') : rule.expression || '...'}
+					{rule.kind === 'rating'
+						? (rule.dimensions ?? []).join(' × ')
+						: rule.kind === 'staircase'
+							? (rule.staircase_levels ?? []).join(' → ')
+							: rule.kind === 'weakest_link'
+								? m.builderWeakestLinkSummary({ depth: String(rule.rated_depth ?? '?') })
+								: rule.expression || '...'}
 				</span>
 
 				<button
@@ -475,29 +585,39 @@
 						}}
 					/>
 				</div>
+			{:else if expandedIndex === index && rule.kind === 'staircase'}
+				<div class="px-3 pb-3 pt-2 border-t border-surface-200-800 space-y-3">
+					{@render idField(rule, index)}
+					{@render kindSelect(rule, index)}
+					<StaircaseRuleEditor
+						{rule}
+						{groups}
+						{nodes}
+						{activeLanguage}
+						onchange={(next) => {
+							rules[index] = next;
+							persist();
+						}}
+					/>
+				</div>
+			{:else if expandedIndex === index && rule.kind === 'weakest_link'}
+				<div class="px-3 pb-3 pt-2 border-t border-surface-200-800 space-y-3">
+					{@render idField(rule, index)}
+					{@render kindSelect(rule, index)}
+					{@render groupsField(rule, index)}
+					<WeakestLinkRuleEditor
+						{rule}
+						{activeLanguage}
+						onchange={(next) => {
+							rules[index] = next;
+							persist();
+						}}
+					/>
+				</div>
 			{:else if expandedIndex === index}
-				{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
 				<div class="px-3 pb-3 pt-1 border-t border-surface-200-800 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
-						<label class="block">
-							<span class="text-xs text-surface-600-400">{m.frameworkRefId()}</span>
-							<input
-								type="text"
-								value={rule.ref_id}
-								aria-invalid={!!idProblem}
-								data-testid="outcome-rule-id"
-								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => {
-									rules[index].ref_id = e.currentTarget.value.trim();
-									persist();
-								}}
-							/>
-							{#if idProblem}
-								<span class="text-xs text-error-600 dark:text-error-400"
-									>{safeTranslate(idProblem)}</span
-								>
-							{/if}
-						</label>
+						{@render idField(rule, index)}
 						<label class="block">
 							<span class="text-xs text-surface-600-400">{m.builderLabel()}</span>
 							<input
@@ -512,31 +632,7 @@
 
 					{@render kindSelect(rule, index)}
 
-					{#if mode === 'framework' && groups.length}
-						<div class="block" role="group" aria-label={m.builderRuleGroups()}>
-							<span class="text-xs text-surface-600-400">{m.builderRuleGroups()}</span>
-							<div class="flex flex-wrap gap-1 mt-0.5" data-testid="outcome-rule-groups">
-								{#each groups as group (group.id)}
-									{@const on = (rule.implementation_groups ?? []).includes(group.id)}
-									<button
-										type="button"
-										aria-pressed={on}
-										title={group.label}
-										class="text-xs px-2 py-0.5 rounded-full border {on
-											? 'border-primary-500 bg-primary-100-900 text-primary-800-200'
-											: 'border-surface-200-800 text-surface-600-400 hover:bg-surface-100-900'}"
-										onclick={() => toggleGroup(index, group.id)}>{group.id}</button
-									>
-								{/each}
-								{#if !rule.implementation_groups?.length}
-									<span class="text-xs text-surface-500 self-center"
-										>({m.builderRuleGroupsAll()})</span
-									>
-								{/if}
-							</div>
-							<span class="text-xs text-surface-500">{m.builderRuleGroupsHint()}</span>
-						</div>
-					{/if}
+					{@render groupsField(rule, index)}
 
 					<div class="block">
 						<span class="text-xs text-surface-600-400">{m.builderCelExpression()}</span>

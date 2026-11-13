@@ -62,7 +62,7 @@
 </script>
 
 <div class="flex items-center justify-center min-h-screen bg-surface-100 p-4">
-	<div class="card bg-surface-50 p-8 shadow-xl space-y-6 overflow-hidden max-w-2xl">
+	<div class="card bg-surface-50 p-8 shadow-xl space-y-6 overflow-hidden max-w-3xl">
 		<header class="text-center space-y-4">
 			<i class="fa-solid fa-shield-halved text-4xl text-primary-500"></i>
 			<h2 class="h2 font-bold">{m.setupMfa()}</h2>

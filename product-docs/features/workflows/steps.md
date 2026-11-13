@@ -6,6 +6,8 @@ description: "Action, Condition, Loop and Stop run: what each step does and how 
 
 Four kinds of step do the work between a trigger and the end of a run.
 
+Quick reference: [cheat sheet](cheat-sheet.md#steps-and-wiring).
+
 | Step | Purpose |
 |---|---|
 | **Action** | Does one thing |
@@ -73,7 +75,7 @@ severity        in    3,4
 
 The value can itself be an expression, so `{{item.severity}}` or `{{payload.new_values.status}}` work. With several conditions on one branch, choose **AND** or **OR** between them.
 
-Operators: `eq`, `neq`, `gt`, `lt`, `gte`, `lte`, `in`, `not_in`, `contains`, `is_null`. Comparison follows the variable's type: a `number` variable compares numerically, a `boolean` variable understands `true`, `1` and `yes`, everything else compares as text. `in` and `not_in` take a comma-separated list.
+Operators: `eq`, `neq`, `gt`, `lt`, `gte`, `lte`, `in`, `not_in`, `contains`, `is_null`. Comparison follows the variable's type: a `number` variable compares numerically, a `boolean` variable understands `true`, `1` and `yes`, everything else compares as text. `in` and `not_in` take a comma-separated list. An empty list, or a trailing comma, holds an empty entry: `in` then matches an empty variable, so pair it with `neq` empty when the variable may be unset.
 
 Conditions compare variables, not step outputs directly. To branch on a step's output, first copy it into a variable with **Save results to variables** on that step, or with a Set variables step. The variable select in a condition ends with **New variable…** so you can declare one on the spot.
 

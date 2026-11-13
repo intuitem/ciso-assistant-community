@@ -99,7 +99,11 @@ export const navData = {
 				{
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
-					href: '/users'
+					href: '/users',
+					// Listed to who may see users' full record, change users or create them, on Global
+					// where users live (see the full-view-permissions ADR); other members reach users
+					// through pickers.
+					globalPermissions: ['view_user_full', 'change_user', 'add_user']
 				},
 				{
 					name: 'teams',
@@ -121,6 +125,12 @@ export const navData = {
 		{
 			name: 'catalog',
 			items: [
+				{
+					name: 'libraries',
+					fa_icon: 'fa-solid fa-folder-plus',
+					href: '/libraries',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
+				},
 				{
 					name: 'frameworks',
 					fa_icon: 'fa-solid fa-book',
@@ -213,7 +223,7 @@ export const navData = {
 					name: 'documents',
 					fa_icon: 'fa-solid fa-file-lines',
 					href: '/documents',
-					permissions: ['view_documentcontainer']
+					permissions: ['view_documentcontainer', 'view_published_documentcontainer']
 				},
 				{
 					name: 'calendar',
@@ -255,12 +265,6 @@ export const navData = {
 		{
 			name: 'governance',
 			items: [
-				{
-					name: 'libraries',
-					fa_icon: 'fa-solid fa-folder-plus',
-					href: '/libraries',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
-				},
 				{
 					name: 'policies',
 					fa_icon: 'fa-solid fa-file-alt',

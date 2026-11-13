@@ -83,6 +83,24 @@
 			label: m.policies(),
 			urlPattern: '/policies/',
 			icon: 'fa-solid fa-book'
+		},
+		{
+			key: 'applied_controls',
+			label: m.appliedControls(),
+			urlPattern: '/applied-controls/',
+			icon: 'fa-solid fa-fire-extinguisher'
+		},
+		{
+			key: 'document_containers',
+			label: m.documentContainers(),
+			urlPattern: '/document-containers/',
+			icon: 'fa-solid fa-file-lines'
+		},
+		{
+			key: 'business_impact_analyses',
+			label: m.businessImpactAnalyses(),
+			urlPattern: '/business-impact-analysis/',
+			icon: 'fa-solid fa-arrows-to-eye'
 		}
 	];
 
@@ -138,11 +156,11 @@
 		<div class="flex flex-col space-y-2">
 			{#if page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
-					<i class="fa-solid fa-check-circle mr-2"></i>
+					<i class="fa-solid fa-check-circle mr-2 text-amber-500"></i>
 					{m.requestValidation()}
 				</button>
 			{/if}

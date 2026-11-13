@@ -6,6 +6,8 @@ description: "The {{ }} syntax for referencing variables, payloads, step outputs
 
 Every text field in a step can contain expressions. An expression is a path wrapped in double curly braces. When the step runs, the engine replaces each expression with the value it points to.
 
+Quick reference: [cheat sheet](cheat-sheet.md#expressions).
+
 ```
 Overdue controls: {{nodes.fetch_late.count}} on {{today}}
 ```
@@ -83,8 +85,8 @@ A webhook run's payload is the JSON body the caller posted. An internal event ru
 | `operation` | `created`, `updated` or `deleted` |
 | `object_id` | The object's id |
 | `object_repr` | The object's display name |
-| `changes` | For each changed field, a pair `[old, new]` |
-| `new_values` | For each changed field, the new value |
+| `changes` | For each changed field, a pair `[old, new]`. For a link (an assignment's actors, an audit's authors), an object with `operation` and `objects` (display names) instead: read the operation from `new_values` |
+| `new_values` | For each changed field, the new value. For a link (an assignment's actors, an audit's authors), `add` or `delete` |
 | `folder_id` | The object's domain |
 | `actor_email` | Who made the change, when known |
 | `timestamp` | When |

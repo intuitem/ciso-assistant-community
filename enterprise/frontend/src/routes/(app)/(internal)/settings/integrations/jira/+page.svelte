@@ -12,6 +12,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { describeTestFailure } from '#lib/utils/integration-test.js';
 
 	interface Props {
 		data: PageData;
@@ -71,7 +72,7 @@
 
 	let showApiTokenField = $state(!data?.config?.has_api_token);
 	let showWebhookSecretField = $state(!data?.config?.has_webhook_secret);
-	let testConnectionState: { loading: boolean; success?: boolean } = $state({
+	let testConnectionState: { loading: boolean; success?: boolean; detail?: string } = $state({
 		loading: false,
 		success: undefined
 	});
@@ -168,7 +169,11 @@
 										configuration_id: page.data?.config?.id
 									})
 								});
-								testConnectionState = { loading: false, success: response.ok };
+								testConnectionState = {
+									loading: false,
+									success: response.ok,
+									detail: response.ok ? '' : await describeTestFailure(response)
+								};
 							}}>{m.testConnection()}</button
 						>
 						<div class="flex items-center">
@@ -177,7 +182,11 @@
 							{:else if testConnectionState.success === true}
 								<span class="text-success-700-300 font-semibold">{m.connectionSuccessful()}</span>
 							{:else if testConnectionState.success === false}
-								<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
+								<span class="text-error-500 font-semibold"
+									>{m.connectionFailed()}{testConnectionState.detail
+										? `: ${testConnectionState.detail}`
+										: ''}</span
+								>
 							{/if}
 						</div>
 					</span>
