@@ -8,6 +8,7 @@ from ebios_rm.models import EbiosRMStudy, FearedEvent
 from iam.models import Folder, Role, RoleAssignment, User
 from privacy.models import PersonalData, Processing
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
+from tprm.models import Entity
 
 
 @pytest.fixture
@@ -90,3 +91,18 @@ def test_feared_event_batch_create_hides_unviewable_study(reader_client):
 
     assert resp.status_code == 404
     assert "Secret" not in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_reader_cannot_batch_create_entities(reader_client, domain):
+    Entity.objects.create(name="Acme", folder=domain)
+
+    resp = reader_client.post(
+        "/api/entities/batch-create/",
+        {"entities_text": "Acme\nNewco", "folder": str(domain.id)},
+        format="json",
+    )
+
+    assert resp.status_code == 403
+    assert "Acme" not in resp.content.decode()
+    assert not Entity.objects.filter(name="Newco").exists()
