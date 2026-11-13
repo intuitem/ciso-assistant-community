@@ -566,8 +566,9 @@ your GRC data.
 
 Three tools work the evidence review queue: `get_evidences_to_review` and
 `read_evidence` read it, `review_evidence` approves or rejects the latest version
-of an evidence. A decision is refused if the file changed after the agent read it,
-and four-eyes review applies as in the UI.
+of an evidence. The agent can only decide on a version whose whole file
+`read_evidence` gave it; a decision is refused if a newer version was uploaded or
+the file changed after the agent read it, and four-eyes review applies as in the UI.
 
 Two ways to use them:
 
@@ -581,10 +582,12 @@ Two ways to use them:
   agent that has been manipulated.
 
 By default `read_evidence` shows the evidence, its links and its history, not the
-file. Set `CA_MCP_READ_EVIDENCE_FILES=true` to let the agent read files too: text
-files and images are returned directly, other files (PDF, office documents) are
-saved to a temporary folder for the agent to open on a local (stdio) server, or
-attached to the result on an HTTP server. Files over 5 MB are not read.
+file, so the agent can suggest but not decide. Set
+`CA_MCP_READ_EVIDENCE_FILES=true` to let the agent read files too: short text
+files and images are returned directly, other files (PDF, office documents, long
+text) are saved to a temporary folder for the agent to open on a local (stdio)
+server, or attached to the result on an HTTP server. Files over 5 MB and
+link-only evidences are left to a reviewer in the UI.
 
 {% hint style="warning" %}
 Reading files sends their content to the model provider your client uses. A file

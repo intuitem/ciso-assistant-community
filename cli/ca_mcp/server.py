@@ -335,7 +335,8 @@ def _annotations(fn, is_read):
         return ToolAnnotations(
             read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )
-    if name.startswith(("update_", "sync_")):
+    # review_: overwrites an earlier decision and the evidence status
+    if name.startswith(("update_", "sync_", "review_")):
         return ToolAnnotations(
             read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )
