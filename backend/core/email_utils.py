@@ -347,9 +347,10 @@ MODEL_NAME_TO_FRONTEND_ROUTE: dict[str, str] = {
     "quantitativeriskstudy": "quantitative-risk-studies",
     "riskassessment": "risk-assessments",
     "rightrequest": "right-requests",
+    "securityexception": "security-exceptions",
     "solution": "solutions",
 }
-"""Maps a django `model_name` to a frotnend(sveltekit) route."""
+"""Maps a django `model_name` to a frontend (SvelteKit) route."""
 
 
 def object_url(obj) -> str:
