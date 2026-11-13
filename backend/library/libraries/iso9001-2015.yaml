@@ -1,0 +1,1158 @@
+---
+urn: urn:intuitem:risk:library:iso9001-2015
+locale: en
+ref_id: iso9001-2015
+name: ISO 9001:2015 — Quality management systems — Requirements outline
+description: 'Outline of ISO 9001:2015 — Quality management systems — Requirements, summarised clause
+  by clause.
+
+  You can purchase the standard for full details.'
+copyright: ISO - You can purchase the standard for full details.
+version: 1
+publication_date: 2015-09-15
+provider: ISO
+packager: Nadia QOUDHADH
+translations:
+  fr:
+    name: ISO 9001:2015 — Systèmes de management de la qualité — Exigences
+    description: Norme ISO 9001:2015 relative aux systèmes de management de la qualité. Synthèse détaillée
+      par article et sous-clause. Version complète à acquérir auprès de l'ISO.
+    copyright: ISO - Version complète à acquérir auprès de l'ISO.
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso9001-2015
+    ref_id: iso9001-2015
+    name: ISO 9001:2015 — Quality management systems — Requirements outline
+    description: Outline of ISO 9001:2015 on quality management systems.
+    translations:
+      fr:
+        name: ISO 9001:2015 — Systèmes de management de la qualité — Exigences
+        description: Norme ISO 9001:2015 relative aux systèmes de management de la qualité.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and uncontrolled
+      translations:
+        fr:
+          name: Incomplet
+          description: Ad hoc et non maîtrisé
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+      translations:
+        fr:
+          name: Initial
+          description: Imprévisible et réactif
+    - score: 2
+      name: Managed
+      description: Managed at project level
+      translations:
+        fr:
+          name: Géré
+          description: Géré au niveau projet
+    - score: 3
+      name: Defined
+      description: Proactive rather than reactive
+      translations:
+        fr:
+          name: Défini
+          description: Proactif plutôt que réactif
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+      translations:
+        fr:
+          name: Géré quantitativement
+          description: Mesuré et contrôlé
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+      translations:
+        fr:
+          name: Optimisé
+          description: Stable et flexible
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Context of the organization
+      translations:
+        fr:
+          name: Contexte de l'organisme
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: Identify the internal and external issues relevant to the QMS purpose and strategic
+        direction, and keep them under review.
+      annotation: Use a SWOT or PESTLE analysis to record internal and external factors.
+      translations:
+        fr:
+          name: Compréhension de l'organisme et de son contexte
+          description: Déterminer les enjeux internes et externes pertinents pour la finalité et l'orientation
+            stratégique du SMQ, et les surveiller.
+          annotation: Utiliser une analyse SWOT ou PESTLE pour documenter les facteurs internes/externes.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+      description: Identify the relevant interested parties and their QMS-related requirements, and keep
+        them under review.
+      annotation: Maintain a stakeholder register and review it every year.
+      translations:
+        fr:
+          name: Compréhension des besoins et attentes des parties intéressées
+          description: Identifier les parties intéressées pertinentes et leurs exigences vis-à-vis du
+            SMQ, et les surveiller.
+          annotation: Tenir un registre des parties prenantes et le revoir annuellement.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:4
+      ref_id: '4.3'
+      name: Determining the scope of the QMS
+      description: Set the boundaries and applicability of the QMS, considering context, requirements
+        and products/services. Keep the scope documented.
+      annotation: Write a scope document listing sites, activities and justified exclusions.
+      translations:
+        fr:
+          name: Détermination du domaine d'application du SMQ
+          description: Définir les limites et l'applicabilité du SMQ en tenant compte du contexte, des
+            exigences et des produits/services. Documenter le domaine d'application.
+          annotation: Rédiger un document de périmètre précisant sites, activités et exclusions justifiées.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:4
+      ref_id: '4.4'
+      name: Quality management system and its processes
+      description: Set up, run, maintain and improve the QMS and the processes it needs, with their interactions
+        (inputs/outputs, sequence, criteria, resources, responsibilities, risks, evaluation, improvement).
+      annotation: Map the processes and document how they interact.
+      translations:
+        fr:
+          name: Système de management de la qualité et ses processus
+          description: Établir, mettre en œuvre, tenir à jour et améliorer le SMQ ainsi que les processus
+            nécessaires et leurs interactions (entrées/sorties, séquence, critères, ressources, responsabilités,
+            risques, évaluation, amélioration).
+          annotation: Cartographier les processus et documenter leurs interactions.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Leadership
+      translations:
+        fr:
+          name: Leadership
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+      translations:
+        fr:
+          name: Leadership et engagement
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:5.1
+      ref_id: 5.1.1
+      name: General
+      description: Top management shows leadership and commitment to the QMS (accountability, integration
+        into the business, process and risk-based thinking, resources, communication, results, support,
+        improvement).
+      annotation: Set up a quality committee with executive sponsorship.
+      translations:
+        fr:
+          name: Généralités
+          description: La direction démontre son leadership et son engagement vis-à-vis du SMQ (responsabilité,
+            intégration, promotion de l'approche processus et des risques, ressources, communication,
+            résultats, soutien, amélioration).
+          annotation: Mettre en place un comité qualité et un parrainage exécutif.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:5.1
+      ref_id: 5.1.2
+      name: Customer focus
+      description: Top management ensures customer and legal requirements are identified, understood and
+        met, and that risks and opportunities are addressed.
+      annotation: Track customer satisfaction as a key performance indicator.
+      translations:
+        fr:
+          name: Orientation client
+          description: La direction s'assure que les exigences du client et les exigences légales sont
+            déterminées, comprises et satisfaites, et que les risques/opportunités sont pris en compte.
+          annotation: Suivre la satisfaction client comme indicateur clé de performance.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:5
+      ref_id: '5.2'
+      name: Policy
+      translations:
+        fr:
+          name: Politique
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:5.2
+      ref_id: 5.2.1
+      name: Establishing the quality policy
+      description: Top management sets up, applies and maintains a quality policy suited to the context,
+        providing a framework for objectives and including commitments to conformity and continual improvement.
+      annotation: Write a short policy aligned with the strategy.
+      translations:
+        fr:
+          name: Établissement de la politique qualité
+          description: La direction établit, met en œuvre et tient à jour une politique qualité appropriée
+            au contexte, cadre des objectifs, incluant l'engagement de conformité et d'amélioration continue.
+          annotation: Rédiger une politique concise alignée sur la stratégie.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:5.2
+      ref_id: 5.2.2
+      name: Communicating the quality policy
+      description: The quality policy is available, communicated, understood and applied, and made available
+        to relevant interested parties.
+      annotation: Share the policy internally and publish it where relevant.
+      translations:
+        fr:
+          name: Communication de la politique qualité
+          description: La politique qualité est disponible, communiquée, comprise et appliquée, et mise
+            à disposition des parties intéressées pertinentes.
+          annotation: Diffuser la politique en interne et la publier si pertinent.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:5
+      ref_id: '5.3'
+      name: Organizational roles, responsibilities and authorities
+      description: Assign, communicate and make understood the responsibilities and authorities for conformity,
+        process results, reporting, customer focus and QMS integrity.
+      annotation: Use a RACI matrix to document roles.
+      translations:
+        fr:
+          name: Rôles, responsabilités et autorités
+          description: Attribuer, communiquer et faire comprendre les responsabilités et autorités pour
+            la conformité, les résultats des processus, le reporting, l'orientation client et l'intégrité
+            du SMQ.
+          annotation: Utiliser une matrice RACI pour documenter les rôles.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Planning
+      translations:
+        fr:
+          name: Planification
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+      description: Identify the risks and opportunities to address so that intended results are achieved,
+        desirable effects increased, undesirable effects prevented and improvement achieved. Plan the
+        actions and how they will be evaluated.
+      annotation: Include quality risks in the enterprise risk management process.
+      translations:
+        fr:
+          name: Actions face aux risques et opportunités
+          description: Déterminer les risques et opportunités à traiter pour assurer l'atteinte des résultats,
+            accroître les effets souhaitables, prévenir les effets indésirables et s'améliorer. Planifier
+            les actions et leur évaluation.
+          annotation: Intégrer les risques qualité dans la gestion des risques de l'entreprise.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:6
+      ref_id: '6.2'
+      name: Quality objectives and planning to achieve them
+      translations:
+        fr:
+          name: Objectifs qualité et planification pour les atteindre
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:6.2
+      ref_id: 6.2.1
+      name: Establishing quality objectives
+      description: Set quality objectives that are consistent with the policy, measurable, relevant, monitored,
+        communicated and kept up to date. Keep documented information.
+      annotation: Define 3 to 5 measurable objectives and review them at management review.
+      translations:
+        fr:
+          name: Établissement des objectifs qualité
+          description: Établir des objectifs qualité cohérents avec la politique, mesurables, pertinents,
+            surveillés, communiqués et mis à jour. Conserver des informations documentées.
+          annotation: Définir 3 à 5 objectifs mesurables et les revoir en revue de direction.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:6.2
+      ref_id: 6.2.2
+      name: Planning actions to achieve the objectives
+      description: Decide what will be done, with which resources, by whom, by when, and how results will
+        be evaluated.
+      annotation: Set clear KPIs and review them at management review.
+      translations:
+        fr:
+          name: Planification des actions pour atteindre les objectifs
+          description: Déterminer ce qui sera fait, les ressources, les responsables, les échéances et
+            la méthode d'évaluation des résultats.
+          annotation: Établir des KPI clairs et les revoir en revue de direction.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:6
+      ref_id: '6.3'
+      name: Planning of changes
+      description: Plan QMS changes in a controlled way, considering their purpose, system integrity,
+        resources and responsibilities.
+      annotation: Use a change log with impact assessment.
+      translations:
+        fr:
+          name: Planification des modifications
+          description: Planifier de manière maîtrisée les modifications du SMQ en tenant compte de leur
+            objectif, de l'intégrité du système, des ressources et des responsabilités.
+          annotation: Utiliser un journal des changements avec évaluation d'impact.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Support
+      translations:
+        fr:
+          name: Support
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7
+      ref_id: '7.1'
+      name: Resources
+      translations:
+        fr:
+          name: Ressources
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
+      ref_id: 7.1.1
+      name: General
+      description: Identify and provide the resources the QMS needs, considering internal capabilities
+        and what must come from external providers.
+      annotation: List resources by category in quality plans.
+      translations:
+        fr:
+          name: Généralités
+          description: Identifier et fournir les ressources nécessaires au SMQ en tenant compte des capacités
+            internes et des besoins externes.
+          annotation: Recenser les ressources par catégorie dans les plans qualité.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
+      ref_id: 7.1.2
+      name: People
+      description: Identify and provide the people needed to run the QMS effectively and control its processes.
+      annotation: Map skills and anticipate staffing needs.
+      translations:
+        fr:
+          name: Ressources humaines
+          description: Déterminer et fournir les ressources humaines nécessaires à la mise en œuvre efficace
+            du SMQ et à la maîtrise des processus.
+          annotation: Cartographier les compétences et anticiper les besoins en effectifs.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
+      ref_id: 7.1.3
+      name: Infrastructure
+      description: Identify, provide and maintain the infrastructure needed (buildings, equipment, transport,
+        ICT).
+      annotation: Keep an inventory of critical infrastructure and its condition.
+      translations:
+        fr:
+          name: Infrastructure
+          description: Déterminer, fournir et maintenir l'infrastructure nécessaire (bâtiments, équipements,
+            transport, TIC).
+          annotation: Tenir un inventaire des infrastructures critiques et de leur état.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
+      ref_id: 7.1.4
+      name: Environment for the operation of processes
+      description: Identify, provide and maintain the working environment needed (social, psychological
+        and physical factors).
+      annotation: Assess working conditions and workplace climate periodically.
+      translations:
+        fr:
+          name: Environnement pour la mise en œuvre des processus
+          description: Déterminer, fournir et maintenir l'environnement nécessaire (aspects sociaux, psychologiques
+            et physiques).
+          annotation: Évaluer périodiquement les conditions de travail et le climat social.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
+      ref_id: 7.1.5
+      name: Monitoring and measuring resources
+      translations:
+        fr:
+          name: Ressources pour la surveillance et la mesure
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5
+      ref_id: 7.1.5.1
+      name: General
+      description: Identify and provide suitable, maintained monitoring and measuring resources, and keep
+        evidence that they are fit for purpose.
+      annotation: Document measuring equipment and how it is used.
+      translations:
+        fr:
+          name: Généralités
+          description: Déterminer et fournir les ressources de surveillance/mesure appropriées et maintenues,
+            et conserver les preuves de leur adéquation.
+          annotation: Documenter les équipements de mesure et leur usage.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5
+      ref_id: 7.1.5.2
+      name: Measurement traceability
+      description: Where traceability is required, calibrate or verify equipment, identify it and protect
+        it. Deal with equipment found unfit.
+      annotation: Keep a calibration register with certificates.
+      translations:
+        fr:
+          name: Traçabilité de la mesure
+          description: Lorsque la traçabilité est exigée, étalonner/vérifier les équipements, les identifier
+            et les protéger. Traiter les équipements inadaptés.
+          annotation: Tenir un registre d'étalonnage avec les certificats.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
+      ref_id: 7.1.6
+      name: Organizational knowledge
+      description: Identify the knowledge needed for processes and conformity, keep it current and make
+        it available. Acquire additional knowledge when needed.
+      annotation: Document critical know-how and organise sharing (lessons learned, mentoring).
+      translations:
+        fr:
+          name: Connaissances organisationnelles
+          description: Déterminer les connaissances nécessaires aux processus et à la conformité, les
+            tenir à jour et les mettre à disposition. Acquérir les connaissances supplémentaires nécessaires.
+          annotation: Documenter les savoir-faire critiques et organiser le partage (retours d'expérience,
+            tutorat).
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7
+      ref_id: '7.2'
+      name: Competence
+      description: Identify the competence needed, make sure staff are competent, take action where needed
+        and keep evidence.
+      annotation: Keep training records up to date and check competence every year.
+      translations:
+        fr:
+          name: Compétences
+          description: Déterminer les compétences nécessaires, s'assurer que le personnel est compétent,
+            mener des actions si besoin et conserver les preuves.
+          annotation: Tenir à jour les dossiers de formation et vérifier les compétences annuellement.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7
+      ref_id: '7.3'
+      name: Awareness
+      description: Make staff aware of the policy, the objectives, their contribution and the consequences
+        of not following QMS requirements.
+      annotation: Run awareness sessions based on practical cases.
+      translations:
+        fr:
+          name: Sensibilisation
+          description: Sensibiliser le personnel à la politique, aux objectifs, à sa contribution et aux
+            conséquences d'un non-respect.
+          annotation: Organiser des sessions de sensibilisation avec des cas pratiques.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7
+      ref_id: '7.4'
+      name: Communication
+      description: Identify the relevant internal and external communications (topics, timing, audience,
+        channels, owners).
+      annotation: Define a quality communication plan.
+      translations:
+        fr:
+          name: Communication
+          description: Déterminer les communications internes et externes pertinentes (sujets, moments,
+            destinataires, moyens, responsables).
+          annotation: Définir un plan de communication qualité.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7
+      ref_id: '7.5'
+      name: Documented information
+      translations:
+        fr:
+          name: Informations documentées
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.5
+      ref_id: 7.5.1
+      name: General
+      description: The QMS includes the documented information required by the standard and any the organization
+        deems necessary for its effectiveness.
+      annotation: Scale documentation to size, complexity and competence.
+      translations:
+        fr:
+          name: Généralités
+          description: Le SMQ inclut les informations documentées exigées par la norme et celles jugées
+            nécessaires à son efficacité.
+          annotation: Adapter l'étendue documentaire à la taille, la complexité et les compétences.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.5
+      ref_id: 7.5.2
+      name: Creating and updating
+      description: Ensure documented information is properly identified, formatted, held on suitable media,
+        reviewed and approved.
+      annotation: Version every document with its approval date.
+      translations:
+        fr:
+          name: Création et mise à jour
+          description: Assurer l'identification, le format, le support, la revue et l'approbation appropriés
+            des informations documentées.
+          annotation: Versionner tous les documents avec dates d'approbation.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+      description: Control availability, protection, distribution, access, storage, changes, retention
+        and disposal. Identify and control documents of external origin.
+      annotation: Protect sensitive data and ensure backups.
+      translations:
+        fr:
+          name: Maîtrise des informations documentées
+          description: Maîtriser la disponibilité, la protection, la distribution, l'accès, le stockage,
+            les modifications, la conservation et l'élimination. Identifier et maîtriser les documents
+            d'origine externe.
+          annotation: Protéger les données sensibles et assurer les sauvegardes.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Operation
+      translations:
+        fr:
+          name: Réalisation des activités opérationnelles
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      ref_id: '8.1'
+      name: Operational planning and control
+      description: Plan, run and control the processes needed to deliver products and services, including
+        criteria, resources, change control and outsourced processes.
+      annotation: Draw flowcharts and control plans for critical processes.
+      translations:
+        fr:
+          name: Planification et maîtrise opérationnelles
+          description: Planifier, mettre en œuvre et maîtriser les processus nécessaires à la fourniture
+            des produits et services, y compris les critères, ressources, maîtrise des modifications et
+            processus externalisés.
+          annotation: Élaborer des diagrammes de flux et des plans de contrôle pour les processus critiques.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      ref_id: '8.2'
+      name: Requirements for products and services
+      translations:
+        fr:
+          name: Exigences relatives aux produits et services
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.2
+      ref_id: 8.2.1
+      name: Customer communication
+      description: Communication covers product/service information, handling of enquiries and contracts,
+        customer feedback, customer property and contingency actions.
+      annotation: Formalise customer communication channels and complaint handling.
+      translations:
+        fr:
+          name: Communication avec les clients
+          description: La communication inclut les informations produits/services, le traitement des demandes/contrats,
+            les retours clients, la propriété du client et les actions d'urgence.
+          annotation: Formaliser les canaux de communication client et le traitement des réclamations.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.2
+      ref_id: 8.2.2
+      name: Determining the requirements for products and services
+      description: Define product/service requirements, including legal ones and those the organization
+        considers necessary, and make sure claims can be met.
+      annotation: Formalise the review of customer requirements before any commitment.
+      translations:
+        fr:
+          name: Détermination des exigences relatives aux produits et services
+          description: Définir les exigences des produits/services, y compris les exigences légales et
+            celles jugées nécessaires, et s'assurer de la capacité à répondre aux réclamations.
+          annotation: Formaliser la revue des exigences clients avant tout engagement.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.2
+      ref_id: 8.2.3
+      name: Review of the requirements for products and services
+      description: Before committing, review customer, implied, organizational and legal requirements
+        and any differences. Confirm undocumented customer requirements. Keep evidence.
+      annotation: Formalise the review of customer requirements before any commitment.
+      translations:
+        fr:
+          name: Revue des exigences relatives aux produits et services
+          description: Avant engagement, revoir les exigences client, non formulées, de l'organisme, légales
+            et les écarts. Confirmer les exigences client non documentées. Conserver les preuves.
+          annotation: Formaliser la revue des exigences clients avant tout engagement.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.2
+      ref_id: 8.2.4
+      name: Changes to requirements for products and services
+      description: When requirements change, update documented information and inform the people concerned.
+      annotation: Use a change log with notification to the teams.
+      translations:
+        fr:
+          name: Modifications des exigences
+          description: Amender les informations documentées et informer le personnel concerné lorsque
+            les exigences changent.
+          annotation: Utiliser un journal des changements avec notification aux équipes.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      ref_id: '8.3'
+      name: Design and development of products and services
+      translations:
+        fr:
+          name: Conception et développement de produits et services
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.3
+      ref_id: 8.3.1
+      name: General
+      description: Set up, run and maintain a suitable design and development process.
+      annotation: Document the design process with its stages and deliverables.
+      translations:
+        fr:
+          name: Généralités
+          description: Établir, mettre en œuvre et tenir à jour un processus de conception et développement
+            approprié.
+          annotation: Documenter le processus de conception avec ses étapes et livrables.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.3
+      ref_id: 8.3.2
+      name: Design and development planning
+      description: Consider nature, duration, complexity, stages, verification and validation, responsibilities,
+        resources, interfaces, customer involvement, later requirements, level of control and documented
+        information.
+      annotation: Build a design plan with milestones and reviews.
+      translations:
+        fr:
+          name: Planification
+          description: Prendre en compte la nature, la durée, la complexité, les étapes, les vérifications/validations,
+            les responsabilités, les ressources, les interfaces, l'implication clients, les exigences
+            ultérieures, le niveau de maîtrise et les informations documentées.
+          annotation: Établir un plan de conception avec jalons et revues.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.3
+      ref_id: 8.3.3
+      name: Design and development inputs
+      description: Identify functional and performance requirements, previous similar work, legal requirements,
+        internal standards and consequences of failure. Resolve conflicts and keep evidence.
+      annotation: Formalise a specification with validated input criteria.
+      translations:
+        fr:
+          name: Éléments d'entrée
+          description: Déterminer les exigences fonctionnelles, performances, informations antérieures,
+            exigences légales, normes internes et conséquences de défaillance. Résoudre les conflits et
+            conserver les preuves.
+          annotation: Formaliser un cahier des charges avec critères d'entrée validés.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.3
+      ref_id: 8.3.4
+      name: Design and development controls
+      description: Control design through reviews, verification and validation, deal with issues found
+        and keep evidence.
+      annotation: Document design reviews and corrective actions.
+      translations:
+        fr:
+          name: Maîtrise
+          description: Maîtriser la conception via des revues, vérifications et validations, traiter les
+            problèmes identifiés et conserver les preuves.
+          annotation: Documenter les revues de conception et les actions correctives.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.3
+      ref_id: 8.3.5
+      name: Design and development outputs
+      description: Make sure outputs meet the inputs, suit later processes, include monitoring and acceptance
+        criteria and specify essential characteristics. Keep evidence.
+      annotation: Document design deliverables and their validation.
+      translations:
+        fr:
+          name: Éléments de sortie
+          description: S'assurer que les sorties satisfont aux entrées, sont adéquates pour les processus
+            ultérieurs, incluent les critères de surveillance/acceptation et spécifient les caractéristiques
+            essentielles. Conserver les preuves.
+          annotation: Documenter les livrables de conception et leur validation.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.3
+      ref_id: 8.3.6
+      name: Design and development changes
+      description: Identify, review and control design changes to avoid adverse impact. Keep evidence.
+      annotation: Use a design change log with impact assessment.
+      translations:
+        fr:
+          name: Modifications
+          description: Identifier, revoir et maîtriser les modifications de conception pour éviter les
+            impacts négatifs. Conserver les preuves.
+          annotation: Utiliser un journal des modifications de conception avec évaluation d'impact.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      ref_id: '8.4'
+      name: Control of externally provided processes, products and services
+      translations:
+        fr:
+          name: Maîtrise des processus, produits et services fournis par des prestataires externes
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.4
+      ref_id: 8.4.1
+      name: General
+      description: Make sure outsourced processes, products and services conform. Define and apply criteria
+        to evaluate, select, monitor and re-evaluate providers.
+      annotation: Define supplier selection, monitoring and re-evaluation criteria.
+      translations:
+        fr:
+          name: Généralités
+          description: S'assurer que les processus, produits et services externalisés sont conformes.
+            Définir et appliquer des critères d'évaluation, sélection, surveillance et réévaluation des
+            prestataires.
+          annotation: Définir des critères de sélection, de surveillance et de réévaluation des fournisseurs.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.4
+      ref_id: 8.4.2
+      name: Type and extent of control
+      description: Make sure outsourcing does not undermine conformity. Define the controls applied to
+        the provider and to its outputs, considering impact and provider effectiveness.
+      annotation: Formalise control levels according to how critical each service is.
+      translations:
+        fr:
+          name: Type et étendue de la maîtrise
+          description: S'assurer que l'externalisation ne compromet pas la conformité. Définir la maîtrise
+            exercée sur le prestataire et sur les sorties, en tenant compte de l'impact et de l'efficacité
+            du prestataire.
+          annotation: Formaliser les niveaux de contrôle selon la criticité des prestations.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.4
+      ref_id: 8.4.3
+      name: Information for external providers
+      description: Communicate the requirements for processes/products/services, approvals, competence,
+        interactions, monitoring and verification.
+      annotation: Formalise specifications and contracts that include quality requirements.
+      translations:
+        fr:
+          name: Informations à l'attention des prestataires externes
+          description: Communiquer les exigences relatives aux processus/produits/services, approbations,
+            compétences, interactions, surveillance et vérifications.
+          annotation: Formaliser les cahiers des charges et contrats avec les exigences qualité.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      ref_id: '8.5'
+      name: Production and service provision
+      translations:
+        fr:
+          name: Production et prestation de service
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.5
+      ref_id: 8.5.1
+      name: Control of production and service provision
+      description: Deliver products and services under controlled conditions (documented information,
+        resources, monitoring, infrastructure, competence, validation, error prevention, release, delivery
+        and post-delivery).
+      annotation: Make sure every critical process has instructions and acceptance criteria.
+      translations:
+        fr:
+          name: Maîtrise de la production et de la prestation de service
+          description: Mettre en œuvre la production/prestation dans des conditions maîtrisées (informations
+            documentées, ressources, surveillance, infrastructure, compétences, validation, prévention
+            des erreurs, libération/livraison/après-livraison).
+          annotation: Assurer que chaque processus critique dispose d'instructions et de critères d'acceptation.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.5
+      ref_id: 8.5.2
+      name: Identification and traceability
+      description: Identify outputs and their status against monitoring and measurement requirements,
+        and control unique identification where traceability is required. Keep evidence.
+      annotation: Set up an identification and traceability system suited to the products.
+      translations:
+        fr:
+          name: Identification et traçabilité
+          description: Identifier les sorties, leur état par rapport aux exigences de surveillance/mesure,
+            et maîtriser l'identification unique lorsque la traçabilité est exigée. Conserver les preuves.
+          annotation: Mettre en place un système d'identification et de traçabilité adapté aux produits.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.5
+      ref_id: 8.5.3
+      name: Property belonging to customers or external providers
+      description: Identify, verify, protect and safeguard property belonging to customers or providers.
+        Report any loss or damage and keep evidence.
+      annotation: Keep a register of property entrusted by customers.
+      translations:
+        fr:
+          name: Propriété des clients ou des prestataires externes
+          description: Identifier, vérifier, protéger et sauvegarder la propriété des clients/prestataires.
+            Notifier en cas de perte/dommage et conserver les preuves.
+          annotation: Tenir un registre des biens confiés par les clients.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.5
+      ref_id: 8.5.4
+      name: Preservation
+      description: Preserve outputs during production and service provision (identification, handling,
+        contamination control, packaging, storage, transport, protection).
+      annotation: Define suitable storage and transport conditions.
+      translations:
+        fr:
+          name: Préservation
+          description: Préserver les sorties pendant la production/prestation (identification, manutention,
+            contamination, conditionnement, stockage, transport, protection).
+          annotation: Définir les conditions de stockage et de transport adaptées.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.5
+      ref_id: 8.5.5
+      name: Post-delivery activities
+      description: Meet post-delivery requirements, considering legal requirements, potential undesired
+        consequences, nature and lifetime, customer requirements and feedback.
+      annotation: Define warranty, maintenance and additional service obligations.
+      translations:
+        fr:
+          name: Activités après livraison
+          description: Satisfaire aux exigences après livraison en tenant compte des exigences légales,
+            des conséquences indésirables, de la nature/durée de vie, des exigences clients et des retours.
+          annotation: Définir les obligations de garantie, maintenance et services complémentaires.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8.5
+      ref_id: 8.5.6
+      name: Control of changes
+      description: Review and control changes to production or service provision, and keep evidence (results,
+        who authorised, actions).
+      annotation: Use a change log with approval before implementation.
+      translations:
+        fr:
+          name: Maîtrise des modifications
+          description: Revoir et maîtriser les modifications de production/prestation, conserver les preuves
+            (résultats, autorisateurs, actions).
+          annotation: Utiliser un journal des changements avec validation avant mise en œuvre.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      ref_id: '8.6'
+      name: Release of products and services
+      description: Carry out the planned arrangements to verify conformity before release. Keep evidence
+        of conformity and of who authorised release.
+      annotation: Formalise checkpoints before delivery.
+      translations:
+        fr:
+          name: Libération des produits et services
+          description: Mettre en œuvre les dispositions planifiées pour vérifier la conformité avant libération.
+            Conserver les preuves de conformité et d'autorisation.
+          annotation: Formaliser les points de contrôle avant livraison.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:8.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:8
+      ref_id: '8.7'
+      name: Control of nonconforming outputs
+      description: Identify and control nonconforming outputs to prevent unintended use or delivery. Handle
+        them (correction, segregation, informing the customer, concession), verify conformity after correction
+        and keep evidence.
+      annotation: Keep a nonconformity register with the related corrective actions.
+      translations:
+        fr:
+          name: Maîtrise des éléments de sortie non conformes
+          description: Identifier et maîtriser les sorties non conformes pour empêcher leur utilisation/livraison
+            non intentionnelle. Traiter (correction, isolement, information client, dérogation), vérifier
+            la conformité après correction et conserver les preuves.
+          annotation: Tenir un registre des non-conformités avec actions correctives associées.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Performance evaluation
+      translations:
+        fr:
+          name: Évaluation des performances
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis and evaluation
+      translations:
+        fr:
+          name: Surveillance, mesure, analyse et évaluation
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.1
+      ref_id: 9.1.1
+      name: General
+      description: Decide what to monitor and measure, the methods, the timing and the analysis. Evaluate
+        QMS performance and effectiveness and keep evidence.
+      annotation: Track indicators such as customer satisfaction, conformity and process performance.
+      translations:
+        fr:
+          name: Généralités
+          description: Déterminer ce qui doit être surveillé/mesuré, les méthodes, le moment et l'analyse.
+            Évaluer la performance et l'efficacité du SMQ et conserver les preuves.
+          annotation: Suivre des indicateurs tels que la satisfaction client, la conformité et les performances
+            des processus.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.1
+      ref_id: 9.1.2
+      name: Customer satisfaction
+      description: Monitor how customers perceive the fulfilment of their needs and expectations. Define
+        how this information is collected, monitored and reviewed.
+      annotation: Run satisfaction surveys and analyse complaints.
+      translations:
+        fr:
+          name: Satisfaction du client
+          description: Surveiller la perception des clients sur la satisfaction de leurs besoins et attentes.
+            Déterminer les méthodes de collecte, surveillance et revue.
+          annotation: Mettre en place des enquêtes de satisfaction et analyser les réclamations.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.1
+      ref_id: 9.1.3
+      name: Analysis and evaluation
+      description: Analyse and evaluate data to assess conformity, satisfaction, QMS performance and effectiveness,
+        planning, risks and opportunities, providers and improvement needs.
+      annotation: Use statistical techniques where relevant.
+      translations:
+        fr:
+          name: Analyse et évaluation
+          description: Analyser et évaluer les données pour évaluer la conformité, la satisfaction, la
+            performance/efficacité du SMQ, la planification, les risques/opportunités, les prestataires
+            et les besoins d'amélioration.
+          annotation: Utiliser des techniques statistiques lorsque pertinent.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9
+      ref_id: '9.2'
+      name: Internal audit
+      translations:
+        fr:
+          name: Audit interne
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.2
+      ref_id: 9.2.1
+      name: General
+      description: Carry out internal audits at planned intervals to check conformity with the organization's
+        own requirements and the standard, and QMS effectiveness.
+      annotation: Use trained auditors who are independent of the audited activities.
+      translations:
+        fr:
+          name: Généralités
+          description: Réaliser des audits internes à intervalles planifiés pour vérifier la conformité
+            aux exigences propres et à la norme, et l'efficacité du SMQ.
+          annotation: Utiliser des auditeurs formés et indépendants des activités auditées.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.2
+      ref_id: 9.2.2
+      name: Audit programme
+      description: Plan, set up, run and maintain an audit programme (frequency, methods, responsibilities,
+        planning, reporting). Define criteria and scope, select auditors, report results, correct and
+        keep evidence.
+      annotation: Base audit frequency on risks and past performance.
+      translations:
+        fr:
+          name: Programme d'audit
+          description: Planifier, établir, mettre en œuvre et maintenir un programme d'audit (fréquence,
+            méthodes, responsabilités, planification, compte rendu). Définir les critères et périmètre,
+            sélectionner les auditeurs, rapporter les résultats, corriger et conserver les preuves.
+          annotation: Baser la fréquence des audits sur les risques et les performances passées.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9
+      ref_id: '9.3'
+      name: Management review
+      translations:
+        fr:
+          name: Revue de direction
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.3
+      ref_id: 9.3.1
+      name: General
+      description: Top management reviews the QMS at planned intervals to make sure it remains suitable,
+        adequate, effective and aligned with strategy.
+      annotation: Hold a management review at least once a year.
+      translations:
+        fr:
+          name: Généralités
+          description: La direction revoit le SMQ à intervalles planifiés pour s'assurer qu'il est approprié,
+            adapté, efficace et aligné sur la stratégie.
+          annotation: Organiser une revue de direction au moins annuelle.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.3
+      ref_id: 9.3.2
+      name: Management review inputs
+      description: Consider action status, changes in context, performance (satisfaction, objectives,
+        processes, nonconformities, monitoring, audits, providers), resources, effectiveness of risk and
+        opportunity actions, and improvement opportunities.
+      annotation: 'Prepare review inputs: audit results, KPIs, incident summary.'
+      translations:
+        fr:
+          name: Éléments d'entrée
+          description: Prendre en compte l'état des actions, les changements de contexte, la performance
+            (satisfaction, objectifs, processus, non-conformités, surveillance, audits, prestataires),
+            les ressources, l'efficacité des actions risques/opportunités et les opportunités d'amélioration.
+          annotation: 'Préparer les entrées de revue : résultats d''audit, KPI, synthèse des incidents.'
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:9.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:9.3
+      ref_id: 9.3.3
+      name: Management review outputs
+      description: Include decisions and actions on improvement opportunities, needed QMS changes and
+        resource needs. Keep evidence.
+      annotation: Document decisions, actions and improvement plans.
+      translations:
+        fr:
+          name: Éléments de sortie
+          description: Inclure les décisions et actions relatives aux opportunités d'amélioration, aux
+            besoins de changements du SMQ et aux besoins en ressources. Conserver les preuves.
+          annotation: Documenter les décisions, actions et plans d'amélioration.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Improvement
+      translations:
+        fr:
+          name: Amélioration
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:10
+      ref_id: '10.1'
+      name: General
+      description: Identify and select improvement opportunities and take the necessary actions (improving
+        products/services, correcting or preventing undesired effects, improving QMS performance).
+      annotation: Build improvement into strategic and operational planning.
+      translations:
+        fr:
+          name: Généralités
+          description: Déterminer et sélectionner les opportunités d'amélioration et entreprendre les
+            actions nécessaires (amélioration des produits/services, correction/prévention des effets
+            indésirables, amélioration de la performance du SMQ).
+          annotation: Intégrer l'amélioration dans la planification stratégique et opérationnelle.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:10
+      ref_id: '10.2'
+      name: Nonconformity and corrective action
+      description: React to nonconformities, assess the need for corrective action, analyse causes, implement
+        actions, review their effectiveness, update risks and opportunities and change the QMS if needed.
+        Keep evidence.
+      annotation: Keep a CAPA register and check that closure is effective.
+      translations:
+        fr:
+          name: Non-conformité et action corrective
+          description: Réagir aux non-conformités, évaluer la nécessité d'actions correctives, analyser
+            les causes, mettre en œuvre les actions, examiner leur efficacité, mettre à jour les risques/opportunités
+            et modifier le SMQ si nécessaire. Conserver les preuves.
+          annotation: Tenir un registre CAPA et vérifier l'efficacité de la clôture.
+    - urn: urn:intuitem:risk:req_node:iso9001-2015:10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:10
+      ref_id: '10.3'
+      name: Continual improvement
+      description: Continually improve the suitability, adequacy and effectiveness of the QMS, using analysis
+        and evaluation results and management review outputs.
+      annotation: Assess QMS maturity every year and feed improvements into the plans.
+      translations:
+        fr:
+          name: Amélioration continue
+          description: Améliorer en continu la pertinence, l'adéquation et l'efficacité du SMQ en prenant
+            en compte les résultats d'analyse/évaluation et les sorties de revue de direction.
+          annotation: Évaluer annuellement la maturité du SMQ et intégrer les améliorations dans les plans.
