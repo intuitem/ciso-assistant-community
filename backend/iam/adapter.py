@@ -28,6 +28,10 @@ User = get_user_model()
 
 DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
 
+# allauth puts the IdP's raw token endpoint response in the exception message,
+# so cap what we log of it.
+SSO_ERROR_MESSAGE_MAX_LENGTH = 500
+
 
 class AccountAdapter(DefaultAccountAdapter):
     def is_safe_url(self, url):
@@ -139,6 +143,32 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     values.extend(v for v in value if isinstance(v, str) and v)
         return values
 
+    def on_authentication_error(
+        self, request, provider, error=None, exception=None, extra_context=None
+    ):
+        cause = exception.__cause__ if exception else None
+        logger.error(
+            "SSO authentication error",
+            provider=getattr(provider, "id", provider),
+            error=error,
+            # allauth passes "state_id" only when it found no stashed state for
+            # the callback (lost session cookie, expired or replayed callback).
+            state_lookup_failed="state_id" in (extra_context or {}),
+            error_type=type(exception).__name__ if exception else None,
+            error_message=str(exception)[:SSO_ERROR_MESSAGE_MAX_LENGTH]
+            if exception
+            else None,
+            cause_type=type(cause).__name__ if cause else None,
+            cause_message=str(cause)[:SSO_ERROR_MESSAGE_MAX_LENGTH] if cause else None,
+        )
+        return super().on_authentication_error(
+            request,
+            provider,
+            error=error,
+            exception=exception,
+            extra_context=extra_context,
+        )
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -234,6 +264,12 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 provider=sociallogin.account.provider,
                 user_id=str(user.id),
             )
+            if not user.is_active:
+                logger.error(
+                    "pre_social_login: user account is inactive",
+                    provider=sociallogin.account.provider,
+                    user_id=str(user.id),
+                )
         except User.DoesNotExist:
             if not jit_provisioning_active:
                 logger.error(
