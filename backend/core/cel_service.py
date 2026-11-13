@@ -525,6 +525,7 @@ def evaluate_outcomes(compliance_assessment) -> None:
     rules = applicable_rules(framework, ca.selected_implementation_groups)
 
     computed = values = None
+    errors: list[str] = []
     if rules:
         context, hidden_urns = build_cel_context(ca)
         _add_scores(context, ca, framework, rules)
@@ -535,16 +536,23 @@ def evaluate_outcomes(compliance_assessment) -> None:
             rules,
             context,
             seed_values=staircase_values,
+            errors=errors,
             compliance_assessment_id=str(ca.pk),
         )
         if not staircase_values and not any(is_numeric_rule(r) for r in rules):
             values = None
 
-    if ca.computed_outcome != computed or ca.computed_values != values:
+    errors = errors or None
+    if (
+        ca.computed_outcome != computed
+        or ca.computed_values != values
+        or ca.outcome_errors != errors
+    ):
         ca.computed_outcome = computed
         ca.computed_values = values
+        ca.outcome_errors = errors
         ComplianceAssessment.objects.filter(pk=ca.pk).update(
-            computed_outcome=computed, computed_values=values
+            computed_outcome=computed, computed_values=values, outcome_errors=errors
         )
 
 
@@ -830,7 +838,9 @@ def _as_number(result) -> float | None:
 _NOT_PASSED_ON = ("expression", "ref_id", "implementation_groups")
 
 
-def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
+def _evaluate_rules(
+    env, rules, context: dict, seed_values=None, errors=None, **log_fields
+):
     """Run outcome rules against `context`, in their order.
 
     Number rules (`kind: number`) run first, each seeing the values computed
@@ -838,7 +848,8 @@ def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
     each sees the yes/no rules above it that fired as `computed_outcomes`.
     Returns (fired, values): the classifications that fired, keyed by ref_id
     with their pass-through attributes, and {ref_id: float}. Fail-open per rule:
-    an expression error or a non-number result is logged and skipped.
+    an expression error or a non-number result is logged and skipped, and its
+    ref_id appended to `errors` when given.
     """
     values: dict[str, float] = dict(seed_values or {})
     fired: dict[str, dict] = {}
@@ -875,6 +886,8 @@ def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
                 exc_info=True,
                 **log_fields,
             )
+            if errors is not None:
+                errors.append(rule["ref_id"])
             continue
         number = _as_number(result)
         if number is None:
@@ -884,6 +897,8 @@ def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
                 rule=rule["ref_id"],
                 **log_fields,
             )
+            if errors is not None:
+                errors.append(rule["ref_id"])
             continue
         values[rule["ref_id"]] = number
 
@@ -901,6 +916,8 @@ def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
                 exc_info=True,
                 **log_fields,
             )
+            if errors is not None:
+                errors.append(rule["ref_id"])
     return fired, values
 
 

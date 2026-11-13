@@ -24,6 +24,47 @@
 )
 
 // Landscape: the table needs the width.
+#let treatment-label = (
+  open: "Ouvert",
+  mitigate: "Atténuer",
+  accept: "Accepter",
+  avoid: "Éviter",
+  transfer: "Transférer",
+  cancelled: "Annulé",
+)
+
+// Set when the report covers a scenario selection rather than the whole assessment.
+#let selection = d.at("selection", default: none)
+#let selection-filter-label = (
+  within_tolerance: "Tolérable",
+  treatment: "Traitement",
+  current_level: "Niveau courant",
+  residual_level: "Niveau résiduel",
+  owner: "Propriétaire",
+  threats: "Menaces",
+  assets: "Actifs",
+  qualifications: "Qualifications",
+  filtering_labels: "Étiquettes",
+)
+#let tolerance-label = ("YES": "Oui", "NO": "Non", "--": "Non défini")
+#let selection-value(key, value) = if key == "within_tolerance" {
+  tolerance-label.at(value, default: value)
+} else if key == "treatment" {
+  treatment-label.at(value, default: value)
+} else { value }
+#let selection-box = if selection != none {
+  block(width: 100%, fill: rgb("#eef2ff"), stroke: 0.6pt + accent, radius: 3pt, inset: 8pt)[
+    #set par(justify: false)
+    #set align(left)
+    #text(weight: "bold", fill: accent)[Sélection de scénarios] · #selection.count sur #selection.total scénarios
+    #v(2pt)
+    #for f in selection.filters [
+      #selection-filter-label.at(f.key, default: f.key) : #f.values.map(v => selection-value(f.key, v)).join(", ") \
+    ]
+    #text(fill: muted)[Seules les mesures liées aux scénarios sélectionnés figurent dans ce plan.]
+  ]
+}
+
 #set page(
   paper: "a4",
   flipped: true,
@@ -39,7 +80,8 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      [#d.date · #d.timezone], align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone#if selection != none [ · Sélection #selection.count/#selection.total]],
+      align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -59,6 +101,11 @@
     [*Évaluation*], [#d.subject.name — #d.subject.version],
     ..if d.subject.framework != "" { ([*Référentiel*], [#d.subject.framework]) } else { () },
   )
+]
+
+#if selection != none [
+  #selection-box
+  #v(0.4em)
 ]
 
 #text(fill: muted)[

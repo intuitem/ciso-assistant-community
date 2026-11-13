@@ -1,0 +1,170 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:aafeher:risk:library:hu-7-2024-mk-rendelet-kockazati-matrix
+locale: hu
+ref_id: hu-7-2024-mk-rendelet-kockazati-matrix
+name: "7/2024. (VI. 24.) MK rendelet \u2013 Kock\xE1zati m\xE1trix"
+description: "N\xE9gyszer n\xE9gyes kock\xE1zati m\xE1trix a 7/2024. (VI. 24.) MK\
+  \ rendelet 1. mell\xE9klet 5.1.1.5. pontja szerinti n\xE9gy kock\xE1zati kateg\xF3\
+  ri\xE1val (\u201Ealacsony\u201D, \u201Ek\xF6zepes\u201D, \u201Emagas\u201D, \u201E\
+  kritikus\u201D): a kock\xE1zatot a fenyeget\xE9s bek\xF6vetkez\xE9s\xE9nek val\xF3\
+  sz\xEDn\u0171s\xE9ge \xE9s k\xE1ros hat\xE1s\xE1nak m\xE9rt\xE9ke hat\xE1rozza meg.\
+  \ A hat\xE1s fokozatai az 1. mell\xE9klet 2.2.2\u20132.2.4. pontja szerinti k\xE1\
+  resem\xE9nyszinteket (csek\xE9ly, k\xF6zepes, nagy) k\xF6vetik, egy elhanyagolhat\xF3\
+  \ fokozattal kieg\xE9sz\xEDtve, \xEDgy a biztons\xE1gi oszt\xE1lyba sorol\xE1s hat\xE1\
+  selemz\xE9se \xE9s a kock\xE1zatelemz\xE9s ugyanazt a m\xE9rc\xE9t haszn\xE1lja.\
+  \ A val\xF3sz\xEDn\u0171s\xE9g sk\xE1l\xE1j\xE1t a rendelet nem hat\xE1rozza meg:\
+  \ a fokozatok le\xEDr\xE1sa kiindul\xF3pont, amelyet a szervezet a kock\xE1zatmenedzsment-elj\xE1\
+  r\xE1s\xE1ban pontos\xEDthat. Az 5.1.2.2. pont szerint r\xE9szletes indokl\xE1s\
+  \ n\xE9lk\xFCli kock\xE1zatfelv\xE1llal\xE1s csak az \u201Ealacsony\u201D kateg\xF3\
+  ri\xE1ban alkalmazhat\xF3. A hu-7-2024-mk-rendelet keretrendszerhez \xE9s a hu-7-2024-mk-rendelet-fenyegetesek\
+  \ fenyeget\xE9skatal\xF3gushoz tartoz\xF3 m\xE1trix.\nSz\xF6veg\xE1llapot: a 7/2024.\
+  \ MK rendelet njt.hu szerinti egys\xE9ges szerkezete (2025. 01. 02.)."
+copyright: "A kock\xE1zati kateg\xF3ri\xE1k \xE9s a k\xE1resem\xE9nyszintek a 7/2024.\
+  \ (VI. 24.) MK rendeletb\u0151l sz\xE1rmaznak; a jogszab\xE1lyok sz\xF6vege a szerz\u0151\
+  i jogr\xF3l sz\xF3l\xF3 1999. \xE9vi LXXVI. t\xF6rv\xE9ny 1. \xA7 (4) bekezd\xE9\
+  se alapj\xE1n nem \xE1ll szerz\u0151i jogi v\xE9delem alatt. Forr\xE1sok: Magyar\
+  \ K\xF6zl\xF6ny 2024/68. sz\xE1m, Nemzeti Jogszab\xE1lyt\xE1r (njt.hu). Hungarian\
+  \ legal texts are not subject to copyright (Act LXXVI of 1999, Section 1(4))."
+version: 1
+publication_date: 2026-10-25
+provider: aafeher
+packager: aafeher
+labels:
+- HUNGARY
+- KIBERTV
+- NIS2
+objects:
+  risk_matrices:
+  - urn: urn:aafeher:risk:matrix:hu-7-2024-mk-rendelet
+    ref_id: hu-7-2024-mk-rendelet-4x4
+    name: "Kock\xE1zati m\xE1trix (7/2024. MK rendelet, 4\xD74)"
+    description: "N\xE9gy kock\xE1zati kateg\xF3ria a 7/2024. (VI. 24.) MK rendelet\
+      \ 1. mell\xE9klet 5.1.1.5. pontja szerint; a hat\xE1s fokozatai az 1. mell\xE9\
+      klet 2.2.2\u20132.2.4. pontja szerinti k\xE1resem\xE9nyszintek."
+    probability:
+    - id: 0
+      abbreviation: V1
+      name: Ritka
+      description: "A fenyeget\xE9s bek\xF6vetkez\xE9se nem v\xE1rhat\xF3, csak kiv\xE9\
+        teles k\xF6r\xFClm\xE9nyek k\xF6z\xF6tt fordulhat el\u0151; a szervezetn\xE9\
+        l \xE9s a hasonl\xF3 szervezetekn\xE9l nincs ismert el\u0151zm\xE9nye."
+      hexcolor: '#FAF7E9'
+    - id: 1
+      abbreviation: V2
+      name: "Lehets\xE9ges"
+      description: "A fenyeget\xE9s bek\xF6vetkezhet: hasonl\xF3 szervezetekn\xE9\
+        l m\xE1r el\u0151fordult, a szervezetn\xE9l azonban nem jellemz\u0151."
+      hexcolor: '#EEE6BC'
+    - id: 2
+      abbreviation: V3
+      name: "Val\xF3sz\xEDn\u0171"
+      description: "A fenyeget\xE9s bek\xF6vetkez\xE9se a m\u0171k\xF6d\xE9s sor\xE1\
+        n v\xE1rhat\xF3: a szervezetn\xE9l vagy az \xE1gazatban ism\xE9telten el\u0151\
+        fordult."
+      hexcolor: '#DCCC77'
+    - id: 3
+      abbreviation: V4
+      name: Szinte biztos
+      description: "A fenyeget\xE9s rendszeresen bek\xF6vetkezik vagy jelenleg is\
+        \ fenn\xE1ll; a megl\xE9v\u0151 v\xE9delmi int\xE9zked\xE9sek mellett is szinte\
+        \ biztosan bek\xF6vetkezik."
+      hexcolor: '#C4AA00'
+    impact:
+    - id: 0
+      abbreviation: H1
+      name: "Elhanyagolhat\xF3"
+      description: "Nincs \xE9rdemi hat\xE1s az elektronikus inform\xE1ci\xF3s rendszerre,\
+        \ az adatokra \xE9s a szolg\xE1ltat\xE1sra; a k\xF6vetkezm\xE9nyek a szok\xE1\
+        sos m\u0171k\xF6d\xE9s keret\xE9ben azonnal kezelhet\u0151k."
+      hexcolor: '#E2EFDA'
+    - id: 1
+      abbreviation: H2
+      name: "Csek\xE9ly"
+      description: "Legfeljebb csek\xE9ly k\xE1resem\xE9ny a 7/2024. MK rendelet 1.\
+        \ mell\xE9klet 2.2.2. pontja szerint, p\xE9ld\xE1ul: jogszab\xE1ly \xE1ltal\
+        \ nem v\xE9dett adat vagy legfeljebb kis mennyis\xE9g\u0171 szem\xE9lyes adat\
+        \ s\xE9r\xFCl; a szervezet \xFCzleti vagy \xFCgymenete szempontj\xE1b\xF3\
+        l csek\xE9ly \xE9rt\xE9k\u0171 adat vagy rendszer s\xE9r\xFCl; a t\xE1rsadalmi-politikai\
+        \ hat\xE1s a szervezeten bel\xFCl kezelhet\u0151; vagy a k\xF6zvetlen \xE9\
+        s k\xF6zvetett anyagi k\xE1r az \xE9ves k\xF6lts\xE9gvet\xE9s vagy nett\xF3\
+        \ \xE1rbev\xE9tel 1%-\xE1t nem haladja meg."
+      hexcolor: '#FFF2CC'
+    - id: 2
+      abbreviation: H3
+      name: "K\xF6zepes"
+      description: "K\xF6zepes k\xE1resem\xE9ny a 2.2.3. pont szerint, p\xE9ld\xE1\
+        ul: nagy mennyis\xE9g\u0171 szem\xE9lyes adat vagy k\xFCl\xF6nleges szem\xE9\
+        lyes adat s\xE9r\xFCl; megn\u0151 a szem\xE9lyi s\xE9r\xFCl\xE9sek es\xE9\
+        lye; \xE9rz\xE9keny folyamatokat kezel\u0151 rendszer vagy jogszab\xE1llyal\
+        \ v\xE9dett adat s\xE9r\xFCl; bizalomveszt\xE9s k\xF6vetkezik be, vagy elmarad\
+        \ a jogszab\xE1lyok betart\xE1sa; vagy a k\xF6zvetlen \xE9s k\xF6zvetett anyagi\
+        \ k\xE1r az \xE9ves k\xF6lts\xE9gvet\xE9s vagy nett\xF3 \xE1rbev\xE9tel 1%-\xE1\
+        t meghaladja, de 10%-\xE1t nem."
+      hexcolor: '#FCE4D6'
+    - id: 3
+      abbreviation: H4
+      name: Nagy
+      description: "Nagy k\xE1resem\xE9ny a 2.2.4. pont szerint, p\xE9ld\xE1ul: k\xFC\
+        l\xF6nleges szem\xE9lyes adat nagy mennyis\xE9gben s\xE9r\xFCl; emberi \xE9\
+        letek ker\xFClnek k\xF6zvetlen vesz\xE9lybe; nemzeti adatvagyon helyre\xE1\
+        ll\xEDthatatlanul s\xE9r\xFCl; a kritikus infrastrukt\xFAra rendelkez\xE9\
+        sre \xE1ll\xE1sa nem biztos\xEDtott; s\xFAlyos bizalomveszt\xE9s \xE1ll el\u0151\
+        ; vagy a k\xF6zvetlen \xE9s k\xF6zvetett anyagi k\xE1r az \xE9ves k\xF6lts\xE9\
+        gvet\xE9s vagy nett\xF3 \xE1rbev\xE9tel 10%-\xE1t meghaladja."
+      hexcolor: '#F8CBAD'
+    risk:
+    - id: 0
+      abbreviation: '1'
+      name: Alacsony
+      description: "A legalacsonyabb kock\xE1zati kateg\xF3ria: a kock\xE1zat r\xE9\
+        szletes indokl\xE1s n\xE9lk\xFCl is felv\xE1llalhat\xF3 (7/2024. MK rendelet\
+        \ 1. mell\xE9klet 5.1.2.2. pont); v\xE1ltoz\xE1s\xE1t figyelemmel kell k\xED\
+        s\xE9rni."
+      hexcolor: '#A8D08D'
+    - id: 1
+      abbreviation: '2'
+      name: "K\xF6zepes"
+      description: "Kezelend\u0151 kock\xE1zat: cs\xF6kkent\xE9se, \xE1th\xE1r\xED\
+        t\xE1sa vagy megoszt\xE1sa tervezett int\xE9zked\xE9sekkel. Felv\xE1llal\xE1\
+        s\xE1t a szervezet vezet\u0151je vagy a kock\xE1zatok kezel\xE9s\xE9\xE9rt\
+        \ felel\u0151s szerepk\xF6rt bet\xF6lt\u0151 szem\xE9ly kock\xE1zatonk\xE9\
+        nt, indokl\xE1ssal hagyja j\xF3v\xE1 (5.1.2.2. pont)."
+      hexcolor: '#FFE699'
+    - id: 2
+      abbreviation: '3'
+      name: Magas
+      description: "Kiemelten kezelend\u0151 kock\xE1zat: r\xF6vid hat\xE1ridej\u0171\
+        \ kock\xE1zatcs\xF6kkent\u0151 int\xE9zked\xE9sek sz\xFCks\xE9gesek. Felv\xE1\
+        llal\xE1sa kock\xE1zatonk\xE9nti indokl\xE1ssal, a szervezet vezet\u0151j\xE9\
+        nek vagy a kock\xE1zatok kezel\xE9s\xE9\xE9rt felel\u0151s szerepk\xF6rt bet\xF6\
+        lt\u0151 szem\xE9lynek a j\xF3v\xE1hagy\xE1s\xE1val lehets\xE9ges (5.1.2.2.\
+        \ pont)."
+      hexcolor: '#F4B183'
+    - id: 3
+      abbreviation: '4'
+      name: Kritikus
+      description: "Azonnali beavatkoz\xE1st ig\xE9nyl\u0151 kock\xE1zat: halad\xE9\
+        ktalan kock\xE1zatcs\xF6kkent\u0151 int\xE9zked\xE9sek \xE9s a szervezet vezet\u0151\
+        j\xE9nek t\xE1j\xE9koztat\xE1sa sz\xFCks\xE9ges. Felv\xE1llal\xE1sa kock\xE1\
+        zatonk\xE9nti indokl\xE1ssal, a szervezet vezet\u0151j\xE9nek vagy a kock\xE1\
+        zatok kezel\xE9s\xE9\xE9rt felel\u0151s szerepk\xF6rt bet\xF6lt\u0151 szem\xE9\
+        lynek a j\xF3v\xE1hagy\xE1s\xE1val lehets\xE9ges (5.1.2.2. pont)."
+      hexcolor: '#E06666'
+    grid:
+    - - 0
+      - 0
+      - 1
+      - 2
+    - - 0
+      - 1
+      - 1
+      - 2
+    - - 0
+      - 1
+      - 2
+      - 3
+    - - 1
+      - 2
+      - 3
+      - 3

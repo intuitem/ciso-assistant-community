@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import { filterOptions } from '#lib/utils/list-selector.js';
 	import type { CacheLock } from '#lib/utils/types.js';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import * as m from '#paraglide/messages.js';
@@ -12,6 +13,8 @@
 		group?: string;
 		groupsList?: string[];
 		translatedLabel?: string;
+		detail?: string;
+		groupLabels?: string[];
 	}
 
 	interface NestedGroup {
@@ -29,6 +32,8 @@
 		helpText?: string;
 		optionsEndpoint: string;
 		optionsLabelField?: string;
+		optionsDetailField?: string;
+		searchable?: boolean;
 		groupBy?: { field: string; path?: string[] }[] | string;
 		cacheLock?: CacheLock;
 		cachedValue?: (string | number)[] | undefined;
@@ -47,6 +52,8 @@
 		helpText,
 		optionsEndpoint,
 		optionsLabelField = 'name',
+		optionsDetailField,
+		searchable = false,
 		groupBy = '',
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
@@ -69,6 +76,10 @@
 	let selected: (string | number)[] = $state([]);
 	let selectedSet = $derived(new Set(selected));
 	let isLoading = $state(false);
+	let query = $state('');
+	let isSearching = $derived(query.trim() !== '');
+	let matchingOptions = $derived(isSearching ? filterOptions(options, query) : options);
+	let displayedGroups = $derived(isSearching ? createNestedGroups(matchingOptions) : nestedGroups);
 
 	function attachFlatOptions(nested: NestedGroup): void {
 		Object.values(nested).forEach((group) => {
@@ -180,7 +191,10 @@
 						label,
 						value: option.id,
 						groupsList,
-						translatedLabel: translateOptions ? safeTranslate(label) : label
+						translatedLabel: translateOptions ? safeTranslate(label) : label,
+						detail: optionsDetailField ? option[optionsDetailField] : undefined,
+						// Group headers are always shown translated, so search what they show.
+						groupLabels: groupsList.map((group) => safeTranslate(group))
 					};
 				});
 
@@ -282,12 +296,12 @@
 	});
 </script>
 
-{#snippet renderNestedGroups(groups, depth, pathPrefix)}
+{#snippet renderNestedGroups(groups: NestedGroup, depth: number, pathPrefix: string)}
 	{#each Object.entries(groups).sort( ([a], [b]) => safeTranslate(a).localeCompare(safeTranslate(b)) ) as [groupName, group]}
 		{@const currentPath = pathPrefix ? `${pathPrefix}>${groupName}` : groupName}
 		{@const hasSubGroups = Object.keys(group.subGroups).length > 0}
 		{@const hasDirectOptions = group.options.length > 0}
-		{@const isCollapsed = collapsedGroups.has(currentPath)}
+		{@const isCollapsed = !isSearching && collapsedGroups.has(currentPath)}
 		{@const totalOptions = group.flatOptions.length}
 		{@const selectionState = showGroupHeaders && groupBy ? getGroupSelectionState(group) : 'none'}
 
@@ -300,7 +314,7 @@
 					class:bg-surface-200-800={depth >= 2}
 				>
 					<div class="flex items-center gap-2">
-						{#if collapsibleGroups}
+						{#if collapsibleGroups && !isSearching}
 							<button
 								type="button"
 								aria-label="Toggle Group"
@@ -356,7 +370,12 @@
 									{disabled}
 									class="rounded border-surface-300-700 text-blue-600 focus:ring-blue-500"
 								/>
-								<span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
+								<span class="flex items-baseline gap-2">
+									<span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
+									{#if opt.detail}
+										<span class="text-xs font-mono text-surface-500">{opt.detail}</span>
+									{/if}
+								</span>
 							</label>
 						{/each}
 					</div>
@@ -403,9 +422,25 @@
 			></path>
 		</svg>
 	{:else}
-		<div class="space-y-3">
-			{@render renderNestedGroups(nestedGroups, 0, '')}
-		</div>
+		{#if searchable}
+			<!-- Enter would otherwise submit the surrounding form. -->
+			<input
+				type="search"
+				class="input"
+				placeholder={m.searchPlaceholder()}
+				aria-label={m.search()}
+				bind:value={query}
+				onkeydown={(e) => e.key === 'Enter' && e.preventDefault()}
+				data-testid="list-selector-search"
+			/>
+		{/if}
+		{#if isSearching && matchingOptions.length === 0}
+			<p class="text-sm text-surface-600-400">{m.noResultFound()}</p>
+		{:else}
+			<div class="space-y-3">
+				{@render renderNestedGroups(displayedGroups, 0, '')}
+			</div>
+		{/if}
 	{/if}
 
 	{#if helpText}

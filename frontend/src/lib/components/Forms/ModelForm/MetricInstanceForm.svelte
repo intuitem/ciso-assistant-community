@@ -9,6 +9,8 @@
 	import type { SuperForm, SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
+	import { hasPermissionAnywhere, isAccessAllowed } from '#lib/utils/access-control.js';
 	import { directionOf, higherIsBetterFor, type Direction } from '#lib/utils/metrics.js';
 
 	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
@@ -58,11 +60,21 @@
 
 	// ---------- one step: the definition is written with the metric ----------
 	const isCreate = !object?.id;
+	// Defining the metric here creates its definition too, in the metric's
+	// domain: the save refuses it without the right to add definitions there.
+	// Until a domain is picked, holding the right somewhere is enough.
+	const canDefine = $derived(
+		$folderValue
+			? isAccessAllowed(page.data?.user, 'add_metricdefinition', String($folderValue))
+			: hasPermissionAnywhere(page.data?.user, 'add_metricdefinition')
+	);
 	// 'define': the form holds the definition's fields; 'existing': a
 	// definition is picked and its settings are copied.
 	let mode = $state<'define' | 'existing'>(
-		initialData.metric_definition || data?.metric_definition ? 'existing' : 'define'
+		initialData.metric_definition || data?.metric_definition || !canDefine ? 'existing' : 'define'
 	);
+	// The mode follows the domain's rights, except where the author picked one.
+	let chosenMode: 'define' | 'existing' | null = null;
 
 	const modeOptions = $derived([
 		{ value: 'define', label: m.defineMetricHere() },
@@ -81,12 +93,16 @@
 	let direction = $state<Direction>('none');
 	let levels = $state<Array<{ ref_id: string; name: string }>>([]);
 
+	// The definition's fields as last entered: the form sends none of them
+	// in 'existing' mode, and gets them back when 'define' resumes.
+	let definitionDraft: Record<string, unknown> | null = null;
+
 	function setMode(next: 'define' | 'existing') {
 		mode = next;
 		if (next === 'define') {
 			$definitionValue = null;
 			if (!$inlineDefinition || typeof $inlineDefinition !== 'object') {
-				$inlineDefinition = {
+				$inlineDefinition = definitionDraft ?? {
 					category: 'quantitative',
 					unit: null,
 					decimals: null,
@@ -97,6 +113,9 @@
 				};
 			}
 		} else {
+			if ($inlineDefinition && typeof $inlineDefinition === 'object') {
+				definitionDraft = { ...$inlineDefinition };
+			}
 			$inlineDefinition = null;
 		}
 	}
@@ -106,6 +125,20 @@
 		if (!$frequencyValue) $frequencyValue = 'monthly';
 		setMode(mode);
 	}
+
+	// Only a change of rights moves the mode: picking or clearing a definition does not.
+	let couldDefine: boolean | undefined;
+	$effect(() => {
+		if (!isCreate || initialData.metric_definition || canDefine === couldDefine) return;
+		couldDefine = canDefine;
+		untrack(() => {
+			if (!canDefine) {
+				if (mode === 'define') setMode('existing');
+			} else if (mode === 'existing' && chosenMode !== 'existing' && !$definitionValue) {
+				setMode('define');
+			}
+		});
+	});
 
 	// Definition defaults follow the metric's own target and frequency: the
 	// definition created here is this metric's, and later metrics from it
@@ -169,6 +202,7 @@
 	function useSimilar() {
 		if (!similar) return;
 		const picked = similar;
+		chosenMode = 'existing';
 		setMode('existing');
 		$definitionValue = picked.id;
 		definitionVersion += 1;
@@ -257,7 +291,7 @@
 	// drawer the metric's page uses, so the formula and its picks have one
 	// place to change, whether the formula is the metric's own or its
 	// definition's.
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 	import FormulaDrawer from '#lib/components/Metrology/FormulaDrawer.svelte';
 	import type { Composition, Saved } from '#lib/components/Metrology/ComposeMetricEditor.svelte';
 	import type { DefinitionComposition } from '#lib/components/Metrology/DefinitionFormulaPanel.svelte';
@@ -366,12 +400,15 @@
 	</div>
 {/if}
 
-{#if isCreate && !initialData.metric_definition}
+{#if isCreate && !initialData.metric_definition && canDefine}
 	<div class="form-group">
 		<SegmentedControl
 			options={modeOptions}
 			value={mode}
-			onChange={(value) => setMode(value as 'define' | 'existing')}
+			onChange={(value) => {
+				chosenMode = value as 'define' | 'existing';
+				setMode(value as 'define' | 'existing');
+			}}
 			ariaLabel={m.metricDefinition()}
 		/>
 		{#if mode === 'define'}

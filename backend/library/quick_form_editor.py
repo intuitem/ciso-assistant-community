@@ -41,6 +41,9 @@ FRAMEWORK_ONLY_META_KEYS = {
     "max_score",
     "implementation_groups_definition",
     "field_visibility",
+    "score_calculation_method",
+    "anchor_na_to_target",
+    "target_score",
 }
 
 

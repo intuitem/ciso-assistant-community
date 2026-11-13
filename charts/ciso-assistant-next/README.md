@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.13.8](https://img.shields.io/badge/Version-0.13.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.2.2](https://img.shields.io/badge/AppVersion-v4.2.2-informational?style=flat-square)
+![Version: 0.14.0](https://img.shields.io/badge/Version-0.14.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.2.3](https://img.shields.io/badge/AppVersion-v4.2.3-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -78,6 +78,93 @@ qdrant:
 Any other key from the Qdrant chart values (`nodeSelector`, `securityContext`, `service`, `ingress`, ...)
 can be set under `qdrant` and is kept across `helm upgrade`.
 
+### MCP server for AI apps
+
+`backend.mcp.enabled` runs the MCP server as a sidecar in the backend pod and serves it at `/mcp`, so
+users can connect AI apps (Claude, Copilot Studio, ChatGPT...) by entering `https://<domain>/mcp` and
+signing in with their own account. The sidecar holds no secret: it passes each app's own token to the
+backend next to it, which decides what the app may do.
+
+Before users can connect apps:
+
+- the backend needs a shared cache: set `memcached.enabled: true`. Sign-in keeps each authorization
+  code in the cache until the app redeems it, possibly on another worker, and the `mcp` feature flag
+  cannot be turned on without it. The bundled memcached runs in each backend pod, so it allows one
+  backend replica only. With more replicas:
+  - use PostgreSQL (`backend.config.databaseType`), since each pod otherwise keeps its own SQLite
+    database;
+  - set `memcached.enabled: false` and point every pod at one shared memcached, or sign-in fails
+    when the app's two requests reach different pods. Allow only the backend pods to reach it, with
+    a network policy or a private network: Django stores Python objects in the cache, so anyone who
+    can write to it can run code in the backend;
+- an administrator turns on the `mcp` feature flag, and `mcp_write` to let apps change data;
+- an administrator ticks "Can connect AI apps" on each user who may do so.
+
+The `/mcp` paths are added to the chart's one ingress. The MCP server applies their isolation rules
+itself: it drops the `Cookie` request header, never sends `Set-Cookie` or `Service-Worker-Allowed`,
+and adds `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff` to every answer.
+Check them with `curl -I https://<domain>/mcp`, which must show the sandbox header.
+
+> **Warning:** the chart does not apply these rules at the ingress. The MCP server applies them
+> itself, which holds only while it is not compromised: a compromised MCP server would receive the
+> session cookie, which browsers send to every path of the host, and could serve pages that run as
+> the app. We advise hardening with your ingress controller's own features (a middleware, a header
+> rule or a route policy), on `/mcp` and `/.well-known/oauth-protected-resource` only:
+>
+> - remove the `Cookie` request header;
+> - remove the `Set-Cookie` and `Service-Worker-Allowed` response headers;
+> - add the response headers `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff`.
+
+With Traefik v3, for example, add a route of your own for the two MCP paths, outside the chart. Its
+priority puts it above the routes Traefik builds from the chart's Ingress for the same paths, and
+its middleware applies the five rules there only:
+
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: mcp-isolation
+  namespace: <namespace>
+spec:
+  headers:
+    # an empty value removes the header
+    customRequestHeaders:
+      Cookie: ""
+    customResponseHeaders:
+      Set-Cookie: ""
+      Service-Worker-Allowed: ""
+      Content-Security-Policy: sandbox
+      X-Content-Type-Options: nosniff
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: <release>-mcp
+  namespace: <namespace>
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`<domain>`) && (PathPrefix(`/mcp`) || PathPrefix(`/.well-known/oauth-protected-resource`))
+      kind: Rule
+      priority: 10000
+      middlewares:
+        - name: mcp-isolation
+      services:
+        - name: <release>-ciso-assistant-backend
+          port: mcp
+  tls:
+    secretName: <the TLS secret of the chart's ingress>
+```
+
+Use the backend Service name from `kubectl get svc -n <namespace>`; it follows the chart's name
+overrides. `curl -I https://<domain>/mcp` must still answer `401` with the sandbox header. The MCP
+server sets that header too, so to see the cookie removed, point the route at a service that echoes
+the request headers for a moment.
+
+Set `backend.mcp.dcr.allowedRedirectHosts` to the AI apps you support to limit which apps can
+register themselves.
+
 ### OIDC signing key (service accounts)
 
 The backend signs the tokens issued to service accounts with an RSA key. The chart generates one on
@@ -146,6 +233,17 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | backend.image.repository | string | `"intuitem/ciso-assistant-community/backend"` | Repository to use for the backend |
 | backend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the backend |
 | backend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
+| backend.mcp.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1002,"runAsNonRoot":true,"runAsUser":1002}` | Security context of the MCP container: its own user, apart from the backend's |
+| backend.mcp.dcr.allowedRedirectHosts | string | `""` | Comma-separated hosts a self-registered app may send users back to (empty: any) |
+| backend.mcp.dcr.enabled | bool | `true` | Let AI apps register themselves |
+| backend.mcp.enabled | bool | `false` | Serve MCP at /mcp |
+| backend.mcp.env | list | `[]` | Environment variables to pass to the MCP container |
+| backend.mcp.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the MCP server |
+| backend.mcp.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the MCP server |
+| backend.mcp.image.repository | string | `"intuitem/ciso-assistant-community/mcp"` | Repository to use for the MCP server |
+| backend.mcp.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the MCP server |
+| backend.mcp.name | string | `"mcp"` | MCP container name |
+| backend.mcp.resources | object | `{}` | Resources for the MCP container |
 | backend.name | string | `"backend"` | Backend container name |
 | backend.nodeSelector | object | `{}` | Default node selector for backend |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
@@ -177,6 +275,7 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | frontend.args | list | `[]` (image arguments) | Override the frontend container arguments |
 | frontend.command | list | `[]` (image entrypoint) | Override the frontend container entrypoint |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
+| frontend.config.xffDepth | int | `1` | Number of reverse proxies in front of the frontend (used to pick the real client address for login rate limiting; only used when `ingress.enabled`). |
 | frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
 | frontend.extraVolumeMounts | list | `[]` | Set extra volume mounts for frontend container |
@@ -223,6 +322,14 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | ingress.tls.certificateSecret | object | `{}` | Custom TLS certificate as secret # Note: 'key' and 'certificate' are expected in PEM format |
 | ingress.tls.enabled | bool | `false` | Enable TLS for the ingress |
 | ingress.tls.existingSecret | string | `""` | Use existing TLS secret |
+| memcached.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001}` | Container-level security context for memcached |
+| memcached.enabled | bool | `false` | Run a memcached container in the backend pod, reached by the backend and Huey through a unix socket (sets ENABLE_MEMCACHED). Optional: whoever enables it runs it |
+| memcached.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for memcached |
+| memcached.image.registry | string | `"docker.io"` | Registry to use for memcached |
+| memcached.image.repository | string | `"library/memcached"` | Repository to use for memcached |
+| memcached.image.tag | string | `"1.6-alpine"` | Tag to use for memcached |
+| memcached.memoryLimit | int | `16` | Memory memcached may use for items, in megabytes |
+| memcached.resources | object | `{}` | Resources for memcached |
 | nameOverride | string | `"ciso-assistant"` | Provide a name in place of `ciso-assistant` |
 | networkPolicy.egress | list | `[]` | Egress rules (raw Kubernetes NetworkPolicy `egress` entries) |
 | networkPolicy.enabled | bool | `false` | Create a NetworkPolicy for CISO Assistant pods |

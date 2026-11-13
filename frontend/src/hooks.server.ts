@@ -337,6 +337,17 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		}
 		request.headers.set('Accept-Language', currentLang);
 
+		try {
+			// (Note that `getClientAddress` is adapter-dependent)
+			request.headers.set('X-Forwarded-For', event.getClientAddress());
+		} catch {
+			// The above `getClientAddress` can fail if the `ADDRESS_HEADER`/`XFF_DEPTH` config can't resolve the IP.
+			const clientAddress = event.platform?.req?.socket?.remoteAddress;
+			if (clientAddress !== undefined) {
+				request.headers.set('X-Forwarded-For', clientAddress);
+			}
+		}
+
 		const token = event.cookies.get('token');
 		const csrfToken = event.cookies.get('csrftoken');
 
@@ -347,7 +358,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		// FocusModeMiddleware re-checks the flag and drops the header when it is off,
 		// so gating here would only cost a feature-flag round-trip per proxied call.
 		const focusFolderId = event.cookies.get('focus_folder_id');
-		if (focusFolderId) {
+		if (focusFolderId && !event.locals.user?.is_third_party) {
 			request.headers.set('X-Focus-Folder-Id', focusFolderId);
 		}
 		if (unsafeMethods.has(request.method) && csrfToken) {

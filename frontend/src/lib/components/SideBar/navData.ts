@@ -119,6 +119,12 @@ export const navData = {
 					name: 'idpGroups',
 					fa_icon: 'fa-solid fa-id-badge',
 					href: '/idp-groups'
+				},
+				{
+					name: 'connectedApps',
+					fa_icon: 'fa-solid fa-plug',
+					href: '/connected-apps',
+					adminOnly: true
 				}
 			]
 		},
@@ -372,6 +378,12 @@ export const navData = {
 			name: 'compliance',
 			items: [
 				{
+					name: 'recap',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/recap',
+					permissions: ['view_compliance_assessment_full']
+				},
+				{
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
 					href: '/compliance-assessments',
@@ -387,12 +399,6 @@ export const navData = {
 					name: 'evidences',
 					fa_icon: 'fa-solid fa-receipt',
 					href: '/evidences'
-				},
-				{
-					name: 'recap',
-					fa_icon: 'fa-solid fa-clipboard-list',
-					href: '/recap',
-					permissions: ['view_perimeter'] //this is temporary workaround to manage 3rd parties
 				}
 			]
 		},

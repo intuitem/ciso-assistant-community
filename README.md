@@ -366,6 +366,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 114. China: Personal Information Protection Law (PIPL) and CAC Personal Information Protection Compliance Audit Measures 🇨🇳
 115. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 116. Australian Information Security Manual (ASD ISM) (September 2026) 🇦🇺
+117. ITSP.10.033 - Security and privacy controls and assurance activities catalogue, with the medium impact profile (ITSP.10.033-01) 🇨🇦
 
 ### Community contributions
 
@@ -407,6 +408,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 36. JM 181101-02 - Cybersecurity and Information Security Regulation (Junta Monetaria, Dominican Republic) 🏦🇩🇴
 37. R-CNMV-2024-08-MV - Cybersecurity and Information Security Regulation for the Securities Market (CNMV, Dominican Republic) 🏦🇩🇴
 38. Vyhláška 409/2025 Sb. (Czech cybersecurity decree) - compliance questionnaire 🇨🇿
+39. LYSS - Lyaazale Switch Security: network switch security controls (draft) 🇲🇦🌐
 
 ### Threat and TTP catalogs
 
@@ -686,6 +688,9 @@ export LOG_FORMAT=plain # optional, default value is plain. Available options: j
 export AUTH_TOKEN_TTL=3600 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
+
+# Evidence export of the framework report
+export EVIDENCE_EXPORT_MAX_SIZE_MB=2048 # optional, default value is 2048. Total size of the files in one evidence zip; 0 disables the limit.
 ```
 
 <details>
@@ -898,6 +903,7 @@ The following recommendations apply for production:
 - Use non-root deployment, as explained below.
 - Use a valid certificate for the reverse proxy
 - If the reverse proxy is not running on the same host as the backend and frontend, use a VPN like wireguard between the nodes.
+- Ensure the reverse proxy sets the `X-Forwarded-For` header (it is trusted by the login rate limiting).
 - Use an encrypted volume for the database, and manage the encryption key cautiously.
 - Manage secrets in environment variables instead of putting them directly in the docker-compose.yml file.
 

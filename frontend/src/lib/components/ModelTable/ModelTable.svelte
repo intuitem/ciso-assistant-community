@@ -37,7 +37,7 @@
 	}
 	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
 	import { toCamelCase } from '#lib/utils/locales.js';
-	import { onDestroy, onMount, tick, untrack } from 'svelte';
+	import { onDestroy, onMount, tick, untrack, type Component } from 'svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { applyUnreadCount } from '#lib/utils/stores.js';
 
@@ -136,6 +136,12 @@
 		deleteForm?: SuperValidated<FormDataShape>;
 		URLModel?: urlModel;
 		baseEndpoint?: string;
+		/** Query appended to every request without becoming part of `baseEndpoint`,
+		 *  so the table's own filter state and sort stay keyed to the same table
+		 *  while the extra params change. A change refetches. */
+		extraParams?: string;
+		/** Cell components for this table only, over the model's defaults. */
+		fieldComponents?: Record<string, Component<any>>;
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
@@ -202,6 +208,8 @@
 		deleteForm = undefined,
 		URLModel = undefined,
 		baseEndpoint = `/${URLModel}`,
+		extraParams = '',
+		fieldComponents = {},
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
@@ -498,6 +506,8 @@
 	// first request only ends the skeleton once no retry is still pending.
 	const isFetching = $derived(hasRemoteSource && !hasLoadedOnce && (!loadFailed || inFlight > 0));
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
+	// Requests can land out of order: only the latest one may fill the table.
+	let latestLoad = 0;
 
 	if (hasRemoteSource) {
 		// The trigger handler calls our reload synchronously before its first
@@ -512,12 +522,18 @@
 			query.delete('limit');
 			onQueryChange(query.toString());
 			inFlight += 1;
+			const request = ++latestLoad;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
 			currentLoad = loadTableData({
-				state,
+				state: {
+					...state,
+					setTotalRows: (value) => {
+						if (request === latestLoad) state.setTotalRows(value);
+					}
+				},
 				URLModel,
-				endpoint: baseEndpoint,
+				endpoint: withExtraParams(baseEndpoint, extraParams),
 				fields:
 					showColumnSelector && allColumnKeys.length > 0
 						? { head: allColumnKeys, body: allColumnKeys }
@@ -541,13 +557,32 @@
 				}
 			}).finally(() => {
 				inFlight -= 1;
+				if (request !== latestLoad) return;
 				if (!failed) hasLoadedOnce = true;
 				// The latest request decides: a failed search must not read as an empty result.
 				loadFailed = failed;
 			});
-			return currentLoad;
+			// The handler keeps its rows when it is handed nothing.
+			return currentLoad.then((rows) => (request === latestLoad ? rows : undefined));
 		});
 	}
+
+	function withExtraParams(endpoint: string, params: string) {
+		if (!params) return endpoint;
+		return `${endpoint}${endpoint.includes('?') ? '&' : '?'}${params}`;
+	}
+
+	let previousExtraParams = extraParams;
+	$effect(() => {
+		if (extraParams === previousExtraParams) return;
+		previousExtraParams = extraParams;
+		// New params mean a new row set: start from its first page.
+		if (hasRemoteSource)
+			untrack(() => {
+				handler.setPage(1);
+				handler.invalidate();
+			});
+	});
 
 	function applySavedSort() {
 		const saved = $tableSortStates[filterStoreKey];
@@ -777,7 +812,7 @@
 		}
 	});
 
-	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
+	let fieldComponentMap = $derived({ ...getFieldComponentMap(URLModel), ...fieldComponents });
 	let canCreateObject = $derived(
 		model
 			? page.params.id

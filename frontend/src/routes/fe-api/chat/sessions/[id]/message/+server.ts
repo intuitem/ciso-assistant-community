@@ -3,13 +3,16 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ fetch, request, params }) => {
 	const body = await request.text();
-	const res = await fetch(`${BASE_API_URL}/chat/sessions/${params.id}/message/`, {
-		method: 'POST',
-		body,
-		headers: {
-			'Content-Type': 'application/json'
+	const res = await fetch(
+		`${BASE_API_URL}/chat/sessions/${encodeURIComponent(params.id)}/message/`,
+		{
+			method: 'POST',
+			body,
+			headers: {
+				'Content-Type': 'application/json'
+			}
 		}
-	});
+	);
 
 	// Forward error responses with their original content type
 	if (!res.ok) {

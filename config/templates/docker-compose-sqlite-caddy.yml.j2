@@ -1,12 +1,24 @@
 services:
   backend:
+    {% if mcp.enabled %}
+    networks: [default, mcp]
+    {% endif %}
+    {% if memcached.enabled %}
+    depends_on:
+      memcached:
+        condition: service_started
+    {% endif %}
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
     restart: always
     environment:
+      {% if memcached.enabled %}
+      - ENABLE_MEMCACHED=True
+      {% endif %}
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      {% if mcp.enabled %}- OAUTH_DCR_ENABLED=True{% endif %}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
       - HOME=/tmp
@@ -29,10 +41,13 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
+      {% if memcached.enabled %}
+      - memcached_socket:/run/memcached
+      {% endif %}
       - ./db:/code/db
     user: "1001:1001"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://backend:8000/api/health/', timeout=5)"]
       interval: 10s
       timeout: 10s
       retries: 30
@@ -43,10 +58,17 @@ services:
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
     depends_on:
+      {% if memcached.enabled %}
+      memcached:
+        condition: service_started
+      {% endif %}
       backend:
         condition: service_healthy
     restart: always
     environment:
+      {% if memcached.enabled %}
+      - ENABLE_MEMCACHED=True
+      {% endif %}
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG=False
@@ -71,6 +93,9 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
+      {% if memcached.enabled %}
+      - memcached_socket:/run/memcached
+      {% endif %}
       - ./db:/code/db
     user: "1001:1001"
     entrypoint:
@@ -79,6 +104,24 @@ services:
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
 
+  {% if memcached.enabled %}
+  memcached:
+    container_name: memcached
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+    # Unix socket only: no network listener, and no network at all.
+    command: ["memcached", "-s", "/run/memcached/memcached.sock", "-a", "0700", "-m", "16"]
+    network_mode: none
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+    volumes:
+      - memcached_socket:/run/memcached
+  {% endif %}
+
   frontend:
     container_name: frontend
     environment:
@@ -86,6 +129,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -118,8 +163,10 @@ services:
       - CA_MCP_TRANSPORT=streamable-http
       - CA_MCP_HOST=0.0.0.0
       - CA_MCP_PORT=8001
-      - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
-      # matched against the Host header; both forms, since the port is dropped for 443
+      - CA_MCP_AUTH=oauth
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      # matched against the Host header; both forms: some proxies (nginx $host, so
+      # BunkerWeb) forward the host without the port, whatever the port
       - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
       - CA_MCP_ALLOW_ENV_TOKEN=false
       - HOME=/tmp
@@ -133,10 +180,15 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    user: "1001:1001"
+    user: "1002:1002"
+    networks:
+      - mcp
   {% endif %}
 
   caddy:
+    {% if mcp.enabled %}
+    networks: [default, mcp]
+    {% endif %}
     container_name: caddy
     image: caddy:2.11.4
     environment:
@@ -155,7 +207,15 @@ services:
     command: |
       sh -c 'echo "$$CISO_ASSISTANT_URL {
         reverse_proxy /api/* backend:8000{% if mcp.enabled %}
-        reverse_proxy /mcp* mcp:8001{% endif %}
+        reverse_proxy /.well-known/oauth-authorization-server* backend:8000
+        @mcp path /mcp* /.well-known/oauth-protected-resource*
+        reverse_proxy @mcp mcp:8001 {
+          header_up -Cookie
+          header_down -Set-Cookie
+          header_down -Service-Worker-Allowed
+          header_down Content-Security-Policy sandbox
+          header_down X-Content-Type-Options nosniff
+        }{% endif %}
         reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
         tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
         tls internal{% endif %}{% endif %}
@@ -195,3 +255,21 @@ services:
       backend:
         condition: service_healthy
   {% endif %}
+
+{% if memcached.enabled %}
+volumes:
+  memcached_socket:
+    # RAM-backed, owned by the uid the backend, huey and memcached run as;
+    # it only holds the socket.
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "uid=1001,gid=1001,mode=0700,size=64k"
+{% endif %}
+
+{% if mcp.enabled %}
+networks:
+  # the MCP server reaches the backend and the proxy only, never the data stores
+  mcp:
+    internal: true
+{% endif %}

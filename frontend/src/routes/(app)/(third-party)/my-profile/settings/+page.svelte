@@ -15,6 +15,7 @@
 		type DateFormatPreference
 	} from '#lib/utils/datetime.js';
 	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { setTheme, type ThemeMode } from '#lib/utils/theme.js';
 	import { defaults } from 'sveltekit-superforms';
@@ -296,6 +297,26 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalConfirmConnectedAppRevoke(id: string, name: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: defaults({ id }, zod(z.object({ id: z.string() }))),
+				schema: zod(z.object({ id: z.string() })),
+				id: id,
+				debug: false,
+				formAction: '?/revokeConnectedApp'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: m.connectedAppRevokeConfirm({ name })
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalRegisterWebAuthn(): void {
 		const modalComponent: ModalComponent = {
 			ref: RegisterWebAuthnModal,
@@ -524,6 +545,94 @@
 											{m.generateNewPersonalAccessToken()}
 										</button>
 									</div>
+								</div>
+							</dd>
+						</div>
+					</dl>
+				{/if}
+				<!-- kept while the flag is off if apps remain, so they can still be revoked -->
+				{#if page.data.featureflags?.mcp || data.connectedApps?.length}
+					<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
+						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+							<dt class="font-medium">{m.connectedApps()}</dt>
+							<dd class="text-surface-900-100 sm:col-span-2">
+								<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
+									<div class="flex flex-col space-y-2">
+										<span class="text-xl"><i class="fa-solid fa-plug"></i></span>
+										<h6 class="h6 text-token">{m.connectedApps()}</h6>
+										<p class="text-sm text-surface-800-200 max-w-[65ch]">
+											{m.connectedAppsDescription()}
+										</p>
+									</div>
+									{#if !page.data.user?.can_connect_apps}
+										<p
+											class="card preset-tonal-surface p-3 text-sm flex gap-2 max-w-[65ch]"
+											data-testid="connected-apps-not-allowed"
+										>
+											<i class="fa-solid fa-circle-info mt-0.5"></i>
+											<span>{m.connectAppsNotAllowed()}</span>
+										</p>
+									{:else if data.connectedApps === null}
+										<p class="text-sm text-error-500">{m.connectedAppsLoadError()}</p>
+									{:else if data.connectedApps.length === 0}
+										<p class="text-sm text-surface-600-400">{m.noConnectedApps()}</p>
+									{:else}
+										<table class="table-auto w-full text-sm" data-testid="connected-apps-table">
+											<thead>
+												<tr class="text-left border-b border-surface-200-800">
+													<th class="py-2 pr-4">{m.connectedAppName()}</th>
+													<th class="py-2 pr-4">{m.connectedAppRedirectsTo()}</th>
+													<th class="py-2 pr-4">{m.connectedAppAllowedActions()}</th>
+													<th class="py-2 pr-4">{m.connectedAppLastUsed()}</th>
+													<th class="py-2"></th>
+												</tr>
+											</thead>
+											<tbody>
+												{#each data.connectedApps as app (app.client_id)}
+													<tr class="border-b border-surface-100-900 align-top">
+														<td class="py-2 pr-4">
+															<p class="font-medium">{app.name}</p>
+														</td>
+														<td class="py-2 pr-4">
+															{#each app.redirect_hosts as host}
+																<code class="block">{host}</code>
+															{/each}
+														</td>
+														<td class="py-2 pr-4">
+															{#if app.profile}
+																<ul class="list-disc list-inside">
+																	{#each app.profile.actions as action}
+																		<li>{safeTranslate(action)}</li>
+																	{/each}
+																</ul>
+															{:else}
+																<span class="text-surface-600-400">--</span>
+															{/if}
+														</td>
+														<td class="py-2 pr-4">
+															{#if app.last_used_at}
+																{formatDate(new Date(app.last_used_at), true, getLocale())}
+															{:else}
+																<span class="text-surface-600-400">{m.connectedAppNeverUsed()}</span
+																>
+															{/if}
+														</td>
+														<td class="py-2">
+															<button
+																onclick={(_) =>
+																	modalConfirmConnectedAppRevoke(app.client_id, app.name)}
+																aria-label={m.revokeConnectedApp()}
+																title={m.revokeConnectedApp()}
+																class="cursor-pointer hover:text-error-500"
+																data-testid="connected-app-revoke-button"
+																><i class="fa-solid fa-trash"></i></button
+															>
+														</td>
+													</tr>
+												{/each}
+											</tbody>
+										</table>
+									{/if}
 								</div>
 							</dd>
 						</div>

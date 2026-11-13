@@ -201,17 +201,25 @@ def get_config():
         default=False,
     ).ask()
 
+    # what apps may do is set in the app: the mcp and mcp_write feature flags
+    config["mcp"] = {"enabled": bool(enable_mcp)}
+
+    # Shared cache, opt-in: one more container for the operator to run. MCP
+    # sign-in needs it, so it comes with MCP.
     if enable_mcp:
-        config["mcp"] = {
-            "enabled": True,
-            "read_only": questionary.confirm(
-                "Restrict the MCP server to read-only tools? "
-                "(recommended; answer No to also allow create/update/delete)",
-                default=True,
-            ).ask(),
-        }
+        print(
+            "[yellow]memcached is included: AI app sign-in needs a cache "
+            "shared by the backend workers.[/yellow]"
+        )
+        config["memcached"] = {"enabled": True}
     else:
-        config["mcp"] = {"enabled": False}
+        config["memcached"] = {
+            "enabled": questionary.confirm(
+                "Would you like to run memcached as a cache shared by the backend workers? "
+                "Without it, each worker counts login rate limits on its own.",
+                default=False,
+            ).ask()
+        }
 
     # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
