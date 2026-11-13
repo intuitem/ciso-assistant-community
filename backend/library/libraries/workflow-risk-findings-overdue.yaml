@@ -2,19 +2,26 @@ urn: urn:intuitem:risk:library:workflow-risk-findings-overdue
 locale: en
 ref_id: workflow-risk-findings-overdue
 name: Overdue findings — daily digest
-description: Findings whose due date has passed and that are not closed yet, mailed once a day.
+description: Emails the count of overdue, unclosed findings once a day.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Überfällige Feststellungen – Tagesübersicht
+    description: |-
+      Versendet täglich eine E-Mail mit der Anzahl der Feststellungen, deren Fälligkeit überschritten ist und die noch nicht geschlossen sind.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-risk-findings-overdue:workflow:findings-overdue
     schema_version: 1
     ref_id: findings-overdue
     name: Overdue findings — daily digest
-    description: Findings whose due date has passed and that are not closed yet, mailed once a day.
+    description: Emails the count of overdue, unclosed findings once a day.
     graph:
       variables:
       - key: notify_emails

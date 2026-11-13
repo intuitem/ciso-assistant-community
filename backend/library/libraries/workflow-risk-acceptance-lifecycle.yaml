@@ -5,10 +5,17 @@ name: Risk acceptance lifecycle — submitted and decided
 description: 'Two triggers in one workflow: a new acceptance notifies the approver, a decided one notifies
   the requester. The decision itself is never written by the workflow.'
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Risikoakzeptanz – Antrag und Entscheidung
+    description: |-
+      Zwei Trigger in einem Workflow: Ein neuer Risikoakzeptanzantrag benachrichtigt den Genehmiger; nach der Entscheidung wird der Antragsteller informiert. Der Workflow trägt selbst keine Entscheidung ein.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-risk-acceptance-lifecycle:workflow:acceptance-lifecycle

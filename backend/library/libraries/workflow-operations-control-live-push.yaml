@@ -5,10 +5,17 @@ name: Control went live — push it to an external system
 description: Posts a small JSON payload to your ITSM or chat webhook when a control becomes active. Set
   the target URL, and provide the itsm_token secret when you install it.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Maßnahme aktiv – externes System informieren
+    description: |-
+      Sendet eine kleine JSON-Nachricht an Ihren ITSM- oder Chat-Webhook, sobald eine Maßnahme aktiv wird. Legen Sie die Ziel-URL fest und hinterlegen Sie bei der Installation das Secret itsm_token.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-control-live-push:workflow:control-live-push

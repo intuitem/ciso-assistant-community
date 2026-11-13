@@ -6,7 +6,7 @@ ref_id: intuitem-common-catalog
 name: INTUITEM Common Catalog
 description: INTUITEM Common Catalog - Threats
 copyright: "\xA9 intuitem - 2025"
-version: 2
+version: 3
 publication_date: 2025-06-14
 provider: intuitem
 packager: intuitem
@@ -14,6 +14,12 @@ translations:
   fr:
     name: Catalogue commun INTUITEM
     description: Catalogue commun INTUITEM - Menaces
+  de:
+    name: INTUITEM-Basiskatalog
+    description: |-
+      INTUITEM-Basiskatalog – Bedrohungen
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung der Herausgeber; keine unabhängige menschliche Prüfung. Die deutschen Ergänzungen umfassen die Bibliotheksmetadaten und Bedrohungstexte.
 objects:
   threats:
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
@@ -26,6 +32,9 @@ objects:
         name: "Ran\xE7ongiciel"
         description: "Logiciel malveillant qui chiffre les donn\xE9es et exige une\
           \ ran\xE7on pour les cl\xE9s de d\xE9chiffrement"
+      de:
+        name: Ransomware
+        description: Schadsoftware verschlüsselt Daten und fordert Lösegeld für die Entschlüsselungsschlüssel.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
     ref_id: ICT-002
     name: Phishing and Spear Phishing
@@ -36,6 +45,10 @@ objects:
         name: "Hame\xE7onnage et Harponnage"
         description: "Courriels ou messages trompeurs incitant les utilisateurs \xE0\
           \ r\xE9v\xE9ler des informations sensibles ou \xE0 donner acc\xE8s"
+      de:
+        name: Phishing und Spear-Phishing
+        description: Täuschende E-Mails oder Nachrichten verleiten Nutzer dazu, sensible Informationen preiszugeben
+          oder Zugriff zu gewähren.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-003
     ref_id: ICT-003
     name: Third-Party / Supply Chain Attacks
@@ -45,6 +58,9 @@ objects:
         name: "Attaques via Tiers / Cha\xEEne d'Approvisionnement"
         description: "Compromission de fournisseurs tiers pour acc\xE9der \xE0 la\
           \ cible principale."
+      de:
+        name: Angriffe über Dritte oder die Lieferkette
+        description: Kompromittierung von Drittanbietern, um Zugang zum eigentlichen Angriffsziel zu erlangen.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-004
     ref_id: ICT-004
     name: Zero-Day Exploits
@@ -54,6 +70,9 @@ objects:
         name: Exploits Zero-Day
         description: "Exploitation de vuln\xE9rabilit\xE9s inconnues avant que des\
           \ correctifs ne soient disponibles."
+      de:
+        name: Zero-Day-Exploits
+        description: Ausnutzung unbekannter Schwachstellen, bevor Patches verfügbar sind.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-005
     ref_id: ICT-005
     name: Insider Threats
@@ -63,6 +82,9 @@ objects:
         name: Menaces Internes
         description: "Actions malveillantes ou n\xE9gligentes par des employ\xE9s\
           \ ou des sous-traitants."
+      de:
+        name: Bedrohungen durch Insider
+        description: Böswillige oder fahrlässige Handlungen von Beschäftigten oder Auftragnehmern.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-006
     ref_id: ICT-006
     name: Advanced Persistent Threats (APTs)
@@ -72,6 +94,9 @@ objects:
         name: "Menaces Persistantes Avanc\xE9es (APTs)"
         description: "Attaques de cyber-espionnage cibl\xE9es et prolong\xE9es par\
           \ des groupes soutenus par des \xC9tats."
+      de:
+        name: Advanced Persistent Threats (APTs)
+        description: Langfristige, gezielte Cyberspionageangriffe durch staatlich unterstützte Gruppen.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-007
     ref_id: ICT-007
     name: DoS / DDoS
@@ -80,6 +105,9 @@ objects:
       fr:
         name: DoS / DDoS
         description: "Surcharge de syst\xE8mes pour rendre les services indisponibles."
+      de:
+        name: DoS / DDoS
+        description: Überlastung von Systemen, um Dienste unerreichbar zu machen.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-008
     ref_id: ICT-008
     name: Social Engineering
@@ -90,6 +118,9 @@ objects:
         name: "Ing\xE9nierie Sociale"
         description: "Manipulation d'individus pour qu'ils divulguent des informations\
           \ confidentielles ou accordent un acc\xE8s."
+      de:
+        name: Social Engineering
+        description: Manipulation von Personen, um vertrauliche Informationen oder Zugriff zu erlangen.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
     ref_id: ICT-009
     name: Malware and Spyware
@@ -99,6 +130,9 @@ objects:
         name: Logiciels Malveillants et Espions
         description: "Logiciels malveillants con\xE7us pour endommager ou espionner\
           \ des syst\xE8mes."
+      de:
+        name: Malware und Spyware
+        description: Schadsoftware, die Systeme beschädigen oder ausspionieren soll.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-010
     ref_id: ICT-010
     name: Cryptojacking
@@ -108,6 +142,9 @@ objects:
         name: Cryptojacking
         description: "Utilisation non autoris\xE9e de ressources informatiques pour\
           \ miner des cryptomonnaies."
+      de:
+        name: Cryptojacking
+        description: Unbefugte Nutzung von Rechenressourcen zum Schürfen von Kryptowährungen.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-011
     ref_id: ICT-011
     name: Domain Name System (DNS) Spoofing and Hijacking
@@ -117,6 +154,9 @@ objects:
         name: "Usurpation et D\xE9tournement de DNS"
         description: "Prise de contr\xF4le du DNS pour rediriger les utilisateurs\
           \ vers des sites malveillants."
+      de:
+        name: DNS-Spoofing und DNS-Hijacking
+        description: Übernahme der Kontrolle über das DNS, um Nutzer auf schädliche Websites umzuleiten.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
     ref_id: ICT-012
     name: Password Attacks (Brute Force and Credential Stuffing)
@@ -126,6 +166,9 @@ objects:
         name: Attaques par Mot de Passe (Force Brute et Bourrage)
         description: "Tentatives r\xE9p\xE9t\xE9es de deviner des mots de passe ou\
           \ d'utiliser des identifiants vol\xE9s."
+      de:
+        name: Passwortangriffe (Brute Force und Credential Stuffing)
+        description: Wiederholte Versuche, Passwörter zu erraten oder gestohlene Zugangsdaten zu verwenden.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-013
     ref_id: ICT-013
     name: Deepfake and Synthetic Identity Fraud
@@ -135,6 +178,9 @@ objects:
         name: "Deepfake et Fraude d'Identit\xE9 Synth\xE9tique"
         description: "Utilisation de contenu g\xE9n\xE9r\xE9 par IA pour l'usurpation\
           \ d'identit\xE9."
+      de:
+        name: Betrug mit Deepfakes und synthetischen Identitäten
+        description: Nutzung KI-generierter Inhalte, um sich als jemand anderes auszugeben.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-014
     ref_id: ICT-014
     name: Artificial Intelligence (AI) Threats and Model Manipulation
@@ -148,6 +194,11 @@ objects:
           \ de mod\xE8les, la manipulation de donn\xE9es et les fuites de LLM, conduisant\
           \ \xE0 des actions non autoris\xE9es, de la d\xE9sinformation et des d\xE9\
           cisions compromises."
+      de:
+        name: KI-Bedrohungen und Modellmanipulation
+        description: Modellverzerrungen, gezielte Angriffe mit manipulierten Eingaben, Modellvergiftung, Datenmanipulation
+          und das Umgehen von LLM-Schutzmechanismen führen zu unbefugten Handlungen, Fehlinformationen und beeinträchtigter
+          Entscheidungsfindung.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-015
     ref_id: ICT-015
     name: Cloud Security Threats
@@ -159,6 +210,10 @@ objects:
         description: "Erreurs de configuration, APIs non s\xE9curis\xE9es et d\xE9\
           tournement de comptes dans les environnements cloud entra\xEEnant l'exposition\
           \ de donn\xE9es et des acc\xE8s non autoris\xE9s."
+      de:
+        name: Bedrohungen der Cloud-Sicherheit
+        description: Fehlkonfigurationen, unsichere APIs und Kontoübernahmen in Cloud-Umgebungen führen zur
+          Offenlegung von Daten und zu unbefugtem Zugriff.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-016
     ref_id: ICT-016
     name: Internet of Things (IoT) Vulnerabilities
@@ -170,6 +225,10 @@ objects:
         description: "Appareils intelligents et capteurs non s\xE9curis\xE9s, entra\xEE\
           nant la compromission du r\xE9seau et l'acc\xE8s non autoris\xE9 \xE0 des\
           \ donn\xE9es sensibles."
+      de:
+        name: Schwachstellen im Internet der Dinge (IoT)
+        description: Unsichere vernetzte Geräte und Sensoren führen zur Kompromittierung von Netzwerken und
+          zu unbefugtem Zugriff auf sensible Daten.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-017
     ref_id: ICT-017
     name: Mobile Device Threats
@@ -181,6 +240,10 @@ objects:
         description: "Risques de s\xE9curit\xE9 li\xE9s aux appareils mobiles, y compris\
           \ les applications malveillantes, le vol d'appareils et l'acc\xE8s non autoris\xE9\
           \ aux donn\xE9es sensibles."
+      de:
+        name: Bedrohungen für Mobilgeräte
+        description: Sicherheitsrisiken bei Mobilgeräten, darunter schädliche Apps, Gerätediebstahl und unbefugter
+          Zugriff auf sensible Daten.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-018
     ref_id: ICT-018
     name: API Security Threats
@@ -192,6 +255,10 @@ objects:
         description: "Exploitation d'APIs mal s\xE9curis\xE9es pour un acc\xE8s non\
           \ autoris\xE9, des fuites de donn\xE9es et la manipulation de la logique\
           \ m\xE9tier."
+      de:
+        name: Bedrohungen der API-Sicherheit
+        description: Ausnutzung unzureichend abgesicherter APIs für unbefugten Zugriff, Datenkompromittierungen
+          und die Manipulation von Geschäftslogik.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-019
     ref_id: ICT-019
     name: Data Breach, Leak and Shadow IT
@@ -203,6 +270,10 @@ objects:
         description: "Exposition non autoris\xE9e de donn\xE9es \xE0 cause d'une attaque,\
           \ erreur ou via des applications ou services utilis\xE9s par les employ\xE9\
           s sans l'approbation de l'organisation."
+      de:
+        name: Datenkompromittierung, Datenlecks und Schatten-IT
+        description: Unbefugte Offenlegung von Daten durch einen Angriff, einen Fehler oder durch Anwendungen
+          und Dienste, die Beschäftigte ohne Genehmigung der Organisation verwenden.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-020
     ref_id: ICT-020
     name: Physical Security Threats (Manipulation and Theft)
@@ -214,6 +285,10 @@ objects:
         description: "Acc\xE8s physique non autoris\xE9 au mat\xE9riel, alt\xE9ration\
           \ ou vol, entra\xEEnant des fuites de donn\xE9es ou la manipulation du mat\xE9\
           riel."
+      de:
+        name: Physische Bedrohungen (Manipulation und Diebstahl)
+        description: Unbefugter physischer Zugriff auf Hardware, Manipulation oder Diebstahl führen zu Datenkompromittierungen
+          oder Hardwaremanipulation.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-021
     ref_id: ICT-021
     name: Disinformation and Reputation Attacks
@@ -225,6 +300,10 @@ objects:
         description: "Diffusion d\xE9lib\xE9r\xE9e d'informations fausses ou trompeuses\
           \ pour nuire \xE0 la r\xE9putation d'une organisation, manipuler la perception\
           \ du public ou influencer la prise de d\xE9cision."
+      de:
+        name: Desinformation und Rufschädigung
+        description: Gezielte Verbreitung falscher oder irreführender Informationen, um den Ruf einer Organisation
+          zu schädigen, die öffentliche Wahrnehmung zu manipulieren oder Entscheidungen zu beeinflussen.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-022
     ref_id: ICT-022
     name: System Outage (Due to Failure, Bugs or Errors)
@@ -238,6 +317,10 @@ objects:
           me caus\xE9es par des d\xE9faillances, des bugs, des erreurs de configuration\
           \ ou des erreurs humaines, entra\xEEnant un temps d'arr\xEAt op\xE9rationnel\
           \ et une perte potentielle de donn\xE9es."
+      de:
+        name: Systemausfall durch Defekte oder Fehler
+        description: Ungeplante Unterbrechungen der Systemverfügbarkeit durch Defekte, Softwarefehler, Konfigurationsfehler
+          oder menschliche Fehler führen zu Betriebsausfällen und möglicherweise zu Datenverlust.
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-023
     ref_id: ICT-023
     name: Regulatory Non-Compliance
@@ -249,3 +332,7 @@ objects:
         description: "Non-respect des exigences l\xE9gales et r\xE9glementaires entra\xEE\
           nant des p\xE9nalit\xE9s, des actions en justice, des restrictions op\xE9\
           rationnelles et des dommages \xE0 la r\xE9putation."
+      de:
+        name: Nichteinhaltung regulatorischer Anforderungen
+        description: Die Nichteinhaltung gesetzlicher und regulatorischer Anforderungen führt zu Sanktionen,
+          rechtlichen Verfahren, betrieblichen Einschränkungen und Reputationsschäden.

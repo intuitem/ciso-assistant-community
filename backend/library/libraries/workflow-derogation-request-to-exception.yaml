@@ -13,10 +13,19 @@ description: >
   After import: enable the trigger. Internal-event triggers register disabled, so nothing
   fires until you say so.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-09-10
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Genehmigter Antrag – Ausnahme anlegen
+    description: |-
+      Verknüpft den Antrag mit seiner Umsetzung: Wird ein Ausnahmeantrag geschlossen, prüft der Workflow, ob die Entscheidung „accepted“ lautet, und legt die beantragte Ausnahme mit Datum und Schweregrad an. Er verknüpft sie mit der Maßnahme, von der abgewichen wird.
+      Der Ablauf reagiert auf eine bereits von einer Person getroffene Entscheidung und dokumentiert lediglich deren Folge. Er trifft selbst keine Beurteilung.
+      Nach dem Import den Trigger aktivieren. Trigger für interne Ereignisse werden deaktiviert angelegt; bis zur Aktivierung wird nichts ausgelöst.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-derogation-to-exception:workflow:derogation-to-exception

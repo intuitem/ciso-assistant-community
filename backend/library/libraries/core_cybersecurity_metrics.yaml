@@ -8,10 +8,17 @@ description: A curated set of 25 essential cybersecurity metrics for organizatio
   of all sizes and industries. Covers governance, vulnerabilities, incidents, access,
   awareness, third-party risk, assets, and resilience.
 copyright: intuitem
-version: 2
+version: 3
 publication_date: 2025-12-13
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Zentrale Cybersicherheitskennzahlen
+    description: |-
+      Eine Auswahl von 25 wesentlichen Cybersicherheitskennzahlen für Organisationen aller Größen und Branchen. Deckt Governance, Schwachstellen, Vorfälle, Zugriff, Sensibilisierung, Drittparteirisiken, Assets und Resilienz ab.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   metric_definitions:
   - urn: urn:intuitem:risk:metric:core:gov-01
@@ -23,6 +30,10 @@ objects:
       fr:
         name: Score de conformité
         description: Pourcentage global de conformité au regard des référentiels de sécurité et des exigences réglementaires applicables
+      de:
+        name: Konformitätsgrad
+        description: Gesamter prozentualer Erfüllungsgrad der anwendbaren Sicherheitsreferenzwerke und regulatorischen
+          Anforderungen
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -36,20 +47,44 @@ objects:
       fr:
         name: Maturité du programme de sécurité
         description: Maturité globale du programme de cybersécurité de l'organisation fondée sur les capacités humaines, les processus et les technologies
+      de:
+        name: Reifegrad des Sicherheitsprogramms
+        description: Gesamtreife des Cybersicherheitsprogramms der Organisation anhand der personellen, prozessualen
+          und technischen Fähigkeiten
     category: qualitative
     higher_is_better: true
     choices_definition:
     - name: Initial
       description: Ad-hoc security practices, reactive approach, no formal program
+      translations:
+        de:
+          name: Initial
+          description: Ad-hoc-Sicherheitspraktiken, reaktives Vorgehen, kein formelles Programm
     - name: Developing
       description: Basic policies exist, some processes documented, limited resources
+      translations:
+        de:
+          name: Im Aufbau
+          description: Grundlegende Richtlinien vorhanden, einige Prozesse dokumentiert, begrenzte Ressourcen
     - name: Defined
       description: Formal security program, documented processes, dedicated team
+      translations:
+        de:
+          name: Definiert
+          description: Formelles Sicherheitsprogramm, dokumentierte Prozesse, eigenes zuständiges Team
     - name: Managed
       description: Metrics-driven, regular assessments, integrated with business
+      translations:
+        de:
+          name: Gesteuert
+          description: Kennzahlengestützte Steuerung, regelmäßige Bewertungen, in die Geschäftsprozesse eingebunden
     - name: Optimized
       description: Continuous improvement, proactive threat management, security culture
         embedded
+      translations:
+        de:
+          name: Optimiert
+          description: Kontinuierliche Verbesserung, vorausschauendes Bedrohungsmanagement, verankerte Sicherheitskultur
   - urn: urn:intuitem:risk:metric:core:gov-03
     ref_id: GOV-03
     name: Risk Management Maturity
@@ -59,21 +94,47 @@ objects:
       fr:
         name: Maturité de la gestion des risques
         description: Maturité des processus d'identification, d'évaluation, de traitement et de surveillance des risques
+      de:
+        name: Reifegrad des Risikomanagements
+        description: Reifegrad der Prozesse zur Risikoidentifikation, Risikobewertung, Risikobehandlung und
+          Risikoüberwachung
     category: qualitative
     higher_is_better: true
     choices_definition:
     - name: Initial
       description: No formal risk process, risks addressed reactively
+      translations:
+        de:
+          name: Initial
+          description: Kein formeller Risikomanagementprozess; Risiken werden reaktiv behandelt
     - name: Developing
       description: Basic risk register, informal assessments
+      translations:
+        de:
+          name: Im Aufbau
+          description: Einfaches Risikoregister, informelle Bewertungen
     - name: Defined
       description: Formal risk framework, regular assessments, documented treatment
         plans
+      translations:
+        de:
+          name: Definiert
+          description: Formelles Rahmenwerk für das Risikomanagement, regelmäßige Bewertungen, dokumentierte
+            Risikobehandlungspläne
     - name: Managed
       description: Quantitative risk analysis, KRIs tracked, risk-informed decisions
+      translations:
+        de:
+          name: Gesteuert
+          description: Quantitative Risikoanalyse, Überwachung von Risikokennzahlen (KRI), risikobasierte Entscheidungen
     - name: Optimized
       description: Real-time risk monitoring, predictive analytics, full business
         integration
+      translations:
+        de:
+          name: Optimiert
+          description: Risikoüberwachung in Echtzeit, vorausschauende Analysen, vollständige Einbindung in die
+            Geschäftsprozesse
   - urn: urn:intuitem:risk:metric:core:vuln-01
     ref_id: VULN-01
     name: Open Critical/High Vulnerabilities
@@ -83,6 +144,10 @@ objects:
       fr:
         name: Vulnérabilités critiques/élevées ouvertes
         description: Nombre total de vulnérabilités critiques et de gravité élevée non résolues sur l'ensemble des systèmes
+      de:
+        name: Offene kritische und schwere Schwachstellen
+        description: Gesamtzahl der noch nicht behobenen Schwachstellen mit kritischem oder hohem Schweregrad
+          über alle Systeme hinweg
     category: quantitative
     unit: count
     higher_is_better: false
@@ -96,6 +161,10 @@ objects:
       fr:
         name: Délai de remédiation des vulnérabilités
         description: Nombre moyen de jours nécessaires pour remédier aux vulnérabilités identifiées, de leur découverte à leur résolution
+      de:
+        name: Dauer der Schwachstellenbehebung
+        description: Durchschnittliche Anzahl von Tagen von der Entdeckung bis zur Behebung identifizierter
+          Schwachstellen
     category: quantitative
     unit: days
     higher_is_better: false
@@ -109,6 +178,10 @@ objects:
       fr:
         name: Couverture des correctifs
         description: Pourcentage de systèmes sur lesquels les correctifs de sécurité ont été appliqués dans les délais SLA définis
+      de:
+        name: Patch-Abdeckung
+        description: Anteil der Systeme in Prozent, auf denen Sicherheitspatches innerhalb der festgelegten
+          SLA-Fristen installiert wurden
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -122,6 +195,9 @@ objects:
       fr:
         name: Nombre d'incidents de sécurité
         description: Nombre total d'incidents de sécurité confirmés au cours de la période de mesure
+      de:
+        name: Anzahl der Sicherheitsvorfälle
+        description: Gesamtzahl bestätigter Sicherheitsvorfälle im Messzeitraum
     category: quantitative
     unit: count
     higher_is_better: false
@@ -135,6 +211,10 @@ objects:
       fr:
         name: Temps moyen de détection
         description: Temps moyen en heures entre la survenue d'un incident de sécurité et sa détection
+      de:
+        name: Mittlere Erkennungszeit
+        description: Durchschnittliche Zeit in Stunden vom Eintritt eines Sicherheitsvorfalls bis zu seiner
+          Erkennung
     category: quantitative
     unit: hours
     higher_is_better: false
@@ -148,6 +228,10 @@ objects:
       fr:
         name: Temps moyen de réponse
         description: Temps moyen en heures entre la détection d'un incident et la réponse initiale de confinement
+      de:
+        name: Mittlere Reaktionszeit
+        description: Durchschnittliche Zeit in Stunden von der Erkennung eines Vorfalls bis zur ersten Reaktion
+          zur Eindämmung
     category: quantitative
     unit: hours
     higher_is_better: false
@@ -161,21 +245,48 @@ objects:
       fr:
         name: Préparation à la réponse aux incidents
         description: Évaluation de la capacité de l'organisation à détecter les incidents de sécurité, à y répondre et à s'en remettre
+      de:
+        name: Bereitschaft zur Vorfallbehandlung
+        description: Bewertung der Vorbereitung der Organisation auf die Erkennung und Behandlung von Sicherheitsvorfällen
+          sowie die anschließende Wiederherstellung
     category: qualitative
     higher_is_better: true
     choices_definition:
     - name: Unprepared
       description: No incident response plan, no defined roles or procedures
+      translations:
+        de:
+          name: Unvorbereitet
+          description: Kein Plan zur Vorfallbehandlung, keine festgelegten Rollen oder Verfahren
     - name: Basic
       description: Documented IR plan exists but rarely tested, limited team training
+      translations:
+        de:
+          name: Grundlegend
+          description: Dokumentierter Plan zur Vorfallbehandlung vorhanden, aber selten getestet; begrenzte
+            Schulung des Teams
     - name: Capable
       description: IR plan tested annually, trained response team, basic playbooks
+      translations:
+        de:
+          name: Handlungsfähig
+          description: Plan zur Vorfallbehandlung wird jährlich getestet, geschultes Reaktionsteam, grundlegende
+            Ablaufanweisungen (Playbooks)
     - name: Advanced
       description: Regular tabletop and live exercises, automated detection, established
         partnerships
+      translations:
+        de:
+          name: Fortgeschritten
+          description: Regelmäßige Planspiele und praktische Übungen, automatisierte Erkennung, etablierte Partnerschaften
     - name: Elite
       description: 24/7 response capability, threat hunting, continuous improvement
         from lessons learned
+      translations:
+        de:
+          name: Führend
+          description: Reaktionsfähigkeit rund um die Uhr (24/7), aktive Bedrohungssuche, kontinuierliche Verbesserung
+            anhand gewonnener Erkenntnisse
   - urn: urn:intuitem:risk:metric:core:iam-01
     ref_id: IAM-01
     name: MFA Adoption Rate
@@ -185,6 +296,10 @@ objects:
       fr:
         name: Taux d'adoption de l'authentification multi-facteurs
         description: Pourcentage de comptes utilisateurs et de systèmes critiques protégés par une authentification multi-facteurs
+      de:
+        name: MFA-Abdeckung
+        description: Anteil der durch Multi-Faktor-Authentifizierung geschützten Benutzerkonten und kritischen
+          Systeme in Prozent
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -198,6 +313,10 @@ objects:
       fr:
         name: Couverture des accès privilégiés
         description: Pourcentage de comptes privilégiés gérés au moyen de contrôles de gestion des accès privilégiés (PAM)
+      de:
+        name: Absicherung privilegierter Konten
+        description: Anteil privilegierter Konten in Prozent, die durch Maßnahmen zur Verwaltung privilegierter
+          Zugriffe (PAM) gesteuert werden
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -211,6 +330,10 @@ objects:
       fr:
         name: Taux de comptes inactifs
         description: Pourcentage de comptes utilisateurs inactifs au-delà du seuil défini et qui n'ont pas encore été désactivés
+      de:
+        name: Anteil inaktiver Konten
+        description: Anteil der Benutzerkonten in Prozent, deren Inaktivität die festgelegte Grenze überschreitet
+          und die noch nicht deaktiviert wurden
     category: quantitative
     unit: percentage
     higher_is_better: false
@@ -224,6 +347,10 @@ objects:
       fr:
         name: Achèvement de la formation à la sécurité
         description: Pourcentage d'employés ayant terminé la formation obligatoire de sensibilisation à la sécurité dans le délai requis
+      de:
+        name: Abschlussquote Sicherheitsschulungen
+        description: Anteil der Beschäftigten in Prozent, die die verpflichtende Sicherheitssensibilisierung
+          innerhalb des vorgegebenen Zeitraums abgeschlossen haben
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -237,6 +364,10 @@ objects:
       fr:
         name: Taux de clics d'hameçonnage
         description: Pourcentage d'employés ayant cliqué sur des e-mails d'hameçonnage simulés lors des campagnes de test de sensibilisation
+      de:
+        name: Phishing-Klickrate
+        description: Anteil der Beschäftigten in Prozent, die bei Sensibilisierungstests in simulierten Phishing-E-Mails
+          auf einen Link geklickt haben
     category: quantitative
     unit: percentage
     higher_is_better: false
@@ -250,6 +381,10 @@ objects:
       fr:
         name: Couverture des évaluations des fournisseurs
         description: Pourcentage de fournisseurs critiques et à haut risque ayant réalisé les évaluations de sécurité dans la période requise
+      de:
+        name: Prüfquote kritischer Anbieter
+        description: Anteil kritischer Anbieter und Anbieter mit hohem Risiko in Prozent, deren Sicherheitsprüfung
+          innerhalb des erforderlichen Zeitraums abgeschlossen wurde
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -263,6 +398,10 @@ objects:
       fr:
         name: Couverture de l'inventaire des actifs
         description: Pourcentage d'actifs informatiques (matériel, logiciels, ressources cloud) documentés dans l'inventaire des actifs
+      de:
+        name: Vollständigkeit des Asset-Inventars
+        description: Anteil der IT-Assets (Hardware, Software, Cloud-Ressourcen) in Prozent, die im Asset-Inventar
+          dokumentiert sind
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -276,20 +415,46 @@ objects:
       fr:
         name: Maturité de la protection des données
         description: Maturité de la classification des données, du chiffrement, de la prévention des pertes de données et des contrôles de protection de la vie privée
+      de:
+        name: Reifegrad des Schutzes von Daten
+        description: Reifegrad von Datenklassifizierung, Verschlüsselung, Schutz vor Datenabfluss und Datenschutzmaßnahmen
     category: qualitative
     higher_is_better: true
     choices_definition:
     - name: Initial
       description: No data classification, encryption used inconsistently, no DLP
+      translations:
+        de:
+          name: Initial
+          description: Keine Datenklassifizierung, uneinheitliche Verschlüsselung, kein Schutz vor Datenabfluss
+            (DLP)
     - name: Developing
       description: Basic classification scheme, encryption for some data at rest
+      translations:
+        de:
+          name: Im Aufbau
+          description: Grundlegendes Klassifizierungsschema, Verschlüsselung für einen Teil der gespeicherten
+            Daten
     - name: Defined
       description: Formal classification policy, encryption standards, basic DLP rules
+      translations:
+        de:
+          name: Definiert
+          description: Formelle Klassifizierungsrichtlinie, Verschlüsselungsstandards, grundlegende DLP-Regeln
     - name: Managed
       description: Automated classification, comprehensive encryption, DLP with monitoring
+      translations:
+        de:
+          name: Gesteuert
+          description: Automatisierte Klassifizierung, umfassende Verschlüsselung, DLP mit Überwachung
     - name: Optimized
       description: Data-centric security, advanced DLP with ML, privacy by design
         embedded
+      translations:
+        de:
+          name: Optimiert
+          description: Datenzentrierte Sicherheit, fortgeschrittene DLP mit maschinellem Lernen, verankerter
+            Datenschutz durch Technikgestaltung
   - urn: urn:intuitem:risk:metric:core:mon-01
     ref_id: MON-01
     name: Security Monitoring Maturity
@@ -299,21 +464,47 @@ objects:
       fr:
         name: Maturité de la surveillance de la sécurité
         description: Maturité de la surveillance de la sécurité, de la journalisation, des capacités SIEM et de la détection des menaces
+      de:
+        name: Reifegrad des Sicherheitsmonitorings
+        description: Reifegrad von Sicherheitsüberwachung, Protokollierung, SIEM-Fähigkeiten und Bedrohungserkennung
     category: qualitative
     higher_is_better: true
     choices_definition:
     - name: Initial
       description: Minimal logging, no centralized monitoring, reactive only
+      translations:
+        de:
+          name: Initial
+          description: Minimale Protokollierung, keine zentrale Überwachung, ausschließlich reaktives Vorgehen
     - name: Developing
       description: Basic log collection, some alerting, limited coverage
+      translations:
+        de:
+          name: Im Aufbau
+          description: Grundlegende Protokollsammlung, teilweise Alarmierung, begrenzte Abdeckung
     - name: Defined
       description: Centralized SIEM, correlation rules, defined use cases, 8x5 monitoring
+      translations:
+        de:
+          name: Definiert
+          description: Zentrales SIEM, Korrelationsregeln, definierte Anwendungsfälle, Überwachung an fünf Tagen
+            für jeweils acht Stunden (8x5)
     - name: Managed
       description: Comprehensive visibility, tuned detection, threat intelligence
         integrated, 24x7 monitoring
+      translations:
+        de:
+          name: Gesteuert
+          description: Umfassender Überblick, abgestimmte Erkennung, eingebundene Bedrohungsinformationen, Überwachung
+            rund um die Uhr (24x7)
     - name: Optimized
       description: Advanced analytics, proactive threat hunting, automated response,
         continuous optimization
+      translations:
+        de:
+          name: Optimiert
+          description: Fortgeschrittene Analysen, vorausschauende aktive Bedrohungssuche, automatisierte Reaktion,
+            kontinuierliche Optimierung
   - urn: urn:intuitem:risk:metric:core:res-01
     ref_id: RES-01
     name: Backup Coverage
@@ -323,6 +514,10 @@ objects:
       fr:
         name: Couverture des sauvegardes
         description: Pourcentage de systèmes critiques et de données pour lesquels des sauvegardes automatisées régulières sont configurées
+      de:
+        name: Backup-Abdeckung
+        description: Anteil kritischer Systeme und Daten in Prozent, für die regelmäßige automatisierte Sicherungen
+          eingerichtet sind
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -336,6 +531,10 @@ objects:
       fr:
         name: Couverture des sauvegardes immuables
         description: Pourcentage de systèmes critiques disposant de sauvegardes isolées ou immuables protégées contre les rançongiciels
+      de:
+        name: Abdeckung geschützter Backups
+        description: Anteil kritischer Systeme in Prozent, deren Backups durch Netztrennung (Air Gap) oder Unveränderbarkeit
+          gegen Ransomware geschützt sind
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -349,6 +548,10 @@ objects:
       fr:
         name: Taux de réussite des tests de sauvegarde
         description: Pourcentage de tests de restauration des sauvegardes réalisés avec succès dans le délai RTO défini
+      de:
+        name: Erfolgsquote der Wiederherstellungstests
+        description: Anteil der erfolgreich innerhalb der festgelegten Wiederanlaufzeit (RTO) abgeschlossenen
+          Backup-Wiederherstellungstests in Prozent
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -362,6 +565,10 @@ objects:
       fr:
         name: Conformité aux objectifs de reprise
         description: Pourcentage de systèmes critiques respectant leurs objectifs de délai de reprise (RTO) et de point de reprise (RPO) définis
+      de:
+        name: Einhaltung der Wiederherstellungsziele
+        description: Anteil kritischer Systeme in Prozent, die ihre festgelegte Wiederanlaufzeit (RTO) und ihren
+          maximal tolerierbaren Datenverlust in Zeit (RPO) einhalten
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -375,6 +582,10 @@ objects:
       fr:
         name: Couverture du PCA/PRA
         description: Pourcentage de processus métiers critiques disposant de plans de continuité d'activité et de reprise après sinistre documentés et testés
+      de:
+        name: Abdeckung durch Notfallpläne
+        description: Anteil kritischer Geschäftsprozesse in Prozent, für die dokumentierte und getestete Pläne
+          zur Geschäftsfortführung und Wiederherstellung vorhanden sind
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -388,6 +599,10 @@ objects:
       fr:
         name: Temps moyen de reprise
         description: Temps moyen en heures nécessaire pour rétablir complètement les opérations métiers critiques après un incident majeur ou un sinistre
+      de:
+        name: Mittlere Wiederherstellungszeit
+        description: Durchschnittliche Zeit in Stunden bis zur vollständigen Wiederherstellung kritischer Geschäftsabläufe
+          nach einem schwerwiegenden Vorfall oder einer Katastrophe
     category: quantitative
     unit: hours
     higher_is_better: false
