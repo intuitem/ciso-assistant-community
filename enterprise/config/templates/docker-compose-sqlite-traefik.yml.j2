@@ -1,10 +1,18 @@
 services:
   backend:
+    {% if memcached.enabled %}
+    depends_on:
+      memcached:
+        condition: service_started
+    {% endif %}
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
     pull_policy: always
     restart: always
     environment:
+      {% if memcached.enabled %}
+      - ENABLE_MEMCACHED=True
+      {% endif %}
       - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG={{ enable_debug }}
@@ -31,6 +39,9 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
+      {% if memcached.enabled %}
+      - memcached_socket:/run/memcached
+      {% endif %}
       - ./db:/code/db
     user: "1001:1001"
     healthcheck:
@@ -51,10 +62,17 @@ services:
     image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
     pull_policy: always
     depends_on:
+      {% if memcached.enabled %}
+      memcached:
+        condition: service_started
+      {% endif %}
       backend:
         condition: service_healthy
     restart: always
     environment:
+      {% if memcached.enabled %}
+      - ENABLE_MEMCACHED=True
+      {% endif %}
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG=False
@@ -81,6 +99,9 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
     volumes:
+      {% if memcached.enabled %}
+      - memcached_socket:/run/memcached
+      {% endif %}
       - ./db:/code/db
     user: "1001:1001"
     entrypoint:
@@ -88,6 +109,24 @@ services:
       - -c
       - |
         python manage.py run_huey -w 2 --scheduler-interval 60
+  {% if memcached.enabled %}
+  memcached:
+    container_name: memcached
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+    # Unix socket only: no network listener, and no network at all.
+    command: ["memcached", "-s", "/run/memcached/memcached.sock", "-a", "0700", "-m", "16"]
+    network_mode: none
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+    volumes:
+      - memcached_socket:/run/memcached
+  {% endif %}
+
   frontend:
     container_name: frontend
     environment:
@@ -95,6 +134,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -153,3 +194,14 @@ services:
       - "--providers.file.directory=/etc/traefik"
       - "--providers.file.watch=true"{% else %}
       - "--experimental.localPlugins.selfsigned.moduleName=traefik.tls"{% endif %}
+
+{% if memcached.enabled %}
+volumes:
+  memcached_socket:
+    # RAM-backed, owned by the uid the backend, huey and memcached run as;
+    # it only holds the socket.
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "uid=1001,gid=1001,mode=0700,size=64k"
+{% endif %}

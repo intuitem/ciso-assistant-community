@@ -79,6 +79,7 @@
   * [Setting up mailer](installation/mailer.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
   * [Structured logging](installation/structured-logging.md)
+  * [Shared cache and login rate limiting](installation/shared-cache.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -246,6 +247,10 @@
 ## AI and Integrations
 
 * [Overview](integrations/README.md)
+* [API reference](integrations/api.md)
+* [Generating a PAT](integrations/pat.md)
+* [Service accounts](integrations/service-accounts.md)
+* [Identity providers (for service accounts)](integrations/identity-providers.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [Microsoft Sentinel](integrations/sentinel.md)

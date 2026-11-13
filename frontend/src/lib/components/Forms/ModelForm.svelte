@@ -40,6 +40,7 @@
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import IdpGroupForm from './ModelForm/IdpGroupForm.svelte';
 	import ServiceAccountForm from './ModelForm/ServiceAccountForm.svelte';
+	import IdentityProviderForm from './ModelForm/IdentityProviderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
 	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
@@ -223,6 +224,9 @@
 	const defaultFolderWritePermission =
 		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
 	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
+	// Pickers keep links to objects the user cannot see only when this form edits an
+	// existing object: on a create, clone or duplicate every id is a new link.
+	setContext('formKeepsHiddenLinks', Boolean(object?.id) && context !== 'clone' && !duplicate);
 
 	function cancel(): void {
 		if (browser) {
@@ -523,6 +527,8 @@
 			<IdpGroupForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 		{:else if URLModel === 'service-accounts'}
 			<ServiceAccountForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {object} />
+		{:else if URLModel === 'identity-providers'}
+			<IdentityProviderForm {form} {model} {cacheLocks} {formDataCache} {shape} />
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
 				{form}

@@ -36,6 +36,8 @@
 		/**
 		 * Defaults to ['DO', 'GL']
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
+		 * With 'GL', Global is the root of the tree; without it, Global is left
+		 * out and the domains sit at the top level.
 		 */
 		contentTypes?: string[];
 		/**
@@ -138,14 +140,18 @@
 		new Set([...excludedSelf, ...excludedIds.map(String)])
 	);
 
-	// Include the GL root as a flat first entry; its children are listed beside it, so
-	// excluding the root must drop them too.
+	// Search walks the root on its own, then its children: results show the
+	// path below Global, which every folder shares. The children are listed
+	// beside the root, so excluding the root must drop them too.
 	const topNodes = $derived(
 		shownTree && !excluded.has(String(shownTree.uuid))
 			? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])]
 			: []
 	);
 	const hasNodes = $derived(topNodes.length > 0);
+	// A node of a type that is not accepted hides its whole subtree, so Global
+	// can only be drawn as the root when it is accepted.
+	const showRoot = $derived(!!shownTree && contentTypes.includes(shownTree.content_type));
 
 	/** Recursively prune the excluded nodes (and their subtrees) from a node list. */
 	function pruneExcluded(nodes: TreeNode[]): TreeNode[] {
@@ -158,10 +164,19 @@
 			}));
 	}
 
+	// What the tree draws: Global as the root with the domains under it, or the
+	// domains alone when Global is not accepted. An excluded Global leaves
+	// topNodes empty, so nothing is drawn.
+	const rootNode = $derived(
+		shownTree && showRoot && !excluded.has(String(shownTree.uuid))
+			? { ...shownTree, children: pruneExcluded(shownTree.children ?? []) }
+			: null
+	);
 	const sortedTopNodes = $derived.by(() => {
+		const domains = shownTree?.children ?? [];
 		const sorted = sortAsc
-			? [...topNodes].sort((a, b) => a.name.localeCompare(b.name))
-			: [...topNodes].sort((a, b) => b.name.localeCompare(a.name));
+			? [...domains].sort((a, b) => a.name.localeCompare(b.name))
+			: [...domains].sort((a, b) => b.name.localeCompare(a.name));
 		return pruneExcluded(sorted);
 	});
 
@@ -554,16 +569,29 @@
 								</button>
 							</li>
 						{/if}
-						{#each sortedTopNodes as node (node.uuid ?? node.name)}
+						{#if rootNode}
+							<!-- The displayed path starts below Global, as it does in search results -->
 							<FolderTreeNode
-								{node}
+								node={rootNode}
 								{sortAsc}
 								{contentTypes}
 								focusId={$value ? String($value) : null}
-								onSelect={handleSelect}
+								onSelect={(id, name, path) => handleSelect(id, name, path.slice(1))}
 								depth={0}
+								expanded={true}
 							/>
-						{/each}
+						{:else}
+							{#each sortedTopNodes as node (node.uuid ?? node.name)}
+								<FolderTreeNode
+									{node}
+									{sortAsc}
+									{contentTypes}
+									focusId={$value ? String($value) : null}
+									onSelect={handleSelect}
+									depth={0}
+								/>
+							{/each}
+						{/if}
 					{/if}
 				</ul>
 			</div>

@@ -14,9 +14,11 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
-from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
+
+from core.custom_middleware import resolve_client_ip
+from iam.login_refusals import record_refused_login
 
 import structlog
 
@@ -41,24 +43,19 @@ class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return False
 
-    def authenticate(self, request, **credentials):
-        try:
-            serializer = AuthTokenSerializer(
-                data={
-                    "username": credentials.get("email"),
-                    "password": credentials.get("password"),
-                }
-            )
-            serializer.is_valid(raise_exception=True)
-            user = serializer.validated_data["user"]
-            if not user.is_local:
-                raise NotImplementedError(
-                    "This user is not allowed to use local login."
-                )
+    def get_client_ip(self, request):
+        client_ip = resolve_client_ip(request)
+        if client_ip is not None:
+            return client_ip
+        else:
+            return super().get_client_ip(request)
 
-            return user
-        except Exception:
-            return None
+    def pre_authenticate(self, request, **credentials):
+        try:
+            super().pre_authenticate(request, **credentials)
+        except ValidationError:  # refused by the failed-login rate limit
+            record_refused_login(request, credentials)
+            raise
 
     def reauthenticate(self, user, password):
         from allauth.mfa.utils import is_mfa_enabled

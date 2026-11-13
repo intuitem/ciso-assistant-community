@@ -92,9 +92,7 @@ test('user can create asset assessments inside BIA', async ({
 	});
 
 	await test.step('create asset assessment', async () => {
-		await businessImpactAnalysisPage.viewItemDetail(
-			testObjectsData.businessImpactAnalysisPage.build.name
-		);
+		await expect(page).toHaveURL(/\/business-impact-analysis\/[0-9a-f-]+$/);
 		await assetAssessmentsPage.createItem({ asset: vars.assetName }, undefined, page);
 	});
 
