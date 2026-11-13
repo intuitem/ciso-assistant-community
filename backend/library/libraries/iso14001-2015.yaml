@@ -2,20 +2,19 @@
 urn: urn:intuitem:risk:library:iso14001-2015
 locale: en
 ref_id: iso14001-2015
-name: ISO 14001:2015 — Environmental management systems — Requirements with guidance for use
-description: ISO 14001:2015 standard for environmental management systems (EMS). Detailed summary by clause
+name: ISO 14001:2015 — Environmental management systems — Requirements outline
+description: Outline of ISO 14001:2015 — Environmental management systems (EMS) — Requirements, by clause
   and sub-clause. Full version to be purchased from ISO.
 copyright: ISO - Full version to be purchased from ISO.
-version: 1
-publication_date: 2015-09-15
+version: 2
+publication_date: 2026-11-13
 provider: ISO
 packager: Nadia QOUDHADH
 translations:
   fr:
-    name: ISO 14001:2015 — Systèmes de management environnemental — Exigences et lignes directrices pour
-      son utilisation
-    description: Norme ISO 14001:2015 relative aux systèmes de management environnemental (SME). Synthèse
-      détaillée par article et sous-clause. Version complète à acquérir auprès de l'ISO.
+    name: ISO 14001:2015 — Systèmes de management environnemental — Exigences (synthèse)
+    description: Synthèse de la norme ISO 14001:2015 — Systèmes de management environnemental (SME) —
+      Exigences, par article et sous-article. Version complète à acquérir auprès de l'ISO.
     copyright: ISO - Version complète à acquérir auprès de l'ISO.
 objects:
   framework:
@@ -199,7 +198,7 @@ objects:
       annotation: Use a RACI matrix to document roles and authorities.
       translations:
         fr:
-          name: Rôles, responsabilités et autorités
+          name: Rôles, responsabilités et autorités au sein de l'organisme
           description: Attribuer et communiquer les responsabilités et autorités pour assurer la conformité
             au SME et rendre compte de la performance environnementale à la direction.
           annotation: Utiliser une matrice RACI pour documenter les rôles et autorités.
@@ -253,7 +252,7 @@ objects:
           name: Aspects environnementaux
           description: Déterminer les aspects environnementaux des activités, produits et services (maîtrisés
             ou influencés) et leurs impacts associés dans une perspective de cycle de vie. Déterminer
-            les aspects significatifs via des critères établis et les communiquer. Conserver les preuves.
+            les aspects significatifs via des critères établis et les communiquer. Conserver des informations documentées.
           annotation: Utiliser une grille d'évaluation (gravité, fréquence, maîtrise) pour identifier
             les aspects significatifs.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:6.1.3
@@ -269,7 +268,7 @@ objects:
         fr:
           name: Obligations de conformité
           description: Déterminer et avoir accès aux obligations de conformité relatives aux aspects environnementaux,
-            déterminer leur application et les prendre en compte dans le SME. Conserver les preuves.
+            déterminer leur application et les prendre en compte dans le SME. Conserver des informations documentées.
           annotation: Tenir un registre réglementaire à jour (veille légale).
     - urn: urn:intuitem:risk:req_node:iso14001-2015:6.1.4
       assessable: true
@@ -310,8 +309,7 @@ objects:
         fr:
           name: Objectifs environnementaux
           description: Établir des objectifs environnementaux aux fonctions et niveaux concernés, cohérents
-            avec la politique, mesurables (si réalisable), surveillés, communiqués et mis à jour. Conserver
-            les preuves.
+            avec la politique, mesurables (si réalisable), surveillés, communiqués et mis à jour. Conserver des informations documentées.
           annotation: Définir des objectifs SMART alignés sur les aspects significatifs.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:6.2.2
       assessable: true
@@ -324,7 +322,7 @@ objects:
       annotation: Establish environmental performance indicators (EPIs) and review them periodically.
       translations:
         fr:
-          name: Planification des actions pour atteindre les objectifs
+          name: Planification des actions pour atteindre les objectifs environnementaux
           description: Déterminer ce qui sera fait, les ressources, les responsables, les échéances et
             la méthode d'évaluation des résultats (indicateurs).
           annotation: Établir des indicateurs de performance environnementale (IPE) et les revoir périodiquement.
@@ -360,14 +358,14 @@ objects:
       description: Determine necessary competence for persons whose work affects environmental performance
         and compliance obligations, ensure they are competent, determine training needs, and keep documented
         information.
-      annotation: Keep training records up to date and verify competence annually.
+      annotation: Keep training records up to date and verify competence periodically.
       translations:
         fr:
           name: Compétences
           description: Déterminer les compétences nécessaires pour les personnes dont le travail a une
             incidence sur la performance environnementale et les obligations de conformité, s'assurer
             qu'elles sont compétentes, déterminer les besoins de formation et conserver les preuves.
-          annotation: Tenir à jour les dossiers de formation et vérifier les compétences annuellement.
+          annotation: Tenir à jour les dossiers de formation et vérifier les compétences périodiquement.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:7.3
       assessable: true
       depth: 2
@@ -529,14 +527,14 @@ objects:
       name: Emergency preparedness and response
       description: Establish, implement and maintain processes to prepare for and respond to potential
         emergency situations (planning, actual response, mitigation, periodic testing, review, training).
-      annotation: Develop environmental emergency plans and test them annually.
+      annotation: Develop environmental emergency plans and test them periodically, where practicable.
       translations:
         fr:
           name: Préparation et réponse aux situations d'urgence
           description: Établir, mettre en œuvre et tenir à jour les processus pour se préparer et répondre
             aux situations d'urgence potentielles (planification, réponse réelle, atténuation, essais
             périodiques, revue, formation).
-          annotation: Élaborer des plans d'urgence environnementale et les tester annuellement.
+          annotation: Élaborer des plans d'urgence environnementale et les tester périodiquement, lorsque cela est possible.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:9
       assessable: false
       depth: 1
@@ -569,7 +567,7 @@ objects:
           name: Généralités
           description: Déterminer ce qui doit être surveillé/mesuré, les méthodes, les critères et indicateurs,
             le moment et l'analyse. Évaluer la performance environnementale et l'efficacité du SME. Communiquer
-            les informations pertinentes. Conserver les preuves.
+            les informations pertinentes. Conserver des informations documentées.
           annotation: Suivre des indicateurs tels que la consommation d'énergie, les émissions, les déchets.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:9.1.2
       assessable: true
@@ -585,7 +583,7 @@ objects:
           name: Évaluation de la conformité
           description: Établir, mettre en œuvre et tenir à jour les processus d'évaluation du respect
             des obligations de conformité (fréquence, évaluation, actions, connaissance de l'état de conformité).
-            Conserver les preuves.
+            Conserver des informations documentées.
           annotation: Réaliser des audits de conformité réglementaire périodiques.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:9.2
       assessable: false
@@ -604,13 +602,13 @@ objects:
       name: General
       description: Conduct internal audits at planned intervals to determine whether the EMS conforms
         to the organization's own requirements and the standard, and is effectively implemented and maintained.
-      annotation: Use trained auditors independent of the audited activity.
+      annotation: Select trained auditors who ensure objectivity and impartiality (e.g. not auditing their own work).
       translations:
         fr:
           name: Généralités
           description: Réaliser des audits internes à intervalles planifiés pour vérifier la conformité
             aux exigences propres et à la norme, et l'efficacité du SME.
-          annotation: Utiliser des auditeurs formés et indépendants des activités auditées.
+          annotation: Choisir des auditeurs formés garantissant objectivité et impartialité (p. ex. ne pas auditer son propre travail).
     - urn: urn:intuitem:risk:req_node:iso14001-2015:9.2.2
       assessable: true
       depth: 3
@@ -636,16 +634,16 @@ objects:
       name: Management review
       description: 'Top management reviews the EMS at planned intervals to check it remains suitable,
         adequate and effective (inputs: previous actions, changes, objectives, performance, compliance,
-        resources, complaints, opportunities; outputs: conclusions, decisions, actions). Keep evidence.'
-      annotation: Hold management review at least annually with a structured agenda.
+        resources, complaints, opportunities; outputs: conclusions, decisions, actions). Keep documented information.'
+      annotation: Hold management reviews at planned intervals (e.g. annually) with a structured agenda.
       translations:
         fr:
           name: Revue de direction
           description: 'La direction revoit le SME à intervalles planifiés pour s''assurer qu''il est
             approprié, adapté et efficace (entrées : actions précédentes, changements, objectifs, performance,
             conformité, ressources, plaintes, opportunités ; sorties : conclusions, décisions, actions).
-            Conserver les preuves.'
-          annotation: Organiser une revue de direction au moins annuelle avec un ordre du jour structuré.
+            Conserver des informations documentées.'
+          annotation: Organiser les revues de direction à intervalles planifiés (p. ex. annuellement) avec un ordre du jour structuré.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:10
       assessable: false
       depth: 1
@@ -683,7 +681,7 @@ objects:
           name: Non-conformité et actions correctives
           description: Réagir aux non-conformités, évaluer la nécessité d'actions correctives, analyser
             les causes, mettre en œuvre les actions, examiner leur efficacité, modifier le SME si nécessaire.
-            Conserver les preuves.
+            Conserver des informations documentées.
           annotation: Tenir un registre CAPA et vérifier l'efficacité de la clôture.
     - urn: urn:intuitem:risk:req_node:iso14001-2015:10.3
       assessable: true
@@ -693,10 +691,10 @@ objects:
       name: Continual improvement
       description: Continually improve the suitability, adequacy and effectiveness of the EMS to enhance
         environmental performance.
-      annotation: Assess EMS maturity annually and embed improvements into plans.
+      annotation: Assess EMS maturity periodically and embed improvements into plans.
       translations:
         fr:
           name: Amélioration continue
           description: Améliorer en continu la pertinence, l'adéquation et l'efficacité du SME afin d'améliorer
             la performance environnementale.
-          annotation: Évaluer annuellement la maturité du SME et intégrer les améliorations dans les plans.
+          annotation: Évaluer périodiquement la maturité du SME et intégrer les améliorations dans les plans.
