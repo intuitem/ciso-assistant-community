@@ -139,6 +139,23 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     values.extend(v for v in value if isinstance(v, str) and v)
         return values
 
+    def on_authentication_error(
+        self, request, provider, error=None, exception=None, extra_context=None
+    ):
+        cause = exception.__cause__ if exception else None
+        logger.error(
+            "SSO authentication error",
+            provider=getattr(provider, "id", provider),
+            error=error,
+            error_type=type(exception).__name__ if exception else None,
+            error_message=str(exception) if exception else None,
+            cause_type=type(cause).__name__ if cause else None,
+            cause_message=str(cause) if cause else None,
+        )
+        return super().on_authentication_error(
+            request, provider, error, exception, extra_context
+        )
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -234,6 +251,12 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 provider=sociallogin.account.provider,
                 user_id=str(user.id),
             )
+            if not user.is_active:
+                logger.error(
+                    "pre_social_login: user account is inactive",
+                    provider=sociallogin.account.provider,
+                    user_id=str(user.id),
+                )
         except User.DoesNotExist:
             if not jit_provisioning_active:
                 logger.error(
