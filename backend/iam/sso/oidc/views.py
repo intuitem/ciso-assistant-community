@@ -22,7 +22,7 @@ from allauth.socialaccount.providers.openid_connect.views import (  # type: igno
 from allauth.utils import get_request_param  # type: ignore[import-untyped]
 from django.conf import settings
 from django.http import Http404, HttpRequest, HttpResponseRedirect
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from iam.sso.errors import AuthError
 from iam.sso.redirects import get_sso_authenticate_url
@@ -40,6 +40,17 @@ _OIDC_NONCE_SESSION_PREFIX = "oidc_nonce::"
 # Cap stashed nonces per session so abandoned login attempts can't grow the
 # session bag indefinitely. Mirrors allauth's MAX_STATES (statekit.py).
 _OIDC_NONCE_SESSION_MAX = 10
+# Rejection reasons the login page can explain to the user. allauth's headless
+# flow reports the reason as an `error` query parameter on its redirect; every
+# other failure stays the generic one.
+_FORWARDED_AUTH_ERRORS = frozenset(
+    {AuthError.EMAIL_NOT_VERIFIED, AuthError.EMAIL_VERIFICATION_CLAIM_MISSING}
+)
+
+
+def _forwarded_auth_error(location: str) -> str:
+    error = parse_qs(urlparse(location).query).get("error", [None])[0]
+    return error if error in _FORWARDED_AUTH_ERRORS else AuthError.FAILED_SSO
 
 
 def _generate_oidc_token(length: int = _OIDC_TOKEN_LENGTH) -> str:
@@ -224,16 +235,16 @@ def callback(request, provider_id):
             return response
 
         if request.user.is_anonymous:
+            error = _forwarded_auth_error(response.get("Location", ""))
             logger.error(
                 "SSO authentication failed - user is anonymous after callback",
                 provider=provider_id,
+                error=error,
                 has_socialaccount_state=bool(
                     request.session.get("socialaccount_state")
                 ),
             )
-            return render_authentication_error(
-                request, None, error=AuthError.FAILED_SSO
-            )
+            return render_authentication_error(request, None, error=error)
 
         token = generate_token(request.user)
         next = get_sso_authenticate_url(response.get("Location"))

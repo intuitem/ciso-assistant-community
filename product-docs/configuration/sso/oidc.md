@@ -34,6 +34,16 @@ Once you've retrieved the **Client ID**, the **Client Secret** and the **Issuer 
 {% endhint %}
 
 {% hint style="info" %}
+CISO Assistant only accepts an email address the identity provider vouches for, through the standard `email_verified` claim or Microsoft's `xms_edov` claim.
+
+* If the provider reports the address as verified, the login proceeds.
+* If the provider reports it as unverified, the login is always refused. The user sees "Your identity provider reports your email address as unverified" and must fix it at the provider.
+* If the provider does not report verification at all, the login is refused unless **This identity provider does not report whether email addresses are verified** is enabled under **Advanced settings**. The user then sees "Your identity provider did not confirm your email address".
+
+Enable that option only for providers that do not report verification, typically Microsoft Entra ID unless it is configured to provide the `xms_edov` claim. When this option is enabled, CISO Assistant trusts the email address supplied by the provider, so users must not be able to choose or change it themselves. Keep it disabled for Keycloak, Okta, Google Workspace and Auth0, which report verification status.
+{% endhint %}
+
+{% hint style="info" %}
 CISO Assistant automatically sends a standards-compliant `state` and `nonce` on every OIDC authorization request (43 characters matching `^[A-Za-z0-9-._~]{43,128}$`), and validates the `nonce` claim returned in the `id_token`. No configuration is required. This is helpful for identity providers that enforce format or length constraints on these parameters. Per OIDC Core 3.1.3.7, the `nonce` sent in the authorization request must be present and match in the `id_token` — a missing or mismatched nonce will reject the login.
 {% endhint %}
 

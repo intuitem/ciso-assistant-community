@@ -49,7 +49,6 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     )
     slo_enabled = serializers.BooleanField(
         required=False,
-        default=False,
     )
     jit_provisioning_enabled = serializers.BooleanField(
         required=False,
@@ -100,8 +99,17 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         source="settings.token_auth_method",
     )  # NOTE: Only used for OIDC
     oauth_pkce_enabled = serializers.BooleanField(
-        default=False,
+        required=False,
         source="settings.oauth_pkce_enabled",
+    )  # NOTE: Only used for OIDC
+    trust_email_without_verified_claim = serializers.BooleanField(
+        required=False,
+        source="settings.trust_email_without_verified_claim",
+        help_text=(
+            "Accept the identity provider's email when the token carries no "
+            "email_verified (or xms_edov) claim. Required for Microsoft Entra ID, "
+            "which emits neither by default. An explicit false is always rejected."
+        ),
     )  # NOTE: Only used for OIDC
     additional_scopes = serializers.RegexField(
         regex=(
@@ -358,6 +366,9 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         )
         validated_data["force_sso"] = validated_data.get(
             "force_sso", settings_object.value.get("force_sso", False)
+        )
+        validated_data["slo_enabled"] = validated_data.get(
+            "slo_enabled", settings_object.value.get("slo_enabled", False)
         )
 
         # Guard the enabled -> disabled transition only: re-saving an already
