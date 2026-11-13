@@ -201,6 +201,9 @@ importers:
       '@fortawesome/fontawesome-free':
         specifier: ^7.3.1
         version: 7.3.1
+      '@number-flow/svelte':
+        specifier: 0.4.2
+        version: 0.4.2(svelte@5.57.3(@typescript-eslint/types@8.72.1))
       '@simplewebauthn/browser':
         specifier: ^13.3.0
         version: 13.3.0
@@ -261,6 +264,9 @@ importers:
       svelte-persisted-store:
         specifier: ^0.12.0
         version: 0.12.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))
+      svelte-sonner:
+        specifier: 1.2.3
+        version: 1.2.3(svelte@5.57.3(@typescript-eslint/types@8.72.1))
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.14.0
@@ -839,6 +845,11 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1 || 2.0.0-beta.2
       '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2
+
+  '@number-flow/svelte@0.4.2':
+    resolution: {integrity: sha512-svlhRTdBXl1MKfRcrCllqvSZkb2qt0Ep+qEh3TUAcv8E4pnf9wJfhKzx5ISKZcFbpS117i+257U4LHyuTYdTuA==}
+    peerDependencies:
+      svelte: ^4 || ^5
 
   '@oxc-minify/binding-android-arm-eabi@0.136.0':
     resolution: {integrity: sha512-gk1jzky1vLeOcK7w9Ib2RT/UooZ7O21s8YSeXCsy4tzsmguKb3Cbsv/Ra2fKhMp4mKeKCzvC1Xa41OfSBWfWdQ==}
@@ -3328,6 +3339,9 @@ packages:
     resolution: {integrity: sha512-JYc0DPlpGWB40kH5g07gGTrYuMqV653k3uBKY6uITPWds3M0ov3GaWGp9lbE3Bzngx8+XkfzgvASb9vk9JDFXQ==}
     engines: {node: '>=14.16'}
 
+  number-flow@0.6.2:
+    resolution: {integrity: sha512-MCnImG4Q5vPwhSXnov56nOuyyKn6LC+Qd7II1UiKc+ACRtug5iAtn0+CwXNxM38AC5lSowEY+oYEtZX2qMnUyw==}
+
   nwsapi@2.2.28:
     resolution: {integrity: sha512-IlVB7OS7qrOsVYlpnFIkETjMwT9jwvmocJmmM+GZU/PAB3uGi9Ezd7vcWhWBUnSc0ya4ppmQITOyP1ez9gg8cg==}
 
@@ -3813,6 +3827,11 @@ packages:
     engines: {node: '>=0.14'}
     peerDependencies:
       svelte: ^3.48.0 || ^4 || ^5
+
+  svelte-sonner@1.2.3:
+    resolution: {integrity: sha512-SjQaDI/k6L/ordD2w84XOkGv3kaZwyGRsJzR+lHW097/aJCaydvp63VblMTFsrakm58BxRjUSySK/BWH9jdY1Q==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   svelte-toolbelt@0.10.6:
     resolution: {integrity: sha512-YWuX+RE+CnWYx09yseAe4ZVMM7e7GRFZM6OYWpBKOb++s+SQ8RBIMMe+Bs/CznBMc0QPLjr+vDBxTAkozXsFXQ==}
@@ -4710,6 +4729,12 @@ snapshots:
       '@emnapi/runtime': 1.11.1
       '@tybys/wasm-util': 0.10.4
     optional: true
+
+  '@number-flow/svelte@0.4.2(svelte@5.57.3(@typescript-eslint/types@8.72.1))':
+    dependencies:
+      esm-env: 1.2.2
+      number-flow: 0.6.2
+      svelte: 5.57.3(@typescript-eslint/types@8.72.1)
 
   '@oxc-minify/binding-android-arm-eabi@0.136.0':
     optional: true
@@ -7561,6 +7586,10 @@ snapshots:
   normalize-url@8.1.1:
     optional: true
 
+  number-flow@0.6.2:
+    dependencies:
+      esm-env: 1.2.2
+
   nwsapi@2.2.28: {}
 
   object-inspect@1.13.4: {}
@@ -8103,6 +8132,10 @@ snapshots:
       vite: 8.3.5(@types/node@24.19.2)(jiti@2.7.0)(yaml@1.10.3)
 
   svelte-persisted-store@0.12.0(svelte@5.57.3(@typescript-eslint/types@8.72.1)):
+    dependencies:
+      svelte: 5.57.3(@typescript-eslint/types@8.72.1)
+
+  svelte-sonner@1.2.3(svelte@5.57.3(@typescript-eslint/types@8.72.1)):
     dependencies:
       svelte: 5.57.3(@typescript-eslint/types@8.72.1)
 

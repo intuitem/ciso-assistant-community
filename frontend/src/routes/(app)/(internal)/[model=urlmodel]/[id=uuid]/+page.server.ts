@@ -13,7 +13,8 @@ import {
 	defaultWriteFormAction,
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
-	handleErrorResponse
+	handleErrorResponse,
+	REDIRECT_AFTER_CREATE
 } from '#lib/utils/actions.js';
 import { modelSchema } from '#lib/utils/schemas.js';
 
@@ -122,7 +123,10 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'perimeters');
+		// Decided by what is created, not by the page it is created from.
+		const created = (await event.request.clone().formData()).get('urlmodel') as string;
+		const redirectToWrittenObject =
+			event.params.model === 'perimeters' || REDIRECT_AFTER_CREATE.has(created);
 		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
 	},
 	delete: async (event) => {
