@@ -1,7 +1,7 @@
 <script lang="ts">
+	import Kbd from '#lib/components/utils/Kbd.svelte';
 	import '../../app.css';
 	import { onMount } from 'svelte';
-	import { browser } from '$app/env';
 	import { page } from '$app/state';
 	import { m } from '#paraglide/messages.js';
 	import CommandPalette from '#lib/components/CommandPalette/CommandPalette.svelte';
@@ -10,9 +10,6 @@
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children?: import('svelte').Snippet } = $props();
-
-	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-	const modifierKey = isMac ? '⌘' : 'Ctrl';
 
 	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
 	let menuOpen = $state(false);
@@ -85,10 +82,7 @@
 				>
 					<i class="fa-solid fa-magnifying-glass"></i>
 					<span class="hidden sm:inline">{m.searchEllipsis()}</span>
-					<kbd
-						class="hidden sm:inline rounded border border-surface-200-800 px-1.5 py-0.5 font-mono text-[10px]"
-						>{modifierKey}K</kbd
-					>
+					<Kbd keys={['mod', 'K']} class="hidden sm:inline-flex" />
 				</button>
 			{/if}
 			<a

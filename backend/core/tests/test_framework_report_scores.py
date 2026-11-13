@@ -272,6 +272,37 @@ def test_report_scores_follow_the_implementation_group_filter(admin_client, fram
 
 
 @pytest.mark.django_db
+def test_every_status_counts_unless_live_only(admin_client, framework):
+    """All but deprecated audits count by default; `statuses=live` leaves planned out too."""
+    root = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    _audit("Live", root, framework, ANSWERS)
+    planned = _audit("Planned", root, framework, ANSWERS)
+    ComplianceAssessment.objects.filter(pk=planned.pk).update(status="planned")
+    deprecated = _audit("Deprecated", root, framework, ANSWERS)
+    ComplianceAssessment.objects.filter(pk=deprecated.pk).update(status="deprecated")
+
+    report = _report(admin_client, framework)
+    assert not report["live_only"]
+    assert _audit_entry(report, "Planned")["is_counted"]
+    assert not _audit_entry(report, "Deprecated")["is_counted"]
+    assert {r["compliance_assessment_name"] for r in report["rows"]} == {
+        "Live",
+        "Planned",
+    }
+
+    response = admin_client.get(
+        reverse("frameworks-report", kwargs={"pk": str(framework.pk)}),
+        {"statuses": "live"},
+    )
+    assert response.status_code == 200, response.content
+    report = response.json()
+    assert report["live_only"]
+    assert _audit_entry(report, "Live")["is_counted"]
+    assert not _audit_entry(report, "Planned")["is_counted"]
+    assert {r["compliance_assessment_name"] for r in report["rows"]} == {"Live"}
+
+
+@pytest.mark.django_db
 def test_audit_without_documentation_score(admin_client, framework):
     """Maturity is the implementation score when the audit has no documentation
     score, which the report then never shows."""
@@ -432,3 +463,22 @@ def test_combined_view_keeps_scoreless_answers_from_other_scales(
     combined = _audit_entry(report, "Child")["combined_scores"]
     assert combined["total"] == _layers(3.0, None, None)
     assert combined["sections"][f"{URN}:s21"] == _layers(3.0, None, None)
+
+
+@pytest.mark.django_db
+def test_evidence_export_without_evidence_is_empty(admin_client, framework):
+    """A selection with no evidence returns 204 rather than an empty zip."""
+    root = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    audit = _audit("Audit", root, framework, ANSWERS)
+    ra_ids = [
+        str(i)
+        for i in RequirementAssessment.objects.filter(
+            compliance_assessment=audit
+        ).values_list("id", flat=True)
+    ]
+    response = admin_client.post(
+        reverse("frameworks-requirement-evidences", kwargs={"pk": str(framework.pk)}),
+        {"requirement_assessments": ra_ids},
+        format="json",
+    )
+    assert response.status_code == 204, response.content

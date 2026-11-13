@@ -75,6 +75,7 @@ EXCLUDED = {
     "sec_intel.TTPCatalog": LIBRARY,
     "sec_intel.Tactic": LIBRARY,
     "sec_intel.Technique": LIBRARY,
+    "socialaccount.SocialApp": IDENTITY,
     "webhooks.WebhookEndpoint": EXTERNAL,
 }
 

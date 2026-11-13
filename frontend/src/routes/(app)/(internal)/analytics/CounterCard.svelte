@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '#lib/utils/breadcrumbs.js';
+	import AnimatedNumber from '#lib/components/utils/AnimatedNumber.svelte';
 
 	interface Props {
 		count?: number;
@@ -19,43 +20,34 @@
 		children
 	}: Props = $props();
 
-	const clickHandler = () => {
-		if (href) {
-			goto(href, { breadcrumbAction: 'push', label });
-		}
+	// Keep the breadcrumb trail the plain link would skip.
+	const onclick = (e: MouseEvent) => {
+		if (!href || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+		e.preventDefault();
+		goto(href, { breadcrumbAction: 'push', label });
 	};
 </script>
 
-<div
-	class="card p-4 w-full flex flex-col whitespace-normal group transition-all duration-200 ease-in-out
-		   bg-surface-50-950
-		   border border-surface-100-900 shadow-sm hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700
-		   {href ? 'cursor-pointer hover:scale-[1.02] hover:-translate-y-1' : ''}"
-	onclick={clickHandler}
-	role={href ? 'button' : ''}
+<svelte:element
+	this={href ? 'a' : 'div'}
+	{href}
+	onclick={href ? onclick : undefined}
+	class="w-full flex flex-col justify-between gap-3 rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 transition-colors
+		{href
+		? 'hover:bg-surface-100-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500'
+		: ''}"
 >
-	<div
-		class="text-xs font-medium text-surface-600-400 uppercase tracking-wide mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-200"
-	>
+	<span class="flex items-start gap-2 text-[13px] leading-snug text-surface-600-400">
+		{#if faIcon}
+			<i class="{faIcon} {iconColor || 'text-primary-500'} mt-0.5 text-sm" aria-hidden="true"></i>
+		{/if}
 		{label}
-	</div>
-	<div class="flex flex-row items-center justify-between">
-		<div class="flex flex-row items-center">
-			{#if faIcon}
-				<div
-					class="text-3xl {iconColor ||
-						'text-violet-500'} mr-3 group-hover:scale-110 transition-transform duration-200"
-				>
-					<i class={faIcon}></i>
-				</div>
-			{/if}
-			<div
-				class="text-4xl font-bold text-surface-950-50 group-hover:text-violet-700 dark:group-hover:text-violet-400 transition-colors duration-200"
-				data-testid="card-{label}"
-			>
-				{count?.toLocaleString()}
-			</div>
-		</div>
+	</span>
+	<span class="flex items-end justify-between">
+		<span
+			class="text-[1.75rem] leading-none font-semibold tabular-nums tracking-tight text-surface-950-50"
+			data-testid="card-{label}"><AnimatedNumber value={count ?? 0} countUp /></span
+		>
 		{@render children?.()}
-	</div>
-</div>
+	</span>
+</svelte:element>
