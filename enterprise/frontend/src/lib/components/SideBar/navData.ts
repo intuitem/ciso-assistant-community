@@ -173,6 +173,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-robot',
 					href: '/service-accounts',
 					adminOnly: true
+				},
+				{
+					name: 'identityProviders',
+					fa_icon: 'fa-solid fa-id-card',
+					href: '/identity-providers',
+					adminOnly: true
 				}
 			]
 		},
@@ -421,6 +427,12 @@ export const navData = {
 			name: 'compliance',
 			items: [
 				{
+					name: 'recap',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/recap',
+					permissions: ['view_compliance_assessment_full']
+				},
+				{
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
 					href: '/compliance-assessments',
@@ -442,12 +454,6 @@ export const navData = {
 					key: 'campaignsInternal',
 					fa_icon: 'fa-solid fa-scale-balanced',
 					href: '/campaigns?kind=internal'
-				},
-				{
-					name: 'recap',
-					fa_icon: 'fa-solid fa-clipboard-list',
-					href: '/recap',
-					permissions: ['view_appliedcontrol']
 				}
 			]
 		},

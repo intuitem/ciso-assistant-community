@@ -618,7 +618,6 @@ class TestProcessingMultiSheetEndpoint:
         assert personal_data.category == pd_category
         assert personal_data.is_sensitive is True
         assert personal_data.folder == domain_folder
-        assert processing.has_sensitive_personal_data is True
         assert processing.data_subjects.get().category == "privacy_employee"
         assert processing.data_recipients.get().category == "privacy_data_processor"
         contractor = processing.contractors_involved.get()

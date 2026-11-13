@@ -5,12 +5,13 @@
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 	import * as m from '#paraglide/messages.js';
+	import { SENSITIVE_PERSONAL_DATA_CATEGORIES } from '#lib/utils/constants.js';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -24,6 +25,46 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
+
+	const formData = form.form;
+	// Derived so the effect below only reruns when the category changes, not on every field edit
+	const categoryId = $derived($formData.category);
+	let categoryIsSensitive = $state(false);
+	// The user's own value, set aside while a sensitive category locks the checkbox
+	let valueBeforeLock: boolean | null = null;
+	// On edit, a stored true under a sensitive category was forced by the backend, not chosen
+	let firstResolution = true;
+
+	function setSensitive(value: boolean) {
+		form.form.update((current) => ({ ...current, is_sensitive: value }));
+	}
+
+	function applyLock(sensitive: boolean) {
+		categoryIsSensitive = sensitive;
+		if (sensitive && valueBeforeLock === null) {
+			valueBeforeLock = firstResolution ? false : !!$formData.is_sensitive;
+			setSensitive(true);
+		} else if (!sensitive && valueBeforeLock !== null) {
+			setSensitive(valueBeforeLock);
+			valueBeforeLock = null;
+		}
+		firstResolution = false;
+	}
+
+	// Art. 9/10 categories are always sensitive: tick and lock the checkbox, on create and edit
+	$effect(() => {
+		const id = categoryId;
+		if (!id) {
+			applyLock(false);
+			return;
+		}
+		fetch(`/terminologies/${id}`)
+			.then((res) => (res.ok ? res.json() : null))
+			.then((term) => {
+				if (!term || $formData.category !== id) return;
+				applyLock(SENSITIVE_PERSONAL_DATA_CATEGORIES.has(term.name));
+			});
+	});
 </script>
 
 <AutocompleteSelect
@@ -65,6 +106,8 @@
 	{form}
 	field="is_sensitive"
 	label={m.isSensitive()}
+	disabled={categoryIsSensitive}
+	helpText={categoryIsSensitive ? m.sensitiveCategoryHelpText() : undefined}
 	cacheLock={cacheLocks['is_sensitive']}
 	bind:cachedValue={formDataCache['is_sensitive']}
 />
