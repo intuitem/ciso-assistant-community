@@ -1273,23 +1273,6 @@
 																>
 																	{task.name}
 																</Anchor>
-																{#if task.earlier_overdue?.node_id}
-																	{@const earlier = m.controlPlanEarlierOverdue({
-																		count: task.earlier_overdue.count
-																	})}
-																	<!-- Late since before the first column: nothing in the
-																	     grid would otherwise show why the task is outstanding. -->
-																	<Anchor
-																		href="/task-nodes/{task.earlier_overdue.node_id}"
-																		label={task.name}
-																		class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-red-500 bg-red-200 text-red-800 hover:opacity-80 dark:border-red-400 dark:bg-red-800/70 dark:text-red-100"
-																		title={earlier}
-																		aria-label={earlier}
-																		data-testid="control-plan-earlier-overdue"
-																	>
-																		<i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
-																	</Anchor>
-																{/if}
 																{#if task.link}
 																	<a
 																		href={task.link}

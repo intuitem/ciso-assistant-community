@@ -5089,7 +5089,6 @@
 	"controlPlanCurrentPeriod": "Current period",
 	"controlPlanOutstanding": "Outstanding",
 	"controlPlanNothingOutstanding": "Nothing outstanding",
-	"controlPlanEarlierOverdue": "{count} overdue before this period",
 	"controlPlanGroupBy": "Group by",
 	"controlPlanNoGrouping": "No grouping",
 	"controlPlanColumns": "Columns",

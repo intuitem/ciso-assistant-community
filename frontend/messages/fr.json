@@ -4875,7 +4875,6 @@
 	"controlPlanCurrentPeriod": "Période en cours",
 	"controlPlanOutstanding": "À traiter",
 	"controlPlanNothingOutstanding": "Rien à traiter",
-	"controlPlanEarlierOverdue": "{count} en retard avant cette période",
 	"controlPlanGroupBy": "Grouper par",
 	"controlPlanNoGrouping": "Sans regroupement",
 	"controlPlanColumns": "Colonnes",
