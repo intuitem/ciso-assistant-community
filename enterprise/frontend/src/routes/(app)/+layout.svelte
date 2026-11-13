@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Kbd from '#lib/components/utils/Kbd.svelte';
 	import { run } from 'svelte/legacy';
 
 	import CommandPalette from '#lib/components/CommandPalette/CommandPalette.svelte';
@@ -46,9 +47,6 @@
 		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
 		children
 	}: Props = $props();
-
-	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-	const modifierKey = isMac ? '⌘' : 'Ctrl';
 
 	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
 
@@ -266,10 +264,7 @@
 						>
 							<i class="fa-solid fa-magnifying-glass text-surface-500"></i>
 							<span class="hidden sm:inline text-surface-500">{m.searchEllipsis()}</span>
-							<kbd
-								class="hidden sm:inline-flex items-center rounded border border-surface-200-800 bg-surface-50-950 px-1.5 py-0.5
-					font-mono text-[10px] text-surface-500">{modifierKey}K</kbd
-							>
+							<Kbd keys={['mod', 'K']} class="hidden sm:inline-flex" />
 						</button>
 						{#if data?.featureflags?.focus_mode}
 							<FocusModeSelector orgTree={data?.orgTree} />

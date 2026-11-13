@@ -587,6 +587,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     relations_graph = serializers.BooleanField(
         source="value.relations_graph", required=False, default=False
     )
+    mcp = serializers.BooleanField(source="value.mcp", required=False, default=False)
+    mcp_write = serializers.BooleanField(
+        source="value.mcp_write", required=False, default=False
+    )
 
     # Flags a user may switch off for themselves. Opt-in, like batch actions: a
     # new flag is not hideable until listed. Eligible means it hides a navigation
@@ -650,6 +654,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "dpias": frozenset({"quick_forms"}),
             # The SLA computes vulnerability due dates.
             "vulnerability_sla": frozenset({"vulnerabilities"}),
+            # Write profiles for AI apps only exist with MCP itself.
+            "mcp_write": frozenset({"mcp"}),
         }
     )
 
@@ -664,6 +670,21 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "folder",
         ]
         read_only_fields = ["name"]
+
+    def validate(self, attrs):
+        from iam.mcp_access import has_shared_cache
+
+        value = attrs.get("value") or {}
+        # sign-in keeps each authorization code in the cache until the app
+        # redeems it, possibly on another worker
+        if (value.get("mcp") or value.get("mcp_write")) and not has_shared_cache():
+            raise serializers.ValidationError(
+                {
+                    "mcp": "AI app connections need a shared cache (memcached): "
+                    "configure it first."
+                }
+            )
+        return attrs
 
     def get_fields(self):
         fields = super().get_fields()

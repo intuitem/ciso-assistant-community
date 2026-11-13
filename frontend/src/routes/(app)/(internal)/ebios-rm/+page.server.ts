@@ -1,4 +1,8 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import {
+	defaultDeleteFormAction,
+	defaultWriteFormAction,
+	REDIRECT_AFTER_CREATE
+} from '#lib/utils/actions.js';
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import {
 	getModelInfo,
@@ -62,12 +66,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		// const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
 		return defaultWriteFormAction({
 			event,
 			urlModel: 'ebios-rm',
-			action: 'create'
-			// redirectToWrittenObject: redirectToWrittenObject
+			action: 'create',
+			redirectToWrittenObject: REDIRECT_AFTER_CREATE.has('ebios-rm')
 		});
 	},
 	delete: async (event) => {

@@ -55,6 +55,7 @@ from itertools import chain, cycle
 import django_filters as df
 
 import magic
+import math
 import shutil
 from pathlib import Path
 import humanize
@@ -4301,8 +4302,11 @@ class VulnerabilityViewSet(BaseModelViewSet):
 
         sla_anchor = sla_policy.get("sla_anchor", "detected_at")
 
-        object_ids = RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
-        accessible = Vulnerability.objects.filter(id__in=object_ids)
+        accessible = Vulnerability.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
+        ).filter(
+            id__in=RoleAssignment.get_changeable_object_ids(request.user, Vulnerability)
+        )
 
         # Backfill missing detected_at from created_at
         accessible.filter(detected_at__isnull=True).update(
@@ -6150,6 +6154,18 @@ class AppliedControlFilterSet(GenericFilterSet):
         choices=Commitment.State.choices, label="Commitment state"
     )
     is_assigned = df.BooleanFilter(method="filter_is_assigned")
+    # Controls covered by the control plan of a domain: linked to an enabled
+    # recurrent task living in that domain, wherever the control itself lives.
+    # With include_subfolders=true, tasks below the domain count too.
+    include_subfolders = df.BooleanFilter(method="filter_noop")
+    # Only viewable domains are valid choices, so a hidden domain's id gets the
+    # same 400 as a made-up one.
+    recurrent_task_folder = df.ModelChoiceFilter(
+        queryset=lambda request: Folder.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        ),
+        method="filter_recurrent_task_folder",
+    )
     linked_models = df.MultipleChoiceFilter(
         choices=[("--", "--")] + APPLIED_CONTROL_LINKED_FIELDS,
         method="filter_linked_models",
@@ -6265,6 +6281,30 @@ class AppliedControlFilterSet(GenericFilterSet):
             return queryset.filter(owner__isnull=False).distinct()
         else:
             return queryset.filter(owner__isnull=True)
+
+    def filter_noop(self, queryset, name, value):
+        # Read by filter_recurrent_task_folder; filters nothing by itself.
+        return queryset
+
+    def filter_recurrent_task_folder(self, queryset, name, value):
+        if not value:
+            return queryset
+        include_subfolders = self.form.cleaned_data.get("include_subfolders")
+        folders = (
+            value.get_sub_folders(include_self=True) if include_subfolders else [value]
+        )
+        # Only tasks the requester can see count, so the filter reveals nothing
+        # about tasks hidden from them.
+        viewable_task_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, TaskTemplate
+        )
+        tasks = TaskTemplate.objects.filter(
+            id__in=viewable_task_ids,
+            folder__in=folders,
+            is_recurrent=True,
+            enabled=True,
+        )
+        return queryset.filter(task_templates__in=tasks).distinct()
 
     def filter_linked_models(self, queryset, name, value):
         """
@@ -8313,6 +8353,18 @@ class RiskScenarioFilter(GenericFilterSet):
         method="filter_exclude",
         label="Exclude scenario",
     )
+    # Same per-matrix rule as the analytics summary's high risks count.
+    top_level = df.ChoiceFilter(
+        choices=[
+            ("inherent", "inherent"),
+            ("current", "current"),
+            ("residual", "residual"),
+        ],
+        method="filter_top_level",
+    )
+
+    def filter_top_level(self, queryset, name, value):
+        return filter_top_risk_levels(queryset, f"{value}_level")
 
     def filter_within_tolerance(self, queryset, name, value):
         if value == "YES":
@@ -11066,6 +11118,8 @@ def get_analytics_export_xlsx(request):
     ws1.append(["Category", "Metric", "Value"])
     style_header_row(ws1)
     for category, values in metrics.items():
+        if category == "trends":
+            continue
         if isinstance(values, dict):
             for key, val in values.items():
                 ws1.append([category, key, val])
@@ -11464,11 +11518,9 @@ class FrameworkViewSet(BaseModelViewSet):
         field_visibility for the viewer's role) come back as null so the
         row still contributes to domain/section counts.
 
-        Only "live" CAs participate by default: status in (in_progress,
-        in_review, done). This excludes planned (not yet started) and
-        deprecated (superseded by a newer audit on the same folder),
-        which would otherwise double-count requirements when multiple
-        audit cycles coexist on the same folder.
+        Every CA but deprecated ones participates by default; deprecated CAs
+        are superseded by a newer audit on the same folder and would otherwise
+        double-count requirements. Planned CAs count but carry no verdicts.
 
         Query params:
           - implementation_group (str): narrow to a single IG.
@@ -11476,27 +11528,38 @@ class FrameworkViewSet(BaseModelViewSet):
           - campaign (uuid): narrow to one campaign's audits. A campaign is
             already an explicit scope, so planned audits are kept — they are the
             normal state right after a launch and cannot double-count here.
+          - statuses ("live"): count only live audits (LIVE_STATUSES below).
+            Default counts every status but deprecated.
         """
         framework = self.get_object()  # checks read permission
 
         ig_filter = request.query_params.get("implementation_group") or None
         campaign_id = request.query_params.get("campaign") or None
+        live_only = request.query_params.get("statuses") == "live"
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
 
-        # Statuses considered "live" for cross-CA rollups. Planned and
-        # deprecated CAs are intentionally excluded; surface them via the
-        # standard CA list page if needed.
+        # Statuses considered "live" when `statuses=live`: planned and
+        # deprecated CAs are then excluded from the rollups.
         LIVE_STATUSES = ("in_progress", "in_review", "done")
         if campaign_id:
             LIVE_STATUSES = LIVE_STATUSES + ("planned",)
 
-        visible_cas_qs = ComplianceAssessment.objects.filter(
-            framework=framework,
-            id__in=viewable_ca_ids,
-        ).select_related("folder")
+        visible_cas_qs = (
+            ComplianceAssessment.objects.filter(
+                framework=framework,
+                id__in=viewable_ca_ids,
+            )
+            .select_related("folder")
+            .prefetch_related(
+                "filtering_labels",
+                "authors__user",
+                "authors__team",
+                "authors__entity",
+            )
+        )
         campaign_scope = None
         if campaign_id:
             visible_cas_qs = visible_cas_qs.filter(campaign_id=campaign_id)
@@ -11515,7 +11578,12 @@ class FrameworkViewSet(BaseModelViewSet):
             key = ca.status or "unknown"
             ca_status_counts[key] = ca_status_counts.get(key, 0) + 1
 
-        cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
+        def is_counted(ca) -> bool:
+            if live_only:
+                return ca.status in LIVE_STATUSES
+            return ca.status != "deprecated"
+
+        cas = [ca for ca in all_visible_cas if is_counted(ca)]
 
         # Per-CA viewer role: respondent unless the user holds the full auditor
         # view (view_compliance_assessment_full) on the CA's folder. Computed once per CA.
@@ -11580,16 +11648,17 @@ class FrameworkViewSet(BaseModelViewSet):
         )
 
         # Cache folder paths so we don't walk ancestry twice for the same folder.
-        folder_path_cache: Dict[Any, List[str]] = {}
+        folder_path_cache: Dict[Any, List[Any]] = {}
 
-        def folder_path_for(folder) -> List[str]:
+        def folder_chain_for(folder) -> List[Any]:
             if folder is None:
                 return []
-            if folder.id in folder_path_cache:
-                return folder_path_cache[folder.id]
-            path = [f.name for f in folder.get_folder_full_path()]
-            folder_path_cache[folder.id] = path
-            return path
+            if folder.id not in folder_path_cache:
+                folder_path_cache[folder.id] = list(folder.get_folder_full_path())
+            return folder_path_cache[folder.id]
+
+        def folder_path_for(folder) -> List[str]:
+            return [f.name for f in folder_chain_for(folder)]
 
         # Non-assessable nodes that act as sections (the immediate parents of
         # assessable requirements). The frontend uses this to render the
@@ -11779,6 +11848,43 @@ class FrameworkViewSet(BaseModelViewSet):
                 else None,
             }
 
+        from core.cel_service import applicable_rules, is_numeric_rule
+
+        def outcomes_of(ca) -> List[Dict[str, Any]] | None:
+            """The audit's outcome verdicts and numbers the viewer may read."""
+            role = ca_viewer_roles[ca.id]
+            score_visible = is_field_visible_to(ca, "score", role)
+            score_only = not is_field_visible_to(ca, "result", "auditor")
+            verdict_visible = is_field_visible_to(ca, "result", role) or (
+                score_only and score_visible
+            )
+            fired = ca.computed_outcome or {}
+            values = ca.computed_values or {}
+            failed = set(ca.outcome_errors or [])
+            out = []
+            for rule in applicable_rules(framework, ca.selected_implementation_groups):
+                if rule.get("kind") in ("staircase", "weakest_link"):
+                    continue
+                ref_id = rule.get("ref_id")
+                visible = score_visible if is_numeric_rule(rule) else verdict_visible
+                if not visible:
+                    continue
+                if ref_id in failed:
+                    out.append({"ref_id": ref_id, "error": True})
+                elif is_numeric_rule(rule):
+                    if values.get(ref_id) is not None:
+                        out.append({"ref_id": ref_id, "value": values[ref_id]})
+                else:
+                    out.append({"ref_id": ref_id, "met": ref_id in fired})
+            return out or None
+
+        viewable_label_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, FilteringLabel)
+        )
+        viewable_actor_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Actor)
+        )
+
         # Per-CA summary used by the frontend "detected assessments" drawer.
         # Includes every visible CA, counted or not, so users can see what
         # the live-status filter excluded. Only counted CAs carry scores.
@@ -11790,7 +11896,24 @@ class FrameworkViewSet(BaseModelViewSet):
                 "folder_id": str(ca.folder_id) if ca.folder_id else None,
                 "folder_path": folder_path_for(ca.folder),
                 "folder_path_str": " / ".join(folder_path_for(ca.folder)),
-                "is_counted": ca.status in LIVE_STATUSES,
+                "folder_path_ids": [str(f.id) for f in folder_chain_for(ca.folder)],
+                "eta": ca.eta,
+                "due_date": ca.due_date,
+                "labels": [
+                    {"id": str(label.id), "name": label.label}
+                    for label in ca.filtering_labels.all()
+                    if label.id in viewable_label_ids
+                ],
+                "authors": [
+                    {"id": str(actor.id), "name": str(actor)}
+                    for actor in ca.authors.all()
+                    if actor.id in viewable_actor_ids
+                ],
+                # A planned audit has not started: its verdicts would all read as not met.
+                "outcomes": outcomes_of(ca)
+                if ca.id in audits_by_id and ca.status != "planned"
+                else None,
+                "is_counted": is_counted(ca),
                 **(
                     scores_of(audits_by_id[ca.id])
                     if ca.id in audits_by_id
@@ -11815,17 +11938,290 @@ class FrameworkViewSet(BaseModelViewSet):
                     "max_score": framework.max_score,
                     "scores_definition": framework.scores_definition,
                     "implementation_groups_definition": framework.get_implementation_groups_definition_translated(),
+                    "outcomes_definition": [
+                        {
+                            key: rule.get(key)
+                            for key in (
+                                "ref_id",
+                                "kind",
+                                "annotation",
+                                "label",
+                                "implementation_groups",
+                            )
+                        }
+                        | {
+                            "translations": {
+                                lang: {
+                                    k: v
+                                    for k, v in (t or {}).items()
+                                    if k in ("annotation", "label")
+                                }
+                                for lang, t in (rule.get("translations") or {}).items()
+                            }
+                        }
+                        for rule in framework.outcomes_definition or []
+                        if rule.get("kind") not in ("staircase", "weakest_link")
+                    ],
                     "sections": sections,
                 },
                 "rows": rows,
                 "compliance_assessments": compliance_assessments,
                 "ca_status_counts": ca_status_counts,
                 "live_statuses": list(LIVE_STATUSES),
+                "live_only": live_only,
                 "aggregation_strategy": aggregation_strategy,
                 "campaign": campaign_scope,
                 "generated_at": timezone.now().isoformat(),
             }
         )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="requirement_evidences",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def requirement_evidences(self, request, pk):
+        """Zip of the evidences of picked requirement assessments of this framework.
+
+        JSON body:
+          - requirement_assessments (uuids, required): the selection to export.
+          - implementation_group (str): keep requirements of this group only.
+        Each picked assessment is also checked against what the caller may see.
+        """
+        framework = self.get_object()
+        if not RoleAssignment.is_object_readable(request.user, Framework, framework.id):
+            raise NotFound()
+
+        raw_ids = request.data.get("requirement_assessments")
+        if not isinstance(raw_ids, list) or not raw_ids:
+            return Response(
+                {"error": "requirement_assessments is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            picked = {UUID(str(i)) for i in raw_ids}
+        except ValueError:
+            return Response(
+                {"error": "invalid requirement assessment id"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        ig_filter = request.data.get("implementation_group") or None
+
+        audits = ComplianceAssessment.objects.filter(
+            framework=framework,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                request.user, ComplianceAssessment
+            ),
+            requirement_assessments__id__in=picked,
+        ).distinct()
+        viewable_evidences = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Evidence)
+        )
+        viewable_controls = set(
+            RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+        )
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        audit_roles = {}
+        allowed_ra_ids: set = set()
+        for audit in audits.select_related("folder"):
+            audit_roles[audit.id] = (
+                "respondent"
+                if respondent_folders and audit.folder_id in respondent_folders
+                else "auditor"
+            )
+            scoped, _hidden = scoped_requirement_assessments(
+                audit, request.user, include_non_assessable=False
+            )
+            allowed_ra_ids.update(
+                ra.id
+                for ra in scoped
+                if ra.id in picked
+                and (
+                    not ig_filter
+                    or ig_filter in (ra.requirement.implementation_groups or [])
+                )
+            )
+        ras = (
+            RequirementAssessment.objects.filter(id__in=allowed_ra_ids)
+            .select_related("compliance_assessment__folder", "requirement")
+            .prefetch_related(
+                "evidences__revisions",
+                "applied_controls__evidences__revisions",
+            )
+            .order_by(
+                "compliance_assessment__folder__name",
+                "compliance_assessment__name",
+                "requirement__urn",
+            )
+        )
+        requirements = {ra.requirement for ra in ras}
+
+        def sanitize(name: str) -> str:
+            return (
+                sanitize_file_name((name or "").replace("/", "-").replace("\\", "-"))
+                or "_"
+            )
+
+        from django.utils.translation import gettext
+
+        index_wb = Workbook()
+        index_ws = index_wb.active
+        index_ws.title = gettext("Evidence")
+        index_ws.append(
+            [
+                gettext("Domain"),
+                gettext("Audit"),
+                gettext("Requirement"),
+                gettext("Evidence"),
+                gettext("Applied control"),
+                gettext("Link"),
+            ]
+        )
+        domain_paths: dict = {}
+        # (ra, evidence, carrying controls) per index row; files per audit.
+        rows: list = []
+        audit_evidences: dict = {}
+        for ra in ras:
+            ca = ra.compliance_assessment
+            if ca.folder_id not in domain_paths:
+                domain_paths[ca.folder_id] = (
+                    " / ".join(f.name for f in ca.folder.get_folder_full_path())
+                    if ca.folder
+                    else ""
+                )
+            role = audit_roles[ca.id]
+            evidences_visible = is_field_visible_to(ca, "evidences", role)
+            direct = {e.id: e for e in ra.evidences.all()} if evidences_visible else {}
+            controls = (
+                [ac for ac in ra.applied_controls.all() if ac.id in viewable_controls]
+                if evidences_visible
+                and is_field_visible_to(ca, "applied_controls", role)
+                else []
+            )
+            carriers: dict = {}
+            for ac in controls:
+                for e in ac.evidences.all():
+                    carriers.setdefault(e.id, []).append(ac.name)
+            indirect = {
+                e.id: e
+                for ac in controls
+                for e in ac.evidences.all()
+                if e.id not in direct
+            }
+            for evidence_id, evidence in {**direct, **indirect}.items():
+                if evidence_id not in viewable_evidences:
+                    continue
+                audit_evidences.setdefault(ca.id, (ca, {}))[1][evidence_id] = evidence
+                rows.append(
+                    (
+                        ra,
+                        evidence,
+                        ""
+                        if evidence_id in direct
+                        else ", ".join(carriers.get(evidence_id, [])),
+                    )
+                )
+
+        # Each file once per audit; the index rows of every requirement point to it.
+        to_write: list = []
+        taken_dirs: set = set()
+        for ca, evidences in audit_evidences.values():
+            base_dir = (
+                f"{sanitize(ca.folder.name if ca.folder else '')}/{sanitize(ca.name)}"
+            )
+            directory, counter = base_dir, 1
+            while directory.lower() in taken_dirs:
+                counter += 1
+                directory = f"{base_dir} ({counter})"
+            taken_dirs.add(directory.lower())
+            names = build_evidence_archive_names(list(evidences.values()))
+            for evidence in evidences.values():
+                entry = names.get(evidence.id)
+                revision = evidence.last_revision
+                if not entry or not revision or not revision.attachment:
+                    continue
+                try:
+                    size = revision.attachment.size
+                except Exception:
+                    logger.warning(
+                        "evidence file unreadable, omitted from archive",
+                        evidence_id=evidence.id,
+                    )
+                    continue
+                to_write.append((ca, evidence, revision, f"{directory}/{entry}", size))
+
+        max_mb = settings.EVIDENCE_EXPORT_MAX_SIZE_MB
+        total = sum(item[4] for item in to_write)
+        if max_mb and total > max_mb * 1_000_000:
+            return Response(
+                {
+                    "error": "evidence_export_too_large",
+                    "size_mb": math.ceil(total / 1_000_000),
+                    "max_size_mb": max_mb,
+                },
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            )
+
+        temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
+        try:
+            with zipfile.ZipFile(temp_file, "w") as zipf:
+                written_paths: dict = {}
+                for ca, evidence, revision, path, size in to_write:
+                    try:
+                        with default_storage.open(revision.attachment.name) as source:
+                            with zipf.open(
+                                path, "w", force_zip64=size > 2**31
+                            ) as entry_file:
+                                shutil.copyfileobj(source, entry_file, 1024 * 1024)
+                        written_paths[(ca.id, evidence.id)] = path
+                    except Exception:
+                        logger.warning(
+                            "evidence file unreadable, omitted from archive",
+                            evidence_id=evidence.id,
+                        )
+
+                for ra, evidence, carried_by in rows:
+                    ca = ra.compliance_assessment
+                    written = written_paths.get((ca.id, evidence.id), "")
+                    revision = evidence.last_revision
+                    target = written or (revision.link if revision else "") or ""
+                    index_ws.append(
+                        [
+                            escape_excel_formula(sanitize_xlsx_value(value))
+                            for value in (
+                                domain_paths[ca.folder_id],
+                                ca.name,
+                                ra.requirement.ref_id or ra.requirement.urn,
+                                evidence.name,
+                                carried_by,
+                                target,
+                            )
+                        ]
+                    )
+                    if written or target.startswith(("http://", "https://")):
+                        index_ws.cell(row=index_ws.max_row, column=6).hyperlink = target
+                index_ws.freeze_panes = "A2"
+                for cell in index_ws[1]:
+                    cell.font = Font(bold=True)
+                for column, width in zip("ABCDEF", (30, 30, 14, 40, 30, 60)):
+                    index_ws.column_dimensions[column].width = width
+                index_buffer = io.BytesIO()
+                index_wb.save(index_buffer)
+                zipf.writestr("index.xlsx", index_buffer.getvalue())
+            if index_ws.max_row == 1:  # header only: nothing to export
+                temp_file.close()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            temp_file.seek(0)
+            if len(requirements) == 1:
+                label = next(iter(requirements)).ref_id or "requirement"
+                filename = f"{sanitize(framework.name)}-{sanitize(label)}-evidences.zip"
+            else:
+                filename = f"{sanitize(framework.name)}-evidences.zip"
+            return FileResponse(temp_file, as_attachment=True, filename=filename)
+        except Exception:
+            temp_file.close()
+            raise
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
@@ -19522,16 +19918,20 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         return Response(dict(Incident.Answer.choices))
 
     def perform_update(self, serializer):
-        previous_instance = self.get_object()
-        previous_status = previous_instance.status
-        previous_severity = previous_instance.severity
+        # snapshot before save() mutates the instance; no get_object(): batch-action has no pk kwarg
+        old = serializer.instance
+        previous_status, previous_status_display = old.status, old.get_status_display()
+        previous_severity, previous_severity_display = (
+            old.severity,
+            old.get_severity_display(),
+        )
 
         instance = serializer.save()
 
         if previous_status != instance.status and previous_status is not None:
             TimelineEntry.objects.create(
                 incident=instance,
-                entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
+                entry=f"{previous_status_display}->{instance.get_status_display()}",
                 entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
                 author=self.request.user.actor,
                 timestamp=now(),
@@ -19540,7 +19940,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         if previous_severity != instance.severity and previous_severity is not None:
             TimelineEntry.objects.create(
                 incident=instance,
-                entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
+                entry=f"{previous_severity_display}->{instance.get_severity_display()}",
                 entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
                 author=self.request.user.actor,
                 timestamp=now(),
@@ -21143,6 +21543,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
     def assigned_to(self, request):
         return Response(self._viewable_actors(assigned_task_templates__isnull=False))
 
+    REVIEW_GRANULARITIES = ("monthly", "weekly", "quarterly", "semiannual")
+    # Width in months of the month-aligned review buckets.
+    _BUCKET_MONTH_SPAN = MappingProxyType(
+        {"monthly": 1, "quarterly": 3, "semiannual": 6}
+    )
+
     @staticmethod
     def _generate_buckets(start_date, end_date, granularity):
         """Generate time buckets for the given date range and granularity.
@@ -21176,28 +21582,24 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 )
                 current += timedelta(weeks=1)
         else:
-            # Monthly buckets
-            current = date(start_date.year, start_date.month, 1)
+            # Month-aligned buckets: one, three or six months wide.
+            span = TaskTemplateViewSet._BUCKET_MONTH_SPAN[granularity]
+            first_month = start_date.month - (start_date.month - 1) % span
+            current = date(start_date.year, first_month, 1)
             while current <= end_date:
-                if current.month == 12:
-                    month_end = date(current.year, 12, 31)
-                else:
-                    month_end = date(current.year, current.month + 1, 1) - timedelta(
-                        days=1
-                    )
-                key = f"{current.year}-{current.month:02d}"
+                following = current + rd.relativedelta(months=span)
+                key = TaskTemplateViewSet._assign_node_to_bucket_key(
+                    current, granularity
+                )
                 buckets.append(
                     {
                         "key": key,
                         "label": key,
                         "start": current.isoformat(),
-                        "end": min(month_end, end_date).isoformat(),
+                        "end": min(following - timedelta(days=1), end_date).isoformat(),
                     }
                 )
-                if current.month == 12:
-                    current = date(current.year + 1, 1, 1)
-                else:
-                    current = date(current.year, current.month + 1, 1)
+                current = following
         return buckets
 
     @staticmethod
@@ -21238,8 +21640,11 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         if granularity == "weekly":
             iso_year, iso_week, _ = node_date.isocalendar()
             return f"{iso_year}-W{iso_week:02d}"
-        else:
-            return f"{node_date.year}-{node_date.month:02d}"
+        if granularity == "quarterly":
+            return f"{node_date.year}-Q{(node_date.month - 1) // 3 + 1}"
+        if granularity == "semiannual":
+            return f"{node_date.year}-H{(node_date.month - 1) // 6 + 1}"
+        return f"{node_date.year}-{node_date.month:02d}"
 
     @action(detail=False, name="Yearly tasks review")
     def yearly_review(self, request):
@@ -21256,7 +21661,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             end_month, end_year = 12, current_year
 
         granularity = request.query_params.get("granularity", "monthly")
-        if granularity not in ("monthly", "weekly"):
+        if granularity not in self.REVIEW_GRANULARITIES:
             granularity = "monthly"
 
         # Validate month values
@@ -21268,6 +21673,17 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             year_end = date(end_year, 12, 31)
         else:
             year_end = date(end_year, end_month + 1, 1) - timedelta(days=1)
+
+        # Quarters and semesters are shown whole, so widen the range to their bounds.
+        span = self._BUCKET_MONTH_SPAN.get(granularity, 1)
+        if span > 1:
+            year_start = date(
+                year_start.year, year_start.month - (year_start.month - 1) % span, 1
+            )
+            last_month = year_end.month + (-year_end.month) % span
+            year_end = date(year_end.year, last_month, 1) + rd.relativedelta(
+                months=1, days=-1
+            )
 
         # Cap weekly view to 1 year
         if granularity == "weekly":
@@ -21283,14 +21699,29 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         folder_filter = request.query_params.get("folder")
         assigned_to_filter = request.query_params.get("assigned_to")
         applied_controls_filter = request.query_params.get("applied_controls")
-        status_filter = request.query_params.get("status")
+        # Several statuses may be asked for: a task is kept when any of its
+        # buckets matches any of them.
+        status_filters = {
+            value for value in request.query_params.getlist("status") if value
+        }
+        include_subfolders = (
+            request.query_params.get("include_subfolders", "").lower() == "true"
+        )
 
         queryset = self.get_queryset().filter(
             is_recurrent=True,
             enabled=True,
         )
 
-        if folder_filter:
+        if folder_filter and include_subfolders:
+            # Opt-in: the folder and everything below it.
+            folder = Folder.objects.filter(id=folder_filter).first()
+            queryset = (
+                queryset.filter(folder__in=folder.get_sub_folders(include_self=True))
+                if folder
+                else queryset.none()
+            )
+        elif folder_filter:
             queryset = queryset.filter(folder_id=folder_filter)
         if assigned_to_filter:
             queryset = queryset.filter(assigned_to__id=assigned_to_filter)
@@ -21304,9 +21735,22 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             due_date__gte=year_start, due_date__lte=year_end
         ).order_by("due_date")
 
+        today = timezone.localdate()
+
+        # Open occurrences late today but outside the displayed range, before or
+        # after it: still late, whatever the range shows.
+        late_outside_period = TaskNode.objects.filter(
+            Q(due_date__lt=year_start) | Q(due_date__gt=year_end),
+            task_template=OuterRef("pk"),
+            status__in=TaskNode.OPEN_STATUSES,
+            due_date__lt=today,
+        )
+
         # get_queryset already joins folder and the serializer's related columns.
         task_templates = list(
-            queryset.prefetch_related(
+            queryset.annotate(
+                late_outside_period=Exists(late_outside_period)
+            ).prefetch_related(
                 Prefetch(
                     "tasknode_set",
                     queryset=filtered_nodes_qs,
@@ -21335,22 +21779,43 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
             # Build bucket_status for each bucket
             bucket_status = {}
-            has_any_matching_status = False
+            has_any_matching_status = (
+                template.late_outside_period and "overdue" in status_filters
+            )
             for key in bucket_keys:
                 bucket_nodes = nodes_by_bucket.get(key, [])
                 status, node_ids = self._aggregate_status(bucket_nodes)
+                # An open occurrence past its due date makes the whole bucket late.
+                # The oldest one is named, so the cell can lead to it rather than
+                # to an earlier occurrence of the bucket that is already closed.
+                overdue_node_id = next(
+                    (
+                        str(node.id)
+                        for node in bucket_nodes
+                        if node.status in TaskNode.OPEN_STATUSES
+                        and node.due_date < today
+                    ),
+                    None,
+                )
+                overdue = overdue_node_id is not None
                 bucket_status[key] = {
                     "status": status,
                     "node_ids": node_ids,
+                    "overdue": overdue,
+                    "overdue_node_id": overdue_node_id,
                 }
-                if status and (not status_filter or status == status_filter):
+                matches = (overdue and "overdue" in status_filters) or (
+                    bool(status) and (not status_filters or status in status_filters)
+                )
+                if matches:
                     has_any_matching_status = True
 
             # Post-aggregation status filter: skip templates with no matching buckets
-            if status_filter and not has_any_matching_status:
+            if status_filters and not has_any_matching_status:
                 continue
 
             template_data["bucket_status"] = bucket_status
+            template_data["late_outside_period"] = template.late_outside_period
 
             if tpl_folder_id not in folders_dict:
                 folders_dict[tpl_folder_id] = {
@@ -21372,6 +21837,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "start_year": start_year,
                 "end_month": end_month,
                 "end_year": end_year,
+                # The day the overdue flags were worked out for.
+                "today": today.isoformat(),
             }
         )
 
@@ -21393,7 +21860,10 @@ class TaskNodeFilterSet(GenericFilterSet):
         if value is True:
             return queryset.filter(due_date__lt=date.today()).order_by("due_date")
         elif value is False:
-            return queryset.filter(due_date__gte=date.today()).order_by("due_date")
+            # Undated (a one-time task without a date) is not past: listed here.
+            return queryset.filter(
+                Q(due_date__gte=date.today()) | Q(due_date__isnull=True)
+            ).order_by("due_date")
         return queryset
 
     class Meta:

@@ -192,6 +192,10 @@
 				formAction: '?/createTaskTemplate',
 				model: data.taskTemplateModel,
 				invalidateAll: false,
+				// A third-party audit lives in an enclave: offer it, else the prefilled
+				// domain is not in the picker and shows blank.
+				folderContentTypes:
+					data.requirementAssessment.folder?.content_type === 'EN' ? ['DO', 'GL', 'EN'] : undefined,
 				debug: false
 			}
 		};
