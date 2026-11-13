@@ -38,12 +38,13 @@ JIRA_CONFIG_SCHEMA = {
     "settings": {
         "required": ["table_name"],
         "properties": {
-            # Composite "<PROJECT_KEY>:<Issue Type Name>" string the
-            # FieldMapper UI writes back. Falls back to the legacy split
+            # Composite "<PROJECT_KEY>:<issue type id>" string the
+            # FieldMapper UI writes back (older configs hold the issue type
+            # name instead). Falls back to the legacy split
             # ``project_key`` / ``issue_type`` settings for backward compat.
             "table_name": {
                 "type": "string",
-                "description": "Composite project key and issue type, e.g. 'PROJ:Task'",
+                "description": "Composite project key and issue type id, e.g. 'PROJ:10001'",
             },
             "project_key": {"type": "string", "description": "Jira project key"},
             "issue_type": {"type": "string", "default": "Task"},
@@ -157,6 +158,7 @@ class JiraOrchestrator(BaseITSMOrchestrator):
             "get_choices",
             "suggest_mapping",
             "refresh_schema",
+            "resolve_table",
         ]
 
     def execute_action(self, action: str, params: dict):
@@ -172,6 +174,12 @@ class JiraOrchestrator(BaseITSMOrchestrator):
 
         if action == "get_tables":
             return client.get_available_tables()
+
+        if action == "resolve_table":
+            table = params.get("table_name")
+            if not table:
+                raise ValueError("Parameter 'table_name' is required for resolve_table")
+            return client.resolve_table_name(table)
 
         if action == "get_columns":
             table = params.get("table_name")

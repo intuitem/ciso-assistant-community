@@ -519,6 +519,7 @@
 	"remoteField": "Champ distant",
 	"jiraIntegrationMappingsHelpText": "Faites correspondre vos mesures locales aux tickets Jira.",
 	"jiraTableHelpText": "Sélectionnez le projet et le type de ticket Jira à synchroniser.",
+	"unverifiedOption": "{value} (non vérifié)",
 	"jiraField": "Champ Jira",
 	"instanceUrl": "URL de l'instance",
 	"username": "Nom d'utilisateur",

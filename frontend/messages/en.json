@@ -5371,6 +5371,7 @@
 	"remoteField": "Remote Field",
 	"jiraIntegrationMappingsHelpText": "Map your local controls to Jira issues.",
 	"jiraTableHelpText": "Select the Jira project and issue type to sync with.",
+	"unverifiedOption": "{value} (unverified)",
 	"jiraField": "Jira Field",
 	"instanceUrl": "Instance URL",
 	"username": "Username",
