@@ -3,7 +3,6 @@
 import uuid
 
 import requests
-from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
