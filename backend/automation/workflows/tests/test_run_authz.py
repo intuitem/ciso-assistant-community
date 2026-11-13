@@ -619,6 +619,112 @@ class TestAutomationEntryPoints:
         )
 
 
+def dispatch_in(folder, event_key, **fields):
+    from automation.workflows.events import dispatch_internal_event
+
+    payload = {"event_key": event_key, "folder_id": str(folder.id), **fields}
+    return dispatch_internal_event(event_key, payload, folder.id)
+
+
+@pytest.mark.django_db
+class TestEventVisibility:
+    """The run receives the event's payload, so an event only reaches a run
+    whose identity could read its object: seeing the folder is not enough."""
+
+    def test_object_the_identity_cannot_view_is_not_delivered(self, no_run):
+        domain = make_domain("EvtHidden")
+        control = AppliedControl.objects.create(name="Hidden", folder=domain)
+        runner = User.objects.create_user(email="evthidden@authz.test")
+        grant(runner, domain, ["view_asset"])
+        build_event_workflow("EvtHidden", domain, runner)
+
+        started = dispatch_in(
+            domain,
+            "appliedcontrol.updated",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(control.id),
+        )
+        assert started == []
+
+    def test_object_the_identity_can_view_is_delivered(self, no_run):
+        domain = make_domain("EvtVisible")
+        control = AppliedControl.objects.create(name="Visible", folder=domain)
+        runner = User.objects.create_user(email="evtvisible@authz.test")
+        grant(runner, domain, ["view_appliedcontrol"])
+        build_event_workflow("EvtVisible", domain, runner)
+
+        started = dispatch_in(
+            domain,
+            "appliedcontrol.updated",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(control.id),
+        )
+        assert len(started) == 1
+
+    def test_object_in_a_subfolder_outside_a_non_recursive_grant(self, no_run):
+        parent = make_domain("EvtParent")
+        child = Folder.objects.create(
+            name="EvtChild",
+            parent_folder=parent,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        control = AppliedControl.objects.create(name="In child", folder=child)
+        runner = User.objects.create_user(email="evtparent@authz.test")
+        grant(runner, parent, ["view_appliedcontrol"], recursive=False)
+        build_event_workflow("EvtParent", parent, runner)
+
+        started = dispatch_in(
+            child,
+            "appliedcontrol.updated",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(control.id),
+        )
+        assert started == []
+
+    def test_deleted_object_needs_view_permission_on_its_folder(self, no_run):
+        domain = make_domain("EvtDeleted")
+        viewer = User.objects.create_user(email="evtdelviewer@authz.test")
+        grant(viewer, domain, ["view_appliedcontrol"])
+        blind = User.objects.create_user(email="evtdelblind@authz.test")
+        grant(blind, domain, ["view_asset"])
+        seen, _ = build_event_workflow(
+            "EvtDelSeen", domain, viewer, event_key="appliedcontrol.deleted"
+        )
+        build_event_workflow(
+            "EvtDelBlind", domain, blind, event_key="appliedcontrol.deleted"
+        )
+
+        started = dispatch_in(
+            domain,
+            "appliedcontrol.deleted",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(uuid.uuid4()),
+        )
+        assert [instance.workflow_id for instance in started] == [seen.id]
+
+    def test_custom_event_names_its_model_in_the_key(self, no_run):
+        domain = make_domain("EvtCustom")
+        viewer = User.objects.create_user(email="evtcustomviewer@authz.test")
+        grant(viewer, domain, ["view_quickformresponse"])
+        blind = User.objects.create_user(email="evtcustomblind@authz.test")
+        grant(blind, domain, ["view_asset"])
+        seen, _ = build_event_workflow(
+            "EvtCustomSeen", domain, viewer, event_key="quickformresponse.submitted"
+        )
+        build_event_workflow(
+            "EvtCustomBlind", domain, blind, event_key="quickformresponse.submitted"
+        )
+
+        started = dispatch_in(
+            domain, "quickformresponse.submitted", id=str(uuid.uuid4())
+        )
+        assert [instance.workflow_id for instance in started] == [seen.id]
+
+
 @pytest.mark.django_db
 class TestPrivilegeBranches:
     """Every codename required_permissions can emit must be enforced, not just

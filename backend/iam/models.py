@@ -68,6 +68,15 @@ ALLOWED_PERMISSION_APPS = (
     "iam",
     "global_settings",
     "portals",
+    "automation",
+    "chat",
+    "custom_fields",
+    "data_wizard",
+    "doc_management",
+    "integrations",
+    "notifications",
+    "sec_intel",
+    "threat_modeling",
 )
 
 IGNORED_PERMISSION_MODELS = (
@@ -82,13 +91,22 @@ IGNORED_PERMISSION_MODELS = (
     "serviceaccount",
     # Internal: access is gated through the parent object, never by these permissions
     "answerattachment",
+    "conditionbranch",
+    "customfieldchoice",
+    "customfieldvalue",
     "demomanifest",
+    "documentreference",
     "flowevent",
+    "posturerun",
     "producedobjectlink",
     "quickformapplication",
     "quickformoutcome",
     "requirementassignmentevent",
     "requirementnodeattachment",
+    "syncevent",
+    # Served without RBAC: a global catalog and a cache
+    "integrationprovider",
+    "integrationschemacache",
     # Stale content types of removed models
     "cacheversion",
     "processingnature",
@@ -101,22 +119,54 @@ IGNORED_PERMISSION_MODELS = (
 READ_ONLY_PERMISSION_MODELS = (
     "actor",
     "assetcapability",
+    "chatmessage",
     "commitment",
+    "documentedit",
     "dpiarequirementchange",
     "entitytierchange",
     "quickformpage",
     "responsibilityassignment",
     "responsibilityrole",
     "solutiontierchange",
+    "workflowinstancelog",
 )
 
-IGNORED_PERMISSIONS = Q(content_type__model__in=IGNORED_PERMISSION_MODELS) | Q(
-    codename__in=[
-        f"{action}_{model}"
-        for model in READ_ONLY_PERMISSION_MODELS
-        for action in ("add", "change", "delete")
-    ]
+# Created only by the system; users still delete their own notifications
+SYSTEM_MANAGED_PERMISSIONS = (
+    "add_notification",
+    "add_workflowtoken",
+    "delete_workflowtoken",
+    "add_workflowtrigger",
+    "delete_workflowtrigger",
 )
+
+ADMINISTRATOR_ONLY_PERMISSIONS = (
+    "change_indexeddocument",
+    "add_integrationconfiguration",
+    "change_integrationconfiguration",
+    "delete_integrationconfiguration",
+)
+
+IGNORED_PERMISSIONS = (
+    Q(content_type__model__in=IGNORED_PERMISSION_MODELS)
+    | Q(
+        codename__in=[
+            f"{action}_{model}"
+            for model in READ_ONLY_PERMISSION_MODELS
+            for action in ("add", "change", "delete")
+        ]
+    )
+    | Q(codename__in=SYSTEM_MANAGED_PERMISSIONS)
+    | Q(codename__in=ADMINISTRATOR_ONLY_PERMISSIONS)
+)
+
+
+def get_permission_catalog() -> QuerySet[Permission]:
+    """Return the permissions a custom role or a service account may be granted."""
+    return Permission.objects.filter(
+        content_type__app_label__in=ALLOWED_PERMISSION_APPS
+    ).exclude(IGNORED_PERMISSIONS)
+
 
 type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
 """Default permission prefixes available for all models (django-native)."""
@@ -1979,13 +2029,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if perm_prefix != "view":
             return Permission.objects.none().values_list("id", flat=True)
 
-        return (
-            Permission.objects.filter(
-                content_type__app_label__in=ALLOWED_PERMISSION_APPS
-            )
-            .exclude(IGNORED_PERMISSIONS)
-            .values_list("id", flat=True)
-        )
+        return get_permission_catalog().values_list("id", flat=True)
 
     @staticmethod
     def get_iam_folder_field(model: type[models.Model]) -> str:
