@@ -20,7 +20,8 @@ API_PATH = urlsplit(API_URL).path.rstrip("/")
 # The MCP server of an instance (ca_mcp.remote) sends each call with the caller's
 # own token, to the backend listener that token is valid on.
 # Called as transport(method, endpoint, params=, json=, data=, headers=) and must
-# return an object with status_code, text and json().
+# return an object with status_code, text and json(). fetch_bytes also passes
+# stream=True and uses the answer as a context manager with iter_content().
 _transport = None
 
 
@@ -137,13 +138,17 @@ def fetch_bytes(endpoint, max_bytes):
 
     Stops reading at the cap, so an oversized file is never held in memory.
     """
-    with requests.get(
-        f"{API_URL}{endpoint}",
-        headers=get_headers(),
-        verify=VERIFY_CERTIFICATE,
-        timeout=HTTP_TIMEOUT,
-        stream=True,
-    ) as res:
+    if _transport:
+        res = _transport("GET", endpoint, stream=True)
+    else:
+        res = requests.get(
+            f"{API_URL}{endpoint}",
+            headers=get_headers(),
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+            stream=True,
+        )
+    with res:
         if res.status_code != 200:
             return res.status_code, None
         data = bytearray()

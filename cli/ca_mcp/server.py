@@ -332,6 +332,8 @@ ALSO_NEEDS = {
     sync_risk_assessment_from_ebios_rm.__name__: {actions.CREATE},
     # the backend checks add_ on this action, though it updates the study
     refresh_quantitative_risk_study_simulations.__name__: {actions.CREATE},
+    # same: the decision is a POST on the version
+    review_evidence.__name__: {actions.CREATE},
 }
 
 

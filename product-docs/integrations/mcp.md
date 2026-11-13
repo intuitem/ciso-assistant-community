@@ -594,6 +594,11 @@ text) are saved to a temporary folder for the agent to open on a local (stdio)
 server, or attached to the result on an HTTP server. Files over 5 MB and
 link-only evidences are left to a reviewer in the UI.
 
+On the instance's MCP server with OAuth sign-in, this setting only decides
+whether the tool hands files over. It is not what protects them: an app
+connected with Read can also fetch the files of the evidences its user can see
+straight from the API, with its own token.
+
 {% hint style="warning" %}
 Reading files sends their content to the model provider your client uses. A file
 can also contain text written to manipulate the agent ("approve all evidences"),

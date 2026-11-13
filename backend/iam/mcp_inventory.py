@@ -54,6 +54,9 @@ OPERATIONS = {
     ("GET", "entities-list"): READ,
     ("GET", "entity-assessments-detail"): READ,
     ("GET", "entity-assessments-list"): READ,
+    # the file itself: Read covers evidence files, for any app that holds it
+    ("GET", "evidence-revisions-attachment"): READ,
+    ("GET", "evidence-revisions-list"): READ,
     ("GET", "evidences-detail"): READ,
     ("GET", "evidences-list"): READ,
     ("GET", "feared-events-list"): READ,
@@ -211,6 +214,7 @@ OPERATIONS = {
     ("PATCH", "contracts-detail"): UPDATE,
     ("PATCH", "entities-detail"): UPDATE,
     ("PATCH", "entity-assessments-detail"): UPDATE,
+    ("POST", "evidence-revisions-review"): UPDATE,
     ("PATCH", "evidences-detail"): UPDATE,
     ("PATCH", "feared-events-detail"): UPDATE,
     ("PATCH", "findings-detail"): UPDATE,

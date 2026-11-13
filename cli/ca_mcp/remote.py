@@ -207,6 +207,12 @@ class _Refused:
     def json(self):
         return json.loads(self.text)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
 
 def _with_params(endpoint, params) -> str:
     # pagination links already carry a query string: merge, params winning
@@ -222,8 +228,11 @@ def _with_params(endpoint, params) -> str:
     return parts.path + ("?" + urlencode(query) if query else "")
 
 
-def forward(method, endpoint, *, params=None, json=None, data=None, headers=None):
-    """ca_mcp transport: the call goes out with the caller's own token."""
+def forward(
+    method, endpoint, *, params=None, json=None, data=None, headers=None, stream=False
+):
+    """ca_mcp transport: the call goes out with the caller's own token. With
+    `stream`, the caller reads the body, and closes the answer."""
     access = get_access_token()
     if access is None:
         return _Refused()
@@ -236,6 +245,7 @@ def forward(method, endpoint, *, params=None, json=None, data=None, headers=None
             headers={**(headers or {}), "Authorization": f"Bearer {access.token}"},
             verify=config.VERIFY_CERTIFICATE,
             timeout=config.HTTP_TIMEOUT,
+            stream=stream,
         )
 
 

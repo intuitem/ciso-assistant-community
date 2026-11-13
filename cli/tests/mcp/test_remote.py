@@ -221,6 +221,34 @@ class TestForward:
         assert error is None
         assert [row["name"] for row in results] == ["a", "b", "c"]
 
+    def test_a_file_is_fetched_with_the_callers_token(self, connected):
+        connected(_access(token="oauth"))
+        answer = Mock(status_code=200)
+        answer.__enter__ = Mock(return_value=answer)
+        answer.__exit__ = Mock(return_value=False)
+        answer.iter_content.return_value = iter([b"abc"])
+        with (
+            patch("ca_mcp.remote.requests.request", return_value=answer) as request,
+            patch.object(client, "_transport", remote.forward),
+        ):
+            fetched = client.fetch_bytes("/evidence-revisions/x/attachment/", 10)
+
+        assert fetched == (200, b"abc")
+        method, url = request.call_args.args
+        assert (method, url) == ("GET", API + "/evidence-revisions/x/attachment/")
+        assert request.call_args.kwargs["headers"]["Authorization"] == "Bearer oauth"
+        # read in chunks up to the cap, not loaded whole
+        assert request.call_args.kwargs["stream"] is True
+
+    def test_no_caller_no_file(self):
+        with (
+            patch("ca_mcp.remote.requests.request") as request,
+            patch.object(client, "_transport", remote.forward),
+        ):
+            fetched = client.fetch_bytes("/evidence-revisions/x/attachment/", 10)
+        assert fetched == (401, None)
+        request.assert_not_called()
+
 
 class TestBudget:
     def test_calls_above_the_minute_limit_are_refused(self):
