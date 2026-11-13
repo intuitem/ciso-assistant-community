@@ -10,7 +10,6 @@ body: |
   - Status: ${exception_status}
   - Vervaldatum: ${expiration_date}
   - Domein: ${folder_name}
-  - URL: <${exception_url}>
 
   Beschrijving:
 
@@ -20,6 +19,6 @@ body: |
 
   ${exception_observation}
 
-  Meld u aan op uw CISO Assistant-portaal om deze uitzondering te bekijken en te beheren: [Naar CISO Assistant](${ciso_assistant_url})
+  Meld u aan op uw CISO Assistant-portaal om deze uitzondering te bekijken en te beheren: [Uitzondering bekijken](${exception_url})
 
   Bedankt.
