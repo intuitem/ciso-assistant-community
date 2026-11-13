@@ -289,3 +289,17 @@ export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'1-5': ['1', '2', '3', '4', '5'],
 	'FIPS-199': ['low', 'moderate', 'moderate', 'high', 'high']
 };
+
+// GDPR Art. 9 + Art. 10 categories, mirrors PersonalData.SENSITIVE_CATEGORIES (backend forces is_sensitive on save)
+export const SENSITIVE_PERSONAL_DATA_CATEGORIES = new Set([
+	'privacy_health_data',
+	'privacy_genetic_data',
+	'privacy_biometric_data',
+	'privacy_racial_ethnic_origin',
+	'privacy_political_opinions',
+	'privacy_religious_beliefs',
+	'privacy_trade_union_membership',
+	'privacy_sexual_orientation',
+	'privacy_sex_life_data',
+	'privacy_criminal_records'
+]);
