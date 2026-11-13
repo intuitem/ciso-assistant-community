@@ -545,3 +545,28 @@ def test_oauth_mode_is_not_read_only_by_default(monkeypatch):
     finally:
         monkeypatch.undo()
         importlib.reload(config)
+
+
+@pytest.mark.parametrize(
+    "public, host",
+    [
+        ("https://ca.example.com", "ca.example.com"),
+        # a proxy that drops the public port (nginx's $host) must still pass
+        ("https://ca.example.com:8443", "ca.example.com"),
+        ("https://[::1]:8443", "[::1]"),
+    ],
+)
+def test_the_default_hosts_take_the_host_with_or_without_a_port(public, host):
+    from mcp.server.transport_security import (
+        TransportSecurityMiddleware,
+        TransportSecuritySettings,
+    )
+
+    allowed = remote.default_allowed_hosts(public)
+    check = TransportSecurityMiddleware(
+        TransportSecuritySettings(allowed_hosts=allowed)
+    )
+    for sent in (host, f"{host}:8443", f"{host}:443"):
+        assert check._validate_host(sent), sent
+    assert not check._validate_host("other.example.com")
+    assert not check._validate_host("other.example.com:8443")

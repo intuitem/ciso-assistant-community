@@ -33,6 +33,15 @@ def resource_url() -> str:
     return config.PUBLIC_URL + "/mcp"
 
 
+def default_allowed_hosts(public_url: str) -> list[str]:
+    """The public host, with any port or none: a proxy may keep the public port
+    in Host, change it, or drop it (nginx's $host does)."""
+    parts = urlsplit(public_url)
+    # from netloc, not hostname: an IPv6 address keeps its brackets
+    host = parts.netloc.rsplit(":", 1)[0] if parts.port else parts.netloc
+    return [host, f"{host}:*"]
+
+
 # every backend call, token checks included: any request with a made-up token
 # triggers one, and they share the backend's workers with the UI
 _backend_calls = threading.BoundedSemaphore(max(1, config.MAX_CONCURRENT_CALLS))
@@ -324,9 +333,7 @@ def build_app():
     from .server import build_oauth_http_app
 
     if not config.ALLOWED_HOSTS:
-        # with or without a port: some proxies change it in Host
-        public = urlsplit(config.PUBLIC_URL)
-        config.ALLOWED_HOSTS = [public.netloc, f"{public.hostname}:*"]
+        config.ALLOWED_HOSTS = default_allowed_hosts(config.PUBLIC_URL)
     client.set_transport(forward)
     return outage_as_503(
         build_oauth_http_app(
