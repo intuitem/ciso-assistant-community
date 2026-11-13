@@ -6,6 +6,14 @@ import type { PageServerLoad } from './$types';
 import { error, type Actions } from '@sveltejs/kit';
 import { nestedDeleteFormAction } from '#lib/utils/actions.js';
 
+interface TerminologyTerm {
+	id: string;
+	name: string;
+	translated_name?: string;
+	hexcolor?: string;
+	is_visible: boolean;
+}
+
 export const load: PageServerLoad = async (event) => {
 	const detail = await loadDetail({
 		event,
@@ -17,27 +25,29 @@ export const load: PageServerLoad = async (event) => {
 		event.fetch(`${BASE_API_URL}/pmbok/projects/priority/`),
 		event.fetch(`${BASE_API_URL}/pmbok/projects/kind/`),
 		event.fetch(`${BASE_API_URL}/pmbok/projects/currencies/`),
-		fetchAllPages(event.fetch, `${BASE_API_URL}/terminologies/?field_path=project.status`).catch(
-			() => []
-		),
-		fetchAllPages(event.fetch, `${BASE_API_URL}/terminologies/?field_path=project.health`).catch(
-			() => []
-		)
+		fetchAllPages<TerminologyTerm>(
+			event.fetch,
+			`${BASE_API_URL}/terminologies/?field_path=project.status`
+		).catch(() => []),
+		fetchAllPages<TerminologyTerm>(
+			event.fetch,
+			`${BASE_API_URL}/terminologies/?field_path=project.health`
+		).catch(() => [])
 	]);
 
 	const priorityOptions = priorityRes.ok ? await priorityRes.json() : [];
 	const kindOptions = kindRes.ok ? await kindRes.json() : [];
 	const currencyOptions = currenciesRes.ok ? await currenciesRes.json() : [];
 
-	function toEnumOptions(items: any[]): { value: string; label: string }[] {
+	function toEnumOptions(items: TerminologyTerm[]): { value: string; label: string }[] {
 		return items
-			.filter((t: any) => t.is_visible)
-			.map((t: any) => ({ value: t.id, label: t.translated_name ?? t.name }));
+			.filter((t) => t.is_visible)
+			.map((t) => ({ value: t.id, label: t.translated_name ?? t.name }));
 	}
 	const statusOptions = toEnumOptions(statusTerms);
 	const healthOptions = toEnumOptions(healthTerms);
 	// Snapshots store the value's name: colours are looked up by it.
-	const toColors = (items: { name: string; hexcolor?: string }[]): Record<string, string> =>
+	const toColors = (items: TerminologyTerm[]): Record<string, string> =>
 		Object.fromEntries(items.map((t) => [t.name, t.hexcolor ?? '']));
 	const statusColors = toColors(statusTerms);
 	const healthColors = toColors(healthTerms);
