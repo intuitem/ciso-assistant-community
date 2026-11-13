@@ -552,6 +552,18 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const TOP_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'briefingHighRisks',
+		options: [
+			{ label: 'currentRisk', value: 'current' },
+			{ label: 'residualRisk', value: 'residual' }
+		],
+		multiple: false
+	}
+};
+
 export const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2053,6 +2065,7 @@ export const listViewFields = {
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
+			top_level: TOP_RISK_LEVEL_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
