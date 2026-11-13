@@ -3,7 +3,7 @@ import { loadDetail } from '#lib/utils/load.js';
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { fetchAllPages } from '#lib/utils/pagination.js';
 import type { PageServerLoad } from './$types';
-import type { Actions } from '@sveltejs/kit';
+import { error, type Actions } from '@sveltejs/kit';
 import { nestedDeleteFormAction } from '#lib/utils/actions.js';
 
 export const load: PageServerLoad = async (event) => {
@@ -42,14 +42,38 @@ export const load: PageServerLoad = async (event) => {
 	const statusColors = toColors(statusTerms);
 	const healthColors = toColors(healthTerms);
 
-	const snapshotsRes = await event.fetch(
-		`${BASE_API_URL}/metrology/builtin-metric-samples/for_object/?model=project&object_id=${event.params.id}`
-	);
+	const [snapshotsRes, objectRes] = await Promise.all([
+		event.fetch(
+			`${BASE_API_URL}/metrology/builtin-metric-samples/for_object/?model=project&object_id=${event.params.id}`
+		),
+		event.fetch(`${BASE_API_URL}/pmbok/projects/${event.params.id}/object/`)
+	]);
 	const rawSnapshots = snapshotsRes.ok ? await snapshotsRes.json() : [];
 	const snapshots = Array.isArray(rawSnapshots) ? [...rawSnapshots].reverse() : [];
 
+	// The ids the project links to, from the raw object: the read data masks the
+	// objects the user cannot see, and a section save must send those links back
+	// untouched. Without them the page does not load.
+	if (!objectRes.ok) {
+		error(objectRes.status, objectRes.statusText || 'Failed to load the linked objects');
+	}
+	const rawObject = await objectRes.json();
+	const linkedIds = Object.fromEntries(
+		[
+			'parent_project',
+			'status',
+			'health',
+			'linked_collection',
+			'responsibility_matrices',
+			'filtering_labels',
+			'owner',
+			'sponsor'
+		].map((field) => [field, rawObject[field]])
+	);
+
 	return {
 		...detail,
+		linkedIds,
 		priorityOptions,
 		kindOptions,
 		currencyOptions,

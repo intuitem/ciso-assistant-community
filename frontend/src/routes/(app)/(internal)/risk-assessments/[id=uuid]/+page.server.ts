@@ -11,10 +11,23 @@ import {
 } from '#lib/utils/actions.js';
 import { modelSchema } from '#lib/utils/schemas.js';
 import { fail, type Actions } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+import { selectionParams, withParams } from '#lib/utils/scenarioSelection.js';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+
+// Depends on the URL: changing the selection reruns this load only, not the layout's.
+export const load: PageServerLoad = async ({ fetch, params, url }) => {
+	const res = await fetch(
+		withParams(
+			`${BASE_API_URL}/risk-assessments/${params.id}/scenario-selection/`,
+			selectionParams(url.searchParams)
+		)
+	);
+	return { selection: res.ok ? await res.json() : null, selectionError: !res.ok };
+};
 
 export const actions: Actions = {
 	create: async (event) => {

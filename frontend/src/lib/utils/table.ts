@@ -2638,6 +2638,7 @@ export const listViewFields = {
 		],
 		optionalFields: {
 			head: [
+				'isActive',
 				'tierSetAt',
 				'lastAssessmentDate',
 				'filteringLabels',
@@ -2646,6 +2647,7 @@ export const listViewFields = {
 				'updatedAt'
 			],
 			body: [
+				'is_active',
 				'tier_set_at',
 				'last_assessment_date',
 				'filtering_labels',
@@ -2659,6 +2661,7 @@ export const listViewFields = {
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
 			tier: ENTITY_TIER_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER,
 			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2710,12 +2713,13 @@ export const listViewFields = {
 		head: ['refId', 'name', 'description', 'providerEntity', 'tier', 'labels'],
 		body: ['ref_id', 'name', 'description', 'provider_entity', 'tier', 'filtering_labels'],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['isActive', 'createdAt', 'updatedAt'],
+			body: ['is_active', 'created_at', 'updated_at']
 		},
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			tier: ENTITY_TIER_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
@@ -4745,6 +4749,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'tier',
 			optionsEndpoint: 'tiers?is_visible=true'
 		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'entities/is_active'
+		},
 		LABELS_BATCH_ACTION,
 		{
 			type: 'change_folder',
@@ -4763,6 +4774,14 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'tier',
 			optionsEndpoint: 'tiers?is_visible=true'
 		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'solutions/is_active'
+		},
+		LABELS_BATCH_ACTION,
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'entity-assessments': [

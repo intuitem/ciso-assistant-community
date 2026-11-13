@@ -2816,8 +2816,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objekt er skjult. Tilknytningen kan gå tapt ved redigering.",
-				"countPlural=other": "{count} objekter er skjult. Tilknytningene kan gå tapt ved redigering."
+				"countPlural=one": "{count} objekt er skjult.",
+				"countPlural=other": "{count} objekter er skjult."
 			}
 		}
 	],
