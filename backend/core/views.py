@@ -6151,6 +6151,18 @@ class AppliedControlFilterSet(GenericFilterSet):
         choices=Commitment.State.choices, label="Commitment state"
     )
     is_assigned = df.BooleanFilter(method="filter_is_assigned")
+    # Controls covered by the control plan of a domain: linked to an enabled
+    # recurrent task living in that domain, wherever the control itself lives.
+    # With include_subfolders=true, tasks below the domain count too.
+    include_subfolders = df.BooleanFilter(method="filter_noop")
+    # Only viewable domains are valid choices, so a hidden domain's id gets the
+    # same 400 as a made-up one.
+    recurrent_task_folder = df.ModelChoiceFilter(
+        queryset=lambda request: Folder.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        ),
+        method="filter_recurrent_task_folder",
+    )
     linked_models = df.MultipleChoiceFilter(
         choices=[("--", "--")] + APPLIED_CONTROL_LINKED_FIELDS,
         method="filter_linked_models",
@@ -6266,6 +6278,30 @@ class AppliedControlFilterSet(GenericFilterSet):
             return queryset.filter(owner__isnull=False).distinct()
         else:
             return queryset.filter(owner__isnull=True)
+
+    def filter_noop(self, queryset, name, value):
+        # Read by filter_recurrent_task_folder; filters nothing by itself.
+        return queryset
+
+    def filter_recurrent_task_folder(self, queryset, name, value):
+        if not value:
+            return queryset
+        include_subfolders = self.form.cleaned_data.get("include_subfolders")
+        folders = (
+            value.get_sub_folders(include_self=True) if include_subfolders else [value]
+        )
+        # Only tasks the requester can see count, so the filter reveals nothing
+        # about tasks hidden from them.
+        viewable_task_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, TaskTemplate
+        )
+        tasks = TaskTemplate.objects.filter(
+            id__in=viewable_task_ids,
+            folder__in=folders,
+            is_recurrent=True,
+            enabled=True,
+        )
+        return queryset.filter(task_templates__in=tasks).distinct()
 
     def filter_linked_models(self, queryset, name, value):
         """
@@ -21504,6 +21540,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
     def assigned_to(self, request):
         return Response(self._viewable_actors(assigned_task_templates__isnull=False))
 
+    REVIEW_GRANULARITIES = ("monthly", "weekly", "quarterly", "semiannual")
+    # Width in months of the month-aligned review buckets.
+    _BUCKET_MONTH_SPAN = MappingProxyType(
+        {"monthly": 1, "quarterly": 3, "semiannual": 6}
+    )
+
     @staticmethod
     def _generate_buckets(start_date, end_date, granularity):
         """Generate time buckets for the given date range and granularity.
@@ -21537,28 +21579,24 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 )
                 current += timedelta(weeks=1)
         else:
-            # Monthly buckets
-            current = date(start_date.year, start_date.month, 1)
+            # Month-aligned buckets: one, three or six months wide.
+            span = TaskTemplateViewSet._BUCKET_MONTH_SPAN[granularity]
+            first_month = start_date.month - (start_date.month - 1) % span
+            current = date(start_date.year, first_month, 1)
             while current <= end_date:
-                if current.month == 12:
-                    month_end = date(current.year, 12, 31)
-                else:
-                    month_end = date(current.year, current.month + 1, 1) - timedelta(
-                        days=1
-                    )
-                key = f"{current.year}-{current.month:02d}"
+                following = current + rd.relativedelta(months=span)
+                key = TaskTemplateViewSet._assign_node_to_bucket_key(
+                    current, granularity
+                )
                 buckets.append(
                     {
                         "key": key,
                         "label": key,
                         "start": current.isoformat(),
-                        "end": min(month_end, end_date).isoformat(),
+                        "end": min(following - timedelta(days=1), end_date).isoformat(),
                     }
                 )
-                if current.month == 12:
-                    current = date(current.year + 1, 1, 1)
-                else:
-                    current = date(current.year, current.month + 1, 1)
+                current = following
         return buckets
 
     @staticmethod
@@ -21599,8 +21637,11 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         if granularity == "weekly":
             iso_year, iso_week, _ = node_date.isocalendar()
             return f"{iso_year}-W{iso_week:02d}"
-        else:
-            return f"{node_date.year}-{node_date.month:02d}"
+        if granularity == "quarterly":
+            return f"{node_date.year}-Q{(node_date.month - 1) // 3 + 1}"
+        if granularity == "semiannual":
+            return f"{node_date.year}-H{(node_date.month - 1) // 6 + 1}"
+        return f"{node_date.year}-{node_date.month:02d}"
 
     @action(detail=False, name="Yearly tasks review")
     def yearly_review(self, request):
@@ -21617,7 +21658,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             end_month, end_year = 12, current_year
 
         granularity = request.query_params.get("granularity", "monthly")
-        if granularity not in ("monthly", "weekly"):
+        if granularity not in self.REVIEW_GRANULARITIES:
             granularity = "monthly"
 
         # Validate month values
@@ -21629,6 +21670,17 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             year_end = date(end_year, 12, 31)
         else:
             year_end = date(end_year, end_month + 1, 1) - timedelta(days=1)
+
+        # Quarters and semesters are shown whole, so widen the range to their bounds.
+        span = self._BUCKET_MONTH_SPAN.get(granularity, 1)
+        if span > 1:
+            year_start = date(
+                year_start.year, year_start.month - (year_start.month - 1) % span, 1
+            )
+            last_month = year_end.month + (-year_end.month) % span
+            year_end = date(year_end.year, last_month, 1) + rd.relativedelta(
+                months=1, days=-1
+            )
 
         # Cap weekly view to 1 year
         if granularity == "weekly":
@@ -21644,14 +21696,29 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         folder_filter = request.query_params.get("folder")
         assigned_to_filter = request.query_params.get("assigned_to")
         applied_controls_filter = request.query_params.get("applied_controls")
-        status_filter = request.query_params.get("status")
+        # Several statuses may be asked for: a task is kept when any of its
+        # buckets matches any of them.
+        status_filters = {
+            value for value in request.query_params.getlist("status") if value
+        }
+        include_subfolders = (
+            request.query_params.get("include_subfolders", "").lower() == "true"
+        )
 
         queryset = self.get_queryset().filter(
             is_recurrent=True,
             enabled=True,
         )
 
-        if folder_filter:
+        if folder_filter and include_subfolders:
+            # Opt-in: the folder and everything below it.
+            folder = Folder.objects.filter(id=folder_filter).first()
+            queryset = (
+                queryset.filter(folder__in=folder.get_sub_folders(include_self=True))
+                if folder
+                else queryset.none()
+            )
+        elif folder_filter:
             queryset = queryset.filter(folder_id=folder_filter)
         if assigned_to_filter:
             queryset = queryset.filter(assigned_to__id=assigned_to_filter)
@@ -21665,9 +21732,22 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             due_date__gte=year_start, due_date__lte=year_end
         ).order_by("due_date")
 
+        today = timezone.localdate()
+
+        # Open occurrences late today but outside the displayed range, before or
+        # after it: still late, whatever the range shows.
+        late_outside_period = TaskNode.objects.filter(
+            Q(due_date__lt=year_start) | Q(due_date__gt=year_end),
+            task_template=OuterRef("pk"),
+            status__in=TaskNode.OPEN_STATUSES,
+            due_date__lt=today,
+        )
+
         # get_queryset already joins folder and the serializer's related columns.
         task_templates = list(
-            queryset.prefetch_related(
+            queryset.annotate(
+                late_outside_period=Exists(late_outside_period)
+            ).prefetch_related(
                 Prefetch(
                     "tasknode_set",
                     queryset=filtered_nodes_qs,
@@ -21696,22 +21776,43 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
             # Build bucket_status for each bucket
             bucket_status = {}
-            has_any_matching_status = False
+            has_any_matching_status = (
+                template.late_outside_period and "overdue" in status_filters
+            )
             for key in bucket_keys:
                 bucket_nodes = nodes_by_bucket.get(key, [])
                 status, node_ids = self._aggregate_status(bucket_nodes)
+                # An open occurrence past its due date makes the whole bucket late.
+                # The oldest one is named, so the cell can lead to it rather than
+                # to an earlier occurrence of the bucket that is already closed.
+                overdue_node_id = next(
+                    (
+                        str(node.id)
+                        for node in bucket_nodes
+                        if node.status in TaskNode.OPEN_STATUSES
+                        and node.due_date < today
+                    ),
+                    None,
+                )
+                overdue = overdue_node_id is not None
                 bucket_status[key] = {
                     "status": status,
                     "node_ids": node_ids,
+                    "overdue": overdue,
+                    "overdue_node_id": overdue_node_id,
                 }
-                if status and (not status_filter or status == status_filter):
+                matches = (overdue and "overdue" in status_filters) or (
+                    bool(status) and (not status_filters or status in status_filters)
+                )
+                if matches:
                     has_any_matching_status = True
 
             # Post-aggregation status filter: skip templates with no matching buckets
-            if status_filter and not has_any_matching_status:
+            if status_filters and not has_any_matching_status:
                 continue
 
             template_data["bucket_status"] = bucket_status
+            template_data["late_outside_period"] = template.late_outside_period
 
             if tpl_folder_id not in folders_dict:
                 folders_dict[tpl_folder_id] = {
@@ -21733,6 +21834,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "start_year": start_year,
                 "end_month": end_month,
                 "end_year": end_year,
+                # The day the overdue flags were worked out for.
+                "today": today.isoformat(),
             }
         )
 
@@ -21754,7 +21857,10 @@ class TaskNodeFilterSet(GenericFilterSet):
         if value is True:
             return queryset.filter(due_date__lt=date.today()).order_by("due_date")
         elif value is False:
-            return queryset.filter(due_date__gte=date.today()).order_by("due_date")
+            # Undated (a one-time task without a date) is not past: listed here.
+            return queryset.filter(
+                Q(due_date__gte=date.today()) | Q(due_date__isnull=True)
+            ).order_by("due_date")
         return queryset
 
     class Meta:
