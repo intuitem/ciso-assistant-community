@@ -6082,7 +6082,6 @@
 	"implementationGroup": "Uygulama grubu",
 	"frameworkReportSubtitle": "Puanlama ölçeği {min}–{max} · {nIGs} uygulama grubu",
 	"complianceAssessmentsInScope": "kapsamdaki denetimler",
-	"onlyLiveStatusesCounted": "Yalnızca {statuses} durumundaki değerlendirmeler sayılır; denetimleri hariç tutmak için {deprecated} olarak işaretleyin.",
 	"detectedComplianceAssessments": "{total} denetim algılandı ({counted} sayıldı, {excluded} hariç tutuldu):",
 	"backToFramework": "Çerçeveye geri dön",
 	"compliancePercentage": "Uyum %",

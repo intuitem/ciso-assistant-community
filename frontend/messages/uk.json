@@ -5689,7 +5689,6 @@
 	"implementationGroup": "Група впровадження",
 	"frameworkReportSubtitle": "Шкала оцінювання {min}–{max} · груп впровадження: {nIGs}",
 	"complianceAssessmentsInScope": "аудитів в області застосування",
-	"onlyLiveStatusesCounted": "Враховуються лише оцінювання зі статусом {statuses} — позначте аудити як {deprecated}, щоб виключити їх.",
 	"detectedComplianceAssessments": "Виявлено аудитів: {total} (враховано: {counted}, виключено: {excluded}):",
 	"compliancePercentage": "% відповідності",
 	"complianceFormulaShort": "відповідні + ½·часткові, без урахування Н/З та неоцінених",
