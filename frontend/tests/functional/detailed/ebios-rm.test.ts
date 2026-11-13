@@ -4,6 +4,17 @@ import { optionLocator } from '../../utils/form-content.js';
 
 test.use({ actionTimeout: 60_000 });
 
+async function clickRowEdit(page: Page) {
+	// Toasts stack over the row actions and stop expiring once hovered: dismiss them first.
+	const toasts = page.getByTestId('toast');
+	await expect(async () => {
+		if (await toasts.count())
+			await toasts.first().getByLabel('Dismiss toast').click({ timeout: 1000 });
+		await expect(toasts).toHaveCount(0, { timeout: 1000 });
+	}).toPass({ timeout: 30_000 });
+	await page.getByTestId('tablerow-edit-button').click();
+}
+
 async function selectOptions(page: Page, field: string, ...names: string[]) {
 	const input = page.getByTestId(field);
 	for (const name of names) {
@@ -279,7 +290,7 @@ test('ebios rm study', async ({
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[22]], false);
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
-		await page.getByTestId('tablerow-edit-button').click();
+		await clickRowEdit(page);
 		await expect(page).toHaveURL(/.*edit.*/);
 		await page.getByTestId('form-input-motivation').selectOption('3');
 		await page.getByTestId('form-input-resources').selectOption('1');
@@ -298,7 +309,7 @@ test('ebios rm study', async ({
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[23]], false);
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
-		await page.getByTestId('tablerow-edit-button').click();
+		await clickRowEdit(page);
 		await expect(page).toHaveURL(/.*edit.*/);
 		await page.getByTestId('form-input-is-selected').uncheck();
 		await page.getByTestId('form-input-is-selected').check();
@@ -419,7 +430,7 @@ test('ebios rm study', async ({
 			await appliedControlsPage.createItem({ name: 'test applied control 2' });
 			await page.getByRole('link', { name: 'Define security measures for' }).click();
 			await expect(page).toHaveURL(/.*workshop-3.*/);
-			await page.getByTestId('tablerow-edit-button').click();
+			await clickRowEdit(page);
 			await expect(page).toHaveURL(/.*edit.*/);
 			await page
 				.locator(
