@@ -57,7 +57,8 @@ def test_reader_cannot_refresh_vulnerability_due_dates(reader_client, domain):
         detected_at=date(2026, 1, 1), due_date=date(2030, 1, 1)
     )
 
-    reader_client.post("/api/vulnerabilities/refresh-due-dates/")
+    resp = reader_client.post("/api/vulnerabilities/refresh-due-dates/")
 
+    assert resp.status_code == 200
     vulnerability.refresh_from_db()
     assert vulnerability.due_date == date(2030, 1, 1)
