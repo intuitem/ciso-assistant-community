@@ -947,9 +947,11 @@ def _construct_validation_flow(kwargs, params, instance):
 
     Naming a requester also hands them the right to act on the flow: a
     `change_requested` can only be answered by the requester, so leaving it on
-    the run's identity strands the request. Both it and `approver` are single
-    FKs, so a second id would be dropped without a word.
+    the run's identity strands the request, and so would naming someone who
+    cannot change validation flows in the domain. Both it and `approver` are
+    single FKs, so a second id would be dropped without a word.
     """
+    from . import authz
     from .engine import run_identity
 
     approvers = _rows_for(User, params.get("approver"), instance, "approver")
@@ -958,6 +960,12 @@ def _construct_validation_flow(kwargs, params, instance):
     requesters = _rows_for(User, params.get("requester"), instance, "requester")
     if len(requesters) > 1:
         raise FatalActionError("create_object: 'requester' names one user, not several")
+    if requesters and not authz.can(
+        requesters[0], "change_validationflow", kwargs["folder"]
+    ):
+        raise FatalActionError(
+            "create_object: 'requester' cannot act on validation flows in this domain"
+        )
 
     relations = {
         "compliance_assessments": ComplianceAssessment,

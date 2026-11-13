@@ -28,6 +28,7 @@ from automation.workflows.engine import start_instance
 from automation.workflows.graph import save_graph
 from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
 from automation.workflows.tests.helpers import publisher_user
+from automation.workflows.tests.test_run_authz import grant
 
 
 def node(type_, **kwargs):
@@ -232,6 +233,7 @@ class TestCreatingAValidationFlow:
         someone who did not submit it."""
         approver = User.objects.create(email=f"boss-{uuid.uuid4()}@test.example")
         submitter = User.objects.create(email=f"sub-{uuid.uuid4()}@test.example")
+        grant(submitter, domain, ["view_validationflow", "change_validationflow"])
         instance = start_instance(
             action_flow(
                 domain,
@@ -273,6 +275,7 @@ class TestCreatingAValidationFlow:
         it from the event that started the run, which is the whole point of the
         parameter."""
         submitter = User.objects.create(email=f"qf-{uuid.uuid4()}@test.example")
+        grant(submitter, domain, ["view_validationflow", "change_validationflow"])
         version = action_flow(
             domain,
             {
@@ -287,6 +290,28 @@ class TestCreatingAValidationFlow:
         instance = start_instance(version, payload={"submitted_by": str(submitter.id)})
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
         assert ValidationFlow.objects.get(folder=domain).requester == submitter
+
+    def test_a_requester_who_cannot_act_on_the_flow_is_refused(self, domain, audit):
+        """Only the requester can answer a `change_requested`: naming someone
+        who cannot change validation flows in the domain strands the request,
+        which is the very thing naming a requester is meant to prevent."""
+        reader = User.objects.create(email=f"r-{uuid.uuid4()}@test.example")
+        grant(reader, domain, ["view_validationflow"])
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {
+                        "requester": str(reader.id),
+                        "compliance_assessments": str(audit.id),
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not ValidationFlow.objects.filter(folder=domain).exists()
 
     def test_two_requesters_are_refused_rather_than_silently_halved(
         self, domain, audit

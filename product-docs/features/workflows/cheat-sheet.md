@@ -219,7 +219,7 @@ See [Read objects](actions.md#read-objects).
 - `timeline_entry` type: only `detection`, `mitigation`, `observation`.
 - `entity_score`: one reading per provider per day. Turn upsert on to correct same-day re-runs.
 - `task_template`: creates the occurrence too. Upsert re-dates it.
-- `validation_flow`: the requester is the run identity.
+- `validation_flow`: the requester is the run identity, unless `requester` names a user who can change validation flows in the domain.
 - `right_request`: opens in **New**.
 
 See [Create object](actions.md#create-object).
