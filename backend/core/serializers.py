@@ -4386,6 +4386,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "framework",
             "computed_outcome",
             "computed_values",
+            "outcome_errors",
             "folder",
             "perimeter",
             "progress",
@@ -4884,7 +4885,7 @@ class ComplianceAssessmentWriteSerializer(
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
-        read_only_fields = ["computed_outcome", "computed_values"]
+        read_only_fields = ["computed_outcome", "computed_values", "outcome_errors"]
 
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
@@ -4987,7 +4988,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             },
         ]
     )
-    folder = FieldsRelatedField()
+    # content_type tells the UI the requirement sits in a third-party enclave, so a
+    # task raised from it can be filed there.
+    folder = FieldsRelatedField(["id", "content_type"])
     perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()

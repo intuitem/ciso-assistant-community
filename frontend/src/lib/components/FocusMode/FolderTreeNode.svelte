@@ -19,6 +19,8 @@
 		depth?: number;
 		contentTypes?: string[];
 		ancestors?: string[];
+		/** Start expanded: the root of a tree shows its first level at once. */
+		expanded?: boolean;
 	}
 
 	let {
@@ -28,7 +30,8 @@
 		onSelect,
 		depth = 0,
 		contentTypes = ['DO', 'GL'],
-		ancestors = []
+		ancestors = [],
+		expanded = false
 	}: Props = $props();
 
 	const sortedChildren = $derived.by(() => {
@@ -54,7 +57,7 @@
 		() => node.writable === false && (node.children ?? []).some(subtreeHasWritable)
 	);
 
-	let isExpanded = $state(shouldAutoExpand);
+	let isExpanded = $state(shouldAutoExpand || untrack(() => expanded));
 	const isSelected = $derived(node.uuid !== null && focusId === String(node.uuid));
 	// Node is selectable if it has a uuid, matches the allowed content types,
 	// and — when a write_perm filter is active.

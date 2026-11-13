@@ -13,6 +13,7 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -140,6 +141,15 @@ class PersonalDataViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Processing not found"},
                 status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_personaldata"),
+            folder=processing.folder,
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
             )
 
         category_terms = {

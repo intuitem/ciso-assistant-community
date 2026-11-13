@@ -57,3 +57,5 @@ JSON_RESPONSE = _flag("CA_MCP_JSON_RESPONSE", "false")
 # Serving every HTTP caller with the server's own TOKEN collapses all users into
 # one identity; opt-in only.
 ALLOW_ENV_TOKEN = _flag("CA_MCP_ALLOW_ENV_TOKEN", "false")
+# Evidence files go to the model provider once read; opt-in only.
+READ_EVIDENCE_FILES = _flag("CA_MCP_READ_EVIDENCE_FILES", "false")

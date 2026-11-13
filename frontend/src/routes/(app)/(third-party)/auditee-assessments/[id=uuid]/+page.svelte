@@ -782,7 +782,10 @@
 		await refreshAll();
 	}
 
-	function modalTaskTemplateCreateForm(createform: SuperForm<any>): void {
+	function modalTaskTemplateCreateForm(
+		createform: SuperForm<any>,
+		folderContentType?: string
+	): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -790,6 +793,9 @@
 				formAction: '?/createTaskTemplate',
 				invalidateAll: true,
 				model: data.taskTemplateModel,
+				// A third-party audit lives in an enclave: offer it, else the prefilled
+				// domain is not in the picker and shows blank.
+				folderContentTypes: folderContentType === 'EN' ? ['DO', 'GL', 'EN'] : undefined,
 				debug: false
 			}
 		};
@@ -1878,7 +1884,8 @@
 																data-testid="add-task-template-button"
 																onclick={() =>
 																	modalTaskTemplateCreateForm(
-																		requirementAssessment.taskTemplateCreateForm
+																		requirementAssessment.taskTemplateCreateForm,
+																		requirementAssessment.folder?.content_type
 																	)}
 															>
 																<i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}
