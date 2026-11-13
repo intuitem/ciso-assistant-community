@@ -9536,6 +9536,10 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
     computed_values = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed values")
     )
+    # ref_ids of outcome rules whose last evaluation failed.
+    outcome_errors = models.JSONField(
+        blank=True, null=True, verbose_name=_("Outcome errors")
+    )
 
     assets = models.ManyToManyField(
         Asset,

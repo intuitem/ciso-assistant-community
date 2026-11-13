@@ -5312,7 +5312,6 @@
 	"implementationGroup": "Izvedbena skupina",
 	"frameworkReportSubtitle": "Lestvica točkovanja {min}–{max} · {nIGs} izvedbenih skupin",
 	"complianceAssessmentsInScope": "revizije v obsegu",
-	"onlyLiveStatusesCounted": "Upoštevajo se samo ocene s statusom {statuses} — označite revizije kot {deprecated}, da jih izključite.",
 	"detectedComplianceAssessments": "Zaznanih {total} revizij ({counted} upoštevanih, {excluded} izključenih):",
 	"backToFramework": "Nazaj na okvir",
 	"compliancePercentage": "% skladnosti",

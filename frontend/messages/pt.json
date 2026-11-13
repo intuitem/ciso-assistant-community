@@ -5946,7 +5946,6 @@
 	"implementationGroup": "Grupo de implementação",
 	"frameworkReportSubtitle": "Escala de pontuação {min}–{max} · {nIGs} grupos de implementação",
 	"complianceAssessmentsInScope": "auditorias no escopo",
-	"onlyLiveStatusesCounted": "Somente avaliações com status {statuses} são contabilizadas — marque as auditorias como {deprecated} para excluí-las.",
 	"detectedComplianceAssessments": "Detectadas {total} auditorias ({counted} contabilizadas, {excluded} excluídas):",
 	"backToFramework": "Voltar ao framework",
 	"compliancePercentage": "Conformidade %",
