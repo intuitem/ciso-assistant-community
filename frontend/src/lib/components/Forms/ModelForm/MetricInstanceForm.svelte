@@ -93,12 +93,16 @@
 	let direction = $state<Direction>('none');
 	let levels = $state<Array<{ ref_id: string; name: string }>>([]);
 
+	// The definition's fields as last entered: the form sends none of them
+	// in 'existing' mode, and gets them back when 'define' resumes.
+	let definitionDraft: Record<string, unknown> | null = null;
+
 	function setMode(next: 'define' | 'existing') {
 		mode = next;
 		if (next === 'define') {
 			$definitionValue = null;
 			if (!$inlineDefinition || typeof $inlineDefinition !== 'object') {
-				$inlineDefinition = {
+				$inlineDefinition = definitionDraft ?? {
 					category: 'quantitative',
 					unit: null,
 					decimals: null,
@@ -109,6 +113,9 @@
 				};
 			}
 		} else {
+			if ($inlineDefinition && typeof $inlineDefinition === 'object') {
+				definitionDraft = { ...$inlineDefinition };
+			}
 			$inlineDefinition = null;
 		}
 	}
