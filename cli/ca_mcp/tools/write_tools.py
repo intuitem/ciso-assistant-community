@@ -1848,6 +1848,13 @@ def _rollback_note(evidence_id) -> str:
     return f" (could not delete empty evidence {evidence_id}, remove it manually)"
 
 
+def _refuse_hidden_or_symlinked_path(path: Path) -> bool:
+    """Reject hidden paths and any symlink that could escape the user's visible tree."""
+    expanded = path.expanduser()
+    resolved = expanded.resolve(strict=False)
+    return expanded.is_symlink() or any(part.startswith(".") for part in resolved.parts)
+
+
 async def create_evidence(
     file_path: str,
     name: str = None,
@@ -1883,9 +1890,10 @@ async def create_evidence(
             folder
     """
     try:
-        path = Path(file_path).expanduser().resolve()
-        if any(part.startswith(".") for part in path.parts):
+        path = Path(file_path).expanduser()
+        if _refuse_hidden_or_symlinked_path(path):
             return f"Error: refusing a hidden file or directory: {file_path}"
+        path = path.resolve(strict=False)
         if not path.is_file():
             return f"Error: file not found: {file_path}"
         size = path.stat().st_size
