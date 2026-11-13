@@ -115,6 +115,11 @@ from .tools.update_tools import (
     update_timeline_entry,
 )
 
+from .tools.evidence_review_tools import (
+    get_evidences_to_review,
+    read_evidence,
+    review_evidence,
+)
 from .tools.tprm_tools import (
     # Read tools
     get_entities,
@@ -173,6 +178,8 @@ from .tools.ebios_rm_tools import (
 )
 
 READ_TOOLS = [
+    get_evidences_to_review,
+    read_evidence,
     find_requirements,
     get_requirement_mappings,
     count_objects,
@@ -278,6 +285,7 @@ UPDATE_TOOLS = [
     update_vulnerability,
     update_finding,
     update_evidence,
+    review_evidence,
     update_incident,
     update_timeline_entry,
     update_asset,
@@ -357,7 +365,8 @@ def _annotations(fn, is_read):
         return ToolAnnotations(
             read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )
-    if name.startswith(("update_", "sync_")):
+    # review_: overwrites an earlier decision and the evidence status
+    if name.startswith(("update_", "sync_", "review_")):
         return ToolAnnotations(
             read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )

@@ -99,3 +99,5 @@ MAX_CALLS_PER_MINUTE = int(os.getenv("MCP_MAX_CALLS_PER_MINUTE", "60"))
 MAX_RESPONSE_CHARS_PER_HOUR = int(
     os.getenv("MCP_MAX_RESPONSE_CHARS_PER_HOUR", "2000000")
 )
+# Evidence files go to the model provider once read; opt-in only.
+READ_EVIDENCE_FILES = _flag("CA_MCP_READ_EVIDENCE_FILES", "false")

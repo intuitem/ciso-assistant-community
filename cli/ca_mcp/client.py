@@ -132,6 +132,28 @@ def pagination_hint(data, shown):
     )
 
 
+def fetch_bytes(endpoint, max_bytes):
+    """Stream a file: (status_code, bytes), bytes None when over max_bytes.
+
+    Stops reading at the cap, so an oversized file is never held in memory.
+    """
+    with requests.get(
+        f"{API_URL}{endpoint}",
+        headers=get_headers(),
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+        stream=True,
+    ) as res:
+        if res.status_code != 200:
+            return res.status_code, None
+        data = bytearray()
+        for chunk in res.iter_content(64 * 1024):
+            data.extend(chunk)
+            if len(data) > max_bytes:
+                return res.status_code, None
+        return res.status_code, bytes(data)
+
+
 def make_post_request(endpoint, payload):
     """
     Make a POST request to the API
