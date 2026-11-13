@@ -779,13 +779,13 @@
 	{#if $errors && $errors._errors}
 		<div>
 			{#each $errors._errors as error}
-				<p class="text-error-500 text-xs font-medium">{error}</p>
+				<p class="text-error-500 text-xs font-medium">{safeTranslate(error)}</p>
 			{/each}
 		</div>
 	{:else if $errors && $errors.length > 0}
 		<div>
 			{#each $errors as error}
-				<p class="text-error-500 text-xs font-medium">{error}</p>
+				<p class="text-error-500 text-xs font-medium">{safeTranslate(error)}</p>
 			{/each}
 		</div>
 	{/if}
