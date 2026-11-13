@@ -4988,7 +4988,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             },
         ]
     )
-    folder = FieldsRelatedField()
+    # content_type tells the UI the requirement sits in a third-party enclave, so a
+    # task raised from it can be filed there.
+    folder = FieldsRelatedField(["id", "content_type"])
     perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()
