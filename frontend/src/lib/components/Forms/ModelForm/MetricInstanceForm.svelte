@@ -73,8 +73,8 @@
 	let mode = $state<'define' | 'existing'>(
 		initialData.metric_definition || data?.metric_definition || !canDefine ? 'existing' : 'define'
 	);
-	// The mode follows the domain's rights until the author picks one.
-	let modeChosen = false;
+	// The mode follows the domain's rights, except where the author picked one.
+	let chosenMode: 'define' | 'existing' | null = null;
 
 	const modeOptions = $derived([
 		{ value: 'define', label: m.defineMetricHere() },
@@ -126,13 +126,18 @@
 		setMode(mode);
 	}
 
+	// Only a change of rights moves the mode: picking or clearing a definition does not.
+	let couldDefine: boolean | undefined;
 	$effect(() => {
-		if (!isCreate || initialData.metric_definition) return;
-		if (!canDefine) {
-			if (mode === 'define') setMode('existing');
-		} else if (mode === 'existing' && !modeChosen && !$definitionValue) {
-			setMode('define');
-		}
+		if (!isCreate || initialData.metric_definition || canDefine === couldDefine) return;
+		couldDefine = canDefine;
+		untrack(() => {
+			if (!canDefine) {
+				if (mode === 'define') setMode('existing');
+			} else if (mode === 'existing' && chosenMode !== 'existing' && !$definitionValue) {
+				setMode('define');
+			}
+		});
 	});
 
 	// Definition defaults follow the metric's own target and frequency: the
@@ -197,7 +202,7 @@
 	function useSimilar() {
 		if (!similar) return;
 		const picked = similar;
-		modeChosen = true;
+		chosenMode = 'existing';
 		setMode('existing');
 		$definitionValue = picked.id;
 		definitionVersion += 1;
@@ -286,7 +291,7 @@
 	// drawer the metric's page uses, so the formula and its picks have one
 	// place to change, whether the formula is the metric's own or its
 	// definition's.
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 	import FormulaDrawer from '#lib/components/Metrology/FormulaDrawer.svelte';
 	import type { Composition, Saved } from '#lib/components/Metrology/ComposeMetricEditor.svelte';
 	import type { DefinitionComposition } from '#lib/components/Metrology/DefinitionFormulaPanel.svelte';
@@ -401,7 +406,7 @@
 			options={modeOptions}
 			value={mode}
 			onChange={(value) => {
-				modeChosen = true;
+				chosenMode = value as 'define' | 'existing';
 				setMode(value as 'define' | 'existing');
 			}}
 			ariaLabel={m.metricDefinition()}
