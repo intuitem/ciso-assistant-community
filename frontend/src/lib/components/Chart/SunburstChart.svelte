@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface SunburstData {
 		name: string;
@@ -80,8 +81,8 @@
 						formatter: function (params: any) {
 							// Use ECharts' treePathInfo to get the full path
 							const path = params.treePathInfo
-								? params.treePathInfo.map((node: any) => node.name).join(' → ')
-								: params.name;
+								? params.treePathInfo.map((node: any) => escapeHtml(node.name)).join(' → ')
+								: escapeHtml(params.name);
 
 							const count = params.data.value || 0;
 							const percentage = params.percent ? `${params.percent.toFixed(1)}%` : '';

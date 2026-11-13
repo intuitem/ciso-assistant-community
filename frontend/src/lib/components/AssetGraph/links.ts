@@ -1,5 +1,3 @@
-import { fetchAllByIds } from '$lib/utils/pagination';
-
 export const idOf = (ref: any): string => (typeof ref === 'object' && ref !== null ? ref.id : ref);
 
 export function createLinkWriter(notifyError: (message: string) => void) {
@@ -33,11 +31,12 @@ export function createLinkWriter(notifyError: (message: string) => void) {
 		const run = async () => {
 			let current: string[];
 			try {
-				const [row] = await fetchAllByIds<{ parent_assets?: unknown[] }>(fetch, '/assets', [
-					childId
-				]);
+				// The raw object, not the list data: that one masks the parents the user
+				// cannot see, and the write must send them back untouched.
+				const res = await fetch(`/assets/${childId}/object`);
+				const row = res.ok ? await res.json() : null;
 				if (!Array.isArray(row?.parent_assets)) throw new Error('parents unavailable');
-				current = row.parent_assets.map(idOf);
+				current = row.parent_assets.map(String);
 			} catch {
 				notifyError('Network error updating asset relationship');
 				return false;

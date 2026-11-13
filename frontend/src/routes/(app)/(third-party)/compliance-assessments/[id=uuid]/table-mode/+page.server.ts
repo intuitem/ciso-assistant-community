@@ -1,14 +1,14 @@
-import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { modelSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { handleErrorResponse, nestedWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import type { ModelInfo } from '$lib/utils/types';
+import type { ModelInfo } from '#lib/utils/types.js';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
@@ -55,12 +55,10 @@ export const load = (async ({ fetch, params }) => {
 				folder: requirementAssessment.folder.id,
 				requirement: requirementAssessment.requirement.id,
 				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				...(requirementAssessment.evidences !== undefined && {
-					evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
-				}),
-				...(requirementAssessment.applied_controls !== undefined && {
-					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
-				})
+				// Every link field this viewer reads, as ids: the read data holds objects
+				// and masks the ones the user cannot see, and the form must send those
+				// links back untouched.
+				...requirementAssessment.linked_ids
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {

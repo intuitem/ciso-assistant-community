@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 
 	interface Props {
 		width?: string;
@@ -39,7 +40,9 @@
 						},
 						formatter: function (params) {
 							var tar = params[1];
-							return tar.name + '<br/>' + tar.seriesName + ' : ' + tar.value;
+							return (
+								escapeHtml(tar.name) + '<br/>' + escapeHtml(tar.seriesName) + ' : ' + tar.value
+							);
 						}
 					},
 					grid: {

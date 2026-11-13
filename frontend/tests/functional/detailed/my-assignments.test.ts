@@ -1,4 +1,4 @@
-import { assigned, author, m, owners, riskAssessment } from '$paraglide/messages.js';
+import { assigned, author, m, owners, riskAssessment } from '#paraglide/messages.js';
 import { version } from 'os';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
@@ -130,7 +130,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 			folder: vars.folderName
 		});
 
-		// await page.getByTestId('accordion-item-overview').click();
+		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
 		await expect(page.getByText('control-without-owner')).toHaveCount(0);
 	});

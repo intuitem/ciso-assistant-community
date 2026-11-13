@@ -1,15 +1,15 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -341,10 +341,10 @@
 		{#each frameworks as framework (framework.id)}
 			<a
 				href="/frameworks/{framework.id}/report?campaign={data.data.id}"
-				class="btn preset-filled-secondary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				data-testid="campaign-insights-button"
 			>
-				<i class="fa-solid fa-chart-line mr-2"></i>
+				<i class="fa-solid fa-chart-line mr-2 text-indigo-500"></i>
 				{frameworks.length > 1 ? `${m.insights()} — ${framework.str}` : m.insights()}
 			</a>
 		{/each}

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import AssetClassNode, { type ClassNode } from '$lib/components/AssetTree/AssetClassNode.svelte';
-	import UnclassifiedAssets from '$lib/components/AssetTree/UnclassifiedAssets.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
+	import AssetClassNode, { type ClassNode } from '#lib/components/AssetTree/AssetClassNode.svelte';
+	import UnclassifiedAssets from '#lib/components/AssetTree/UnclassifiedAssets.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Props {

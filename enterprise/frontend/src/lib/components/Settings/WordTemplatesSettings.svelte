@@ -1,12 +1,12 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
-	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants';
-	import { fetchAllPages } from '$lib/utils/pagination';
+	import * as m from '#paraglide/messages.js';
+	import { LOCALE_DISPLAY_MAP } from '#lib/utils/constants.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -19,6 +19,7 @@
 	interface WordTemplateInfo {
 		template_key: string;
 		description: string;
+		format: 'docx' | 'typst';
 		default_languages: string[];
 		variables: WordTemplateVariable[];
 		overrides: string[];
@@ -196,6 +197,10 @@
 		return (LOCALE_DISPLAY_MAP as Record<string, string>)[code] ?? code.toUpperCase();
 	}
 
+	function isTypst(key: string): boolean {
+		return availableTemplates.find((t) => t.template_key === key)?.format === 'typst';
+	}
+
 	function getTemplateVariables(key: string): WordTemplateVariable[] {
 		return availableTemplates.find((t) => t.template_key === key)?.variables || [];
 	}
@@ -214,7 +219,7 @@
 </script>
 
 <div class="flex flex-col gap-6">
-	<span class="text-surface-600-400">{m.wordTemplatesDescription()}</span>
+	<span class="text-surface-600-400">{m.reportTemplatesDescription()}</span>
 	<div class="card p-4 preset-tonal-warning w-fit">
 		<i class="fa-solid fa-warning mr-2 text-warning-900-5"></i>
 		{m.wordTemplatesWarning()}
@@ -289,8 +294,21 @@
 				<!-- Current file info -->
 				{#if getOverride(editingKey, editingLang)?.file}
 					<div class="flex items-center gap-2 text-sm text-surface-600-400">
-						<i class="fa-solid fa-file-word text-primary-500"></i>
+						<i
+							class="fa-solid {isTypst(editingKey)
+								? 'fa-file-pdf'
+								: 'fa-file-word'} text-primary-500"
+						></i>
 						<span>{getOverride(editingKey, editingLang)?.file}</span>
+						<a
+							href="/fe-api/custom-word-templates/{getOverride(editingKey, editingLang)
+								?.id}/download"
+							class="btn btn-sm preset-outlined-surface-500"
+							download
+						>
+							<i class="fa-solid fa-download text-xs"></i>
+							{m.download()}
+						</a>
 					</div>
 				{/if}
 
@@ -300,12 +318,14 @@
 					<input
 						id="word-file-upload"
 						type="file"
-						accept=".docx"
+						accept={isTypst(editingKey) ? '.typ' : '.docx'}
 						class="input mt-1"
 						onchange={handleFileInput}
 						disabled={uploading}
 					/>
-					<p class="text-xs text-surface-600-400 mt-1">{m.wordTemplateUploadHelp()}</p>
+					<p class="text-xs text-surface-600-400 mt-1">
+						{isTypst(editingKey) ? m.typstTemplateUploadHelp() : m.wordTemplateUploadHelp()}
+					</p>
 				</div>
 
 				{#if uploading}
@@ -323,15 +343,17 @@
 							{m.templateVariables()}
 						</summary>
 						<p class="text-xs text-surface-600-400 mt-2 mb-3">
-							{m.wordTemplateSyntaxHelp()}
+							{isTypst(editingKey) ? m.typstTemplateSyntaxHelp() : m.wordTemplateSyntaxHelp()}
 						</p>
-						<div class="text-xs text-surface-600-400 mb-3 space-y-1 font-mono">
-							<p>{'{{variable}}'} &mdash; simple value</p>
-							<p>{'{{image}}'} &mdash; inline image</p>
-							<p>
-								{'{%tr for ra in requirement_assessments %} ... {%tr endfor %}'} &mdash; table rows
-							</p>
-						</div>
+						{#if !isTypst(editingKey)}
+							<div class="text-xs text-surface-600-400 mb-3 space-y-1 font-mono">
+								<p>{'{{variable}}'} &mdash; simple value</p>
+								<p>{'{{image}}'} &mdash; inline image</p>
+								<p>
+									{'{%tr for ra in requirement_assessments %} ... {%tr endfor %}'} &mdash; table rows
+								</p>
+							</div>
+						{/if}
 						<div class="space-y-2 mt-2">
 							{#each getTemplateVariables(editingKey) as variable}
 								<div class="flex items-start gap-2 text-sm">
@@ -374,7 +396,11 @@
 					<hr class="border-surface-200-800" />
 				{/if}
 				<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-100-900 transition-colors">
-					<i class="fa-solid fa-file-word text-primary-500"></i>
+					<i
+						class="fa-solid {template.format === 'typst'
+							? 'fa-file-pdf'
+							: 'fa-file-word'} text-primary-500"
+					></i>
 					<div class="flex-1 min-w-0">
 						<div class="flex items-center gap-2">
 							<span class="font-medium">{templateName(template.template_key)}</span>

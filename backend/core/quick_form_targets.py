@@ -46,6 +46,11 @@ class Target:
         of one request, for lookups that do not depend on the form."""
         return self.validate_config(config, quick_form)
 
+    def applies_to(self, subject) -> bool:
+        """Whether this subject can be assessed for the target at all: no form
+        is offered on, nor writes to, a subject it does not apply to."""
+        return True
+
     def current(self, subject) -> tuple[Any, str]:
         """The subject's current value and its display."""
         raise NotImplementedError

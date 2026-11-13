@@ -2,6 +2,7 @@ import uuid
 from collections import defaultdict
 from math import isfinite
 
+import django_filters as df
 import structlog
 from django.contrib.auth.models import Permission
 from django.db import transaction
@@ -13,7 +14,7 @@ from rest_framework.response import Response
 from core.models import AppliedControl, Asset, Vulnerability
 from core.permissions import FeatureFlagRequired
 from iam.models import RoleAssignment
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from sec_intel.models import Technique
 from sec_intel.views import build_catalog_matrix
 from .models import ThreatModel, ThreatModelNode, ThreatModelEdge
@@ -25,21 +26,32 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "threat_modeling.serializers"
 
 
-def _validate_related(user, parsed: dict) -> list[str]:
-    """Reject linked objects the caller cannot see; save_graph bypasses serializers."""
+def _validate_related(user, threat_model, parsed: dict) -> list[str]:
+    """Reject new links to objects the caller cannot see, as serializers do:
+    save_graph bypasses them. A link the node already has is kept, visible or
+    not, and dropping one needs nothing."""
     errors = []
     for key, model in (
         ("assets", Asset),
         ("applied_controls", AppliedControl),
         ("vulnerabilities", Vulnerability),
     ):
+        current = defaultdict(set)
+        for node_id, related_id in ThreatModelNode.objects.filter(
+            threat_model=threat_model, id__in=parsed
+        ).values_list("id", f"{key}__id"):
+            if related_id is not None:
+                current[node_id].add(related_id)
         requested = set()
-        for payload in parsed.values():
+        for node_id, payload in parsed.items():
             for raw in payload.get(key) or []:
                 try:
-                    requested.add(uuid.UUID(str(raw)))
+                    related_id = uuid.UUID(str(raw))
                 except ValueError, AttributeError:
                     errors.append(f"Invalid {key} id '{raw}'.")
+                    continue
+                if related_id not in current[node_id]:
+                    requested.add(related_id)
         if not requested:
             continue
         try:
@@ -77,6 +89,27 @@ def validate_placements(threat_model, placements) -> list[str]:
     return errors
 
 
+class ThreatModelFilterSet(GenericFilterSet):
+    # A threat model uses an asset, control or vulnerability through its nodes.
+    assets = df.ModelMultipleChoiceFilter(
+        field_name="nodes__assets", queryset=Asset.objects.all(), distinct=True
+    )
+    applied_controls = df.ModelMultipleChoiceFilter(
+        field_name="nodes__applied_controls",
+        queryset=AppliedControl.objects.all(),
+        distinct=True,
+    )
+    vulnerabilities = df.ModelMultipleChoiceFilter(
+        field_name="nodes__vulnerabilities",
+        queryset=Vulnerability.objects.all(),
+        distinct=True,
+    )
+
+    class Meta:
+        model = ThreatModel
+        fields = ["folder", "catalog", "filtering_labels"]
+
+
 class ThreatModelViewSet(BaseModelViewSet):
     """
     API endpoint that allows threat models to be viewed or edited.
@@ -94,7 +127,7 @@ class ThreatModelViewSet(BaseModelViewSet):
     }
 
     model = ThreatModel
-    filterset_fields = ["folder", "catalog"]
+    filterset_class = ThreatModelFilterSet
     search_fields = ["ref_id", "name", "description"]
 
     @action(detail=True, name="Get the catalog matrix with the selection applied")
@@ -278,7 +311,7 @@ class ThreatModelViewSet(BaseModelViewSet):
             }
 
         errors.extend(validate_placements(threat_model, placements))
-        errors.extend(_validate_related(request.user, parsed))
+        errors.extend(_validate_related(request.user, threat_model, parsed))
 
         edges = []
         for index, edge in enumerate(raw_edges):

@@ -3,7 +3,7 @@
 // shapes (live domain vs export shape), so their mappers stay separate — but
 // the edge styling and node-type labels are identical and live here.
 import { MarkerType } from '@xyflow/svelte';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export const EDGE_STYLE = 'stroke: var(--color-surface-500); stroke-width: 2;';
 export const EDGE_MARKER = { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' };

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Calendar from '$lib/components/Calendar/Calendar.svelte';
-	import { CALENDAR_CATEGORIES, type CalendarEvent } from '$lib/components/Calendar/types';
+	import Calendar from '#lib/components/Calendar/Calendar.svelte';
+	import { CALENDAR_CATEGORIES, type CalendarEvent } from '#lib/components/Calendar/types.js';
 	import type { PageData } from './$types';
 
 	interface Props {

@@ -4,13 +4,14 @@
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import NumberField from '../NumberField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -48,22 +49,26 @@
 	}
 
 	let isScheduleTainted = $derived(scheduleTaintedHandler($scheduleTainted));
+	const isVendor = $derived(!!page.data?.user?.is_third_party);
 </script>
 
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="actors?user__is_third_party=False"
-	optionsLabelField="str"
-	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
-		position: 'prefix'
-	}}
-	field="assigned_to"
-	cacheLock={cacheLocks['assigned_to']}
-	bind:cachedValue={formDataCache['assigned_to']}
-	label={m.assignedTo()}
-/>
+{#if !isVendor}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="actors?user__is_third_party=False"
+		lazy
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="assigned_to"
+		cacheLock={cacheLocks['assigned_to']}
+		bind:cachedValue={formDataCache['assigned_to']}
+		label={m.assignedTo()}
+	/>
+{/if}
 {#if !$is_recurrent}
 	<TextField
 		type="date"
@@ -74,14 +79,16 @@
 		bind:cachedValue={formDataCache['task_date']}
 	/>
 {/if}
-<Checkbox
-	{form}
-	field="is_recurrent"
-	label={m.recurrent()}
-	helpText={m.isRecurrentHelpText()}
-	cacheLock={cacheLocks['is_recurrent']}
-	bind:cachedValue={formDataCache['is_recurrent']}
-/>
+{#if !isVendor}
+	<Checkbox
+		{form}
+		field="is_recurrent"
+		label={m.recurrent()}
+		helpText={m.isRecurrentHelpText()}
+		cacheLock={cacheLocks['is_recurrent']}
+		bind:cachedValue={formDataCache['is_recurrent']}
+	/>
+{/if}
 {#if $is_recurrent}
 	<Dropdown
 		open={true}
@@ -224,96 +231,100 @@
 		disableDoubleDash={true}
 	/>
 {/if}
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="evidences"
-	optionsExtraFields={[['folder', 'str']]}
-	optionsLabelField="auto"
-	helpText={m.taskTemplateEvidenceHelpText()}
-	helpTextClass="mt-1 border-l-2 border-primary-500 bg-primary-500/5 rounded-r py-1 pl-2"
-	field="evidences"
-	label={m.evidences()}
-	translateOptions={false}
-	allowUserOptions="append"
-	additionalMultiselectOptions={{
-		createOptionMsg: ({ searchText }: { searchText: string }) =>
-			m.createExpectedEvidence({ name: searchText }),
-		liUserMsgClass: '!text-primary-700 font-semibold',
-		liActiveUserMsgClass: '!bg-primary-500/10'
-	}}
-/>
-<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+{#if !isVendor}
 	<AutocompleteSelect
 		multiple
-		lazy
 		{form}
-		optionsEndpoint="assets"
+		optionsEndpoint="evidences"
 		optionsExtraFields={[['folder', 'str']]}
-		optionsInfoFields={{
-			fields: [
-				{
-					field: 'type'
-				}
-			],
-			classes: 'text-blue-500'
-		}}
 		optionsLabelField="auto"
-		field="assets"
-		label={m.assets()}
-	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="applied-controls"
-		optionsExtraFields={[['folder', 'str']]}
-		optionsInfoFields={{
-			fields: [{ field: 'category', translate: true }],
-			position: 'prefix'
+		helpText={m.taskTemplateEvidenceHelpText()}
+		helpTextClass="mt-1 border-l-2 border-primary-500 bg-primary-500/5 rounded-r py-1 pl-2"
+		field="evidences"
+		label={m.evidences()}
+		translateOptions={false}
+		allowUserOptions="append"
+		additionalMultiselectOptions={{
+			createOptionMsg: ({ searchText }: { searchText: string }) =>
+				m.createExpectedEvidence({ name: searchText }),
+			liUserMsgClass: '!text-primary-700 font-semibold',
+			liActiveUserMsgClass: '!bg-primary-500/10'
 		}}
-		field="applied_controls"
-		label={m.appliedControls()}
 	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="compliance-assessments"
-		field="compliance_assessments"
-		cacheLock={cacheLocks['compliance_assessments']}
-		bind:cachedValue={formDataCache['compliance_assessments']}
-		label={m.complianceAssessments()}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="risk-assessments"
-		optionsExtraFields={[['folder', 'str']]}
-		optionsLabelField="str"
-		field="risk_assessments"
-		cacheLock={cacheLocks['risk_assessments']}
-		bind:cachedValue={formDataCache['risk_assessments']}
-		label={m.riskAssessments()}
-	/>
+{/if}
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	{#if !isVendor}
+		<AutocompleteSelect
+			multiple
+			lazy
+			{form}
+			optionsEndpoint="assets"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsInfoFields={{
+				fields: [
+					{
+						field: 'type'
+					}
+				],
+				classes: 'text-blue-500'
+			}}
+			optionsLabelField="auto"
+			field="assets"
+			label={m.assets()}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			optionsEndpoint="applied-controls"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsInfoFields={{
+				fields: [{ field: 'category', translate: true }],
+				position: 'prefix'
+			}}
+			field="applied_controls"
+			label={m.appliedControls()}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			optionsEndpoint="compliance-assessments"
+			field="compliance_assessments"
+			cacheLock={cacheLocks['compliance_assessments']}
+			bind:cachedValue={formDataCache['compliance_assessments']}
+			label={m.complianceAssessments()}
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="risk-assessments"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="str"
+			field="risk_assessments"
+			cacheLock={cacheLocks['risk_assessments']}
+			bind:cachedValue={formDataCache['risk_assessments']}
+			label={m.riskAssessments()}
+		/>
 
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="findings-assessments"
-		field="findings_assessment"
-		cacheLock={cacheLocks['findings_assessment']}
-		bind:cachedValue={formDataCache['findings_assessment']}
-		label={m.findingsAssessment()}
-	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="findings"
-		optionsExtraFields={[['folder', 'str']]}
-		field="findings"
-		cacheLock={cacheLocks['findings']}
-		bind:cachedValue={formDataCache['findings']}
-		label={m.findings()}
-	/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			optionsEndpoint="findings-assessments"
+			field="findings_assessment"
+			cacheLock={cacheLocks['findings_assessment']}
+			bind:cachedValue={formDataCache['findings_assessment']}
+			label={m.findingsAssessment()}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			optionsEndpoint="findings"
+			optionsExtraFields={[['folder', 'str']]}
+			field="findings"
+			cacheLock={cacheLocks['findings']}
+			bind:cachedValue={formDataCache['findings']}
+			label={m.findings()}
+		/>
+	{/if}
 	<MarkdownField
 		{form}
 		field="observation"
@@ -329,17 +340,21 @@
 		cacheLock={cacheLocks['link']}
 		bind:cachedValue={formDataCache['link']}
 	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		createFromSelection={true}
-		optionsEndpoint="filtering-labels"
-		optionsLabelField="label"
-		field="filtering_labels"
-		helpText={m.labelsHelpText()}
-		label={m.labels()}
-		translateOptions={false}
-		allowUserOptions="append"
-	/>
+	{#if !isVendor}
+		<AutocompleteSelect
+			multiple
+			{form}
+			createFromSelection={true}
+			optionsEndpoint="filtering-labels"
+			optionsLabelField="label"
+			field="filtering_labels"
+			helpText={m.labelsHelpText()}
+			label={m.labels()}
+			translateOptions={false}
+			allowUserOptions="append"
+		/>
+	{/if}
 </Dropdown>
-<Checkbox {form} field="enabled" label={m.enabled()} />
+{#if !isVendor}
+	<Checkbox {form} field="enabled" label={m.enabled()} />
+{/if}

@@ -5,7 +5,7 @@ from django.utils.formats import date_format
 import magic
 import structlog
 from django.db import models, transaction
-from django.db.models import CharField, Value, Case, When
+from django.db.models import CharField, Value, Case, When, Q
 from django.db.models.functions import Coalesce, Lower, Cast, NullIf
 import django_filters as df
 from django.contrib.auth.models import Permission
@@ -34,6 +34,10 @@ from core.views import (
     GenericFilterSet,
     RoleFilter,
     SmartOrderingFilter,
+)
+from core.serializers import (
+    full_user_view_folder_ids,
+    has_full_user_view,
 )
 from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_respondent_scoped_folder_ids
 from iam.models import User, Role, UserGroup, RoleAssignment
@@ -75,7 +79,7 @@ from .template_registry import (
     WORD_TEMPLATE_REGISTRY,
     DOC_HTML_TEMPLATE_REGISTRY,
 )
-from .license import effective_expiration
+from .license import effective_expiration, get_editors, seat_limit_reachable
 
 from auditlog.models import LogEntry
 
@@ -385,19 +389,24 @@ class RoleViewSet(BaseModelViewSet):
         Update the user groups associated with the role.
         """
         with transaction.atomic():
-            editors_before = len(User.get_editors())
+            # A role edit changes no user count: when the limit is out of reach
+            # before, it stays so after, and both editor scans can be skipped.
+            check_seats = seat_limit_reachable(settings.LICENSE_SEATS)
+            if check_seats:
+                editors_before = get_editors().count()
 
             role = serializer.save()
             self._ensure_default_permissions(role)
 
-            editors_after = len(User.get_editors())
-            if (
-                editors_after > editors_before
-                and editors_after > settings.LICENSE_SEATS
-            ):
-                raise serializers.ValidationError(
-                    {"permissions": "errorLicenseSeatsExceeded"}
-                )
+            if check_seats:
+                editors_after = get_editors().count()
+                if (
+                    editors_after > editors_before
+                    and editors_after > settings.LICENSE_SEATS
+                ):
+                    raise serializers.ValidationError(
+                        {"permissions": "errorLicenseSeatsExceeded"}
+                    )
 
             ug_ids = (
                 RoleAssignment.objects.filter(
@@ -512,7 +521,7 @@ def get_build(request):
             "build": BUILD,
             "infrastructure": database_type,
             "licenseSeats": LICENSE_SEATS,
-            "availableSeats": LICENSE_SEATS - len(User.get_editors()),
+            "availableSeats": LICENSE_SEATS - get_editors().count(),
             "licenseExpiration": license_expiration,
             **disk_response,
         }
@@ -886,6 +895,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
                 {
                     "template_key": key,
                     "description": meta["description"],
+                    "format": meta.get("format", "docx"),
                     "default_languages": meta["default_languages"],
                     "variables": meta.get("variables", []),
                     "overrides": [
@@ -916,24 +926,36 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
         try:
             template = CustomWordTemplate.objects.get(id=pk)
             uploaded = request.FILES["file"]
+            is_typst = (
+                WORD_TEMPLATE_REGISTRY.get(template.template_key, {}).get("format")
+                == "typst"
+            )
 
-            if not uploaded.name.endswith(".docx"):
+            if not uploaded.name.endswith(".typ" if is_typst else ".docx"):
                 return Response(
                     {"file": "invalidFileType"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Validate the docx can be parsed by docxtpl
+            # Typst errors only surface against real data, at render time; a
+            # failing override falls back to the default there.
             try:
-                from docxtpl import DocxTemplate
-                import io
-
                 uploaded.seek(0)
-                DocxTemplate(io.BytesIO(uploaded.read()))
+                if is_typst:
+                    uploaded.read().decode("utf-8")
+                else:
+                    from docxtpl import DocxTemplate
+                    import io
+
+                    DocxTemplate(io.BytesIO(uploaded.read()))
                 uploaded.seek(0)
             except Exception:
                 return Response(
-                    {"file": "invalidDocxTemplate"},
+                    {
+                        "file": "invalidTypstTemplate"
+                        if is_typst
+                        else "invalidDocxTemplate"
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -970,12 +992,15 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
 
             from django.http import FileResponse
 
+            ext = template.file.name.rsplit(".", 1)[-1]
             template.file.open("rb")
             return FileResponse(
                 template.file,
-                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                content_type="text/plain"
+                if ext == "typ"
+                else "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 as_attachment=True,
-                filename=f"{template.template_key}_{template.language}.docx",
+                filename=f"{template.template_key}_{template.language}.{ext}",
             )
         except CustomWordTemplate.DoesNotExist:
             return Response(
@@ -1000,6 +1025,18 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
 
         from django.http import FileResponse
         import core as core_module
+
+        meta = WORD_TEMPLATE_REGISTRY[template_key]
+        if meta.get("format") == "typst":
+            from core.typst_render import TEMPLATE_DIR, localized_template
+
+            name = localized_template(meta["default_template"], language)
+            return FileResponse(
+                open(TEMPLATE_DIR / name, "rb"),
+                content_type="text/plain",
+                as_attachment=True,
+                filename=name,
+            )
 
         core_dir = Path(core_module.__file__).resolve().parent
 
@@ -1262,6 +1299,20 @@ class ObjectAuditTrailView(APIView):
     permission_classes = [IsAuthenticated]
 
     MAX_ENTRIES = 200
+    # What a user's trail shows to who has only the base view of the user: the
+    # fields the users API shows them. The rest needs the full view: account details,
+    # sign-ins, password changes, SCIM ids, group membership (logged with group
+    # names), fields since removed from the model, and any field added later.
+    USER_BASE_VIEW_LOG_FIELDS = (
+        "id",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "date_joined",
+        "is_third_party",
+        "folder",
+    )
 
     def get(self, request, format=None):
         from uuid import UUID
@@ -1299,32 +1350,67 @@ class ObjectAuditTrailView(APIView):
         ):
             raise PermissionDenied
 
-        entries = (
-            LogEntry.objects.filter(content_type=content_type, object_pk=str(object_id))
-            .select_related("actor")
-            .order_by("-timestamp")[: self.MAX_ENTRIES]
+        # The fields whose changes are shown; None shows them all.
+        shown = None
+        if model_class is User and not self._has_full_user_view(request, obj):
+            shown = self.USER_BASE_VIEW_LOG_FIELDS
+        entries = LogEntry.objects.filter(
+            content_type=content_type, object_pk=str(object_id)
         )
+        if shown is not None:
+            # Leave out, in the query, updates that touch no shown field: every
+            # sign-in logs one (last_login), so filtering after the limit could leave
+            # nothing of an active user's trail. auditlog keys changes by field name.
+            entries = entries.filter(
+                ~Q(action=LogEntry.Action.UPDATE) | Q(changes__has_any_keys=list(shown))
+            )
+        entries = entries.select_related("actor").order_by("-timestamp")[
+            : self.MAX_ENTRIES
+        ]
         fk_models = {
             f.name: f.related_model
             for f in model_class._meta.get_fields()
             if getattr(f, "many_to_one", False) and f.related_model
         }
         label_cache = {}
-        results = [
-            {
-                "id": entry.id,
-                "cid": entry.cid or None,
-                "action": entry.get_action_display(),
-                "actor": (entry.additional_data or {}).get("user_email")
-                or (entry.actor.email if entry.actor else None),
-                "timestamp": entry.timestamp,
-                "changes": self._mask(
-                    model_name, self._humanize(entry.changes, fk_models, label_cache)
-                ),
-            }
-            for entry in entries
-        ]
+        results = []
+        for entry in entries:
+            changes = self._mask(
+                model_name,
+                self._humanize(entry.changes, fk_models, label_cache),
+                shown,
+            )
+            # An update touching no shown field would still tell when the others
+            # changed. The query already leaves them out; this is the backstop.
+            if (
+                shown is not None
+                and entry.action == LogEntry.Action.UPDATE
+                and not changes
+            ):
+                continue
+            results.append(
+                {
+                    "id": entry.id,
+                    "cid": entry.cid or None,
+                    "action": entry.get_action_display(),
+                    "actor": (entry.additional_data or {}).get("user_email")
+                    or (entry.actor.email if entry.actor else None),
+                    "timestamp": entry.timestamp,
+                    "changes": changes,
+                }
+            )
         return Response(results)
+
+    @staticmethod
+    def _has_full_user_view(request, user) -> bool:
+        if user is not None:
+            return has_full_user_view(request, user)
+        # A deleted user has no row left to place, and users live in Global.
+        return (
+            full_user_view_folder_ids(request)
+            .filter(id=Folder.get_root_folder_id())
+            .exists()
+        )
 
     @staticmethod
     def _humanize(changes, fk_models, label_cache):
@@ -1356,11 +1442,17 @@ class ObjectAuditTrailView(APIView):
         return label_cache[key]
 
     @staticmethod
-    def _mask(model_name, changes):
+    def _mask(model_name, changes, shown):
+        if not isinstance(changes, dict):
+            return changes
+        if shown is not None:
+            changes = {
+                field: value for field, value in changes.items() if field in shown
+            }
         # Backstop for rows logged before "password" was excluded at registration
         # (iam/models.py); current writes never include it.
-        if model_name == "user" and isinstance(changes, dict) and "password" in changes:
-            return {**changes, "password": ["***", "***"]}
+        if model_name == "user" and "password" in changes:
+            changes["password"] = ["***", "***"]
         return changes
 
 

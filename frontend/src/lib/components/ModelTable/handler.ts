@@ -1,5 +1,5 @@
-import { getListViewFields, tableSourceMapper } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import { getListViewFields, tableSourceMapper } from '#lib/utils/table.js';
+import type { urlModel } from '#lib/utils/types.js';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
 
@@ -25,6 +25,7 @@ export const loadTableData = async ({
 	const newParams = getParams(state);
 
 	newParams.forEach((value, key) => params.append(key, value));
+	if (URLModel === 'filtering-labels') params.set('usage_count', 'true');
 	url.search = params.toString();
 
 	let response;
@@ -87,7 +88,7 @@ export const getParams = ({ offset, rowsPerPage, search, sort, filters }: State)
 	if (search) {
 		params.set('search', search);
 	}
-	if (sort) {
+	if (sort?.orderBy) {
 		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
 	}
 	if (filters) {

@@ -13,7 +13,7 @@ production. It is the check that the action reference describes what happens.
 import json
 import threading
 import uuid
-from datetime import date
+from datetime import date, timedelta
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -239,6 +239,11 @@ class TestWeeklyEvidenceCollection:
         evidence.refresh_from_db()
         assert evidence.status == Evidence.Status.IN_REVIEW
 
+        # Week one was a week ago: a metric keeps one sample per second, and
+        # both runs happen within this one.
+        sample.timestamp -= timedelta(days=7)
+        sample.save()
+
         second = start_instance(version)
         assert second.status == WorkflowInstance.Status.COMPLETED, second.variables
 
@@ -410,8 +415,9 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(
             variable.save()
 
     # Without a mail configuration the run never reaches the warning step.
-    settings.EMAIL_HOST = "smtp.tests.local"
-    settings.EMAIL_PORT = "25"
+    settings.MAILERS = {
+        "default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}
+    }
     settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
 
     monkeypatch.setattr(

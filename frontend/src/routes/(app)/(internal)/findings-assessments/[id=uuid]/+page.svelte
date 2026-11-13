@@ -1,21 +1,21 @@
 <script lang="ts">
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
 	import type { PageData, ActionData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import HalfDonutChart from '#lib/components/Chart/HalfDonutChart.svelte';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { invalidateAll } from '$app/navigation';
+	} from '#lib/components/Modals/stores.js';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -36,7 +36,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -108,31 +108,28 @@
 				<Anchor
 					breadcrumbAction="push"
 					href={`/compliance-assessments/${data.data.compliance_assessment.id}`}
-					class="btn preset-filled-secondary-500 w-full"
+					class="btn btn-quiet"
 					data-testid="go-to-audit-button"
-					><i class="fa-solid fa-list-check mr-2"></i>{m.complianceAssessment()}</Anchor
+					><i class="fa-solid fa-list-check mr-2 text-green-600"
+					></i>{m.complianceAssessment()}</Anchor
 				>
 			{/if}
-			<button
-				type="button"
-				class="btn preset-filled-primary-500 w-full"
-				onclick={modalExport}
-				data-testid="export-button"
-			>
-				<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+			<button type="button" class="btn btn-quiet" onclick={modalExport} data-testid="export-button">
+				<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
 			</button>
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
-				class="btn preset-filled-primary-500 h-fit"
-				breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
+				class="btn btn-quiet h-fit"
+				breadcrumbAction="push"
+				><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}</Anchor
 			>
 			{#if !findings_assessment?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
-					<i class="fa-solid fa-check-circle mr-2"></i>
+					<i class="fa-solid fa-check-circle mr-2 text-amber-500"></i>
 					{m.requestValidation()}
 				</button>
 			{/if}

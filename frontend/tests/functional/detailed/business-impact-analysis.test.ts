@@ -1,7 +1,7 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -92,9 +92,7 @@ test('user can create asset assessments inside BIA', async ({
 	});
 
 	await test.step('create asset assessment', async () => {
-		await businessImpactAnalysisPage.viewItemDetail(
-			testObjectsData.businessImpactAnalysisPage.build.name
-		);
+		await expect(page).toHaveURL(/\/business-impact-analysis\/[0-9a-f-]+$/);
 		await assetAssessmentsPage.createItem({ asset: vars.assetName }, undefined, page);
 	});
 

@@ -2,9 +2,8 @@
 
 ### Expected outcome
 
-* define your metrics or import their definition
-* instantiate them on your domains
-* feed data to your metric instances
+* create your metrics in one form, from a library definition or from scratch
+* record their values for each period, or compute them from other metrics
 * create dashboards with builtin and custom metrics
 
 ## Mental model
@@ -19,13 +18,13 @@ graph LR
   W -.->|reads| BMS[Builtin sample]
 ```
 
-A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: assignee, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are timestamped data points against an instance. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
+A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: owner, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are the values recorded against an instance; a metric with a collection frequency records one value per period (month, quarter, week…), and a new value for a period replaces the previous one. The definition also holds how a value reads: its direction (higher is better, lower is better, or none) and the decimals it is shown with. You rarely create a definition by hand: the [metric form](../features/metrics/creating-a-metric.md) creates it with the metric. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
 
 | User-facing | Internal | Notes |
 |---|---|---|
 | Metric definition | `MetricDefinition` | Catalog template; optional `library` FK |
 | Metric instance | `MetricInstance` | One definition × one domain |
-| Sample | `CustomMetricSample` | Timestamped data point on an instance |
+| Sample | `CustomMetricSample` | A recorded value on an instance, for a period when the instance has a frequency |
 | Builtin sample | `BuiltinMetricSample` | System-computed; daily; `ContentType` GFK to any object |
 | Dashboard | `Dashboard` | Container |
 | Widget | `DashboardWidget` | KPI / donut / pie / bar / line / area / gauge / sparkline / table / text |
@@ -119,7 +118,24 @@ This is the actual data of the metric instance on a given timestamp.&#x20;
 
 Keep in mind that you can add the data manually or through all the supported integrations (API, n8n, etc.). Note that data cannot be in the future.
 
-<figure><img src="../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
+## Computed metrics
+
+A computed metric is an instance whose samples come from a formula rather than from people or integrations: a training coverage from the employees trained and the headcount, a click rate from the clicks and the people tested, a status level from a threshold on either. Nobody types its numbers in; the application computes them on the instance's collection frequency, and on demand with **Refresh now**.
+
+```mermaid
+graph LR
+  A[Metric instance] -->|input| C[Computed metric]
+  B[Metric instance] -->|input| C
+  C -->|samples, period by period| S[Sample]
+```
+
+* **Start from the metrics you track.** Pick metric instances, write a formula, name the result: the application creates the instance and its definition. See [Create a computed metric](../features/metrics/creating.md), or follow [Creating your first computed metric](../guides/first-computed-metric.md).
+* **The formula runs once per period.** The instance's collection frequency cuts time into calendar periods, and each input contributes its latest sample in the period. The series is complete from the start and follows corrections to its inputs. See the [Formula reference](../features/metrics/formulas.md).
+* **The result is a number or a level.** A level metric returns one of an ordered list of texts, such as *On track* and *Behind*.
+* **The formula lives on the definition.** The application creates the definition with the metric, or reuses an identical one, and the formula reads exactly the instances you picked. Editing it never changes another metric. See [Edit a formula](../features/metrics/editing.md).
+* **The domain holds what the formula reads.** A computed metric lives in a domain holding every metric it reads, and its value is the same for everyone allowed to see it.
+
+All of it is described in [Computed metrics](../features/metrics/README.md).
 
 ## Dashboards
 

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { SuperForm } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
-	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
+	import { m } from '#paraglide/messages.js';
+	import FeatureFlagGroupList from '#lib/components/Forms/FeatureFlagGroupList.svelte';
 	import { page } from '$app/state';
-	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
+	import { getFeatureFlagGroups } from '#lib/utils/feature-flag-groups.js';
 
 	interface Props {
 		form: SuperForm<Record<string, boolean | undefined>>;
@@ -65,6 +65,7 @@
 				'risk_acceptances',
 				'exceptions',
 				'vulnerabilities',
+				'vulnerability_sla',
 				'ebiosrm',
 				'quantitative_risk_studies',
 				'scoring_assistant',
@@ -107,30 +108,41 @@
 
 	const enabledCount = $derived(allFields.filter((f) => $formData[f]).length);
 
-	function setFields(fields: string[], value: boolean) {
+	// Flags that only work with others (DPIAs: Forms and Requests), kept as the server
+	// keeps them on save: on turns those on, turning one of those off turns it off.
+	const requirements = featureFlagGroups.flatMap((g) => g.fields).filter((f) => f.requires?.length);
+
+	function updateFlags(change: (next: Record<string, boolean | undefined>) => void) {
 		formData.update((data) => {
 			const next = { ...data };
-			for (const f of fields) next[f] = value;
+			change(next);
+			for (const { field, requires = [] } of requirements) {
+				if (!next[field]) continue;
+				if (requires.some((r) => data[r] && !next[r])) next[field] = false;
+				else for (const r of requires) next[r] = true;
+			}
 			return next;
 		});
 	}
 
+	function setFields(fields: string[], value: boolean) {
+		updateFlags((next) => {
+			for (const f of fields) next[f] = value;
+		});
+	}
+
 	function applyPreset(on: Set<string>) {
-		formData.update((data) => {
-			const next = { ...data };
+		updateFlags((next) => {
 			for (const f of allFields) next[f] = on.has(f);
-			return next;
 		});
 	}
 
 	function resetToDefaults() {
 		const defaults = (page.data.featureFlagDefaults ?? {}) as Record<string, boolean>;
-		formData.update((data) => {
-			const next = { ...data };
+		updateFlags((next) => {
 			for (const f of allFields) {
 				if (f in defaults) next[f] = defaults[f];
 			}
-			return next;
 		});
 	}
 </script>

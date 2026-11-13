@@ -1,5 +1,5 @@
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
 
 export type ValidationFlowAction =
 	'approve' | 'reject' | 'request_changes' | 'drop' | 'revoke' | 'resubmit';
@@ -17,7 +17,9 @@ export const VALIDATION_FLOW_MODEL_URLS: Record<string, string> = {
 	policies: 'policies',
 	processings: 'processings',
 	accreditations: 'accreditations',
-	contracts: 'contracts'
+	contracts: 'contracts',
+	requirement_assessments: 'requirement-assessments',
+	risk_scenarios: 'risk-scenarios'
 };
 
 export function validationFlowModelLabels(): Record<string, string> {
@@ -34,7 +36,9 @@ export function validationFlowModelLabels(): Record<string, string> {
 		policies: m.policies(),
 		processings: m.processings(),
 		accreditations: m.accreditations(),
-		contracts: m.contracts()
+		contracts: m.contracts(),
+		requirement_assessments: m.requirementAssessments(),
+		risk_scenarios: m.riskScenarios()
 	};
 }
 

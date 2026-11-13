@@ -1,8 +1,8 @@
 <script lang="ts">
 	import AssetClassNode from './AssetClassNode.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	export interface ClassNode {
 		id: string;

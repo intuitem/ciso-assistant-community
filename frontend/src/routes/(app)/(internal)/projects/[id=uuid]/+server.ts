@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 const ENDPOINT = 'pmbok/projects';
 
@@ -8,7 +8,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const endpoint = `${BASE_API_URL}/${ENDPOINT}/${params.id}/${url.search || ''}`;
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	return new Response(res.body, {
 		status: res.status,
@@ -25,7 +25,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 		body: JSON.stringify(body)
 	});
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	return new Response(res.body, {
 		status: res.status,

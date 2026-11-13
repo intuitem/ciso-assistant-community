@@ -1,4 +1,4 @@
-import { compliancePercent } from '$lib/utils/compliance';
+import { compliancePercent } from '#lib/utils/compliance.js';
 import { COUNT, type CountTuple, type DomainTreeFeed } from './feed';
 
 export type Metric = 'compliance' | 'score';

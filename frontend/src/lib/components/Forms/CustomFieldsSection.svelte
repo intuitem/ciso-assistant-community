@@ -4,10 +4,10 @@
 	import Checkbox from './Checkbox.svelte';
 	import Select from './Select.svelte';
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { fetchAllPages } from '$lib/utils/pagination';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { get } from 'svelte/store';
 	import { type SuperForm } from 'sveltekit-superforms';
 
@@ -178,6 +178,7 @@
 						{form}
 						field={path}
 						options={choiceOptions(def)}
+						translateOptions={false}
 						label={def.label_localized}
 						helpText={def.help_text_localized}
 					/>
@@ -187,6 +188,7 @@
 						multiple
 						field={path}
 						options={choiceOptions(def)}
+						translateOptions={false}
 						label={def.label_localized}
 						helpText={def.help_text_localized}
 					/>

@@ -1,52 +1,52 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { modelSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import * as m from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
-	import { ensureSelectOptions } from '$lib/utils/select-options';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { createModalCache } from '$lib/utils/stores';
+	import { ensureSelectOptions } from '#lib/utils/select-options.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
-	import { loadTableData } from '$lib/components/ModelTable/handler';
-	import Search from '$lib/components/ModelTable/Search.svelte';
-	import RowsPerPage from '$lib/components/ModelTable/RowsPerPage.svelte';
-	import RowCount from '$lib/components/ModelTable/RowCount.svelte';
-	import Pagination from '$lib/components/ModelTable/Pagination.svelte';
-	import { listViewFields } from '$lib/utils/table';
+	import { loadTableData } from '#lib/components/ModelTable/handler.js';
+	import Search from '#lib/components/ModelTable/Search.svelte';
+	import RowsPerPage from '#lib/components/ModelTable/RowsPerPage.svelte';
+	import RowCount from '#lib/components/ModelTable/RowCount.svelte';
+	import Pagination from '#lib/components/ModelTable/Pagination.svelte';
+	import { listViewFields } from '#lib/utils/table.js';
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
-	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getListViewFields } from '$lib/utils/table';
-	import type { ReverseForeignKeyField } from '$lib/utils/crud';
-	import { countMasked } from '$lib/utils/related-visibility';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import TableRowActions from '#lib/components/TableRowActions/TableRowActions.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import SelectExistingModal from '#lib/components/Modals/SelectExistingModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { getListViewFields } from '#lib/utils/table.js';
+	import type { ReverseForeignKeyField } from '#lib/utils/crud.js';
+	import { countMasked } from '#lib/utils/related-visibility.js';
 
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import type { TableSource } from '$lib/components/ModelTable/types';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
@@ -137,7 +137,7 @@
 	$effect(() => {
 		if (invalidateTable) {
 			handler.invalidate();
-			_goto(page.url);
+			_goto(page.url.href);
 			invalidateTable = false;
 		}
 	});
@@ -202,6 +202,7 @@
 	});
 
 	const doraEnabled = $derived(!!page.data?.featureflags?.dora);
+	const nis2Enabled = $derived(!!page.data?.featureflags?.nis2);
 
 	function buildExportGroups(): ExportGroup[] {
 		const id = data.data.id;
@@ -222,7 +223,18 @@
 						format: 'PDF',
 						href: `/incidents/${id}/export/pdf`,
 						testId: 'export-option-pdf'
-					}
+					},
+					...(nis2Enabled
+						? [
+								{
+									titleKey: 'nis2NotificationWorksheet',
+									descriptionKey: 'nis2NotificationWorksheetDesc',
+									format: 'PDF',
+									href: `/incidents/${id}/export/nis2`,
+									testId: 'export-option-nis2'
+								}
+							]
+						: [])
 				]
 			},
 			...(doraEnabled
@@ -323,7 +335,20 @@
 		modalStore.trigger(modal);
 	}
 
-	const linkedPanels: { tabValue: string; urlmodel: string; icon: string; labelKey: string }[] = [
+	const linkedPanels: {
+		tabValue: string;
+		urlmodel: string;
+		icon: string;
+		labelKey: string;
+		allowCreate?: boolean;
+	}[] = [
+		{
+			tabValue: 'data-breaches',
+			urlmodel: 'data-breaches',
+			icon: 'fa-solid fa-user-shield',
+			labelKey: 'dataBreaches',
+			allowCreate: true
+		},
 		{
 			tabValue: 'applied-controls',
 			urlmodel: 'applied-controls',
@@ -341,8 +366,32 @@
 			urlmodel: 'risk-scenarios',
 			icon: 'fa-solid fa-triangle-exclamation',
 			labelKey: 'riskScenarios'
+		},
+		{
+			tabValue: 'vulnerabilities',
+			urlmodel: 'vulnerabilities',
+			icon: 'fa-solid fa-bug',
+			labelKey: 'vulnerabilities'
 		}
 	];
+
+	const nis2Deadlines: any[] = $derived(nis2Enabled ? (data.data.nis2_deadlines ?? []) : []);
+	const dataBreaches: any[] = $derived((data as any).dataBreaches ?? []);
+	const showFollowUp = $derived(nis2Deadlines.length > 0 || dataBreaches.length > 0);
+
+	// DataBreach.NOTIFIED_OR_CLOSED_STATUSES: the status chip already says it, no deadline left
+	const BREACH_SETTLED = [
+		'privacy_authority_notified',
+		'privacy_subjects_notified',
+		'privacy_closed'
+	];
+
+	function deadlineState(due: string | null, doneAt: string | null, overdue: boolean) {
+		if (doneAt) return { cls: 'preset-tonal-success', label: m.sentOn() };
+		if (overdue) return { cls: 'preset-tonal-error', label: m.overdue() };
+		if (!due) return { cls: 'preset-tonal-surface', label: m.notRequired() };
+		return { cls: 'preset-tonal-warning', label: m.dueBy() };
+	}
 
 	// DORA reports fetched server-side, sorted by creation date (newest first)
 	const doraRows: any[] = $derived(
@@ -358,11 +407,11 @@
 			<div class="flex flex-col space-y-2">
 				<button
 					type="button"
-					class="btn preset-filled-primary-500 w-full"
+					class="btn btn-quiet"
 					data-testid="export-button"
 					onclick={modalExport}
 				>
-					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
 				</button>
 			</div>
 		{/snippet}
@@ -419,6 +468,7 @@
 											{form}
 											multiple
 											optionsEndpoint="evidences"
+											lazy
 											optionsDetailedUrlParameters={[
 												['scope_folder_id', page.data.data?.folder?.id]
 											]}
@@ -467,6 +517,66 @@
 			</div>
 		{/snippet}
 	</DetailView>
+
+	{#if showFollowUp}
+		<div class="card shadow-lg bg-surface-50-950 p-4" data-testid="regulatory-follow-up">
+			<h2 class="text-lg font-semibold mb-3">
+				<i class="fa-solid fa-scale-balanced mr-2"></i>{m.regulatoryFollowUp()}
+			</h2>
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+				{#if nis2Deadlines.length > 0}
+					<div>
+						<h3 class="font-semibold mb-2">{m.nis2Notification()}</h3>
+						<ul class="space-y-2">
+							{#each nis2Deadlines as stage}
+								{@const st = deadlineState(stage.due, stage.done_at, stage.overdue)}
+								<li class="flex flex-wrap items-center gap-2 text-sm">
+									<span class="w-48 font-medium">{safeTranslate(stage.stage)}</span>
+									<span class="rounded px-2 py-0.5 text-xs {st.cls}">{st.label}</span>
+									<span class="text-surface-600-400">
+										{formatDateOrDateTime(stage.done_at ?? stage.due, getLocale())}
+									</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+				{#if dataBreaches.length > 0}
+					<div>
+						<h3 class="font-semibold mb-2">{m.gdprBreachNotification()}</h3>
+						<ul class="space-y-2">
+							{#each dataBreaches as breach}
+								{@const st = deadlineState(
+									breach.authority_notification_due,
+									breach.authority_notified_on,
+									breach.authority_notification_overdue
+								)}
+								<li class="flex flex-wrap items-center gap-2 text-sm">
+									<a href="/data-breaches/{breach.id}" class="w-48 font-medium anchor truncate"
+										>{breach.name}</a
+									>
+									<span class="rounded px-2 py-0.5 text-xs preset-tonal-secondary"
+										>{safeTranslate(breach.status)}</span
+									>
+									{#if breach.authority_notified_on || !BREACH_SETTLED.includes(breach.status)}
+										<span class="rounded px-2 py-0.5 text-xs {st.cls}">{st.label}</span>
+									{/if}
+									{#if breach.authority_notified_on || (breach.authority_notification_due && !BREACH_SETTLED.includes(breach.status))}
+										<span class="text-surface-600-400">
+											{formatDateOrDateTime(
+												breach.authority_notified_on ?? breach.authority_notification_due,
+												getLocale()
+											)}
+										</span>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
 
 	<div class="card shadow-lg bg-surface-50-950 p-4 space-y-2">
 		<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)}>
@@ -614,7 +724,7 @@
 							<ModelTable
 								baseEndpoint={`/${panel.urlmodel}?${field.field}=${data.data.id}`}
 								source={related.table}
-								disableCreate={!field?.addExisting}
+								disableCreate={!field?.addExisting && !panel.allowCreate}
 								disableEdit={true}
 								disableDelete={true}
 								deleteForm={related.deleteForm}
@@ -623,20 +733,22 @@
 								fields={fieldsToUse}
 							>
 								{#snippet addButton()}
-									{#if canEditObject && field?.addExisting}
-										<span
-											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
-										>
-											<button
-												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-												data-testid="select-existing-{panel.urlmodel}"
-												title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
-												onclick={() => modalSelectExisting(field)}
-												type="button"
+									{#if canEditObject && (field?.addExisting || panel.allowCreate)}
+										{#if field?.addExisting}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 											>
-												<i class="fa-solid fa-hand-pointer"></i>
-											</button>
-										</span>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="select-existing-{panel.urlmodel}"
+													title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
+													onclick={() => modalSelectExisting(field)}
+													type="button"
+												>
+													<i class="fa-solid fa-hand-pointer"></i>
+												</button>
+											</span>
+										{/if}
 										<span
 											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 										>

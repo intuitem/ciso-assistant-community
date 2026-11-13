@@ -1,0 +1,35 @@
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+const TIER_TARGETS: Record<string, string> = {
+	entities: 'entity.tier',
+	solutions: 'solution.tier'
+};
+
+function tierTarget(model: string) {
+	const target = TIER_TARGETS[model];
+	if (!target) error(404);
+	return target;
+}
+
+// What the caller can start to set this object's tier: forms they may fill
+// in-house, else publications they may file against.
+export const GET: RequestHandler = async ({ fetch, params }) => {
+	const query = new URLSearchParams({ target: tierTarget(params.model), subject: params.id });
+	const res = await fetch(`${BASE_API_URL}/quick-forms/assess-options/?${query}`);
+	return Response.json(res.ok ? await res.json() : []);
+};
+
+// Start (or resume) an assessment of this object through one of them.
+export const POST: RequestHandler = async ({ fetch, params, request }) => {
+	tierTarget(params.model);
+	const { kind, id } = await request.json();
+	const base = kind === 'form' ? 'quick-forms' : 'quick-form-publications';
+	const res = await fetch(`${BASE_API_URL}/${base}/${id}/start/`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ subject: params.id })
+	});
+	return Response.json(await res.json().catch(() => ({})), { status: res.status });
+};

@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { isDark } from '$lib/utils/helpers';
+	import { m } from '#paraglide/messages.js';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface TimelineEntry {
 		folder: string;
 		asset: string;
+		qualification?: string | null;
 		data: Record<
 			number,
 			{
@@ -21,6 +23,23 @@
 	}
 
 	let { data }: Props = $props();
+
+	let groupBy = $state<'asset' | 'qualification'>('asset');
+
+	const hasQualifications = $derived(Array.isArray(data) && data.some((e) => e.qualification));
+
+	const assetLabel = (e: TimelineEntry) => `${e.folder}/${e.asset}`;
+	const qualificationLabel = (e: TimelineEntry) =>
+		e.qualification ? safeTranslate(e.qualification) : '--';
+
+	const groups = $derived.by(() => {
+		const key = groupBy === 'asset' ? assetLabel : qualificationLabel;
+		const map = new Map<string, TimelineEntry[]>();
+		for (const e of Array.isArray(data) ? data : []) {
+			map.set(key(e), [...(map.get(key(e)) ?? []), e]);
+		}
+		return [...map.entries()];
+	});
 
 	// Extract the x-axis values
 	const xAxisPoints =
@@ -104,7 +123,29 @@
 	}
 </script>
 
+{#snippet assetCell(e: TimelineEntry)}
+	<div class="flex flex-col items-start gap-1">
+		<span>{e.asset}</span>
+		<span class="badge preset-tonal-secondary text-xs">{e.folder}</span>
+	</div>
+{/snippet}
+
 <div class="space-y-4">
+	{#if hasQualifications}
+		<div class="flex gap-2 no-print">
+			<button
+				class="btn btn-sm {groupBy === 'asset' ? 'preset-filled-primary-500' : 'preset-tonal'}"
+				onclick={() => (groupBy = 'asset')}>{m.asset()}</button
+			>
+			<button
+				class="btn btn-sm {groupBy === 'qualification'
+					? 'preset-filled-primary-500'
+					: 'preset-tonal'}"
+				onclick={() => (groupBy = 'qualification')}>{m.qualification()}</button
+			>
+		</div>
+	{/if}
+
 	<!-- Legend -->
 	{#if impactLevels.length > 0}
 		<div class="bg-surface-50-950 shadow-sm rounded-lg p-4">
@@ -137,8 +178,13 @@
 							<th
 								class="sticky-col px-4 py-2 text-left font-medium text-surface-600-400 bg-surface-100-900"
 							>
-								{m.asset()}
+								{groupBy === 'asset' ? m.asset() : m.qualification()}
 							</th>
+							{#if hasQualifications}
+								<th class="px-4 py-2 text-left font-medium text-surface-600-400">
+									{groupBy === 'asset' ? m.qualification() : m.asset()}
+								</th>
+							{/if}
 							{#each xAxisPoints as point, i}
 								<th class="px-4 py-2 text-center font-medium text-surface-600-400">
 									T{i}
@@ -147,31 +193,56 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each data as entry}
-							<tr class="border-t border-surface-200-800">
-								<td class="sticky-col px-4 py-2 font-medium bg-surface-50-950">
-									{entry.folder}/{entry.asset}
-								</td>
-								{#each xAxisPoints as point, i}
-									<td
-										class="px-4 py-2 text-center"
-										style="background-color: {cellBg(entry.data[point])};
-										       {!isImpactChange(entry, i) ? 'border-left: none;' : ''}"
-									>
-										{#if isImpactChange(entry, i)}
-											<div class="font-medium {cellTextClass(entry.data[point])}">
-												{entry.data[point].name || '--'}
-											</div>
-										{/if}
-									</td>
-								{/each}
-							</tr>
+						{#each groups as [label, entries], g}
+							{#each entries as entry, j}
+								<tr class:group-start={j === 0}>
+									{#if j === 0}
+										<td
+											class="sticky-col px-4 py-2 font-medium {g % 2
+												? 'bg-surface-100-900'
+												: 'bg-surface-50-950'}"
+											rowspan={entries.length}
+										>
+											{#if groupBy === 'asset'}
+												{@render assetCell(entry)}
+											{:else}
+												{label}
+											{/if}
+										</td>
+									{/if}
+									{#if hasQualifications}
+										<td
+											class="px-4 py-2 text-sm {g % 2 ? 'bg-surface-100-900' : 'bg-surface-50-950'}"
+										>
+											{#if groupBy === 'asset'}
+												{qualificationLabel(entry)}
+											{:else}
+												{@render assetCell(entry)}
+											{/if}
+										</td>
+									{/if}
+									{#each xAxisPoints as point, i}
+										<td
+											class="px-4 py-2 text-center"
+											style="background-color: {cellBg(entry.data[point])};
+										       {i < xAxisPoints.length - 1 && !isImpactChange(entry, i + 1) ? 'border-right: none;' : ''}"
+										>
+											{#if isImpactChange(entry, i)}
+												<div class="font-medium {cellTextClass(entry.data[point])}">
+													{entry.data[point].name || '--'}
+												</div>
+											{/if}
+										</td>
+									{/each}
+								</tr>
+							{/each}
 						{/each}
 					</tbody>
 					<tfoot>
 						<tr class="bg-surface-50-950 border-t-2 border-surface-200-800">
 							<td
 								class="sticky-col px-4 py-2 font-medium text-surface-600-400 capitalize bg-surface-50-950"
+								colspan={hasQualifications ? 2 : 1}
 							>
 								{m.time()}
 							</td>
@@ -225,23 +296,15 @@
 		z-index: 20;
 	}
 
-	/* Add visual cues for impact transitions */
-	td[style*='border-left: none'] {
-		position: relative;
-	}
-
-	td[style*='border-left: none']::before {
-		content: '';
-		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		width: 1px;
-		background: var(--color-surface-300-700);
-		opacity: 0.3;
-	}
-
 	/* Footer styling */
+	tbody td {
+		border-top: 1px solid var(--color-surface-200-800);
+	}
+
+	tbody tr.group-start td {
+		border-top: 2px solid var(--color-surface-400-600);
+	}
+
 	tfoot td {
 		font-size: 0.85rem;
 		padding-top: 0.75rem;

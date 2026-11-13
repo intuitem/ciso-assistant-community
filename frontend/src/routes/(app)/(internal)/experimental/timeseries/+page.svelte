@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TimeSeriesChart from '$lib/components/Chart/TimeSeriesChart.svelte';
+	import TimeSeriesChart from '#lib/components/Chart/TimeSeriesChart.svelte';
 </script>
 
 <div class="bg-surface-50-950 p-6 shadow-sm flex overflow-x-auto">

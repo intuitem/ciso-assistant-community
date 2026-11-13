@@ -494,3 +494,25 @@ class TestStartWithSubject:
         )
         assert refused.status_code == 400
         assert refused.json() == {"error": "unreachableObjectReference"}
+
+
+@pytest.mark.django_db
+def test_solution_options_show_the_provider_domain():
+    from types import SimpleNamespace
+
+    from core.object_references import labels_for, options_for
+    from tprm.models import Solution
+
+    domain = Folder.objects.create(
+        name="vendors",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    )
+    solution = Solution.objects.create(
+        name="Payroll",
+        provider_entity=Entity.objects.create(name="Acme", folder=domain),
+    )
+    question = SimpleNamespace(config={"model": "solution"})
+    [row] = options_for(question, domain)["results"]
+    assert row["folder"] == "vendors"
+    assert labels_for(question, domain, [str(solution.id)])[0]["folder"] == "vendors"

@@ -1,37 +1,46 @@
 <script lang="ts">
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
-	import { listViewFields } from '$lib/utils/table';
-	import type { ListViewFilterConfig } from '$lib/utils/table';
-	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { formatDate } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import { URL_MODEL_MAP, getModelInfo } from '#lib/utils/crud.js';
+	import ScenarioSelectionBar from '#lib/components/ScenarioSelection/ScenarioSelectionBar.svelte';
+	import { selectionSummary } from '#lib/components/ScenarioSelection/labels.js';
+	import {
+		DEFAULT_LINK_TYPE,
+		LINK_TYPE_PARAM,
+		hasSelection,
+		readSelection,
+		selectionParams,
+		selectionListFilters,
+		withParams
+	} from '#lib/utils/scenarioSelection.js';
+	import type { RiskMatrixJsonDefinition, RiskScenario } from '#lib/utils/types.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import RiskScenarioItem from '#lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import SyncToActionsRiskModal from '#lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { refreshAll } from '$app/navigation';
 
 	let { data, form } = $props();
 
@@ -39,19 +48,17 @@
 	const useBubbles = data.useBubbles;
 	const risk_assessment = $derived(data.risk_assessment);
 
-	const scenarioTableFilters = $derived.by(() => {
-		const base = listViewFields['risk-scenarios'].filters;
-		const scope: [string, string][] = [['risk_assessment', risk_assessment.id]];
-		const withScope = (filter: ListViewFilterConfig): ListViewFilterConfig => ({
-			...filter,
-			props: { ...filter.props, optionsDetailedUrlParameters: scope }
-		});
-		return {
-			...base,
-			current_level: withScope(base.current_level),
-			residual_level: withScope(base.residual_level)
-		};
+	// The selection bar filters the table, the matrices, the action plan link and
+	// the exports alike; the table keeps no filters of its own.
+	const selection = $derived(data.selection);
+	const scoped = $derived(hasSelection(page.url.searchParams));
+	const selectionQuery = $derived(selectionParams(page.url.searchParams));
+	const selectedScenarios = $derived.by(() => {
+		if (!scoped || !selection) return risk_assessment.risk_scenarios;
+		const ids = new Set(selection.ids);
+		return risk_assessment.risk_scenarios.filter((s: { id: string }) => ids.has(s.id));
 	});
+	const hiddenCount = $derived(risk_assessment.risk_scenarios.length - selectedScenarios.length);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -113,7 +120,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -200,15 +207,11 @@
 		return grid;
 	};
 
-	const currentCluster = buildRiskCluster(
-		risk_assessment.risk_scenarios,
-		risk_assessment.risk_matrix,
-		'current'
+	const currentCluster = $derived(
+		buildRiskCluster(selectedScenarios, risk_assessment.risk_matrix, 'current')
 	);
-	const residualCluster = buildRiskCluster(
-		risk_assessment.risk_scenarios,
-		risk_assessment.risk_matrix,
-		'residual'
+	const residualCluster = $derived(
+		buildRiskCluster(selectedScenarios, risk_assessment.risk_matrix, 'residual')
 	);
 
 	let fields = [
@@ -223,8 +226,11 @@
 		'residual_level'
 	];
 
-	function buildExportGroups(): ExportGroup[] {
+	function buildExportGroups(selectionQuery: URLSearchParams): ExportGroup[] {
 		const id = risk_assessment.id;
+		// Same default as the action plan page: the measures still to implement.
+		const actionPlanQuery = new URLSearchParams(selectionQuery);
+		actionPlanQuery.set(LINK_TYPE_PARAM, DEFAULT_LINK_TYPE);
 		return [
 			{
 				titleKey: 'riskAssessment',
@@ -233,21 +239,21 @@
 						titleKey: 'exportRiskReport',
 						descriptionKey: 'exportRiskReportDesc',
 						format: 'PDF' as const,
-						href: `/risk-assessments/${id}/export/pdf`,
+						href: withParams(`/risk-assessments/${id}/export/pdf`, selectionQuery),
 						testId: 'export-option-pdf'
 					},
 					{
 						titleKey: 'exportRiskScenariosData',
 						descriptionKey: 'exportRiskScenariosDataDesc',
 						format: 'CSV' as const,
-						href: `/risk-assessments/${id}/export/csv`,
+						href: withParams(`/risk-assessments/${id}/export/csv`, selectionQuery),
 						testId: 'export-option-csv'
 					},
 					{
 						titleKey: 'exportRiskScenariosWorkbook',
 						descriptionKey: 'exportRiskScenariosWorkbookDesc',
 						format: 'XLSX' as const,
-						href: `/risk-assessments/${id}/export/xlsx`,
+						href: withParams(`/risk-assessments/${id}/export/xlsx`, selectionQuery),
 						testId: 'export-option-xlsx'
 					}
 				]
@@ -259,14 +265,14 @@
 						titleKey: 'exportStatusGroupedReport',
 						descriptionKey: 'exportStatusGroupedReportDesc',
 						format: 'PDF' as const,
-						href: `/risk-assessments/${id}/action-plan/export/pdf`,
+						href: withParams(`/risk-assessments/${id}/action-plan/export/pdf`, actionPlanQuery),
 						testId: 'export-option-ap-pdf'
 					},
 					{
 						titleKey: 'exportControlsWorkbook',
 						descriptionKey: 'exportControlsWorkbookDesc',
 						format: 'XLSX' as const,
-						href: `/risk-assessments/${id}/action-plan/export/excel`,
+						href: withParams(`/risk-assessments/${id}/action-plan/export/excel`, actionPlanQuery),
 						testId: 'export-option-ap-xlsx'
 					}
 				]
@@ -277,7 +283,19 @@
 	function modalExport(): void {
 		const modalComponent: ModalComponent = {
 			ref: ExportModal,
-			props: { title: m.exportOptionsTitle(), groups: buildExportGroups() }
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups(new URLSearchParams()),
+				selection:
+					scoped && selection
+						? {
+								count: selection.count,
+								total: selection.total,
+								summary: selectionSummary(readSelection(page.url.searchParams), selection),
+								groups: buildExportGroups(selectionQuery)
+							}
+						: undefined
+			}
 		};
 		modalStore.trigger({ type: 'component', component: modalComponent });
 	}
@@ -296,8 +314,8 @@
 				</div>
 			</div>
 		{/if}
-		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex space-x-2 relative">
-			<div class="container w-1/3">
+		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex flex-col lg:flex-row gap-4 relative">
+			<div class="container lg:w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{#if risk_assessment.perimeter}
 						{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
@@ -349,7 +367,7 @@
 					{/key}
 				{/if}
 			</div>
-			<div class="container w-2/3">
+			<div class="container lg:w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="risk-matrix-field-title">{m.riskMatrix()}:</span>
 					<Anchor
@@ -379,102 +397,129 @@
 					<MarkdownRenderer content={risk_assessment.description} />
 				</div>
 			</div>
-			<div class="flex flex-col space-y-2 ml-4">
-				<div class="flex flex-row space-x-2">
-					<button
-						type="button"
-						class="btn preset-filled-primary-500 w-full"
-						onclick={modalExport}
-						data-testid="export-button"
-					>
-						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-					</button>
+			<div class="flex flex-col space-y-2 w-full lg:w-80 xl:w-96 shrink-0">
+				<!-- Same pattern as the audit header: filled primary first, the rest quiet. -->
+				<div class="action-grid">
 					{#if canEditObject}
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
 							label={m.edit()}
-							class="btn preset-filled-primary-500 w-full"
+							class="btn preset-filled-primary-500"
 							data-testid="edit-button"
 						>
 							<i class="fa-solid fa-edit mr-2"></i>
 							{m.edit()}</Anchor
 						>
 					{/if}
+					<button
+						type="button"
+						class="btn btn-quiet"
+						onclick={modalExport}
+						data-testid="export-button"
+					>
+						<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
+					</button>
+					<Anchor
+						label={m.actionPlan()}
+						href={withParams(`/risk-assessments/${risk_assessment.id}/action-plan`, selectionQuery)}
+						class="btn btn-quiet relative"
+						data-testid="action-plan-button"
+						><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}
+						{#if scoped && selection}
+							<!-- Corner badge: the side panel's half-width cells have no room inline. -->
+							<span
+								class="absolute -top-2 -right-1.5 badge preset-filled-primary-500 px-1.5 py-0.5 text-[10px] leading-none tabular-nums shadow-sm"
+								title={m.scenarioSelectionCount({
+									count: selection.count,
+									total: selection.total
+								})}
+								><i class="fa-solid fa-filter text-[9px] mr-1" aria-hidden="true"
+								></i>{selection.count}</span
+							>
+						{/if}</Anchor
+					>
+					<Anchor
+						label={m.analytics()}
+						href="/risk-assessments/{risk_assessment.id}/analytics"
+						class="btn btn-quiet"
+						><i class="fa-solid fa-chart-line mr-2 text-indigo-500"></i>{m.analytics()}</Anchor
+					>
+					<Anchor
+						label={m.riskTrajectory()}
+						href="/risk-assessments/{risk_assessment.id}/trajectory"
+						class="btn btn-quiet"
+						><i class="fa-solid fa-route mr-2 text-teal-500"></i>{m.riskTrajectory()}</Anchor
+					>
+					<AuditTrailButton
+						model="risk-assessments"
+						objectId={risk_assessment.id}
+						folderId={risk_assessment.folder?.id ?? user.root_folder_id}
+					/>
 				</div>
-				<AuditTrailButton
-					model="risk-assessments"
-					objectId={risk_assessment.id}
-					folderId={risk_assessment.folder?.id ?? user.root_folder_id}
-				/>
-				<Anchor
-					label={m.actionPlan()}
-					href="/risk-assessments/{risk_assessment.id}/action-plan"
-					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
-				>
-				<Anchor
-					label={m.analytics()}
-					href="/risk-assessments/{risk_assessment.id}/analytics"
-					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
-				>
-				<Anchor
-					label={m.riskTrajectory()}
-					href="/risk-assessments/{risk_assessment.id}/trajectory"
-					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-route mr-2"></i>{m.riskTrajectory()}</Anchor
-				>
-				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
-				<button
-					class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
-					onclick={(_) => modalDuplicateForm()}
-					data-testid="duplicate-button"
-				>
-					<i class="fa-solid fa-copy mr-2"></i>
-					{m.duplicate()}</button
-				>
-				{#if !risk_assessment?.is_locked}
-					<button
-						class="btn text-white bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-						onclick={async () => {
-							await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
-						}}
+				<div class="pt-3 mt-1 border-t border-surface-200-800 space-y-1.5">
+					<span
+						class="text-xs font-semibold text-surface-400-600 uppercase tracking-widest select-none"
+						>{m.powerUps()}</span
 					>
-						<span class="mr-2">
-							{#if syncingToActionsIsLoading}
-								<Progress value={null}>
-									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
-										<Progress.CircleTrack />
-										<Progress.CircleRange class="stroke-white" />
-									</Progress.Circle>
-								</Progress>
-							{:else}
-								<i class="fa-solid fa-arrows-rotate mr-2"></i>
-							{/if}
-						</span>
-						{m.syncToAppliedControls()}
-					</button>
-				{/if}
-				<Anchor
-					href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
-					label={m.convertToQuantitative()}
-					class="btn text-white bg-linear-to-r from-purple-500 to-pink-500"
-				>
-					<i class="fa-solid fa-calculator mr-2"></i>
-					{m.convertToQuantitative()}
-				</Anchor>
-				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
+				</div>
+				<div class="grid grid-cols-2 gap-2">
 					<button
-						class="btn text-white bg-linear-to-r from-orange-500 to-amber-500"
-						onclick={() => modalRequestValidation()}
-						data-testid="request-validation-button"
+						class="action-tile"
+						onclick={(_) => modalDuplicateForm()}
+						data-testid="duplicate-button"
 					>
-						<i class="fa-solid fa-check-circle mr-2"></i>
-						{m.requestValidation()}
-					</button>
-				{/if}
+						<i class="fa-solid fa-copy text-fuchsia-500"></i>
+						{m.duplicate()}</button
+					>
+					{#if !risk_assessment?.is_locked}
+						<button
+							class="action-tile"
+							onclick={async () => {
+								await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
+							}}
+						>
+							<span>
+								{#if syncingToActionsIsLoading}
+									<Progress value={null}>
+										<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+											<Progress.CircleTrack />
+											<Progress.CircleRange class="stroke-current" />
+										</Progress.Circle>
+									</Progress>
+								{:else}
+									<i class="fa-solid fa-arrows-rotate text-cyan-500"></i>
+								{/if}
+							</span>
+							{m.syncToAppliedControls()}
+						</button>
+					{/if}
+					<Anchor
+						href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
+						label={m.convertToQuantitative()}
+						class="action-tile"
+					>
+						<i class="fa-solid fa-calculator text-yellow-600"></i>
+						{m.convertToQuantitative()}
+					</Anchor>
+					{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
+						<button
+							class="action-tile"
+							onclick={() => modalRequestValidation()}
+							data-testid="request-validation-button"
+						>
+							<i class="fa-solid fa-check-circle text-amber-500"></i>
+							{m.requestValidation()}
+						</button>
+					{/if}
+				</div>
 			</div>
 		</div>
+	</div>
+	<div class="mx-4">
+		<ScenarioSelectionBar riskAssessmentId={risk_assessment.id} {selection} />
+		{#if data.selectionError}
+			<p class="mt-2 text-sm text-error-600" role="alert">{m.selectionError()}</p>
+		{/if}
 	</div>
 	<!--Risk risk_assessment-->
 	<div class="card m-4 p-4 shadow-sm bg-surface-50-950">
@@ -490,8 +535,9 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
-				tableFilters={scenarioTableFilters}
+				tableFilters={{}}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				extraParams={selectionListFilters(selection?.filters).toString()}
 				folderId={data.risk_assessment.folder.id}
 				{fields}
 				disableCreate={risk_assessment.is_locked}
@@ -514,7 +560,19 @@
 	</div>
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow-sm bg-surface-50-950 page-break">
-		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
+		<div class="flex flex-wrap items-baseline justify-between gap-2">
+			<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
+			{#if scoped && selection}
+				<span
+					class="inline-flex items-center gap-2 text-xs font-semibold rounded-full px-3 py-1 bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200"
+					data-testid="matrix-selection-badge"
+				>
+					<i class="fa-solid fa-filter" aria-hidden="true"></i>
+					{m.scenarioSelectionCount({ count: selection.count, total: selection.total })}
+					<span class="font-normal">· {m.outsideSelectionHidden({ count: hiddenCount })}</span>
+				</span>
+			{/if}
+		</div>
 		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
 			{#if page.data?.featureflags?.inherent_risk}
 				<div>
@@ -523,11 +581,7 @@
 					<RiskMatrix
 						riskMatrix={risk_assessment.risk_matrix}
 						matrixName={'inherent'}
-						data={buildRiskCluster(
-							risk_assessment.risk_scenarios,
-							risk_assessment.risk_matrix,
-							'inherent'
-						)}
+						data={buildRiskCluster(selectedScenarios, risk_assessment.risk_matrix, 'inherent')}
 						dataItemComponent={RiskScenarioItem}
 						{useBubbles}
 					/>

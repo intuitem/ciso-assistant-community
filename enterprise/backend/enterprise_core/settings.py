@@ -75,6 +75,8 @@ Otherwise neither the role nor the group is created.
 # --- License ---
 LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
+BACKUP_RESTORE_VALIDATORS.append("enterprise_core.license.check_restored_seats")  # noqa: F405
+INSTANCE_STATUS_EXTENSIONS.append("enterprise_core.instance_status")  # noqa: F405
 
 # --- Startup banner ---
 logger.info("Launching CISO Assistant Enterprise")

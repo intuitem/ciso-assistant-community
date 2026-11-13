@@ -1,19 +1,20 @@
 <script lang="ts">
-	import { goto, invalidateAll, preloadData, pushState } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { goto, refreshAll, preloadData } from '$app/navigation';
+	import { navigating, page } from '$app/state';
 	import { deserialize } from '$app/forms';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import NewRevisionModal from '$lib/components/Modals/NewRevisionModal.svelte';
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
-	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import type { ModalComponent, ModalSettings } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import NewRevisionModal from '#lib/components/Modals/NewRevisionModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
+	import RingProgress from '#lib/components/DataViz/RingProgress.svelte';
+	import ComplianceOverview from '#lib/components/DataViz/ComplianceOverview.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import type { ModalComponent, ModalSettings } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
 	import AuditTableMode from '../../../(third-party)/compliance-assessments/[id=uuid]/table-mode/+page.svelte';
-	import TreeView from '$lib/components/TreeView/TreeView.svelte';
-	import TreeViewItem from '$lib/components/TreeView/TreeViewItem.svelte';
+	import TreeView from '#lib/components/TreeView/TreeView.svelte';
+	import TreeViewItem from '#lib/components/TreeView/TreeViewItem.svelte';
 	import type { Actions, PageData } from './$types';
 
 	interface Props {
@@ -51,7 +52,7 @@
 				cloneBody?: { id?: string; error?: string; name?: string[]; version?: string[] };
 			} | null;
 			if (cloned?.cloneStatus === 201) {
-				await invalidateAll();
+				await refreshAll();
 				goto(`/entity-assessments/${cloned.cloneBody?.id}`);
 			} else {
 				const body = cloned?.cloneBody;
@@ -154,31 +155,36 @@
 							</span>
 						{/if}
 					</div>
+					{#if data.data.compliance_overview}
+						<ComplianceOverview overview={data.data.compliance_overview} name="ea_compliance" />
+					{/if}
 				</div>
+			{:else}
+				<ComplianceOverview overview={null} name="ea_compliance" />
 			{/if}
 		{/snippet}
 		{#snippet actions()}
 			{#if data.data.compliance_assessment}
 				<button
 					type="button"
-					class="btn preset-filled-primary-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={modalExport}
 					data-testid="export-button"
 				>
-					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
 				</button>
 				<button
-					class="btn preset-filled-secondary-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={handleClone}
 					disabled={isCloning}
 					data-testid="clone-assessment-button"
 				>
-					<i class="fa-solid fa-copy mr-2"></i>{m.newRevision()}
+					<i class="fa-solid fa-copy mr-2 text-fuchsia-500"></i>{m.newRevision()}
 				</button>
 			{/if}
 			{#if reviewAssignments.length > 0}
-				<a href={reviewHref} class="btn preset-filled-secondary-500 h-fit">
-					<i class="fa-solid fa-clipboard-check mr-2"></i>{m.reviewResponses()}
+				<a href={reviewHref} class="btn btn-quiet h-fit">
+					<i class="fa-solid fa-clipboard-check mr-2 text-blue-500"></i>{m.reviewResponses()}
 				</a>
 			{/if}
 		{/snippet}
@@ -193,8 +199,10 @@
 					onToggle={async () => {
 						const href = `/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`;
 						const result = await preloadData(href);
+						// A shallow goto would cancel a navigation the user started meanwhile
+						if (navigating.to) return;
 						if (result.type === 'loaded' && result.status === 200) {
-							pushState('', { auditTableMode: result.data });
+							goto(page.url.href, { shallow: true, state: { auditTableMode: result.data } });
 						} else {
 							// Something went wrong, try navigating
 							goto(href);
@@ -203,11 +211,11 @@
 				>
 					<span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
 					{#snippet childrenSlot()}
-						{#if Object.hasOwn($page?.state, 'auditTableMode')}
+						{#if Object.hasOwn(page?.state, 'auditTableMode')}
 							<div class="max-h-192 overflow-y-scroll">
 								<AuditTableMode
 									{form}
-									data={$page?.state?.auditTableMode}
+									data={page?.state?.auditTableMode}
 									actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`}
 									shallow
 									questionnaireOnly

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -43,6 +43,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],

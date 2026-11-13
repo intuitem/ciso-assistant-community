@@ -1,19 +1,19 @@
 <script lang="ts">
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { m } from '$paraglide/messages';
-	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
+	import { canPerformAction } from '#lib/utils/access-control.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 

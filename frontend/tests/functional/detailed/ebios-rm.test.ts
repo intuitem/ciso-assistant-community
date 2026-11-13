@@ -1,5 +1,42 @@
 import { LoginPage } from '../../utils/login-page.js';
-import { TestContent, test, expect } from '../../utils/test-utils.js';
+import { TestContent, test, expect, getUniqueValue, type Page } from '../../utils/test-utils.js';
+import { optionLocator } from '../../utils/form-content.js';
+
+test.use({ actionTimeout: 60_000 });
+
+async function clickRowEdit(page: Page) {
+	// Toasts stack over the row actions and stop expiring once hovered: dismiss them first.
+	const toasts = page.getByTestId('toast');
+	await expect(async () => {
+		if (await toasts.count())
+			await toasts.first().getByLabel('Dismiss toast').click({ timeout: 1000 });
+		await expect(toasts).toHaveCount(0, { timeout: 1000 });
+	}).toPass({ timeout: 30_000 });
+	await page.getByTestId('tablerow-edit-button').click();
+}
+
+async function selectOptions(page: Page, field: string, ...names: string[]) {
+	const input = page.getByTestId(field);
+	for (const name of names) {
+		const option = optionLocator(page, input, name);
+		await expect(async () => {
+			if (!(await option.isVisible())) {
+				await input.getByRole('combobox').click({ timeout: 2_000 });
+			}
+			await option.click({ timeout: 2_000 });
+		}).toPass({ timeout: 30_000, intervals: [500, 1000, 2000] });
+	}
+	const visibleOptions = input
+		.getByRole('option')
+		.or(page.locator('ul.portaled-options').getByRole('option'))
+		.filter({ visible: true });
+	await expect(async () => {
+		if ((await visibleOptions.count()) > 0) {
+			await input.getByRole('combobox').press('Escape', { timeout: 2_000 });
+		}
+		await expect(visibleOptions).toHaveCount(0, { timeout: 1_000 });
+	}).toPass({ timeout: 10_000, intervals: [500, 1000] });
+}
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -30,7 +67,7 @@ const ebiosRmStudy = {
 	modelName: 'ebiosrmstudy',
 	dependency: vars.matrix,
 	build: {
-		name: 'Test EBIOS RM Study',
+		name: getUniqueValue('Test EBIOS RM Study'),
 		risk_matrix: vars.matrix.displayName,
 		folder: vars.folderName
 		// eta: "2025-01-01",
@@ -110,7 +147,7 @@ test('ebios rm study', async ({
 			name: ebiosRmStudy.build.name,
 			folder: vars.folderName
 		});
-		await page.getByRole('cell', { name: ebiosRmStudy.build.name }).first().click();
+		await expect(page).toHaveURL(/\/ebios-rm\/[0-9a-f-]+$/);
 	});
 
 	await test.step('workshop 1', async () => {
@@ -154,9 +191,7 @@ test('ebios rm study', async ({
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('select-button').click();
 			// Scoped: bare combobox is ambiguous — native <select>s (e.g. "Show entries") share the role
-			await page.getByTestId('form-input-assets').getByRole('combobox').click();
-			await page.getByRole('option', { name: `${vars.folderName}/${vars.assetName}` }).click();
-			await page.getByText(`Assets ${vars.folderName}/${vars.assetName}`).click();
+			await selectOptions(page, 'form-input-assets', `${vars.folderName}/${vars.assetName}`);
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await assetsPage.createItem({ name: 'added asset' });
@@ -179,25 +214,20 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 1');
 			await page.getByTestId('form-input-gravity').selectOption('3');
-			await page.getByTestId('form-input-assets').getByRole('combobox').click();
-			await page.getByRole('option', { name: `${vars.folderName}/added asset Primary` }).click();
-			await page.getByTestId('form-input-qualifications').getByRole('combobox').click();
-			await page.getByRole('option', { name: 'Authenticity' }).click();
-			await page.getByRole('option', { name: 'Availability' }).click();
-			await page.getByTestId('form-input-name').click(); // just to close the qualifications
+			await selectOptions(page, 'form-input-assets', `${vars.folderName}/added asset Primary`);
+			await selectOptions(page, 'form-input-qualifications', 'Authenticity', 'Availability');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 2');
 			await page.getByTestId('form-input-gravity').selectOption('1');
-			await page.getByTestId('form-input-assets').getByRole('combobox').click();
-			await page
-				.getByRole('option', { name: `${vars.folderName}/${vars.assetName} Primary` })
-				.click();
-			await page.getByTestId('form-input-qualifications').getByRole('combobox').click();
-			await page.getByRole('option', { name: 'Environmental' }).click();
-			await page.getByTestId('form-input-qualifications').getByRole('combobox').press('Escape');
+			await selectOptions(
+				page,
+				'form-input-assets',
+				`${vars.folderName}/${vars.assetName} Primary`
+			);
+			await selectOptions(page, 'form-input-qualifications', 'Environmental');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: 'Go back to EBIOS RM study' }).click();
@@ -239,8 +269,7 @@ test('ebios rm study', async ({
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-risk-origin').getByRole('combobox').click();
-		await page.getByRole('option', { name: 'Amateur' }).click();
+		await selectOptions(page, 'form-input-risk-origin', 'Amateur');
 		await page.getByTestId('form-input-target-objective').click();
 		await page
 			.getByTestId('form-input-target-objective')
@@ -261,7 +290,7 @@ test('ebios rm study', async ({
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[22]], false);
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
-		await page.getByTestId('tablerow-edit-button').click();
+		await clickRowEdit(page);
 		await expect(page).toHaveURL(/.*edit.*/);
 		await page.getByTestId('form-input-motivation').selectOption('3');
 		await page.getByTestId('form-input-resources').selectOption('1');
@@ -280,13 +309,16 @@ test('ebios rm study', async ({
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[23]], false);
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
-		await page.getByTestId('tablerow-edit-button').click();
+		await clickRowEdit(page);
 		await expect(page).toHaveURL(/.*edit.*/);
 		await page.getByTestId('form-input-is-selected').uncheck();
 		await page.getByTestId('form-input-is-selected').check();
-		await page.getByTestId('form-input-feared-events').getByRole('combobox').click();
-		await page.getByRole('option', { name: `${vars.folderName}/test feared event 1` }).click();
-		await page.getByRole('option', { name: `${vars.folderName}/test feared event 2` }).click();
+		await selectOptions(
+			page,
+			'form-input-feared-events',
+			`${vars.folderName}/test feared event 1`,
+			`${vars.folderName}/test feared event 2`
+		);
 		await page.getByTestId('save-button').click();
 		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await page.getByRole('link', { name: 'Go back to EBIOS RM study' }).click();
@@ -312,8 +344,7 @@ test('ebios rm study', async ({
 					timeout: 10_000
 				});
 			}
-			await page.getByTestId('form-input-category').getByRole('combobox').click();
-			await page.getByRole('option', { name: 'partner' }).click();
+			await selectOptions(page, 'form-input-category', 'partner');
 			await page.getByText('4').first().click();
 			await page.getByText('4').nth(1).click();
 			await page.getByText('1', { exact: true }).nth(2).click();
@@ -399,7 +430,7 @@ test('ebios rm study', async ({
 			await appliedControlsPage.createItem({ name: 'test applied control 2' });
 			await page.getByRole('link', { name: 'Define security measures for' }).click();
 			await expect(page).toHaveURL(/.*workshop-3.*/);
-			await page.getByTestId('tablerow-edit-button').click();
+			await clickRowEdit(page);
 			await expect(page).toHaveURL(/.*edit.*/);
 			await page
 				.locator(
@@ -518,9 +549,7 @@ test('ebios rm study', async ({
 				.fill(
 					'Minim ad dolore do pariatur non. Nostrud enim dolore est fugiat occaecat deserunt minim labore. Commodo minim adipisicing proident esse irure. Veniam nostrud et adipisicing.'
 				);
-			await page.getByTestId('form-input-threats').getByRole('combobox').click();
-			await page.getByTestId('form-input-attack-path').getByRole('combobox').click();
-			await page.getByRole('option', { name: 'test attack path 1' }).click();
+			await selectOptions(page, 'form-input-attack-path', 'test attack path 1');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
@@ -608,5 +637,25 @@ test('ebios rm study', async ({
 			.click();
 		await expect(page).not.toHaveURL(/.*workshop-5.*/);
 		await expect(page.locator('span:text("High")').first()).toBeVisible();
+	});
+
+	await test.step('duplicate study', async () => {
+		await page.goto('/ebios-rm');
+		await ebiosRmStudyPage.hasUrl();
+		await page.getByRole('cell', { name: ebiosRmStudy.build.name }).first().click();
+		await expect(page).toHaveURL(/\/ebios-rm\/[0-9a-f-]+$/);
+		const sourceUrl = page.url();
+
+		await page.getByTestId('duplicate-button').click();
+		await expect(page.getByTestId('modal-title')).toBeVisible();
+		await page.getByTestId('form-input-name').fill(`${ebiosRmStudy.build.name} (copy)`);
+		await page.getByTestId('save-button').click();
+
+		// the duplicate redirects to the clone: a different study carrying the copied name.
+		// not.toHaveURL auto-retries, so it waits for the SPA redirect to land.
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
+		await expect(page).not.toHaveURL(sourceUrl);
+		await expect(page).toHaveURL(/\/ebios-rm\/[0-9a-f-]+$/);
+		await expect(page.getByText(`${ebiosRmStudy.build.name} (copy)`).first()).toBeVisible();
 	});
 });

@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import {
 		TASK_STATUS_COLORS as statusColorMap,
 		TASK_STATUS_FALLBACK_COLOR as FALLBACK_COLOR
-	} from '$lib/utils/taskStatus';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
+	} from '#lib/utils/taskStatus.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import GroupedBarChart from '#lib/components/Chart/GroupedBarChart.svelte';
 	import SimpleCard from './SimpleCard.svelte';
 
 	interface Bucket {
@@ -63,7 +63,8 @@
 		due_30d: m.dueIn30Days,
 		due_90d: m.dueIn90Days,
 		later: m.laterDue,
-		no_eta: m.noEtaSet
+		no_eta: m.noEtaSet,
+		closed: m.closed
 	};
 
 	function toDonutValues(buckets: Bucket[] | undefined) {
@@ -115,7 +116,7 @@
 	const commitmentColors = $derived(toColors(data?.commitment?.by_state, commitmentColorMap));
 
 	const dueBars = $derived.by(() => {
-		const ordered = ['overdue', 'due_30d', 'due_90d', 'later', 'no_eta'];
+		const ordered = ['overdue', 'due_30d', 'due_90d', 'later', 'no_eta', 'closed'];
 		const map = new Map((data?.due_buckets ?? []).map((b) => [b.key, b]));
 		const labels: string[] = [];
 		const values: number[] = [];

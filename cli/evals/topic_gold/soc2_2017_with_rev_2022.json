@@ -1,0 +1,431 @@
+{
+ "framework": "soc2_2017_with_rev_2022",
+ "labels": {
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.2.11": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.2.7": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.2.8": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.2.9": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.3.1": {
+   "backup": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.3.2": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.1.1": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.1.3": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.1.2": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.1.5": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.3.5": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.4.1": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.4.2": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.4.3": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.4.6": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.4.7": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.1.5": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.1.6": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.1.7": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.1.9": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.2.1": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.2.10": {
+   "incident_response": "core",
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.2.5": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.2.6": {
+   "incident_response": "related",
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.2.8": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.2.9": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.3.12": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.3.6": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.3.7": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.3.8": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.6": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.7": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.8": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.4.5": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.4.6": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.1.6": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.2.3": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.1": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.10": {
+   "encryption": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.11": {
+   "encryption": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.12": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.13": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.3": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.4": {
+   "mfa": "core",
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.6": {
+   "access_control": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.7": {
+   "encryption": "related",
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.8": {
+   "mfa": "related",
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1.9": {
+   "access_control": "core",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.2.1": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.2.2": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.2.3": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.3.1": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.3.2": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.3.3": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.3.4": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.4.1": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.4.2": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.4.3": {
+   "access_control": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.4.4": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.6.2": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.6.3": {
+   "mfa": "core",
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.6.4": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.7.2": {
+   "encryption": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.7.3": {
+   "backup": "related",
+   "encryption": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.7.4": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.8.1": {
+   "logging": "related",
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.8.2": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1.1": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1.2": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1.3": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1.4": {
+   "logging": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1.5": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.2.1": {
+   "logging": "core",
+   "vuln_mgmt": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.2.2": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.2.3": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.2.4": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3.1": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3.2": {
+   "logging": "core",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3.3": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3.4": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3.5": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3.6": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3.7": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.1": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.10": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.11": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.12": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.13": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.14": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.2": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.3": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.4": {
+   "vuln_mgmt": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.5": {
+   "backup": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.6": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.7": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.8": {
+   "vuln_mgmt": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4.9": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.1": {
+   "vuln_mgmt": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.2": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.3": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.4": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.5": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.6": {
+   "backup": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1.11": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1.12": {
+   "vuln_mgmt": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1.14": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1.7": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.1.1": {
+   "backup": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.1": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.10": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.11": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.12": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.13": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.2": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.3": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.4": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.5": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.6": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.7": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.8": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.9": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p4.2.2": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.1.1": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.1.3": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.3.1": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.4.1": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.4.2": {
+   "incident_response": "related",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.4.3": {
+   "incident_response": "related",
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.5.1": {
+   "incident_response": "related",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.5.2": {
+   "incident_response": "related",
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.6.1": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.6.2": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.7.2": {
+   "asset_inventory": "related"
+  }
+ }
+}

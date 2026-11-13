@@ -2,6 +2,7 @@ import { expect, type Locator, type Page } from './test-utils.js';
 import { FormContent, FormFieldType } from './form-content.js';
 import { BasePage } from './base-page.js';
 import { PageDetail } from './page-detail.js';
+import { REDIRECT_AFTER_CREATE } from '#lib/utils/redirect-after-create.js';
 
 interface Filter {
 	has?: Locator | undefined;
@@ -64,6 +65,9 @@ export class PageContent extends BasePage {
 			await this.goto();
 		}
 
+		// The page title is server-rendered, so a visible title no longer implies the add
+		// button is interactive: wait for hydration before clicking it.
+		await this.page.locator('body[data-hydrated="true"]').waitFor();
 		// Default to the first add button if no value is provided
 		// addButtonValue is useful when there is multiple tabs with add buttons
 		if (addButtonValue === undefined) {
@@ -95,8 +99,15 @@ export class PageContent extends BasePage {
 			}
 		}
 
+		// Created from its own list, the object opens: let that redirect land before the caller's next click.
+		const redirects =
+			REDIRECT_AFTER_CREATE.has(this.url.split(/[/?]/)[1]) &&
+			new URL(this.page.url()).pathname === this.url;
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
+		if (redirects) {
+			await this.page.waitForURL(new RegExp(`${this.url}/[0-9a-f-]{36}`));
+		}
 		if (typeof this.name == 'string') {
 			await this.isToastVisible(
 				'The ' +

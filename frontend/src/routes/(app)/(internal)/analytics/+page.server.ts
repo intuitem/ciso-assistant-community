@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 async function loadCustomDashboard(fetch: typeof globalThis.fetch, dashboardId: string) {
 	// Fetch the dashboard metadata
@@ -77,7 +77,7 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 				.catch(() => null)
 		: Promise.resolve(null);
 
-	const risksCountPerLevelPromise = shown('risk', 'summary')
+	const risksCountPerLevelPromise = shown('risk')
 		? fetch(`${BASE_API_URL}/risk-scenarios/count_per_level/`)
 				.then(assertOk)
 				.then((res) => res.json())

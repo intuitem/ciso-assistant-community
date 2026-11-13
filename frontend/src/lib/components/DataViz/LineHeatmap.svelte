@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
-	import { isDark } from '$lib/utils/helpers';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
+	import { isDark } from '#lib/utils/helpers.js';
 	let { data } = $props();
 
 	// On a fixed impact hexcolor, pick black/white text by luminance; with no color, fall back

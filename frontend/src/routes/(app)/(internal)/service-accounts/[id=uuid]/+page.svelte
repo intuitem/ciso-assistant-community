@@ -1,19 +1,19 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import ServiceAccountSecretModal from '$lib/components/Modals/ServiceAccountSecretModal.svelte';
-	import ServiceAccountRotateSecretModal from '$lib/components/Modals/ServiceAccountRotateSecretModal.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import ServiceAccountSecretModal from '#lib/components/Modals/ServiceAccountSecretModal.svelte';
+	import ServiceAccountRotateSecretModal from '#lib/components/Modals/ServiceAccountRotateSecretModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { goto, invalidateAll } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { goto, refreshAll } from '$app/navigation';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -54,7 +54,7 @@
 			});
 			if (res.ok) {
 				const result = await res.json();
-				await invalidateAll();
+				await refreshAll();
 				setTimeout(() => modalSecret(result), 0);
 			} else {
 				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
@@ -88,7 +88,7 @@
 				body: JSON.stringify({ is_active: isActive })
 			});
 			if (res.ok) {
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				toastStore.trigger({ message: await extractErrorMessage(res), preset: 'error' });
 			}
@@ -98,9 +98,9 @@
 		busy = false;
 	}
 
-	// The backend replies with translation keys (e.g. the enterprise seat
-	// quota's errorServiceAccountSeatsExceeded); surface them instead of a
-	// generic failure message when present.
+	// The backend replies with translation keys (e.g. from the enterprise
+	// license rules); surface them instead of a generic failure message when
+	// present.
 	async function extractErrorMessage(res: Response): Promise<string> {
 		try {
 			const body = await res.json();
@@ -140,7 +140,7 @@
 				try {
 					const res = await fetch(`/service-accounts/${data.data.id}`, { method: 'DELETE' });
 					if (res.ok) {
-						await goto('/service-accounts', { invalidateAll: true });
+						await goto('/service-accounts', { refreshAll: true });
 					} else {
 						toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 					}
@@ -164,23 +164,23 @@
 				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>{m.edit()}</Anchor
 			>
 			<button
-				class="btn preset-filled-secondary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				data-testid="toggle-active-button"
 				disabled={busy}
 				onclick={toggleActive}
 			>
 				{#if data.data.is_active}
-					<i class="fa-solid fa-ban mr-2"></i>{m.deactivate()}
+					<i class="fa-solid fa-ban mr-2 text-red-500"></i>{m.deactivate()}
 				{:else}
 					<i class="fa-solid fa-check mr-2"></i>{m.activate()}
 				{/if}
 			</button>
 			<button
-				class="btn preset-filled-tertiary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				data-testid="rotate-secret-button"
 				disabled={busy}
 				onclick={modalRotateSecret}
-				><i class="fa-solid fa-arrows-rotate mr-2"></i>{m.rotateSecret()}</button
+				><i class="fa-solid fa-arrows-rotate mr-2 text-cyan-500"></i>{m.rotateSecret()}</button
 			>
 			<button
 				class="btn preset-filled-error-500 h-fit"

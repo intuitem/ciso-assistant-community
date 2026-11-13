@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
@@ -12,10 +13,12 @@ from core.models import (
     Finding,
     OrganisationIssue,
     OrganisationObjective,
+    RiskAcceptance,
     RiskAssessment,
     Severity,
     TaskNode,
     TaskTemplate,
+    Vulnerability,
 )
 from iam.models import RoleAssignment
 
@@ -265,11 +268,84 @@ def _rules(today: date) -> list[Rule]:
             ("status", "due_date"),
             F("task_template__name"),
         ),
+        # The remediation date is the user's to keep consistent with the status.
+        Rule(
+            OPERATIONS,
+            "warnings",
+            "vulnerabilityOpenWithRemediationDate",
+            _("Open vulnerability has a remediation date"),
+            Vulnerability,
+            "vulnerability",
+            "vulnerabilities",
+            lambda qs: qs.filter(remediated_at__isnull=False).exclude(
+                status__in=Vulnerability.RESOLVED_STATUSES
+            ),
+            ("status", "remediated_at"),
+        ),
+        Rule(
+            OPERATIONS,
+            "info",
+            "vulnerabilityResolvedWithoutRemediationDate",
+            _("Resolved vulnerability has no remediation date"),
+            Vulnerability,
+            "vulnerability",
+            "vulnerabilities",
+            lambda qs: qs.filter(
+                status__in=Vulnerability.RESOLVED_STATUSES, remediated_at__isnull=True
+            ),
+            ("status", "remediated_at"),
+        ),
     ]
 
 
 def empty_block() -> dict:
     return {"errors": [], "warnings": [], "info": [], "count": 0}
+
+
+# What an assessment's own `quality_check()` reports on besides the assessment
+# and its parts: linked objects, which may sit where the user cannot view them.
+LINKED_FINDING_MODELS = {
+    "appliedcontrol": AppliedControl,
+    "evidence": Evidence,
+    "riskacceptance": RiskAcceptance,
+}
+SEVERITIES = ("errors", "warnings", "info")
+
+
+def linked_findings_filter(user) -> Callable[[dict], dict]:
+    """A function giving an assessment's `quality_check()` without the findings
+    on linked objects `user` cannot view, as the rules below leave them out.
+    What the user may view is worked out once, for every assessment to come."""
+    viewable = {
+        obj_type: RoleAssignment.get_viewable_object_ids(user, model)
+        for obj_type, model in LINKED_FINDING_MODELS.items()
+    }
+
+    def keep(findings: dict) -> dict:
+        linked = defaultdict(set)
+        for severity in SEVERITIES:
+            for finding in findings[severity]:
+                if finding["obj_type"] in viewable:
+                    linked[finding["obj_type"]].add(str(finding["object"]["id"]))
+        hidden = {
+            (obj_type, object_id)
+            for obj_type, ids in linked.items()
+            for object_id in ids
+            - {str(pk) for pk in viewable[obj_type].filter(id__in=ids)}
+        }
+        if not hidden:
+            return findings
+        kept = {
+            severity: [
+                finding
+                for finding in findings[severity]
+                if (finding["obj_type"], str(finding["object"]["id"])) not in hidden
+            ]
+            for severity in SEVERITIES
+        }
+        return {**findings, **kept, "count": sum(map(len, kept.values()))}
+
+    return keep
 
 
 def _run_rules(user, today, scopes, bucket_for):
@@ -371,6 +447,6 @@ def object_xrays(obj, user, today: date | None = None) -> dict:
             "name": obj.name,
             "type": obj._meta.model_name,
         },
-        "assessment": obj.quality_check(),
+        "assessment": linked_findings_filter(user)(obj.quality_check()),
         **object_quality_checks(obj, user, today),
     }

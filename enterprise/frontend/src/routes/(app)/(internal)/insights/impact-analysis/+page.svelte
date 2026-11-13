@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
-	import { pageTitle } from '$lib/utils/stores';
+	import GraphExplorer from '#lib/components/DataViz/GraphExplorer.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
 	interface Props {
 		data: PageData;
 	}

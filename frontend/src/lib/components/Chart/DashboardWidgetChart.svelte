@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { roundScore } from '$lib/utils/helpers';
+	import { sampleMoment } from '#lib/utils/derived-metrics.js';
+	import { escapeHtml, roundScore } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { resolveBreakdownColor } from '$lib/utils/constants';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { resolveBreakdownColor } from '#lib/utils/constants.js';
+	import { directionOf, formatMetricNumber } from '#lib/utils/metrics.js';
 	import MarkdownRenderer from '../MarkdownRenderer.svelte';
 	import BreakdownSmallMultiples from './BreakdownSmallMultiples.svelte';
 
@@ -49,7 +51,8 @@
 		unitName === 'percentage' ? '%' : HIDDEN_UNITS.includes(unitName) ? '' : unitName
 	);
 	const targetValue = $derived(widget.metric_instance?.target_value);
-	const higherIsBetter = $derived(metricDefinition?.higher_is_better ?? true);
+	// Three-way: a metric without a direction gets no good or bad colour.
+	const direction = $derived(directionOf(metricDefinition));
 
 	// Helper to determine builtin metric type
 	function getBuiltinMetricType(metricKey: string): string {
@@ -93,9 +96,10 @@
 
 	// Format value with unit
 	function formatValueWithUnit(value: number | string): string {
-		if (unitName === 'percentage') return `${value}%`;
-		if (unitSymbol) return `${value} ${unitSymbol}`;
-		return String(value);
+		const shown = isBuiltinMetric ? String(value) : formatMetricNumber(value, metricDefinition);
+		if (unitName === 'percentage') return `${shown}%`;
+		if (unitSymbol) return `${shown} ${unitSymbol}`;
+		return shown;
 	}
 
 	// Prepare chart data from samples (custom metrics)
@@ -105,12 +109,12 @@
 				try {
 					const value = typeof sample.value === 'string' ? JSON.parse(sample.value) : sample.value;
 					if (isQualitative) {
-						return [sample.timestamp, value?.choice_index ?? null];
+						return [sampleMoment(sample), value?.choice_index ?? null];
 					} else {
-						return [sample.timestamp, value?.result ?? null];
+						return [sampleMoment(sample), value?.result ?? null];
 					}
 				} catch {
-					return [sample.timestamp, null];
+					return [sampleMoment(sample), null];
 				}
 			})
 			.filter((item) => item[1] !== null)
@@ -293,20 +297,21 @@
 			left: 50
 		};
 
+		// What a point reads as: its level's name, or the number with its unit.
+		function describeValue(value: any): string {
+			if (isQualitative && choiceNames && choiceNames[value - 1]) {
+				return `${value}. ${choiceNames[value - 1]}`;
+			}
+			return isQualitative ? String(value) : formatValueWithUnit(value);
+		}
+
 		const baseTooltip = {
 			trigger: 'axis',
 			formatter: function (params: any) {
 				const date = new Date(params[0].value[0]).toLocaleString();
-				const value = params[0].value[1];
-				let displayValue = value;
-
-				if (isQualitative && choiceNames && choiceNames[value - 1]) {
-					displayValue = `${value}. ${choiceNames[value - 1]}`;
-				} else if (!isQualitative && unitSymbol) {
-					displayValue = formatValueWithUnit(value);
-				}
-
-				return `${date}<br/>${params[0].marker}${displayValue}`;
+				// Rendered as HTML by ECharts: level names and units are typed
+				// text (a formula's results, a definition's levels), escaped.
+				return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(describeValue(params[0].value[1]))}`;
 			}
 		};
 
@@ -338,6 +343,22 @@
 					}
 				: { min: 0 })
 		};
+
+		// The axis is sized to the values: a target beyond them would fall off
+		// the chart, dashed line and all. Stretched to a round number past it.
+		function roundAbove(v: number): number {
+			const step = Math.pow(10, Math.floor(Math.log10(v))) / 5;
+			return Number.isFinite(step) && step > 0 ? Math.ceil((v * 1.05) / step) * step : v;
+		}
+		const numbers = chartData.map((d) => Number(d[1])).filter(Number.isFinite);
+		const showTarget = widget.show_target && typeof targetValue === 'number';
+		const targetYAxis =
+			showTarget && !isQualitative && numbers.length > 0 && targetValue > Math.max(...numbers)
+				? {
+						...baseYAxis,
+						max: unitName === 'percentage' && targetValue <= 100 ? 100 : roundAbove(targetValue)
+					}
+				: baseYAxis;
 
 		// For breakdown metrics, render as a time series, pie or donut
 		if (isBreakdownMetric) {
@@ -471,7 +492,7 @@
 					grid: baseGrid,
 					tooltip: baseTooltip,
 					xAxis: baseXAxis,
-					yAxis: baseYAxis,
+					yAxis: targetYAxis,
 					series: [
 						{
 							type: 'line',
@@ -499,7 +520,7 @@
 					grid: baseGrid,
 					tooltip: baseTooltip,
 					xAxis: baseXAxis,
-					yAxis: baseYAxis,
+					yAxis: targetYAxis,
 					series: [
 						{
 							type: 'line',
@@ -533,16 +554,19 @@
 				return {
 					grid: baseGrid,
 					tooltip: {
-						...baseTooltip,
 						trigger: 'axis',
-						axisPointer: { type: 'shadow' }
+						axisPointer: { type: 'shadow' },
+						// A bar's point is the value alone, under its date as the category.
+						formatter: function (params: any) {
+							return `${escapeHtml(params[0].name)}<br/>${params[0].marker}${escapeHtml(describeValue(params[0].value))}`;
+						}
 					},
 					xAxis: {
 						type: 'category',
 						data: chartData.map((d) => new Date(d[0]).toLocaleDateString()),
 						axisLabel: { rotate: 45 }
 					},
-					yAxis: baseYAxis,
+					yAxis: targetYAxis,
 					series: [
 						{
 							type: 'bar',
@@ -624,12 +648,7 @@
 							},
 							detail: {
 								valueAnimation: true,
-								formatter:
-									unitName === 'percentage'
-										? '{value}%'
-										: unitSymbol
-											? `{value} ${unitSymbol}`
-											: '{value}',
+								formatter: (value: number) => formatValueWithUnit(value),
 								fontSize: 20,
 								offsetCenter: [0, '40%'],
 								color: gaugeColor
@@ -727,7 +746,7 @@
 		if (isQualitative && choiceNames[value - 1]) {
 			return choiceNames[value - 1];
 		}
-		return String(value);
+		return isBuiltinMetric ? String(value) : formatMetricNumber(value, metricDefinition);
 	}
 
 	// Format display value with unit
@@ -764,19 +783,26 @@
 					>
 				{/if}
 			</div>
-			<!-- Trend indicator -->
-			{#if chartData.length > 1}
+			<!-- Trend indicator: a percentage change between two levels means nothing -->
+			{#if chartData.length > 1 && !isQualitative}
 				{@const prevValue = rawChartData[rawChartData.length - 2]?.[1]}
 				{@const change = prevValue
 					? (((rawLatestValue - prevValue) / prevValue) * 100).toFixed(1)
 					: null}
 				{@const isPositiveChange = Number(change) >= 0}
-				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}
+				{@const isGood =
+					direction === 'none'
+						? null
+						: direction === 'higher'
+							? isPositiveChange
+							: !isPositiveChange}
 				{#if change !== null}
 					<div
-						class="text-base font-medium px-2 py-0.5 rounded {isGood
-							? 'text-green-700 bg-green-100'
-							: 'text-red-700 bg-red-100'}"
+						class="text-base font-medium px-2 py-0.5 rounded {isGood === null
+							? 'text-surface-700 bg-surface-200'
+							: isGood
+								? 'text-green-700 bg-green-100'
+								: 'text-red-700 bg-red-100'}"
 					>
 						{isPositiveChange ? '↑' : '↓'}
 						{Math.abs(Number(change))}%

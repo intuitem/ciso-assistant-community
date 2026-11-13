@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { isQuestionVisible } from '$lib/utils/helpers';
-	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { isQuestionVisible } from '#lib/utils/helpers.js';
+	import * as m from '#paraglide/messages.js';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 	import SliderInput from './SliderInput.svelte';
 
@@ -50,6 +50,8 @@
 		onSearchReferences,
 		lockedUrns = []
 	}: Props = $props();
+
+	const questionEntries = $derived(Object.entries(questions ?? {}));
 
 	// Object-reference pickers: one open dropdown at a time, results per question.
 	let refOpen = $state<string | null>(null);
@@ -173,11 +175,22 @@
 	{/if}
 
 	<ul class="control flex flex-col gap-4 whitespace-pre-line">
-		{#each Object.entries(questions) as [urn, question]}
+		{#each questionEntries as [urn, question], i}
+			{@const group = question.config?.group}
+			{#if group && group !== questionEntries[i - 1]?.[1].config?.group}
+				<li
+					class="mt-2 border-l-4 border-surface-300-700 pl-3 text-sm font-semibold"
+					style:border-color={question.config?.group_color}
+					style:color={question.config?.group_color}
+				>
+					{group}
+				</li>
+			{/if}
 			<!-- Only render if visible according to depends_on -->
 			{#if isQuestionVisible(question, internalAnswers, questions)}
 				<li
 					class="flex flex-col justify-between gap-2 rounded-xl border border-surface-200-800 bg-surface-50-950 px-4 py-3"
+					data-question-urn={urn}
 				>
 					<p class="flex flex-wrap items-baseline gap-x-2 font-semibold">
 						<span>{question.text}</span>
@@ -190,6 +203,9 @@
 							>{safeTranslate(question.type)}</span
 						>
 					</p>
+					{#if question.annotation && !shallow}
+						<p class="text-xs text-surface-600-400 whitespace-pre-line">{question.annotation}</p>
+					{/if}
 
 					{#if shallow}
 						{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}
@@ -390,7 +406,7 @@
 						{#if form}
 							<textarea
 								placeholder=""
-								class="input w-full {_class}"
+								class="input w-full min-h-20 max-h-96 resize-y [field-sizing:content] {_class}"
 								{disabled}
 								autocomplete="off"
 								bind:value={internalAnswers[urn]}
@@ -399,7 +415,7 @@
 							<div>
 								<textarea
 									placeholder=""
-									class="input w-full {_class}"
+									class="input w-full min-h-20 max-h-96 resize-y [field-sizing:content] {_class}"
 									{disabled}
 									autocomplete="off"
 									bind:value={questionBuffers[urn]}
@@ -502,6 +518,11 @@
 															: 'fa-circle'} text-xs opacity-60"
 													></i>
 													<span class="min-w-0 grow truncate">{option.label}</span>
+													{#if option.on_subject}
+														<span class="badge preset-tonal-primary shrink-0 text-xs"
+															>{m.referenceOnSubject()}</span
+														>
+													{/if}
 													{#if option.folder}
 														<span class="shrink-0 text-xs text-surface-400">{option.folder}</span>
 													{/if}

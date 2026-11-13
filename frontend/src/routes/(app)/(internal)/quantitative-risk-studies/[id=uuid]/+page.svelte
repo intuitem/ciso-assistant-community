@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import LossExceedanceCurve from '#lib/components/Chart/LossExceedanceCurve.svelte';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
-	import { getToastStore } from '$lib/components/Toast/stores.ts';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { getToastStore } from '#lib/components/Toast/stores.ts';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		data: PageData;
@@ -26,7 +26,7 @@
 		if (form?.message?.simulationsComplete) {
 			// Add a small delay to ensure database transaction is committed
 			setTimeout(() => {
-				invalidateAll();
+				refreshAll();
 			}, 100);
 		}
 	});
@@ -37,24 +37,24 @@
 		<div class="flex flex-col space-y-2">
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
-				class="btn preset-filled-primary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-heart-pulse mr-2 capitalize"></i>{m.actionPlan()}
+				<i class="fa-solid fa-heart-pulse mr-2 capitalize text-red-500"></i>{m.actionPlan()}
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/executive-summary`}
-				class="btn bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white h-fit"
+				class="btn btn-quiet h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-chart-line mr-2"></i>{m.executiveSummary()}
+				<i class="fa-solid fa-chart-line mr-2 text-indigo-500"></i>{m.executiveSummary()}
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/key-metrics`}
-				class="btn bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white h-fit"
+				class="btn btn-quiet h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-chart-simple mr-2"></i>{m.keyMetrics()}
+				<i class="fa-solid fa-chart-simple mr-2 text-indigo-500"></i>{m.keyMetrics()}
 			</Anchor>
 			<form
 				method="POST"
@@ -62,7 +62,7 @@
 				use:enhance={() => {
 					retriggerIsLoading = true;
 					return async ({ result, update }) => {
-						await update();
+						await update({ navigate: false });
 						retriggerIsLoading = false;
 
 						// Handle responses immediately in the enhance callback
@@ -141,7 +141,7 @@
 			>
 				<button
 					type="submit"
-					class="btn bg-violet-500 hover:bg-violet-600 dark:bg-violet-600 dark:hover:bg-violet-700 text-white h-fit disabled:opacity-50 disabled:cursor-not-allowed"
+					class="btn btn-quiet h-fit disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={retriggerIsLoading}
 					title="Retrigger all simulations for this study including hypotheses, portfolio data, and risk tolerance curve"
 				>
@@ -150,7 +150,7 @@
 							<Progress value={null}>
 								<Progress.Circle class="[--size:--spacing(6)] -ml-2">
 									<Progress.CircleTrack />
-									<Progress.CircleRange class="stroke-white" />
+									<Progress.CircleRange class="stroke-current" />
 								</Progress.Circle>
 							</Progress>
 						{:else}

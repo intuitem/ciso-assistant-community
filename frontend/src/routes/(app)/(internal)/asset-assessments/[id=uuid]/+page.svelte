@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import LineHeatmap from '$lib/components/DataViz/LineHeatmap.svelte';
-	import ObjectivesComparisonTable from '$lib/components/Assets/ObjectivesComparisonTable.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import LineHeatmap from '#lib/components/DataViz/LineHeatmap.svelte';
+	import ObjectivesComparisonTable from '#lib/components/Assets/ObjectivesComparisonTable.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -59,9 +59,9 @@
 		<Anchor
 			breadcrumbAction="push"
 			href={`${page.url.pathname}/dependencies`}
-			class="btn preset-filled-secondary-500 h-fit"
+			class="btn btn-quiet h-fit"
 		>
-			<i class="fa-solid fa-sitemap mr-2"></i>
+			<i class="fa-solid fa-sitemap mr-2 text-emerald-500"></i>
 			{m.assetDependencies()}
 		</Anchor>
 	{/snippet}

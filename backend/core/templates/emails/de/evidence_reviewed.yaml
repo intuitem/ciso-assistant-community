@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Nachweis '${evidence_name}': ${decision}"
+body: |
+  Hallo,
+
+  Ein Nachweis, der Ihnen gehört, wurde geprüft:
+
+  - Name: ${evidence_name}
+  - Status: ${decision}
+  - Geprüft von: ${actor_name}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um ihn anzuzeigen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

@@ -1,17 +1,19 @@
 import type { Actions, PageServerLoad } from './$types';
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { type TableSource } from '$lib/components/ModelTable/types';
-import { headData } from '$lib/utils/table';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { headData } from '#lib/utils/table.js';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { error, redirect } from '@sveltejs/kit';
+import { loadValidationFlowFormData } from '#lib/utils/load.js';
 
-export const load = (async ({ fetch, params, cookies, locals }) => {
+export const load = (async (event) => {
+	const { fetch, params, cookies, locals } = event;
 	const URLModel = 'risk-scenarios';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
@@ -65,12 +67,25 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
+	const { validationFlowForm, validationFlowModel } = await loadValidationFlowFormData({
+		event,
+		folderId: scenario.folder?.id,
+		targetField: 'risk_scenarios',
+		targetIds: [params.id]
+	});
+
 	return {
 		scenario,
 		tables,
 		riskMatrix,
 		title: scenario.str,
-		riskAcceptances: await riskAcceptancesPromise
+		riskAcceptances: await riskAcceptancesPromise,
+		validationFlowForm,
+		validationFlowModel,
+		validationFlows: await fetchAllPages(
+			fetch,
+			`${BASE_API_URL}/validation-flows/?risk_scenarios=${params.id}`
+		).catch(() => [])
 	};
 }) satisfies PageServerLoad;
 

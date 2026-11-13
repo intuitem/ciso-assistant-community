@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo, urlParamModelVerboseName } from '#lib/utils/crud.js';
 
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
 
 import { fail, type Actions, type RequestEvent } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
@@ -13,11 +13,12 @@ import {
 	defaultWriteFormAction,
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
-	handleErrorResponse
-} from '$lib/utils/actions';
-import { modelSchema } from '$lib/utils/schemas';
+	handleErrorResponse,
+	REDIRECT_AFTER_CREATE
+} from '#lib/utils/actions.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 
-import { loadDetail } from '$lib/utils/load';
+import { loadDetail } from '#lib/utils/load.js';
 import type { PageServerLoad } from './$types';
 
 async function handleRiskAcceptanceTransition(
@@ -122,7 +123,10 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'perimeters');
+		// Decided by what is created, not by the page it is created from.
+		const created = (await event.request.clone().formData()).get('urlmodel') as string;
+		const redirectToWrittenObject =
+			event.params.model === 'perimeters' || REDIRECT_AFTER_CREATE.has(created);
 		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
 	},
 	delete: async (event) => {

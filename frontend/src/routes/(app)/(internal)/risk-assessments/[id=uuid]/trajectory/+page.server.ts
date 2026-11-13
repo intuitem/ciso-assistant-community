@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import type { ControlInfo } from '$lib/components/RiskMatrix/trajectory';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import type { ControlInfo } from '#lib/components/RiskMatrix/trajectory.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {

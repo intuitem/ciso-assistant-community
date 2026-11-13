@@ -1,7 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const model = getModelInfo(params.model);
@@ -11,13 +12,13 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const allowedOptions = new Set(['category', 'deletion_policy']);
 	const optionsField = url.searchParams.get('options');
 	if (!optionsField || !allowedOptions.has(optionsField)) {
-		error(400, { message: 'Invalid or missing options parameter' });
+		error(400, 'Invalid or missing options parameter');
 	}
 
 	const endpoint = `${baseUrl}/${encodeURIComponent(optionsField)}/`;
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
 	const data = await res.json();
@@ -40,7 +41,7 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
 	const data = await res.json();

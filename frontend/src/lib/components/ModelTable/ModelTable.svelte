@@ -4,16 +4,16 @@
 
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
+	import TableRowActions from '#lib/components/TableRowActions/TableRowActions.svelte';
+	import { booleanDisplay } from '#lib/utils/boolean-display.js';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '#lib/utils/constants.js';
 	import {
 		CUSTOM_ACTIONS_COMPONENT,
 		getFieldComponentMap,
 		isFieldFlagEnabled,
 		URL_MODEL_MAP,
 		urlModelForDjangoName
-	} from '$lib/utils/crud';
+	} from '#lib/utils/crud.js';
 
 	// Presentational row weighting, declared per model in listViewFields.rowEmphasis.
 	function rowEmphasisClass(row: TableSource): string {
@@ -35,36 +35,36 @@
 			})
 		);
 	}
-	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { onMount, tick, untrack } from 'svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { applyUnreadCount } from '$lib/utils/stores';
+	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { onDestroy, onMount, tick, untrack, type Component } from 'svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { applyUnreadCount } from '#lib/utils/stores.js';
 
 	// Types
-	import { browser } from '$app/environment';
-	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import type { ListViewFilterConfig, BatchActionConfig } from '$lib/utils/table';
-	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isDark } from '$lib/utils/helpers';
-	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
-	import { tableFilterStates } from '$lib/utils/stores';
+	import { browser } from '$app/env';
+	import LecChartPreview from '#lib/components/ModelTable/field/LecChartPreview.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import type { ListViewFilterConfig, BatchActionConfig } from '#lib/utils/table.js';
+	import { goto, breadcrumbs } from '#lib/utils/breadcrumbs.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { contextMenuActions, listViewFields, getBatchActions } from '#lib/utils/table.js';
+	import { tableFilterStates } from '#lib/utils/stores.js';
 	import BatchActionBar from './BatchActionBar.svelte';
 	import ColumnSelector from './ColumnSelector.svelte';
-	import type { urlModel } from '$lib/utils/types.js';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import type { SvelteEvent } from '$lib/utils/types';
+	import HexColorPill from './HexColorPill.svelte';
+	import type { urlModel } from '#lib/utils/types.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import type { SvelteEvent } from '#lib/utils/types.js';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
@@ -76,22 +76,23 @@
 		canPerformAction,
 		canPerformActionOnObject,
 		hasPermissionAnywhere
-	} from '$lib/utils/access-control';
+	} from '#lib/utils/access-control.js';
 	import { ContextMenu } from 'bits-ui';
 	import {
 		tableHandlers,
 		tableRefreshers,
 		tableStates,
-		tableColumnStates
-	} from '$lib/utils/stores';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+		tableColumnStates,
+		tableSortStates
+	} from '#lib/utils/stores.js';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		// Props
@@ -123,12 +124,24 @@
 		// inbox's read flag), so this is separable from `disableEdit` -- which it
 		// defaults to, leaving existing callers unaffected.
 		disableBatchEdit?: boolean;
+		/** Columns the backend cannot meaningfully ORDER BY (computed, or stored
+		 *  in a shape whose order means nothing), so the header must not offer
+		 *  a sort. Defaults to the resolved model's
+		 *  `ModelMapEntry.unsortableColumns`, so every caller gets it; pass this
+		 *  only to override that per table. */
+		unsortableColumns?: string[];
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
 		deleteForm?: SuperValidated<FormDataShape>;
 		URLModel?: urlModel;
 		baseEndpoint?: string;
+		/** Query appended to every request without becoming part of `baseEndpoint`,
+		 *  so the table's own filter state and sort stay keyed to the same table
+		 *  while the extra params change. A change refetches. */
+		extraParams?: string;
+		/** Cell components for this table only, over the model's defaults. */
+		fieldComponents?: Record<string, Component<any>>;
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
@@ -160,7 +173,7 @@
 		// only applies the disableDelete/disableEdit filters — never the
 		// child-model permission filter, which would ask the wrong question for
 		// parent_action entries.
-		extraBatchActions?: import('$lib/utils/table').TableBatchAction[];
+		extraBatchActions?: import('#lib/utils/table.js').TableBatchAction[];
 	}
 
 	let {
@@ -188,12 +201,15 @@
 		disableCreate = false,
 		disableEdit = false,
 		disableBatchEdit = undefined,
+		unsortableColumns = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
 		deleteForm = undefined,
 		URLModel = undefined,
 		baseEndpoint = `/${URLModel}`,
+		extraParams = '',
+		fieldComponents = {},
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
@@ -227,6 +243,15 @@
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+	// Null, blank, empty lists, the "--" (Undefined) choice and the not-rated risk level
+	// ({name: "--", hexcolor}) all render the same muted placeholder.
+	const isEmptyCell = (v: any) =>
+		v == null ||
+		v === '' ||
+		v === '-' ||
+		v === '--' ||
+		(Array.isArray(v) && v.length === 0) ||
+		(typeof v === 'object' && v.hexcolor && (v.name ?? v.str) === '--');
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
@@ -400,7 +425,12 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
-	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const nonNavigableRelatedFields = new Set([
+		'qualifications',
+		'relationship',
+		'nature',
+		'lifecycle_stage'
+	]);
 	const getRelatedFieldHref = (
 		fieldName: string,
 		id: string,
@@ -440,12 +470,11 @@
 			totalRows: source?.meta?.count
 		}
 	);
-	const rows = handler.getRows();
 
+	const rows = handler.getRows();
 	const relatedFieldNames = $derived(
 		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
 	);
-
 	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
 	// A table handed its rows up front has no model or endpoint ("/undefined"): the
@@ -454,6 +483,13 @@
 	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
 
 	if (hasRemoteSource) $tableHandlers[baseEndpoint] = handler;
+	onDestroy(() => {
+		// A newer table may already own this endpoint.
+		tableHandlers.update((h) => {
+			if (h[baseEndpoint] === handler) delete h[baseEndpoint];
+			return h;
+		});
+	});
 
 	const toastStore = getToastStore();
 
@@ -464,8 +500,14 @@
 	// refetch keeps the previous rows on screen.
 	let inFlight = $state(0);
 	let hasLoadedOnce = $state(false);
-	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let loadFailed = $state(false);
+	// A remote table is "fetching" until its first page lands (not only while a request is
+	// in flight): otherwise it flashes empty headers before the first request starts. A failed
+	// first request only ends the skeleton once no retry is still pending.
+	const isFetching = $derived(hasRemoteSource && !hasLoadedOnce && (!loadFailed || inFlight > 0));
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
+	// Requests can land out of order: only the latest one may fill the table.
+	let latestLoad = 0;
 
 	if (hasRemoteSource) {
 		// The trigger handler calls our reload synchronously before its first
@@ -480,12 +522,18 @@
 			query.delete('limit');
 			onQueryChange(query.toString());
 			inFlight += 1;
+			const request = ++latestLoad;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
 			currentLoad = loadTableData({
-				state,
+				state: {
+					...state,
+					setTotalRows: (value) => {
+						if (request === latestLoad) state.setTotalRows(value);
+					}
+				},
 				URLModel,
-				endpoint: baseEndpoint,
+				endpoint: withExtraParams(baseEndpoint, extraParams),
 				fields:
 					showColumnSelector && allColumnKeys.length > 0
 						? { head: allColumnKeys, body: allColumnKeys }
@@ -509,19 +557,56 @@
 				}
 			}).finally(() => {
 				inFlight -= 1;
+				if (request !== latestLoad) return;
 				if (!failed) hasLoadedOnce = true;
+				// The latest request decides: a failed search must not read as an empty result.
+				loadFailed = failed;
 			});
-			return currentLoad;
+			// The handler keeps its rows when it is handed nothing.
+			return currentLoad.then((rows) => (request === latestLoad ? rows : undefined));
 		});
 	}
 
+	function withExtraParams(endpoint: string, params: string) {
+		if (!params) return endpoint;
+		return `${endpoint}${endpoint.includes('?') ? '&' : '?'}${params}`;
+	}
+
+	let previousExtraParams = extraParams;
+	$effect(() => {
+		if (extraParams === previousExtraParams) return;
+		previousExtraParams = extraParams;
+		// New params mean a new row set: start from its first page.
+		if (hasRemoteSource)
+			untrack(() => {
+				handler.setPage(1);
+				handler.invalidate();
+			});
+	});
+
+	function applySavedSort() {
+		const saved = $tableSortStates[filterStoreKey];
+		const sort = saved ? { identifier: saved.orderBy, direction: saved.direction } : orderBy;
+		if (!sort) handler.getSort().set({});
+		else if (sort.direction === 'asc') handler.sortAsc(sort.identifier);
+		else handler.sortDesc(sort.identifier);
+	}
+
 	onMount(() => {
-		if (orderBy) {
-			orderBy.direction === 'asc'
-				? handler.sortAsc(orderBy.identifier)
-				: handler.sortDesc(orderBy.identifier);
-		}
+		applySavedSort();
+		const unsubscribeSort = handler.getSort().subscribe(({ orderBy: key, direction }) => {
+			if (!key || !direction) return;
+			const next = { ...$tableSortStates };
+			if (key === orderBy?.identifier && direction === orderBy?.direction) {
+				if (!(filterStoreKey in next)) return;
+				delete next[filterStoreKey];
+			} else {
+				next[filterStoreKey] = { orderBy: String(key), direction };
+			}
+			$tableSortStates = next;
+		});
 		return () => {
+			unsubscribeSort();
 			if (hasRemoteSource)
 				tableRefreshers.update((r) => {
 					delete r[baseEndpoint];
@@ -541,7 +626,6 @@
 		forcePreventDelete;
 	const preventEdit = (row: TableSource) =>
 		(row?.meta?.builtin && !BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)) || forcePreventEdit;
-
 	const tableURLModel = URLModel;
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
@@ -572,6 +656,7 @@
 			)
 			.sort()
 			.join('&');
+
 	const isDefaultFilterState = (state: Record<string, any[]>) =>
 		filteredFields.every(
 			(field) =>
@@ -640,21 +725,23 @@
 	// under the new key -- two separate effects can't guarantee that order.
 	let previousFilterStoreKey = filterStoreKey;
 	$effect(() => {
+		// Rerun (and refetch) when the page reloads its data
+		page.data;
 		if (filterStoreKey !== previousFilterStoreKey) {
 			previousFilterStoreKey = filterStoreKey;
-			const fresh = seedFilterValues();
+			untrack(applySavedSort);
+			const fresh = untrack(seedFilterValues);
 			Object.assign(filterValues, fresh);
 			_form.form.update((data) => ({
 				...data,
 				...Object.fromEntries(
-					Object.entries(fresh).map(([f, v]: [string, any]) => [
-						f,
-						(v ?? []).map((x: any) => x.value)
-					])
+					Object.entries(fresh).map(([f, v]) => [f, (v ?? []).map((x: any) => x.value)])
 				)
 			}));
 		}
 
+		// untracked: the shallow goto below swaps page.url, which must not rerun this effect
+		const url = syncFiltersToUrl ? new URL(untrack(() => page.url.href)) : null;
 		for (const field of filteredFields) {
 			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
 
@@ -666,20 +753,22 @@
 			}
 			for (const [param, values] of Object.entries(buckets)) {
 				handler.filter(values, param);
-				if (!syncFiltersToUrl) continue;
-				page.url.searchParams.delete(param);
-				values.forEach((value: string) => page.url.searchParams.append(param, value));
+				if (!url) continue;
+				url.searchParams.delete(param);
+				values.forEach((value: string) => url.searchParams.append(param, value));
 			}
 		}
-		if (syncFiltersToUrl) {
-			history.replaceState(history.state, '', page.url.pathname + page.url.search);
+		if (url) {
+			if (url.href !== untrack(() => page.url.href)) {
+				_goto(url, { shallow: true, replace: true, state: untrack(() => page.state) });
+			}
 			// Sync the current crumb's href with the new filter query.
 			breadcrumbs.update((crumbs) => {
 				if (crumbs.length < 2) return crumbs;
 				const last = crumbs[crumbs.length - 1];
 				const lastPath = last.href?.split('?')[0];
-				if (lastPath !== page.url.pathname) return crumbs;
-				const newHref = page.url.pathname + page.url.search;
+				if (lastPath !== url.pathname) return crumbs;
+				const newHref = url.pathname + url.search;
 				if (last.href === newHref) return crumbs;
 				const next = crumbs.slice();
 				next[next.length - 1] = { ...last, href: newHref };
@@ -704,13 +793,14 @@
 			}, 10);
 	});
 
-	// Refetch when the page reloads its data (invalidateAll() swaps page.url for a
-	// new URL object). Standalone tables get this from syncing filters with the
-	// URL above; embedded ones no longer touch it, so track it here.
-	let pageUrlSeen = false;
+	// Refetch when the page reloads its data (navigation, refreshAll(), form actions).
+	// Standalone tables get this from the filter effect above; embedded ones don't sync
+	// filters, so track it here. page.data, not page.url: the filter-syncing shallow goto
+	// also swaps page.url.
+	let pageDataSeen = false;
 	$effect(() => {
-		page.url;
-		if (!pageUrlSeen) return void (pageUrlSeen = true);
+		page.data;
+		if (!pageDataSeen) return void (pageDataSeen = true);
 		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
 	});
 
@@ -722,7 +812,7 @@
 		}
 	});
 
-	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
+	let fieldComponentMap = $derived({ ...getFieldComponentMap(URLModel), ...fieldComponents });
 	let canCreateObject = $derived(
 		model
 			? page.params.id
@@ -779,7 +869,9 @@
 				: false)
 	);
 
-	let contextMenuDisplayDelete = $derived(contextMenuCanDeleteObject && deleteForm !== undefined);
+	let contextMenuDisplayDelete = $derived(
+		!disableDelete && contextMenuCanDeleteObject && deleteForm !== undefined
+	);
 
 	function contextMenuModalConfirmDelete(
 		id: string,
@@ -787,17 +879,13 @@
 	): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,
-			props: {
-				_form: deleteForm,
-				id: id,
-				debug: false,
-				URLModel: URLModel
-			}
+			props: { _form: deleteForm, id, debug: false, URLModel }
 		};
 		const name =
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
 				: (row.name ?? row.meta?.str ?? Object.values(row)[0]);
+
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name as string })
@@ -806,7 +894,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.deleteModalTitle(),
-			body: body
+			body
 		};
 		modalStore.trigger(modal);
 	}
@@ -819,9 +907,9 @@
 			ref: PromptConfirmModal,
 			props: {
 				_form: deleteForm,
-				id: id,
+				id,
 				debug: false,
-				URLModel: URLModel,
+				URLModel,
 				formAction: '?/delete'
 			}
 		};
@@ -829,6 +917,7 @@
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
 				: (row.name ?? Object.values(row)[0]);
+
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name as string })
@@ -837,7 +926,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.deleteModalTitle(),
-			body: body
+			body
 		};
 		modalStore.trigger(modal);
 	}
@@ -868,6 +957,12 @@
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
+		if (!(filterStoreKey in $tableSortStates)) return;
+		const nextSort = { ...$tableSortStates };
+		delete nextSort[filterStoreKey];
+		$tableSortStates = nextSort;
+		applySavedSort();
+		handler.invalidate();
 	}
 
 	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
@@ -878,13 +973,20 @@
 		degraded: 'preset-tonal-error',
 		deprecated: 'preset-tonal-surface'
 	};
-
-	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
-		// The badge background is a fixed hex color, so the text must be a fixed color too
-		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
-		// light-colored badge. White on dark backgrounds, fixed dark surface otherwise.
-		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
-	});
+	// Status column badges: the applied-control tones plus the shared assessment statuses.
+	const STATUS_PRESETS: Record<string, string> = {
+		...APPLIED_CONTROL_STATUS_PRESETS,
+		planned: 'preset-tonal-primary',
+		in_review: 'preset-tonal-secondary',
+		done: 'preset-tonal-success'
+	};
+	// Same flag tones as the detail view.
+	const PRIORITY_FLAGS: Record<string, string> = {
+		'1': 'text-red-500',
+		'2': 'text-orange-500',
+		'3': 'text-blue-500',
+		'4': 'text-surface-600-400'
+	};
 
 	const tail_render = $derived(tail);
 
@@ -902,15 +1004,10 @@
 		'user_groups'
 	];
 
-	// Computed in Python from related rows, so there is no column for the backend to
-	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
-	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress', 'schedule'];
-
-	// Function to check if a column is multi-value and should not be sortable
-	const isMultiValueColumn = (key: string): boolean => {
+	const isUnsortableColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
-			UNSORTABLE_COMPUTED_COLUMNS.includes(key) ||
+			(unsortableColumns ?? model?.unsortableColumns ?? []).includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};
@@ -980,6 +1077,7 @@
 	const extraActions = $derived(
 		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !noBatchFieldEdit))
 	);
+
 	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
 	const hasBatchActions = $derived(
 		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
@@ -1024,6 +1122,13 @@
 	});
 
 	let tableWrapEl: HTMLElement | undefined = $state();
+
+	const refPrefix = (key: string, val: { ref_id?: string; str?: string }) => {
+		const name = val.str ?? '';
+		const named =
+			!!val.ref_id && name.startsWith(val.ref_id) && !/[\w-]/.test(name.charAt(val.ref_id.length));
+		return key === 'applied_controls' && val.ref_id && !named ? `${val.ref_id} - ` : '';
+	};
 </script>
 
 <div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
@@ -1087,7 +1192,7 @@
 												{/key}
 											{/if}
 										{/each}
-										{#if filterCount > 0}
+										{#if filterCount > 0 || filterStoreKey in $tableSortStates}
 											<div class="flex justify-end pt-1">
 												<button
 													type="button"
@@ -1169,7 +1274,7 @@
 					</th>
 				{/if}
 				{#each renderColumnKeys as key (key)}
-					<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+					<Th {handler} orderBy={isUnsortableColumn(key) ? undefined : key} class={regionHeadCell}
 						>{safeTranslate(tableSource.head[key])}</Th
 					>
 				{/each}
@@ -1245,7 +1350,10 @@
 													data-testid="model-table-td-array-elem"
 													class="font-typo-base whitespace-pre-line break-words"
 												>
-													{#if Array.isArray(value)}
+													<!-- last_assessment_status: null means "never assessed", rendered by its own branch. -->
+													{#if key !== 'last_assessment_status' && isEmptyCell(value)}
+														<span class="text-surface-400-600">--</span>
+													{:else if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
 														{@const visibleValues = isRelatedField(key)
 															? value.filter((item) => !isMaskedPlaceholder(item))
@@ -1277,10 +1385,10 @@
 																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{safeTranslate(val.str)}</Anchor
+																					>{refPrefix(key, val)}{safeTranslate(val.str)}</Anchor
 																				>
 																			{:else}
-																				{safeTranslate(val.str)}
+																				{refPrefix(key, val)}{safeTranslate(val.str)}
 																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
@@ -1333,25 +1441,26 @@
 																	)[1]}</Anchor
 																>
 															{:else}
-																<Anchor
-																	breadcrumbAction="push"
-																	href={itemHref}
-																	class="anchor"
-																	stopPropagation>{safeTranslate(value.str)}</Anchor
+																<!-- Clamp a wrapper, not the link: a block-level link would fill the
+																     cell and steal clicks meant for the row. -->
+																<span class="line-clamp-2" title={safeTranslate(value.str)}
+																	><Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation>{safeTranslate(value.str)}</Anchor
+																	></span
 																>
 															{/if}
 														{:else}
 															{safeTranslate(value.str) ?? '-'}
 														{/if}
 													{:else if value && value.hexcolor}
-														<p
-															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																value.hexcolor
-															)}"
-															style="background-color: {value.hexcolor}"
-														>
-															{safeTranslate(value.name ?? value.str) ?? '-'}
-														</p>
+														<HexColorPill
+															hexcolor={value.hexcolor}
+															label={safeTranslate(value.name ?? value.str) ?? '-'}
+															class="ml-2"
+														/>
 													{:else if ISO_8601_REGEX.test(value) && DATE_FIELDS_TO_FORMAT.includes(key)}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
@@ -1360,12 +1469,33 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
-														<span class="ml-9"
-															>{value != null
-																? safeTranslate('percentageDisplay', { number: value })
-																: '--'}</span
+													{:else if key === 'status' && typeof value === 'string' && !(URLModel == 'document-containers' && row.meta?.pending_revision)}
+														<span
+															class="badge text-xs {STATUS_PRESETS[value] ??
+																'preset-tonal-surface'}">{safeTranslate(value)}</span
 														>
+													{:else if key === 'priority' && PRIORITY_FLAGS[String(value).replace('P', '')]}
+														<span class="whitespace-nowrap"
+															><i
+																class="fa-solid fa-flag mr-1 {PRIORITY_FLAGS[
+																	String(value).replace('P', '')
+																]}"
+															></i>{safeTranslate(value)}</span
+														>
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
+														<div class="flex items-center gap-2 min-w-24">
+															<div
+																class="h-1.5 flex-1 rounded-full bg-surface-200-800 overflow-hidden"
+															>
+																<div
+																	class="h-full rounded-full bg-primary-500"
+																	style="width: {Math.min(100, Math.max(0, Number(value)))}%"
+																></div>
+															</div>
+															<span class="text-xs tabular-nums whitespace-nowrap w-10 text-end"
+																>{safeTranslate('percentageDisplay', { number: value })}</span
+															>
+														</div>
 													{:else if key === 'last_assessment_status'}
 														<!-- The status is nullable: only a missing round is "never assessed". -->
 														{#if !meta?.last_assessment_date}
@@ -1379,13 +1509,14 @@
 																{#each Object.entries(value) as [lang, translation]}
 																	<div class="flex flex-row gap-2">
 																		<strong>{lang}:</strong>
-																		<span
-																			>{safeTranslate(
+
+																		<span>
+																			{safeTranslate(
 																				typeof translation === 'object' && translation !== null
 																					? ((translation as Record<string, string>).name ?? '')
 																					: translation
-																			)}</span
-																		>
+																			)}
+																		</span>
 																	</div>
 																{/each}
 															</div>
@@ -1431,14 +1562,14 @@
 														{value.name}
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{@const displayValue = [
-															'name',
-															'description',
-															'ref_id',
-															'key'
-														].includes(key)
-															? (value ?? '-')
-															: safeTranslate(value ?? '-')}
+														{@const displayValue =
+															['name', 'description', 'observation', 'ref_id', 'key'].includes(
+																key
+															) ||
+															(key.startsWith('cf__') && typeof value === 'string')
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
+
 														{#if displayValue?.length > 300}
 															{displayValue.slice(0, 300)}...
 														{:else}
@@ -1486,7 +1617,10 @@
 												{/snippet}
 												{#snippet tail()}
 													{@const ActionsComponent = actionsComponent}
-													{#if tail_render}{@render tail_render()}{:else if ActionsComponent}
+
+													{#if tail_render}
+														{@render tail_render()}
+													{:else if ActionsComponent}
 														<ActionsComponent meta={row.meta ?? {}} {actionsURLModel} {handler} />
 													{/if}
 												{/snippet}
@@ -1592,13 +1726,19 @@
 			</tfoot>
 		{/if}
 	</table>
+	<!-- Outside the table: an empty tbody stays empty (tests count rows) and no context menu targets it. -->
+	{#if !loading && !isFetching && inFlight === 0 && $rows.length === 0}
+		<p data-testid="table-empty" class="py-8 text-center text-sm text-surface-500">
+			{loadFailed ? m.errorLoadingData() : m.noEntriesFound()}
+		</p>
+	{/if}
 
 	<footer class="flex justify-between items-center space-x-8 p-2">
 		{#if rowCount && pagination}
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} syncToUrl={syncFiltersToUrl} />
 		{/if}
 	</footer>
 </div>

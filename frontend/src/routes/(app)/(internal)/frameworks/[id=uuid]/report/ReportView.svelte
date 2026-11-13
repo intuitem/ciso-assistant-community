@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { roundScore } from '#lib/utils/helpers.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
 
 	// -----------------------------------------------------------------------------
 	// Types — match the backend response shape from GET /api/frameworks/{id}/report/
@@ -43,12 +46,29 @@
 		path: InheritancePathEntry[];
 	};
 
+	// Implementation, documentation and maturity scores, as the audit counts them
+	// (its calculation method, N/A at the target when it anchors N/A). A layer the
+	// audit does not count, or the viewer may not read, is null.
+	type ScoreLayers = {
+		implementation_score: number | null;
+		documentation_score: number | null;
+		maturity_score: number | null;
+	};
+
+	// An audit's scores over its in-scope requirements, as on the audit's own page,
+	// in total and per report section (keyed by section urn, or '__top__').
+	type AuditScores = {
+		total: ScoreLayers;
+		sections: Record<string, ScoreLayers>;
+	};
+
 	type ReportRow = {
 		requirement_assessment_id: string;
 		requirement_urn: string;
 		requirement_parent_urn: string | null;
 		requirement_ref_id: string | null;
 		requirement_name: string | null;
+		requirement_description: string | null;
 		assessable: boolean;
 		implementation_groups: string[] | null;
 
@@ -58,6 +78,12 @@
 		score: number | null;
 		documentation_score: number | null;
 		is_scored: boolean | null;
+		scores: ScoreLayers;
+		// Combined view's reading; null when the row inherits nothing.
+		combined_scores: ScoreLayers | null;
+		// Part of what the scores mean, so readable with them even when
+		// compliance is hidden; null when the viewer may not read scores.
+		not_applicable: boolean | null;
 
 		compliance_assessment_id: string;
 		compliance_assessment_name: string;
@@ -81,12 +107,20 @@
 		folder_path: string[];
 		folder_path_str: string;
 		is_counted: boolean;
+		// Only counted audits carry scores.
+		score_scale: { min: number | null; max: number | null; calculation_method: string } | null;
+		result_visible: boolean;
+		documentation_score_visible: boolean;
+		scores: AuditScores | null;
+		// Combined view's reading; null when the audit inherits nothing.
+		combined_scores: AuditScores | null;
 	};
 
 	type Section = {
 		urn: string;
 		ref_id: string | null;
 		name: string | null;
+		description: string | null;
 		parent_urn: string | null;
 	};
 
@@ -169,10 +203,11 @@
 	let expandedRow = $state<string | null>(null);
 	let expandedSections = $state<Set<string>>(new Set());
 	let showCAList = $state<boolean>(false);
-	let domainSortKey = $state<'name' | 'compliance' | 'score'>('name');
+	type DomainSortKey = 'name' | 'compliance' | 'score' | 'documentation' | 'maturity';
+	let domainSortKey = $state<DomainSortKey>('name');
 	let domainSortDir = $state<'asc' | 'desc'>('asc');
 
-	function setDomainSortKey(k: 'name' | 'compliance' | 'score') {
+	function setDomainSortKey(k: DomainSortKey) {
 		if (k === domainSortKey) return;
 		domainSortKey = k;
 		// pick a sensible default direction per metric
@@ -200,19 +235,13 @@
 
 	function onIGChange(event: Event) {
 		const nextIG = (event.currentTarget as HTMLSelectElement).value;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (nextIG && nextIG !== 'all') url.searchParams.set('implementation_group', nextIG);
 		else url.searchParams.delete('implementation_group');
-		goto(url, { invalidateAll: true, keepFocus: true });
+		goto(url, { refreshAll: true, reset: false });
 	}
 
-	const RESULT_COLORS: Record<Result, string> = {
-		compliant: '#91CC75',
-		partially_compliant: '#74C0DE',
-		non_compliant: '#E66',
-		not_applicable: '#EAE2D7',
-		not_assessed: '#d7dfea'
-	};
+	const RESULT_COLORS = complianceResultColorMap as Record<Result, string>;
 
 	const resultLabel = (r: Result): string => safeTranslate(r);
 
@@ -234,6 +263,12 @@
 		'not_assessed'
 	];
 
+	// Audits whose compliance the viewer reads. A score-only audit (CyFun) hides
+	// it: its rows would only add "not assessed" to the distribution.
+	let resultVisibleAuditIds = $derived(
+		new Set(complianceAssessments.filter((ca) => ca.result_visible).map((ca) => ca.id))
+	);
+
 	function distribution(rs: ReportRow[]): Record<Result, number> {
 		const d: Record<Result, number> = {
 			compliant: 0,
@@ -243,16 +278,35 @@
 			not_assessed: 0
 		};
 		for (const r of rs) {
+			if (!resultVisibleAuditIds.has(r.compliance_assessment_id)) continue;
 			const k: Result = (r.result as Result | null) ?? 'not_assessed';
 			d[k]++;
 		}
 		return d;
 	}
 
-	function avgScore(rs: ReportRow[]): number | null {
-		const scored = rs.filter((r) => r.is_scored && r.score !== null && r.score !== undefined);
-		if (scored.length === 0) return null;
-		return scored.reduce((a, r) => a + (r.score ?? 0), 0) / scored.length;
+	const SCORE_LAYERS = ['implementation_score', 'documentation_score', 'maturity_score'] as const;
+
+	// Average of each layer over the entries that have it. Scores are computed
+	// per audit by the backend, as on the audit's own page; across audits, the
+	// report averages them, so a report over one audit shows that audit's numbers.
+	function meanLayers(list: (ScoreLayers | null | undefined)[]): ScoreLayers {
+		const out: ScoreLayers = {
+			implementation_score: null,
+			documentation_score: null,
+			maturity_score: null
+		};
+		for (const layer of SCORE_LAYERS) {
+			const values = list
+				.map((s) => s?.[layer])
+				.filter((v): v is number => v !== null && v !== undefined);
+			out[layer] = values.length ? values.reduce((a, v) => a + v, 0) / values.length : null;
+		}
+		return out;
+	}
+
+	function formatScore(value: number | null): string {
+		return value === null ? '—' : String(roundScore(value));
 	}
 
 	function compliancePct(d: Record<Result, number>): number | null {
@@ -285,15 +339,96 @@
 	function toEffective(r: ReportRow): ReportRow {
 		const inh = r.inheritance;
 		if (!applyInheritance || !inh || !inh.inherited) return r;
+		// The inherited score as this audit counts it: none when it is on another
+		// audit's scale (the overlay's own value is rescaled and rounded).
+		const score = r.combined_scores ? r.combined_scores.implementation_score : inh.effective_score;
 		return {
 			...r,
 			result: inh.effective_result,
-			score: inh.effective_score,
-			is_scored: inh.effective_score !== null
+			score,
+			is_scored: score !== null,
+			// Inheritance carries no documentation score.
+			documentation_score: null,
+			scores: r.combined_scores ?? r.scores,
+			not_applicable: r.not_applicable === null ? null : inh.effective_result === 'not_applicable'
 		};
 	}
 
 	let displayRows = $derived(inheritanceAvailable ? rows.map(toEffective) : rows);
+
+	// Counted audits and the scores the current view reads for each.
+	let useCombinedScores = $derived(inheritanceAvailable && applyInheritance);
+	let auditScoresById = $derived(
+		new Map(
+			complianceAssessments
+				.filter((ca) => ca.is_counted && ca.scores)
+				.map((ca) => [
+					ca.id,
+					(useCombinedScores && ca.combined_scores) || (ca.scores as AuditScores)
+				])
+		)
+	);
+	// Documentation and maturity columns show when a counted audit has them.
+	let showDocumentation = $derived(
+		complianceAssessments.some((ca) => ca.is_counted && ca.documentation_score_visible)
+	);
+	// A lone score is just "Score"; "Implementation score" only next to a documentation score.
+	let implementationLabel = $derived(showDocumentation ? m.implementationScore() : m.score());
+	// Compliance distribution and percentage show when a counted audit shows
+	// compliance; score-only audits (CyFun) hide it.
+	let showCompliance = $derived(
+		complianceAssessments.some((ca) => ca.is_counted && ca.result_visible)
+	);
+	// One tile per shown metric, plus the two counts (static class names for Tailwind).
+	let kpiGridClass = $derived(
+		{
+			3: 'md:grid-cols-3',
+			4: 'md:grid-cols-4',
+			5: 'md:grid-cols-3 xl:grid-cols-5',
+			6: 'md:grid-cols-3 xl:grid-cols-6'
+		}[(showCompliance ? 1 : 0) + (showDocumentation ? 3 : 1) + 2]
+	);
+	// Columns of the requirement table, for the drill-down row's colspan.
+	let requirementColumns = $derived(3 + (showCompliance ? 2 : 0) + (showDocumentation ? 3 : 1));
+
+	let scaleById = $derived(
+		new Map(
+			complianceAssessments.filter((ca) => ca.score_scale).map((ca) => [ca.id, ca.score_scale!])
+		)
+	);
+
+	// Averages scores across audits only when they mean the same thing: one
+	// scale, and no sum over several audits (a sum's ceiling depends on the
+	// audit's scope). Otherwise the rollup is left out (all null).
+	function meanAcrossAudits(
+		entries: { auditId: string; scores: ScoreLayers | null | undefined }[],
+		{ sums }: { sums: boolean }
+	): ScoreLayers {
+		const contributing = entries.filter(
+			(e) => e.scores && SCORE_LAYERS.some((layer) => e.scores![layer] !== null)
+		);
+		const audits = new Set(contributing.map((e) => e.auditId));
+		const scales = new Set(
+			[...audits].map((id) => `${scaleById.get(id)?.min}:${scaleById.get(id)?.max}`)
+		);
+		const summed =
+			sums && [...audits].some((id) => scaleById.get(id)?.calculation_method === 'sum');
+		if (scales.size > 1 || (summed && audits.size > 1)) return meanLayers([]);
+		return meanLayers(contributing.map((e) => e.scores));
+	}
+
+	function auditsScores(
+		auditIds: Iterable<string>,
+		pick: (s: AuditScores) => ScoreLayers | undefined
+	): ScoreLayers {
+		return meanAcrossAudits(
+			[...new Set(auditIds)].map((id) => {
+				const s = auditScoresById.get(id);
+				return { auditId: id, scores: s ? pick(s) : null };
+			}),
+			{ sums: true }
+		);
+	}
 
 	let filteredRows = $derived(
 		igFilter === 'all'
@@ -321,17 +456,18 @@
 			urn: string;
 			ref: string;
 			name: string;
+			ca_count: number;
 			row_count: number;
 			requirement_count: number;
 			dist: Record<Result, number>;
-			avg_score: number | null;
+			scores: ScoreLayers;
 			requirements: {
 				urn: string;
 				ref_id: string;
 				name: string;
 				ca_count: number;
 				dist: Record<Result, number>;
-				avg_score: number | null;
+				scores: ScoreLayers;
 				rows: ReportRow[];
 			}[];
 		}[] = [];
@@ -348,10 +484,15 @@
 				.map(([reqUrn, rs2]) => ({
 					urn: reqUrn,
 					ref_id: rs2[0].requirement_ref_id ?? '',
-					name: rs2[0].requirement_name ?? '',
+					name: rs2[0].requirement_name || rs2[0].requirement_description || '',
 					ca_count: rs2.length,
 					dist: distribution(rs2),
-					avg_score: avgScore(rs2),
+					// Each audit's requirement scores, N/A at the target when it anchors N/A.
+					// A requirement's scores are never sums: only the scale must match.
+					scores: meanAcrossAudits(
+						rs2.map((r) => ({ auditId: r.compliance_assessment_id, scores: r.scores })),
+						{ sums: false }
+					),
 					rows: rs2
 				}))
 				.sort((a, b) => a.ref_id.localeCompare(b.ref_id, undefined, { numeric: true }));
@@ -360,10 +501,14 @@
 				urn,
 				ref,
 				name,
+				ca_count: new Set(rs.map((r) => r.compliance_assessment_id)).size,
 				row_count: rs.length,
 				requirement_count: requirements.length,
 				dist: distribution(rs),
-				avg_score: avgScore(rs),
+				scores: auditsScores(
+					rs.map((r) => r.compliance_assessment_id),
+					(s) => s.sections[urn]
+				),
 				requirements
 			});
 		};
@@ -372,7 +517,8 @@
 		for (const s of sectionList) {
 			const rs = byParent.get(s.urn);
 			if (!rs || rs.length === 0) continue;
-			pushSection(s.urn, s.ref_id ?? '', s.name ?? s.urn, rs);
+			// The ref column already identifies the section: no URN fallback.
+			pushSection(s.urn, s.ref_id ?? '', s.name || s.description || '', rs);
 			seen.add(s.urn);
 		}
 
@@ -416,10 +562,19 @@
 				ca_count: new Set(rs.map((r) => r.compliance_assessment_id)).size,
 				row_count: rs.length,
 				dist,
-				avg_score: avgScore(rs),
+				scores: auditsScores(
+					rs.map((r) => r.compliance_assessment_id),
+					(s) => s.total
+				),
 				compliance: compliancePct(dist)
 			};
 		});
+
+		const sortScore = {
+			score: 'implementation_score',
+			documentation: 'documentation_score',
+			maturity: 'maturity_score'
+		} as const;
 
 		// Null metrics always sort to the bottom regardless of direction —
 		// they represent "no measurable data" and shouldn't move with toggles.
@@ -436,14 +591,20 @@
 				return domainSortDir === 'asc' ? cmp : -cmp;
 			}
 			if (domainSortKey === 'compliance') return compareNumeric(a.compliance, b.compliance);
-			return compareNumeric(a.avg_score, b.avg_score);
+			const layer = sortScore[domainSortKey];
+			return compareNumeric(a.scores[layer], b.scores[layer]);
 		});
 
 		return entries;
 	});
 
 	let overallDist = $derived(distribution(filteredRows));
-	let overallScore = $derived(avgScore(filteredRows));
+	let overallScores = $derived(
+		auditsScores(
+			filteredRows.map((r) => r.compliance_assessment_id),
+			(s) => s.total
+		)
+	);
 	let overallCompliance = $derived(compliancePct(overallDist));
 	let totalCAs = $derived(new Set(filteredRows.map((r) => r.compliance_assessment_id)).size);
 	let totalAssessments = $derived(filteredRows.length);
@@ -453,6 +614,41 @@
 		return Math.max(m, 1);
 	});
 </script>
+
+<!-- Score columns: implementation and documentation in the order of the general
+     settings (ScorePair), then maturity. Documentation and maturity only show
+     when a counted audit has a documentation score. -->
+{#snippet scoreHeaders(cls: string)}
+	<ScorePair>
+		{#snippet implementation()}
+			<th class={cls}>{implementationLabel}</th>
+		{/snippet}
+		{#snippet documentation()}
+			{#if showDocumentation}
+				<th class={cls}>{m.documentationScore()}</th>
+			{/if}
+		{/snippet}
+	</ScorePair>
+	{#if showDocumentation}
+		<th class={cls}>{m.maturity()}</th>
+	{/if}
+{/snippet}
+
+{#snippet scoreCells(scores: ScoreLayers, cls: string)}
+	<ScorePair>
+		{#snippet implementation()}
+			<td class={cls}>{formatScore(scores.implementation_score)}</td>
+		{/snippet}
+		{#snippet documentation()}
+			{#if showDocumentation}
+				<td class={cls}>{formatScore(scores.documentation_score)}</td>
+			{/if}
+		{/snippet}
+	</ScorePair>
+	{#if showDocumentation}
+		<td class={cls}>{formatScore(scores.maturity_score)}</td>
+	{/if}
+{/snippet}
 
 <div class="space-y-4 p-2">
 	<!-- Header card -->
@@ -572,21 +768,36 @@
 		</div>
 
 		<!-- KPI row -->
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+		{#snippet scoreTile(label: string, value: number | null)}
 			<div class="rounded border p-3">
-				<div class="text-xs text-surface-600-400">{m.compliancePercentage()}</div>
-				<div class="text-2xl font-semibold">
-					{overallCompliance === null ? '—' : `${overallCompliance.toFixed(1)}%`}
-				</div>
-				<div class="text-xs text-surface-600-400">{m.complianceFormulaShort()}</div>
+				<div class="text-xs text-surface-600-400">{label}</div>
+				<div class="text-2xl font-semibold">{formatScore(value)}</div>
+				<div class="text-xs text-surface-600-400">{m.frameworkReportScoreCaption()}</div>
 			</div>
-			<div class="rounded border p-3">
-				<div class="text-xs text-surface-600-400">{m.averageImplementationScore()}</div>
-				<div class="text-2xl font-semibold">
-					{overallScore === null ? '—' : overallScore.toFixed(1)}
+		{/snippet}
+		<div class="grid grid-cols-2 gap-3 mt-4 {kpiGridClass}">
+			{#if showCompliance}
+				<div class="rounded border p-3">
+					<div class="text-xs text-surface-600-400">{m.compliancePercentage()}</div>
+					<div class="text-2xl font-semibold">
+						{overallCompliance === null ? '—' : `${overallCompliance.toFixed(1)}%`}
+					</div>
+					<div class="text-xs text-surface-600-400">{m.complianceFormulaShort()}</div>
 				</div>
-				<div class="text-xs text-surface-600-400">{m.overScoredRequirementsOnly()}</div>
-			</div>
+			{/if}
+			<ScorePair>
+				{#snippet implementation()}
+					{@render scoreTile(implementationLabel, overallScores.implementation_score)}
+				{/snippet}
+				{#snippet documentation()}
+					{#if showDocumentation}
+						{@render scoreTile(m.documentationScore(), overallScores.documentation_score)}
+					{/if}
+				{/snippet}
+			</ScorePair>
+			{#if showDocumentation}
+				{@render scoreTile(m.maturity(), overallScores.maturity_score)}
+			{/if}
 			<div class="rounded border p-3">
 				<div class="text-xs text-surface-600-400">{m.complianceAssessments()}</div>
 				<div class="text-2xl font-semibold">{totalCAs}</div>
@@ -600,7 +811,7 @@
 		</div>
 
 		<!-- Overall distribution -->
-		{#if totalAssessments > 0}
+		{#if totalAssessments > 0 && showCompliance}
 			<div class="mt-4">
 				<div class="text-xs text-surface-600-400 mb-1">{m.overallResultDistribution()}</div>
 				<div class="flex h-6 w-full rounded overflow-hidden border">
@@ -609,7 +820,9 @@
 							distTotal(overallDist) === 0 ? 0 : (overallDist[r] / distTotal(overallDist)) * 100}
 						{#if w > 0}
 							<div
-								class="h-full flex items-center justify-center text-[10px] text-gray-800"
+								class="h-full flex items-center justify-center text-[10px] {r === 'not_applicable'
+									? 'text-white'
+									: 'text-gray-800'}"
 								style="width:{w}%; background:{RESULT_COLORS[r]};"
 								title="{resultLabel(r)}: {overallDist[r]}"
 							>
@@ -630,7 +843,7 @@
 					{/each}
 				</div>
 			</div>
-		{:else}
+		{:else if totalAssessments === 0}
 			<div class="mt-4 text-sm text-surface-600-400 italic">
 				{m.noVisibleComplianceAssessments()}
 			</div>
@@ -751,8 +964,22 @@
 						class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 					>
 						<option value="name">{m.domainAlphabetical()}</option>
-						<option value="compliance">{m.compliancePercentage()}</option>
-						<option value="score">{m.avgScore()}</option>
+						{#if showCompliance}
+							<option value="compliance">{m.compliancePercentage()}</option>
+						{/if}
+						<ScorePair>
+							{#snippet implementation()}
+								<option value="score">{implementationLabel}</option>
+							{/snippet}
+							{#snippet documentation()}
+								{#if showDocumentation}
+									<option value="documentation">{m.documentationScore()}</option>
+								{/if}
+							{/snippet}
+						</ScorePair>
+						{#if showDocumentation}
+							<option value="maturity">{m.maturity()}</option>
+						{/if}
 					</select>
 					<button
 						type="button"
@@ -787,11 +1014,13 @@
 						<th class="px-3 py-2 w-32">{m.refLabel()}</th>
 						<th class="px-3 py-2">{m.sectionOrRequirement()}</th>
 						<th class="px-3 py-2 w-24 text-center">{m.coverage()}</th>
-						<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
-						<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
-							>{m.compliancePercentage()}</th
-						>
-						<th class="px-3 py-2 w-24 text-right">{m.avgScore()}</th>
+						{#if showCompliance}
+							<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
+							<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
+								>{m.compliancePercentage()}</th
+							>
+						{/if}
+						{@render scoreHeaders('px-3 py-2 w-24 text-right')}
 					</tr>
 				</thead>
 				<tbody>
@@ -802,47 +1031,49 @@
 								class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
 								onclick={() => toggleSection(section.urn)}
 							>
-								<td class="px-3 py-2 font-mono text-xs">
+								<td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
 									<span class="inline-block w-3 text-surface-600-400"
 										>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
 									>
 									{section.ref}
 								</td>
-								<td class="px-3 py-2">
-									{section.name}
-									<span class="text-xs text-surface-600-400 ml-2 font-normal"
-										>({section.requirement_count}
-										{m.reqsAbbr()} · {section.row_count}
-										{m.rowsLabel()})</span
+								<td class="px-3 py-2 w-full max-w-0">
+									<div class="flex items-baseline gap-2 min-w-0">
+										<span class="truncate" title={section.name}>{section.name}</span>
+										<span class="shrink-0 text-xs text-surface-600-400 font-normal"
+											>({section.requirement_count}
+											{m.reqsAbbr()}{#if section.row_count !== section.requirement_count}
+												· {section.row_count} {m.rowsLabel()}{/if})</span
+										>
+									</div>
+								</td>
+								<td class="px-3 py-2 text-center">{section.ca_count}</td>
+								{#if showCompliance}
+									<td class="px-3 py-2">
+										{#if section.row_count > 0}
+											<div class="flex h-5 w-full rounded overflow-hidden border">
+												{#each RESULT_ORDER as r}
+													{@const w =
+														distTotal(section.dist) === 0
+															? 0
+															: (section.dist[r] / distTotal(section.dist)) * 100}
+													{#if w > 0}
+														<div
+															style="width:{w}%; background:{RESULT_COLORS[r]};"
+															title="{resultLabel(r)}: {section.dist[r]}"
+														></div>
+													{/if}
+												{/each}
+											</div>
+										{:else}
+											<span class="text-xs text-surface-500">{m.noRowsInScope()}</span>
+										{/if}
+									</td>
+									<td class="px-3 py-2 text-right font-mono"
+										>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
 									>
-								</td>
-								<td class="px-3 py-2 text-center text-xs text-surface-600-400">—</td>
-								<td class="px-3 py-2">
-									{#if section.row_count > 0}
-										<div class="flex h-5 w-full rounded overflow-hidden border">
-											{#each RESULT_ORDER as r}
-												{@const w =
-													distTotal(section.dist) === 0
-														? 0
-														: (section.dist[r] / distTotal(section.dist)) * 100}
-												{#if w > 0}
-													<div
-														style="width:{w}%; background:{RESULT_COLORS[r]};"
-														title="{resultLabel(r)}: {section.dist[r]}"
-													></div>
-												{/if}
-											{/each}
-										</div>
-									{:else}
-										<span class="text-xs text-surface-500">{m.noRowsInScope()}</span>
-									{/if}
-								</td>
-								<td class="px-3 py-2 text-right font-mono"
-									>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
-								>
-								<td class="px-3 py-2 text-right font-mono"
-									>{section.avg_score === null ? '—' : section.avg_score.toFixed(0)}</td
-								>
+								{/if}
+								{@render scoreCells(section.scores, 'px-3 py-2 text-right font-mono')}
 							</tr>
 						{/if}
 
@@ -853,39 +1084,43 @@
 									class="border-t hover:bg-surface-50-950 cursor-pointer"
 									onclick={() => (expandedRow = expandedRow === req.urn ? null : req.urn)}
 								>
-									<td class="px-3 py-2 font-mono text-xs {isFlat ? '' : 'pl-8'}">
+									<td class="px-3 py-2 font-mono text-xs whitespace-nowrap {isFlat ? '' : 'pl-8'}">
 										<span class="inline-block w-3 text-surface-500"
 											>{expandedRow === req.urn ? '▾' : '▸'}</span
 										>
 										{req.ref_id}
 									</td>
-									<td class="px-3 py-2 {isFlat ? '' : 'pl-6'}">{req.name}</td>
-									<td class="px-3 py-2 text-center">{req.ca_count}</td>
-									<td class="px-3 py-2">
-										<div class="flex h-4 w-full rounded overflow-hidden border">
-											{#each RESULT_ORDER as r}
-												{@const w =
-													distTotal(req.dist) === 0 ? 0 : (req.dist[r] / distTotal(req.dist)) * 100}
-												{#if w > 0}
-													<div
-														style="width:{w}%; background:{RESULT_COLORS[r]};"
-														title="{resultLabel(r)}: {req.dist[r]}"
-													></div>
-												{/if}
-											{/each}
-										</div>
+									<td class="px-3 py-2 max-w-0 {isFlat ? '' : 'pl-6'}">
+										<span class="line-clamp-2" title={req.name}>{req.name}</span>
 									</td>
-									<td class="px-3 py-2 text-right font-mono"
-										>{reqCompliance === null ? '—' : `${reqCompliance.toFixed(0)}%`}</td
-									>
-									<td class="px-3 py-2 text-right font-mono"
-										>{req.avg_score === null ? '—' : req.avg_score.toFixed(0)}</td
-									>
+									<td class="px-3 py-2 text-center">{req.ca_count}</td>
+									{#if showCompliance}
+										<td class="px-3 py-2">
+											<div class="flex h-4 w-full rounded overflow-hidden border">
+												{#each RESULT_ORDER as r}
+													{@const w =
+														distTotal(req.dist) === 0
+															? 0
+															: (req.dist[r] / distTotal(req.dist)) * 100}
+													{#if w > 0}
+														<div
+															style="width:{w}%; background:{RESULT_COLORS[r]};"
+															title="{resultLabel(r)}: {req.dist[r]}"
+														></div>
+													{/if}
+												{/each}
+											</div>
+										</td>
+										<td class="px-3 py-2 text-right font-mono"
+											>{reqCompliance === null ? '—' : `${reqCompliance.toFixed(0)}%`}</td
+										>
+									{/if}
+									{@render scoreCells(req.scores, 'px-3 py-2 text-right font-mono')}
 								</tr>
 								{#if expandedRow === req.urn}
 									<tr class="bg-surface-50-950 border-t">
 										<td></td>
-										<td colspan="5" class="px-3 py-2">
+										<td colspan={requirementColumns - 1} class="px-3 py-2">
 											<div class="text-xs text-surface-600-400 mb-2">
 												{m.perAssessmentBreakdown()}
 											</div>
@@ -894,8 +1129,10 @@
 													<tr class="text-left text-surface-600-400">
 														<th class="py-1">{m.domain()}</th>
 														<th class="py-1">{m.assessment()}</th>
-														<th class="py-1">{m.result()}</th>
-														<th class="py-1 text-right">{m.score()}</th>
+														{#if showCompliance}
+															<th class="py-1">{m.result()}</th>
+														{/if}
+														{@render scoreHeaders('py-1 text-right')}
 														<th class="py-1 text-center">{m.controls()}</th>
 														<th class="py-1 text-center">{m.evidences()}</th>
 													</tr>
@@ -912,6 +1149,10 @@
 																		indirect: row.indirect_evidences_count
 																	})
 																: m.directEvidencesOnly({ direct: row.direct_evidences_count })}
+														<!-- An N/A row shows, greyed, what it counts for: the
+														     target when the audit counts N/A at it, else nothing. -->
+														{@const naClass = row.not_applicable ? 'text-surface-400-600' : ''}
+														{@const naTitle = row.not_applicable ? m.notApplicable() : undefined}
 														<tr class="border-t border-surface-200-800">
 															<td class="py-1 font-mono">{row.folder_path_str}</td>
 															<td class="py-1">
@@ -927,43 +1168,63 @@
 																	{row.compliance_assessment_name}
 																</a>
 															</td>
-															<td class="py-1">
-																<span class="inline-flex items-center gap-1">
-																	<span
-																		class="inline-block w-2 h-2 rounded-full"
-																		style="background:{RESULT_COLORS[
-																			(row.result as Result | null) ?? 'not_assessed'
-																		]}"
-																	></span>
-																	{row.result ? resultLabel(row.result) : '—'}
-																	{#if showInh && inh}
-																		<a
-																			class="anchor inline-flex items-center gap-0.5 text-xs text-surface-600-400"
-																			href="/compliance-assessments/{inh.source?.ca_id}"
-																			title="{m.inheritedFrom()}: {inh.source?.folder_name ??
-																				'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
-																		>
-																			<i class="fa-solid fa-code-branch text-[10px]"></i>
-																			{inh.source?.ca_name}
-																		</a>
-																	{/if}
-																</span>
-															</td>
-															<td class="py-1 text-right font-mono">
-																{row.score ?? '—'}
-																{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
-																	<span
-																		class="text-[10px] text-surface-500"
-																		title="{m.ownResult()}: {inh.own.result
-																			? resultLabel(inh.own.result)
-																			: '—'}{inh.own.score !== null
-																			? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
-																			: ''}"
-																	>
-																		<i class="fa-solid fa-circle-info"></i>
+															{#if showCompliance}
+																<td class="py-1">
+																	<span class="inline-flex items-center gap-1">
+																		<span
+																			class="inline-block w-2 h-2 rounded-full"
+																			style="background:{RESULT_COLORS[
+																				(row.result as Result | null) ?? 'not_assessed'
+																			]}"
+																		></span>
+																		{row.result ? resultLabel(row.result) : '—'}
+																		{#if showInh && inh}
+																			<a
+																				class="anchor inline-flex items-center gap-0.5 text-xs text-surface-600-400"
+																				href="/compliance-assessments/{inh.source?.ca_id}"
+																				title="{m.inheritedFrom()}: {inh.source?.folder_name ??
+																					'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
+																			>
+																				<i class="fa-solid fa-code-branch text-[10px]"></i>
+																				{inh.source?.ca_name}
+																			</a>
+																		{/if}
 																	</span>
-																{/if}
-															</td>
+																</td>
+															{/if}
+															<ScorePair>
+																{#snippet implementation()}
+																	<td class="py-1 text-right font-mono {naClass}" title={naTitle}>
+																		{row.not_applicable
+																			? formatScore(row.scores?.implementation_score ?? null)
+																			: (row.score ?? '—')}
+																		{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
+																			<span
+																				class="text-[10px] text-surface-500"
+																				title="{m.ownResult()}: {inh.own.result
+																					? resultLabel(inh.own.result)
+																					: '—'}{inh.own.score !== null
+																					? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
+																					: ''}"
+																			>
+																				<i class="fa-solid fa-circle-info"></i>
+																			</span>
+																		{/if}
+																	</td>
+																{/snippet}
+																{#snippet documentation()}
+																	{#if showDocumentation}
+																		<td class="py-1 text-right font-mono {naClass}" title={naTitle}
+																			>{formatScore(row.scores?.documentation_score ?? null)}</td
+																		>
+																	{/if}
+																{/snippet}
+															</ScorePair>
+															{#if showDocumentation}
+																<td class="py-1 text-right font-mono {naClass}" title={naTitle}
+																	>{formatScore(row.scores?.maturity_score ?? null)}</td
+																>
+															{/if}
 															<td class="py-1 text-center">{row.applied_controls_count}</td>
 															<td class="py-1 text-center" title={evidencesTitle}>
 																{row.evidences_count}
@@ -992,11 +1253,13 @@
 						<th class="px-3 py-2">{m.domain()} ({m.depthLabel()} {domainDepth})</th>
 						<th class="px-3 py-2 w-32 text-center">{m.complianceAssessments()}</th>
 						<th class="px-3 py-2 w-24 text-center capitalize-first">{m.rowsLabel()}</th>
-						<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
-						<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
-							>{m.compliancePercentage()}</th
-						>
-						<th class="px-3 py-2 w-24 text-right">{m.avgScore()}</th>
+						{#if showCompliance}
+							<th class="px-3 py-2 w-[24%]">{m.resultDistribution()}</th>
+							<th class="px-3 py-2 w-24 text-right" title={m.complianceFormulaShort()}
+								>{m.compliancePercentage()}</th
+							>
+						{/if}
+						{@render scoreHeaders('px-3 py-2 w-24 text-right')}
 					</tr>
 				</thead>
 				<tbody>
@@ -1006,25 +1269,26 @@
 							<td class="px-3 py-2 font-mono">{d.key}</td>
 							<td class="px-3 py-2 text-center">{d.ca_count}</td>
 							<td class="px-3 py-2 text-center">{d.row_count}</td>
-							<td class="px-3 py-2">
-								<div class="flex h-4 w-full rounded overflow-hidden border">
-									{#each RESULT_ORDER as r}
-										{@const w = distTotal(d.dist) === 0 ? 0 : (d.dist[r] / distTotal(d.dist)) * 100}
-										{#if w > 0}
-											<div
-												style="width:{w}%; background:{RESULT_COLORS[r]};"
-												title="{resultLabel(r)}: {d.dist[r]}"
-											></div>
-										{/if}
-									{/each}
-								</div>
-							</td>
-							<td class="px-3 py-2 text-right font-mono"
-								>{dCompliance === null ? '—' : `${dCompliance.toFixed(0)}%`}</td
-							>
-							<td class="px-3 py-2 text-right font-mono"
-								>{d.avg_score === null ? '—' : d.avg_score.toFixed(0)}</td
-							>
+							{#if showCompliance}
+								<td class="px-3 py-2">
+									<div class="flex h-4 w-full rounded overflow-hidden border">
+										{#each RESULT_ORDER as r}
+											{@const w =
+												distTotal(d.dist) === 0 ? 0 : (d.dist[r] / distTotal(d.dist)) * 100}
+											{#if w > 0}
+												<div
+													style="width:{w}%; background:{RESULT_COLORS[r]};"
+													title="{resultLabel(r)}: {d.dist[r]}"
+												></div>
+											{/if}
+										{/each}
+									</div>
+								</td>
+								<td class="px-3 py-2 text-right font-mono"
+									>{dCompliance === null ? '—' : `${dCompliance.toFixed(0)}%`}</td
+								>
+							{/if}
+							{@render scoreCells(d.scores, 'px-3 py-2 text-right font-mono')}
 						</tr>
 					{/each}
 				</tbody>

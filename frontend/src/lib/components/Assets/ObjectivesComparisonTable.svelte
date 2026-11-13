@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '#lib/utils/constants.js';
 	import { page } from '$app/state';
 
 	interface Props {

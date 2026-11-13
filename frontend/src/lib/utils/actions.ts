@@ -1,11 +1,11 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { contentDispositionHeader } from '$lib/utils/contentDisposition';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { contentDispositionHeader } from '#lib/utils/contentDisposition.js';
+import { getModelInfo, urlParamModelVerboseName } from '#lib/utils/crud.js';
 
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
-import { safeTranslate } from '$lib/utils/i18n';
-import { modelSchema } from '$lib/utils/schemas';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
@@ -97,6 +97,8 @@ export async function handleErrorResponse({
 	// Structured values (e.g. a 409's impact summary) reach the form through the message.
 	return message(form, { status: response.status, data: res });
 }
+
+export { REDIRECT_AFTER_CREATE } from './redirect-after-create';
 
 export async function defaultWriteFormAction({
 	event,

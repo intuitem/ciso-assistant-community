@@ -1,13 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -27,7 +27,7 @@
 		object = {}
 	}: Props = $props();
 
-	let doraEnabled = $derived(!!$page.data?.featureflags?.dora);
+	let doraEnabled = $derived(!!page.data?.featureflags?.dora);
 </script>
 
 <AutocompleteSelect
@@ -97,6 +97,7 @@
 	{form}
 	multiple
 	optionsEndpoint="evidences"
+	lazy
 	optionsExtraFields={[['folder', 'str']]}
 	field="evidences"
 	cacheLock={cacheLocks['evidences']}
@@ -121,6 +122,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],

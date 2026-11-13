@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { roundScore } from '$lib/utils/helpers';
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { complianceResultColorMap } from '$lib/utils/constants';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { roundScore } from '#lib/utils/helpers.js';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import StackedBarsNormalized from '#lib/components/Chart/StackedBarsNormalized.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import RadarChart from '#lib/components/Chart/RadarChart.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -206,6 +206,13 @@
 	}
 
 	const shown = (value: number | null) => (value == null ? value : roundScore(value));
+	const below = (value: number | null, target: number | null | undefined) =>
+		value != null && target != null && value < target;
+	// Chip colour: amber when under the audit's (or group's) target
+	const chip = (base: string, value: number | null, target: number | null | undefined) =>
+		below(value, target) ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-300' : base;
+
+	let openGroups: Record<string, boolean> = $state({});
 </script>
 
 <div class="flex flex-col gap-5 pb-8">
@@ -889,7 +896,10 @@
 			{#await data.stream.igBreakdown}
 				<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
 			{:then igData}
-				{@const groups = igData.groups}
+				<!-- Groups out of the audit's scope are left out once some are selected -->
+				{@const groups = igData.groups?.some((g: any) => g.selected)
+					? igData.groups.filter((g: any) => g.selected && g.total_assessable > 0)
+					: igData.groups}
 				{#if groups && groups.length > 0}
 					{@const chartInfo = (() => {
 						const chartData = groups.map((g: any) => RESULT_KEYS.map((k) => g.results[k] || 0));
@@ -916,6 +926,8 @@
 									{#if data.compliance_assessment.show_documentation_score}
 										<th class="pb-2 pr-4 text-right font-medium">{m.maturity()}</th>
 									{/if}
+									<th class="pb-2 pr-4 text-right font-medium">{m.lowestScore()}</th>
+									<th class="pb-2 pr-4 text-right font-medium">{m.target()}</th>
 									<ScorePair>
 										{#snippet implementation()}
 											<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
@@ -935,7 +947,27 @@
 											? 'bg-surface-50-950/50'
 											: ''}"
 									>
-										<td class="py-2.5 pr-4 text-surface-700-300">{group.name || group.ref_id}</td>
+										<td class="py-2.5 pr-4 text-surface-700-300">
+											{#if group.requirements?.length}
+												<button
+													type="button"
+													class="inline-flex items-center gap-2 hover:text-primary-600"
+													aria-expanded={!!openGroups[group.ref_id]}
+													onclick={() => (openGroups[group.ref_id] = !openGroups[group.ref_id])}
+												>
+													<i
+														class="fa-solid fa-chevron-right text-[10px] transition-transform {openGroups[
+															group.ref_id
+														]
+															? 'rotate-90'
+															: ''}"
+													></i>
+													{group.name || group.ref_id}
+												</button>
+											{:else}
+												{group.name || group.ref_id}
+											{/if}
+										</td>
 										<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
 											>{group.total_assessable}</td
 										>
@@ -954,20 +986,44 @@
 											<td class="py-2.5 pr-4 text-right">
 												{#if group.maturity_score !== null}
 													<span
-														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
-														>{shown(group.maturity_score)}</span
+														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+															'bg-violet-50 text-violet-700',
+															group.maturity_score,
+															group.target_score
+														)} text-xs font-medium px-2 py-0.5">{shown(group.maturity_score)}</span
 													>
 												{:else}
 													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 										{/if}
+										<td class="py-2.5 pr-4 text-right">
+											{#if group.min_maturity_score != null}
+												<span
+													class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+														'bg-surface-100-900 text-surface-700-300',
+														group.min_maturity_score,
+														group.target_score
+													)} text-xs font-medium px-2 py-0.5"
+													>{shown(group.min_maturity_score)}</span
+												>
+											{:else}
+												<span class="text-surface-400">&mdash;</span>
+											{/if}
+										</td>
+										<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
+											>{group.target_score ?? '—'}</td
+										>
 										<ScorePair>
 											{#snippet implementation()}
 												<td class="py-2.5 pr-4 text-right">
 													{#if group.implementation_score !== null}
 														<span
-															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
+															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+																'bg-indigo-50 text-indigo-700',
+																group.implementation_score,
+																group.target_score
+															)} text-xs font-medium px-2 py-0.5"
 															>{shown(group.implementation_score)}</span
 														>
 													{:else}
@@ -980,7 +1036,11 @@
 													<td class="py-2.5 pr-4 text-right">
 														{#if group.documentation_score !== null}
 															<span
-																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
+																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+																	'bg-emerald-50 text-emerald-700',
+																	group.documentation_score,
+																	group.target_score
+																)} text-xs font-medium px-2 py-0.5"
 																>{shown(group.documentation_score)}</span
 															>
 														{:else}
@@ -991,6 +1051,55 @@
 											{/snippet}
 										</ScorePair>
 									</tr>
+									{#if openGroups[group.ref_id]}
+										{#each group.requirements as req}
+											<tr class="border-t border-surface-100-900 text-xs">
+												<td class="py-1.5 pr-4 pl-6">
+													<a class="anchor" href="/requirement-assessments/{req.id}">{req.name}</a>
+													{#if req.result}
+														<span class="ml-1 text-surface-500">· {safeTranslate(req.result)}</span>
+													{/if}
+													{#if req.description}
+														<span
+															class="block max-w-xl truncate text-surface-500"
+															title={req.description}>{req.description}</span
+														>
+													{/if}
+												</td>
+												<td></td>
+												<td></td>
+												{#if data.compliance_assessment.show_documentation_score}
+													<td class="py-1.5 pr-4 text-right">
+														{#if req.maturity_score !== null}
+															<span
+																class="inline-flex justify-center min-w-[2.5rem] rounded-full px-2 py-0.5 {chip(
+																	'bg-violet-50 text-violet-700',
+																	req.maturity_score,
+																	group.target_score
+																)}">{shown(req.maturity_score)}</span
+															>
+														{:else}<span class="text-surface-400">&mdash;</span>{/if}
+													</td>
+												{/if}
+												<td></td>
+												<td></td>
+												<ScorePair>
+													{#snippet implementation()}
+														<td class="py-1.5 pr-4 text-right tabular-nums"
+															>{shown(req.implementation_score) ?? '—'}</td
+														>
+													{/snippet}
+													{#snippet documentation()}
+														{#if data.compliance_assessment.show_documentation_score}
+															<td class="py-1.5 pr-4 text-right tabular-nums"
+																>{shown(req.documentation_score) ?? '—'}</td
+															>
+														{/if}
+													{/snippet}
+												</ScorePair>
+											</tr>
+										{/each}
+									{/if}
 								{/each}
 							</tbody>
 						</table>

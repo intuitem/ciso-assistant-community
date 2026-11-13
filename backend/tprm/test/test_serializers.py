@@ -1,5 +1,7 @@
 from unittest.mock import patch, MagicMock, PropertyMock
 
+import pytest
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
@@ -20,6 +22,13 @@ from tprm.serializers import (
 )
 
 User = get_user_model()
+
+
+# for tests whose MagicMock request user has no real permissions
+@pytest.fixture
+def skip_link_visibility():
+    with patch("core.serializers.BaseModelSerializer._check_m2m_visibility"):
+        yield
 
 
 class EntitySerializersTestCase(TestCase):
@@ -77,6 +86,20 @@ class EntitySerializersTestCase(TestCase):
         self.assertEqual(entity.reference_link, new_entity_data["reference_link"])
         self.assertEqual(entity.folder, self.folder)
 
+    def test_entity_write_serializer_rejects_non_dict_legal_identifiers(self):
+        for bad in ["LEI123", ["LEI123"], 42]:
+            serializer = EntityWriteSerializer(
+                data={"name": "Bad", "folder": self.folder.id, "legal_identifiers": bad}
+            )
+            self.assertFalse(serializer.is_valid())
+            self.assertIn("legal_identifiers", serializer.errors)
+
+    def test_entity_read_serializer_tolerates_legacy_non_dict_legal_identifiers(self):
+        Entity.objects.filter(pk=self.entity.pk).update(legal_identifiers="LEI123")
+        self.entity.refresh_from_db()
+        data = EntityReadSerializer(self.entity).data
+        self.assertEqual(data["legal_identifiers"], "LEI123")
+
     def test_entity_import_export_serializer(self):
         """Test that EntityImportExportSerializer correctly serializes an Entity for import/export"""
         serializer = EntityImportExportSerializer(self.entity)
@@ -92,6 +115,7 @@ class EntitySerializersTestCase(TestCase):
         self.assertIn("updated_at", data)
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class EntityAssessmentSerializersTestCase(TestCase):
     """Tests for EntityAssessment-related serializers"""
 
@@ -329,6 +353,7 @@ class EntityAssessmentSerializersTestCase(TestCase):
         mock_assign.assert_called_once()
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class RepresentativeSerializersTestCase(TestCase):
     """Tests for Representative-related serializers"""
 
@@ -477,6 +502,7 @@ class RepresentativeSerializersTestCase(TestCase):
             serializer.save()
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class SolutionSerializersTestCase(TestCase):
     """Tests for Solution-related serializers"""
 
@@ -555,6 +581,7 @@ class SolutionSerializersTestCase(TestCase):
 # ===========================================================================
 
 
+@pytest.mark.usefixtures("skip_link_visibility")
 class SolutionSubcontractingChainTestCase(TestCase):
     """
     Tests for the nested `subcontracting_chain` field on Solution serializers

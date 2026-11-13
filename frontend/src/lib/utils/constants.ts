@@ -1,9 +1,12 @@
-import { env } from '$env/dynamic/public';
-import { m } from '$paraglide/messages';
+import {
+	PUBLIC_BACKEND_API_URL,
+	PUBLIC_DEFAULT_LANGUAGE,
+	PUBLIC_BACKEND_API_EXPOSED_URL
+} from '$app/env/public';
 
-const rawBackendApiUrl = Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
-	? env.PUBLIC_BACKEND_API_URL
-	: 'http://localhost:8000/api';
+import { m } from '#paraglide/messages.js';
+
+const rawBackendApiUrl = PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
 
 // Strip default ports so this matches request.url in handleFetch's startsWith check (issue #4422).
 export const BASE_API_URL = (() => {
@@ -14,24 +17,16 @@ export const BASE_API_URL = (() => {
 	}
 })();
 
-export const DEFAULT_LANGUAGE = `${
-	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE') ? env.PUBLIC_DEFAULT_LANGUAGE : 'en'
-}`;
-
+export const DEFAULT_LANGUAGE = PUBLIC_DEFAULT_LANGUAGE ?? 'en';
 export const ALLAUTH_API_URL = `${BASE_API_URL}/_allauth/app/v1`;
-
-export const BACKEND_API_EXPOSED_URL = `${
-	Object.hasOwn(env, 'PUBLIC_BACKEND_API_EXPOSED_URL')
-		? env.PUBLIC_BACKEND_API_EXPOSED_URL
-		: BASE_API_URL
-}`;
+export const BACKEND_API_EXPOSED_URL = PUBLIC_BACKEND_API_EXPOSED_URL ?? BASE_API_URL;
 
 export const complianceResultColorMap: { [key: string]: string } = {
 	not_assessed: '#d1d5db',
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
 	compliant: '#86efac',
-	not_applicable: '#000000'
+	not_applicable: '#475569'
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
@@ -39,14 +34,14 @@ export const complianceResultTailwindColorMap: { [key: string]: string } = {
 	partially_compliant: 'bg-yellow-300 dark:bg-yellow-600',
 	non_compliant: 'bg-red-300 dark:bg-red-800',
 	compliant: 'bg-green-300 dark:bg-green-700',
-	not_applicable: 'bg-black text-white'
+	not_applicable: 'bg-slate-600 text-white'
 };
 
 export const postureResultTailwindColorMap: { [key: string]: string } = {
 	pass: 'bg-green-300 dark:bg-green-700',
 	fail: 'bg-red-300 dark:bg-red-800',
 	error: 'bg-amber-300 dark:bg-amber-600',
-	not_applicable: 'bg-black text-white',
+	not_applicable: 'bg-slate-600 text-white',
 	not_checked: 'bg-surface-300-700'
 };
 
@@ -82,7 +77,7 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
 	compliant: '#86efac',
-	not_applicable: '#1f2937',
+	not_applicable: '#475569',
 	// Compliance / task / generic statuses
 	to_do: '#9ca3af',
 	in_progress: '#f59e0b',
@@ -115,6 +110,56 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	observation: '#eab308',
 	opportunity_for_improvement: '#3b82f6',
 	good_practice: '#22c55e'
+};
+
+// Vulnerability statuses (raw values): solid and soft for the treemap filters,
+// outline for the badge on a vulnerability's page. Class names are written out
+// in full because Tailwind only generates the classes it finds in the source.
+export const VULNERABILITY_STATUS_COLORS: Record<
+	string,
+	{ solid: string; soft: string; outline: string }
+> = {
+	potential: {
+		solid: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
+		soft: 'bg-yellow-50 text-yellow-400 border-yellow-200 hover:bg-yellow-100',
+		outline:
+			'bg-yellow-50 text-yellow-800 border-yellow-400 dark:bg-yellow-950 dark:text-yellow-200 dark:border-yellow-600'
+	},
+	exploitable: {
+		solid: 'bg-red-500 dark:bg-red-600 text-white border-red-600 hover:bg-red-600',
+		soft: 'bg-red-50 text-red-400 border-red-200 hover:bg-red-100',
+		outline:
+			'bg-red-50 text-red-800 border-red-400 dark:bg-red-950 dark:text-red-200 dark:border-red-600'
+	},
+	mitigated: {
+		solid: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 hover:bg-blue-600',
+		soft: 'bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100',
+		outline:
+			'bg-blue-50 text-blue-800 border-blue-400 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-600'
+	},
+	fixed: {
+		solid: 'bg-green-500 dark:bg-green-600 text-white border-green-600 hover:bg-green-600',
+		soft: 'bg-green-50 text-green-400 border-green-200 hover:bg-green-100',
+		outline:
+			'bg-green-50 text-green-800 border-green-400 dark:bg-green-950 dark:text-green-200 dark:border-green-600'
+	},
+	not_exploitable: {
+		solid: 'bg-teal-500 dark:bg-teal-600 text-white border-teal-600 hover:bg-teal-600',
+		soft: 'bg-teal-50 text-teal-400 border-teal-200 hover:bg-teal-100',
+		outline:
+			'bg-teal-50 text-teal-800 border-teal-400 dark:bg-teal-950 dark:text-teal-200 dark:border-teal-600'
+	},
+	unaffected: {
+		solid: 'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-600',
+		soft: 'bg-emerald-50 text-emerald-400 border-emerald-200 hover:bg-emerald-100',
+		outline:
+			'bg-emerald-50 text-emerald-800 border-emerald-400 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-600'
+	},
+	'--': {
+		solid: 'bg-surface-950-50 text-surface-50-950 border-surface-600-400 hover:bg-surface-800-200',
+		soft: 'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900',
+		outline: 'bg-surface-50-950 text-surface-700-300 border-surface-300-700'
+	}
 };
 
 // Fallback palette for breakdown keys not in breakdownSemanticColorMap.
@@ -163,9 +208,6 @@ export const TODAY = new Date();
 export const UUID_REGEX = '([0-9a-f]{8}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{12})';
 export const UUID_LIST_REGEX = new RegExp(`^${UUID_REGEX}(,${UUID_REGEX})*$`);
 
-export const URN_REGEX =
-	/^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$/;
-
 export const LOCALE_DISPLAY_MAP = {
 	en: '🇬🇧 English',
 	fr: '🇫🇷 Français',
@@ -190,7 +232,8 @@ export const LOCALE_DISPLAY_MAP = {
 	ko: '🇰🇷 한국어',
 	et: '🇪🇪 Eesti',
 	sk: '🇸🇰 Slovenčina',
-	sl: '🇸🇮 Slovenščina'
+	sl: '🇸🇮 Slovenščina',
+	nb: '🇳🇴 Norsk bokmål'
 };
 
 export const ISO_8601_REGEX =
@@ -218,13 +261,18 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'expiry_date',
 	'exploited_date_added',
 	'last_assessment_date',
+	'nis2_early_warning_at',
+	'nis2_final_report_at',
+	'nis2_notification_at',
 	'occurred_at',
 	'published_date',
 	'read_at',
 	'rejected_at',
+	'remediated_at',
 	'reported_at',
 	'requested_on',
 	'resolved_at',
+	'reviewed_at',
 	'revoked_at',
 	'start_date',
 	'subjects_notified_on',
@@ -241,3 +289,17 @@ export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'1-5': ['1', '2', '3', '4', '5'],
 	'FIPS-199': ['low', 'moderate', 'moderate', 'high', 'high']
 };
+
+// GDPR Art. 9 + Art. 10 categories, mirrors PersonalData.SENSITIVE_CATEGORIES (backend forces is_sensitive on save)
+export const SENSITIVE_PERSONAL_DATA_CATEGORIES = new Set([
+	'privacy_health_data',
+	'privacy_genetic_data',
+	'privacy_biometric_data',
+	'privacy_racial_ethnic_origin',
+	'privacy_political_opinions',
+	'privacy_religious_beliefs',
+	'privacy_trade_union_membership',
+	'privacy_sexual_orientation',
+	'privacy_sex_life_data',
+	'privacy_criminal_records'
+]);

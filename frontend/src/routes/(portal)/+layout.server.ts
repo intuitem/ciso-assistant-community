@@ -1,12 +1,15 @@
 import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
 export const load = loadFlash(async ({ locals, url, fetch }) => {
 	const user = await locals.getUser();
 	if (!user) {
 		redirect(302, `/login?next=${encodeURIComponent(url.pathname + url.search)}`);
+	}
+	if (user.is_third_party) {
+		redirect(302, '/auditee-dashboard');
 	}
 	const [settings, featureflags] = await Promise.all([
 		locals.getSettings(),

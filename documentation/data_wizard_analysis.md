@@ -245,6 +245,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `ref_id` or `urn` | **Yes** | Used to match requirements |
 | `assessable` | No | Skips non-assessable items |
 | `compliance_result` | No | Maps to `result` |
+| `extended_result` | No | Maps to `extended_result` |
 | `requirement_progress` | No | Maps to `status` |
 | `observations` | No | Maps to `observation` |
 | `implementation_score` | No | Maps to `score` |

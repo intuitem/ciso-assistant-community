@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 
 	interface Choice {
 		urn: string;

@@ -6,14 +6,14 @@
 // mutations (cell-cycle, drag-reorder, inline add) that don't fit the form
 // submission round-trip. Each action proxies straight to the backend.
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error } from '@sveltejs/kit';
-import { UUID_RE, proxyJson } from '$lib/utils/jsonProxy';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { UUID_RE, proxyJson } from '#lib/utils/jsonProxy.js';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 function requireUuid(value: unknown, field: string): string {
 	if (typeof value !== 'string' || !UUID_RE.test(value)) {
-		error(400, { detail: `Invalid UUID for "${field}"` });
+		errorFromBody(400, { detail: `Invalid UUID for "${field}"` });
 	}
 	return value;
 }
@@ -56,6 +56,17 @@ export const POST: RequestHandler = async ({ fetch, params, request, url }) => {
 				`${BASE_API_URL}/pmbok/responsibility-matrix-activities/${activityId}/`,
 				'PATCH',
 				patch
+			);
+		}
+
+		// The activity's write data, with the ids of every linked object: the list data
+		// masks the ones the user cannot see, and the drawer must send them back.
+		case 'activity-links': {
+			const activityId = requireUuid(body.id, 'id');
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/pmbok/responsibility-matrix-activities/${activityId}/object/`,
+				'GET'
 			);
 		}
 
@@ -114,6 +125,6 @@ export const POST: RequestHandler = async ({ fetch, params, request, url }) => {
 			);
 
 		default:
-			error(400, { detail: `unknown action: ${action}` });
+			errorFromBody(400, { detail: `unknown action: ${action}` });
 	}
 };

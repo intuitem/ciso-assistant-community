@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		cell: string | null | undefined;
@@ -13,7 +13,8 @@
 	const LABELS: Record<string, () => string> = {
 		assessment: m.tierSourceAssessment,
 		override: m.tierSourceOverride,
-		manual: m.tierSourceManual
+		manual: m.tierSourceManual,
+		rollup: m.tierSourceRollup
 	};
 </script>
 

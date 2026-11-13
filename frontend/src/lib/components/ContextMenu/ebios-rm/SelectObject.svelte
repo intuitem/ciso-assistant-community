@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	import type { urlModel } from '$lib/utils/types';
+	import type { urlModel } from '#lib/utils/types.js';
 	import { ContextMenu } from 'bits-ui';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
-	import { getModelInfo } from '$lib/utils/crud';
+	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
+	import { getModelInfo } from '#lib/utils/crud.js';
 
 	const flash = getFlash(page);
 

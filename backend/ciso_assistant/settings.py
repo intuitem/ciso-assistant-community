@@ -10,15 +10,17 @@ else it is sqlite, and no env variable is required
 """
 
 from pathlib import Path
+import hashlib
 import os
+import re
 from dotenv import load_dotenv
 from datetime import timedelta
 import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
-import ssl
 from . import meta
+from .mailers import build_mailers, describe
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -159,6 +161,13 @@ FEATURE_FLAGS = {}
 MODULE_PATHS = {}
 ROUTES = {}
 MODULES = {}
+# Dotted paths to callables run after a backup is restored: each returns an
+# error key to reject the restored data (rolled back, 400) or None to accept it.
+BACKUP_RESTORE_VALIDATORS = []
+# Dotted paths to modules adding to the instance status: each provides
+# status_fields() -> list of (key, value) appended to the `status` command line,
+# and update_metrics() setting its own Prometheus gauges.
+INSTANCE_STATUS_EXTENSIONS = []
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
@@ -486,7 +495,6 @@ INSTALLED_APPS = [
     "django.forms",
     "django_structlog",
     "auditlog",
-    "tailwind",
     "iam",
     "sec_intel",
     "threat_modeling",
@@ -509,6 +517,7 @@ INSTALLED_APPS = [
     "django_filters",
     "library",
     "serdes",
+    "data_wizard",
     "integrations",
     "webhooks",
     "rest_framework",
@@ -562,68 +571,39 @@ logger.info("FORCE_CREATE_ADMIN: %s", FORCE_CREATE_ADMIN)
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-logger.info("EMAIL_HOST: %s", EMAIL_HOST)
-EMAIL_PORT = os.environ.get("EMAIL_PORT")
-logger.info("EMAIL_PORT: %s", EMAIL_PORT)
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
-logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
-logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
-if EMAIL_USE_TLS and EMAIL_USE_SSL:
-    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
-# rescue mail
-EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
-logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
-EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
-logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
-EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
-EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
-    "true",
-    "1",
-    "yes",
-)
-logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
-EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
-    "true",
-    "1",
-    "yes",
-)
-logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
-if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
-    raise ValueError(
-        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
-    )
+# Outgoing mail. The EMAIL_* environment variables are the operator interface
+# and keep their names; they feed Django's MAILERS, tried in order by
+# core.mailer (primary, then the _RESCUE server). Django's own EMAIL_* settings
+# are deprecated in 6.1 and not defined here.
 EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
     "true",
     "1",
     "yes",
 )
 logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
-
-
-def _build_tls12_context():
-    context = ssl.create_default_context()
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.maximum_version = ssl.TLSVersion.TLSv1_2
-    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
-    return context
-
-
-EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
-
-EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
-logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
+MAILERS = build_mailers(os.environ, mail_debug=MAIL_DEBUG)
+# Lets administrators configure the mailers in the app (custom-mailer-settings
+# ADR). Off by default; set per hosted instance at our discretion.
+ENABLE_CUSTOM_MAILER = os.environ.get("ENABLE_CUSTOM_MAILER", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("ENABLE_CUSTOM_MAILER: %s", ENABLE_CUSTOM_MAILER)
+for _line in describe(MAILERS):
+    logger.info(_line)
+if not MAILERS:
+    logger.info("no mailer configured (EMAIL_HOST unset): mailing is disabled")
+# An empty MAILERS is the supported "mailing off" state; Django would otherwise
+# warn about the missing "default" entry on every check and migrate.
+SILENCED_SYSTEM_CHECKS = ["mail.W001"]
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "knox.auth.TokenAuthentication",
+        "iam.authentication.KnoxTokenAuthentication",
         "iam.authentication.OIDCServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -633,7 +613,7 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomLimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "ciso_assistant.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",
 }
 
@@ -760,6 +740,7 @@ LANGUAGES = [
     ("et", "Estonian"),
     ("sk", "Slovak"),
     ("sl", "Slovenian"),
+    ("nb", "Norwegian Bokmål"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -819,6 +800,58 @@ else:
     }
     logger.info("SQLITE_FILE: %s", SQLITE_FILE)
 
+# Optional shared cache. Without it, each gunicorn worker keeps its own
+# in-memory cache: rate limits count per worker and cached values (feature
+# flags) reach the other workers only when they expire.
+ENABLE_MEMCACHED = os.environ.get("ENABLE_MEMCACHED", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+# A unix socket by default: memcached then has no network listener at all, so
+# no outbound request of the backend (webhook, SIEM, LLM URL...) can reach it.
+# Anything that can write to memcached can run code in the backend (values are
+# pickled). The path must be absolute: pymemcache reads a relative one as a host.
+MEMCACHED_LOCATION = os.environ.get(
+    "MEMCACHED_LOCATION", "unix:/run/memcached/memcached.sock"
+)
+
+
+def _memcached_key(key, key_prefix, version):
+    # Django's default key, hashed when memcached would refuse it: longer than
+    # 250 characters, or with spaces, control or non-ASCII characters. allauth's
+    # SAML metadata key, for example, holds the metadata URL and the entity ID.
+    full_key = f"{key_prefix}:{version}:{key}"
+    if len(full_key) <= 250 and all(32 < ord(char) < 127 for char in full_key):
+        return full_key
+    digest = hashlib.sha256(full_key.encode()).hexdigest()
+    return f"{key_prefix}:{version}:sha256:{digest}"
+
+
+def _memcached_cache(location):
+    return {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": location,
+        "KEY_FUNCTION": _memcached_key,
+        # If memcached is down or stuck, reads miss, writes are dropped and
+        # add() fails, instead of raising, so the app keeps working without it.
+        # Login rate limiting fails closed: allauth refuses a login when its
+        # add() lock fails, so logins are refused until memcached is back.
+        "OPTIONS": {
+            "ignore_exc": True,
+            "dead_timeout": 5,  # retry a dead memcached after 5 s, not 60
+            "connect_timeout": 0.5,
+            "timeout": 0.5,
+        },
+    }
+
+
+logger.info("ENABLE_MEMCACHED: %s", ENABLE_MEMCACHED)
+if ENABLE_MEMCACHED:
+    logger.info("MEMCACHED_LOCATION: %s", MEMCACHED_LOCATION)
+    CACHES = {"default": _memcached_cache(MEMCACHED_LOCATION)}
+
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
 PASSWORD_HASHERS = [
@@ -830,10 +863,26 @@ PASSWORD_HASHERS = [
 ]
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "CISO Assistant API - Experimental",
-    "DESCRIPTION": "CISO Assistant - API Documentation for automating all your GRC needs",
-    "VERSION": "0.7.0",
+    "TITLE": "CISO Assistant API",
+    "DESCRIPTION": (
+        "Automate your GRC work with the CISO Assistant REST API.\n\n"
+        "- **Authentication**: send a personal access token, created from your "
+        "user profile, as `Authorization: Token <PAT>`.\n"
+        "- **Pagination**: list endpoints take `limit` and `offset`.\n"
+        "- **Filters**: date and number filters take the suffixes `__gt`, `__gte`, "
+        "`__lt`, `__lte` and `__isnull` (e.g. `created_at__date__gte=2026-01-01`).\n"
+        "- **Sparse fields**: `?fields=a,b,c` trims a GET response to those fields."
+    ),
+    "VERSION": VERSION,
     "SERVE_INCLUDE_SCHEMA": False,
+    # serdes routes live outside /api/, which would collapse every tag to "api"
+    "SCHEMA_PATH_PREFIX": r"/api/",
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "ciso_assistant.openapi.split_namespace_tags",
+    ],
+    # Redoc 3 ships an ES module bundle that drf-spectacular's template cannot load
+    "REDOC_DIST": "https://cdn.jsdelivr.net/npm/redoc@2",
     # OTHER SETTINGS
 }
 
@@ -843,12 +892,59 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
-# NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
-ACCOUNT_REAUTHENTICATION_TIMEOUT = 24 * 60 * 60  # 24 hours
+ACCOUNT_REAUTHENTICATION_TIMEOUT = 2 * 60 * 60  # 2 hours
+
+# Login rate limits, adjustable on the backend container. A value is a
+# comma-separated list of "amount/period/per" rules: period is s, m, h or d,
+# optionally preceded by a number (5m = 5 minutes), and per is "ip" (the
+# default) or, for failed logins only, "key" (the email being logged in to).
+# An empty value turns that limit off. A malformed one stops the backend here
+# instead of failing every login.
+_LOGIN_RATE_RULE = re.compile(
+    r"[1-9][0-9]*/(?:[0-9]+(?:\.[0-9]+)?)?[smhd](?:/([a-z]+))?"
+)
+
+
+def _login_rate_limit(*, variable: str, default: str, allowed_per: set[str]) -> str:
+    value = os.environ.get(variable, default).strip()
+    if not value:
+        return value
+    for rule in value.split(","):
+        match = _LOGIN_RATE_RULE.fullmatch(rule.strip())
+        if not match or (match.group(1) or "ip") not in allowed_per:
+            raise ImproperlyConfigured(
+                f"{variable}: invalid rule {rule.strip()!r}. Use amount/period/per, "
+                f"for example 10/m/ip, with per one of: {', '.join(sorted(allowed_per))}. "
+                "Leave the value empty to turn the limit off."
+            )
+    return value
+
+
+def _login_rate_limits() -> dict[str, str]:
+    return {
+        # Every login attempt. Above it, allauth answers a bare 429.
+        "login": _login_rate_limit(
+            variable="LOGIN_RATE_LIMIT", default="30/m/ip", allowed_per={"ip"}
+        ),
+        # Failed logins, per IP and per email ("key"). The per-email rule locks
+        # the account, even for the right password, until the period ends.
+        "login_failed": _login_rate_limit(
+            variable="LOGIN_FAILED_RATE_LIMIT",
+            default="10/m/ip,5/5m/key",
+            allowed_per={"ip", "key"},
+        ),
+    }
+
+
+# allauth keeps its own defaults for the other actions (password reset...).
+ACCOUNT_RATE_LIMITS = _login_rate_limits()
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Password logins run allauth's own AccountAdapter.authenticate; this backend
+# only adds the local-login rule (User.is_local).
+AUTHENTICATION_BACKENDS = ["iam.auth_backends.LocalLoginBackend"]
 ACCOUNT_ADAPTER = "iam.adapter.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "iam.adapter.SocialAccountAdapter"
 
@@ -910,7 +1006,6 @@ MFA_PASSKEY_SIGNUP_ENABLED = False
 MFA_ADAPTER = "iam.adapter.MFAAdapter"
 
 if MAIL_DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
 
 
@@ -952,6 +1047,9 @@ WORKFLOWS_DISPATCH_TIMEOUT_SECONDS = int(
 WORKFLOWS_INBOUND_HOOKS = (
     os.environ.get("WORKFLOWS_INBOUND_HOOKS", "true").lower() != "false"
 )
+
+# Per-user rate limit on chat messages (DRF rate string); raised for evals
+CHAT_MESSAGE_THROTTLE_RATE = os.environ.get("CHAT_MESSAGE_THROTTLE_RATE", "120/hour")
 
 # Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
 # rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.

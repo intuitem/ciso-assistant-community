@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -18,12 +18,17 @@
 	);
 </script>
 
-<ModelForm
-	form={data.form}
-	object={data.object}
-	selectOptions={data.selectOptions}
-	model={data.model}
-	{customNameDescription}
-	context="edit"
-	supportedModels={data.supportedModels}
-/>
+<!-- Keyed on what is edited: the form is built once from `data`, so moving
+     to another object's edit page (a metric instance to its definition, say)
+     must build it again, or the previous object's form stays on screen. -->
+{#key `${data.model.urlModel}/${data.object?.id ?? ''}`}
+	<ModelForm
+		form={data.form}
+		object={data.object}
+		selectOptions={data.selectOptions}
+		model={data.model}
+		{customNameDescription}
+		context="edit"
+		supportedModels={data.supportedModels}
+	/>
+{/key}

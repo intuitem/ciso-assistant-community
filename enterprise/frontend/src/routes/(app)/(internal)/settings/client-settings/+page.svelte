@@ -1,22 +1,22 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
-	import { ClientSettingsSchema } from '$lib/utils/client-settings';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import HiddenInput from '#lib/components/Forms/HiddenInput.svelte';
+	import { ClientSettingsSchema } from '#lib/utils/client-settings.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import FileInput from '$lib/components/Forms/FileInput.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import * as m from '$paraglide/messages.js';
+	import FileInput from '#lib/components/Forms/FileInput.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import * as m from '#paraglide/messages.js';
 
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
 
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;

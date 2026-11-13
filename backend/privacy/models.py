@@ -12,6 +12,13 @@ from auditlog.registry import auditlog
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import uuid
+from datetime import timedelta
+
+
+class DpiaRequirementSource(models.TextChoices):
+    ASSESSMENT = "assessment", _("Assessment")
+    OVERRIDE = "override", _("Override")
+    MANUAL = "manual", _("Manual")
 
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
@@ -78,8 +85,25 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("privacy_approved", "Approved"),
         ("privacy_deprecated", "Deprecated"),
     )
+    ROLE_CHOICES = (
+        ("privacy_controller", "Controller"),
+        ("privacy_joint_controller", "Joint Controller"),
+        ("privacy_data_processor", "Data Processor"),
+    )
+    # A DPIA is the controller's (Art. 35): a processor only assists (Art. 28(3)(f)).
+    DPIA_ROLES = ("privacy_controller", "privacy_joint_controller")
 
     ref_id = models.CharField(max_length=100, blank=True)
+    # Art. 30(1) register for controller roles, Art. 30(2) for processor roles
+    role = models.CharField(
+        max_length=30, choices=ROLE_CHOICES, default="privacy_controller"
+    )
+    controllers = models.ManyToManyField(
+        Entity,
+        blank=True,
+        related_name="processings_as_controller",
+        help_text="Controllers on whose behalf this processing is carried out",
+    )
     nature = models.ManyToManyField(
         Terminology,
         blank=True,
@@ -99,7 +123,35 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     usage_channel = models.CharField(max_length=255, blank=True)
     dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
-    has_sensitive_personal_data = models.BooleanField(default=False)
+    dpia_screening = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="screened_processings",
+        verbose_name=_("DPIA screening"),
+    )
+    # The DPIA last validated for this processing, a quick form response.
+    dpia = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assessed_processings",
+        verbose_name=_("DPIA"),
+    )
+    # Who or what last set `dpia_required`; written through
+    # `privacy.dpia_requirement.set_dpia_required` with its history row.
+    dpia_required_source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        blank=True,
+        default="",
+        verbose_name=_("DPIA requirement source"),
+    )
+    dpia_required_set_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("DPIA requirement set at")
+    )
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
@@ -122,13 +174,14 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     fields_to_check = ["ref_id", "name"]
 
-    def update_sensitive_data_flag(self):
-        """Update the has_sensitive_personal_data flag based on associated personal data"""
-        has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
+    @property
+    def dpia_applies(self) -> bool:
+        return self.role in self.DPIA_ROLES
 
-        if has_sensitive != self.has_sensitive_personal_data:
-            self.has_sensitive_personal_data = has_sensitive
-            self.save(update_fields=["has_sensitive_personal_data"])
+    @property
+    def has_sensitive_personal_data(self) -> bool:
+        # Reads the personal_data prefetch when the queryset has one
+        return any(pd.is_sensitive for pd in self.personal_data.all())
 
     def metrics(self):
         return {}
@@ -174,6 +227,8 @@ class Purpose(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.legal_basis
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -232,16 +287,13 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else str(self.category)
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
         super().save(*args, **kwargs)
-
-        # Update the processing's sensitive data flag if needed
-        if self.is_sensitive and not self.processing.has_sensitive_personal_data:
-            self.processing.has_sensitive_personal_data = True
-            self.processing.save(update_fields=["has_sensitive_personal_data"])
 
     @classmethod
     def get_categories_count(cls, filters: dict = {}):
@@ -295,6 +347,8 @@ class DataSubject(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.category
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -355,6 +409,8 @@ class DataRecipient(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.category
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -395,6 +451,8 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.relationship_type
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -427,6 +485,8 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.country
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -577,6 +637,80 @@ class DataBreach(NameDescriptionFolderMixin):
         ordering = ["-discovered_on"]
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
+
+    # Past the authority notification, whether or not its date was entered
+    NOTIFIED_OR_CLOSED_STATUSES = (
+        "privacy_authority_notified",
+        "privacy_subjects_notified",
+        "privacy_closed",
+    )
+
+    @property
+    def authority_notification_due(self):
+        # GDPR art. 33(1): 72h from awareness, unless unlikely to result in a risk
+        if self.risk_level == "privacy_no_risk" or not self.discovered_on:
+            return None
+        return self.discovered_on + timedelta(hours=72)
+
+    @property
+    def authority_notification_overdue(self) -> bool:
+        due = self.authority_notification_due
+        return bool(
+            due
+            and not self.authority_notified_on
+            and self.status not in self.NOTIFIED_OR_CLOSED_STATUSES
+            and timezone.now() > due
+        )
+
+
+class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
+    """One change of a processing's `dpia_required`, whatever the path (form,
+    API, batch, accepted screening). Append-only; `created_at` is when it
+    happened."""
+
+    processing = models.ForeignKey(
+        Processing,
+        on_delete=models.CASCADE,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Processing"),
+    )
+    dpia_required = models.BooleanField(verbose_name=_("DPIA required"))
+    previous_dpia_required = models.BooleanField(
+        null=True, blank=True, verbose_name=_("Previously required")
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        verbose_name=_("Source"),
+    )
+    response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Screening"),
+    )
+    changed_by = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Changed by"),
+    )
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+
+    class Meta:
+        verbose_name = _("DPIA requirement change")
+        verbose_name_plural = _("DPIA requirement changes")
+        ordering = ["-created_at"]
+
+    folder_from = "processing"
+
+    def save(self, *args, **kwargs):
+        self.folder = self.processing.folder
+        super().save(*args, **kwargs)
 
 
 common_exclude = ["created_at", "updated_at"]

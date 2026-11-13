@@ -1,5 +1,5 @@
+import math
 from collections import defaultdict
-from contextlib import nullcontext
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task
@@ -8,6 +8,8 @@ from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
+    Incident,
+    RiskAcceptance,
     OrganisationIssue,
     RequirementAssignment,
     RiskAssessment,
@@ -16,13 +18,18 @@ from core.models import (
     TaskNode,
     TaskTemplate,
     ValidationFlow,
+    Vulnerability,
 )
 from iam.models import ServiceAccount, User
-from django.core.mail import get_connection, EmailMessage
+from core import mailer
+from core.constants import EEA_COUNTRIES_SET
 from django.conf import settings
+from django.utils.timezone import now
 from django.db import models, transaction
+from django.db.models import Exists, OuterRef
 import logging
 from global_settings.models import GlobalSettings
+from global_settings.utils import ff_is_enabled
 
 import logging.config
 import structlog
@@ -171,6 +178,311 @@ def check_compliance_assessments_due_soon():
             "days_remaining": days,
         },
         send=send_compliance_assessment_due_soon_notification,
+    )
+
+
+# Hours before a regulatory deadline on which email escalates; -1 is "just missed".
+# shortcut: an hourly run that is skipped misses that bucket's email (the inbox row
+# stays); move to stored "last notified" state if delivery must be guaranteed.
+REGULATORY_NOTICE_HOURS = (168, 24, 6, 1, -1)
+# nis2_deadlines() stage -> label key shared by the email table and the message catalogs
+_STAGE_LABEL_KEYS = {
+    "early_warning": "earlyWarning",
+    "incident_notification": "incidentNotification",
+    "final_report": "finalReport",
+}
+
+
+def _regulatory_deadlines():
+    """(recipients, target, deadline_key, due, in_inbox) for every open NIS2 stage and
+    every personal data breach not yet notified to the authority. Every deadline
+    emails on its own schedule; the inbox keeps one row per incident (in_inbox)."""
+    from privacy.models import DataBreach
+
+    incidents = (
+        Incident.objects.filter(nis2_significant=True)
+        .exclude(status__in=["closed", "dismissed"])
+        .prefetch_related("owners")
+        if ff_is_enabled("nis2")
+        else Incident.objects.none()
+    )
+    for incident in incidents:
+        emails = _actor_emails(incident.owners.all())
+        # The inbox row is on the stage the worksheet also points to; the stages it
+        # moved past (a missed early warning) still get their emails
+        shown = incident.nis2_next_stage()
+        for stage in incident.nis2_deadlines():
+            if stage["done_at"] is None:
+                yield (
+                    emails,
+                    incident,
+                    _STAGE_LABEL_KEYS[stage["stage"]],
+                    stage["due"],
+                    stage["stage"] == shown["stage"],
+                )
+
+    breaches = (
+        DataBreach.objects.filter(authority_notified_on__isnull=True)
+        .exclude(risk_level="privacy_no_risk")
+        .exclude(status__in=DataBreach.NOTIFIED_OR_CLOSED_STATUSES)
+        .prefetch_related("assigned_to")
+    )
+    for breach in breaches:
+        yield (
+            _actor_emails(breach.assigned_to.all()),
+            breach,
+            "gdprBreachNotification",
+            breach.authority_notification_due,
+            True,
+        )
+
+
+@db_periodic_task(crontab(minute="5"))
+def check_regulatory_deadlines():
+    """NIS2 notification stages (24h / 72h / 1 month) and the GDPR 72h breach
+    notification. Hourly: these deadlines are counted in hours, not days."""
+    current = now()
+    items, escalating = [], defaultdict(list)
+    for emails, target, deadline_key, due, in_inbox in _regulatory_deadlines():
+        if not emails or due is None:
+            continue
+        hours = math.floor((due - current).total_seconds() / 3600)
+        context = {
+            "object_name": str(target),
+            "deadline_key": deadline_key,
+            "due": due.strftime("%Y-%m-%d %H:%M UTC"),
+        }
+        escalate = hours in REGULATORY_NOTICE_HOURS
+        if in_inbox:
+            items.append((emails, target, context, escalate))
+        if escalate:
+            for email in emails:
+                escalating[email].append(context)
+
+    rows = notify_many(
+        "regulatory_deadline", [(e, t, c) for e, t, c, esc in items if not esc]
+    ) + notify_many(
+        "regulatory_deadline",
+        [(e, t, c) for e, t, c, esc in items if esc],
+        renotify=True,
+    )
+    clear_stale("regulatory_deadline", _written(rows))
+    for email, deadlines in escalating.items():
+        send_regulatory_deadline_notification(email, deadlines)
+
+
+@task()
+def send_regulatory_deadline_notification(email, deadlines):
+    from .email_utils import get_locale_for_email, localize_regulatory_label
+
+    locale = get_locale_for_email(email)
+    lines = [
+        f"- {localize_regulatory_label(d['deadline_key'], locale)}: {d['object_name']} ({d['due']})"
+        for d in deadlines
+    ]
+    _send_digest(
+        "regulatory_deadline",
+        email,
+        {"deadline_count": len(deadlines), "deadline_list": "\n".join(lines)},
+    )
+
+
+def _send_digest(template_name, email, context):
+    if not check_email_configuration(email):
+        return
+    from .email_utils import render_email_template
+
+    rendered = render_email_template(template_name, context, recipient_email=email)
+    if rendered:
+        send_notification_email(
+            rendered["subject"], rendered["body"], email, rendered.get("html_body")
+        )
+    elif rendered is not None:
+        logger.error("Failed to render email template", template=template_name)
+
+
+def _named_list(objects) -> str:
+    return "\n".join(f"- {obj}" for obj in objects)
+
+
+@db_periodic_task(crontab(hour="6", minute="12"))
+def check_right_requests_due_soon():
+    """Data subject requests (GDPR art. 12(3): one month) approaching their due date."""
+    from privacy.models import RightRequest
+
+    today = date.today()
+    _sweep_deadline(
+        "right_request_due_soon",
+        RightRequest.objects.filter(
+            due_date__isnull=False,
+            due_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+        )
+        .exclude(status="done")
+        .prefetch_related("owner"),
+        due_date=lambda request: request.due_date,
+        recipients=lambda request: _actor_emails(request.owner.all()),
+        context=lambda request, days: {
+            "request_name": str(request),
+            "days_remaining": days,
+            # Title shows the date: a day count reads wrong once the request is overdue
+            "due": request.due_date.isoformat(),
+        },
+        send=lambda email, requests, days: send_right_request_due_soon_notification(
+            email, [str(r) for r in requests], days
+        ),
+    )
+
+
+@task()
+def send_right_request_due_soon_notification(email, names, days):
+    _send_digest(
+        "right_request_due_soon",
+        email,
+        {
+            "request_count": len(names),
+            "request_list": _named_list(names),
+            "days_remaining": days,
+        },
+    )
+
+
+@db_periodic_task(crontab(hour="6", minute="14"))
+def check_contracts_expiring_soon():
+    """Active supplier contracts reaching their end date."""
+    from tprm.models import Contract
+
+    today = date.today()
+    _sweep_deadline(
+        "contract_expiring_soon",
+        Contract.objects.filter(
+            status=Contract.Status.ACTIVE,
+            end_date__gte=today,
+            end_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+        ).prefetch_related("owner"),
+        due_date=lambda contract: contract.end_date,
+        recipients=lambda contract: _actor_emails(contract.owner.all()),
+        context=lambda contract, days: {
+            "contract_name": str(contract),
+            "days_remaining": days,
+        },
+        send=lambda email, contracts, days: send_contract_expiring_soon_notification(
+            email, [str(c) for c in contracts], days
+        ),
+    )
+
+
+@task()
+def send_contract_expiring_soon_notification(email, names, days):
+    _send_digest(
+        "contract_expiring_soon",
+        email,
+        {
+            "contract_count": len(names),
+            "contract_list": _named_list(names),
+            "days_remaining": days,
+        },
+    )
+
+
+def _with_gap_flags(processings):
+    """Annotate what processing_obligation_gaps needs, so a sweep runs one query."""
+    from privacy.models import DataTransfer, PersonalData, Purpose
+
+    return processings.annotate(
+        _has_purpose=Exists(Purpose.objects.filter(processing=OuterRef("pk"))),
+        _retention_missing=Exists(
+            PersonalData.objects.filter(processing=OuterRef("pk"), retention="")
+        ),
+        _mechanism_missing=Exists(
+            DataTransfer.objects.filter(
+                processing=OuterRef("pk"), transfer_mechanism=""
+            ).exclude(country__in=EEA_COUNTRIES_SET)
+        ),
+    )
+
+
+def processing_obligation_gaps(processing) -> list[str]:
+    """GDPR record-keeping shortcomings of one processing, as message keys."""
+
+    def flag(name, query):
+        # annotated by _with_gap_flags in sweeps; queried for a single processing
+        return getattr(processing, name) if hasattr(processing, name) else query()
+
+    gaps = []
+    if not flag("_has_purpose", processing.purposes.exists):
+        gaps.append("gapNoPurpose")
+    # dpia: an in-app DPIA (quick form); dpia_reference: one recorded elsewhere
+    if (
+        processing.dpia_applies
+        and processing.dpia_required
+        and not (processing.dpia_id or processing.dpia_reference)
+    ):
+        gaps.append("gapDpiaMissing")
+    if flag(
+        "_retention_missing",
+        lambda: processing.personal_data.filter(retention="").exists(),
+    ):
+        gaps.append("gapRetentionMissing")
+    if flag(
+        "_mechanism_missing",
+        lambda: (
+            processing.data_transfers.filter(transfer_mechanism="")
+            .exclude(country__in=EEA_COUNTRIES_SET)
+            .exists()
+        ),
+    ):
+        gaps.append("gapTransferMechanismMissing")
+    return gaps
+
+
+@db_periodic_task(crontab(hour="6", minute="16"))
+def check_processing_obligations():
+    """Shortcomings in the record of processing activities (art. 30). The inbox tracks
+    them daily; email is a Monday digest, since a gap is not news every morning."""
+    from privacy.models import Processing
+
+    items, per_recipient = [], defaultdict(list)
+    for processing in _with_gap_flags(
+        Processing.objects.exclude(status="privacy_deprecated")
+    ).prefetch_related("assigned_to"):
+        gaps = processing_obligation_gaps(processing)
+        emails = _actor_emails(processing.assigned_to.all())
+        if not gaps or not emails:
+            continue
+        items.append(
+            (
+                emails,
+                processing,
+                {"processing_name": str(processing), "gap_count": len(gaps)},
+            )
+        )
+        for email in emails:
+            per_recipient[email].append((processing, gaps))
+
+    rows = notify_many("processing_obligation_gap", items)
+    clear_stale("processing_obligation_gap", _written(rows))
+    if date.today().weekday() != 0:
+        return
+    for email, entries in per_recipient.items():
+        send_processing_obligation_gaps_notification(
+            email, [(str(p), gaps) for p, gaps in entries]
+        )
+
+
+@task()
+def send_processing_obligation_gaps_notification(email, entries):
+    from .email_utils import get_locale_for_email, localize_regulatory_label
+
+    locale = get_locale_for_email(email)
+    lines = [
+        f"- {name}: "
+        + ", ".join(localize_regulatory_label(gap, locale) for gap in gaps)
+        for name, gaps in entries
+    ]
+    _send_digest(
+        "processing_obligation_gap",
+        email,
+        {"processing_count": len(entries), "gap_list": "\n".join(lines)},
     )
 
 
@@ -411,9 +723,11 @@ def check_task_nodes_due_soon():
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="7", minute="10"))
 def check_task_nodes_overdue():
-    """Check for TaskNodes that are past due and still pending."""
+    """Check for TaskNodes that are past due and still open."""
     overdue_nodes = (
-        TaskNode.objects.filter(due_date__lt=date.today(), status="pending")
+        TaskNode.objects.filter(
+            due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        )
         .select_related("task_template")
         .filter(task_template__enabled=True)
         .prefetch_related("task_template__assigned_to")
@@ -445,18 +759,29 @@ def check_task_nodes_overdue():
 @task()
 def send_task_node_due_soon_notification(actor_email, task_nodes, days):
     """Send notification when TaskNodes are due soon."""
-    if not check_email_configuration(actor_email, task_nodes):
+    if not check_email_configuration(actor_email):
         return
 
-    from .email_utils import format_task_node_list, render_email_template
+    from .email_utils import (
+        format_task_node_list,
+        get_email_preferences,
+        localize_day_unit,
+        render_email_template,
+    )
 
-    locale, days_unit = _localized_day_unit(actor_email, days)
+    locale, date_format = get_email_preferences(actor_email)
+    days_unit = localize_day_unit(days, locale)
 
     context = {
         "task_count": len(task_nodes),
-        "task_list": format_task_node_list(task_nodes),
+        "task_list": format_task_node_list(
+            task_nodes, locale=locale, date_format=date_format
+        ),
         "task_list_detailed": format_task_node_list(
-            task_nodes, include_description=True
+            task_nodes,
+            include_description=True,
+            locale=locale,
+            date_format=date_format,
         ),
         "days_remaining": days,
         "days_remaining_unit": days_unit,
@@ -481,21 +806,35 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
 @task()
 def send_task_node_overdue_notification(actor_email, task_nodes):
     """Send notification for overdue TaskNodes."""
-    if not check_email_configuration(actor_email, task_nodes):
+    if not check_email_configuration(actor_email):
         return
 
-    from .email_utils import render_email_template, format_task_node_list
+    from .email_utils import (
+        format_task_node_list,
+        get_email_preferences,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(actor_email)
 
     context = {
         "task_count": len(task_nodes),
-        "task_list": format_task_node_list(task_nodes),
+        "task_list": format_task_node_list(
+            task_nodes, locale=locale, date_format=date_format
+        ),
         "task_list_detailed": format_task_node_list(
-            task_nodes, include_description=True
+            task_nodes,
+            include_description=True,
+            locale=locale,
+            date_format=date_format,
         ),
     }
 
     rendered = render_email_template(
-        "task_node_overdue", context, recipient_email=actor_email
+        "task_node_overdue",
+        context,
+        locale=locale,
+        recipient_email=actor_email,
     )
     if rendered:
         send_notification_email(
@@ -529,18 +868,29 @@ def check_expired_organisation_issues():
 
 @task()
 def send_notification_email_expired_eta(owner_email, controls):
-    if not check_email_configuration(owner_email, controls):
+    if not check_email_configuration(owner_email):
         return
 
-    from .email_utils import render_email_template, format_control_list
+    from .email_utils import (
+        format_control_list,
+        get_email_preferences,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(owner_email)
 
     context = {
         "control_count": len(controls),
-        "control_list": format_control_list(controls),
+        "control_list": format_control_list(
+            controls, locale=locale, date_format=date_format
+        ),
     }
 
     rendered = render_email_template(
-        "expired_controls", context, recipient_email=owner_email
+        "expired_controls",
+        context,
+        locale=locale,
+        recipient_email=owner_email,
     )
     if rendered:
         send_notification_email(
@@ -562,33 +912,12 @@ def send_email_now(
     html_message: str | None = None,
     connection=None,
 ) -> None:
-    """Synchronous send that propagates failures to the caller. Pass
-    `connection` to batch several sends over one SMTP session (the caller
-    owns its lifecycle).
-
-    Raises RuntimeError when the backend reports the message unsent;
-    connection/backend exceptions propagate as-is."""
-    if connection is None:
-        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-        scope = get_connection(ssl_context=ssl_context)
-    else:
-        scope = nullcontext(connection)
-    with scope as conn:
-        msg = EmailMessage(
-            subject=subject,
-            body=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient],
-            connection=conn,
-        )
-        if html_message:
-            msg.content_subtype = "html"
-            msg.body = html_message
-        sent = msg.send()
-    # Backends can report 0 sent without raising (fail_silently paths,
-    # filtered recipients); that is a delivery failure, not a success.
-    if sent != 1:
-        raise RuntimeError(f"email backend reported {sent} of 1 messages sent")
+    """Synchronous send through core.mailer; failures propagate to the caller.
+    Pass `connection` (from core.mailer.open_connection) to batch several
+    sends over one session; the caller owns its lifecycle."""
+    mailer.send(
+        subject, message, recipient, html_body=html_message, connection=connection
+    )
 
 
 @task()
@@ -614,20 +943,10 @@ def send_notification_email(subject, message, owner_email, html_message=None):
         )
 
 
-def get_missing_email_settings() -> list[str]:
-    """Names of the email settings that are required but unset; empty when
-    email can be sent. The console backend (MAIL_DEBUG) never opens an SMTP
-    connection, so EMAIL_HOST/EMAIL_PORT are only required for the other
-    backends."""
-    required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
-    if getattr(settings, "EMAIL_BACKEND", "").endswith("console.EmailBackend"):
-        required_settings = ["DEFAULT_FROM_EMAIL"]
-    return [
-        setting for setting in required_settings if not getattr(settings, setting, None)
-    ]
-
-
-def check_email_configuration(owner_email, controls):
+def check_email_configuration(owner_email):
+    """Return True if an email can be sent: mailing is enabled in the general
+    settings, the SMTP settings are complete, and a recipient is given.
+    """
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
     )
@@ -637,7 +956,7 @@ def check_email_configuration(owner_email, controls):
         )
         return False
 
-    missing_settings = get_missing_email_settings()
+    missing_settings = mailer.missing_configuration()
 
     if missing_settings:
         error_msg = f"Cannot send email notification: Missing email settings: {', '.join(missing_settings)}"
@@ -704,7 +1023,7 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
     notify("applied_control_assignment", assigned_user_emails, control, context)
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [control]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "applied_control_assignment", context, recipient_email=email
             )
@@ -748,7 +1067,7 @@ def send_task_template_assignment_notification(task_template_id, emails):
     notify("task_template_assignment", emails, task_template, context)
 
     for email in emails:
-        if email and check_email_configuration(email, [task_template]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "task_template_assignment", context, recipient_email=email
             )
@@ -759,6 +1078,45 @@ def send_task_template_assignment_notification(task_template_id, emails):
                     email,
                     rendered.get("html_body"),
                 )
+
+
+def _compliance_assessment_context(assessment):
+    return {
+        "assessment_name": assessment.name,
+        "assessment_description": assessment.description or "No description provided",
+        "assessment_ref_id": assessment.ref_id or "N/A",
+        "framework_name": assessment.framework.name
+        if assessment.framework
+        else "No framework",
+        "assessment_status": assessment.get_status_display(),
+        "assessment_version": assessment.version or "1.0",
+        "assessment_due_date": assessment.due_date.strftime("%Y-%m-%d")
+        if assessment.due_date
+        else "Not set",
+        "folder_name": assessment.folder.name if assessment.folder else "Default",
+    }
+
+
+@task()
+def send_compliance_assessment_reviewer_assignment_notification(
+    assessment_id, reviewer_ids
+):
+    """Tell actors added as reviewers of an audit. Recipients are resolved from the
+    audit's current reviewers, so one removed before the task runs is skipped."""
+    assessment = ComplianceAssessment.objects.filter(id=assessment_id).first()
+    if not assessment:
+        return
+
+    emails = sorted(_actor_emails(assessment.reviewers.filter(id__in=reviewer_ids)))
+    if not emails:
+        return
+
+    context = _compliance_assessment_context(assessment)
+    notify("compliance_assessment_reviewer_assignment", emails, assessment, context)
+
+    for email in emails:
+        if check_email_configuration(email):
+            _send_rendered("compliance_assessment_reviewer_assignment", context, email)
 
 
 @task()
@@ -779,27 +1137,14 @@ def send_compliance_assessment_assignment_notification(
 
     from .email_utils import render_email_template
 
-    context = {
-        "assessment_name": assessment.name,
-        "assessment_description": assessment.description or "No description provided",
-        "assessment_ref_id": assessment.ref_id or "N/A",
-        "framework_name": assessment.framework.name
-        if assessment.framework
-        else "No framework",
-        "assessment_status": assessment.get_status_display(),
-        "assessment_version": assessment.version or "1.0",
-        "assessment_due_date": assessment.due_date.strftime("%Y-%m-%d")
-        if assessment.due_date
-        else "Not set",
-        "folder_name": assessment.folder.name if assessment.folder else "Default",
-    }
+    context = _compliance_assessment_context(assessment)
 
     notify(
         "compliance_assessment_assignment", assigned_user_emails, assessment, context
     )
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [assessment]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "compliance_assessment_assignment", context, recipient_email=email
             )
@@ -840,7 +1185,7 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
     notify("risk_scenario_assignment", assigned_user_emails, scenario, context)
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [scenario]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "risk_scenario_assignment", context, recipient_email=email
             )
@@ -854,9 +1199,329 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
 
 
 @task()
+def send_incident_assignment_notification(incident_id, owner_ids):
+    """Send notification when an Incident is assigned to owners.
+
+    Takes owner IDs, not addresses: an owner removed before this task runs must not
+    be notified, so recipients are resolved here from the incident's current owners.
+    """
+    if not owner_ids:
+        return
+
+    try:
+        incident = Incident.objects.get(id=incident_id)
+    except Incident.DoesNotExist:
+        logger.error(f"Incident with id {incident_id} not found")
+        return
+
+    assigned_user_emails = sorted(
+        _actor_emails(incident.owners.filter(id__in=owner_ids))
+    )
+    if not assigned_user_emails:
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "incident_name": incident.name,
+        "incident_ref_id": incident.ref_id or "N/A",
+        "incident_severity": incident.get_severity_display(),
+        "incident_status": incident.get_status_display(),
+        "folder_name": incident.folder.name if incident.folder else "Default",
+    }
+
+    notify("incident_assignment", assigned_user_emails, incident, context)
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email):
+            rendered = render_email_template(
+                "incident_assignment", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+def _risk_acceptance_context(acceptance, actor_name):
+    return {
+        "acceptance_name": acceptance.name,
+        "actor_name": actor_name,
+        "risk_scenarios": ", ".join(str(s) for s in acceptance.risk_scenarios.all()),
+        "folder_name": acceptance.folder.name if acceptance.folder else "Default",
+    }
+
+
+def _send_rendered(template_name, context, email, locale=None):
+    from .email_utils import render_email_template
+
+    rendered = render_email_template(
+        template_name, context, locale=locale, recipient_email=email
+    )
+    if rendered:
+        send_notification_email(
+            rendered["subject"], rendered["body"], email, rendered.get("html_body")
+        )
+
+
+@task()
+def send_risk_acceptance_submitted_notification(acceptance_id, actor_name):
+    """Ask the approver to decide on a submitted risk acceptance."""
+    acceptance = (
+        RiskAcceptance.objects.select_related("approver", "folder")
+        .filter(id=acceptance_id)
+        .first()
+    )
+    # Re-checked at run time: a draft-back or approver change since submit cancels it.
+    if not acceptance or acceptance.state != "submitted" or not acceptance.approver:
+        return
+
+    email = acceptance.approver.email
+    context = {
+        **_risk_acceptance_context(acceptance, actor_name),
+        "expiry_date": acceptance.expiry_date.strftime("%Y-%m-%d")
+        if acceptance.expiry_date
+        else "-",
+    }
+    notify("risk_acceptance_submitted", [email], acceptance, context)
+
+    if check_email_configuration(email):
+        _send_rendered("risk_acceptance_submitted", context, email)
+
+
+@task()
+def send_risk_acceptance_decided_notification(acceptance_id, decision, actor_name):
+    """Tell the owners of the covered risk scenarios that the approver decided."""
+    acceptance = (
+        RiskAcceptance.objects.select_related("folder")
+        .prefetch_related("risk_scenarios__owner", "risk_scenarios__risk_assessment")
+        .filter(id=acceptance_id)
+        .first()
+    )
+    if not acceptance or acceptance.state != decision:
+        return
+
+    owners = {o for s in acceptance.risk_scenarios.all() for o in s.owner.all()}
+    emails = sorted(_actor_emails(owners))
+    if not emails:
+        return
+
+    context = {
+        **_risk_acceptance_context(acceptance, actor_name),
+        "justification": acceptance.justification or "-",
+    }
+    notify(
+        "risk_acceptance_decided",
+        emails,
+        acceptance,
+        {"acceptance_name": acceptance.name, "decision_key": decision},
+    )
+
+    from django.contrib.auth.models import Permission
+
+    from iam.models import RoleAssignment
+
+    from .email_utils import get_locale_for_email, localize_state
+
+    view_perm = Permission.objects.get(codename="view_riskscenario")
+    users = {u.email: u for u in User.objects.filter(email__in=emails)}
+    for email in emails:
+        if check_email_configuration(email):
+            user = users.get(email)
+            visible = [
+                str(s)
+                for s in acceptance.risk_scenarios.all()
+                if user
+                and RoleAssignment.is_access_allowed(
+                    user, view_perm, s.risk_assessment.folder
+                )
+            ]
+            locale = get_locale_for_email(email)
+            _send_rendered(
+                "risk_acceptance_decided",
+                {
+                    **context,
+                    "risk_scenarios": ", ".join(visible) or "-",
+                    "decision": localize_state(decision, locale),
+                },
+                email,
+                locale,
+            )
+
+
+@task()
+def send_evidence_reviewed_notification(evidence_id, decision, actor_name):
+    """Tell an evidence's owners it was approved or rejected, one notice per evidence."""
+    evidence = Evidence.objects.select_related("folder").filter(id=evidence_id).first()
+    # Re-checked at run time: a later status change supersedes this one.
+    if not evidence or evidence.status != decision:
+        return
+
+    emails = sorted(_actor_emails(evidence.owner.all()))
+    if not emails:
+        return
+
+    notify(
+        "evidence_reviewed",
+        emails,
+        evidence,
+        {"evidence_name": evidence.name, "decision_key": decision},
+    )
+
+    from .email_utils import get_locale_for_email, localize_state
+
+    context = {
+        "evidence_name": evidence.name,
+        "actor_name": actor_name,
+        "folder_name": evidence.folder.name if evidence.folder else "Default",
+    }
+    for email in emails:
+        if check_email_configuration(email):
+            locale = get_locale_for_email(email)
+            _send_rendered(
+                "evidence_reviewed",
+                {**context, "decision": localize_state(decision, locale)},
+                email,
+                locale,
+            )
+
+
+@task()
+def send_object_assignment_notification(
+    notification_type, model_label, object_id, field, actor_ids
+):
+    """Generic "assigned to you" for models without a dedicated type (see
+    AssignmentNotificationMixin). Recipients are resolved from the field's current
+    members, so an actor removed before the task runs is skipped."""
+    from django.apps import apps
+
+    from .email_utils import (
+        get_locale_for_email,
+        localize_model_name,
+        paraglide_model_key,
+    )
+
+    model = apps.get_model(model_label)
+    obj = model.objects.filter(pk=object_id).first()
+    if not obj:
+        return
+
+    emails = sorted(_actor_emails(getattr(obj, field).filter(id__in=actor_ids)))
+    if not emails:
+        return
+
+    object_name = getattr(obj, "name", None) or str(obj)
+    type_key = paraglide_model_key(model)
+    notify(
+        notification_type,
+        emails,
+        obj,
+        {"object_name": object_name, "object_type_key": type_key},
+    )
+
+    folder = getattr(obj, "folder", None)
+    context = {
+        "object_name": object_name,
+        "folder_name": folder.name if folder else "Default",
+    }
+    for email in emails:
+        if check_email_configuration(email):
+            locale = get_locale_for_email(email)
+            _send_rendered(
+                notification_type,
+                {**context, "object_type": localize_model_name(type_key, locale)},
+                email,
+                locale,
+            )
+
+
+def _document_revision(revision_id):
+    from doc_management.models import DocumentRevision
+
+    return (
+        DocumentRevision.objects.select_related("author", "document__container__folder")
+        .filter(id=revision_id)
+        .first()
+    )
+
+
+def _document_context(revision, actor_name):
+    container = revision.document.container
+    return {
+        "document_name": str(container),
+        "version_number": revision.version_number,
+        "actor_name": actor_name,
+        "folder_name": container.folder.name if container.folder else "Default",
+    }
+
+
+@task()
+def send_document_review_requested_notification(
+    revision_id, actor_name, submitter_email
+):
+    """Ask the container's reviewers to review a submitted revision."""
+    revision = _document_revision(revision_id)
+    # Re-checked at run time: a decision taken since then supersedes the request.
+    if not revision or revision.status != "in_review":
+        return
+
+    container = revision.document.container
+    emails = sorted(_actor_emails(container.reviewers.all()) - {submitter_email})
+    if not emails:
+        return
+
+    context = {
+        **_document_context(revision, actor_name),
+        "change_summary": revision.change_summary or "-",
+    }
+    notify(
+        "document_review_requested",
+        emails,
+        container,
+        {"document_name": context["document_name"]},
+    )
+    for email in emails:
+        if check_email_configuration(email):
+            _send_rendered("document_review_requested", context, email)
+
+
+@task()
+def send_document_revision_reviewed_notification(revision_id, state, actor_name):
+    """Tell a revision's author it was validated, sent back, or published."""
+    revision = _document_revision(revision_id)
+    if not revision or revision.status != state or not revision.author:
+        return
+
+    email = revision.author.email
+    context = {
+        **_document_context(revision, actor_name),
+        "reviewer_comments": revision.reviewer_comments or "-",
+    }
+    notify(
+        "document_revision_reviewed",
+        [email],
+        revision.document.container,
+        {"document_name": context["document_name"], "decision_key": state},
+    )
+    if check_email_configuration(email):
+        from .email_utils import get_locale_for_email, localize_state
+
+        locale = get_locale_for_email(email)
+        _send_rendered(
+            "document_revision_reviewed",
+            {**context, "decision": localize_state(state, locale)},
+            email,
+            locale,
+        )
+
+
+@task()
 def send_compliance_assessment_due_soon_notification(author_email, assessments, days):
     """Send notification when ComplianceAssessment is due soon"""
-    if not check_email_configuration(author_email, assessments):
+    if not check_email_configuration(author_email):
         return
 
     from .email_utils import format_assessment_list, render_email_template
@@ -890,16 +1555,24 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
 @task()
 def send_applied_control_expiring_soon_notification(owner_email, controls, days):
     """Send notification when AppliedControl is due soon"""
-    if not check_email_configuration(owner_email, controls):
+    if not check_email_configuration(owner_email):
         return
 
-    from .email_utils import format_control_list, render_email_template
+    from .email_utils import (
+        format_control_list,
+        get_email_preferences,
+        localize_day_unit,
+        render_email_template,
+    )
 
-    locale, days_unit = _localized_day_unit(owner_email, days)
+    locale, date_format = get_email_preferences(owner_email)
+    days_unit = localize_day_unit(days, locale)
 
     context = {
         "control_count": len(controls),
-        "control_list": format_control_list(controls),
+        "control_list": format_control_list(
+            controls, locale=locale, date_format=date_format
+        ),
         "days_remaining": days,
         "days_remaining_unit": days_unit,
     }
@@ -923,7 +1596,7 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
 
 @task()
 def send_notification_email_expired_evidence(owner_email, evidences, days=0):
-    if not check_email_configuration(owner_email, evidences):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_evidence_list, render_email_template
@@ -956,7 +1629,7 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
 @task()
 def send_evidence_expiring_soon_notification(owner_email, evidences, days):
     """Send notification when Evidence is expiring soon"""
-    if not check_email_configuration(owner_email, evidences):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_evidence_list, render_email_template
@@ -992,7 +1665,7 @@ def send_security_exception_expiring_soon_notification(
     owner_email, security_exceptions, days
 ):
     """Send notification when SecurityException is expiring soon"""
-    if not check_email_configuration(owner_email, security_exceptions):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_security_exception_list, render_email_template
@@ -1028,7 +1701,7 @@ def send_notification_email_expired_security_exception(
     owner_email, security_exceptions, days=0
 ):
     """Send notification for expired SecurityExceptions"""
-    if not check_email_configuration(owner_email, security_exceptions):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_security_exception_list, render_email_template
@@ -1096,9 +1769,52 @@ def send_security_exception_assignment_notification(exception_id, assigned_user_
     )
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [security_exception]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "security_exception_assignment", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+@task()
+def send_vulnerability_assignment_notification(vulnerability_id, assigned_user_emails):
+    """Send notification when a Vulnerability is assigned to owners"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        vulnerability = Vulnerability.objects.get(id=vulnerability_id)
+    except Vulnerability.DoesNotExist:
+        logger.error(f"Vulnerability with id {vulnerability_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "vulnerability_name": vulnerability.name,
+        "vulnerability_description": vulnerability.description
+        or "No description provided",
+        "vulnerability_ref_id": vulnerability.ref_id or "N/A",
+        "vulnerability_severity": vulnerability.get_severity_display(),
+        "vulnerability_status": vulnerability.get_status_display(),
+        "due_date": vulnerability.due_date.strftime("%Y-%m-%d")
+        if vulnerability.due_date
+        else "Not set",
+        "folder_name": vulnerability.folder.name if vulnerability.folder else "Default",
+    }
+
+    notify("vulnerability_assignment", assigned_user_emails, vulnerability, context)
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email):
+            rendered = render_email_template(
+                "vulnerability_assignment", context, recipient_email=email
             )
             if rendered:
                 send_notification_email(
@@ -1143,7 +1859,7 @@ def send_security_exception_status_notification(
     )
 
     for email in set(recipient_emails):
-        if email and check_email_configuration(email, [security_exception]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "security_exception_status_changed", context, recipient_email=email
             )
@@ -1159,6 +1875,13 @@ def send_security_exception_status_notification(
 @task()
 def send_validation_flow_created_notification(validation_flow):
     """Send notification to approver when validation flow is created"""
+    # The instance was pickled at enqueue; the approver may have changed since.
+    try:
+        validation_flow.refresh_from_db()
+    except ValidationFlow.DoesNotExist:
+        return
+    if validation_flow.status != ValidationFlow.Status.SUBMITTED:
+        return
     if not validation_flow.approver or not validation_flow.approver.email:
         logger.warning(
             f"No approver email for validation flow {validation_flow.ref_id}"
@@ -1176,7 +1899,7 @@ def send_validation_flow_created_notification(validation_flow):
 
     # Below is the email channel only: it may be unusable while the inbox above still
     # works, so the guard must not come before the notify() call.
-    if not check_email_configuration(approver_email, [validation_flow]):
+    if not check_email_configuration(approver_email):
         return
 
     from .email_utils import render_email_template
@@ -1244,7 +1967,7 @@ def send_validation_flow_updated_notification(
     )
 
     # Email channel only, hence after the inbox write (see above).
-    if not check_email_configuration(recipient_email, [validation_flow_id]):
+    if not check_email_configuration(recipient_email):
         return
 
     from .email_utils import render_email_template
@@ -1279,7 +2002,7 @@ def send_validation_flow_updated_notification(
 @task()
 def send_validation_deadline_notification(approver_email, validations, days):
     """Send notification about validation deadlines approaching"""
-    if not check_email_configuration(approver_email, validations):
+    if not check_email_configuration(approver_email):
         return
 
     from .email_utils import format_validation_list, render_email_template
@@ -1544,7 +2267,7 @@ def send_assignment_activated_notification(assignment_id):
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
-            if email and check_email_configuration(email, [assignment]):
+            if email and check_email_configuration(email):
                 rendered = render_email_template(
                     "assignment_activated", context, recipient_email=email
                 )
@@ -1594,7 +2317,7 @@ def send_assignment_submitted_notification(assignment_id):
     notify("assignment_submitted", recipient_emails, ca, context)
 
     for email in recipient_emails:
-        if check_email_configuration(email, [assignment]):
+        if check_email_configuration(email):
             rendered = render_email_template(
                 "assignment_submitted", context, recipient_email=email
             )
@@ -1630,7 +2353,7 @@ def send_assignment_reopened_notification(assignment_id, observation=""):
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
-            if email and check_email_configuration(email, [assignment]):
+            if email and check_email_configuration(email):
                 rendered = render_email_template(
                     "assignment_reopened", context, recipient_email=email
                 )
@@ -1669,7 +2392,7 @@ def send_assignment_reviewed_notification(
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
-            if email and check_email_configuration(email, [assignment]):
+            if email and check_email_configuration(email):
                 locale, localized_decision = _localized_assignment_decision(
                     email, decision
                 )
@@ -1765,7 +2488,7 @@ def _notify_actors(actors, template_name, context, response) -> None:
     notify(template_name, recipient_emails, response, context)
 
     for email in sorted(recipient_emails):
-        if check_email_configuration(email, [response]):
+        if check_email_configuration(email):
             rendered = render_email_template(
                 template_name, context, recipient_email=email
             )

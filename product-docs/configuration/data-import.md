@@ -673,6 +673,11 @@ The multi-sheet workbook is the same format produced by the **Export XLSX** butt
 * processing\_nature - comma-separated processing nature names
 * information\_channel
 * usage\_channel
+* role - GDPR role, raw key (e.g. `privacy_data_processor`) or label; `Controller` when blank
+  * Controller
+  * Joint Controller
+  * Data Processor
+* controllers - names of existing third-party entities, one per line or comma-separated: the co-controllers of a joint controller processing, or the clients of a processor one
 * assigned\_to - comma-separated user emails
 * labels - comma-separated label names (created if missing)
 * dpia\_required
@@ -690,6 +695,8 @@ The multi-sheet workbook is the same format produced by the **Export XLSX** butt
 {% file src="../.gitbook/assets/sample_processing_workbook.xlsx" %}
 
 The workbook contains a **Processing** sheet (same columns as the flat list, one row) plus one optional sheet per sub-object type: **Purposes**, **Personal data**, **Data subjects**, **Data recipients**, **Contractors** and **Transfers**. Sheet names are matched case-insensitively; empty sheets are simply skipped.
+
+An export also carries a **Controllers** sheet (each client's name, country and contacts) and a **Security measures** sheet (the processing's applied controls). Both are there to be read, and the import ignores them.
 
 Every choice column accepts either the raw key (e.g. `privacy_contract`) or its English label (e.g. `Performance of a Contract`), case-insensitively.
 
@@ -832,25 +839,38 @@ Every choice column accepts either the raw key (e.g. `privacy_contract`) or its 
 
 ### Supported fields
 
-* ref\_id
-* name\*
-* description
-* status
-  * Potential
-  * Exploitable
-  * Mitigated
-  * Not exploitable
-  * Fixed
-  * Unaffected
-* severity
-  * Information
-  * Low
-  * Medium
-  * High
-  * Critical
-* assets (newline-separated list of the name of the assets)
-* applied\_controls (newline-separated of the names)
-* security\_exceptions (newline-separated of the names)
+* **ref\_id** - e.g. a CVE identifier
+* **name**<mark style="color:red;">\*</mark>
+* **description**
+* **observation** - how the vulnerability is handled (Markdown)
+* **status** - case-insensitive; any other value reads as undefined
+  * `potential`
+  * `exploitable`
+  * `mitigated`
+  * `fixed`
+  * `not exploitable`
+  * `unaffected`
+* **severity** - case-insensitive, or the number `0`–`4`; any other value reads as undefined
+  * `info`
+  * `low`
+  * `medium`
+  * `high`
+  * `critical`
+* **detected\_at** - detection date (YYYY-MM-DD). Left empty, it is set to the import day while the [vulnerability SLA](settings/vulnerability-sla.md) is on
+* **due\_date** - due date (YYYY-MM-DD). Left empty, it is computed from the [vulnerability SLA policy](settings/vulnerability-sla.md) while the SLA is on
+* **remediated\_at** - remediation date (YYYY-MM-DD). Left empty, a resolved status (mitigated, fixed, not exploitable, unaffected) sets it to the import day
+* **owner**\
+  Semicolon-separated list of user emails and/or team names, shown as **Assigned to**. Resolved case-insensitively: first by user email, then by team name. Unresolved entries are skipped with a warning and will not block the import. This column isn't in the template: add it when you need it.
+* **assets**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **applied\_controls**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **security\_exceptions**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **filtering\_labels**\
+  Label names separated by `|`, commas or new lines; missing labels are created.
+
+In update mode, an existing vulnerability is matched by **ref\_id**, then by **name**, in the domain folder. Empty cells leave its fields as they are, except **owner**: an empty owner cell removes the owners.
 
 
 

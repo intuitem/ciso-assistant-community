@@ -55,6 +55,7 @@
 * Specialised modules
   * [Third-party risk](concepts/third-party-risk.md)
   * [Privacy register](concepts/privacy-register.md)
+    * [DPIA and screening](concepts/dpia.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
   * [Object classifications](concepts/object-classification.md)
@@ -78,6 +79,7 @@
   * [Setting up mailer](installation/mailer.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
   * [Structured logging](installation/structured-logging.md)
+  * [Shared cache and login rate limiting](installation/shared-cache.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -108,6 +110,7 @@
   * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
+    * [Active Directory Federation Services (AD FS)](configuration/sso/identity-providers/adfs.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
     * [Google Workspace](configuration/sso/identity-providers/google-workspace.md)
     * [Keycloak](configuration/sso/identity-providers/keycloak.md)
@@ -140,6 +143,7 @@
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
 * [Date format](configuration/date-format.md)
+* [Report time zone](configuration/report-time-zone.md)
 
 ## Guides
 
@@ -151,6 +155,7 @@
   * [Creating your first audit](guides/first-audit.md)
   * [Creating your first risk assessment](guides/first-risk-assessment.md)
   * [Building your first workflow](guides/first-workflow.md)
+  * [Creating your first computed metric](guides/first-computed-metric.md)
   * [Filing and deciding your first request](guides/first-quick-form.md)
 * Assessments
   * [Basic audit](guides/basic-audit.md)
@@ -171,6 +176,8 @@
   * [Third-Party Risk Management](guides/tprm.md)
   * [Tiering your vendors](guides/vendor-tiering.md)
   * [Common TPRM pitfalls](guides/tprm-challenges.md)
+* Privacy
+  * [Screening processings and running DPIAs](guides/dpia.md)
 
 ## Features
 
@@ -197,15 +204,24 @@
 * [Personal module visibility](features/personal-module-visibility.md)
 * [Sync to actions](features/sync-to-actions.md)
 * [Dashboards](features/dashboards.md)
+* [Create a metric](features/metrics/creating-a-metric.md)
+* [Record a value](features/metrics/recording-values.md)
+* [Computed metrics](features/metrics/README.md)
+  * [Create a computed metric](features/metrics/creating.md)
+  * [Edit a formula](features/metrics/editing.md)
+  * [Formula reference](features/metrics/formulas.md)
+  * [Troubleshooting](features/metrics/troubleshooting.md)
 * [Audit advanced analytics](features/audit-analytics.md)
 * [Framework report](features/framework-report.md)
 * [Insights](features/insights.md)
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Risk trajectory](features/risk-trajectory.md)
+* [Scenario selection](features/scenario-selection.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
 * [Workflow builder](features/workflows/README.md)
+  * [Cheat sheet](features/workflows/cheat-sheet.md)
   * [Triggers](features/workflows/triggers.md)
   * [Steps](features/workflows/steps.md)
   * [Expressions](features/workflows/expressions.md)
@@ -231,17 +247,35 @@
 ## AI and Integrations
 
 * [Overview](integrations/README.md)
-* [API reference](integrations/api.md)
-* [Generating a PAT](integrations/pat.md)
-* [Service accounts](integrations/service-accounts.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
+* [Microsoft Sentinel](integrations/sentinel.md)
 * [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Power BI connector](integrations/powerbi.md)
+* [n8n node](integrations/n8n.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
+
+## API documentation
+
+* [Overview](integrations/api.md)
+* [Generating a PAT](integrations/pat.md)
+* [Service accounts](integrations/service-accounts.md)
+* [API reference](api-reference/README.md)
+  * ```yaml
+    props:
+      models: false
+      downloadLink: true
+      grouping: by-tag
+    type: builtin:openapi
+    dependencies:
+      spec:
+        ref:
+          kind: openapi
+          spec: ciso-assistant
+    ```
 
 ## Contributing
 

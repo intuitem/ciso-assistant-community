@@ -2,8 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onMount, untrack } from 'svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { createPickerForm } from '$lib/components/AssetGraph/picker';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { createPickerForm } from '#lib/components/AssetGraph/picker.js';
 	import AssetMap from './AssetMap.svelte';
 	import type { PageData } from './$types';
 
@@ -18,14 +18,14 @@
 	const focusNode = $derived(data.graph?.nodes.find((n: any) => n.id === data.graph?.focus));
 
 	function navigate(changes: Record<string, string | null>) {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		for (const [key, value] of Object.entries(changes)) {
 			if (value) url.searchParams.set(key, value);
 			else url.searchParams.delete(key);
 		}
 		url.searchParams.delete('expand');
 		url.searchParams.delete('reveal');
-		goto(url, { invalidateAll: true, noScroll: true });
+		goto(url, { refreshAll: true, reset: false });
 	}
 
 	type Crumb = { id: string; name: string };
@@ -76,11 +76,11 @@
 	}
 
 	function grow(param: 'expand' | 'reveal', ...ids: string[]) {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		for (const id of ids) {
 			if (!url.searchParams.getAll(param).includes(id)) url.searchParams.append(param, id);
 		}
-		goto(url, { invalidateAll: true, noScroll: true, keepFocus: true });
+		goto(url, { refreshAll: true, reset: false });
 	}
 </script>
 

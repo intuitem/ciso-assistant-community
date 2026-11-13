@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
 		nodeId: string;
@@ -156,6 +156,10 @@
 			{/if}
 		</td>
 	</tr>
+	<!-- An assessable requirement can still carry sub-requirements -->
+	{#each children as [childId, childNode], i}
+		<svelte:self nodeId={childId} node={childNode} depth={depth + 1} index={i} />
+	{/each}
 {:else if hasChildren}
 	<!-- Section header -->
 	<tr class="{sectionStyles} print:break-inside-avoid print:break-after-avoid">

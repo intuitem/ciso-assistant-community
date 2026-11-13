@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Bewijs verlopen sinds ${expired_since} ${expired_since_unit}"
+body: |
+  Hallo,
+
+  ${evidence_count} bewijsstuk(ken) zijn verlopen sinds ${expired_since} ${expired_since_unit}:
+
+  ${evidence_list}
+
+  Meld u aan op uw CISO Assistant-portaal om deze bewijzen te controleren en bij te werken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

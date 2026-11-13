@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Risikoakzeptanz '${acceptance_name}' wartet auf Ihre Entscheidung"
+body: |
+  Hallo,
+
+  ${actor_name} hat Ihnen folgende Risikoakzeptanz zur Genehmigung vorgelegt:
+
+  - Name: ${acceptance_name}
+  - Risikoszenarien: ${risk_scenarios}
+  - Ablaufdatum: ${expiry_date}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um sie zu akzeptieren oder abzulehnen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

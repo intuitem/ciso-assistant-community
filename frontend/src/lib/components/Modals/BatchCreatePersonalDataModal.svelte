@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { fetchAllPages } from '$lib/utils/pagination';
-	import { invalidateAll } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import { refreshAll } from '$app/navigation';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { onMount } from 'svelte';
+	import { SENSITIVE_PERSONAL_DATA_CATEGORIES } from '#lib/utils/constants.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -143,6 +144,11 @@
 		...(customCategories.length ? [{ label: 'pd_group_custom', categories: customCategories }] : [])
 	]);
 
+	// The backend marks these sensitive whatever the checkbox says
+	const hasSensitiveCategory = $derived(
+		selectedCategories.some((c) => SENSITIVE_PERSONAL_DATA_CATEGORIES.has(c))
+	);
+
 	const canSubmit = $derived(selectedCategories.length > 0 && !submitting);
 
 	function parseChoices(data: any): Record<string, string> {
@@ -243,7 +249,7 @@
 					messages.push(`${data.errors.length} error(s)`);
 				}
 				toastStore.trigger({ message: messages.join(', ') });
-				await invalidateAll();
+				await refreshAll();
 				parent.onClose();
 			} else {
 				toastStore.trigger({
@@ -337,6 +343,14 @@
 											class="checkbox"
 										/>
 										<span class="text-sm">{safeTranslate(category.value)}</span>
+										{#if SENSITIVE_PERSONAL_DATA_CATEGORIES.has(category.value)}
+											<i
+												class="fa-solid fa-lock text-xs text-orange-500"
+												role="img"
+												aria-label={m.sensitiveCategoryHelpText()}
+												title={m.sensitiveCategoryHelpText()}
+											></i>
+										{/if}
 									</label>
 								{/each}
 							</div>
@@ -383,6 +397,11 @@
 							<input type="checkbox" bind:checked={isSensitive} class="checkbox" />
 							<span class="text-sm font-medium text-surface-700-300">{m.isSensitive()}</span>
 						</label>
+						{#if hasSensitiveCategory}
+							<p class="text-xs text-surface-600-400 mt-1">
+								<i class="fa-solid fa-lock text-orange-500 mr-1"></i>{m.sensitiveCategoryHelpText()}
+							</p>
+						{/if}
 					</div>
 				</div>
 			</div>

@@ -103,5 +103,6 @@ Read [Permissions and security](../features/workflows/permissions-and-security.m
 
 - [Building your first workflow](../guides/first-workflow.md): enable the feature and build one end to end.
 - [Workflow builder](../features/workflows/README.md): every part of the canvas, then triggers, steps, expressions, variables, runs, sharing and troubleshooting.
+- [Cheat sheet](../features/workflows/cheat-sheet.md): every rule, limit and subtlety on one page.
 - [Template catalog](../features/workflows/templates.md): the ready-made workflows and which one to start from.
 - [Permissions and security](../features/workflows/permissions-and-security.md): who a run acts as and what it can reach.

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import * as m from '$paraglide/messages';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';

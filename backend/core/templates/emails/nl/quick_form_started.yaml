@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Het snelformulier '${response_name}' wacht op uw invoer"
+body: |
+  Hallo,
+
+  U bent gekozen als respondent voor het volgende snelformulier:
+
+  - Antwoord: ${response_name}
+  - Formulier: ${quick_form_name}
+  - Vervaldatum: ${due_date}
+
+  Meld u aan op CISO Assistant om het in te vullen: [Formulier openen](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Bedankt.

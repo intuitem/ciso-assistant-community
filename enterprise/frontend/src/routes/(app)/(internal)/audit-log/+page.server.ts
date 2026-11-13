@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { PageServerLoad } from './$types';
 
 export const load = (async () => {

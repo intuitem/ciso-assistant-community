@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperForm<any>;

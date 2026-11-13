@@ -2,12 +2,12 @@
 	import type { PageData } from './$types';
 	import { onMount, onDestroy } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
-	import { pageTitle } from '$lib/utils/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '$lib/utils/modelTargets';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '#lib/utils/modelTargets.js';
 	import TranslationsEditor from '../../TranslationsEditor.svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	const toastStore = getToastStore();
 
@@ -107,7 +107,8 @@
 		!!draft?.scaffolded_objects?.some((s) => PROJECT_MANAGEMENT_TYPES.includes(s.type))
 	);
 
-	beforeNavigate(({ cancel }) => {
+	beforeNavigate(({ cancel, shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (dirty && !confirm(m.lbPresetUnsavedLeaveConfirm())) cancel();
 	});
 
@@ -715,12 +716,10 @@
 				<a
 					href="/experimental/library-builder/{data.draft.id}"
 					class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors shrink-0"
-					title={m.lbPresetBackToList()}
+					title={m.lbPresetBackToList()}><i class="fa-solid fa-arrow-left"></i></a
 				>
-					<i class="fa-solid fa-arrow-left"></i>
-				</a>
-				<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
+				<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 				<!-- Status pill: the library-draft document is the single draft
 				     layer; publishing happens on the library page. -->
 				{#if dirty}
@@ -779,10 +778,8 @@
 						<button
 							type="button"
 							class="shrink-0 text-xs text-surface-600-400 px-2 py-1 hover:text-surface-700-300"
-							onclick={() => (confirmDiscard = false)}
+							onclick={() => (confirmDiscard = false)}>{m.cancel()}</button
 						>
-							{m.cancel()}
-						</button>
 					{:else}
 						<button
 							type="button"

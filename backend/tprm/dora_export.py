@@ -170,7 +170,7 @@ def get_entity_identifier(
     if priority is None:
         priority = IDENTIFIER_PRIORITY
 
-    if not entity or not entity.legal_identifiers:
+    if not entity or not entity.legal_identifiers_dict:
         return "", "", ""
 
     def map_identifier_type(key: str) -> str:
@@ -190,15 +190,18 @@ def get_entity_identifier(
 
     # Try priority identifiers first
     for id_type in priority:
-        if id_type in entity.legal_identifiers and entity.legal_identifiers[id_type]:
+        if (
+            id_type in entity.legal_identifiers_dict
+            and entity.legal_identifiers_dict[id_type]
+        ):
             return (
-                entity.legal_identifiers[id_type],
+                entity.legal_identifiers_dict[id_type],
                 map_identifier_type(id_type),
                 id_type,
             )
 
     # Use first available identifier if we couldn't find any of the priority ones
-    for key, value in entity.legal_identifiers.items():
+    for key, value in entity.legal_identifiers_dict.items():
         if value:
             return value, map_identifier_type(key), key
 
@@ -234,8 +237,8 @@ def generate_b_01_01_main_entity(
 
     # Extract LEI from legal identifiers
     lei = ""
-    if main_entity.legal_identifiers:
-        lei = main_entity.legal_identifiers.get("LEI", "")
+    if main_entity.legal_identifiers_dict:
+        lei = main_entity.legal_identifiers_dict.get("LEI", "")
 
     # Format country with eba_GA: prefix
     country = ""
@@ -301,8 +304,8 @@ def generate_b_01_02_entities(
     # Write entity data for each entity
     for entity in all_entities:
         lei = ""
-        if entity.legal_identifiers:
-            lei = entity.legal_identifiers.get("LEI", "")
+        if entity.legal_identifiers_dict:
+            lei = entity.legal_identifiers_dict.get("LEI", "")
 
         country = ""
         if entity.country:
@@ -323,8 +326,10 @@ def generate_b_01_02_entities(
 
         # LEI of parent entity
         parent_entity_lei = ""
-        if entity.parent_entity and entity.parent_entity.legal_identifiers:
-            parent_entity_lei = entity.parent_entity.legal_identifiers.get("LEI", "")
+        if entity.parent_entity and entity.parent_entity.legal_identifiers_dict:
+            parent_entity_lei = entity.parent_entity.legal_identifiers_dict.get(
+                "LEI", ""
+            )
 
         if not parent_entity_lei:
             # If no parent or parent has no LEI, use entity's own LEI for c0060 as per EBA rules

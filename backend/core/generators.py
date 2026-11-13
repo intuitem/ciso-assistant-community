@@ -1,16 +1,38 @@
 import io
+from collections import Counter
+import multiprocessing
+import resource
+import traceback
+from collections import OrderedDict, defaultdict
+from datetime import date, datetime, timedelta, timezone, tzinfo
+from decimal import Decimal
 from math import ceil
+from multiprocessing.connection import Connection
+from typing import ClassVar
+from uuid import UUID
 
+import jinja2.filters
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from django.db.models import Count
+from django.utils import translation
+from django.utils.safestring import SafeString
 from django.utils.timezone import now
 from docx.shared import Cm
-from docxtpl import InlineImage
+from docxtpl import DocxTemplate, InlineImage
+from jinja2.exceptions import TemplateError
+from jinja2.runtime import (
+    BlockReference,
+    LoopContext,
+    Macro,
+    TemplateReference,
+)
+from jinja2.sandbox import ImmutableSandboxedEnvironment
+from jinja2.utils import Cycler, Joiner, Namespace
 from library.helpers import get_referential_translation
+from markupsafe import Markup
 
-from .utils import is_field_visible_to
+from .utils import format_report_timestamp, is_field_visible_to
 
 from .models import (
     AppliedControl,
@@ -393,7 +415,28 @@ _ACTION_PLAN_STATUS_FILLS = {
 }
 
 
-def action_plan_context(assessment, controls, lang="en", linked=None):
+def _all_readable(obj) -> bool:
+    return True
+
+
+def _report_time_context(tz: tzinfo) -> dict[str, str]:
+    """Return the report's `date`, `generated_at` and `timezone`, in `tz`."""
+    moment = now()
+    return {
+        "date": moment.astimezone(tz).strftime("%d/%m/%Y"),
+        "generated_at": format_report_timestamp(moment, tz),
+        "timezone": str(tz),
+    }
+
+
+def action_plan_context(
+    assessment,
+    controls,
+    lang="en",
+    linked=None,
+    tz: tzinfo = timezone.utc,
+    readable=_all_readable,
+):
     """Payload for the action plan, grouped by status and sorted by ETA.
 
     `assessment` is whatever the controls hang off — a compliance assessment or a
@@ -406,15 +449,17 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
     which item — and drops CSF function, effort, cost and expiry date.
     """
     linked = linked or {}
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
     buckets = {key: [] for key in _ACTION_PLAN_STATUS_FILLS}
 
-    for control in controls:
+    for control in seen(controls):
         buckets.setdefault(control.status or "--", []).append(
             {
                 "name": control.name or "-",
                 "description": control.description or "-",
                 "category_key": control.category or "",
-                "owner": ", ".join(str(actor) for actor in control.owner.all()) or "-",
+                "owner": ", ".join(str(actor) for actor in seen(control.owner.all()))
+                or "-",
                 "eta": _date_str(control.eta),
                 "linked": linked.get(control.id, []),
             }
@@ -431,6 +476,7 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
     ]
 
     perimeter = getattr(assessment, "perimeter", None)
+    perimeter = perimeter if perimeter and readable(perimeter) else None
     framework = getattr(assessment, "framework", None)
     return {
         "subject": {
@@ -441,8 +487,7 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
             "framework": str(framework) if framework else "",
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "groups": groups,
         "total": sum(len(g["controls"]) for g in groups),
     }
@@ -469,15 +514,29 @@ _CLOSED_FINDING_STATUSES = (
 )
 
 
-def findings_assessment_context(assessment, findings, lang="en"):
+def findings_assessment_context(
+    assessment, findings, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
+):
     """Payload for the findings report.
 
     Findings are grouped by severity, worst first: a reader triages by severity,
     and one block per page (what the HTML template did) turns fifty findings into
     fifty pages.
     """
-    metrics = assessment.get_findings_metrics()
-    severity_counts = metrics.get("severity_distribution", {})
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
+    findings = seen(findings)
+    # counted from the listed findings, so the summary never covers hidden ones
+    severity_counts = Counter(
+        _SEVERITY_KEYS.get(f.severity, "undefined") for f in findings
+    )
+    status_counts = Counter(f.status for f in findings)
+    unresolved_important = sum(
+        1
+        for f in findings
+        if f.severity is not None
+        and f.severity >= 3
+        and f.status not in ("mitigated", "resolved", "dismissed", "closed")
+    )
 
     rows = []
     for finding in findings:
@@ -493,12 +552,14 @@ def findings_assessment_context(assessment, findings, lang="en"):
                 "priority": str(finding.get_priority_display())
                 if finding.priority
                 else "-",
-                "owners": ", ".join(str(a) for a in finding.owner.all()) or "-",
+                "owners": ", ".join(str(a) for a in seen(finding.owner.all())) or "-",
                 "eta": _date_str(finding.eta),
                 "due_date": _date_str(finding.due_date),
-                "controls": [c.name for c in finding.applied_controls.all()],
-                "evidences": [e.name for e in finding.evidences.all()],
-                "labels": [str(label) for label in finding.filtering_labels.all()],
+                "controls": [c.name for c in seen(finding.applied_controls.all())],
+                "evidences": [e.name for e in seen(finding.evidences.all())],
+                "labels": [
+                    str(label) for label in seen(finding.filtering_labels.all())
+                ],
             }
         )
 
@@ -515,10 +576,10 @@ def findings_assessment_context(assessment, findings, lang="en"):
 
     closed = sum(
         count
-        for status, count in metrics.get("status_distribution", {}).items()
+        for status, count in status_counts.items()
         if status in _CLOSED_FINDING_STATUSES
     )
-    total = metrics.get("total_count", 0)
+    total = len(findings)
 
     return {
         "assessment": {
@@ -529,17 +590,17 @@ def findings_assessment_context(assessment, findings, lang="en"):
             "status_key": assessment.status or "",
             "folder": str(assessment.folder) if assessment.folder else "-",
             "observation": getattr(assessment, "observation", "") or "",
-            "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
-            "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
+            "authors": ", ".join(str(a) for a in seen(assessment.authors.all())) or "-",
+            "reviewers": ", ".join(str(r) for r in seen(assessment.reviewers.all()))
+            or "-",
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "metrics": {
             "total": total,
             "closed": closed,
             "open": total - closed,
-            "unresolved_important": metrics.get("unresolved_important_count", 0),
+            "unresolved_important": unresolved_important,
         },
         "severity_rows": [
             {
@@ -552,27 +613,32 @@ def findings_assessment_context(assessment, findings, lang="en"):
     }
 
 
-def _timestamp_str(value):
-    return value.strftime("%Y-%m-%d %H:%M:%S") if value else "-"
-
-
-def incident_context(incident, timeline_entries, lang="en"):
+def incident_context(
+    incident,
+    timeline_entries,
+    lang="en",
+    tz: tzinfo = timezone.utc,
+    readable=_all_readable,
+):
     """Payload for the incident report.
 
     The timeline is the substance: entries in chronological order, each keyed by
     its raw `entry_type` so the locale template supplies the label and the accent
     colour without depending on a translated string.
     """
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
     entries = []
-    for entry in timeline_entries:
+    for entry in seen(timeline_entries):
         entries.append(
             {
                 "entry": entry.entry or "-",
                 "type_key": entry.entry_type or "observation",
-                "timestamp": _timestamp_str(entry.timestamp),
-                "author": str(entry.author) if entry.author else "",
+                "timestamp": format_report_timestamp(entry.timestamp, tz),
+                "author": str(entry.author)
+                if entry.author and readable(entry.author)
+                else "",
                 "observation": entry.observation or "",
-                "evidences": [e.name for e in entry.evidences.all()],
+                "evidences": [e.name for e in seen(entry.evidences.all())],
             }
         )
 
@@ -591,24 +657,172 @@ def incident_context(incident, timeline_entries, lang="en"):
             "description": incident.description or "",
             "resolution": getattr(incident, "resolution", "") or "",
             "is_bcp_activated": bool(incident.is_bcp_activated),
-            "owners": ", ".join(str(o) for o in incident.owners.all()) or "-",
-            "qualifications": [q.name for q in incident.qualifications.all()],
-            "entities": [e.name for e in incident.entities.all()],
-            "assets": [a.name for a in incident.assets.all()],
-            "threats": [t.name for t in incident.threats.all()],
-            "reported_at": _timestamp_str(incident.reported_at),
-            "occurred_at": _timestamp_str(incident.occurred_at),
-            "resolved_at": _timestamp_str(incident.resolved_at),
+            "owners": ", ".join(str(o) for o in seen(incident.owners.all())) or "-",
+            "qualifications": [q.name for q in seen(incident.qualifications.all())],
+            "entities": [e.name for e in seen(incident.entities.all())],
+            "assets": [a.name for a in seen(incident.assets.all())],
+            "threats": [t.name for t in seen(incident.threats.all())],
+            "reported_at": format_report_timestamp(incident.reported_at, tz),
+            "occurred_at": format_report_timestamp(incident.occurred_at, tz),
+            "resolved_at": format_report_timestamp(incident.resolved_at, tz),
         },
         "id": str(incident.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "counts": {
             "total": len(entries),
             "detection": counts.get("detection", 0),
             "mitigation": counts.get("mitigation", 0),
         },
         "timeline": entries,
+    }
+
+
+def nis2_notification_context(
+    incident, breaches, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
+):
+    """Payload for the NIS2 notification worksheet, laid out like the CCB form.
+
+    Empty strings are the fields the user still has to supply on the authority's
+    form: the template flags them instead of hiding them. `readable(obj)` keeps
+    linked objects the requester cannot view out of the PDF.
+    """
+    stamp = lambda v: format_report_timestamp(v, tz, empty="")  # noqa: E731
+    seen = lambda objs: [o for o in objs if readable(o)]
+    controls = seen(incident.applied_controls.all())
+    next_stage = incident.nis2_next_stage()
+    return {
+        "lang": lang,
+        "id": str(incident.id),
+        **_report_time_context(tz),
+        "incident": {
+            "ref_id": incident.ref_id or "",
+            "name": incident.name or "",
+            "folder": str(incident.folder) if incident.folder else "",
+            "owners": ", ".join(str(o) for o in seen(incident.owners.all())),
+            "description": incident.description or "",
+            "severity_key": str(incident.severity or ""),
+            "status_key": incident.status or "",
+            "malicious_intent": incident.nis2_malicious_intent or "",
+            "cross_border_impact": incident.nis2_cross_border_impact or "",
+            "incident_types": [q.name for q in seen(incident.qualifications.all())]
+            + [t.name for t in seen(incident.threats.all())],
+            "assets": [a.name for a in seen(incident.assets.all())],
+            "entities": [e.name for e in seen(incident.entities.all())],
+            "root_cause": incident.root_cause or "",
+            "resolution": incident.resolution or "",
+            "is_bcp_activated": incident.is_bcp_activated,
+            "resolved": incident.status in ("resolved", "closed"),
+            "occurred_at": stamp(incident.occurred_at),
+            "reported_at": stamp(incident.reported_at),
+            "reference": incident.nis2_reference or "",
+            "significant": incident.nis2_significant,
+            "detection_key": incident.detection or "",
+        },
+        # the CCB form asks for the chronology of all actions taken
+        "timeline": [
+            {"timestamp": stamp(e.timestamp), "entry": e.entry or ""}
+            for e in seen(incident.timeline_entries.order_by("timestamp"))
+        ],
+        "actions": [{"name": c.name, "status_key": c.status or ""} for c in controls],
+        "stages": [
+            {
+                "stage": s["stage"],
+                "due": stamp(s["due"]),
+                "done_at": stamp(s["done_at"]),
+                "overdue": s["overdue"],
+            }
+            for s in incident.nis2_deadlines()
+        ],
+        "next_stage": next_stage["stage"] if next_stage else "",
+        "breaches": [
+            {
+                "name": b.name,
+                "discovered_on": stamp(b.discovered_on),
+                "notified_on": stamp(b.authority_notified_on),
+                "due": stamp(b.authority_notification_due),
+            }
+            for b in breaches
+        ],
+    }
+
+
+def breach_notification_context(
+    breach, lang="en", tz: tzinfo = timezone.utc, readable=_all_readable
+):
+    """Payload for the GDPR art. 33 worksheet, laid out like the APD/GBA form (part 1).
+    `readable(obj)` keeps linked objects the requester cannot view out of the PDF."""
+    stamp = lambda v: format_report_timestamp(v, tz, empty="")  # noqa: E731
+    seen = lambda objs: [o for o in objs if readable(o)]
+    incident = (
+        breach.incident if breach.incident and readable(breach.incident) else None
+    )
+    processings = seen(breach.affected_processings.all())
+    late = breach.authority_notification_overdue or (
+        breach.authority_notified_on is not None
+        and breach.authority_notification_due is not None
+        and breach.authority_notified_on > breach.authority_notification_due
+    )
+    personal_data = seen(breach.affected_personal_data.select_related("category"))
+    return {
+        "lang": lang,
+        "id": str(breach.id),
+        **_report_time_context(tz),
+        "breach": {
+            "ref_id": breach.ref_id or "",
+            "name": breach.name or "",
+            "folder": str(breach.folder) if breach.folder else "",
+            "assigned_to": ", ".join(str(a) for a in seen(breach.assigned_to.all())),
+            "description": breach.description or "",
+            "breach_type": breach.breach_type or "",
+            "risk_level": breach.risk_level or "",
+            "status": breach.status or "",
+            "occurred_at": stamp(incident.occurred_at) if incident else "",
+            "discovered_on": stamp(breach.discovered_on),
+            "due": stamp(breach.authority_notification_due),
+            "notified_on": stamp(breach.authority_notified_on),
+            "notification_ref": breach.authority_notification_ref or "",
+            "late": late,
+            "authorities": [a.name for a in seen(breach.authorities.all())],
+            "subjects_count": breach.affected_subjects_count,
+            "subjects_notified_on": stamp(breach.subjects_notified_on),
+            "processings": [p.name for p in processings],
+            # name is optional: str() falls back to the legal basis
+            "purposes": sorted(
+                {str(pu) for p in processings for pu in seen(p.purposes.all())}
+            ),
+            "personal_data": [
+                {
+                    "name": str(pd),
+                    "category": str(pd.category) if pd.category else "",
+                    "sensitive": pd.is_sensitive,
+                }
+                for pd in personal_data
+            ],
+            "personal_data_count": breach.affected_personal_data_count,
+            "consequences": breach.potential_consequences or "",
+            "measures": [
+                {"name": c.name, "status_key": c.status or ""}
+                for c in seen(breach.remediation_measures.all())
+            ],
+            "observation": breach.observation or "",
+            "incident": incident.name if incident else "",
+            "resolved": breach.status == "privacy_closed",
+            "processors": sorted(
+                {
+                    str(c.entity or c)
+                    for p in processings
+                    for c in seen(
+                        p.contractors_involved.filter(
+                            relationship_type__in=(
+                                "privacy_data_processor",
+                                "privacy_sub_processor",
+                            )
+                        ).select_related("entity")
+                    )
+                    if c.entity is None or readable(c.entity)
+                }
+            ),
+        },
     }
 
 
@@ -621,6 +835,8 @@ def risk_assessment_context(
     lang="en",
     label_standard="ISO",
     use_risk_category_label=False,
+    tz: tzinfo = timezone.utc,
+    readable=_all_readable,
 ):
     """Payload for the risk assessment report.
 
@@ -628,6 +844,10 @@ def risk_assessment_context(
     only to encode `swap_axes` x `flip_vertical`, which is a transform on the grid
     rather than four layouts.
     """
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
+    visible = seen(scenarios)
+    hidden_refs = {s.ref_id for s in scenarios} - {s.ref_id for s in visible}
+    scenarios = visible
     matrix = assessment.risk_matrix
     definition = matrix.parse_json_translated()
     grid = matrix.render_grid_as_colors()
@@ -675,7 +895,10 @@ def risk_assessment_context(
         if cluster is None:
             continue
         cells = [
-            [{**rows[r][c], "refs": sorted(cluster[r][c])} for c in range(len(rows[r]))]
+            [
+                {**rows[r][c], "refs": sorted(cluster[r][c] - hidden_refs)}
+                for c in range(len(rows[r]))
+            ]
             for r in range(len(rows))
         ]
         oriented, y_labels, x_labels = orient(cells, y_axis, x_axis)
@@ -690,6 +913,10 @@ def risk_assessment_context(
             }
         )
 
+    def with_status(control):
+        with translation.override(lang):
+            return f"{control.name} ({control.get_status_display()})"
+
     scenario_rows = []
     for scenario in scenarios:
         row = {
@@ -697,14 +924,15 @@ def risk_assessment_context(
             "name": scenario.name or "-",
             "description": getattr(scenario, "description", "") or "",
             "qualifications": [
-                str(q) for q in getattr(scenario, "qualifications", _EMPTY).all()
+                str(q) for q in seen(getattr(scenario, "qualifications", _EMPTY).all())
             ],
-            "assets": [a.name for a in scenario.assets.all()],
-            "threats": [t.get_name_translated for t in scenario.threats.all()],
+            "assets": [a.name for a in seen(scenario.assets.all())],
+            "threats": [t.get_name_translated for t in seen(scenario.threats.all())],
+            "owners": [str(o) for o in seen(scenario.owner.all())],
             "existing_controls": [
-                c.name for c in scenario.existing_applied_controls.all()
+                with_status(c) for c in seen(scenario.existing_applied_controls.all())
             ],
-            "controls": [c.name for c in scenario.applied_controls.all()],
+            "controls": [with_status(c) for c in seen(scenario.applied_controls.all())],
             "treatment_key": scenario.treatment or "",
             "justification": scenario.justification or "",
             "strength_of_knowledge": str(scenario.strength_of_knowledge or "-"),
@@ -724,14 +952,14 @@ def risk_assessment_context(
             "matrix": str(matrix),
             "status_key": assessment.status or "",
             "description": assessment.description or "",
-            "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
-            "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
+            "authors": ", ".join(str(a) for a in seen(assessment.authors.all())) or "-",
+            "reviewers": ", ".join(str(r) for r in seen(assessment.reviewers.all()))
+            or "-",
             "eta": _date_str(assessment.eta),
             "due_date": _date_str(assessment.due_date),
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "include_inherent": include_inherent,
         # `risk_matrix_labels`: ISO says "Impact", EBIOS says "Severity".
         "label_standard": label_standard
@@ -762,7 +990,17 @@ def _risk_level(level):
     }
 
 
-def gen_audit_context(id, tree, lang, assessments=None, charts=True):
+def gen_audit_context(
+    id,
+    tree,
+    lang,
+    assessments=None,
+    charts=True,
+    tz: tzinfo = timezone.utc,
+    readable=_all_readable,
+):
+    seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
+
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -813,7 +1051,14 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
                 "total_score": 0,  # Sum of all scores
                 "item_count": 0,  # Number of scoreable items
                 "scored_count": 0,  # Number of items that have been scored
+                "assessable_count": 0,
+                "not_applicable_count": 0,
             }
+
+            if node_data.get("assessable", False) and node_data.get("ra_id"):
+                scores["assessable_count"] = 1
+                if node_data.get("result") == "not_applicable":
+                    scores["not_applicable_count"] = 1
 
             # Check if the current node is scoreable
             if node_data.get("is_scored", False):
@@ -831,6 +1076,8 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
                 scores["total_score"] += child_scores["total_score"]
                 scores["item_count"] += child_scores["item_count"]
                 scores["scored_count"] += child_scores["scored_count"]
+                scores["assessable_count"] += child_scores["assessable_count"]
+                scores["not_applicable_count"] += child_scores["not_applicable_count"]
 
             return scores
 
@@ -852,6 +1099,8 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
                 "item_count": scores["item_count"],
                 "scored_count": scores["scored_count"],
                 "average_score": round(average_score, 1),
+                "nothing_applicable": scores["not_applicable_count"]
+                == scores["assessable_count"],
             }
 
         return category_scores
@@ -883,10 +1132,14 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     context = dict()
 
     authors = ", ".join(
-        dict.fromkeys(email for a in audit.authors.all() for email in a.get_emails())
+        dict.fromkeys(
+            email for a in seen(audit.authors.all()) for email in a.get_emails()
+        )
     )
     reviewers = ", ".join(
-        dict.fromkeys(email for r in audit.reviewers.all() for email in r.get_emails())
+        dict.fromkeys(
+            email for r in seen(audit.reviewers.all()) for email in r.get_emails()
+        )
     )
 
     spider_data = list()
@@ -897,12 +1150,10 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     # Calculate category scores
     category_scores = aggregate_category_scores(tree)
 
-    max_score = 100  # default
-    for node in tree.values():
-        if node.get("max_score") is not None:
-            max_score = node["max_score"]
-            break
-    print(category_scores)
+    max_score = next(
+        (s for s in (audit.max_score, audit.framework.max_score) if s is not None),
+        100,
+    )
 
     for key, content in tree.items():
         total = sum(result_counts[content["urn"]].values())
@@ -1008,6 +1259,31 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
             "opportunity_for_improvement": "Verbetermogelijkheid",
             "good_practice": "Goede praktijk",
         },
+        "tr": {
+            "compliant": "Uyumlu",
+            "partially_compliant": "Kısmen uyumlu",
+            "non_compliant": "Uyumsuz",
+            "not_applicable": "Uygulanamaz",
+            "not_assessed": "Değerlendirilmedi",
+            "to_do": "Yapılacak",
+            "on_hold": "Beklemede",
+            "in_progress": "Devam ediyor",
+            "deprecated": "Kullanımdan kaldırıldı",
+            "active": "Aktif",
+            "degraded": "Kötüleşti",
+            "policy": "Politika",
+            "process": "Süreç",
+            "technical": "Teknik",
+            "physical": "Fiziksel",
+            "procedure": "Prosedür",
+            "in_review": "İncelemede",
+            "done": "Tamamlandı",
+            "major_nonconformity": "Büyük uygunsuzluk",
+            "minor_nonconformity": "Küçük uygunsuzluk",
+            "observation_sensitive_point": "Gözlem / hassas nokta",
+            "opportunity_for_improvement": "İyileştirme fırsatı",
+            "good_practice": "İyi uygulama",
+        },
     }
 
     def safe_translate(lang: str, key: str) -> str:
@@ -1044,9 +1320,14 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     spider_chart_buffer = (
         plot_spider_chart(spider_data, colors=custom_colors) if charts else None
     )
+    radar_scores = {
+        urn: score
+        for urn, score in category_scores.items()
+        if not score["nothing_applicable"]
+    }
     category_radar_buffer = (
-        plot_category_radar(category_scores, max_score=max_score, colors=custom_colors)
-        if charts
+        plot_category_radar(radar_scores, max_score=max_score, colors=custom_colors)
+        if charts and radar_scores
         else None
     )
     # `assessments` lets a caller pass a row-level-scoped set (see
@@ -1080,35 +1361,36 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
                 "max_score": audit.framework.max_score if ra.is_scored else None,
                 "observation": ra.observation or "-",
                 "answers": _answer_rows(ra),
-                "evidences": [e.name for e in ra.evidences.all()],
-                "task_templates": [t.name for t in ra.task_templates.all()],
+                "evidences": [e.name for e in seen(ra.evidences.all())],
+                "task_templates": [t.name for t in seen(ra.task_templates.all())],
                 "applied_controls": ", ".join(
-                    ac.name for ac in ra.applied_controls.all()
+                    ac.name for ac in seen(ra.applied_controls.all())
                 )
                 or "-",
             }
         )
 
-    applied_controls = AppliedControl.objects.filter(
-        requirement_assessments__in=requirement_assessments_objects
-    ).distinct()
-    ac_total = applied_controls.count()
-    status_cnt = applied_controls.values("status").annotate(count=Count("id"))
+    applied_controls = seen(
+        AppliedControl.objects.filter(
+            requirement_assessments__in=requirement_assessments_objects
+        ).distinct()
+    )
+    ac_total = len(applied_controls)
     ac_chart_data = [
-        {
-            "category": safe_translate(lang, item["status"]),
-            "value": item["count"],
-        }
-        for item in status_cnt
+        {"category": safe_translate(lang, status), "value": count}
+        for status, count in Counter(ac.status for ac in applied_controls).items()
     ]
+    coverage = Counter(
+        RequirementAssessment.applied_controls.through.objects.filter(
+            requirementassessment_id__in=[
+                ra.id for ra in requirement_assessments_objects
+            ]
+        ).values_list("appliedcontrol_id", flat=True)
+    )
     p1_controls = list()
     full_controls = list()
-    for ac in applied_controls.filter(priority=1):
-        requirements_count = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .filter(applied_controls=ac.id)
-            .count()
-        )
+    for ac in [ac for ac in applied_controls if ac.priority == 1]:
+        requirements_count = coverage[ac.id]
         print(f"[{ac.name}] {ac.category}: {type(ac.category)}")
         p1_controls.append(
             {
@@ -1120,12 +1402,8 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
             }
         )
 
-    for ac in applied_controls.all():
-        requirements_count = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .filter(applied_controls=ac.id)
-            .count()
-        )
+    for ac in applied_controls:
+        requirements_count = coverage[ac.id]
         full_controls.append(
             {
                 "name": ac.name,
@@ -1156,9 +1434,8 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
         "audit": _build_safe_audit_context(audit),
-        "date": now().strftime("%d/%m/%Y"),
         # Traceability on the cover: which render, of which audit.
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,
         "compliance_donut": donut_buffer,
@@ -1198,10 +1475,144 @@ def inline_charts_for_docx(context, doc, width=Cm(15)):
     for key in AUDIT_CHART_KEYS:
         buffer = wrapped.get(key)
         if buffer is None:
+            wrapped[key] = ""
             continue
         buffer.seek(0)
         wrapped[key] = InlineImage(doc, buffer, width=width)
     return wrapped
+
+
+class DocxReportSandbox(ImmutableSandboxedEnvironment):
+    """Sandbox for user-supplied Word templates.
+
+    Only plain data and Jinja's own helpers expose attributes. Anything else in
+    the context is opaque: `InlineImage.tpl` alone leads to a `DocxTemplate`,
+    whose public methods render without a sandbox and read or write arbitrary
+    files. Data is matched on its exact type, since a subclass brings its own
+    methods (`numpy.float64.tofile` writes a file).
+    """
+
+    data_types: ClassVar[frozenset[type]] = frozenset(
+        {
+            str,
+            Markup,
+            SafeString,
+            int,
+            bool,
+            float,
+            Decimal,
+            UUID,
+            date,
+            datetime,
+            timedelta,
+            list,
+            tuple,
+            getattr(jinja2.filters, "_GroupTuple", tuple),
+            dict,
+            OrderedDict,
+            defaultdict,
+            range,
+        }
+    )
+    jinja_helper_types: ClassVar[tuple[type, ...]] = (
+        LoopContext,
+        Namespace,
+        Cycler,
+        Joiner,
+        Macro,
+        TemplateReference,
+        BlockReference,
+    )
+
+    def is_safe_attribute(self, obj: object, attr: str, value: object) -> bool:
+        readable = type(obj) in self.data_types or isinstance(
+            obj, self.jinja_helper_types
+        )
+        return readable and super().is_safe_attribute(obj, attr, value)
+
+
+def render_docx_report(doc: DocxTemplate, context: dict) -> None:
+    """Render `doc` in place with `context`, charts included."""
+    doc.render(
+        inline_charts_for_docx(context, doc),
+        jinja_env=DocxReportSandbox(),
+        autoescape=True,
+    )
+
+
+DOCX_RENDER_TIMEOUT = 60
+DOCX_RENDER_MEMORY = 1 << 30
+
+
+class DocxRenderError(Exception):
+    """A custom Word template failed to render; the message says why."""
+
+
+class DocxTemplateError(DocxRenderError):
+    """The Jinja template itself is wrong; the message is meant for its author."""
+
+
+class DocxRenderTimeout(DocxRenderError):
+    """A custom Word template ran longer than `DOCX_RENDER_TIMEOUT` seconds."""
+
+
+class DocxRenderCrash(DocxRenderError):
+    """The process rendering a custom Word template died, likely out of memory."""
+
+
+def _render_docx_in_child(doc: DocxTemplate, context: dict, conn: Connection) -> None:
+    try:
+        with open("/proc/self/statm") as statm:
+            used = int(statm.read().split()[0]) * resource.getpagesize()
+        resource.setrlimit(resource.RLIMIT_AS, (used + DOCX_RENDER_MEMORY,) * 2)
+    except OSError, ValueError:
+        pass
+    try:
+        render_docx_report(doc, context)
+        out = io.BytesIO()
+        doc.save(out)
+    except TemplateError as e:
+        conn.send(("template_error", str(e) or type(e).__name__))
+    except MemoryError:
+        # Closing the pipe unsent makes the parent report it as a crash.
+        return
+    except Exception:
+        conn.send(("error", traceback.format_exc()))
+    else:
+        conn.send(("report", out.getvalue()))
+
+
+def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
+    """Render `doc` with `context` in a forked child bounded in time and memory,
+    since a custom template can loop or allocate without limit.
+
+    Returns the rendered .docx; raises `DocxRenderTimeout` past
+    `DOCX_RENDER_TIMEOUT` seconds, `DocxRenderCrash` when the child dies,
+    `DocxTemplateError` when Jinja rejects the template, and `DocxRenderError`
+    carrying the child's traceback for any other failure.
+    """
+    recv, send = multiprocessing.Pipe(duplex=False)
+    child = multiprocessing.get_context("fork").Process(
+        target=_render_docx_in_child, args=(doc, context, send)
+    )
+    child.start()
+    send.close()
+    try:
+        if not recv.poll(DOCX_RENDER_TIMEOUT):
+            raise DocxRenderTimeout
+        try:
+            outcome, payload = recv.recv()
+        except EOFError, OSError:
+            raise DocxRenderCrash from None
+        if outcome == "template_error":
+            raise DocxTemplateError(payload)
+        if outcome == "error":
+            raise DocxRenderError(payload)
+        return payload
+    finally:
+        recv.close()
+        child.kill()
+        child.join()
 
 
 # Requirement-assessment fields governed by the audit's `field_visibility`;
@@ -1239,6 +1650,8 @@ REPORT_PROFILES = {
         # Each profile has its own self-contained template per locale, so
         # customising one cannot affect the others.
         "template": "audit_report",
+        # `CustomWordTemplate.template_key` of the PRO override.
+        "override_key": "audit_posture",
         # The reader's own role still applies on top; this is the ceiling.
         "role": "auditor",
         "discloses": (),
@@ -1257,6 +1670,7 @@ REPORT_PROFILES = {
     },
     "attestation": {
         "template": "attestation",
+        "override_key": "audit_attestation",
         "role": "respondent",
         # The questionnaire deliberately withholds the auditor's verdict while the
         # respondent is answering (THIRD_PARTY_VISIBILITY marks `result` auditor-only).
@@ -1302,6 +1716,13 @@ _STATE_LABELS = {
         Commitment.State.DECLINED: "Refusé",
         Commitment.State.FULFILLED: "Réalisé",
     },
+    "tr": {
+        Commitment.State.UNDEFINED: "Tanımsız",
+        Commitment.State.IN_NEGOTIATION: "Müzakerede",
+        Commitment.State.COMMITTED: "Taahhüt edildi",
+        Commitment.State.DECLINED: "Reddedildi",
+        Commitment.State.FULFILLED: "Yerine getirildi",
+    },
 }
 
 
@@ -1323,7 +1744,9 @@ def _commitment_row(obj, lang, kind):
     }
 
 
-def audit_undertakings(audit, lang="en", assessments=None, hidden=()):
+def audit_undertakings(
+    audit, lang="en", assessments=None, hidden=(), readable=_all_readable
+):
     """Applied controls and tasks attached to the audit, with commitment state.
 
     Returns ``(commitments, tasks)``: the first is everything carrying a live
@@ -1352,6 +1775,8 @@ def audit_undertakings(audit, lang="en", assessments=None, hidden=()):
         .order_by("name")
     )
 
+    controls = [c for c in controls if readable(c)]
+    task_templates = [t for t in task_templates if readable(t)]
     if "applied_controls" in hidden:
         controls = []
     if "task_templates" in hidden:
@@ -1368,17 +1793,21 @@ def audit_undertakings(audit, lang="en", assessments=None, hidden=()):
     return commitments, tasks
 
 
-def counterparty_context(audit):
+def counterparty_context(audit, readable=_all_readable):
     """The assessed entity behind this audit, when it is a third-party questionnaire.
 
     An audit reached through an entity assessment identifies a counterparty; a plain
     internal audit does not, and the cover simply omits the block.
     """
     entity_assessment = audit.entityassessment_set.select_related("entity").first()
-    if entity_assessment is None or entity_assessment.entity is None:
+    if (
+        entity_assessment is None
+        or entity_assessment.entity is None
+        or not readable(entity_assessment.entity)
+    ):
         return None
     entity = entity_assessment.entity
-    identifiers = entity.legal_identifiers or {}
+    identifiers = entity.legal_identifiers_dict
     return {
         "entity": entity.name,
         "ref_id": entity.ref_id or "",
@@ -1394,7 +1823,13 @@ def counterparty_context(audit):
 
 
 def audit_context_for_typst(
-    context, audit, role="auditor", lang="en", profile="full", assessments=None
+    context,
+    audit,
+    role="auditor",
+    lang="en",
+    profile="full",
+    assessments=None,
+    readable=_all_readable,
 ):
     """Split `gen_audit_context` output into a JSON payload and chart images.
 
@@ -1455,14 +1890,16 @@ def audit_context_for_typst(
             images.pop(f"{name}.png", None)
 
     if {"commitments", "tasks"} & set(spec["sections"]):
-        commitments, tasks = audit_undertakings(audit, lang, assessments, hidden)
+        commitments, tasks = audit_undertakings(
+            audit, lang, assessments, hidden, readable
+        )
         payload["commitments"] = commitments
         payload["tasks"] = tasks
 
     if "charts" not in spec["sections"]:
         images = {}
 
-    payload["counterparty"] = counterparty_context(audit)
+    payload["counterparty"] = counterparty_context(audit, readable)
     payload["profile"] = profile
     payload["sections"] = list(spec["sections"])
     payload["charts"] = sorted(images)

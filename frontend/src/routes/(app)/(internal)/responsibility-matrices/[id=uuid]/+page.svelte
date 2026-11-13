@@ -1,16 +1,17 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import {
 		getModalStore,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { invalidateAll } from '$app/navigation';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/components/Modals/stores.js';
+	import { refreshAll } from '$app/navigation';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { superForm } from 'sveltekit-superforms';
+	import { setContext } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { PageData } from './$types';
 
@@ -116,6 +117,11 @@
 		SPA: true
 	});
 	const linksForm = linksSuperForm.form;
+	// The drawer edits an existing activity: its pickers keep the links the user cannot see.
+	setContext('formKeepsHiddenLinks', true);
+	// Linked ids of the open activity as last loaded or saved, from its raw object: the
+	// activity data masks the objects the user cannot see.
+	let drawerLinkIds: Record<string, string[]> = {};
 
 	// Suppress the synthetic emission that fires when we programmatically set the form
 	// in openDrawer(). Real user edits come AFTER and should auto-save.
@@ -131,7 +137,7 @@
 		if (!activity) return;
 		const patch: Record<string, string[]> = {};
 		for (const field of LINK_FIELDS) {
-			const current = (activity[field] ?? []).map((r) => r.id).sort();
+			const current = (drawerLinkIds[field] ?? []).slice().sort();
 			const next = (($f as any)[field] ?? []).slice().sort();
 			if (
 				current.length !== next.length ||
@@ -150,6 +156,7 @@
 			// {id, str} for every M2M link, so we don't need any client-side
 			// lookup pool to rehydrate the chips.
 			const fresh = await ops('update-activity', { id: activityId, ...patch });
+			if (drawerActivityId === activityId) drawerLinkIds = { ...drawerLinkIds, ...patch };
 			activities = activities.map((a) => {
 				if (a.id !== activityId) return a;
 				const next = { ...a };
@@ -165,16 +172,29 @@
 		}
 	}
 
-	function openDrawer(activity: Activity) {
-		drawerActivityId = activity.id;
+	let drawerRequest = 0;
+	async function openDrawer(activity: Activity) {
+		// The raw object first: without its ids a save would unlink the hidden objects,
+		// so the drawer does not open when it cannot be read.
+		const request = ++drawerRequest;
+		let raw: Record<string, string[]>;
+		try {
+			raw = await ops('activity-links', { id: activity.id });
+		} catch (e) {
+			console.error(e);
+			return;
+		}
+		if (request !== drawerRequest) return;
 		drawerDescription = activity.description ?? '';
 		drawerDescriptionPreview = true;
 		suppressNextLinksUpdate += 1;
 		const initial: Record<string, string[]> = {};
 		for (const field of LINK_FIELDS) {
-			initial[field] = (activity[field] ?? []).map((r) => r.id);
+			initial[field] = (raw[field] ?? []).map(String);
 		}
+		drawerLinkIds = initial;
 		linksForm.set(initial as any);
+		drawerActivityId = activity.id;
 	}
 	function closeDrawer() {
 		drawerActivityId = null;
@@ -412,7 +432,7 @@
 			await ops('reorder-activities', { ids: activities.map((a) => a.id) });
 		} catch (e) {
 			console.error(e);
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 
@@ -442,7 +462,7 @@
 			await ops('reorder-actors', { ids: matrixActors.map((a) => a.id) });
 		} catch (e) {
 			console.error(e);
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 

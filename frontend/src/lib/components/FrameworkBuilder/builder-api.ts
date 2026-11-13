@@ -1,3 +1,5 @@
+import type { VisibilityMap } from '#lib/utils/helpers.js';
+
 /**
  * API functions for the framework builder draft workflow.
  *
@@ -29,7 +31,8 @@ export interface DraftJSON {
 		outcomes_definition: Record<string, unknown>[] | null;
 		subject_question_urn?: string | null;
 		on_accept?: Record<string, unknown>[];
-		field_visibility?: Record<string, string>;
+		field_visibility?: VisibilityMap;
+		scales_definition?: Record<string, unknown>[];
 		urn_namespace?: string;
 		ref_id?: string | null;
 	};

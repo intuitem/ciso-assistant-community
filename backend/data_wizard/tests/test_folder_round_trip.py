@@ -30,7 +30,9 @@ def _import(client, content: bytes, on_conflict: str, fmt: str = "xlsx"):
 
 @pytest.fixture
 def domains(root_folder):
-    alpha = Folder.objects.create(name="Alpha", parent_folder=root_folder)
+    alpha = Folder.objects.create(
+        name="Alpha", ref_id="DOM.A", parent_folder=root_folder
+    )
     alpha.filtering_labels.set([FilteringLabel.objects.create(label="Corporate")])
     beta = Folder.objects.create(name="Beta", parent_folder=root_folder)
     beta.filtering_labels.set(
@@ -54,17 +56,20 @@ class TestFolderRoundTrip:
         rows = list(ws.iter_rows(values_only=True))
         assert rows[0] == (
             "internal_id",
+            "ref_id",
             "name",
             "description",
             "domain",
             "labels",
             "create_iam_groups",
         )
-        exported = {row[1]: row for row in rows[1:]}
+        exported = {row[2]: row for row in rows[1:]}
         # The root folder is implicit in the import, so it is not exported.
         assert set(exported) == {"Alpha", "Beta", "Gamma"}
-        assert exported["Alpha"][3] is None  # blank parent: placed at the root
-        assert set(exported["Beta"][4].split(",")) == {"Finance", "IT"}
+        assert exported["Alpha"][1] == "DOM.A"
+        assert exported["Beta"][1] is None
+        assert exported["Alpha"][4] is None  # blank parent: placed at the root
+        assert set(exported["Beta"][5].split(",")) == {"Finance", "IT"}
 
     def test_unchanged_export_reimports_without_changes(
         self, api_client, domains, all_accessible
@@ -77,6 +82,7 @@ class TestFolderRoundTrip:
         assert results["updated"] == 3
 
         alpha, beta, gamma = (Folder.objects.get(id=f.id) for f in domains)
+        assert alpha.ref_id == "DOM.A"
         assert _labels(alpha) == {"Corporate"}
         assert _labels(beta) == {"Finance", "IT"}
         assert _labels(gamma) == set()
@@ -91,11 +97,12 @@ class TestFolderRoundTrip:
         wb = load_workbook(io.BytesIO(_export(api_client)))
         ws = wb.worksheets[0]
         for row in ws.iter_rows(min_row=2):
-            if row[1].value == "Alpha":
-                row[2].value = "edited"
-            if row[1].value == "Beta":
-                row[4].value = "Audit"
-        ws.append([None, "Delta", None, None, "New,Corporate"])
+            if row[2].value == "Alpha":
+                row[3].value = "edited"
+            if row[2].value == "Beta":
+                row[1].value = "DOM.B"
+                row[5].value = "Audit"
+        ws.append([None, "DOM.D", "Delta", None, None, "New,Corporate"])
         edited = io.BytesIO()
         wb.save(edited)
 
@@ -107,9 +114,14 @@ class TestFolderRoundTrip:
         assert results["updated"] == 3
 
         alpha.refresh_from_db()
+        beta.refresh_from_db()
+        delta = Folder.objects.get(name="Delta")
         assert alpha.description == "edited"
+        assert alpha.ref_id == "DOM.A"
+        assert beta.ref_id == "DOM.B"
+        assert delta.ref_id == "DOM.D"
         assert _labels(beta) == {"Audit"}
-        assert _labels(Folder.objects.get(name="Delta")) == {"New", "Corporate"}
+        assert _labels(delta) == {"New", "Corporate"}
         # Existing labels are reused, not duplicated.
         assert FilteringLabel.objects.filter(label="Corporate").count() == 1
 
@@ -119,7 +131,10 @@ class TestFolderRoundTrip:
     ):
         """The export escapes cells starting with = + - @; the import undoes it."""
         folder = Folder.objects.create(
-            name="-Ops", description="- first item", parent_folder=root_folder
+            name="-Ops",
+            ref_id="=ref",
+            description="- first item",
+            parent_folder=root_folder,
         )
         folder.filtering_labels.set(
             [
@@ -136,6 +151,7 @@ class TestFolderRoundTrip:
 
         folder.refresh_from_db()
         assert folder.name == "-Ops"
+        assert folder.ref_id == "=ref"
         assert folder.description == "- first item"
         assert _labels(folder) == {"-dash", "plain"}
         assert FilteringLabel.objects.count() == 2
@@ -154,9 +170,9 @@ class TestFolderRoundTrip:
         wb = load_workbook(io.BytesIO(_export(api_client)))
         ws = wb.worksheets[0]
         for row in ws.iter_rows(min_row=2):
-            if row[1].value == "Alpha":
+            if row[2].value == "Alpha":
                 row[0].value = "not-a-uuid"
-        ws.append([None, "Delta", None, None, None])
+        ws.append([None, None, "Delta", None, None, None])
         edited = io.BytesIO()
         wb.save(edited)
 
@@ -207,3 +223,38 @@ def test_iam_groups_round_trip(knox_admin_client):
     grouped.refresh_from_db()
     assert not grouped.create_iam_groups
     assert _iam_groups(grouped) == 0
+
+
+@pytest.mark.django_db
+def test_duplicate_ref_id_is_a_400(knox_admin_client):
+    root = Folder.get_root_folder()
+    Folder.objects.create(name="Alpha", ref_id="DOM.1", parent_folder=root)
+
+    resp = knox_admin_client.post(
+        "/api/folders/",
+        {"name": "Beta", "ref_id": "dom.1", "parent_folder": str(root.id)},
+        format="json",
+    )
+    assert resp.status_code == 400, resp.content
+    assert "ref_id" in resp.json()
+
+
+@pytest.mark.django_db
+def test_duplicate_ref_id_fails_only_its_row(knox_admin_client):
+    wb = Workbook()
+    ws = wb.active
+    ws.append(["ref_id", "name"])
+    ws.append(["DOM.1", "Alpha"])
+    ws.append(["dom.1", "Beta"])
+    ws.append([None, "Gamma"])
+    ws.append([None, "Delta"])
+    content = io.BytesIO()
+    wb.save(content)
+
+    resp = _import(knox_admin_client, content.getvalue(), "skip")
+    assert resp.status_code == 200, resp.json()
+    results = resp.json()["results"]
+    assert results["created"] == 3, results
+    assert results["failed"] == 1, results
+    assert "ref_id" in str(results["errors"])
+    assert not Folder.objects.filter(name="Beta").exists()

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
@@ -81,6 +81,7 @@
 	{form}
 	multiple
 	optionsEndpoint="evidences"
+	lazy
 	optionsDetailedUrlParameters={$formStore.folder
 		? [['scope_folder_id', $formStore.folder]]
 		: undefined}

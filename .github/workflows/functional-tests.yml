@@ -58,9 +58,9 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
-          version: 11
+          version: 12.15.0
 
       - name: Install community frontend dependencies
         working-directory: ${{ env.frontend-directory }}
@@ -106,9 +106,9 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
-          version: 11
+          version: 12.15.0
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
@@ -380,9 +380,9 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
-          version: 11
+          version: 12.15.0
 
       - name: Install community frontend dependencies (if not cached/part of build artifact)
         working-directory: ${{ env.frontend-directory }}
@@ -403,18 +403,10 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      # Deliberately outside the retry loop below: install-deps shells out to a
-      # detached root apt-get, so killing it on timeout orphans a process holding
-      # /var/lib/dpkg/lock-frontend and every subsequent retry fails instantly.
-      - name: Install Playwright OS dependencies
-        working-directory: ${{ env.frontend-directory }}
-        timeout-minutes: 10
-        env:
-          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: |
-          timeout 420 pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER" \
-            || echo "::warning::install-deps failed or timed out; falling back to the runner image's preinstalled libraries"
-
+      # No `playwright install-deps`: the ubuntu-24.04 image already ships every
+      # shared library Chromium needs (Chromium fails to launch if one goes missing).
+      # The step only added fonts and upgraded glib/nss/xvfb, and its apt downloads
+      # stalled jobs for 10+ min.
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
@@ -590,9 +582,9 @@ jobs:
         run: make pre-build
 
       - name: Install pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
-          version: 11
+          version: 12.15.0
 
       - name: Install enterprise frontend dependencies
         working-directory: ${{ env.enterprise-frontend-build-directory }}
@@ -613,16 +605,7 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      # See the community job above: apt-get must stay out of the retry loop.
-      - name: Install Playwright OS dependencies
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
-        timeout-minutes: 10
-        env:
-          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: |
-          timeout 420 pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER" \
-            || echo "::warning::install-deps failed or timed out; falling back to the runner image's preinstalled libraries"
-
+      # See the community job above for why there is no install-deps step.
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.enterprise-frontend-build-directory }}

@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { formatMetricNumber } from '#lib/utils/metrics.js';
+	import { sampleMoment } from '#lib/utils/derived-metrics.js';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		samples?: any[];
@@ -43,13 +46,13 @@
 								typeof sample.value === 'string' ? JSON.parse(sample.value) : sample.value;
 							if (isQualitative) {
 								// For qualitative: extract choice_index
-								return [sample.timestamp, value?.choice_index ?? null];
+								return [sampleMoment(sample), value?.choice_index ?? null];
 							} else {
 								// For quantitative: extract result
-								return [sample.timestamp, value?.result ?? null];
+								return [sampleMoment(sample), value?.result ?? null];
 							}
 						} catch {
-							return [sample.timestamp, null];
+							return [sampleMoment(sample), null];
 						}
 					})
 					.filter((item) => item[1] !== null)
@@ -72,15 +75,21 @@
 						formatter: function (params) {
 							const date = new Date(params[0].value[0]).toLocaleString();
 							const value = params[0].value[1];
-							let displayValue = value;
+							let displayValue = isQualitative
+								? value
+								: formatMetricNumber(value, metricDefinition);
 
 							if (isQualitative && choiceNames && choiceNames[value - 1]) {
 								displayValue = `${value}. ${choiceNames[value - 1]}`;
 							} else if (!isQualitative && unitSymbol) {
-								displayValue = unitName === 'percentage' ? `${value}%` : `${value} ${unitSymbol}`;
+								displayValue =
+									unitName === 'percentage' ? `${displayValue}%` : `${displayValue} ${unitSymbol}`;
 							}
 
-							return `${date}<br/>${params[0].marker}${params[0].seriesName}: ${displayValue}`;
+							// ECharts renders the tooltip as HTML: level names and units
+							// are text people typed (a formula's results, a definition's
+							// levels), so they are escaped, never markup.
+							return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(params[0].seriesName)}: ${escapeHtml(displayValue)}`;
 						}
 					},
 					xAxis: {

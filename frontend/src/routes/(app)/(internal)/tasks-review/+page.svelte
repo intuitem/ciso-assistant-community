@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { goto } from '$app/navigation';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -177,6 +178,23 @@
 			.length
 	);
 </script>
+
+<!-- The names of the linked objects the user can see, then how many they cannot. -->
+{#snippet linkedNames(icon: string, items: { str?: string }[])}
+	{@const hidden = countMasked(items)}
+	<div class="text-[11px] text-surface-500 flex items-center gap-1">
+		<i class="fa-solid {icon} text-[9px]"></i>
+		{items
+			.filter((item) => !isMaskedPlaceholder(item))
+			.map((item) => item.str)
+			.join(', ')}
+		{#if hidden}
+			<span class="italic" data-testid="hidden-links-note">
+				{m.objectsNotVisible({ count: hidden })}
+			</span>
+		{/if}
+	</div>
+{/snippet}
 
 <div class="space-y-5 p-6">
 	<!-- Header bar -->
@@ -523,18 +541,10 @@
 														{/if}
 													</div>
 													{#if task.assigned_to && task.assigned_to.length > 0}
-														<div class="text-[11px] text-surface-500 flex items-center gap-1">
-															<i class="fa-solid fa-user text-[9px]"></i>
-															{task.assigned_to.map((user: { str: string }) => user.str).join(', ')}
-														</div>
+														{@render linkedNames('fa-user', task.assigned_to)}
 													{/if}
 													{#if task.applied_controls && task.applied_controls.length > 0}
-														<div class="text-[11px] text-surface-500 flex items-center gap-1">
-															<i class="fa-solid fa-shield-halved text-[9px]"></i>
-															{task.applied_controls
-																.map((control: { str: string }) => control.str)
-																.join(', ')}
-														</div>
+														{@render linkedNames('fa-shield-halved', task.applied_controls)}
 													{/if}
 												</div>
 											{/if}

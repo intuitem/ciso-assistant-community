@@ -1,9 +1,12 @@
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export interface FeatureFlagField {
 	field: string;
 	label: string;
 	description: string;
+	/** Flags this one only works with; the server keeps them on with it
+	 *  (FeatureFlagsSerializer.FLAG_REQUIRES). */
+	requires?: string[];
 }
 
 export interface FeatureFlagGroup {
@@ -234,6 +237,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'dora',
 					label: m.dora(),
 					description: m.doraFlagDescription()
+				},
+				{
+					field: 'nis2',
+					label: m.nis2Notification(),
+					description: m.nis2FlagDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
@@ -260,6 +268,12 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'vulnerabilities',
 					label: m.vulnerabilities(),
 					description: m.vulnerabilitiesDescription()
+				},
+				{
+					field: 'vulnerability_sla',
+					label: m.vulnerabilitySlaPolicy(),
+					description: m.vulnerabilitySlaDescription(),
+					requires: ['vulnerabilities']
 				},
 				{
 					field: 'ebiosrm',
@@ -321,6 +335,12 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'data_breaches',
 					label: m.dataBreaches(),
 					description: m.dataBreachesDescription()
+				},
+				{
+					field: 'dpias',
+					label: m.dpias(),
+					description: m.dpiasDescription(),
+					requires: ['quick_forms']
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},

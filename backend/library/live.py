@@ -213,6 +213,8 @@ def live_framework_to_object(framework) -> dict:
         )
         if node.weight is not None and node.weight != 1:
             node_dict["weight"] = node.weight
+        if node.evidence_required:
+            node_dict["evidence_required"] = True
         if node.importance and node.importance != "undefined":
             node_dict["importance"] = node.importance
         if node.display_mode and node.display_mode != "default":
@@ -331,6 +333,7 @@ def live_framework_to_object(framework) -> dict:
             "score_calculation_method": framework.score_calculation_method,
             "anchor_na_to_target": framework.anchor_na_to_target,
             "target_score": framework.target_score,
+            "result_aggregation": framework.result_aggregation,
             "translations": framework.translations or None,
             "requirement_nodes": requirement_nodes,
         }

@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import { m } from '$paraglide/messages';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -19,6 +19,7 @@
 		initialData?: Record<string, any>;
 		context: string;
 		object?: Record<string, any>;
+		duplicate?: boolean;
 		[key: string]: any;
 	}
 
@@ -30,6 +31,7 @@
 		initialData = {},
 		context,
 		object = {},
+		duplicate = false,
 		...rest
 	}: Props = $props();
 
@@ -88,73 +90,87 @@
 		cacheLock={cacheLocks['version']}
 		bind:cachedValue={formDataCache['version']}
 	/>
-	<Select
-		{form}
-		options={model.selectOptions['quotation_method']}
-		field="quotation_method"
-		disableDoubleDash
-		label={m.quotationMethod()}
-		cacheLock={cacheLocks['quotation_method']}
-		bind:cachedValue={formDataCache['quotation_method']}
-	/>
-	<Select
-		{form}
-		options={model.selectOptions['status']}
-		field="status"
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
-		optionsLabelField="label"
-		optionsExtraFields={[['object_classification', 'str']]}
-		field="classification"
-		label={m.classification()}
-		helpText={m.ebiosRmStudyClassificationHelpText()}
-		nullable
-		cacheLock={cacheLocks['classification']}
-		bind:cachedValue={formDataCache['classification']}
-	/>
-	{#if hasEntities}
+	{#if !duplicate}
+		<Select
+			{form}
+			options={model.selectOptions['quotation_method']}
+			field="quotation_method"
+			disableDoubleDash
+			label={m.quotationMethod()}
+			cacheLock={cacheLocks['quotation_method']}
+			bind:cachedValue={formDataCache['quotation_method']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+			cacheLock={cacheLocks['status']}
+			bind:cachedValue={formDataCache['status']}
+		/>
 		<AutocompleteSelect
 			{form}
-			optionsEndpoint="entities"
-			optionsExtraFields={[['folder', 'str']]}
-			field="reference_entity"
-			cacheLock={cacheLocks['reference_entity']}
-			bind:cachedValue={formDataCache['reference_entity']}
-			label={m.referenceEntity()}
+			optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
+			optionsLabelField="label"
+			optionsExtraFields={[['object_classification', 'str']]}
+			field="classification"
+			label={m.classification()}
+			helpText={m.ebiosRmStudyClassificationHelpText()}
+			nullable
+			cacheLock={cacheLocks['classification']}
+			bind:cachedValue={formDataCache['classification']}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			createFromSelection={true}
+			optionsEndpoint="filtering-labels"
+			optionsLabelField="label"
+			translateOptions={false}
+			field="filtering_labels"
+			helpText={m.labelsHelpText()}
+			label={m.labels()}
+			allowUserOptions="append"
+		/>
+		{#if hasEntities}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint="entities"
+				optionsExtraFields={[['folder', 'str']]}
+				field="reference_entity"
+				cacheLock={cacheLocks['reference_entity']}
+				bind:cachedValue={formDataCache['reference_entity']}
+				label={m.referenceEntity()}
+			/>
+		{/if}
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="risk-matrices?is_enabled=true"
+			field="risk_matrix"
+			cacheLock={cacheLocks['risk_matrix']}
+			bind:cachedValue={formDataCache['risk_matrix']}
+			label={m.riskMatrix()}
+			helpText={m.ebiosRmMatrixHelpText()}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
+			bind:cachedValue={formDataCache['eta']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="due_date"
+			label={m.dueDate()}
+			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
+			bind:cachedValue={formDataCache['due_date']}
 		/>
 	{/if}
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="risk-matrices?is_enabled=true"
-		field="risk_matrix"
-		cacheLock={cacheLocks['risk_matrix']}
-		bind:cachedValue={formDataCache['risk_matrix']}
-		label={m.riskMatrix()}
-		helpText={m.ebiosRmMatrixHelpText()}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="eta"
-		label={m.eta()}
-		helpText={m.etaHelpText()}
-		cacheLock={cacheLocks['eta']}
-		bind:cachedValue={formDataCache['eta']}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="due_date"
-		label={m.dueDate()}
-		helpText={m.dueDateHelpText()}
-		cacheLock={cacheLocks['due_date']}
-		bind:cachedValue={formDataCache['due_date']}
-	/>
 {:else if context === 'ebiosRmStudy'}
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
@@ -189,6 +205,7 @@
 			{form}
 			field="description"
 			label={m.description()}
+			helpText={m.studyDescriptionHelpText()}
 			cacheLock={cacheLocks['description']}
 			bind:cachedValue={formDataCache['description']}
 			data-focusindex="1"
@@ -261,6 +278,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			lazy
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -275,6 +293,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			lazy
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -284,6 +303,18 @@
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}
 			label={m.reviewers()}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			createFromSelection={true}
+			optionsEndpoint="filtering-labels"
+			optionsLabelField="label"
+			translateOptions={false}
+			field="filtering_labels"
+			helpText={m.labelsHelpText()}
+			label={m.labels()}
+			allowUserOptions="append"
 		/>
 		<TextField
 			type="date"
@@ -307,6 +338,7 @@
 			{form}
 			field="objectives"
 			label={m.objectives()}
+			helpText={m.studyObjectivesHelpText()}
 			cacheLock={cacheLocks['objectives']}
 			bind:cachedValue={formDataCache['objectives']}
 		/>
@@ -314,6 +346,7 @@
 			{form}
 			field="constraints_hypotheses"
 			label={m.constraintsHypotheses()}
+			helpText={m.constraintsHypothesesHelpText()}
 			cacheLock={cacheLocks['constraints_hypotheses']}
 			bind:cachedValue={formDataCache['constraints_hypotheses']}
 		/>

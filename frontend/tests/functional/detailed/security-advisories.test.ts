@@ -113,11 +113,18 @@ test.describe('Security Advisories', () => {
 		await test.step('pull MITRE CWE catalog', async () => {
 			const syncBtn = page.getByTestId('sync-cwe-button');
 			await expect(syncBtn).toBeVisible();
+			const syncResponse = page.waitForResponse(
+				(r) => r.url().includes('/cwes/sync-catalog') && r.request().method() === 'POST',
+				{ timeout: 90_000 }
+			);
 			await syncBtn.click();
+			const res = await syncResponse;
+			// 503 = cwe.mitre.org unreachable, an external outage.
+			test.skip(res.status() === 503, 'MITRE CWE feed unreachable');
+			expect(res.ok(), `CWE sync failed with HTTP ${res.status()}`).toBe(true);
 		});
 
 		await test.step('wait for CWE sync to complete and verify rows', async () => {
-			await page.waitForTimeout(5_000);
 			await page.reload();
 			await page.waitForLoadState('networkidle');
 

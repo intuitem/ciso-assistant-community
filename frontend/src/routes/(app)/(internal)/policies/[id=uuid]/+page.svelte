@@ -1,18 +1,18 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { invalidateAll } from '$app/navigation';
+	} from '#lib/components/Modals/stores.js';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -44,7 +44,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -64,20 +64,20 @@
 			{#if page.data?.featureflags?.policy_documents}
 				<a
 					href="/policies/{policy.id}/document"
-					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-indigo-500 h-fit"
+					class="btn btn-quiet h-fit"
 					data-testid="edit-document-button"
 				>
-					<i class="fa-solid fa-file-pen mr-2"></i>
+					<i class="fa-solid fa-file-pen mr-2 text-blue-500"></i>
 					{m.editDocument()}
 				</a>
 			{/if}
 			{#if page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
-					<i class="fa-solid fa-check-circle mr-2"></i>
+					<i class="fa-solid fa-check-circle mr-2 text-amber-500"></i>
 					{m.requestValidation()}
 				</button>
 			{/if}

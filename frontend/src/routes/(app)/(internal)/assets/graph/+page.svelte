@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
-	import { m } from '$paraglide/messages';
-	import { goto } from '$lib/utils/breadcrumbs';
+	import GraphExplorer from '#lib/components/DataViz/GraphExplorer.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { goto } from '#lib/utils/breadcrumbs.js';
 
 	interface Props {
 		data: PageData;

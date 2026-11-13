@@ -38,7 +38,7 @@ The metadata sheet is a key-value table with one property per row.
 | `target_score` | Rarely used. Target score proposed for new audits | Number between `min_score` and `max_score` |
 | `anchor_na_to_target` | Rarely used. Counts not applicable requirements as the target score in new audits | Enter `x` to enable. Requires `target_score`. |
 | `score_scale_locked` | Rarely used. Keeps the framework's score scale in its audits, when the standard defines it | Enter `x` to enable |
-| `field_visibility` | Rarely used. Initial field visibility for auditors and respondents in new audits | JSON object, e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}` |
+| `field_visibility` | Rarely used. Initial field visibility for auditors and respondents in new audits | JSON object, e.g. `{"score": {"auditor": "edit", "respondent": "read"}}`. Roles: `auditor`, `respondent`; access: `edit`, `read`, `hidden`. A field hidden from the auditor must be hidden from the respondent too. |
 
 For example, if `implementation_groups_definition` is `imp_grp`, the framework uses the sheets `imp_grp_meta` and `imp_grp_content`.
 
@@ -58,6 +58,7 @@ The content sheet contains one row per section or requirement. Rows follow the o
 | `description` <mark style="color:$info;">T</mark> | Requirement text or explanation | Text |
 | `annotation` <mark style="color:$info;">T</mark> | Additional guidance | Text |
 | `typical_evidence` <mark style="color:$info;">T</mark> | Examples of evidence to look for | Text |
+| `evidence_required` | Whether the requirement cannot be submitted without an evidence | Enter `x` to require one, leave empty otherwise |
 | `importance` | Priority of the requirement | `mandatory`, `recommended`, or `nice_to_have` |
 | `weight` | Relative weight of the requirement | Positive integer |
 | `min_score` | Lowest score for a specific requirement, overriding the framework value | Integer, `0` or more, lower than the row's `max_score`. Fill both columns or neither. |

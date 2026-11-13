@@ -1,6 +1,6 @@
-import { hasPermissionAnywhere } from '$lib/utils/access-control';
-import { URL_MODEL_MAP } from '$lib/utils/crud';
-import type { User } from '$lib/utils/types';
+import { hasPermissionAnywhere, isAccessAllowed } from '#lib/utils/access-control.js';
+import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+import type { User } from '#lib/utils/types.js';
 
 export interface NavItem {
 	name?: string;
@@ -9,6 +9,8 @@ export interface NavItem {
 	adminOnly?: boolean;
 	exclude?: string[];
 	permissions?: string[];
+	/** Like `permissions`, but held on the root folder (Global). */
+	globalPermissions?: string[];
 }
 
 /**
@@ -22,6 +24,10 @@ export function canSeeNavItem(item: NavItem, user: User | null | undefined): boo
 	// they hold none of the excluded ones.
 	if (item.exclude) {
 		return user?.roles?.some((role: string) => !item.exclude!.includes(role)) ?? false;
+	}
+	if (item.globalPermissions) {
+		const root = user?.root_folder_id;
+		return Boolean(root) && item.globalPermissions.some((p) => isAccessAllowed(user, p, root!));
 	}
 	if (item.permissions) {
 		return item.permissions.some((permission) => hasPermissionAnywhere(user, permission));

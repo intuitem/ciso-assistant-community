@@ -1,36 +1,38 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import type { ActionData, PageData } from './$types';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { isDark } from '$lib/utils/helpers';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { isDark } from '#lib/utils/helpers.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import RiskAcceptancesSection from '#lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
+	import ObjectValidationFlows from '#lib/components/ValidationFlows/ObjectValidationFlows.svelte';
 
 	import { goto } from '$app/navigation';
-	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
+	import { openRiskAcceptanceModal } from '#lib/utils/riskAcceptance.js';
 
 	import { onMount } from 'svelte';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import SyncToActionsRiskModal from '#lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -108,6 +110,7 @@
 				throw new Error('Failed to fetch applied controls sync data');
 			}
 		});
+		const hiddenControls = countMasked(appliedControlsSync.changes);
 		const schema = z.object({ reset_residual: z.boolean().default(false) });
 		const modalComponent: ModalComponent = {
 			ref: SyncToActionsRiskModal,
@@ -119,7 +122,13 @@
 				URLModel: 'risk-scenarios',
 				formAction: action,
 				listProps: {
-					items: appliedControlsSync.changes.map((ac) => ac.name),
+					// The controls the user can see by name, the others as a count.
+					items: [
+						...appliedControlsSync.changes
+							.filter((ac) => !isMaskedPlaceholder(ac))
+							.map((ac) => ac.name),
+						...(hiddenControls ? [m.objectsNotVisible({ count: hiddenControls })] : [])
+					],
 					message: m.theFollowingControlsWillBeMovedToExisting()
 				}
 			}
@@ -210,7 +219,7 @@
 				>
 				{#if !data.scenario.risk_assessment?.is_locked}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn btn-quiet h-fit"
 						onclick={async () => {
 							await modalConfirmSyncToActions(data.scenario.id, '?/syncToActions');
 						}}
@@ -233,14 +242,19 @@
 			{/if}
 			{#if canCreateAcceptance && !data.scenario.risk_assessment?.is_locked}
 				<button
-					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestRiskAcceptance()}
 					data-testid="request-risk-acceptance-button"
 				>
-					<i class="fa-solid fa-signature mr-2"></i>
+					<i class="fa-solid fa-signature mr-2 text-violet-500"></i>
 					{m.requestRiskAcceptance()}
 				</button>
 			{/if}
+			<ObjectValidationFlows
+				form={data.validationFlowForm}
+				model={data.validationFlowModel}
+				flows={data.validationFlows}
+			/>
 			<AuditTrailButton
 				model="risk-scenarios"
 				objectId={data.scenario.id}
@@ -249,11 +263,11 @@
 			{#if showRelations}
 				<button
 					type="button"
-					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
+					class="btn btn-quiet h-fit"
 					data-testid="relations-button"
 					onclick={() => (relationsOpen = true)}
 				>
-					<i class="fa-solid fa-circle-nodes mr-2"></i>{m.relationsGraph()}
+					<i class="fa-solid fa-circle-nodes mr-2 text-purple-500"></i>{m.relationsGraph()}
 				</button>
 			{/if}
 		</div>
@@ -640,7 +654,7 @@
 </div>
 
 {#if showRelations}
-	{#await import('$lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+	{#await import('#lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
 		<RelationsDrawer
 			open={relationsOpen}
 			urlModel="risk-scenarios"

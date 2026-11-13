@@ -47,6 +47,18 @@ def targets_of(quick_form) -> list[str]:
     return [target.key for _, target in form_targets(quick_form)]
 
 
+def forms_with_target(key: str) -> list:
+    """Ids of the forms whose accepted responses write `key`, clones included."""
+    from core.models import QuickForm
+
+    # JSON `contains` is not portable to SQLite: the forms are few, read them.
+    return [
+        quick_form.id
+        for quick_form in QuickForm.objects.exclude(on_accept=[])
+        if key in targets_of(quick_form)
+    ]
+
+
 def configured_targets(response) -> list[tuple[dict, object]]:
     return form_targets(response.quick_form)
 
@@ -106,6 +118,12 @@ def plan(response, user, overrides: dict | None = None) -> list[dict]:
         item["current"] = target.current(subject)
         item["origin"] = target.origin(subject, response)
         item["readable"] = _readable(user, subject)
+        # The subject may have changed since the form was started (a processing
+        # that became a processor no longer takes a DPIA).
+        if not target.applies_to(subject):
+            item["proposal"] = Proposal.refuse("targetNotApplicable")
+            items.append(item)
+            continue
         if not _allowed(user, target, subject):
             item["proposal"] = Proposal.refuse("subjectPermissionRequired")
             items.append(item)
@@ -345,6 +363,15 @@ def project(
     return rows
 
 
+def always_reviewed(response) -> bool:
+    """The form or the publication it was filed through asks for a review even
+    when the submitter could make every change themselves."""
+    publication = getattr(response, "publication", None)
+    return response.quick_form.always_review or bool(
+        publication is not None and publication.always_review
+    )
+
+
 def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool:
     """Whether submitting can apply the form's targets at once: every
     target is ready and its permission on the subject is the submitter's own,
@@ -352,10 +379,9 @@ def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool
     (no subject, nothing resolved, a missing right, scored questions left
     unanswered — they score 0 and would read as the lowest result) goes to
     review."""
-    publication = getattr(response, "publication", None)
     if (
         not scored_complete
-        or (publication is not None and publication.always_review)
+        or always_reviewed(response)
         or not configured_targets(response)
     ):
         return False

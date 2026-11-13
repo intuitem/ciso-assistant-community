@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 
 	interface Props {
 		width?: string;
@@ -32,7 +33,7 @@
 								new Date(params[0].value[0]).toLocaleDateString() +
 								'<br/>' +
 								params[0].marker +
-								params[0].seriesName +
+								escapeHtml(params[0].seriesName) +
 								': ' +
 								params[0].value[1]
 							);
