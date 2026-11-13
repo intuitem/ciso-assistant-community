@@ -113,6 +113,11 @@ from .tools.update_tools import (
     update_timeline_entry,
 )
 
+from .tools.evidence_review_tools import (
+    get_evidences_to_review,
+    read_evidence,
+    review_evidence,
+)
 from .tools.tprm_tools import (
     # Read tools
     get_entities,
@@ -171,6 +176,8 @@ from .tools.ebios_rm_tools import (
 )
 
 READ_TOOLS = [
+    get_evidences_to_review,
+    read_evidence,
     find_requirements,
     get_requirement_mappings,
     count_objects,
@@ -255,6 +262,7 @@ WRITE_TOOLS = [
     update_finding,
     create_evidence,
     update_evidence,
+    review_evidence,
     create_incident,
     update_incident,
     create_timeline_entry,

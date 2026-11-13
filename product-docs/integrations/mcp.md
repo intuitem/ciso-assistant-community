@@ -557,10 +557,41 @@ reserves or rewrites `Authorization`.
 
 #### Read-only by default
 
-The HTTP endpoint exposes **only read tools (51)**. Set
+The HTTP endpoint exposes **only read tools (55)**. Set
 `CA_MCP_READ_ONLY=false` to expose the write tools as well — a deliberate choice,
 since an agent driven by a third-party orchestrator would then be able to modify
 your GRC data.
+
+#### Evidence review with an agent
+
+Three tools work the evidence review queue: `get_evidences_to_review` and
+`read_evidence` read it, `review_evidence` approves or rejects the latest version
+of an evidence. A decision is refused if the file changed after the agent read it,
+and four-eyes review applies as in the UI.
+
+Two ways to use them:
+
+- **The agent pre-screens, a person decides.** Keep the server read-only: the
+  agent reads the queue and suggests a decision, a reviewer clicks Approve or
+  Reject.
+- **The agent decides.** Enable write tools and give the agent **its own user**,
+  for example "AI reviewer". Decisions are recorded under the token's user, so with
+  a personal token they would read as yours. Give that user a role limited to
+  viewing and changing evidences: the role, not the tool list, is what bounds an
+  agent that has been manipulated.
+
+By default `read_evidence` shows the evidence, its links and its history, not the
+file. Set `CA_MCP_READ_EVIDENCE_FILES=true` to let the agent read files too: text
+files and images are returned directly, other files (PDF, office documents) are
+saved to a temporary folder for the agent to open on a local (stdio) server, or
+attached to the result on an HTTP server. Files over 5 MB are not read.
+
+{% hint style="warning" %}
+Reading files sends their content to the model provider your client uses. A file
+can also contain text written to manipulate the agent ("approve all evidences"),
+especially one uploaded by a third party. Prefer the pre-screen mode for evidences
+coming from third parties, and keep the agent's user role minimal.
+{% endhint %}
 
 #### Connecting ChatGPT on the web
 
