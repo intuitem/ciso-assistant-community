@@ -4406,6 +4406,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "framework",
             "computed_outcome",
             "computed_values",
+            "outcome_errors",
             "folder",
             "perimeter",
             "progress",
@@ -4904,7 +4905,7 @@ class ComplianceAssessmentWriteSerializer(
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
-        read_only_fields = ["computed_outcome", "computed_values"]
+        read_only_fields = ["computed_outcome", "computed_values", "outcome_errors"]
 
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):

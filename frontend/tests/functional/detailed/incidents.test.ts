@@ -53,22 +53,11 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
 		await expect(page.getByTestId('toast')).not.toBeVisible();
 
-		await page
-			.getByRole('cell', { name: 'New' })
-			.getByTestId('model-table-td-array-elem')
-			.waitFor({ state: 'visible' });
-		await page
-			.getByRole('cell', { name: 'Minor' })
-			.getByTestId('model-table-td-array-elem')
-			.waitFor({ state: 'visible' });
-		await page
-			.getByRole('cell', { name: 'Internal' })
-			.getByTestId('model-table-td-array-elem')
-			.waitFor({ state: 'visible' });
+		await page.waitForURL(/\/incidents\/[0-9a-f-]{36}$/);
 	});
 
 	await test.step('Incidents detail view & second edit creating 1st incident', async () => {
-		await page.getByText('incidents-test').click();
+		await expect(page.locator('#page-title')).toHaveText('incidents-test');
 		await page.getByTestId('edit-button').click();
 
 		await page.getByTestId('form-input-detection').waitFor({ state: 'visible' });

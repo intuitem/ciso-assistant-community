@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("allauth_idp_oidc", "0003_client_allow_uri_wildcards"),
-        ("iam", "0033_user_view_full_permission"),
+        ("iam", "0034_serviceaccount_federated_subject_and_more"),
     ]
 
     operations = [

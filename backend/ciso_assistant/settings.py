@@ -265,6 +265,8 @@ EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
 logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 50)
+# Total size of the files in one framework-report evidence zip; 0 disables the cap.
+EVIDENCE_EXPORT_MAX_SIZE_MB = int(os.environ.get("EVIDENCE_EXPORT_MAX_SIZE_MB", 2048))
 
 # Workflow engine ceilings: rows one read returns, and items one loop iterates.
 # Every extra row is memory in the run context; every extra item is a token and
@@ -606,6 +608,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "iam.authentication.KnoxTokenAuthentication",
         "iam.authentication.OIDCServiceAccountAuthentication",
+        "iam.authentication.FederatedServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
