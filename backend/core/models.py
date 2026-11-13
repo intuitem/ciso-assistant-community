@@ -3666,7 +3666,7 @@ class Terminology(NameDescriptionMixin, FolderMixin):
 
     fields_to_check = ["name", "field_path"]
 
-    # Mirrored in migration 0206: update both together.
+    # Mirrored in migration 0207: update both together.
     DEFAULT_HEXCOLORS = {
         FieldPath.PROJECT_STATUS: {
             "draft": "#f3f4f6",
