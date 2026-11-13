@@ -1,4 +1,5 @@
 import json
+import math
 import structlog
 from datetime import datetime, timedelta
 
@@ -920,6 +921,73 @@ class BuiltinMetricSample(AbstractBaseModel):
         }
 
     @classmethod
+    def _compute_summary_metrics(cls, folder):
+        """The figures behind the analytics summary trends: cheap enough for a live point."""
+        is_global = folder.content_type == Folder.ContentType.ROOT
+        today = timezone.localdate()
+
+        def scope(qs):
+            return qs if is_global else qs.filter(folder=folder)
+
+        controls = scope(AppliedControl.objects.all())
+        task_templates = scope(TaskTemplate.objects.all())
+        incidents = scope(Incident.objects.all())
+        audits_qs = scope(ComplianceAssessment.objects.all())
+
+        # Same definitions as the analytics summary (core.helpers.get_metrics), so its
+        # figures can carry a trend. Lazy import: core.helpers imports core.models.
+        from core.helpers import (
+            FINDING_CLOSED_STATUSES,
+            _compute_progress_by_assessment,
+            filter_top_risk_levels,
+            overdue_task_templates,
+        )
+
+        summary_scenarios = scope(RiskScenario.objects.all())
+        assessed = list(
+            _compute_progress_by_assessment(
+                audits_qs.values_list("id", flat=True)
+            ).values()
+        )
+        return {
+            "task_templates_overdue": overdue_task_templates(task_templates).count(),
+            "controls_no_status": controls.filter(
+                Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
+            ).count(),
+            "controls_eta_missed": controls.filter(eta__lt=today)
+            .exclude(status="active")
+            .count(),
+            "controls_p1_pending": controls.filter(priority=1)
+            .exclude(status="active")
+            .count(),
+            "audits_avg_assessed": math.ceil(sum(assessed) / len(assessed))
+            if assessed
+            else 0,
+            "non_compliant_items": scope(RequirementAssessment.objects.all())
+            .filter(result=RequirementAssessment.Result.NON_COMPLIANT)
+            .count(),
+            "partially_compliant_items": scope(RequirementAssessment.objects.all())
+            .filter(result=RequirementAssessment.Result.PARTIALLY_COMPLIANT)
+            .count(),
+            "total_risk_scenarios": summary_scenarios.count(),
+            "risk_scenarios_high_current": filter_top_risk_levels(
+                summary_scenarios, "current_level"
+            ).count(),
+            "risk_scenarios_high_residual": filter_top_risk_levels(
+                summary_scenarios, "residual_level"
+            ).count(),
+            "incidents_open": incidents.exclude(
+                status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED]
+            ).count(),
+            "findings_open": scope(Finding.objects.all())
+            .exclude(status__in=FINDING_CLOSED_STATUSES)
+            .count(),
+            "evidence_expired": scope(Evidence.objects.all())
+            .filter(status="expired")
+            .count(),
+        }
+
+    @classmethod
     def _compute_folder_metrics(cls, folder):
         # Root folder = unfiltered org-wide scope; others = direct membership only
         # (no descendant traversal, matching the existing breakdown metrics).
@@ -1130,6 +1198,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             due_date__gte=today, due_date__lte=today + timedelta(days=7)
         ).count()
 
+        summary_metrics = cls._compute_summary_metrics(folder)
+
         eta_on_track = controls.filter(Q(eta__isnull=False) & Q(eta__gte=today)).count()
         eta_late = controls.filter(
             Q(eta__isnull=False)
@@ -1255,6 +1325,7 @@ class BuiltinMetricSample(AbstractBaseModel):
             "projects_avg_progress": projects_avg_progress,
             "projects_total_budget": projects_total_budget,
             "projects_total_actual_cost": projects_total_actual_cost,
+            **summary_metrics,
         }
 
 

@@ -6680,6 +6680,39 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
+    class ReviewStatus(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        APPROVED = "approved", _("Approved")
+        REJECTED = "rejected", _("Rejected")
+
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="uploaded_evidence_revisions",
+        verbose_name=_("Uploaded by"),
+    )
+    review_status = models.CharField(
+        max_length=20,
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.PENDING,
+        db_index=True,
+        verbose_name=_("Review status"),
+    )
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_evidence_revisions",
+        verbose_name=_("Reviewed by"),
+    )
+    reviewed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Reviewed at")
+    )
+    review_comment = models.TextField(blank=True, verbose_name=_("Review comment"))
+
     fields_to_check = ["evidence", "version"]
 
     # A revision without a file or a link carries no evidence.
@@ -6706,10 +6739,102 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
     folder_from = "evidence"
 
+    def record_review(self, user, decision: str, comment: str = "") -> None:
+        """Record a reviewer's decision on this revision and mirror it on the evidence."""
+        if decision not in (self.ReviewStatus.APPROVED, self.ReviewStatus.REJECTED):
+            raise ValidationError({"decision": "invalid_decision"})
+        if (
+            self.uploaded_by_id
+            and self.uploaded_by_id == user.id
+            and GlobalSettings.objects.filter(
+                name="general", value__evidence_four_eyes=True
+            ).exists()
+        ):
+            raise ValidationError({"decision": "four_eyes_uploader_cannot_review"})
+        self.review_status = decision
+        self.reviewed_by = user
+        self.reviewed_at = now()
+        self.review_comment = comment.strip()
+        self.save(
+            update_fields=[
+                "review_status",
+                "reviewed_by",
+                "reviewed_at",
+                "review_comment",
+                "updated_at",
+            ]
+        )
+        if self.evidence.last_revision == self:
+            self.evidence.status = decision
+            self.evidence.save(update_fields=["status", "updated_at"])
+
+    def undo_review(self, user) -> None:
+        """Put a decision back in the queue; only the reviewer who made it can."""
+        if (
+            self.review_status == self.ReviewStatus.PENDING
+            or self.reviewed_by_id != user.id
+        ):
+            raise ValidationError({"decision": "cannot_undo"})
+        self.clear_review()
+        if self.evidence.last_revision == self:
+            self.evidence.status = Evidence.Status.IN_REVIEW
+            self.evidence.save(update_fields=["status", "updated_at"])
+
+    def clear_review(self) -> None:
+        """Back to pending, without touching the evidence status."""
+        self.review_status = self.ReviewStatus.PENDING
+        self.reviewed_by = None
+        self.reviewed_at = None
+        self.review_comment = ""
+        self.save(
+            update_fields=[
+                "review_status",
+                "reviewed_by",
+                "reviewed_at",
+                "review_comment",
+                "updated_at",
+            ]
+        )
+
+    def reopen_evidence_review(self) -> None:
+        """New, unreviewed content on the latest revision sends a decided evidence back to review.
+        Called from upload paths only: imports and seeds create revisions without new content."""
+        evidence = self.evidence
+        if (
+            evidence.status in (Evidence.Status.APPROVED, Evidence.Status.REJECTED)
+            and evidence.last_revision == self
+        ):
+            evidence.status = Evidence.Status.IN_REVIEW
+            evidence.save(update_fields=["status", "updated_at"])
+
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
             self.folder = self.evidence.folder
+
+        # A review covers the content it saw: new content on a reviewed revision voids it.
+        content_changed = False
+        if not self._state.adding:
+            old = (
+                EvidenceRevision.objects.filter(pk=self.pk)
+                .values("attachment", "link")
+                .first()
+            )
+            new_file = bool(self.attachment) and not self.attachment._committed
+            content_changed = bool(old) and (
+                new_file
+                or (old["attachment"] or None) != (self.attachment.name or None)
+                or (old["link"] or None) != (self.link or None)
+            )
+        review_voided = (
+            content_changed and self.review_status != self.ReviewStatus.PENDING
+        )
+        if review_voided:
+            self.review_status = self.ReviewStatus.PENDING
+            self.reviewed_by = None
+            self.reviewed_at = None
+            self.review_comment = ""
+            kwargs.pop("update_fields", None)
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
@@ -6766,6 +6891,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             self.attachment_hash = None
 
         super().save(*args, **kwargs)
+
+        if review_voided:
+            self.reopen_evidence_review()
 
     def filename(self) -> str | None:
         if not self.attachment:
@@ -9407,6 +9535,10 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
     computed_outcome = models.JSONField(null=True, blank=True)
     computed_values = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed values")
+    )
+    # ref_ids of outcome rules whose last evaluation failed.
+    outcome_errors = models.JSONField(
+        blank=True, null=True, verbose_name=_("Outcome errors")
     )
 
     assets = models.ManyToManyField(

@@ -7,6 +7,7 @@
 	import { page } from '$app/state';
 	import { goto } from '#lib/utils/breadcrumbs.js';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { setContext } from 'svelte';
 	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import HiddenInput from '#lib/components/Forms/HiddenInput.svelte';
 	import Score from '#lib/components/Forms/Score.svelte';
@@ -372,6 +373,9 @@
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto'
 	});
+	// This page edits an existing requirement assessment: its pickers keep the links
+	// the user cannot see until removed (a ModelForm on the page sets its own value).
+	setContext('formKeepsHiddenLinks', true);
 
 	let mappingInference = $derived(data.requirementAssessment.mapping_inference);
 

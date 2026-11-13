@@ -2,6 +2,7 @@ import { getSecureRedirect } from '#lib/utils/helpers.js';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '#lib/utils/constants.js';
 import { logger } from '#lib/server/logger.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { loginSchema } from '#lib/utils/schemas.js';
 import type { LoginRequestBody } from '#lib/utils/types.js';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -9,6 +10,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { mfaAuthenticateSchema } from './mfa/utils/schemas';
+import { m } from '#paraglide/messages.js';
 
 interface AuthenticationFlow {
 	id:
@@ -70,9 +72,18 @@ export const actions: Actions = {
 			logger.warning('Login failed', { status: res.status });
 			if (res.errors) {
 				res.errors.forEach((error) => {
-					setError(form, error.param, error.code);
+					// non-field errors (e.g. too_many_login_attempts) have no param
+					if (error.param) {
+						setError(form, error.param, safeTranslate(error.code));
+					} else {
+						setError(form, safeTranslate(error.code));
+					}
 				});
 				return fail(res.status, { form });
+			}
+			// allauth's per-IP "login" rate limit answers a bare {"status": 429}
+			if (res.status === 429) {
+				return setError(form, m.tooManyLoginAttempts(), { status: 429 });
 			}
 			if (res.status === 401 && res.data) {
 				// User is not authenticated

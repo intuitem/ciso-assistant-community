@@ -15,7 +15,11 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import {
+	defaultDeleteFormAction,
+	defaultWriteFormAction,
+	REDIRECT_AFTER_CREATE
+} from '#lib/utils/actions.js';
 
 export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const user = await locals.getUser();
@@ -51,7 +55,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'compliance-assessments');
+		const redirectToWrittenObject = REDIRECT_AFTER_CREATE.has(event.params.model as string);
 		return defaultWriteFormAction({
 			event,
 			urlModel: event.params.model as string,

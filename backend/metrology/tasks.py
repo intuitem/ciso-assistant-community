@@ -68,6 +68,18 @@ def check_daily_and_longer_metric_staleness():
     )
 
 
+@db_periodic_task(crontab(hour="23", minute="50"))
+def snapshot_root_folder_metrics():
+    """Daily org-wide snapshot behind the analytics trends: domain saves only refresh their own folder."""
+    from iam.models import Folder
+    from metrology.models import BuiltinMetricSample
+
+    try:
+        BuiltinMetricSample.update_or_create_snapshot(Folder.get_root_folder())
+    except DatabaseError:
+        logger.warning("Metrology tables do not exist yet — skipping root snapshot")
+
+
 @db_periodic_task(crontab(hour="3", minute="45"))
 def cleanup_old_builtin_metric_samples():
     """
