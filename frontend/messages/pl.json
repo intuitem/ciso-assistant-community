@@ -5960,7 +5960,6 @@
 	"implementationGroup": "Grupa wdrożeniowa",
 	"frameworkReportSubtitle": "Skala punktacji {min}–{max} · grupy wdrożeniowe: {nIGs}",
 	"complianceAssessmentsInScope": "audytów w zakresie",
-	"onlyLiveStatusesCounted": "Uwzględniane są tylko oceny o statusie {statuses} — oznacz audyty jako {deprecated}, aby je wykluczyć.",
 	"detectedComplianceAssessments": "Wykryte audyty: {total} (uwzględnione: {counted}, wykluczone: {excluded}):",
 	"backToFramework": "Powrót do standardu",
 	"compliancePercentage": "Zgodność %",

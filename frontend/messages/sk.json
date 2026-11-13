@@ -4920,7 +4920,6 @@
 	"implementationGroup": "Skupina implementácie",
 	"frameworkReportSubtitle": "Hodnotiaca stupnica {min}–{max} · {nIGs} skupín implementácie",
 	"complianceAssessmentsInScope": "audity v rozsahu",
-	"onlyLiveStatusesCounted": "Započítavajú sa iba posúdenia so stavom {statuses} — označte audity ako {deprecated}, ak ich chcete vylúčiť.",
 	"detectedComplianceAssessments": "Zistených auditov: {total} ({counted} započítaných, {excluded} vylúčených):",
 	"backToFramework": "Späť na rámec",
 	"compliancePercentage": "Súlad (%)",

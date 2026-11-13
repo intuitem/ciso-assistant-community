@@ -4961,7 +4961,6 @@
 	"ollamaEmbedModelHelpText": "Ollama-model dat gebruikt moet worden voor embeddings (bijv. snowflake-arctic-embed2)",
 	"ollamaModel": "LLM-model",
 	"ollamaModelHelpText": "Ollama-model te gebruiken voor het genereren van chatberichten. Aanbevolen: qwen3:14b (beste resultaten voor het aanroepen van tools in EN/FR)",
-	"onlyLiveStatusesCounted": "Alleen beoordelingen met de status {statuses} worden meegeteld — markeer audits als {deprecated} om ze uit te sluiten.",
 	"openActivityDetailsHint": "Open details (beschrijving, gekoppelde objecten)",
 	"openAssistant": "AI-engine (chat)",
 	"openLink": "Link openen",

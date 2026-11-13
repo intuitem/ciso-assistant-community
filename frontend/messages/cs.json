@@ -5007,7 +5007,6 @@
 	"implementationGroup": "Skupina pro implementaci",
 	"frameworkReportSubtitle": "Hodnotící stupnice od {min} do {max} · Obsahuje implementační skupiny v počtu: {nIGs}",
 	"complianceAssessmentsInScope": "Audity, které spadají do rozsahu",
-	"onlyLiveStatusesCounted": "Berou se v potaz pouze ty audity, které jsou ve stavu: {statuses} — pro jejich ignorování označte daný audit stavem {deprecated}.",
 	"detectedComplianceAssessments": "Celkem detekováno {total} auditů (Započítaných: {counted}, Nepoužitých: {excluded}):",
 	"backToFramework": "Návrat do rámce (Framework)",
 	"compliancePercentage": "Procento shody",
