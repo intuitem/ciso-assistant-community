@@ -2,7 +2,7 @@ import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/custom-email-templates/default/${params.template_key}/${params.language}/`;
+	const endpoint = `${BASE_API_URL}/custom-email-templates/default/${encodeURIComponent(params.template_key)}/${encodeURIComponent(params.language)}/`;
 	const res = await fetch(endpoint);
 	const responseData = await res.text();
 

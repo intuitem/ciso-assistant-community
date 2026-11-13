@@ -11,7 +11,7 @@ type LogEntry = {
 };
 
 export const load = (async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/log-entries/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/log-entries/${encodeURIComponent(params.id)}/`;
 	try {
 		const res = await fetch(endpoint);
 		if (!res.ok) {

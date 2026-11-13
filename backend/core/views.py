@@ -4302,8 +4302,11 @@ class VulnerabilityViewSet(BaseModelViewSet):
 
         sla_anchor = sla_policy.get("sla_anchor", "detected_at")
 
-        object_ids = RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
-        accessible = Vulnerability.objects.filter(id__in=object_ids)
+        accessible = Vulnerability.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
+        ).filter(
+            id__in=RoleAssignment.get_changeable_object_ids(request.user, Vulnerability)
+        )
 
         # Backfill missing detected_at from created_at
         accessible.filter(detected_at__isnull=True).update(

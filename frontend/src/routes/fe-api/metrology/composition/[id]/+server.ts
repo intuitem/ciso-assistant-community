@@ -2,7 +2,8 @@ import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 // A computed metric as the compose modal edits it (GET), and the edit (PUT).
-const endpoint = (id: string) => `${BASE_API_URL}/metrology/metric-instances/${id}/composition/`;
+const endpoint = (id: string) =>
+	`${BASE_API_URL}/metrology/metric-instances/${encodeURIComponent(id)}/composition/`;
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
 	const res = await fetch(endpoint(params.id));

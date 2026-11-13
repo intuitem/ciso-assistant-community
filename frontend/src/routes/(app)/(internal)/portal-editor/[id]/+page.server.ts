@@ -9,7 +9,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
-	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
+	const res = await fetch(`${BASE_API_URL}/portals/${encodeURIComponent(params.id)}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
 	const documentsEnabled = !!(await locals.getFeatureFlags())?.document_management;
@@ -92,7 +92,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 };
 
 const patchPortal = (fetch: typeof globalThis.fetch, id: string, body: unknown) =>
-	patchJSON(fetch, `/portals/${id}/`, body);
+	patchJSON(fetch, `/portals/${encodeURIComponent(id)}/`, body);
 
 export const actions: Actions = {
 	uploadDocument: async ({ request, fetch }) => {
@@ -154,14 +154,19 @@ export const actions: Actions = {
 		return { form };
 	},
 	regeneratePublicToken: async ({ params, fetch }) => {
-		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/regenerate-public-token/`, {
-			method: 'POST'
-		});
+		const res = await fetch(
+			`${BASE_API_URL}/portals/${encodeURIComponent(params.id)}/regenerate-public-token/`,
+			{
+				method: 'POST'
+			}
+		);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
 	duplicate: async ({ params, fetch }) => {
-		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/duplicate/`, { method: 'POST' });
+		const res = await fetch(`${BASE_API_URL}/portals/${encodeURIComponent(params.id)}/duplicate/`, {
+			method: 'POST'
+		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		redirect(303, `/portal-editor/${(await res.json()).id}`);
 	}
