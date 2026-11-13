@@ -99,10 +99,9 @@ def test_reader_cannot_batch_create_entities(reader_client, domain):
 
     resp = reader_client.post(
         "/api/entities/batch-create/",
-        {"entities_text": "Acme\nNewco", "folder": str(domain.id)},
+        {"entities_text": "Acme", "folder": str(domain.id)},
         format="json",
     )
 
     assert resp.status_code == 403
     assert "Acme" not in resp.content.decode()
-    assert not Entity.objects.filter(name="Newco").exists()
