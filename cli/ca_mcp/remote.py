@@ -10,6 +10,7 @@ import json
 import logging
 import threading
 import time
+from contextvars import ContextVar
 from urllib.parse import parse_qsl, urlencode, urlsplit
 
 import anyio
@@ -54,15 +55,22 @@ class TokenVerifier:
         self._lock = threading.Lock()
 
     async def verify_token(self, token: str) -> AccessToken | None:
-        return await anyio.to_thread.run_sync(self.verify, token)
+        access, final = await anyio.to_thread.run_sync(self.check, token)
+        if not final:
+            _note_outage()
+        return access
 
     def verify(self, token: str) -> AccessToken | None:
+        return self.check(token)[0]
+
+    def check(self, token: str) -> tuple[AccessToken | None, bool]:
+        """The answer about the token, and whether it is one (see _ask)."""
         key = hashlib.sha256(token.encode()).hexdigest()
         now = self._clock()
         with self._lock:
             hit = self._cache.get(key)
             if hit and hit[0] > now:
-                return hit[1]
+                return hit[1], True
             # forget the expired answers now and then; a flood of made-up
             # tokens that are all still fresh empties it, rather than make every
             # call copy it again
@@ -75,7 +83,7 @@ class TokenVerifier:
         if final:
             with self._lock:
                 self._cache[key] = (now + self._ttl, access)
-        return access
+        return access, final
 
     def _ask(self, token: str) -> tuple[AccessToken | None, bool]:
         """The backend's answer, and whether it is one: a refusal is, an error
@@ -109,6 +117,76 @@ class TokenVerifier:
                 "app": data.get("app"),
             },
         ), True
+
+
+# Set per request by outage_as_503: the token check marks it when the backend
+# gave no answer, so the 401 the SDK then sends becomes a 503.
+_outage: ContextVar[list | None] = ContextVar("mcp_backend_outage", default=None)
+
+
+def _note_outage() -> None:
+    marks = _outage.get()
+    if marks is not None:
+        marks.append(True)
+
+
+def outage_as_503(app):
+    """A 401 tells the app its token is dead, and it signs the user in again.
+    When the backend could not check the token, answer 503 instead: the app
+    retries later with the same token."""
+
+    async def wrapped(scope, receive, send):
+        if scope["type"] != "http":
+            await app(scope, receive, send)
+            return
+        marks: list = []
+        reset = _outage.set(marks)
+        replaced = []
+
+        async def send_checked(message):
+            if (
+                message["type"] == "http.response.start"
+                and message["status"] == 401
+                and marks
+            ):
+                replaced.append(True)
+                return
+            if replaced:
+                # drop the 401's body, then send ours once it is complete
+                if not message.get("more_body"):
+                    await _send_unavailable(send)
+                return
+            await send(message)
+
+        try:
+            await app(scope, receive, send_checked)
+        finally:
+            _outage.reset(reset)
+
+    return wrapped
+
+
+async def _send_unavailable(send) -> None:
+    body = json.dumps(
+        {
+            "error": "temporarily_unavailable",
+            "error_description": "CISO Assistant cannot check the token right now. Try again shortly.",
+        }
+    ).encode()
+    await send(
+        {
+            "type": "http.response.start",
+            "status": 503,
+            "headers": [
+                (b"content-type", b"application/json"),
+                (b"content-length", str(len(body)).encode()),
+                (b"retry-after", b"5"),
+                (b"content-security-policy", b"sandbox"),
+                (b"x-content-type-options", b"nosniff"),
+            ],
+        }
+    )
+    await send({"type": "http.response.body", "body": body})
 
 
 class _Refused:
@@ -250,9 +328,11 @@ def build_app():
         public = urlsplit(config.PUBLIC_URL)
         config.ALLOWED_HOSTS = [public.netloc, f"{public.hostname}:*"]
     client.set_transport(forward)
-    return build_oauth_http_app(
-        token_verifier=TokenVerifier(),
-        issuer_url=issuer_url(),
-        resource_url=resource_url(),
-        hooks=ToolCallHooks(),
+    return outage_as_503(
+        build_oauth_http_app(
+            token_verifier=TokenVerifier(),
+            issuer_url=issuer_url(),
+            resource_url=resource_url(),
+            hooks=ToolCallHooks(),
+        )
     )

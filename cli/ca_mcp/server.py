@@ -578,8 +578,9 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
     from mcp.server.auth.settings import AuthSettings
     from starlette.responses import JSONResponse
 
-    # what a connection may do comes from the backend, which enforces it too
-    read_only = False
+    # what a connection may do comes from the backend, which enforces it too;
+    # CA_MCP_READ_ONLY narrows every connection to the read tools
+    read_only = config.READ_ONLY
     server = ActionFilteredServer(
         "ciso-assistant",
         instructions="Call get_my_access to see what this connection may do.",
@@ -641,9 +642,11 @@ _REPLACED_HEADERS = {
 
 
 def isolated(app):
-    """The proxy rules of /mcp, applied here too so they hold behind any
-    ingress: the instance's session cookie never reaches this server, and no
-    response can act as a page or a service worker of the instance's origin."""
+    """The proxy rules of /mcp, applied here too, against this server's own
+    mistakes: its responses cannot act as a page or a service worker of the
+    instance's origin, and the session cookie, which still reaches this process
+    when the ingress does not strip it, is dropped before any of its code sees
+    it. A compromised server can undo all of this; only the proxy cannot be."""
 
     async def wrapped(scope, receive, send):
         if scope["type"] != "http":

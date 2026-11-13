@@ -443,8 +443,9 @@ def test_the_public_url_drops_the_default_port(configured, expected):
 
 def test_the_server_applies_the_proxy_rules_itself():
     # behind an ingress that applies none of them (one Ingress for the whole app)
-    from ca_mcp.server import isolated
     from starlette.responses import PlainTextResponse
+
+    from ca_mcp.server import isolated
 
     async def upstream(scope, receive, send):
         cookie = dict(scope["headers"]).get(b"cookie", b"none").decode()
@@ -469,3 +470,78 @@ def test_the_metadata_is_served_isolated(app):
         response = http.get(METADATA_PATH)
     assert response.status_code == 200
     assert response.headers["content-security-policy"] == "sandbox"
+
+
+@pytest.mark.parametrize(
+    "backend",
+    [
+        _response(status_code=503),
+        remote.requests.ConnectionError(),
+    ],
+    ids=["backend-503", "backend-unreachable"],
+)
+def test_a_backend_outage_is_not_a_dead_token(backend):
+    # a 401 would make the app sign its user in again; a 503 makes it retry
+    session = Mock()
+    if isinstance(backend, Exception):
+        session.get.side_effect = backend
+    else:
+        session.get.return_value = backend
+    with (
+        patch("ca_mcp.remote.requests.Session", return_value=session),
+        patch.object(config, "ALLOWED_HOSTS", ["localhost:8001"]),
+    ):
+        app = remote.build_app()
+    with TestClient(app, base_url="http://localhost:8001") as http:
+        response = http.post(
+            "/mcp", headers={**MCP_HEADERS, "Authorization": "Bearer t"}, json={}
+        )
+    client.set_transport(None)
+    assert response.status_code == 503
+    assert response.headers["retry-after"] == "5"
+    assert response.headers["content-security-policy"] == "sandbox"
+    assert response.json()["error"] == "temporarily_unavailable"
+
+
+def test_a_refused_token_is_still_a_401():
+    session = _session(status=401)
+    with (
+        patch("ca_mcp.remote.requests.Session", return_value=session),
+        patch.object(config, "ALLOWED_HOSTS", ["localhost:8001"]),
+    ):
+        app = remote.build_app()
+    with TestClient(app, base_url="http://localhost:8001") as http:
+        response = http.post(
+            "/mcp", headers={**MCP_HEADERS, "Authorization": "Bearer t"}, json={}
+        )
+    client.set_transport(None)
+    assert response.status_code == 401
+    assert "invalid_token" in response.headers["www-authenticate"]
+
+
+@pytest.mark.parametrize("read_only", [True, False])
+def test_read_only_holds_in_oauth_mode(read_only):
+    from ca_mcp import server
+
+    with (
+        patch.object(config, "READ_ONLY", read_only),
+        patch.object(config, "ALLOWED_HOSTS", ["localhost:8001"]),
+        patch.object(server, "_register_on") as register,
+    ):
+        remote.build_app()
+    client.set_transport(None)
+    assert register.call_args.args[1] is read_only
+
+
+def test_oauth_mode_is_not_read_only_by_default(monkeypatch):
+    import importlib
+
+    monkeypatch.setenv("CA_MCP_AUTH", "oauth")
+    monkeypatch.delenv("CA_MCP_READ_ONLY", raising=False)
+    try:
+        assert importlib.reload(config).READ_ONLY is False
+        monkeypatch.setenv("CA_MCP_READ_ONLY", "true")
+        assert importlib.reload(config).READ_ONLY is True
+    finally:
+        monkeypatch.undo()
+        importlib.reload(config)

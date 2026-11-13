@@ -466,30 +466,29 @@ and add it again.
 Only needed for clients that cannot start a local process — ChatGPT on the web and
 Microsoft Copilot Studio. If your client can launch a subprocess, use stdio instead.
 
-#### Option A: Docker Compose (recommended)
+#### Option A: served by your instance with OAuth (recommended)
 
-If you deployed CISO Assistant with Docker Compose, the MCP server ships as an
-optional service on the same stack. It is off by default — enable it with a
-profile:
+Your instance can serve MCP itself at `https://<your-host>/mcp`, with OAuth
+sign-in: users enter the URL in their AI app and approve it, with no token to
+paste. Generate your compose file with `config/make_config.py` and answer yes to
+the MCP question, or enable it in the Helm chart. See
+[Connect AI apps with OAuth](mcp-oauth.md).
 
-```bash
-docker compose --profile mcp up -d
-```
+#### Deprecated: the PAT service of `docker-compose.yml`
 
-That starts the server and routes it through the proxy you already run, so it is
-served at `https://<your-host>:8443/mcp` on the existing certificate. Nothing new
-is published on the host: the container has no `ports:` mapping and is reachable
-only through the proxy.
-
-{% hint style="info" %}
-The service defaults to **read-only**. To allow an assistant to create or modify
-records, set `CA_MCP_READ_ONLY=false` in the `mcp` service environment and
-recreate it. See [Read-only by default](#read-only-by-default) before you do.
+{% hint style="warning" %}
+The `mcp` service of `docker-compose.yml` and `docker-compose-build.yml`
+(`docker compose --profile mcp up -d`) is **deprecated** and will be removed in a
+later release. It takes a Personal Access Token, which carries all its user's
+rights, through the server exposed at `/mcp`. Move to option A: see
+[Moving from the PAT service](mcp-oauth.md#moving-from-the-pat-service).
 {% endhint %}
 
-If you generated your deployment with `config/make_config.py`, answer yes to the
-MCP question and the service, the proxy route and the read-only choice are
-written into your compose file for Caddy, Traefik or BunkerWeb alike.
+Until then it still works as before: `docker compose --profile mcp up -d` starts
+the server behind the proxy you already run, at `https://<your-host>:8443/mcp`,
+with no new port published on the host. It defaults to **read-only**; set
+`CA_MCP_READ_ONLY=false` in the `mcp` service environment to allow writes. See
+[Read-only by default](#read-only-by-default) before you do.
 
 #### Option B: Run from source
 
@@ -513,7 +512,8 @@ yet.
 Put an HTTPS reverse proxy or a tunnel in front, forwarding `/mcp` to
 `127.0.0.1:8001`, and set `CA_MCP_ALLOWED_HOSTS` to the public hostname the client
 will use. That keeps TLS termination, certificates and access logging in
-infrastructure you already run. Option A does all of this for you.
+infrastructure you already run. With option A the instance serves MCP for you,
+behind its own proxy, with OAuth sign-in instead of a PAT.
 
 {% hint style="warning" %}
 `CA_MCP_ALLOWED_HOSTS` is matched against the `Host` header **exactly, port
@@ -782,7 +782,7 @@ Additional variables for the HTTP transport:
 | Variable                 | Default     | Description                                                                                                                                               |
 | ------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CA_MCP_TRANSPORT`       | `stdio`     | Set to `http` for Streamable HTTP                                                                                                                         |
-| `CA_MCP_READ_ONLY`       | `true`      | Expose only read tools. PAT mode only: with `CA_MCP_AUTH=oauth`, the backend decides writes (the `mcp_write` feature flag)                                                                                                                                    |
+| `CA_MCP_READ_ONLY`       | `true`      | Expose only read tools. With `CA_MCP_AUTH=oauth` the default is `false`: each connection's profile and the `mcp_write` feature flag decide writes, in the backend; `true` offers only the read tools to every connection                                                                                                                                    |
 | `CA_MCP_HOST`            | `127.0.0.1` | Listen address                                                                                                                                            |
 | `CA_MCP_PORT`            | `8001`      | Listen port                                                                                                                                               |
 | `CA_MCP_PATH`            | `/mcp`      | Endpoint path                                                                                                                                             |

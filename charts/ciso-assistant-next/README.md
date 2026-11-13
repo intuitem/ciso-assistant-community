@@ -101,11 +101,19 @@ Before users can connect apps:
 - an administrator ticks "Can connect AI apps" on each user who may do so.
 
 The `/mcp` paths are added to the chart's one ingress. The MCP server applies their isolation rules
-itself, so they hold behind any ingress controller: it drops the `Cookie` request header, never
-sends `Set-Cookie` or `Service-Worker-Allowed`, and adds `Content-Security-Policy: sandbox` and
-`X-Content-Type-Options: nosniff` to every answer. Check them with `curl -I https://<domain>/mcp`,
-which must show the sandbox header. The browser still sends the session cookie up to the pod, where
-the MCP server drops it: if your ingress controller can strip it on `/mcp` only, do so as well.
+itself: it drops the `Cookie` request header, never sends `Set-Cookie` or `Service-Worker-Allowed`,
+and adds `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff` to every answer.
+Check them with `curl -I https://<domain>/mcp`, which must show the sandbox header.
+
+> **Warning:** the chart does not apply these rules at the ingress. The MCP server applies them
+> itself, which holds only while it is not compromised: a compromised MCP server would receive the
+> session cookie, which browsers send to every path of the host, and could serve pages that run as
+> the app. We advise hardening with your ingress controller's own features (a middleware, a header
+> rule or a route policy), on `/mcp` and `/.well-known/oauth-protected-resource` only:
+>
+> - remove the `Cookie` request header;
+> - remove the `Set-Cookie` and `Service-Worker-Allowed` response headers;
+> - add the response headers `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff`.
 
 Set `backend.mcp.dcr.allowedRedirectHosts` to the AI apps you support to limit which apps can
 register themselves.

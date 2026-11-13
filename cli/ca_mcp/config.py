@@ -68,8 +68,11 @@ TRANSPORT = os.getenv(
     "CA_MCP_TRANSPORT", "streamable-http" if AUTH_MODE == "oauth" else "stdio"
 ).lower()
 IS_HTTP = TRANSPORT in ("http", "streamable-http")
-# honoured on both transports; only the default differs (stdio is one local user)
-READ_ONLY = _flag("CA_MCP_READ_ONLY", "true" if IS_HTTP else "false")
+# honoured in every mode; only the default differs: stdio is one local user, and
+# in OAuth mode each connection's profile decides, in the backend too
+READ_ONLY = _flag(
+    "CA_MCP_READ_ONLY", "true" if IS_HTTP and AUTH_MODE != "oauth" else "false"
+)
 HTTP_HOST = os.getenv("CA_MCP_HOST", "127.0.0.1")
 HTTP_PORT = int(os.getenv("CA_MCP_PORT", "8001"))
 HTTP_PATH = os.getenv("CA_MCP_PATH", "/mcp")
