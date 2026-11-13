@@ -9,6 +9,8 @@
 	import type { SuperForm, SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
+	import { hasPermissionAnywhere, isAccessAllowed } from '#lib/utils/access-control.js';
 	import { directionOf, higherIsBetterFor, type Direction } from '#lib/utils/metrics.js';
 
 	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
@@ -58,11 +60,21 @@
 
 	// ---------- one step: the definition is written with the metric ----------
 	const isCreate = !object?.id;
+	// Defining the metric here creates its definition too, in the metric's
+	// domain: the save refuses it without the right to add definitions there.
+	// Until a domain is picked, holding the right somewhere is enough.
+	const canDefine = $derived(
+		$folderValue
+			? isAccessAllowed(page.data?.user, 'add_metricdefinition', String($folderValue))
+			: hasPermissionAnywhere(page.data?.user, 'add_metricdefinition')
+	);
 	// 'define': the form holds the definition's fields; 'existing': a
 	// definition is picked and its settings are copied.
 	let mode = $state<'define' | 'existing'>(
-		initialData.metric_definition || data?.metric_definition ? 'existing' : 'define'
+		initialData.metric_definition || data?.metric_definition || !canDefine ? 'existing' : 'define'
 	);
+	// The mode follows the domain's rights until the author picks one.
+	let modeChosen = false;
 
 	const modeOptions = $derived([
 		{ value: 'define', label: m.defineMetricHere() },
@@ -106,6 +118,15 @@
 		if (!$frequencyValue) $frequencyValue = 'monthly';
 		setMode(mode);
 	}
+
+	$effect(() => {
+		if (!isCreate || initialData.metric_definition) return;
+		if (!canDefine) {
+			if (mode === 'define') setMode('existing');
+		} else if (mode === 'existing' && !modeChosen && !$definitionValue) {
+			setMode('define');
+		}
+	});
 
 	// Definition defaults follow the metric's own target and frequency: the
 	// definition created here is this metric's, and later metrics from it
@@ -169,6 +190,7 @@
 	function useSimilar() {
 		if (!similar) return;
 		const picked = similar;
+		modeChosen = true;
 		setMode('existing');
 		$definitionValue = picked.id;
 		definitionVersion += 1;
@@ -366,12 +388,15 @@
 	</div>
 {/if}
 
-{#if isCreate && !initialData.metric_definition}
+{#if isCreate && !initialData.metric_definition && canDefine}
 	<div class="form-group">
 		<SegmentedControl
 			options={modeOptions}
 			value={mode}
-			onChange={(value) => setMode(value as 'define' | 'existing')}
+			onChange={(value) => {
+				modeChosen = true;
+				setMode(value as 'define' | 'existing');
+			}}
 			ariaLabel={m.metricDefinition()}
 		/>
 		{#if mode === 'define'}
