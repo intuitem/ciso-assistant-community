@@ -111,6 +111,53 @@ Check them with `curl -I https://<domain>/mcp`, which must show the sandbox head
 > - remove the `Set-Cookie` and `Service-Worker-Allowed` response headers;
 > - add the response headers `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff`.
 
+With Traefik v3, for example, add a route of your own for the two MCP paths, outside the chart. Its
+priority puts it above the routes Traefik builds from the chart's Ingress for the same paths, and
+its middleware applies the five rules there only:
+
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: mcp-isolation
+  namespace: <namespace>
+spec:
+  headers:
+    # an empty value removes the header
+    customRequestHeaders:
+      Cookie: ""
+    customResponseHeaders:
+      Set-Cookie: ""
+      Service-Worker-Allowed: ""
+      Content-Security-Policy: sandbox
+      X-Content-Type-Options: nosniff
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: <release>-mcp
+  namespace: <namespace>
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`<domain>`) && (PathPrefix(`/mcp`) || PathPrefix(`/.well-known/oauth-protected-resource`))
+      kind: Rule
+      priority: 10000
+      middlewares:
+        - name: mcp-isolation
+      services:
+        - name: <release>-ciso-assistant-backend
+          port: mcp
+  tls:
+    secretName: <the TLS secret of the chart's ingress>
+```
+
+Use the backend Service name from `kubectl get svc -n <namespace>`; it follows the chart's name
+overrides. `curl -I https://<domain>/mcp` must still answer `401` with the sandbox header. The MCP
+server sets that header too, so to see the cookie removed, point the route at a service that echoes
+the request headers for a moment.
+
 Set `backend.mcp.dcr.allowedRedirectHosts` to the AI apps you support to limit which apps can
 register themselves.
 
