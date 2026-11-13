@@ -8313,6 +8313,18 @@ class RiskScenarioFilter(GenericFilterSet):
         method="filter_exclude",
         label="Exclude scenario",
     )
+    # Same per-matrix rule as the analytics summary's high risks count.
+    top_level = df.ChoiceFilter(
+        choices=[
+            ("inherent", "inherent"),
+            ("current", "current"),
+            ("residual", "residual"),
+        ],
+        method="filter_top_level",
+    )
+
+    def filter_top_level(self, queryset, name, value):
+        return filter_top_risk_levels(queryset, f"{value}_level")
 
     def filter_within_tolerance(self, queryset, name, value):
         if value == "YES":
@@ -11066,6 +11078,8 @@ def get_analytics_export_xlsx(request):
     ws1.append(["Category", "Metric", "Value"])
     style_header_row(ws1)
     for category, values in metrics.items():
+        if category == "trends":
+            continue
         if isinstance(values, dict):
             for key, val in values.items():
                 ws1.append([category, key, val])

@@ -77,7 +77,7 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 				.catch(() => null)
 		: Promise.resolve(null);
 
-	const risksCountPerLevelPromise = shown('risk', 'summary')
+	const risksCountPerLevelPromise = shown('risk')
 		? fetch(`${BASE_API_URL}/risk-scenarios/count_per_level/`)
 				.then(assertOk)
 				.then((res) => res.json())

@@ -412,6 +412,7 @@ export const FILTER_KEYS = new Set([
 	'task_template',
 	'threats',
 	'tier',
+	'top_level',
 	'transfer_mechanism',
 	'treatment',
 	'trigger_type',
