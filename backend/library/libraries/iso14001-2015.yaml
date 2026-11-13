@@ -1,0 +1,702 @@
+---
+urn: urn:intuitem:risk:library:iso14001-2015
+locale: en
+ref_id: iso14001-2015
+name: ISO 14001:2015 — Environmental management systems — Requirements with guidance for use
+description: ISO 14001:2015 standard for environmental management systems (EMS). Detailed summary by clause
+  and sub-clause. Full version to be purchased from ISO.
+copyright: ISO - Full version to be purchased from ISO.
+version: 1
+publication_date: 2015-09-15
+provider: ISO
+packager: Nadia QOUDHADH
+translations:
+  fr:
+    name: ISO 14001:2015 — Systèmes de management environnemental — Exigences et lignes directrices pour
+      son utilisation
+    description: Norme ISO 14001:2015 relative aux systèmes de management environnemental (SME). Synthèse
+      détaillée par article et sous-clause. Version complète à acquérir auprès de l'ISO.
+    copyright: ISO - Version complète à acquérir auprès de l'ISO.
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso14001-2015
+    ref_id: iso14001-2015
+    name: ISO 14001:2015 — Environmental management systems — Requirements
+    description: ISO 14001:2015 standard for environmental management systems.
+    translations:
+      fr:
+        name: ISO 14001:2015 — Systèmes de management environnemental — Exigences
+        description: Norme ISO 14001:2015 relative aux systèmes de management environnemental.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+      translations:
+        fr:
+          name: Incomplet
+          description: Ad hoc et non maîtrisé
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+      translations:
+        fr:
+          name: Initial
+          description: Imprévisible et réactif
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+      translations:
+        fr:
+          name: Géré
+          description: Géré au niveau projet
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+      translations:
+        fr:
+          name: Défini
+          description: Proactif plutôt que réactif
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+      translations:
+        fr:
+          name: Géré quantitativement
+          description: Mesuré et contrôlé
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+      translations:
+        fr:
+          name: Optimisé
+          description: Stable et flexible
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Context of the organization
+      translations:
+        fr:
+          name: Contexte de l'organisme
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: Determine external and internal issues relevant to the organization's purpose, including
+        environmental conditions affected by or capable of affecting the organization.
+      annotation: Use a PESTLE or SWOT analysis explicitly integrating environmental conditions (climate,
+        resources, biodiversity).
+      translations:
+        fr:
+          name: Compréhension de l'organisme et de son contexte
+          description: Déterminer les enjeux externes et internes pertinents pour la finalité de l'organisme,
+            y compris les conditions environnementales affectées ou susceptibles d'affecter l'organisme.
+          annotation: Utiliser une analyse PESTLE ou SWOT intégrant explicitement les conditions environnementales
+            (climat, ressources, biodiversité).
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+      description: Determine relevant interested parties, their needs and expectations, and identify which
+        become compliance obligations.
+      annotation: Maintain a stakeholder register and map their legal and voluntary requirements.
+      translations:
+        fr:
+          name: Compréhension des besoins et attentes des parties intéressées
+          description: Déterminer les parties intéressées pertinentes, leurs besoins et attentes, et identifier
+            ceux qui deviennent des obligations de conformité.
+          annotation: Tenir un registre des parties prenantes et cartographier leurs exigences légales
+            et volontaires.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:4
+      ref_id: '4.3'
+      name: Determining the scope of the EMS
+      description: Define the boundaries and applicability of the EMS considering issues, compliance obligations,
+        organizational units, activities/products/services, and authority to control/influence.
+      annotation: Draft a scope document specifying sites, activities, and justified exclusions.
+      translations:
+        fr:
+          name: Détermination du domaine d'application du SME
+          description: Définir les limites et l'applicabilité du SME en considérant les enjeux, les obligations
+            de conformité, les unités organisationnelles, les activités/produits/services et l'autorité
+            de maîtrise/influence.
+          annotation: Rédiger un document de périmètre précisant les sites, activités et exclusions justifiées.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:4
+      ref_id: '4.4'
+      name: Environmental management system
+      description: Establish, implement, maintain and continually improve the EMS, including the processes
+        needed and their interactions, considering knowledge from 4.1 and 4.2.
+      annotation: Map EMS processes and document their interactions.
+      translations:
+        fr:
+          name: Système de management environnemental
+          description: Établir, mettre en œuvre, tenir à jour et améliorer en continu le SME, y compris
+            les processus nécessaires et leurs interactions, en tenant compte des connaissances acquises
+            en 4.1 et 4.2.
+          annotation: Cartographier les processus du SME et documenter leurs interactions.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Leadership
+      translations:
+        fr:
+          name: Leadership
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+      description: Top management shows leadership and commitment to the EMS (accountability, integration,
+        resources, communication, results, support, improvement, backing other management roles).
+      annotation: Set up an environmental committee and executive sponsorship.
+      translations:
+        fr:
+          name: Leadership et engagement
+          description: La direction démontre son leadership et son engagement vis-à-vis du SME (responsabilité,
+            intégration, ressources, communication, résultats, soutien, amélioration, soutien aux autres
+            rôles).
+          annotation: Mettre en place un comité environnement et un parrainage exécutif.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:5
+      ref_id: '5.2'
+      name: Environmental policy
+      description: Establish, implement and maintain an environmental policy appropriate to the context,
+        providing a framework for objectives, including commitments to protect the environment (pollution
+        prevention), compliance, and continual improvement.
+      annotation: Draft a concise policy including the three fundamental commitments and communicate it.
+      translations:
+        fr:
+          name: Politique environnementale
+          description: Établir, mettre en œuvre et tenir à jour une politique environnementale appropriée
+            au contexte, cadre des objectifs, incluant les engagements de protection de l'environnement
+            (prévention de la pollution), de conformité et d'amélioration continue.
+          annotation: Rédiger une politique concise incluant les trois engagements fondamentaux et la
+            diffuser.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:5
+      ref_id: '5.3'
+      name: Organizational roles, responsibilities and authorities
+      description: Assign and communicate responsibilities and authorities to ensure EMS conformity and
+        report on environmental performance to top management.
+      annotation: Use a RACI matrix to document roles and authorities.
+      translations:
+        fr:
+          name: Rôles, responsabilités et autorités
+          description: Attribuer et communiquer les responsabilités et autorités pour assurer la conformité
+            au SME et rendre compte de la performance environnementale à la direction.
+          annotation: Utiliser une matrice RACI pour documenter les rôles et autorités.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Planning
+      translations:
+        fr:
+          name: Planification
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+      translations:
+        fr:
+          name: Actions à mettre en œuvre face aux risques et opportunités
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6.1
+      ref_id: 6.1.1
+      name: General
+      description: Establish processes to determine risks and opportunities related to environmental aspects,
+        compliance obligations and other issues, to ensure intended outcomes, prevent undesirable effects
+        and improve. Determine potential emergency situations.
+      annotation: Integrate environmental risks into enterprise risk management.
+      translations:
+        fr:
+          name: Généralités
+          description: Établir les processus pour déterminer les risques et opportunités liés aux aspects
+            environnementaux, aux obligations de conformité et aux autres enjeux, afin d'assurer l'atteinte
+            des résultats, prévenir les effets indésirables et s'améliorer. Déterminer les situations
+            d'urgence potentielles.
+          annotation: Intégrer les risques environnementaux dans la gestion des risques de l'entreprise.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6.1
+      ref_id: 6.1.2
+      name: Environmental aspects
+      description: Determine environmental aspects of activities, products and services (controlled or
+        influenced) and associated impacts from a life cycle perspective. Determine significant aspects
+        using established criteria and communicate them. Keep documented information.
+      annotation: Use an evaluation grid (severity, frequency, control) to identify significant aspects.
+      translations:
+        fr:
+          name: Aspects environnementaux
+          description: Déterminer les aspects environnementaux des activités, produits et services (maîtrisés
+            ou influencés) et leurs impacts associés dans une perspective de cycle de vie. Déterminer
+            les aspects significatifs via des critères établis et les communiquer. Conserver les preuves.
+          annotation: Utiliser une grille d'évaluation (gravité, fréquence, maîtrise) pour identifier
+            les aspects significatifs.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6.1
+      ref_id: 6.1.3
+      name: Compliance obligations
+      description: Determine and have access to compliance obligations related to environmental aspects,
+        determine how they apply, and take them into account in the EMS. Keep documented information.
+      annotation: Maintain an up-to-date legal register (regulatory watch).
+      translations:
+        fr:
+          name: Obligations de conformité
+          description: Déterminer et avoir accès aux obligations de conformité relatives aux aspects environnementaux,
+            déterminer leur application et les prendre en compte dans le SME. Conserver les preuves.
+          annotation: Tenir un registre réglementaire à jour (veille légale).
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6.1
+      ref_id: 6.1.4
+      name: Planning action
+      description: Plan actions to address significant aspects, compliance obligations and risks/opportunities,
+        and how to integrate them into EMS processes and evaluate their effectiveness.
+      annotation: Develop an environmental action plan with owners and deadlines.
+      translations:
+        fr:
+          name: Planification d'actions
+          description: Planifier les actions pour traiter les aspects significatifs, les obligations de
+            conformité et les risques/opportunités, et la manière de les intégrer dans les processus du
+            SME et d'évaluer leur efficacité.
+          annotation: Élaborer un plan d'actions environnemental avec responsables et échéances.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6
+      ref_id: '6.2'
+      name: Environmental objectives and planning to achieve them
+      translations:
+        fr:
+          name: Objectifs environnementaux et planification des actions pour les atteindre
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6.2
+      ref_id: 6.2.1
+      name: Environmental objectives
+      description: Establish environmental objectives at relevant functions and levels, consistent with
+        the policy, measurable (if practicable), monitored, communicated and updated. Keep documented
+        information.
+      annotation: Define SMART objectives aligned with significant aspects.
+      translations:
+        fr:
+          name: Objectifs environnementaux
+          description: Établir des objectifs environnementaux aux fonctions et niveaux concernés, cohérents
+            avec la politique, mesurables (si réalisable), surveillés, communiqués et mis à jour. Conserver
+            les preuves.
+          annotation: Définir des objectifs SMART alignés sur les aspects significatifs.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:6.2
+      ref_id: 6.2.2
+      name: Planning actions to achieve environmental objectives
+      description: Determine what will be done, resources required, who will be responsible, timeframes,
+        and how results will be evaluated (indicators).
+      annotation: Establish environmental performance indicators (EPIs) and review them periodically.
+      translations:
+        fr:
+          name: Planification des actions pour atteindre les objectifs
+          description: Déterminer ce qui sera fait, les ressources, les responsables, les échéances et
+            la méthode d'évaluation des résultats (indicateurs).
+          annotation: Établir des indicateurs de performance environnementale (IPE) et les revoir périodiquement.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Support
+      translations:
+        fr:
+          name: Support
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7
+      ref_id: '7.1'
+      name: Resources
+      description: Identify and provide the resources needed to establish, implement, maintain and continually
+        improve the EMS.
+      annotation: Identify human, technical and financial resources dedicated to the EMS.
+      translations:
+        fr:
+          name: Ressources
+          description: Identifier et fournir les ressources nécessaires à l'établissement, la mise en
+            œuvre, la tenue à jour et l'amélioration continue du SME.
+          annotation: Recenser les ressources humaines, techniques et financières dédiées au SME.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7
+      ref_id: '7.2'
+      name: Competence
+      description: Determine necessary competence for persons whose work affects environmental performance
+        and compliance obligations, ensure they are competent, determine training needs, and keep documented
+        information.
+      annotation: Keep training records up to date and verify competence annually.
+      translations:
+        fr:
+          name: Compétences
+          description: Déterminer les compétences nécessaires pour les personnes dont le travail a une
+            incidence sur la performance environnementale et les obligations de conformité, s'assurer
+            qu'elles sont compétentes, déterminer les besoins de formation et conserver les preuves.
+          annotation: Tenir à jour les dossiers de formation et vérifier les compétences annuellement.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7
+      ref_id: '7.3'
+      name: Awareness
+      description: Ensure personnel are aware of the environmental policy, significant aspects and associated
+        impacts related to their work, their contribution, and the consequences of non-compliance.
+      annotation: Deliver awareness sessions with practical scenarios.
+      translations:
+        fr:
+          name: Sensibilisation
+          description: Sensibiliser le personnel à la politique environnementale, aux aspects significatifs
+            et impacts associés à leur travail, à leur contribution et aux conséquences d'un non-respect.
+          annotation: Organiser des sessions de sensibilisation avec des cas pratiques.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7
+      ref_id: '7.4'
+      name: Communication
+      translations:
+        fr:
+          name: Communication
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7.4
+      ref_id: 7.4.1
+      name: General
+      description: Establish internal and external communication processes (what, when, with whom, how)
+        considering compliance obligations and ensuring consistency and reliability of information.
+      annotation: Define an environmental communication plan.
+      translations:
+        fr:
+          name: Généralités
+          description: Établir les processus de communication interne et externe (sujets, moments, destinataires,
+            moyens) en tenant compte des obligations de conformité et en s'assurant de la cohérence et
+            de la fiabilité des informations.
+          annotation: Définir un plan de communication environnementale.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7.4
+      ref_id: 7.4.2
+      name: Internal communication
+      description: Communicate relevant EMS information internally, including changes, and enable personnel
+        to contribute to continual improvement.
+      annotation: Use internal channels (meetings, intranet) to disseminate environmental information.
+      translations:
+        fr:
+          name: Communication interne
+          description: Communiquer en interne les informations pertinentes du SME, notamment les changements,
+            et permettre au personnel de contribuer à l'amélioration continue.
+          annotation: Utiliser des canaux internes (réunions, intranet) pour diffuser les informations
+            environnementales.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7.4
+      ref_id: 7.4.3
+      name: External communication
+      description: Communicate relevant EMS information externally, as established by communication processes
+        and required by compliance obligations.
+      annotation: Publish an annual environmental report if required or voluntary.
+      translations:
+        fr:
+          name: Communication externe
+          description: Communiquer en externe les informations pertinentes du SME, comme établi par les
+            processus de communication et requis par les obligations de conformité.
+          annotation: Publier un rapport environnemental annuel si requis ou volontaire.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7
+      ref_id: '7.5'
+      name: Documented information
+      translations:
+        fr:
+          name: Informations documentées
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7.5
+      ref_id: 7.5.1
+      name: General
+      description: The EMS holds the documented information the standard calls for, plus whatever the
+        organization considers necessary for it to work effectively.
+      annotation: Tailor documentation extent to size, complexity and competence.
+      translations:
+        fr:
+          name: Généralités
+          description: Le SME inclut les informations documentées exigées par la norme et celles jugées
+            nécessaires à son efficacité.
+          annotation: Adapter l'étendue documentaire à la taille, la complexité et les compétences.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7.5
+      ref_id: 7.5.2
+      name: Creating and updating
+      description: Ensure appropriate identification, format, media, review and approval of documented
+        information.
+      annotation: Version control all documents with approval dates.
+      translations:
+        fr:
+          name: Création et mise à jour
+          description: Assurer l'identification, le format, le support, la revue et l'approbation appropriés
+            des informations documentées.
+          annotation: Versionner tous les documents avec dates d'approbation.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+      description: Control availability, protection, distribution, access, storage, changes, retention
+        and disposal. Identify and control external documents.
+      annotation: Protect sensitive data and ensure backups.
+      translations:
+        fr:
+          name: Maîtrise des informations documentées
+          description: Maîtriser la disponibilité, la protection, la distribution, l'accès, le stockage,
+            les modifications, la conservation et l'élimination. Identifier et maîtriser les documents
+            d'origine externe.
+          annotation: Protéger les données sensibles et assurer les sauvegardes.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Operation
+      translations:
+        fr:
+          name: Réalisation des activités opérationnelles
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:8
+      ref_id: '8.1'
+      name: Operational planning and control
+      description: Establish, implement, control and maintain processes to meet EMS requirements and implement
+        planned actions (operational criteria, management of change, outsourced processes, life cycle
+        perspective).
+      annotation: Develop operating procedures and operational controls for activities with significant
+        impact.
+      translations:
+        fr:
+          name: Planification et maîtrise opérationnelles
+          description: Établir, mettre en œuvre, maîtriser et tenir à jour les processus nécessaires pour
+            satisfaire aux exigences du SME et réaliser les actions planifiées (critères opérationnels,
+            maîtrise des modifications, processus externalisés, perspective cycle de vie).
+          annotation: Élaborer des modes opératoires et des contrôles opérationnels pour les activités
+            à impact significatif.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:8
+      ref_id: '8.2'
+      name: Emergency preparedness and response
+      description: Establish, implement and maintain processes to prepare for and respond to potential
+        emergency situations (planning, actual response, mitigation, periodic testing, review, training).
+      annotation: Develop environmental emergency plans and test them annually.
+      translations:
+        fr:
+          name: Préparation et réponse aux situations d'urgence
+          description: Établir, mettre en œuvre et tenir à jour les processus pour se préparer et répondre
+            aux situations d'urgence potentielles (planification, réponse réelle, atténuation, essais
+            périodiques, revue, formation).
+          annotation: Élaborer des plans d'urgence environnementale et les tester annuellement.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Performance evaluation
+      translations:
+        fr:
+          name: Évaluation des performances
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis and evaluation
+      translations:
+        fr:
+          name: Surveillance, mesure, analyse et évaluation
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:9.1
+      ref_id: 9.1.1
+      name: General
+      description: Determine what needs to be monitored/measured, methods, criteria and indicators, when,
+        and when results are analyzed. Evaluate environmental performance and EMS effectiveness. Communicate
+        relevant information. Keep documented information.
+      annotation: Track indicators such as energy consumption, emissions, waste.
+      translations:
+        fr:
+          name: Généralités
+          description: Déterminer ce qui doit être surveillé/mesuré, les méthodes, les critères et indicateurs,
+            le moment et l'analyse. Évaluer la performance environnementale et l'efficacité du SME. Communiquer
+            les informations pertinentes. Conserver les preuves.
+          annotation: Suivre des indicateurs tels que la consommation d'énergie, les émissions, les déchets.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:9.1
+      ref_id: 9.1.2
+      name: Evaluation of compliance
+      description: Establish, implement and maintain processes to evaluate compliance with obligations
+        (frequency, evaluation, actions, knowledge of compliance status). Keep documented information.
+      annotation: Conduct periodic regulatory compliance audits.
+      translations:
+        fr:
+          name: Évaluation de la conformité
+          description: Établir, mettre en œuvre et tenir à jour les processus d'évaluation du respect
+            des obligations de conformité (fréquence, évaluation, actions, connaissance de l'état de conformité).
+            Conserver les preuves.
+          annotation: Réaliser des audits de conformité réglementaire périodiques.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:9
+      ref_id: '9.2'
+      name: Internal audit
+      translations:
+        fr:
+          name: Audit interne
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:9.2
+      ref_id: 9.2.1
+      name: General
+      description: Conduct internal audits at planned intervals to determine whether the EMS conforms
+        to the organization's own requirements and the standard, and is effectively implemented and maintained.
+      annotation: Use trained auditors independent of the audited activity.
+      translations:
+        fr:
+          name: Généralités
+          description: Réaliser des audits internes à intervalles planifiés pour vérifier la conformité
+            aux exigences propres et à la norme, et l'efficacité du SME.
+          annotation: Utiliser des auditeurs formés et indépendants des activités auditées.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:9.2
+      ref_id: 9.2.2
+      name: Internal audit programme
+      description: Establish, implement and maintain an audit programme (frequency, methods, responsibilities,
+        planning, reporting). Define criteria and scope, select auditors, report results, and keep documented
+        information.
+      annotation: Base audit frequency on risk and past performance.
+      translations:
+        fr:
+          name: Programme d'audit interne
+          description: Établir, mettre en œuvre et maintenir un programme d'audit (fréquence, méthodes,
+            responsabilités, planification, compte rendu). Définir les critères et périmètre, sélectionner
+            les auditeurs, rapporter les résultats et conserver les preuves.
+          annotation: Baser la fréquence des audits sur les risques et les performances passées.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:9
+      ref_id: '9.3'
+      name: Management review
+      description: 'Top management reviews the EMS at planned intervals to check it remains suitable,
+        adequate and effective (inputs: previous actions, changes, objectives, performance, compliance,
+        resources, complaints, opportunities; outputs: conclusions, decisions, actions). Keep evidence.'
+      annotation: Hold management review at least annually with a structured agenda.
+      translations:
+        fr:
+          name: Revue de direction
+          description: 'La direction revoit le SME à intervalles planifiés pour s''assurer qu''il est
+            approprié, adapté et efficace (entrées : actions précédentes, changements, objectifs, performance,
+            conformité, ressources, plaintes, opportunités ; sorties : conclusions, décisions, actions).
+            Conserver les preuves.'
+          annotation: Organiser une revue de direction au moins annuelle avec un ordre du jour structuré.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Improvement
+      translations:
+        fr:
+          name: Amélioration
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:10
+      ref_id: '10.1'
+      name: General
+      description: Determine opportunities for improvement (see 9.1, 9.2, 9.3) and implement necessary
+        actions to achieve the intended outcomes of the EMS.
+      annotation: Integrate improvement into strategic and operational planning.
+      translations:
+        fr:
+          name: Généralités
+          description: Déterminer les opportunités d'amélioration (voir 9.1, 9.2, 9.3) et mettre en œuvre
+            les actions nécessaires pour atteindre les résultats escomptés du SME.
+          annotation: Intégrer l'amélioration dans la planification stratégique et opérationnelle.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:10
+      ref_id: '10.2'
+      name: Nonconformity and corrective action
+      description: React to nonconformities, evaluate the need for corrective action, analyze causes,
+        implement actions, review effectiveness, and modify the EMS if necessary. Keep documented information.
+      annotation: Maintain a CAPA register and verify closure effectiveness.
+      translations:
+        fr:
+          name: Non-conformité et actions correctives
+          description: Réagir aux non-conformités, évaluer la nécessité d'actions correctives, analyser
+            les causes, mettre en œuvre les actions, examiner leur efficacité, modifier le SME si nécessaire.
+            Conserver les preuves.
+          annotation: Tenir un registre CAPA et vérifier l'efficacité de la clôture.
+    - urn: urn:intuitem:risk:req_node:iso14001-2015:10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso14001-2015:10
+      ref_id: '10.3'
+      name: Continual improvement
+      description: Continually improve the suitability, adequacy and effectiveness of the EMS to enhance
+        environmental performance.
+      annotation: Assess EMS maturity annually and embed improvements into plans.
+      translations:
+        fr:
+          name: Amélioration continue
+          description: Améliorer en continu la pertinence, l'adéquation et l'efficacité du SME afin d'améliorer
+            la performance environnementale.
+          annotation: Évaluer annuellement la maturité du SME et intégrer les améliorations dans les plans.
