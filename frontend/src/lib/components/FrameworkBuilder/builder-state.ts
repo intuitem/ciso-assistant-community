@@ -123,10 +123,11 @@ export interface OutcomeRule {
 	/** Absent: a yes/no rule, firing when `expression` is true. 'number' computes a value
 	 *  instead; 'rating' classifies the answers to its scales into named levels (see
 	 *  core.quick_form_ratings); 'staircase' gives the level reached over implementation
-	 *  groups (see core.staircase).
+	 *  groups (see core.staircase); 'weakest_link' rates nodes by their weakest requirement and
+	 *  scores each section (see core.weakest_link).
 	 *  A kind reuses another kind's key only with the same meaning and shape; otherwise the
 	 *  key is prefixed with the kind (`staircase_levels`, not `levels`). */
-	kind?: 'number' | 'rating' | 'staircase';
+	kind?: 'number' | 'rating' | 'staircase' | 'weakest_link';
 	label?: string;
 	/** Ratings: the scales measured, their named levels, and either a grid (two
 	 *  dimensions; rows: the first, low to high) or rules (`when` CEL over `dims`),
@@ -145,6 +146,16 @@ export interface OutcomeRule {
 	cumulative?: boolean;
 	floor_label?: string;
 	section_label?: string;
+	/** Weakest links: the depth of the nodes rated (1 = top level), and what the results are
+	 *  called and weigh. */
+	rated_depth?: number;
+	result_labels?: Partial<
+		Record<
+			'compliant' | 'partially_compliant' | 'non_compliant' | 'not_assessed' | 'not_applicable',
+			string
+		>
+	>;
+	result_weights?: Partial<Record<'compliant' | 'partially_compliant' | 'non_compliant', number>>;
 	/** Frameworks: the rule applies only to audits whose scope includes one of these groups. */
 	implementation_groups?: string[];
 	translations?: Translations | null;

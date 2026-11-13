@@ -117,6 +117,7 @@
 		fr: '\u{1F1EB}\u{1F1F7}',
 		eu: '\u{1F1EA}\u{1F1FA}',
 		be: '\u{1F1E7}\u{1F1EA}',
+		hu: '\u{1F1ED}\u{1F1FA}',
 		us: '\u{1F1FA}\u{1F1F8}',
 		global: '\u{1F310}'
 	};

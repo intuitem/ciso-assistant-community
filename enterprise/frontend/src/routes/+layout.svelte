@@ -8,7 +8,9 @@
 	import { browser } from '$app/env';
 	import { onMount } from 'svelte';
 
-	import Toast from '#lib/components/Toast/Toast.svelte';
+	import { Toaster } from 'svelte-sonner';
+	import { afterNavigate } from '$app/navigation';
+	import { revealActiveTabs } from '#lib/utils/tabs.js';
 	import Modal from '#lib/components/Modals/Modal.svelte';
 	import DisplayJSONModal from '#lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
@@ -29,6 +31,9 @@
 
 	const flash = getFlash(page);
 	const toastStore = getToastStore();
+
+	// Tab bars that overflow keep the selected tab in view (deep links like ?tab=custom).
+	afterNavigate(() => requestAnimationFrame(() => revealActiveTabs()));
 
 	const toast = (message: string, options: Record<string, string>) => {
 		const t: ToastSettings = { message, ...options };
@@ -140,7 +145,8 @@
 </svelte:head>
 
 <Modal components={modalRegistry} />
-<Toast />
+<!-- offset clears the ChatWidget button (fixed bottom-6 right-6, 56px) -->
+<Toaster position="bottom-right" offset={{ bottom: 96, right: 24 }} visibleToasts={3} gap={10} />
 {@render children?.()}
 
 {#if $flash}

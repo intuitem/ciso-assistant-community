@@ -1,4 +1,5 @@
 import json
+import math
 import structlog
 from datetime import datetime, timedelta
 
@@ -7,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -42,6 +44,23 @@ from global_settings.models import GlobalSettings
 from iam.models import Folder, FolderMixin
 
 logger = structlog.getLogger(__name__)
+
+
+class Frequency(models.TextChoices):
+    # Named by their period: a value never changes meaning, since it also
+    # sets when a metric turns stale (STALENESS_THRESHOLDS).
+    EVERY_15_MINUTES = "15min", _("Every 15 minutes")
+    HOURLY = "hourly", _("Hourly")
+    DAILY = "daily", _("Daily")
+    WEEKLY = "weekly", _("Weekly")
+    MONTHLY = "monthly", _("Monthly")
+    QUARTERLY = "quarterly", _("Quarterly")
+    YEARLY = "yearly", _("Yearly")
+
+
+# Decimals shown for a definition that sets none, by unit name. Other units
+# keep the value as entered.
+UNIT_DEFAULT_DECIMALS = {"percentage": 1, "count": 0}
 
 
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
@@ -86,12 +105,33 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         ),
     )
     higher_is_better = models.BooleanField(
-        default=True,
+        default=None,
+        null=True,
+        blank=True,
         verbose_name=_("Higher is better"),
         help_text=_(
             "If true, an increase in value is considered positive (e.g., compliance score). "
-            "If false, a decrease is considered positive (e.g., number of vulnerabilities)."
+            "If false, a decrease is considered positive (e.g., number of vulnerabilities). "
+            "Unset, the default, means no direction: the value is informational."
         ),
+    )
+    decimals = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("Decimals"),
+        help_text=_(
+            "Decimals shown wherever a value is displayed. Unset: one for a "
+            "percentage, none for a count, as entered otherwise. Stored values "
+            "keep their precision."
+        ),
+    )
+    default_collection_frequency = models.CharField(
+        max_length=20,
+        choices=Frequency.choices,
+        blank=True,
+        null=True,
+        verbose_name=_("Default collection frequency"),
+        help_text=_("Copied to metrics created from this definition"),
     )
     default_target = models.FloatField(
         blank=True,
@@ -133,6 +173,14 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
 
     fields_to_check = ["ref_id", "name"]
 
+    def display_decimals(self):
+        """Decimals a shown value is rounded to, or None to show it as is."""
+        if self.decimals is not None:
+            return self.decimals
+        if self.unit_id and self.unit:
+            return UNIT_DEFAULT_DECIMALS.get(self.unit.name)
+        return None
+
     @property
     def is_derived(self) -> bool:
         return bool((self.expression or "").strip())
@@ -161,16 +209,7 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         STALE = "stale", _("Stale")
         DEPRECATED = "deprecated", _("Deprecated")
 
-    class Frequency(models.TextChoices):
-        # Named by their period: a value never changes meaning, since it also
-        # sets when a metric turns stale (STALENESS_THRESHOLDS).
-        EVERY_15_MINUTES = "15min", _("Every 15 minutes")
-        HOURLY = "hourly", _("Hourly")
-        DAILY = "daily", _("Daily")
-        WEEKLY = "weekly", _("Weekly")
-        MONTHLY = "monthly", _("Monthly")
-        QUARTERLY = "quarterly", _("Quarterly")
-        YEARLY = "yearly", _("Yearly")
+    Frequency = Frequency
 
     metric_definition = models.ForeignKey(
         MetricDefinition,
@@ -214,6 +253,23 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="metric_instances",
         blank=True,
         null=True,
+    )
+    # Collection through tasks: a period's value is due this many days
+    # after the period ends (unset: the frequency's default), and the task
+    # template generated for the metric, when it has one.
+    collection_grace_days = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("Collection grace (days)"),
+        help_text=_("Days after a period ends before its value is late"),
+    )
+    collection_task = models.ForeignKey(
+        "core.TaskTemplate",
+        on_delete=models.SET_NULL,
+        related_name="metric_instances",
+        blank=True,
+        null=True,
+        verbose_name=_("Collection task"),
     )
     # Derived metrics: when the sampler last ran for this instance, and what
     # went wrong if no sample came out of it.
@@ -267,7 +323,8 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         # last_refresh, current_value and raw_value each want the same row, so the
         # lookup is memoised per instance. When the caller prefetched `samples`,
         # first() reads the prefetch cache and costs nothing; ordering is the
-        # model's own ("-timestamp"), so first() really is the latest.
+        # model's own (latest period or moment first), so first() is the
+        # current value.
         if "_latest_sample" not in self.__dict__:
             self.__dict__["_latest_sample"] = self.samples.first()
         return self.__dict__["_latest_sample"]
@@ -378,6 +435,27 @@ def quantitative_result(value):
     return result
 
 
+# Decimals a definition may show: beyond this the display is noise and the
+# quantize below would need more precision than the default context holds.
+MAX_DECIMALS = 6
+
+
+def _rounded(result, decimals):
+    """``result`` rounded half up to ``decimals``, an int when none are
+    shown, a Decimal keeping its trailing zeros otherwise: 89.0756 -> 89.1,
+    1290.0 -> 1290, 1 at two decimals -> 1.00. A value too large to quantize
+    is shown as entered."""
+    from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+
+    decimals = min(decimals, MAX_DECIMALS)
+    quantum = Decimal(1).scaleb(-decimals)
+    try:
+        rounded = Decimal(str(result)).quantize(quantum, rounding=ROUND_HALF_UP)
+    except InvalidOperation:
+        return result
+    return int(rounded) if decimals == 0 else rounded
+
+
 class CustomMetricSample(AbstractBaseModel, FolderMixin):
     metric_instance = models.ForeignKey(
         MetricInstance,
@@ -429,18 +507,29 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = _("Custom metric sample")
         verbose_name_plural = _("Custom metric samples")
-        ordering = ["-timestamp"]  # Most recent first
+        # Most recent first, by the moment a value answers for: a period's
+        # value ranks by its period and a plain one by its timestamp, as the
+        # chart places them, so a past period typed today is not the current
+        # value. Two typed in the same second rank by entry.
+        ordering = [
+            Coalesce("period_start", "timestamp").desc(),
+            "-timestamp",
+            "-created_at",
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["metric_instance", "period_start"],
                 condition=models.Q(period_start__isnull=False),
                 name="unique_metric_sample_per_period",
             ),
-            # One entered sample per instance and second (record()); a
-            # formula's samples keep their own rule, one per period.
+            # One entered sample per instance and second (record()) for the
+            # values typed without a period; a value answering for a period
+            # has its own rule above, one per period, as a formula's samples
+            # do, so two periods typed in the same second never collide.
             models.UniqueConstraint(
                 fields=["metric_instance", "timestamp"],
-                condition=~models.Q(source="derived"),
+                condition=~models.Q(source="derived")
+                & models.Q(period_start__isnull=True),
                 name="unique_entered_sample_per_second",
             ),
         ]
@@ -464,16 +553,35 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         source), so a source writing faster than once a second keeps one
         sample a second. Safe under concurrent writes: the unique constraint
         turns the second insert into an update. Returns (sample, created)."""
-        return cls.objects.exclude(source=cls.Source.DERIVED).update_or_create(
+        entered = cls.objects.exclude(source=cls.Source.DERIVED)
+        defaults = {
+            "folder": metric_instance.folder,
+            "observation": None,
+            "evidence_revision": None,
+            "source": cls.Source.MANUAL,
+            **fields,
+        }
+        period_start = defaults.pop("period_start", None)
+        timestamp = whole_second(timestamp)
+        if period_start is not None:
+            # A value answering for a period: one per instance and period,
+            # the last one written wins, whenever it was typed. Its second is
+            # not unique (the per-second rule is for periodless values), so
+            # two periods typed in the same second both keep their entry time.
+            # Looked up among every sample: a formula that stopped computing
+            # leaves its samples behind as plain history, and the period one
+            # of them holds is taken over, not inserted beside it.
+            return cls.objects.update_or_create(
+                metric_instance=metric_instance,
+                period_start=period_start,
+                defaults={"timestamp": timestamp, **defaults},
+            )
+        # A value typed without a period answers for its moment only: a
+        # period sample replaced this way loses its period too.
+        return entered.update_or_create(
             metric_instance=metric_instance,
-            timestamp=whole_second(timestamp),
-            defaults={
-                "folder": metric_instance.folder,
-                "observation": None,
-                "evidence_revision": None,
-                "source": cls.Source.MANUAL,
-                **fields,
-            },
+            timestamp=timestamp,
+            defaults={"period_start": None, **defaults},
         )
 
     def raw_value(self):
@@ -566,6 +674,9 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                 )
                 result = None
             if result is not None:
+                decimals = metric_definition.display_decimals()
+                if decimals is not None:
+                    result = _rounded(result, decimals)
                 if metric_definition.unit:
                     unit = (
                         metric_definition.unit.get_name_translated
@@ -810,6 +921,73 @@ class BuiltinMetricSample(AbstractBaseModel):
         }
 
     @classmethod
+    def _compute_summary_metrics(cls, folder):
+        """The figures behind the analytics summary trends: cheap enough for a live point."""
+        is_global = folder.content_type == Folder.ContentType.ROOT
+        today = timezone.localdate()
+
+        def scope(qs):
+            return qs if is_global else qs.filter(folder=folder)
+
+        controls = scope(AppliedControl.objects.all())
+        task_templates = scope(TaskTemplate.objects.all())
+        incidents = scope(Incident.objects.all())
+        audits_qs = scope(ComplianceAssessment.objects.all())
+
+        # Same definitions as the analytics summary (core.helpers.get_metrics), so its
+        # figures can carry a trend. Lazy import: core.helpers imports core.models.
+        from core.helpers import (
+            FINDING_CLOSED_STATUSES,
+            _compute_progress_by_assessment,
+            filter_top_risk_levels,
+            overdue_task_templates,
+        )
+
+        summary_scenarios = scope(RiskScenario.objects.all())
+        assessed = list(
+            _compute_progress_by_assessment(
+                audits_qs.values_list("id", flat=True)
+            ).values()
+        )
+        return {
+            "task_templates_overdue": overdue_task_templates(task_templates).count(),
+            "controls_no_status": controls.filter(
+                Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
+            ).count(),
+            "controls_eta_missed": controls.filter(eta__lt=today)
+            .exclude(status="active")
+            .count(),
+            "controls_p1_pending": controls.filter(priority=1)
+            .exclude(status="active")
+            .count(),
+            "audits_avg_assessed": math.ceil(sum(assessed) / len(assessed))
+            if assessed
+            else 0,
+            "non_compliant_items": scope(RequirementAssessment.objects.all())
+            .filter(result=RequirementAssessment.Result.NON_COMPLIANT)
+            .count(),
+            "partially_compliant_items": scope(RequirementAssessment.objects.all())
+            .filter(result=RequirementAssessment.Result.PARTIALLY_COMPLIANT)
+            .count(),
+            "total_risk_scenarios": summary_scenarios.count(),
+            "risk_scenarios_high_current": filter_top_risk_levels(
+                summary_scenarios, "current_level"
+            ).count(),
+            "risk_scenarios_high_residual": filter_top_risk_levels(
+                summary_scenarios, "residual_level"
+            ).count(),
+            "incidents_open": incidents.exclude(
+                status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED]
+            ).count(),
+            "findings_open": scope(Finding.objects.all())
+            .exclude(status__in=FINDING_CLOSED_STATUSES)
+            .count(),
+            "evidence_expired": scope(Evidence.objects.all())
+            .filter(status="expired")
+            .count(),
+        }
+
+    @classmethod
     def _compute_folder_metrics(cls, folder):
         # Root folder = unfiltered org-wide scope; others = direct membership only
         # (no descendant traversal, matching the existing breakdown metrics).
@@ -1020,6 +1198,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             due_date__gte=today, due_date__lte=today + timedelta(days=7)
         ).count()
 
+        summary_metrics = cls._compute_summary_metrics(folder)
+
         eta_on_track = controls.filter(Q(eta__isnull=False) & Q(eta__gte=today)).count()
         eta_late = controls.filter(
             Q(eta__isnull=False)
@@ -1145,6 +1325,7 @@ class BuiltinMetricSample(AbstractBaseModel):
             "projects_avg_progress": projects_avg_progress,
             "projects_total_budget": projects_total_budget,
             "projects_total_actual_cost": projects_total_actual_cost,
+            **summary_metrics,
         }
 
 

@@ -37,14 +37,36 @@
 	   same Skeleton btn hover (brightness 125% light / 75% dark) rather than a bg shift. */
 	@apply text-primary-contrast-500 bg-primary-500 hover:brightness-125 dark:hover:brightness-75;
 }
+/* Only the main action (primary) is filled; every secondary toolbar action shares one
+   neutral tonal look, so colour no longer competes with the primary or implies meaning. */
 @utility btn-mini-secondary {
-	@apply text-gray-50 bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500;
+	@apply text-surface-800-200 bg-surface-100-900 hover:bg-surface-200-800 border-l border-surface-200-800;
 }
 @utility btn-mini-tertiary {
-	@apply text-gray-50 bg-sky-500 hover:bg-sky-400 dark:bg-sky-600 dark:hover:bg-sky-500;
+	@apply btn-mini-secondary;
 }
 @utility btn-mini-quaternary {
-	@apply text-gray-50 bg-teal-500 hover:bg-teal-400 dark:bg-teal-600 dark:hover:bg-teal-500;
+	@apply btn-mini-secondary;
+}
+/* Secondary action next to a filled primary: quiet surface + hairline border, the icon carries
+   the brand colour. Same family as btn-mini-secondary so toolbars and headers read as one system. */
+/* Header action block: even 2-column grid of equal buttons; an odd last one spans the row. */
+@utility action-grid {
+	@apply grid grid-cols-2 gap-2 *:w-full;
+	& > :last-child:nth-child(odd) {
+		@apply col-span-2;
+	}
+}
+@utility btn-quiet {
+	@apply bg-surface-50-950 text-surface-800-200 border border-surface-200-800 shadow-xs hover:bg-surface-100-900 hover:border-surface-300-700;
+	/* Icons carry a per-action hue (same action, same colour app-wide); unmapped ones fall back to primary. */
+	& > i:not([class*='text-']) {
+		@apply text-primary-500;
+	}
+}
+/* Accelerator tile: left-aligned icon + label, the audit page's pattern, reused on every assessment. */
+@utility action-tile {
+	@apply flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 text-sm font-medium leading-tight text-left cursor-pointer transition-colors hover:bg-surface-100-900 hover:border-surface-300-700;
 }
 
 /* v5 styles the <code> element itself and dropped the `code` utility; we still tag
@@ -147,6 +169,20 @@ ul.options.portaled-options > li:not(.active):hover {
 	border-color: var(--color-surface-600);
 }
 
+/* AutocompleteSelect: a long selected label must not push its remove button
+   out of a narrow field. Let the selected item shrink, so its label truncates
+   and the button stays within reach. */
+div.multiselect > ul.selected,
+div.multiselect > ul.selected > li {
+	min-width: 0;
+}
+div.multiselect > ul.selected > li {
+	max-width: 100%;
+}
+div.multiselect > ul.selected > li > button.remove {
+	flex-shrink: 0;
+}
+
 /* AutocompleteSelect: collapse overflow chips when chip-max-N class is on outerDiv.
    Uses position/size instead of display:none to avoid Tailwind v4 @layer !important cascade. */
 .chip-max-1 ul.selected > li:nth-child(n + 3),
@@ -170,4 +206,54 @@ ul.options.portaled-options > li:not(.active):hover {
 }
 .hide-scrollbar::-webkit-scrollbar {
 	display: none;
+}
+
+/* Horizontal tab bars scroll sideways instead of clipping their last tabs on narrow viewports.
+   Unlayered so it wins over the Skeleton tabs styles without !important. */
+[data-scope='tabs'][data-part='list'][data-orientation='horizontal'] {
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
+}
+
+/* Fade the edge that hides tabs. A scroll-driven animation only runs while the bar overflows,
+   so a bar that fits gets no fade; browsers without scroll timelines just scroll. */
+@property --tabs-fade-start {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+@property --tabs-fade-end {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+@keyframes tabs-edge-fade {
+	0% {
+		--tabs-fade-start: 0px;
+		--tabs-fade-end: 2rem;
+	}
+	4% {
+		--tabs-fade-start: 2rem;
+	}
+	96% {
+		--tabs-fade-end: 2rem;
+	}
+	100% {
+		--tabs-fade-start: 2rem;
+		--tabs-fade-end: 0px;
+	}
+}
+@supports (animation-timeline: scroll()) {
+	[data-scope='tabs'][data-part='list'][data-orientation='horizontal'] {
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 var(--tabs-fade-start),
+			#000 calc(100% - var(--tabs-fade-end)),
+			transparent
+		);
+		animation: tabs-edge-fade linear both;
+		animation-timeline: scroll(self inline);
+	}
 }

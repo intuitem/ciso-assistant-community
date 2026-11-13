@@ -237,6 +237,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'dora',
 					label: m.dora(),
 					description: m.doraFlagDescription()
+				},
+				{
+					field: 'nis2',
+					label: m.nis2Notification(),
+					description: m.nis2FlagDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
@@ -357,6 +362,16 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'jit_provisioning',
 					label: m.jitProvisioning(),
 					description: m.jitProvisioningDescription()
+				},
+				{
+					field: 'mcp',
+					label: m.mcpConnections(),
+					description: m.mcpConnectionsDescription()
+				},
+				{
+					field: 'mcp_write',
+					label: m.mcpWrite(),
+					description: m.mcpWriteDescription()
 				},
 				{
 					field: 'service_accounts',

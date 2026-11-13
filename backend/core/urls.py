@@ -309,8 +309,16 @@ urlpatterns = [
         "mapping-libraries/",
         MappingLibrariesList.as_view(),
     ),
-    path("library-knowledge/requirements/", RequirementKnowledgeView.as_view()),
-    path("library-knowledge/mappings/", RequirementMappingKnowledgeView.as_view()),
+    path(
+        "library-knowledge/requirements/",
+        RequirementKnowledgeView.as_view(),
+        name="library-knowledge-requirements",
+    ),
+    path(
+        "library-knowledge/mappings/",
+        RequirementMappingKnowledgeView.as_view(),
+        name="library-knowledge-mappings",
+    ),
     path(
         "folders/<uuid:pk>/users/",
         UserRolesOnFolderList.as_view(),

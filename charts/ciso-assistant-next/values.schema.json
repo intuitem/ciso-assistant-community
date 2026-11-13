@@ -162,6 +162,88 @@
                 "imagePullSecrets": {
                     "type": "array"
                 },
+                "mcp": {
+                    "type": "object",
+                    "properties": {
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "type": "boolean"
+                                },
+                                "capabilities": {
+                                    "type": "object",
+                                    "properties": {
+                                        "drop": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "readOnlyRootFilesystem": {
+                                    "type": "boolean"
+                                },
+                                "runAsGroup": {
+                                    "type": "integer"
+                                },
+                                "runAsNonRoot": {
+                                    "type": "boolean"
+                                },
+                                "runAsUser": {
+                                    "type": "integer"
+                                }
+                            },
+                            "additionalProperties": true
+                        },
+                        "dcr": {
+                            "type": "object",
+                            "properties": {
+                                "allowedRedirectHosts": {
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "env": {
+                            "type": "array"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "name": {
                     "type": "string"
                 },
@@ -306,6 +388,10 @@
                     "properties": {
                         "bodySizeLimit": {
                             "type": "string"
+                        },
+                        "xffDepth": {
+                            "type": "integer",
+                            "minimum": 1
                         }
                     },
                     "additionalProperties": false
@@ -502,6 +588,74 @@
                         }
                     },
                     "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "memcached": {
+            "type": "object",
+            "properties": {
+                "containerSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "type": "object",
+                            "properties": {
+                                "drop": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "readOnlyRootFilesystem": {
+                            "type": "boolean"
+                        },
+                        "runAsGroup": {
+                            "type": "integer"
+                        },
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "type": "integer"
+                        }
+                    },
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "memoryLimit": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "resources": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             },
             "additionalProperties": false

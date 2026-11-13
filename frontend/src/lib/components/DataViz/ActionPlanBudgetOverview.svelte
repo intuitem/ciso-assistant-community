@@ -41,23 +41,28 @@
 	let error = $state(false);
 	let collapsed = $state(false);
 
-	async function fetchBudget() {
+	let latest = 0;
+
+	async function fetchBudget(endpoint: string) {
+		const request = ++latest;
 		try {
-			const res = await fetch(budgetEndpoint);
-			if (!res.ok) {
-				error = true;
-				return;
-			}
-			budgetData = await res.json();
+			const res = await fetch(endpoint);
+			if (!res.ok) throw new Error(res.statusText);
+			const body: BudgetData = await res.json();
+			// A slow answer for a previous endpoint must not replace a newer one.
+			if (request !== latest) return;
+			budgetData = body;
+			error = false;
 		} catch {
+			if (request !== latest) return;
 			error = true;
 		} finally {
-			loading = false;
+			if (request === latest) loading = false;
 		}
 	}
 
 	$effect(() => {
-		fetchBudget();
+		fetchBudget(budgetEndpoint);
 	});
 </script>
 

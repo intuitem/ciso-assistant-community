@@ -26,7 +26,7 @@ export const complianceResultColorMap: { [key: string]: string } = {
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
 	compliant: '#86efac',
-	not_applicable: '#000000'
+	not_applicable: '#475569'
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
@@ -34,14 +34,14 @@ export const complianceResultTailwindColorMap: { [key: string]: string } = {
 	partially_compliant: 'bg-yellow-300 dark:bg-yellow-600',
 	non_compliant: 'bg-red-300 dark:bg-red-800',
 	compliant: 'bg-green-300 dark:bg-green-700',
-	not_applicable: 'bg-black text-white'
+	not_applicable: 'bg-slate-600 text-white'
 };
 
 export const postureResultTailwindColorMap: { [key: string]: string } = {
 	pass: 'bg-green-300 dark:bg-green-700',
 	fail: 'bg-red-300 dark:bg-red-800',
 	error: 'bg-amber-300 dark:bg-amber-600',
-	not_applicable: 'bg-black text-white',
+	not_applicable: 'bg-slate-600 text-white',
 	not_checked: 'bg-surface-300-700'
 };
 
@@ -77,7 +77,7 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
 	compliant: '#86efac',
-	not_applicable: '#1f2937',
+	not_applicable: '#475569',
 	// Compliance / task / generic statuses
 	to_do: '#9ca3af',
 	in_progress: '#f59e0b',
@@ -261,6 +261,9 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'expiry_date',
 	'exploited_date_added',
 	'last_assessment_date',
+	'nis2_early_warning_at',
+	'nis2_final_report_at',
+	'nis2_notification_at',
 	'occurred_at',
 	'published_date',
 	'read_at',
@@ -269,6 +272,7 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'reported_at',
 	'requested_on',
 	'resolved_at',
+	'reviewed_at',
 	'revoked_at',
 	'start_date',
 	'subjects_notified_on',
@@ -285,3 +289,17 @@ export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'1-5': ['1', '2', '3', '4', '5'],
 	'FIPS-199': ['low', 'moderate', 'moderate', 'high', 'high']
 };
+
+// GDPR Art. 9 + Art. 10 categories, mirrors PersonalData.SENSITIVE_CATEGORIES (backend forces is_sensitive on save)
+export const SENSITIVE_PERSONAL_DATA_CATEGORIES = new Set([
+	'privacy_health_data',
+	'privacy_genetic_data',
+	'privacy_biometric_data',
+	'privacy_racial_ethnic_origin',
+	'privacy_political_opinions',
+	'privacy_religious_beliefs',
+	'privacy_trade_union_membership',
+	'privacy_sexual_orientation',
+	'privacy_sex_life_data',
+	'privacy_criminal_records'
+]);

@@ -3,6 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
 import { BASE_API_URL } from '#lib/utils/constants.js';
+import { countOpenTasks } from '#lib/utils/vendorTasks.js';
 import {
 	PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS,
 	PUBLIC_LICENSE_EXPIRATION_MESSAGE
@@ -55,7 +56,7 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		children?: unknown[];
 	} | null = null;
 	const focusModeEnabled = featureflags?.focus_mode ?? false;
-	if (user && focusModeEnabled) {
+	if (user && focusModeEnabled && !user.is_third_party) {
 		try {
 			const treeRes = await fetch(
 				`${BASE_API_URL}/folders/org_tree/?include_perimeters=false&no_focus=true`
@@ -83,8 +84,12 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 	const LICENSE_EXPIRATION_NOTIFY_DAYS = PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS ?? 7;
 	const LICENSE_EXPIRATION_MESSAGE = PUBLIC_LICENSE_EXPIRATION_MESSAGE ?? '';
 
+	const openTasks =
+		user?.is_third_party && featureflags?.tasks !== false ? await countOpenTasks(fetch) : 0;
+
 	return {
 		user,
+		openTasks,
 		settings,
 		featureflags,
 		licenseStatus,

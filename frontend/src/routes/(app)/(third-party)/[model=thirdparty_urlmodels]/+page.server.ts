@@ -9,15 +9,23 @@ import { formatSelectFieldData } from '#lib/utils/load.js';
 import { modelSchema } from '#lib/utils/schemas.js';
 import type { ModelInfo } from '#lib/utils/types.js';
 import { m } from '#paraglide/messages.js';
-import { fail, type Actions } from '@sveltejs/kit';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import {
+	defaultDeleteFormAction,
+	defaultWriteFormAction,
+	REDIRECT_AFTER_CREATE
+} from '#lib/utils/actions.js';
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, locals }) => {
+	const user = await locals.getUser();
+	if (user?.is_third_party) {
+		redirect(302, '/auditee-dashboard');
+	}
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = params.model!;
@@ -47,7 +55,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'compliance-assessments');
+		const redirectToWrittenObject = REDIRECT_AFTER_CREATE.has(event.params.model as string);
 		return defaultWriteFormAction({
 			event,
 			urlModel: event.params.model as string,

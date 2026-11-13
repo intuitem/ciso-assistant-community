@@ -104,8 +104,10 @@ export function readableValues(rules: OutcomeRule[], index: number): string[] {
 		.filter(
 			(r, i) =>
 				r.ref_id &&
-				// staircases are computed before every rule
-				(r.kind === 'staircase' || (r.kind === 'number' && (rule?.kind !== 'number' || i < index)))
+				// staircases and weakest links are computed before every rule
+				(r.kind === 'staircase' ||
+					r.kind === 'weakest_link' ||
+					(r.kind === 'number' && (rule?.kind !== 'number' || i < index)))
 		)
 		.map((r) => r.ref_id);
 }
