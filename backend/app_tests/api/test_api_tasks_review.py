@@ -3,14 +3,18 @@ Tests for the control plan endpoint (task-templates/yearly_review): bucket
 generation per granularity and the overdue flag.
 """
 
+import uuid
 from datetime import date, timedelta
 
 import pytest
 from django.utils import timezone
+from knox.models import AuthToken
+from rest_framework.test import APIClient
 
 from core.models import AppliedControl, TaskNode, TaskTemplate
+from core.utils import RoleCodename
 from core.views import TaskTemplateViewSet
-from iam.models import Folder
+from iam.models import Folder, Role, RoleAssignment, User
 
 REVIEW_URL = "/api/task-templates/yearly_review/"
 
@@ -249,37 +253,40 @@ class TestOverdue:
 
 
 @pytest.mark.django_db
-class TestOverdueBeforeThePeriod:
-    """Open occurrences that fell due before the displayed range are still late."""
+class TestLateOutsideThePeriod:
+    """Open occurrences late today but outside the displayed range are still late."""
 
-    def test_counted_with_the_oldest_named(self, authenticated_client):
+    def test_late_before_the_period(self, authenticated_client):
         today = timezone.localdate()
         template = _make_template()
-        oldest = _make_node(template, today - timedelta(days=400))
-        _make_node(template, today - timedelta(days=370), status="in_progress")
-        # Closed, or inside the displayed range: neither counts here.
+        _make_node(template, today - timedelta(days=400))
+        _make_node(template, today)
+
+        payload = _review(authenticated_client, **_window(today))
+
+        assert _task(payload, template)["late_outside_period"] is True
+
+    def test_late_after_a_past_period(self, authenticated_client):
+        today = timezone.localdate()
+        template = _make_template()
+        shown = today - timedelta(days=400)
+        _make_node(template, shown, status="completed")
+        _make_node(template, today - timedelta(days=40))
+
+        payload = _review(authenticated_client, **_window(shown))
+
+        assert _task(payload, template)["late_outside_period"] is True
+
+    def test_closed_occurrences_are_not_late(self, authenticated_client):
+        today = timezone.localdate()
+        template = _make_template()
         _make_node(template, today - timedelta(days=380), status="completed")
         _make_node(template, today - timedelta(days=390), status="cancelled")
         _make_node(template, today)
 
         payload = _review(authenticated_client, **_window(today))
 
-        assert _task(payload, template)["earlier_overdue"] == {
-            "count": 2,
-            "node_id": str(oldest.id),
-        }
-
-    def test_none_when_nothing_is_late(self, authenticated_client):
-        today = timezone.localdate()
-        template = _make_template()
-        _make_node(template, today)
-
-        payload = _review(authenticated_client, **_window(today))
-
-        assert _task(payload, template)["earlier_overdue"] == {
-            "count": 0,
-            "node_id": None,
-        }
+        assert _task(payload, template)["late_outside_period"] is False
 
     def test_a_range_in_the_future_does_not_make_upcoming_work_late(
         self, authenticated_client
@@ -292,7 +299,7 @@ class TestOverdueBeforeThePeriod:
 
         payload = _review(authenticated_client, **_window(shown))
 
-        assert _task(payload, template)["earlier_overdue"]["count"] == 0
+        assert _task(payload, template)["late_outside_period"] is False
 
     def test_overdue_filter_keeps_a_task_late_only_before_the_period(
         self, authenticated_client
@@ -441,6 +448,30 @@ class TestAppliedControlsOfADomainPlan:
         ]
         assert self._names(authenticated_client, line) == ["Line control"]
         assert self._names(authenticated_client, other) == ["Office control"]
+
+    def test_hidden_domain_is_refused_like_an_unknown_one(self):
+        root = Folder.get_root_folder()
+        seen = Folder.objects.create(name="Seen", parent_folder=root)
+        hidden = Folder.objects.create(name="Hidden", parent_folder=root)
+        user = User.objects.create_user(f"plan-{uuid.uuid4().hex[:6]}@test.com")
+        RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name=RoleCodename.ANALYST.value),
+            folder=root,
+            is_recursive=True,
+        ).perimeter_folders.add(seen)
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        def status_for(folder_id):
+            return client.get(
+                self.URL, {"recurrent_task_folder": folder_id}
+            ).status_code
+
+        assert status_for(str(seen.id)) == 200
+        assert status_for(str(hidden.id)) == 400
+        assert status_for(str(uuid.uuid4())) == 400
 
 
 @pytest.mark.django_db

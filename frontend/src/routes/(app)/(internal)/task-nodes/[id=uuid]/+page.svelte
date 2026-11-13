@@ -377,12 +377,15 @@
 	<div class="space-y-1">
 		<p class="text-surface-700-300 text-md font-medium">{m.observation()}</p>
 		<div class="p-2 bg-surface-50-950 border border-surface-200-800 rounded">
-			<TableMarkdownField
-				bind:value={taskNode.observation}
-				onSave={async (observation) => {
-					submitObservationChange(observation);
-				}}
-			/>
+			<!-- Previous/next reuse this page: an unsaved edit must not follow to another occurrence. -->
+			{#key taskNode.id}
+				<TableMarkdownField
+					bind:value={taskNode.observation}
+					onSave={async (observation) => {
+						submitObservationChange(observation);
+					}}
+				/>
+			{/key}
 		</div>
 	</div>
 
@@ -397,8 +400,8 @@
 					}}
 					class="px-4 py-0.5 rounded-lg text-md border
 			{taskNode.status === 'pending'
-						? 'bg-amber-500 dark:bg-amber-600 text-white border-amber-600'
-						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-amber-50'}"
+						? 'bg-sky-500 dark:bg-sky-600 text-white border-sky-600'
+						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-sky-50'}"
 				>
 					{m.pending()}
 				</button>
@@ -409,8 +412,8 @@
 					}}
 					class="px-4 py-0.5 rounded-lg text-md border
 			{taskNode.status === 'in_progress'
-						? 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
-						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-blue-50'}"
+						? 'bg-violet-500 dark:bg-violet-600 text-white border-violet-600'
+						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-violet-50'}"
 				>
 					{m.inProgress()}
 				</button>

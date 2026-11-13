@@ -150,12 +150,9 @@ describe('isOutstanding', () => {
 		expect(isOutstanding(task({ '2026-09': bucket('in_progress', true) }), null)).toBe(true);
 	});
 
-	it('flags an occurrence overdue since before the displayed period', () => {
-		const earlier_overdue = { count: 2, node_id: 'oldest' };
-		expect(isOutstanding({ bucket_status: {}, earlier_overdue }, '2026-11')).toBe(true);
-		expect(
-			isOutstanding({ bucket_status: {}, earlier_overdue: { count: 0, node_id: null } }, '2026-11')
-		).toBe(false);
+	it('flags an occurrence late outside the displayed period', () => {
+		expect(isOutstanding({ bucket_status: {}, late_outside_period: true }, '2026-11')).toBe(true);
+		expect(isOutstanding({ bucket_status: {}, late_outside_period: false }, '2026-11')).toBe(false);
 	});
 
 	it('flags open work in the current period', () => {

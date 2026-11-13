@@ -151,25 +151,18 @@ export interface BucketStatus {
 	overdue_node_id?: string | null;
 }
 
-/** Open occurrences that fell due before the displayed period. */
-export interface EarlierOverdue {
-	count: number;
-	/** The oldest of them. */
-	node_id: string | null;
-}
-
-const OPEN_STATUSES = ['pending', 'in_progress'];
+export const OPEN_STATUSES = ['pending', 'in_progress'];
 
 /**
  * A task is outstanding when it needs action now: an occurrence is overdue,
- * within the displayed period or before it, or the current period still has
+ * within the displayed period or outside it, or the current period still has
  * open work.
  */
 export function isOutstanding(
-	task: { bucket_status?: Record<string, BucketStatus>; earlier_overdue?: EarlierOverdue },
+	task: { bucket_status?: Record<string, BucketStatus>; late_outside_period?: boolean },
 	currentKey: string | null
 ): boolean {
-	if ((task.earlier_overdue?.count ?? 0) > 0) return true;
+	if (task.late_outside_period) return true;
 	return Object.entries(task.bucket_status ?? {}).some(
 		([key, bucket]) =>
 			bucket.overdue === true ||
@@ -195,7 +188,8 @@ export interface ReviewTask {
 	assigned_to?: NamedRef[];
 	applied_controls?: NamedRef[];
 	bucket_status?: Record<string, BucketStatus>;
-	earlier_overdue?: EarlierOverdue;
+	/** An open occurrence outside the displayed period is already late. */
+	late_outside_period?: boolean;
 }
 
 export interface ReviewFolder {

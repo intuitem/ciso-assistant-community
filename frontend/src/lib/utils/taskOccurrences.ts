@@ -1,4 +1,6 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
+import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+import { getLocale } from '#paraglide/runtime.js';
 
 export interface OccurrenceSummary {
 	id: string;
@@ -64,18 +66,44 @@ export async function fetchOccurrenceHistory(
 	};
 }
 
-/** The occurrence of the same task due just before or just after a date, if any. */
+/**
+ * The occurrence of the same task just before or just after the current one,
+ * ordered by due date then id, so occurrences due the same day are reached too.
+ */
 export async function fetchNeighbour(
 	fetch: typeof globalThis.fetch,
 	taskTemplateId: string,
-	dueDate: string,
+	current: { id: string; dueDate: string },
 	before: boolean
 ): Promise<{ occurrence: OccurrenceSummary | null; failed: boolean }> {
+	// shortcut: more than 50 occurrences due the same day hide the next day's, upgrade to a cursor if that ever happens
 	const { results, failed } = await fetchOccurrences(fetch, {
 		task_template: taskTemplateId,
-		[before ? 'due_date__lt' : 'due_date__gt']: dueDate,
-		ordering: before ? '-due_date' : 'due_date',
-		limit: '1'
+		[before ? 'due_date__lte' : 'due_date__gte']: current.dueDate,
+		ordering: before ? '-due_date,-id' : 'due_date,id',
+		limit: '50'
 	});
-	return { occurrence: results[0] ?? null, failed };
+	const occurrence = results.find((candidate) => {
+		const due = candidate.due_date?.slice(0, 10) ?? '';
+		if (due !== current.dueDate) return true;
+		return before ? candidate.id < current.id : candidate.id > current.id;
+	});
+	return { occurrence: occurrence ?? null, failed };
+}
+
+/** An occurrence date in the user's locale, or '--'. */
+export function formatOccurrenceDate(value: string | null): string {
+	return formatDateOrDateTime(value, getLocale()) ?? '--';
+}
+
+/** Days from today to `value`, negative when past; null without a date. */
+export function daysUntil(value: string | null): number | null {
+	if (!value) return null;
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	// A date-only string is parsed as UTC midnight, which is the previous day in
+	// time zones west of UTC; anchoring with a local time keeps the calendar date.
+	const due = new Date(value.includes('T') ? value : `${value}T00:00:00`);
+	due.setHours(0, 0, 0, 0);
+	return Math.round((due.getTime() - today.getTime()) / 86400000);
 }

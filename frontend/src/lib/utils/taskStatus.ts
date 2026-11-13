@@ -5,7 +5,7 @@
  * panel had their own copies and drifted, ending up with pending and in-progress
  * swapped between two views of the same data.
  */
-import { localIsoDate } from './control-plan';
+import { localIsoDate, OPEN_STATUSES } from './control-plan';
 
 // Charts: hex rather than Tailwind classes, because ECharts needs a colour value.
 export const TASK_STATUS_FALLBACK_COLOR = '#a3a3a3';
@@ -13,9 +13,9 @@ export const TASK_STATUS_FALLBACK_COLOR = '#a3a3a3';
 export const TASK_STATUS_COLORS: Record<string, string> = {
 	// No occurrence has been generated yet — analytics only.
 	_unset: '#cbd5e1',
-	// Pending warns: nobody has picked it up yet. In progress is the calmer state.
-	pending: '#f59e0b',
-	in_progress: '#3b82f6',
+	// Same hues as OCCURRENCE_STYLES: red is kept for what is late.
+	pending: '#0ea5e9',
+	in_progress: '#8b5cf6',
 	completed: '#22c55e',
 	cancelled: '#94a3b8'
 };
@@ -36,8 +36,6 @@ export const OCCURRENCE_STYLES = {
 	cancelled: 'bg-surface-200-800 border border-surface-500'
 };
 export type OccurrenceState = keyof typeof OCCURRENCE_STYLES;
-
-const OPEN_STATUSES = ['pending', 'in_progress'];
 
 /**
  * Red is reserved for what is late: open work whose due date has passed.

@@ -6154,8 +6154,13 @@ class AppliedControlFilterSet(GenericFilterSet):
     # recurrent task living in that domain, wherever the control itself lives.
     # With include_subfolders=true, tasks below the domain count too.
     include_subfolders = df.BooleanFilter(method="filter_noop")
+    # Only viewable domains are valid choices, so a hidden domain's id gets the
+    # same 400 as a made-up one.
     recurrent_task_folder = df.ModelChoiceFilter(
-        queryset=Folder.objects.all(), method="filter_recurrent_task_folder"
+        queryset=lambda request: Folder.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        ),
+        method="filter_recurrent_task_folder",
     )
     linked_models = df.MultipleChoiceFilter(
         choices=[("--", "--")] + APPLIED_CONTROL_LINKED_FIELDS,
@@ -21386,29 +21391,24 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
         today = timezone.localdate()
 
-        # Open occurrences that fell due before the displayed range: still late,
-        # whatever the range shows.
-        earlier_overdue_qs = (
-            TaskNode.objects.filter(
-                status__in=TaskNode.OPEN_STATUSES,
-                due_date__lt=min(year_start, today),
-            )
-            .only("id", "task_template_id", "due_date")
-            .order_by("due_date")
+        # Open occurrences late today but outside the displayed range, before or
+        # after it: still late, whatever the range shows.
+        late_outside_period = TaskNode.objects.filter(
+            Q(due_date__lt=year_start) | Q(due_date__gt=year_end),
+            task_template=OuterRef("pk"),
+            status__in=TaskNode.OPEN_STATUSES,
+            due_date__lt=today,
         )
 
         # get_queryset already joins folder and the serializer's related columns.
         task_templates = list(
-            queryset.prefetch_related(
+            queryset.annotate(
+                late_outside_period=Exists(late_outside_period)
+            ).prefetch_related(
                 Prefetch(
                     "tasknode_set",
                     queryset=filtered_nodes_qs,
                     to_attr="filtered_nodes",
-                ),
-                Prefetch(
-                    "tasknode_set",
-                    queryset=earlier_overdue_qs,
-                    to_attr="earlier_overdue_nodes",
                 ),
             )
         )
@@ -21433,9 +21433,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
             # Build bucket_status for each bucket
             bucket_status = {}
-            earlier_overdue = template.earlier_overdue_nodes
             has_any_matching_status = (
-                bool(earlier_overdue) and "overdue" in status_filters
+                template.late_outside_period and "overdue" in status_filters
             )
             for key in bucket_keys:
                 bucket_nodes = nodes_by_bucket.get(key, [])
@@ -21470,10 +21469,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 continue
 
             template_data["bucket_status"] = bucket_status
-            template_data["earlier_overdue"] = {
-                "count": len(earlier_overdue),
-                "node_id": str(earlier_overdue[0].id) if earlier_overdue else None,
-            }
+            template_data["late_outside_period"] = template.late_outside_period
 
             if tpl_folder_id not in folders_dict:
                 folders_dict[tpl_folder_id] = {

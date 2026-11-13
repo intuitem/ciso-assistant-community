@@ -3,8 +3,7 @@
 	import OccurrenceHistory from './OccurrenceHistory.svelte';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
-	import { getLocale } from '#paraglide/runtime.js';
-	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { daysUntil, formatOccurrenceDate as formatDate } from '#lib/utils/taskOccurrences.js';
 	import { OCCURRENCE_STYLES, isOccurrenceLate, occurrenceState } from '#lib/utils/taskStatus.js';
 	import { scheduleLabel, type TaskSchedule } from '#lib/utils/taskSchedule.js';
 
@@ -54,21 +53,6 @@
 	// definition (due today counts as not yet past), so it was missing from the strip
 	// entirely. Showing both makes the row a timeline that runs through today.
 	const timeline = $derived([...sortedPast, ...sortedUpcoming]);
-
-	function formatDate(value: string | null) {
-		return formatDateOrDateTime(value, getLocale()) ?? '--';
-	}
-
-	function daysUntil(value: string | null) {
-		if (!value) return null;
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		// A date-only string is parsed as UTC midnight, which is the previous day in
-		// time zones west of UTC; anchoring with a local time keeps the calendar date.
-		const due = new Date(value.includes('T') ? value : `${value}T00:00:00`);
-		due.setHours(0, 0, 0, 0);
-		return Math.round((due.getTime() - today.getTime()) / 86400000);
-	}
 
 	const dueLabel = $derived.by(() => {
 		const days = daysUntil(next?.due_date ?? null);

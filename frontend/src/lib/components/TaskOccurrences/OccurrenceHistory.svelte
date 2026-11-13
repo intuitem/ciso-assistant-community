@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { m } from '#paraglide/messages.js';
-	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getLocale } from '#paraglide/runtime.js';
-	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { daysUntil, formatOccurrenceDate as formatDate } from '#lib/utils/taskOccurrences.js';
 	import { localIsoDate } from '#lib/utils/control-plan.js';
 	import { OCCURRENCE_STYLES, isOccurrenceLate, occurrenceState } from '#lib/utils/taskStatus.js';
 
@@ -25,21 +25,6 @@
 
 	// Statuses a real occurrence can hold; '_unset' is an analytics-only bucket.
 	const HISTORY_STATUSES = ['pending', 'in_progress', 'completed', 'cancelled'];
-
-	function formatDate(value: string | null) {
-		return formatDateOrDateTime(value, getLocale()) ?? '--';
-	}
-
-	function daysUntil(value: string | null) {
-		if (!value) return null;
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		// A date-only string is parsed as UTC midnight, which is the previous day in
-		// time zones west of UTC; anchoring with a local time keeps the calendar date.
-		const due = new Date(value.includes('T') ? value : `${value}T00:00:00`);
-		due.setHours(0, 0, 0, 0);
-		return Math.round((due.getTime() - today.getTime()) / 86400000);
-	}
 
 	// A bare row of squares reads as a shape with no when. Grouping by year puts the
 	// date on the page instead of behind a hover, and keeps the strip legible in the
@@ -71,6 +56,14 @@
 		}
 		return lastDue ? { after: lastDue.id } : null;
 	});
+	// Squares are occurrences, not months: naming the first and last month of each
+	// row says which part of the year it covers.
+	function monthOf(occurrence: Occurrence | undefined) {
+		if (!occurrence?.due_date) return '';
+		const day = new Date(`${occurrence.due_date.slice(0, 10)}T00:00:00`);
+		return day.toLocaleDateString(getLocale(), { month: 'short' });
+	}
+
 	const todayLabel = $derived(`${m.today()} — ${formatDate(localIsoDate(new Date()))}`);
 </script>
 
@@ -86,17 +79,14 @@
 
 <!-- w-fit: rows align within the widest year rather than the panel width. -->
 <div class="space-y-1 w-fit max-w-full" data-testid="occurrence-history">
-	{#each historyByYear as [year, yearOccurrences], yearIndex (year)}
+	{#each historyByYear as [year, yearOccurrences] (year)}
 		<div class="flex items-start gap-2">
 			<span class="w-9 shrink-0 pt-0.5 text-xs tabular-nums text-surface-600-400">{year}</span>
-			<!-- The window truncates the start of the oldest year, so its squares
-			     sit flush right — the tail of that year running into the next row —
-			     instead of reading as January-onward. -->
-			<div
-				class="flex flex-wrap gap-1 grow {yearIndex === 0 && historyByYear.length > 1
-					? 'justify-end'
-					: ''}"
+			<span
+				class="w-8 shrink-0 pt-0.5 text-right text-[11px] text-surface-500"
+				data-testid="occurrence-history-first-month">{monthOf(yearOccurrences[0])}</span
 			>
+			<div class="flex flex-wrap gap-1">
 				{#each yearOccurrences as occurrence (occurrence.id)}
 					{@const isMarked = occurrence.id === markedId}
 					<!-- Drawn as the control plan draws its cells: late takes over the status. -->
@@ -126,6 +116,11 @@
 					{/if}
 				{/each}
 			</div>
+			{#if yearOccurrences.length > 1}
+				<span class="shrink-0 pt-0.5 text-[11px] text-surface-500"
+					>{monthOf(yearOccurrences.at(-1))}</span
+				>
+			{/if}
 		</div>
 	{/each}
 </div>

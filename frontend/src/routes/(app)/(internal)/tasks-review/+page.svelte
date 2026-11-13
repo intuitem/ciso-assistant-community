@@ -110,9 +110,15 @@
 
 	function toggleColumn(column: OptionalColumn) {
 		const shown = new Set(view.columns);
-		if (shown.has(column)) shown.delete(column);
-		else shown.add(column);
-		updateView({ columns: OPTIONAL_COLUMNS.filter((name) => shown.has(name)) });
+		const showing = !shown.has(column);
+		if (showing) shown.add(column);
+		else shown.delete(column);
+		// The pane grows with its columns rather than squeezing the task names.
+		const width = COLUMNS[column].width * (showing ? 1 : -1);
+		updateView({
+			columns: OPTIONAL_COLUMNS.filter((name) => shown.has(name)),
+			paneWidth: clampPaneWidth(view.paneWidth + width)
+		});
 	}
 
 	const GROUPING_LABELS: Record<Grouping, () => string> = {
@@ -131,20 +137,38 @@
 		 * keeps a floor, so a narrow pane squeezes the other columns first.
 		 */
 		track: string;
+		/** Added to the task pane when the column is shown, so the name keeps its room. */
+		width: number;
 	}
 
 	const COLUMNS: Record<ColumnId, Omit<Column, 'id'>> = {
-		ref: { sortKey: 'ref', label: m.refId, track: 'minmax(0, 64px)' },
-		name: { sortKey: 'name', label: m.name, track: 'minmax(120px, 3fr)' },
-		frequency: { sortKey: 'frequency', label: m.frequency, track: 'minmax(0, 100px)' },
-		assignee: { sortKey: 'assignee', label: m.assignedTo, track: 'minmax(0, 1.5fr)' },
+		ref: { sortKey: 'ref', label: m.refId, track: 'minmax(0, 64px)', width: 64 },
+		name: { sortKey: 'name', label: m.name, track: 'minmax(120px, 3fr)', width: 0 },
+		frequency: {
+			sortKey: 'frequency',
+			label: m.frequency,
+			track: 'minmax(0, 100px)',
+			width: 100
+		},
+		assignee: {
+			sortKey: 'assignee',
+			label: m.assignedTo,
+			track: 'minmax(0, 1.5fr)',
+			width: 140
+		},
 		appliedControl: {
 			sortKey: 'appliedControl',
 			label: m.appliedControl,
-			track: 'minmax(0, 2fr)'
+			track: 'minmax(0, 2fr)',
+			width: 180
 		},
-		nextDue: { sortKey: 'nextDue', label: m.nextOccurrence, track: 'minmax(0, 88px)' },
-		domain: { sortKey: 'domain', label: m.domain, track: 'minmax(0, 1.5fr)' }
+		nextDue: {
+			sortKey: 'nextDue',
+			label: m.nextOccurrence,
+			track: 'minmax(0, 136px)',
+			width: 136
+		},
+		domain: { sortKey: 'domain', label: m.domain, track: 'minmax(0, 1.5fr)', width: 140 }
 	};
 
 	// Every column, shown or not, in the order the user gave them.
@@ -558,6 +582,18 @@
 	});
 
 	const buckets = $derived(review?.buckets ?? []);
+	// The backend widens quarters and semesters to whole ones: name what the grid shows.
+	// ISO weeks can start in the month before, so weekly keeps the requested months.
+	const shownPeriod = $derived.by(() => {
+		const first = buckets[0];
+		const last = buckets[buckets.length - 1];
+		if (!first || !last || granularity === 'weekly') {
+			return [data.startMonth, data.startYear, data.endMonth, data.endYear];
+		}
+		const [startYear, startMonth] = first.start.split('-').map(Number);
+		const [endYear, endMonth] = last.end.split('-').map(Number);
+		return [startMonth, startYear, endMonth, endYear];
+	});
 	const granularity: Granularity = $derived(review?.granularity ?? 'monthly');
 	// The API's day, so the current period and what is outstanding agree with its
 	// overdue flags when the browser and the server are on either side of midnight.
@@ -638,7 +674,7 @@
 		none: m.noData,
 		completed: m.completed,
 		in_progress: m.inProgress,
-		planned: m.planned,
+		planned: m.pending,
 		overdue: m.overdue,
 		cancelled: m.cancelled
 	};
@@ -739,13 +775,13 @@
 				class="flex items-center gap-2 bg-surface-50-950/90 border border-surface-200-800 rounded-lg px-3 py-1.5 shadow-sm"
 			>
 				<span class="text-sm font-semibold text-surface-800-200">
-					{getMonthName(data.startMonth - 1)}
-					{data.startYear}
+					{getMonthName(shownPeriod[0] - 1)}
+					{shownPeriod[1]}
 				</span>
 				<i class="fa-solid fa-arrow-right text-[10px] text-surface-500"></i>
 				<span class="text-sm font-semibold text-surface-800-200">
-					{getMonthName(data.endMonth - 1)}
-					{data.endYear}
+					{getMonthName(shownPeriod[2] - 1)}
+					{shownPeriod[3]}
 				</span>
 				{#if filters.granularity !== 'monthly'}
 					<span
@@ -818,18 +854,23 @@
 					>
 						{#each orderedColumns as column, index (column.id)}
 							{@const id = column.id}
-							<div class="flex items-center rounded hover:bg-surface-100-900">
+							<!-- The group headers already say it: the column would repeat them. -->
+							{@const grouped = (id === 'domain' || id === 'frequency') && view.grouping === id}
+							<div
+								class="flex items-center rounded hover:bg-surface-100-900"
+								title={grouped ? `${m.controlPlanGroupBy()} ${column.label()}` : undefined}
+							>
 								<label
 									class="flex flex-1 items-center gap-2 px-2 py-1.5 text-xs text-surface-800-200
-										{id === 'name' ? '' : 'cursor-pointer'}"
+										{id === 'name' || grouped ? '' : 'cursor-pointer'} {grouped ? 'opacity-50' : ''}"
 								>
 									<!-- The name is what a row is: it moves, it does not hide -->
 									<input
 										type="checkbox"
 										class="checkbox"
 										data-testid="control-plan-column-{id}"
-										checked={id === 'name' || view.columns.includes(id)}
-										disabled={id === 'name'}
+										checked={id === 'name' || (view.columns.includes(id) && !grouped)}
+										disabled={id === 'name' || grouped}
 										onchange={() => id !== 'name' && toggleColumn(id)}
 									/>
 									{column.label()}
@@ -924,11 +965,9 @@
 		<div
 			class="bg-surface-50-950/80 border border-surface-200-800 rounded-xl p-4 transition-all duration-200"
 		>
-			<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-10 gap-3 items-end">
+			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
 				<div>
-					<label
-						for="start-period-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
+					<label for="start-period-filter" class="block text-sm font-semibold mb-1"
 						>{m.startPeriod()}</label
 					>
 					<input
@@ -940,9 +979,7 @@
 					/>
 				</div>
 				<div>
-					<label
-						for="end-period-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
+					<label for="end-period-filter" class="block text-sm font-semibold mb-1"
 						>{m.endPeriod()}</label
 					>
 					<input
@@ -954,9 +991,7 @@
 					/>
 				</div>
 				<div>
-					<label
-						for="granularity-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
+					<label for="granularity-filter" class="block text-sm font-semibold mb-1"
 						>{m.granularity()}</label
 					>
 					<select
@@ -1012,9 +1047,7 @@
 					</div>
 				{:then filterOptions}
 					<div>
-						<label
-							for="assigned-to-filter"
-							class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
+						<label for="assigned-to-filter" class="block text-sm font-semibold mb-1"
 							>{m.assignedTo()}</label
 						>
 						<select
@@ -1058,9 +1091,7 @@
 				</div>
 
 				<div class="relative" data-menu="statuses">
-					<span
-						id="status-filter-label"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
+					<span id="status-filter-label" class="block text-sm font-semibold mb-1"
 						>{m.aggregatedStatus()}</span
 					>
 					<button
