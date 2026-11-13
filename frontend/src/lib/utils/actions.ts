@@ -98,6 +98,8 @@ export async function handleErrorResponse({
 	return message(form, { status: response.status, data: res });
 }
 
+export { REDIRECT_AFTER_CREATE } from './redirect-after-create';
+
 export async function defaultWriteFormAction({
 	event,
 	urlModel,
