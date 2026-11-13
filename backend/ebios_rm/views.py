@@ -1179,6 +1179,7 @@ class FearedEventViewSet(BaseModelViewSet):
         """
         from rest_framework import status as http_status
         from ebios_rm.serializers import FearedEventWriteSerializer
+        from iam.models import RoleAssignment
         import structlog
 
         logger = structlog.get_logger(__name__)
@@ -1199,9 +1200,12 @@ class FearedEventViewSet(BaseModelViewSet):
                     status=http_status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify study exists
             try:
                 study = EbiosRMStudy.objects.get(id=uuid.UUID(str(study_id)))
+                if not RoleAssignment.is_object_readable(
+                    request.user, EbiosRMStudy, study.id
+                ):
+                    raise EbiosRMStudy.DoesNotExist
             except ValueError, AttributeError, EbiosRMStudy.DoesNotExist:
                 return Response(
                     {"error": "EBIOS RM Study not found"},

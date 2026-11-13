@@ -9,9 +9,9 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 
 	// Use the endpointUrl from URL_MODEL_MAP if available, otherwise use the model directly
 	const modelConfig = URL_MODEL_MAP[model as urlModel];
-	const apiPath = modelConfig?.endpointUrl ?? model;
+	const apiPath = modelConfig?.endpointUrl ?? encodeURIComponent(model);
 
-	const endpoint = `${BASE_API_URL}/${apiPath}/${id}/cascade-info/`;
+	const endpoint = `${BASE_API_URL}/${apiPath}/${encodeURIComponent(id)}/cascade-info/`;
 	const response = await fetch(endpoint);
 
 	if (!response.ok) {
