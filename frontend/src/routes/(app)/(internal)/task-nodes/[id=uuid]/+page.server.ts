@@ -17,6 +17,11 @@ import {
 import { modelSchema } from '#lib/utils/schemas.js';
 
 import { loadDetail } from '#lib/utils/load.js';
+import {
+	fetchNeighbour,
+	fetchOccurrenceHistory,
+	type OccurrenceSummary
+} from '#lib/utils/taskOccurrences.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -28,7 +33,34 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
-	return data;
+	// A recurrent task's occurrence shows the same history as its task, plus the
+	// occurrences just before and after it for the previous / next buttons. Those
+	// are asked for separately: the viewed occurrence can sit outside the history.
+	const node = data.data;
+	const dueDate = typeof node?.due_date === 'string' ? node.due_date.slice(0, 10) : null;
+	const taskTemplateId = node?.task_template?.id;
+	let history: OccurrenceSummary[] = [];
+	let previousOccurrence: OccurrenceSummary | null = null;
+	let nextOccurrence: OccurrenceSummary | null = null;
+	// Any of the requests failing: the page says so rather than showing a
+	// history with holes or greying out a button that has somewhere to go.
+	let occurrencesFailed = false;
+	if (node?.is_recurrent && taskTemplateId) {
+		const [occurrences, previous, next] = await Promise.all([
+			fetchOccurrenceHistory(event.fetch, taskTemplateId),
+			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, { id: node.id, dueDate }, true) : null,
+			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, { id: node.id, dueDate }, false) : null
+		]);
+		history = [...occurrences.pastOccurrences, ...occurrences.upcomingOccurrences].map(
+			({ id, due_date, status }) => ({ id, due_date, status })
+		);
+		previousOccurrence = previous?.occurrence ?? null;
+		nextOccurrence = next?.occurrence ?? null;
+		occurrencesFailed =
+			occurrences.occurrencesFailed || previous?.failed === true || next?.failed === true;
+	}
+
+	return { ...data, history, previousOccurrence, nextOccurrence, occurrencesFailed };
 };
 
 const updateStatus = async (status: string, { fetch, params, cookies }) => {
