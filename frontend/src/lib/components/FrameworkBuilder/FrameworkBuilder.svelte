@@ -15,7 +15,8 @@
 		remapGrid,
 		levelsInGroupOrder,
 		type OutcomeRule,
-		type Scale
+		type Scale,
+		scoringDefaultsProblem
 	} from './builder-state';
 	import ScalesEditor from './ScalesEditor.svelte';
 	import type { DraftJSON } from './builder-api';
@@ -281,6 +282,17 @@
 			);
 		return walk($rootNodesStore);
 	});
+
+	const scoringProblem = $derived(scoringDefaultsProblem($frameworkStore));
+
+	// Anchoring needs a target: clearing the target clears it too.
+	function setTargetScore(raw: string) {
+		builder.updateFramework(
+			raw === ''
+				? { target_score: null, anchor_na_to_target: false }
+				: { target_score: Number(raw) }
+		);
+	}
 
 	const hasRequiredEvidence = $derived.by(() => {
 		const walk = (nodes: BuilderNode[]): boolean =>
@@ -919,6 +931,58 @@
 											<p class="text-xs text-surface-500">
 												{m.builderAggregationHint()}
 											</p>
+
+											<!-- Defaults proposed for new audits -->
+											<div
+												class="border-t border-surface-200-800 pt-3 space-y-2"
+												data-testid="framework-audit-defaults"
+											>
+												<div class="grid grid-cols-2 gap-3">
+													<label class="block">
+														<span class="text-xs text-surface-600-400"
+															>{m.scoreCalculationMethod()}</span
+														>
+														<select
+															value={$frameworkStore.score_calculation_method ?? 'average'}
+															class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
+															onchange={(e) =>
+																builder.updateFramework({
+																	score_calculation_method: e.currentTarget.value
+																})}
+														>
+															<option value="average">{m.average()}</option>
+															<option value="sum">{m.sum()}</option>
+															<option value="average_of_averages">{m.averageOfAverages()}</option>
+														</select>
+													</label>
+													<label class="block">
+														<span class="text-xs text-surface-600-400">{m.targetScore()}</span>
+														<input
+															type="number"
+															step="any"
+															value={$frameworkStore.target_score ?? ''}
+															class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+															onblur={(e) => setTargetScore(e.currentTarget.value)}
+														/>
+													</label>
+												</div>
+												<label class="flex items-center gap-2 text-xs text-surface-600-400">
+													<input
+														type="checkbox"
+														class="checkbox"
+														checked={$frameworkStore.anchor_na_to_target ?? false}
+														disabled={$frameworkStore.target_score == null}
+														onchange={(e) =>
+															builder.updateFramework({
+																anchor_na_to_target: e.currentTarget.checked
+															})}
+													/>
+													{m.anchorNaToTarget()}
+												</label>
+												{#if scoringProblem}
+													<p class="text-xs text-error-500">{safeTranslate(scoringProblem)}</p>
+												{/if}
+											</div>
 
 											<!-- Scale entries editor -->
 											<div class="border-t border-surface-200-800 pt-3 space-y-2">

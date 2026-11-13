@@ -15,5 +15,11 @@ spec:
     protocol: TCP
     port: {{ .Values.backend.service.port }}
     targetPort: http
+  {{- if .Values.backend.mcp.enabled }}
+  - name: mcp
+    protocol: TCP
+    port: 8001
+    targetPort: mcp
+  {{- end }}
   selector:
     {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" "backend") | nindent 4 }}

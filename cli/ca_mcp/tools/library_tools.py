@@ -127,6 +127,9 @@ async def import_stored_library(urn_or_id: str) -> str:
     Args:
         urn_or_id: Library URN/ID (e.g. "urn:intuitem:risk:library:nist-csf-2.0")
     """
+    # one path segment only: a "/" or ".." would reach another route
+    if not urn_or_id or "/" in urn_or_id or ".." in urn_or_id:
+        return f"Error: invalid library URN or ID {urn_or_id!r}"
     try:
         res = make_post_request(f"/stored-libraries/{urn_or_id}/import/", {})
 

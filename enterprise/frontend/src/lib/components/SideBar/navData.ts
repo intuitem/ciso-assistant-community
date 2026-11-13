@@ -179,6 +179,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-id-card',
 					href: '/identity-providers',
 					adminOnly: true
+				},
+				{
+					name: 'connectedApps',
+					fa_icon: 'fa-solid fa-plug',
+					href: '/connected-apps',
+					adminOnly: true
 				}
 			]
 		},

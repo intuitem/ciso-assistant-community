@@ -275,6 +275,7 @@ class CurrentUserView(views.APIView):
             "is_admin": request.user.is_admin(),
             "is_local": request.user.is_local,
             "is_sso": request.user.is_sso,
+            "can_connect_apps": request.user.can_connect_apps,
             "accessible_domains": [str(f) for f in accessible_domains],
             "permission_sets": permission_sets,
             "domain_permissions": domain_permissions,

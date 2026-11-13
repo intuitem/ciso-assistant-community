@@ -1,5 +1,6 @@
 services:
   backend:
+    networks: [default, mcp]
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
@@ -99,6 +100,9 @@ services:
     ports:
       - 127.0.0.1:6333:6333
 
+  # DEPRECATED, removed in a later release: this service takes a Personal Access
+  # Token, with all its user's rights. Move to OAuth sign-in, see
+  # product-docs/integrations/mcp-oauth.md, "Moving from the PAT service".
   # MCP server for external AI orchestrators. Opt-in: `docker compose --profile mcp up -d`.
   # No `ports:` — reachable only through caddy at /mcp.
   mcp:
@@ -132,9 +136,12 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    user: "1001:1001"
+    user: "1002:1002"
+    networks:
+      - mcp
 
   caddy:
+    networks: [default, mcp]
     container_name: caddy
     image: caddy:2.11.4
     environment:
@@ -150,10 +157,21 @@ services:
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
-      reverse_proxy /mcp* mcp:8001
+      reverse_proxy /mcp* mcp:8001 {
+        header_up -Cookie
+        header_down -Set-Cookie
+        header_down -Service-Worker-Allowed
+        header_down Content-Security-Policy sandbox
+        header_down X-Content-Type-Options nosniff
+      }
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'
+
+networks:
+  # the MCP server reaches the backend and the proxy only, never the data stores
+  mcp:
+    internal: true
 
 volumes:
   qdrant_data:

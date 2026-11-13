@@ -14,6 +14,7 @@ import tempfile
 from pathlib import Path
 from urllib.parse import quote
 
+from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.mcpserver import Image
 from mcp.types import BlobResourceContents, EmbeddedResource
 
@@ -64,7 +65,10 @@ def _names(items) -> str:
 
 
 def _caller() -> str:
-    return hashlib.sha256(get_request_token().encode()).hexdigest()
+    # the instance's MCP server knows its caller by an OAuth token, not a PAT
+    access = get_access_token()
+    token = access.token if access else get_request_token()
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 def _mark_delivered(revision: dict) -> None:
