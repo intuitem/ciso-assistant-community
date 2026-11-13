@@ -169,6 +169,20 @@ ul.options.portaled-options > li:not(.active):hover {
 	border-color: var(--color-surface-600);
 }
 
+/* AutocompleteSelect: a long selected label must not push its remove button
+   out of a narrow field. Let the selected item shrink, so its label truncates
+   and the button stays within reach. */
+div.multiselect > ul.selected,
+div.multiselect > ul.selected > li {
+	min-width: 0;
+}
+div.multiselect > ul.selected > li {
+	max-width: 100%;
+}
+div.multiselect > ul.selected > li > button.remove {
+	flex-shrink: 0;
+}
+
 /* AutocompleteSelect: collapse overflow chips when chip-max-N class is on outerDiv.
    Uses position/size instead of display:none to avoid Tailwind v4 @layer !important cascade. */
 .chip-max-1 ul.selected > li:nth-child(n + 3),

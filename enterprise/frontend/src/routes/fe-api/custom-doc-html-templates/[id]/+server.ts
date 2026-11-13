@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 	const body = await request.text();
-	const endpoint = `${BASE_API_URL}/custom-doc-html-templates/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/custom-doc-html-templates/${encodeURIComponent(params.id)}/`;
 	const res = await fetch(endpoint, {
 		method: 'PATCH',
 		body,
@@ -22,7 +22,7 @@ export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 };
 
 export const DELETE: RequestHandler = async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/custom-doc-html-templates/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/custom-doc-html-templates/${encodeURIComponent(params.id)}/`;
 	const res = await fetch(endpoint, {
 		method: 'DELETE'
 	});
@@ -44,7 +44,7 @@ export const POST: RequestHandler = async ({ fetch, request, params }) => {
 	const contentType = request.headers.get('Content-Type') ?? '';
 
 	// File upload proxy
-	const endpoint = `${BASE_API_URL}/custom-doc-html-templates/${params.id}/upload/`;
+	const endpoint = `${BASE_API_URL}/custom-doc-html-templates/${encodeURIComponent(params.id)}/upload/`;
 	const body = await request.arrayBuffer();
 	const res = await fetch(endpoint, {
 		method: 'POST',

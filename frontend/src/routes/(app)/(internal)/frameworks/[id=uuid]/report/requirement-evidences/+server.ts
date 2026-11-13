@@ -1,0 +1,36 @@
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import {
+	contentDispositionHeader,
+	parseContentDispositionFilename
+} from '#lib/utils/contentDisposition.js';
+import { error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+const FORWARDED = ['requirement_assessments', 'implementation_group'];
+
+export const POST: RequestHandler = async ({ fetch, params, request }) => {
+	const body = await request.json().catch(() => null);
+	if (!body || typeof body !== 'object') throw error(400, 'Invalid selection');
+	const selection = Object.fromEntries(FORWARDED.filter((k) => k in body).map((k) => [k, body[k]]));
+	const res = await fetch(`${BASE_API_URL}/frameworks/${params.id}/requirement_evidences/`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(selection)
+	});
+	if (res.status === 204) return new Response(null, { status: 204 });
+	if (res.status === 413)
+		return new Response(await res.text(), {
+			status: 413,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	if (!res.ok || !res.body) throw error(res.status, 'Error fetching the ZIP file');
+	const fileName =
+		parseContentDispositionFilename(res.headers.get('Content-Disposition') ?? '') ??
+		'evidences.zip';
+	return new Response(res.body, {
+		headers: {
+			'Content-Type': 'application/zip',
+			'Content-Disposition': contentDispositionHeader(fileName)
+		}
+	});
+};
