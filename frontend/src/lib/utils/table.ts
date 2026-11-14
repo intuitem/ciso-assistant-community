@@ -13,6 +13,7 @@ import EvidenceChangeStatus from '#lib/components/ContextMenu/evidences/ChangeSt
 import WorkflowToggleActive from '#lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '#lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo, isFieldFlagEnabled } from './crud';
+import { folderBatchActions } from '#lib/utils/folder-batch-actions.js';
 import { toCamelCase } from './locales';
 import SelectObject from '#lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '#lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
@@ -4205,6 +4206,9 @@ export interface BatchActionConfig {
 	minSelection?: number;
 	maxSelection?: number;
 	confirmMessage?: string; // i18n key for an extra confirm warning, receives {count}
+	/** A change_field on `parent_folder` of domains: picked from the domain tree with
+	 * the selection's subtrees pruned, after a preview of what the domains carry along. */
+	moveFolders?: boolean;
 }
 
 export interface ParentActionConfig {
@@ -4903,6 +4907,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
+	folders: folderBatchActions,
 	'metric-instances': [
 		{
 			type: 'compose',
