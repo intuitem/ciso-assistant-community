@@ -87,29 +87,30 @@ def indexed_payload_types() -> dict[str, Any]:
     return types
 
 
-def _unreadable_document_ids(scope, folders) -> list[str]:
-    """Evidence and managed-document chunks also need read access to their source."""
+def _readable_document_ids(scope, folders) -> list[str]:
+    """Indexed documents the user may read; evidence and managed documents also need their source."""
     from django.contrib.contenttypes.models import ContentType
 
     from .models import IndexedDocument
 
-    rows = IndexedDocument.objects.filter(
-        folder_id__in=folders,
-        source_type__in=[
-            IndexedDocument.SourceType.EVIDENCE,
-            IndexedDocument.SourceType.DOCUMENT,
-        ],
-    ).values_list("id", "folder_id", "source_content_type_id")
-    readable = {}
-    denied = []
-    for doc_id, folder_id, ct_id in rows:
-        if ct_id not in readable:
-            readable[ct_id] = _source_folder_ids(
-                scope, ContentType.objects.get_for_id(ct_id).model_class()
-            )
-        if str(folder_id) not in readable[ct_id]:
-            denied.append(str(doc_id))
-    return denied
+    gated = {IndexedDocument.SourceType.EVIDENCE, IndexedDocument.SourceType.DOCUMENT}
+    rows = IndexedDocument.objects.filter(folder_id__in=folders).values_list(
+        "id", "folder_id", "source_type", "source_content_type_id"
+    )
+    source_folders = {}
+    readable = []
+    for doc_id, folder_id, source_type, ct_id in rows:
+        if source_type in gated:
+            if ct_id is None:
+                continue
+            if ct_id not in source_folders:
+                source_folders[ct_id] = _source_folder_ids(
+                    scope, ContentType.objects.get_for_id(ct_id).model_class()
+                )
+            if str(folder_id) not in source_folders[ct_id]:
+                continue
+        readable.append(str(doc_id))
+    return readable
 
 
 def _source_folder_ids(scope, model_class) -> set[str]:
@@ -139,22 +140,22 @@ def _user_partition_filter(scope, source_type, object_type) -> Optional[Filter]:
         folders = scope.folder_ids_for(model_class)
         if not folders:
             continue
-        denied = (
-            _unreadable_document_ids(scope, folders)
-            if payload_type == "document_chunk"
-            else []
-        )
+        scope_condition = FieldCondition(key="folder_id", match=MatchAny(any=folders))
+        if payload_type == "document_chunk":
+            readable = _readable_document_ids(scope, folders)
+            if not readable:
+                continue
+            scope_condition = FieldCondition(
+                key="document_id", match=MatchAny(any=readable)
+            )
         clauses.append(
             Filter(
                 must=[
                     FieldCondition(
                         key="object_type", match=MatchValue(value=payload_type)
                     ),
-                    FieldCondition(key="folder_id", match=MatchAny(any=folders)),
-                ],
-                must_not=[FieldCondition(key="document_id", match=MatchAny(any=denied))]
-                if denied
-                else None,
+                    scope_condition,
+                ]
             )
         )
 

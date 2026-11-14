@@ -287,7 +287,10 @@ def index_document_revision(revision):
 
 def index_missing_documents(folder_id=None):
     """Reconcile the index with evidence attachments and published documents."""
+    from datetime import timedelta
+
     from django.contrib.contenttypes.models import ContentType
+    from django.utils import timezone
     from django.db.models import Q
 
     from core.models import EvidenceRevision
@@ -322,6 +325,16 @@ def index_missing_documents(folder_id=None):
                 logger.warning(
                     "Failed to index revision", revision_id=revision.id, error=e
                 )
+    from .tasks import ingest_document
+
+    stuck = IndexedDocument.objects.filter(
+        status=IndexedDocument.Status.PENDING,
+        created_at__lt=timezone.now() - timedelta(hours=1),
+    )
+    if folder_id:
+        stuck = stuck.filter(folder_id=folder_id)
+    for doc_id in stuck.values_list("id", flat=True):
+        ingest_document(str(doc_id))
     return evidence.count(), documents.count()
 
 

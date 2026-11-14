@@ -222,7 +222,7 @@ def test_moved_evidence_moves_its_chunks(ingest, move, evidence):
 def test_chunks_need_read_access_to_their_source(evidence):
     from django.contrib.auth.models import Permission
 
-    from chat.rag import _unreadable_document_ids
+    from chat.rag import _readable_document_ids
     from chat.scoping import ReadScope
     from iam.models import Role, RoleAssignment, User, UserGroup
 
@@ -257,7 +257,46 @@ def test_chunks_need_read_access_to_their_source(evidence):
     chunks_only.permissions.set(
         Permission.objects.filter(codename__in=["view_folder", "view_indexeddocument"])
     )
+    orphan = IndexedDocument.objects.create(
+        folder=evidence.folder,
+        file="orphan.pdf",
+        filename="orphan.pdf",
+        content_type="application/pdf",
+        source_type=IndexedDocument.SourceType.EVIDENCE,
+    )
     folders = [str(evidence.folder_id)]
-    assert _unreadable_document_ids(user_with(chunks_only), folders) == [str(doc.id)]
+    assert _readable_document_ids(user_with(chunks_only), folders) == []
     auditor = user_with(Role.objects.get(name="BI-RL-AUD"))
-    assert _unreadable_document_ids(auditor, folders) == []
+    assert _readable_document_ids(auditor, folders) == [str(doc.id)]
+    assert str(orphan.id) not in _readable_document_ids(auditor, folders)
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.ingest_document")
+def test_catch_up_resubmits_stuck_pending_documents(ingest, evidence):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from chat.signals import index_missing_documents
+
+    stuck = IndexedDocument.objects.create(
+        folder=evidence.folder,
+        file="chat.txt",
+        filename="chat.txt",
+        content_type="text/plain",
+        source_type=IndexedDocument.SourceType.CHAT,
+    )
+    fresh = IndexedDocument.objects.create(
+        folder=evidence.folder,
+        file="fresh.txt",
+        filename="fresh.txt",
+        content_type="text/plain",
+        source_type=IndexedDocument.SourceType.CHAT,
+    )
+    IndexedDocument.objects.filter(id=stuck.id).update(
+        created_at=timezone.now() - timedelta(hours=2)
+    )
+    index_missing_documents()
+    ingest.assert_called_once_with(str(stuck.id))
+    assert fresh.status == IndexedDocument.Status.PENDING
