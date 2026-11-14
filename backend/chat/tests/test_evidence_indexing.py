@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -242,7 +243,7 @@ def test_moved_evidence_moves_its_chunks(ingest, move, evidence):
 
     doc.refresh_from_db()
     assert doc.folder_id == other.id
-    move.assert_called_once_with([str(doc.id)], str(other.id))
+    move.assert_called_once_with([str(doc.id)])
 
 
 @pytest.mark.django_db
@@ -416,7 +417,7 @@ def test_catch_up_realigns_folders_and_drops_orphans(ingest, remove, move, evide
     index_missing_documents()
     doc.refresh_from_db()
     assert doc.folder_id == evidence.folder_id
-    move.assert_called_once_with([str(doc.id)], str(evidence.folder_id))
+    move.assert_called_once_with([str(doc.id)])
 
     # Their evidence is gone, and no signal said so.
     IndexedDocument.objects.filter(pk=doc.pk).update(source_object_id=uuid.uuid4())
@@ -488,3 +489,133 @@ def test_api_clients_cannot_claim_a_source(evidence, document):
 
     assert doc.source_type == IndexedDocument.SourceType.CUSTOM
     assert doc.source_content_type is None and doc.source_object_id is None
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.remove_document_chunks")
+@patch("chat.tasks.ingest_document")
+def test_catch_up_reads_each_revision_when_its_turn_comes(ingest, remove, evidence):
+    """A revision loaded ahead may change before it is reached: act on what it is then."""
+    from chat.signals import index_missing_documents
+
+    for name in ("one.txt", "two.txt", "three.txt"):
+        _attach(EvidenceRevision.objects.create(evidence=evidence), name)
+    seen = []
+
+    def index(revision):
+        if not seen:
+            EvidenceRevision.objects.exclude(pk=revision.pk).update(
+                observation="changed meanwhile"
+            )
+        seen.append(revision)
+
+    with patch("chat.signals.index_evidence_revision", index):
+        index_missing_documents()
+
+    assert len(seen) == 3
+    assert [r.observation for r in seen[1:]] == ["changed meanwhile"] * 2
+
+
+def _pending_document(folder, name="policy.txt"):
+    return IndexedDocument.objects.create(
+        folder=folder,
+        file=SimpleUploadedFile(name, b"policy text"),
+        filename=name,
+        content_type="text/plain",
+        source_type=IndexedDocument.SourceType.CHAT,
+    )
+
+
+@pytest.fixture
+def ingestion():
+    """The real task, with extraction, embedding and the vector store stubbed."""
+    from unittest.mock import MagicMock
+
+    from chat.extractors import Chunk
+
+    extractor = MagicMock(
+        return_value=[Chunk(text="policy text", index=0, metadata={})]
+    )
+    client = MagicMock()
+    embedder = MagicMock()
+    embedder.embed.return_value = [[0.0, 0.0]]
+    with (
+        patch("chat.extractors.get_extractor", return_value=extractor),
+        patch("chat.providers.get_embedder", return_value=embedder),
+        patch("chat.rag.get_qdrant_client", return_value=client),
+    ):
+        yield SimpleNamespace(extractor=extractor, client=client)
+
+
+def _stamped_folders(client):
+    return [
+        call.kwargs["payload"]["folder_id"]
+        for call in client.set_payload.call_args_list
+    ]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_a_document_is_ingested_once_however_often_it_is_submitted(evidence, ingestion):
+    from chat.tasks import ingest_document
+
+    doc = _pending_document(evidence.folder)
+    ingest_document.call_local(str(doc.id))
+    ingest_document.call_local(str(doc.id))
+
+    doc.refresh_from_db()
+    assert doc.status == IndexedDocument.Status.INDEXED
+    ingestion.extractor.assert_called_once()
+    ingestion.client.upsert.assert_called_once()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_chunks_carry_the_folder_the_document_has_when_they_are_written(
+    evidence, ingestion
+):
+    """Moved while it was being ingested, or by a retry that runs after a later move."""
+    from chat.tasks import ingest_document, move_document_chunks
+
+    doc = _pending_document(evidence.folder)
+    moved_to, moved_again = _other_domain(), _other_domain()
+    this_doc = IndexedDocument.objects.filter(pk=doc.pk)
+    ingestion.extractor.side_effect = lambda file: (
+        this_doc.update(folder=moved_to),
+        [ingestion.extractor.return_value[0]],
+    )[1]
+
+    ingest_document.call_local(str(doc.id))
+    assert _stamped_folders(ingestion.client) == [str(moved_to.id)]
+
+    this_doc.update(folder=moved_again)
+    move_document_chunks.call_local([str(doc.id)])
+    assert _stamped_folders(ingestion.client)[-1] == str(moved_again.id)
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.ingest_document")
+def test_catch_up_releases_an_abandoned_ingestion(ingest, evidence):
+    """A worker stopped mid-run leaves its document in processing for good."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from chat.signals import index_missing_documents
+    from chat.tasks import INGESTION_LEASE
+
+    abandoned = _pending_document(evidence.folder, "abandoned.txt")
+    running = _pending_document(evidence.folder, "running.txt")
+    IndexedDocument.objects.filter(pk=abandoned.pk).update(
+        status=IndexedDocument.Status.PROCESSING,
+        updated_at=timezone.now() - INGESTION_LEASE - timedelta(minutes=1),
+    )
+    IndexedDocument.objects.filter(pk=running.pk).update(
+        status=IndexedDocument.Status.PROCESSING,
+        updated_at=timezone.now() - timedelta(hours=2),
+    )
+    index_missing_documents()
+
+    abandoned.refresh_from_db()
+    running.refresh_from_db()
+    assert abandoned.status == IndexedDocument.Status.PENDING
+    assert running.status == IndexedDocument.Status.PROCESSING
+    ingest.assert_called_once_with(str(abandoned.id))

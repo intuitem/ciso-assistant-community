@@ -4,12 +4,18 @@ Huey background tasks for document ingestion and object indexing.
 
 import structlog
 import uuid
+from datetime import timedelta
 
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
 
 logger = structlog.get_logger(__name__)
+
+#: How long an ingestion may hold its claim on a document. A worker stopped
+#: mid-run never releases it, so the catch-up does once this has passed: keep
+#: it above the longest ingestion, or a run still in progress is started again.
+INGESTION_LEASE = timedelta(hours=6)
 
 
 @db_task()
@@ -22,14 +28,15 @@ def ingest_document(document_id: str):
     from .providers import get_embedder
     from .rag import COLLECTION_NAME, get_qdrant_client
 
-    try:
-        doc = IndexedDocument.objects.get(id=document_id)
-    except IndexedDocument.DoesNotExist:
-        logger.error("IndexedDocument %s not found", document_id)
+    # Claim it: the catch-up resubmits what looks stuck, and a second delivery
+    # must not extract and embed the same document again.
+    claimed = IndexedDocument.objects.filter(
+        id=document_id, status=IndexedDocument.Status.PENDING
+    ).update(status=IndexedDocument.Status.PROCESSING, updated_at=timezone.now())
+    doc = IndexedDocument.objects.filter(id=document_id).first() if claimed else None
+    if doc is None:
+        logger.info("Document is not waiting for ingestion", document_id=document_id)
         return
-
-    doc.status = IndexedDocument.Status.PROCESSING
-    doc.save(update_fields=["status"])
 
     try:
         # Get extractor for file type
@@ -73,23 +80,14 @@ def ingest_document(document_id: str):
 
         client.upsert(collection_name=COLLECTION_NAME, points=points)
 
-        folder_id = (
-            IndexedDocument.objects.filter(id=doc.id)
-            .values_list("folder_id", flat=True)
-            .first()
-        )
-        if folder_id is None:
+        # The document may have been dropped or moved while this ran.
+        if not IndexedDocument.objects.filter(id=doc.id).exists():
             client.delete(
                 collection_name=COLLECTION_NAME,
                 points_selector=_document_filter([document_id]),
             )
             return
-        if folder_id != doc.folder_id:
-            client.set_payload(
-                collection_name=COLLECTION_NAME,
-                payload={"folder_id": str(folder_id)},
-                points=_document_filter([document_id]),
-            )
+        _stamp_current_folders(client, [document_id])
 
         doc.status = IndexedDocument.Status.INDEXED
         doc.chunk_count = len(chunks)
@@ -239,19 +237,45 @@ def remove_document_chunks(document_id: str):
         raise
 
 
+def _stamp_current_folders(client, document_ids):
+    """Write on each document's chunks the folder the database gives it now.
+
+    The folder is read when writing, never handed over by the caller: a retry
+    running late, or an ingestion racing with a move, would otherwise put an
+    older folder back. The second pass catches a move committed in between.
+    """
+    from .models import IndexedDocument
+    from .rag import COLLECTION_NAME
+
+    written = {}
+    for _ in range(2):
+        by_folder = {}
+        rows = IndexedDocument.objects.filter(id__in=document_ids).values_list(
+            "id", "folder_id"
+        )
+        for doc_id, folder_id in rows:
+            if written.get(doc_id) != folder_id:
+                written[doc_id] = folder_id
+                by_folder.setdefault(str(folder_id), []).append(str(doc_id))
+        for folder_id, ids in by_folder.items():
+            client.set_payload(
+                collection_name=COLLECTION_NAME,
+                payload={"folder_id": folder_id},
+                points=_document_filter(ids),
+            )
+
+
 @db_task(retries=3, retry_delay=60)
-def move_document_chunks(document_ids: list[str], folder_id: str):
-    """Point indexed documents' chunks at their new folder."""
-    from .rag import COLLECTION_NAME, get_qdrant_client
+def move_document_chunks(document_ids: list[str]):
+    """Point indexed documents' chunks at the folder their document is in now."""
+    from .rag import get_qdrant_client
 
     try:
-        get_qdrant_client().set_payload(
-            collection_name=COLLECTION_NAME,
-            payload={"folder_id": folder_id},
-            points=_document_filter(document_ids),
-        )
+        _stamp_current_folders(get_qdrant_client(), document_ids)
     except Exception as e:
-        logger.error("Failed to move document chunks", folder_id=folder_id, error=e)
+        logger.error(
+            "Failed to move document chunks", document_ids=document_ids, error=e
+        )
         raise
 
 

@@ -174,8 +174,7 @@ def _follow_folder(parent, revisions):
     if not doc_ids:
         return
     stale.update(folder_id=parent.folder_id)
-    folder_id = str(parent.folder_id)
-    transaction.on_commit(lambda: move_document_chunks(doc_ids, folder_id))
+    transaction.on_commit(lambda: move_document_chunks(doc_ids))
 
 
 def _indexed_for(source):
@@ -254,9 +253,8 @@ def _refresh(doc, source):
     from .tasks import ingest_document, move_document_chunks
 
     if doc.folder_id != source.folder_id:
-        folder_id = str(source.folder_id)
-        IndexedDocument.objects.filter(pk=doc.pk).update(folder_id=folder_id)
-        transaction.on_commit(lambda: move_document_chunks([str(doc.id)], folder_id))
+        IndexedDocument.objects.filter(pk=doc.pk).update(folder_id=source.folder_id)
+        transaction.on_commit(lambda: move_document_chunks([str(doc.id)]))
     if doc.status != IndexedDocument.Status.FAILED:
         return
     IndexedDocument.objects.filter(pk=doc.pk).update(
@@ -384,21 +382,32 @@ def index_missing_documents(folder_id=None):
         (evidence, index_evidence_revision),
         (documents, index_document_revision),
     ):
-        for revision in revisions.iterator():
+        # Ids only, each revision read when its turn comes: one loaded ahead may
+        # be published, replaced or deleted before it is reached, and reconciling
+        # from that copy would index the old state over the new one.
+        for pk in revisions.values_list("pk", flat=True).iterator():
             try:
-                index(revision)
+                revision = revisions.model.objects.filter(pk=pk).first()
+                if revision is not None:
+                    index(revision)
             except Exception as e:
-                logger.warning(
-                    "Failed to index revision", revision_id=revision.id, error=e
-                )
-    from .tasks import ingest_document
+                logger.warning("Failed to index revision", revision_id=pk, error=e)
+    from .tasks import INGESTION_LEASE, ingest_document
 
-    stuck = IndexedDocument.objects.filter(
-        status=IndexedDocument.Status.PENDING,
-        updated_at__lt=timezone.now() - timedelta(hours=1),
-    )
+    now = timezone.now()
+    waiting = IndexedDocument.objects.all()
     if folder_id:
-        stuck = stuck.filter(folder_id=folder_id)
+        waiting = waiting.filter(folder_id=folder_id)
+    # A worker stopped mid-ingestion never releases its claim: once the lease has
+    # passed, hand the document back. It is then old enough to be resubmitted below.
+    waiting.filter(
+        status=IndexedDocument.Status.PROCESSING,
+        updated_at__lt=now - INGESTION_LEASE,
+    ).update(status=IndexedDocument.Status.PENDING)
+    stuck = waiting.filter(
+        status=IndexedDocument.Status.PENDING,
+        updated_at__lt=now - timedelta(hours=1),
+    )
     for doc_id in stuck.values_list("id", flat=True):
         ingest_document(str(doc_id))
     return evidence.count(), documents.count()
