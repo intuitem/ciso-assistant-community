@@ -1,5 +1,6 @@
 """EBIOS RM (Risk Management) MCP tools for CISO Assistant"""
 
+from ..resolvers import _is_uuid
 from ..client import (
     found_line,
     make_get_request,
@@ -154,7 +155,7 @@ def _resolve_target_objective_category(category_input: str) -> str:
 
 
 def _resolve_technique_id(technique: str) -> str:
-    if "-" in technique and len(technique) == 36:
+    if _is_uuid(technique):
         return technique
     results, error = fetch_all_results("/techniques/", params={"search": technique})
     if error:

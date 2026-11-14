@@ -2,7 +2,7 @@ import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/custom-word-templates/download-default/${params.template_key}/${params.language}/`;
+	const endpoint = `${BASE_API_URL}/custom-word-templates/download-default/${encodeURIComponent(params.template_key)}/${encodeURIComponent(params.language)}/`;
 	const res = await fetch(endpoint);
 
 	return new Response(res.body, {

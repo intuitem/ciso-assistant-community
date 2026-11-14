@@ -13,14 +13,13 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 | Surface | Scope | Edition | Gating |
 |---|---|---|---|
 | **[Audit advanced analytics](audit-analytics.md)** | One audit | Community | `advanced_analytics` flag |
-| **Framework report** (this page) | One framework, every live audit using it | Community | None (permission-gated) |
+| **Framework report** (this page) | One framework, every audit using it | Community | None (permission-gated) |
 | **[Insights](insights.md)** menu | Cross-cutting (impact graph, priority/effort, Gantt timeline) | Enterprise (PRO) | None (permission-gated) |
 
 ## Where to find it
 
-1. Open the **Frameworks** list (`/frameworks`).
-2. Click into a framework's detail page.
-3. Click the **Insights** button at the top.
+- From the main menu: **Compliance > Summary** opens on the **By framework** tab, which lists every framework used by an audit you can read. Click one to open its report. The **By domain** tab shows each domain's audits.
+- From a framework: open its detail page and click the **Insights** button at the top.
 
 ## What it shows
 
@@ -30,26 +29,44 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 | **Compliance %** | Aggregate compliance percentage. Formula: _compliant + ½·partial, excluding N/A and not-assessed_ |
 | **Average implementation score** | Mean implementation score over scored requirements only (so partially-scored audits don't drag the mean down with null values) |
 | **In-scope audits** | The count of audits the report rolled up |
-| **Detected audits drawer** | Per-audit list with status, folder path, and `counted vs excluded` marker — so you can see what the live-status filter left out |
+| **Detected audits drawer** | Per-audit list with status, folder path, and `counted vs excluded` marker — so you can see what the status filter left out |
 | **Per-section breakdown** | Requirement rows grouped by their immediate parent section |
 | **Implementation-group filter** | Narrow the report to a single IG via the **Implementation group** dropdown |
+| **Verdicts** | For frameworks with outcome rules, how many of the filtered audits meet each verdict, and the average of each computed number. **By audit** shows each audit's verdicts and values; **By domain** counts them per domain at the chosen depth |
+| **Excel export** | **Export (Excel)** downloads what the filters show: audits (with authors, labels, dates, scores and one column per verdict), requirements, domains with their requirements, verdicts per domain, and one row per requirement per audit |
+
+## Filters
+
+The **Filters** panel at the top of the report drives every figure below it: indicators, distribution, verdicts, tables and the Excel export.
+
+- **Domains**: tick one or more domains, at any depth, or search them by name. An audit is kept when one of the ticked domains is on its path, so you can combine branches of the tree (for example two regional nodes under different parents). Domains under a ticked one show as already included.
+- **Labels** and **Authors**: keep the audits carrying one of the ticked labels, or written by one of the ticked authors.
+- **Implementation group**: narrow the report to a single group.
+- **Status**: **All but deprecated** (the default) or only live audits, in progress, in review or done.
+- **Deadline**: pick **ETA** or **Due date**, then **Overdue** (done audits are never overdue), **Next 3 / 6 / 12 months**, or **Custom** for a window in months from today. In a custom window, `3 → 6` keeps audits due between three and six months from now, and a negative bound reaches back into overdue audits. Audits without that date are left out while the filter is on.
+
+Active filters show as chips under the panel; click a chip's cross to remove it, or **Reset filters** to clear them all. The detected audits drawer greys out the audits the filters leave out.
 
 ## Two ways to read it
 
 The **View** toggle in the filter bar switches the body of the report between two lenses on the same numbers:
 
-- **Requirements tree** — the default. Sections roll up their requirements; click a section to expand it, then click a requirement row to drill into its **Per-assessment breakdown** (one row per audit, with domain, result, score, controls and evidence counts, and a link straight to that requirement assessment). **Expand all** / **Collapse all** act on every section at once.
-- **Per domain** — pivots the same rows by the domain (Folder) they live in. **Group by domain depth** controls how far down the tree the grouping cuts (`root` … `leaf domain`), and **Sort by** orders the rows by domain name (alphabetical), compliance %, or average score, ascending or descending.
+- **Requirements tree** — the default. Sections roll up their requirements; click a section to expand it, then click a requirement row to drill into its **Per-assessment breakdown** (one row per audit, with domain, result, score, controls and evidence counts, and a link straight to that requirement assessment). Several requirements can be open at once. **Expand all** / **Collapse all** act on every section at once; **Collapse all** also closes open requirements.
+- **Per domain** — pivots the same rows by the domain (Folder) they live in. **Group by domain depth** controls how far down the tree the grouping cuts (`root` … `leaf domain`), and **Sort by** orders the rows by domain name (alphabetical), compliance %, or average score, ascending or descending. Click a domain to filter the report on it and switch to the **Requirements tree**, which then shows that domain's sections and requirements with their compliance and average scores.
+
+## Exporting evidences
+
+Tick what to export in the **Requirements tree**: a requirement covers all its audits, a section ticks all its requirements, and in a requirement's **Per-assessment breakdown** each audit can be ticked on its own (the requirement then shows as partly ticked). The box in the **Ref.** header ticks every requirement shown. **Export evidences (N requirements)** above the table downloads one zip for the selection, over the filtered audits, with one folder per domain and audit. Each file is stored once per audit, however many of its requirements it supports; the index lists one row per requirement. When the selection has no evidence, a message says so and nothing is downloaded. When its files add up to more than 2 GB, the export is refused with a message giving the size; narrow the selection, or ask your administrator to change the limit (`EVIDENCE_EXPORT_MAX_SIZE_MB`). It includes evidences attached to the requirements and those attached to their applied controls, limited to the evidences you can read. An `index.xlsx` at the root of the zip lists every evidence with its domain, audit and requirement, the applied control it comes from when it is not attached to the requirement directly, and a clickable link to its file in the zip, or to its URL when it has no file.
 
 ## What gets counted
 
-Only **live** audits roll into the numbers. "Live" means the audit's status is one of:
+By default every audit you can read rolls into the numbers, except deprecated ones: when you cut a new audit cycle on the same domain, mark the previous one deprecated so it doesn't double-count its requirements alongside the new one. Set **Status** to the live statuses to keep only audits that are:
 
 - `in_progress`
 - `in_review`
 - `done`
 
-Audits in `planned` or `deprecated` status are visible in the drawer (so you can see them) but **excluded** from the aggregates. The `deprecated` filter exists for a specific reason — when you cut a new audit cycle on the same domain, you mark the previous one deprecated so it doesn't double-count its requirements alongside the new live audit. The page surfaces this rule inline: _"Only assessments with status {statuses} are counted — mark audits as {deprecated} to exclude them."_
+Planned audits are then left out as well. In the default mode, planned audits count in the figures but not in the verdicts, since they have not started. Excluded audits stay visible in the drawer. In a campaign report, planned audits count as live.
 
 ## Combined view: domain-tree inheritance
 

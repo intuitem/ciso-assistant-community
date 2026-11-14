@@ -8,6 +8,7 @@
 	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { startAuthentication } from '@simplewebauthn/browser';
+	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -66,7 +67,11 @@
 			const formData = new FormData();
 			formData.set('credential', JSON.stringify(credential));
 
-			const response = await fetch(`?/mfaAuthenticateWebAuthn`, {
+			const next = page.url.searchParams.get('next');
+			const action = next
+				? `?/mfaAuthenticateWebAuthn&next=${encodeURIComponent(next)}`
+				: '?/mfaAuthenticateWebAuthn';
+			const response = await fetch(action, {
 				method: 'POST',
 				body: formData
 			});

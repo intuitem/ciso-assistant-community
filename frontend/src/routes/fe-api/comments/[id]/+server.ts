@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 	const body = await request.text();
-	const endpoint = `${BASE_API_URL}/comments/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/comments/${encodeURIComponent(params.id)}/`;
 	const res = await fetch(endpoint, {
 		method: 'PATCH',
 		body,
@@ -22,7 +22,7 @@ export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 };
 
 export const DELETE: RequestHandler = async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/comments/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/comments/${encodeURIComponent(params.id)}/`;
 	const res = await fetch(endpoint, {
 		method: 'DELETE'
 	});

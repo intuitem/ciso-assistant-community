@@ -7,9 +7,6 @@
 	import BarChart from '#lib/components/Chart/BarChart.svelte';
 	import TreemapChart from '#lib/components/Chart/TreemapChart.svelte';
 	import GroupedBarChart from '#lib/components/Chart/GroupedBarChart.svelte';
-	import HalfDonutChart from '#lib/components/Chart/HalfDonutChart.svelte';
-	import NightingaleChart from '#lib/components/Chart/NightingaleChart.svelte';
-	import StackedBarsNormalized from '#lib/components/Chart/StackedBarsNormalized.svelte';
 	import IncidentMonthlyChart from '#lib/components/Chart/IncidentMonthlyChart.svelte';
 	import ExceptionSankeyChart from '#lib/components/Chart/ExceptionSankeyChart.svelte';
 	import FindingsSankeyChart from '#lib/components/Chart/FindingsSankeyChart.svelte';
@@ -29,6 +26,7 @@
 	import { canPerformAction } from '#lib/utils/access-control.js';
 	import type { PageData } from './$types';
 	import CounterCard from './CounterCard.svelte';
+	import SummaryBriefing from './SummaryBriefing.svelte';
 
 	interface Props {
 		data: PageData;
@@ -213,245 +211,11 @@
 					</div>
 				{:then metrics}
 					{#if metrics}
-						<section id="summary" class="space-y-6">
-							<!-- Controls + CSF Functions Row -->
-							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-								<!-- Controls Section (3/5 of width) -->
-								<div class="xl:col-span-3">
-									<CardGroup
-										title={m.sumpageSectionControls()}
-										icon="fa-solid fa-shield-halved"
-										maxColumns={3}
-									>
-										<SimpleCard
-											count={metrics.controls?.total}
-											label={m.sumpageTotal()}
-											href="/applied-controls/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={metrics.controls?.active}
-											label={m.sumpageActive()}
-											href="/applied-controls/?status=active"
-										/>
-										<SimpleCard
-											count={metrics.controls?.degraded}
-											label={m.sumpageDegraded()}
-											href="/applied-controls/?status=degraded"
-										/>
-										<SimpleCard
-											count={metrics.controls?.deprecated}
-											label={m.sumpageDeprecated()}
-											href="/applied-controls/?status=deprecated"
-										/>
-										<SimpleCard
-											count={metrics.controls?.to_do}
-											label={m.sumpageToDo()}
-											href="/applied-controls/?status=to_do"
-										/>
-										<SimpleCard
-											count={metrics.controls?.in_progress}
-											label={m.sumpageInProgress()}
-											href="/applied-controls/?status=in_progress"
-										/>
-										<SimpleCard
-											count={metrics.controls?.on_hold}
-											label={m.sumpageOnHold()}
-											href="/applied-controls/?status=on_hold"
-										/>
-										<SimpleCard
-											count={metrics.controls?.p1}
-											label={m.sumpageP1()}
-											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={metrics.controls?.eta_missed}
-											label={m.sumpageEtaMissed()}
-											href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
-												.toISOString()
-												.split('T')[0]}"
-											emphasis={true}
-										/>
-									</CardGroup>
-								</div>
-
-								<!-- CSF Functions Chart (2/5 of width) -->
-								<div class="xl:col-span-2">
-									<div class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800">
-										{#if metrics.csf_functions}
-											<NightingaleChart name="nightingale" values={metrics.csf_functions} />
-										{/if}
-									</div>
-								</div>
-							</div>
-							<!-- Compliance + Audits Chart Row -->
-							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-								<!-- Compliance Section (2/5 of width) -->
-								<div class="xl:col-span-2">
-									<CardGroup
-										title={m.sumpageSectionCompliance()}
-										icon="fa-solid fa-list-check"
-										maxColumns={3}
-									>
-										<SimpleCard
-											count={metrics.compliance?.used_frameworks}
-											label={m.usedFrameworks()}
-											href="/frameworks/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count="{metrics.compliance?.active_audits}/{metrics.compliance?.audits}"
-											label={m.sumpageActiveAudits()}
-											href="/compliance-assessments/"
-											emphasis={true}
-										/>
-										{#await data.stream.auditsMetrics}
-											<SimpleCard
-												count="..."
-												label={m.sumpageAvgProgress()}
-												href="/compliance-assessments/"
-											/>
-										{:then auditsMetrics}
-											{#if auditsMetrics}
-												<SimpleCard
-													count="{auditsMetrics.progress_avg}%"
-													label={m.sumpageAvgProgress()}
-													href="/compliance-assessments/"
-												/>
-											{:else}
-												<SimpleCard
-													count="-"
-													label={m.sumpageAvgProgress()}
-													href="/compliance-assessments/"
-												/>
-											{/if}
-										{:catch}
-											<SimpleCard
-												count="-"
-												label={m.sumpageAvgProgress()}
-												href="/compliance-assessments/"
-											/>
-										{/await}
-										<SimpleCard
-											count={metrics.compliance?.non_compliant_items}
-											label={m.sumpageNonCompliantItems()}
-											href="/requirement-assessments?result=non_compliant"
-										/>
-										<SimpleCard
-											count={metrics.compliance?.evidences}
-											label={m.sumpageEvidences()}
-											href="/evidences/"
-										/>
-										<SimpleCard
-											count={metrics.compliance?.expired_evidences}
-											label={m.sumpageExpiredEvidences()}
-											href="/evidences/?status=expired"
-											emphasis={true}
-										/>
-									</CardGroup>
-								</div>
-
-								<!-- Audits Chart (3/5 of width) -->
-								<div class="xl:col-span-3">
-									{#await data.stream.auditsMetrics}
-										<div
-											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800 flex items-center justify-center"
-										>
-											<LoadingSpinner />
-										</div>
-									{:then auditsMetrics}
-										<div
-											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800"
-										>
-											{#if auditsMetrics?.audits_stats?.data?.length > 0}
-												<StackedBarsNormalized
-													names={auditsMetrics.audits_stats.names}
-													data={auditsMetrics.audits_stats.data}
-													uuids={auditsMetrics.audits_stats.uuids}
-													title={m.recentlyUpdatedAudits()}
-												/>
-											{:else}
-												<div class="flex items-center justify-center h-full text-surface-600-400">
-													<p>{m.nothingToShowYet()}</p>
-												</div>
-											{/if}
-										</div>
-									{:catch}
-										<div
-											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800 flex items-center justify-center text-red-500"
-										>
-											<p>Error loading audits data</p>
-										</div>
-									{/await}
-								</div>
-							</div>
-							<!-- Risk Section + Charts Row -->
-							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-								<!-- Risk Cards (2/5 of width) -->
-								<div class="xl:col-span-2">
-									<CardGroup title={m.sumpageSectionRisk()} icon="fa-solid fa-biohazard">
-										<SimpleCard
-											count={metrics.risk?.assessments}
-											label={m.sumpageAssessments()}
-											href="/risk-assessments/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={metrics.risk?.scenarios}
-											label={m.sumpageScenarios()}
-											href="/risk-scenarios/"
-										/>
-										<SimpleCard
-											count={metrics.risk?.threats}
-											label={m.sumpageMappedThreats()}
-											href="/analytics?tab=risk"
-										/>
-										<SimpleCard
-											count={metrics.risk?.acceptances}
-											label={m.sumpageRiskAccepted()}
-											href="/risk-acceptances"
-										/>
-									</CardGroup>
-								</div>
-
-								<!-- Risk Charts (3/5 of width) -->
-								<div class="xl:col-span-3">
-									{#await data.stream.risksCountPerLevel}
-										<div class="flex items-center justify-center h-80">
-											<LoadingSpinner />
-										</div>
-									{:then risksCountPerLevel}
-										<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-											<div
-												class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800"
-											>
-												<HalfDonutChart
-													name="current_h"
-													title={m.sumpageTitleCurrentRisks()}
-													values={risksCountPerLevel?.current ?? []}
-													colors={(risksCountPerLevel?.current ?? []).map((object) => object.color)}
-												/>
-											</div>
-											<div
-												class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800"
-											>
-												<HalfDonutChart
-													name="residual_h"
-													title={m.sumpageTitleResidualRisks()}
-													values={risksCountPerLevel?.residual ?? []}
-													colors={(risksCountPerLevel?.residual ?? []).map(
-														(object) => object.color
-													)}
-												/>
-											</div>
-										</div>
-									{:catch}
-										<div class="text-red-500">Error loading risk level data</div>
-									{/await}
-								</div>
-							</div>
-						</section>
+						<SummaryBriefing
+							{metrics}
+							auditsMetrics={data.stream.auditsMetrics}
+							featureflags={page.data.featureflags}
+						/>
 					{:else}
 						<div class="col-span-3 lg:col-span-1">
 							<p class="text-red-500">Error loading metrics</p>
@@ -1083,9 +847,15 @@
 								<div
 									class="xl:col-span-1 bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 								>
-									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.tasksStatus()}
-									</h3>
+									<div class="flex items-baseline justify-between gap-3 mb-4">
+										<h3 class="text-lg font-semibold text-surface-900-100">
+											{m.tasksStatus()}
+										</h3>
+										<a
+											href="/task-templates/analytics"
+											class="text-[13px] text-primary-700-300 hover:underline">{m.viewAll()}</a
+										>
+									</div>
 									<div class="h-96">
 										{#await data.stream.taskTemplateStatus}
 											<div class="flex items-center justify-center h-full">

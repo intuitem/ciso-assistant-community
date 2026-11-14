@@ -1,5 +1,6 @@
-import { writable } from 'svelte/store';
 import { getContext, setContext } from 'svelte';
+import { toast } from 'svelte-sonner';
+import ToastCard, { type ToastTone } from './ToastCard.svelte';
 
 export interface ToastSettings {
 	/** Provide the toast message. Supports HTML. */
@@ -27,13 +28,6 @@ export interface ToastSettings {
 	classes?: string;
 	/** Callback function that fires on trigger and close. */
 	callback?: (response: { id: string; status: 'queued' | 'closed' }) => void;
-}
-
-export interface Toast extends ToastSettings {
-	/** A UUID will be auto-assigned on `.trigger()`. */
-	id: string;
-	/** The id of the `setTimeout` if `autohide` is enabled  */
-	timeoutId?: ReturnType<typeof setTimeout>;
 }
 
 const toastDefaults: ToastSettings = {
@@ -80,85 +74,45 @@ export function initializeToastStore(): ToastStore {
 	return setContext(TOAST_STORE_KEY, toastStore);
 }
 
-// Note for security; differentiates the queued toasts
-function randomUUID(): string {
-	const random = Math.random();
-	return Number(random).toString(32);
+// Older callers pass a Skeleton background class instead of a preset.
+function toneOf(t: ToastSettings): ToastTone {
+	const hint = t.preset ?? t.background ?? '';
+	if (hint.includes('error')) return 'error';
+	if (hint.includes('success')) return 'success';
+	if (hint.includes('warning')) return 'warning';
+	return 'info';
 }
 
 export type ToastStore = ReturnType<typeof toastService>;
 function toastService() {
-	const { subscribe, set, update } = writable<Toast[]>([]);
-
-	/** Remove toast in queue*/
-	const close = (id: string) =>
-		update((tStore) => {
-			if (tStore.length > 0) {
-				const index = tStore.findIndex((t) => t.id === id);
-				const selectedToast = tStore[index];
-				if (selectedToast) {
-					// Trigger Callback
-					if (selectedToast.callback) selectedToast.callback({ id, status: 'closed' });
-					// Clear timeout
-					if (selectedToast.timeoutId) clearTimeout(selectedToast.timeoutId);
-					// Remove
-					tStore.splice(index, 1);
-				}
-			}
-			return tStore;
-		});
-
-	// If toast should auto-hide, wait X time, then close by ID
-	function handleAutoHide(toast: Toast) {
-		if (toast.autohide === true) {
-			return setTimeout(() => {
-				close(toast.id);
-			}, toast.timeout);
-		}
-	}
-
 	return {
-		subscribe,
-		close,
-		/** Add a new toast to the queue. */
-		trigger: (toast: ToastSettings) => {
-			let id: string = randomUUID();
-			update((tStore) => {
-				// a page with many tables can fail N times at once; show it once
-				const duplicate = tStore.find((t) => t.message === toast.message);
-				if (duplicate) {
-					id = duplicate.id;
-					toast.callback?.({ id, status: 'queued' });
-					return tStore;
+		/** Show a toast; returns its id. */
+		trigger: (settings: ToastSettings) => {
+			const t = { ...toastDefaults, ...settings };
+			// Same message, same id: a page with many tables can fail N times at once; show it once.
+			const id = `toast:${t.message}`;
+			const closed = () => t.callback?.({ id, status: 'closed' });
+			toast.custom(ToastCard, {
+				id,
+				// hideDismiss always auto-hides, otherwise the toast could never go away.
+				duration: t.autohide || t.hideDismiss ? t.timeout : Number.POSITIVE_INFINITY,
+				dismissible: !t.hideDismiss,
+				onDismiss: closed,
+				onAutoClose: closed,
+				componentProps: {
+					message: t.message,
+					tone: toneOf(t),
+					action: t.action,
+					hideDismiss: t.hideDismiss,
+					classes: t.classes
 				}
-				// Trigger Callback
-				if (toast && toast.callback) toast.callback({ id, status: 'queued' });
-				// activate autohide when dismiss button is hidden.
-				if (toast.hideDismiss) toast.autohide = true;
-				// Merge with defaults
-				const tMerged: Toast = { ...toastDefaults, ...toast, id };
-				// Handle auto-hide, if needed
-				tMerged.timeoutId = handleAutoHide(tMerged);
-				// Push into store
-				tStore.push(tMerged);
-				// Return
-				return tStore;
 			});
+			t.callback?.({ id, status: 'queued' });
 			return id;
 		},
-		/** Remain visible on hover */
-		freeze: (index: number) =>
-			update((tStore) => {
-				if (tStore.length > 0) clearTimeout(tStore[index].timeoutId);
-				return tStore;
-			}),
-		/** Cancel remain visible on leave */
-		unfreeze: (index: number) =>
-			update((tStore) => {
-				if (tStore.length > 0) tStore[index].timeoutId = handleAutoHide(tStore[index]);
-				return tStore;
-			}),
-		/** Remove all toasts from queue */
-		clear: () => set([])
+		/** Remove a toast by id. */
+		close: (id: string) => toast.dismiss(id),
+		/** Remove all toasts. */
+		clear: () => toast.dismiss()
 	};
 }

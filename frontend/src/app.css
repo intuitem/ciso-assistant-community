@@ -169,6 +169,20 @@ ul.options.portaled-options > li:not(.active):hover {
 	border-color: var(--color-surface-600);
 }
 
+/* AutocompleteSelect: a long selected label must not push its remove button
+   out of a narrow field. Let the selected item shrink, so its label truncates
+   and the button stays within reach. */
+div.multiselect > ul.selected,
+div.multiselect > ul.selected > li {
+	min-width: 0;
+}
+div.multiselect > ul.selected > li {
+	max-width: 100%;
+}
+div.multiselect > ul.selected > li > button.remove {
+	flex-shrink: 0;
+}
+
 /* AutocompleteSelect: collapse overflow chips when chip-max-N class is on outerDiv.
    Uses position/size instead of display:none to avoid Tailwind v4 @layer !important cascade. */
 .chip-max-1 ul.selected > li:nth-child(n + 3),
@@ -192,4 +206,54 @@ ul.options.portaled-options > li:not(.active):hover {
 }
 .hide-scrollbar::-webkit-scrollbar {
 	display: none;
+}
+
+/* Horizontal tab bars scroll sideways instead of clipping their last tabs on narrow viewports.
+   Unlayered so it wins over the Skeleton tabs styles without !important. */
+[data-scope='tabs'][data-part='list'][data-orientation='horizontal'] {
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
+}
+
+/* Fade the edge that hides tabs. A scroll-driven animation only runs while the bar overflows,
+   so a bar that fits gets no fade; browsers without scroll timelines just scroll. */
+@property --tabs-fade-start {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+@property --tabs-fade-end {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+@keyframes tabs-edge-fade {
+	0% {
+		--tabs-fade-start: 0px;
+		--tabs-fade-end: 2rem;
+	}
+	4% {
+		--tabs-fade-start: 2rem;
+	}
+	96% {
+		--tabs-fade-end: 2rem;
+	}
+	100% {
+		--tabs-fade-start: 2rem;
+		--tabs-fade-end: 0px;
+	}
+}
+@supports (animation-timeline: scroll()) {
+	[data-scope='tabs'][data-part='list'][data-orientation='horizontal'] {
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 var(--tabs-fade-start),
+			#000 calc(100% - var(--tabs-fade-end)),
+			transparent
+		);
+		animation: tabs-edge-fade linear both;
+		animation-timeline: scroll(self inline);
+	}
 }

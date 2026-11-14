@@ -552,6 +552,18 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const TOP_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'briefingHighRisks',
+		options: [
+			{ label: 'currentRisk', value: 'current' },
+			{ label: 'residualRisk', value: 'residual' }
+		],
+		multiple: false
+	}
+};
+
 export const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2053,6 +2065,7 @@ export const listViewFields = {
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
+			top_level: TOP_RISK_LEVEL_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2334,6 +2347,7 @@ export const listViewFields = {
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
+			'canConnectApps',
 			'is_third_party',
 			'hasMfaEnabled'
 		],
@@ -2346,6 +2360,7 @@ export const listViewFields = {
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
+			'can_connect_apps',
 			'is_third_party',
 			'has_mfa_enabled'
 		],
@@ -2370,8 +2385,28 @@ export const listViewFields = {
 		body: ['name', 'user_groups']
 	},
 	'service-accounts': {
-		head: ['name', 'clientId', 'secretPreview', 'isActive', 'expiryDate', 'createdAt'],
-		body: ['name', 'client_id', 'secret_preview', 'is_active', 'expiry_date', 'created_at']
+		head: [
+			'name',
+			'identitySource',
+			'clientId',
+			'secretPreview',
+			'isActive',
+			'expiryDate',
+			'createdAt'
+		],
+		body: [
+			'name',
+			'identity_source',
+			'client_id',
+			'secret_preview',
+			'is_active',
+			'expiry_date',
+			'created_at'
+		]
+	},
+	'identity-providers': {
+		head: ['name', 'providerId', 'clientId'],
+		body: ['name', 'provider_id', 'client_id']
 	},
 	roles: {
 		head: ['name', 'description'],

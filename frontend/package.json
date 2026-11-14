@@ -80,6 +80,7 @@
 		"@dagrejs/dagre": "^3.1.3",
 		"@floating-ui/dom": "^1.8.0",
 		"@fortawesome/fontawesome-free": "^7.3.1",
+		"@number-flow/svelte": "0.4.2",
 		"@simplewebauthn/browser": "^13.3.0",
 		"@svar-ui/svelte-grid": "^2.7.5",
 		"@unovis/svelte": "1.6.7",
@@ -99,7 +100,8 @@
 		"sanitize-html": "^2.18.1",
 		"ssf": "^0.11.2",
 		"svelte-multiselect": "^11.8.0",
-		"svelte-persisted-store": "^0.12.0"
+		"svelte-persisted-store": "^0.12.0",
+		"svelte-sonner": "1.2.3"
 	},
 	"packageManager": "pnpm@12.15.0",
 	"imports": {
