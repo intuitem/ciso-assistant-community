@@ -14,9 +14,9 @@ provider: ISO
 packager: Nadia QOUDHADH
 translations:
   fr:
-    name: ISO 9001:2015 — Systèmes de management de la qualité — Exigences
-    description: Norme ISO 9001:2015 relative aux systèmes de management de la qualité. Synthèse détaillée
-      par article et sous-clause. Version complète à acquérir auprès de l'ISO.
+    name: ISO 9001:2015 — Systèmes de management de la qualité — Exigences (synthèse)
+    description: Synthèse de la norme ISO 9001:2015 — Systèmes de management de la qualité — Exigences,
+      article par article. Version complète à acquérir auprès de l'ISO.
     copyright: ISO - Version complète à acquérir auprès de l'ISO.
 objects:
   framework:
@@ -26,8 +26,8 @@ objects:
     description: Outline of ISO 9001:2015 on quality management systems.
     translations:
       fr:
-        name: ISO 9001:2015 — Systèmes de management de la qualité — Exigences
-        description: Norme ISO 9001:2015 relative aux systèmes de management de la qualité.
+        name: ISO 9001:2015 — Systèmes de management de la qualité — Exigences (synthèse)
+        description: Synthèse de la norme ISO 9001:2015 relative aux systèmes de management de la qualité.
     min_score: 0
     max_score: 5
     scores_definition:
@@ -89,13 +89,15 @@ objects:
       ref_id: '4.1'
       name: Understanding the organization and its context
       description: Identify the internal and external issues relevant to the QMS purpose and strategic
-        direction, and keep them under review.
+        direction, and keep them under review. Since Amendment 1:2024, determine whether climate change
+        is a relevant issue.
       annotation: Use a SWOT or PESTLE analysis to record internal and external factors.
       translations:
         fr:
           name: Compréhension de l'organisme et de son contexte
           description: Déterminer les enjeux internes et externes pertinents pour la finalité et l'orientation
-            stratégique du SMQ, et les surveiller.
+            stratégique du SMQ, et les surveiller. Depuis l'amendement 1:2024, déterminer si le changement
+            climatique est un enjeu pertinent.
           annotation: Utiliser une analyse SWOT ou PESTLE pour documenter les facteurs internes/externes.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:4.2
       assessable: true
@@ -105,13 +107,15 @@ objects:
       name: Understanding the needs and expectations of interested parties
       description: Identify the relevant interested parties and their QMS-related requirements, and keep
         them under review.
-      annotation: Maintain a stakeholder register and review it every year.
+      annotation: Maintain a stakeholder register and review it regularly. Since Amendment 1:2024, interested
+        parties may have climate-change requirements.
       translations:
         fr:
           name: Compréhension des besoins et attentes des parties intéressées
           description: Identifier les parties intéressées pertinentes et leurs exigences vis-à-vis du
             SMQ, et les surveiller.
-          annotation: Tenir un registre des parties prenantes et le revoir annuellement.
+          annotation: Tenir un registre des parties prenantes et le revoir régulièrement. Depuis l'amendement
+            1:2024, les parties intéressées peuvent avoir des exigences liées au changement climatique.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:4.3
       assessable: true
       depth: 2
@@ -242,7 +246,7 @@ objects:
       annotation: Use a RACI matrix to document roles.
       translations:
         fr:
-          name: Rôles, responsabilités et autorités
+          name: Rôles, responsabilités et autorités au sein de l'organisme
           description: Attribuer, communiquer et faire comprendre les responsabilités et autorités pour
             la conformité, les résultats des processus, le reporting, l'orientation client et l'intégrité
             du SMQ.
@@ -267,7 +271,7 @@ objects:
       annotation: Include quality risks in the enterprise risk management process.
       translations:
         fr:
-          name: Actions face aux risques et opportunités
+          name: Actions à mettre en œuvre face aux risques et opportunités
           description: Déterminer les risques et opportunités à traiter pour assurer l'atteinte des résultats,
             accroître les effets souhaitables, prévenir les effets indésirables et s'améliorer. Planifier
             les actions et leur évaluation.
@@ -289,13 +293,13 @@ objects:
       name: Establishing quality objectives
       description: Set quality objectives that are consistent with the policy, measurable, relevant, monitored,
         communicated and kept up to date. Keep documented information.
-      annotation: Define 3 to 5 measurable objectives and review them at management review.
+      annotation: Keep a small set of measurable objectives and review them at management review.
       translations:
         fr:
           name: Établissement des objectifs qualité
           description: Établir des objectifs qualité cohérents avec la politique, mesurables, pertinents,
             surveillés, communiqués et mis à jour. Conserver des informations documentées.
-          annotation: Définir 3 à 5 objectifs mesurables et les revoir en revue de direction.
+          annotation: Retenir un nombre restreint d'objectifs mesurables et les revoir en revue de direction.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:6.2.2
       assessable: true
       depth: 3
@@ -403,44 +407,24 @@ objects:
             et physiques).
           annotation: Évaluer périodiquement les conditions de travail et le climat social.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1
       ref_id: 7.1.5
       name: Monitoring and measuring resources
+      description: Identify and provide suitable, maintained monitoring and measuring resources, and keep
+        evidence that they are fit for purpose. Where measurement traceability is required, calibrate or
+        verify equipment, identify it and protect it, and deal with equipment found unfit.
+      annotation: Document measuring equipment and how it is used; keep a calibration register with certificates.
       translations:
         fr:
           name: Ressources pour la surveillance et la mesure
-    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5.1
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5
-      ref_id: 7.1.5.1
-      name: General
-      description: Identify and provide suitable, maintained monitoring and measuring resources, and keep
-        evidence that they are fit for purpose.
-      annotation: Document measuring equipment and how it is used.
-      translations:
-        fr:
-          name: Généralités
           description: Déterminer et fournir les ressources de surveillance/mesure appropriées et maintenues,
-            et conserver les preuves de leur adéquation.
-          annotation: Documenter les équipements de mesure et leur usage.
-    - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5.2
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.5
-      ref_id: 7.1.5.2
-      name: Measurement traceability
-      description: Where traceability is required, calibrate or verify equipment, identify it and protect
-        it. Deal with equipment found unfit.
-      annotation: Keep a calibration register with certificates.
-      translations:
-        fr:
-          name: Traçabilité de la mesure
-          description: Lorsque la traçabilité est exigée, étalonner/vérifier les équipements, les identifier
-            et les protéger. Traiter les équipements inadaptés.
-          annotation: Tenir un registre d'étalonnage avec les certificats.
+            et conserver les preuves de leur adéquation. Lorsque la traçabilité de la mesure est exigée,
+            étalonner/vérifier les équipements, les identifier et les protéger, et traiter les équipements
+            inadaptés.
+          annotation: Documenter les équipements de mesure et leur usage ; tenir un registre d'étalonnage
+            avec les certificats.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:7.1.6
       assessable: true
       depth: 3
@@ -465,13 +449,13 @@ objects:
       name: Competence
       description: Identify the competence needed, make sure staff are competent, take action where needed
         and keep evidence.
-      annotation: Keep training records up to date and check competence every year.
+      annotation: Keep training records up to date and check competence periodically.
       translations:
         fr:
           name: Compétences
           description: Déterminer les compétences nécessaires, s'assurer que le personnel est compétent,
             mener des actions si besoin et conserver les preuves.
-          annotation: Tenir à jour les dossiers de formation et vérifier les compétences annuellement.
+          annotation: Tenir à jour les dossiers de formation et vérifier les compétences périodiquement.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:7.3
       assessable: true
       depth: 2
@@ -549,14 +533,15 @@ objects:
       name: Control of documented information
       description: Control availability, protection, distribution, access, storage, changes, retention
         and disposal. Identify and control documents of external origin.
-      annotation: Protect sensitive data and ensure backups.
+      annotation: Define document control rules for approval, distribution, access rights, retention and disposal.
       translations:
         fr:
           name: Maîtrise des informations documentées
           description: Maîtriser la disponibilité, la protection, la distribution, l'accès, le stockage,
             les modifications, la conservation et l'élimination. Identifier et maîtriser les documents
             d'origine externe.
-          annotation: Protéger les données sensibles et assurer les sauvegardes.
+          annotation: Définir les règles de maîtrise documentaire (approbation, diffusion, droits d'accès,
+            conservation, élimination).
     - urn: urn:intuitem:risk:req_node:iso9001-2015:8
       assessable: false
       depth: 1
@@ -612,14 +597,17 @@ objects:
       ref_id: 8.2.2
       name: Determining the requirements for products and services
       description: Define product/service requirements, including legal ones and those the organization
-        considers necessary, and make sure claims can be met.
-      annotation: Formalise the review of customer requirements before any commitment.
+        considers necessary, and make sure the organization can meet the claims it makes about its products
+        and services.
+      annotation: Keep a register of product and service requirements, including applicable legal requirements.
       translations:
         fr:
           name: Détermination des exigences relatives aux produits et services
           description: Définir les exigences des produits/services, y compris les exigences légales et
-            celles jugées nécessaires, et s'assurer de la capacité à répondre aux réclamations.
-          annotation: Formaliser la revue des exigences clients avant tout engagement.
+            celles jugées nécessaires, et s'assurer de pouvoir satisfaire aux allégations concernant les produits
+            et services proposés.
+          annotation: Tenir un registre des exigences relatives aux produits et services, y compris les exigences
+            légales applicables.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:8.2.3
       assessable: true
       depth: 3
@@ -645,7 +633,7 @@ objects:
       annotation: Use a change log with notification to the teams.
       translations:
         fr:
-          name: Modifications des exigences
+          name: Modifications des exigences relatives aux produits et services
           description: Amender les informations documentées et informer le personnel concerné lorsque
             les exigences changent.
           annotation: Utiliser un journal des changements avec notification aux équipes.
@@ -684,7 +672,7 @@ objects:
       annotation: Build a design plan with milestones and reviews.
       translations:
         fr:
-          name: Planification
+          name: Planification de la conception et du développement
           description: Prendre en compte la nature, la durée, la complexité, les étapes, les vérifications/validations,
             les responsabilités, les ressources, les interfaces, l'implication clients, les exigences
             ultérieures, le niveau de maîtrise et les informations documentées.
@@ -700,7 +688,7 @@ objects:
       annotation: Formalise a specification with validated input criteria.
       translations:
         fr:
-          name: Éléments d'entrée
+          name: Éléments d'entrée de la conception et du développement
           description: Déterminer les exigences fonctionnelles, performances, informations antérieures,
             exigences légales, normes internes et conséquences de défaillance. Résoudre les conflits et
             conserver les preuves.
@@ -716,7 +704,7 @@ objects:
       annotation: Document design reviews and corrective actions.
       translations:
         fr:
-          name: Maîtrise
+          name: Maîtrise de la conception et du développement
           description: Maîtriser la conception via des revues, vérifications et validations, traiter les
             problèmes identifiés et conserver les preuves.
           annotation: Documenter les revues de conception et les actions correctives.
@@ -731,7 +719,7 @@ objects:
       annotation: Document design deliverables and their validation.
       translations:
         fr:
-          name: Éléments de sortie
+          name: Éléments de sortie de la conception et du développement
           description: S'assurer que les sorties satisfont aux entrées, sont adéquates pour les processus
             ultérieurs, incluent les critères de surveillance/acceptation et spécifient les caractéristiques
             essentielles. Conserver les preuves.
@@ -746,7 +734,7 @@ objects:
       annotation: Use a design change log with impact assessment.
       translations:
         fr:
-          name: Modifications
+          name: Modifications de la conception et du développement
           description: Identifier, revoir et maîtriser les modifications de conception pour éviter les
             impacts négatifs. Conserver les preuves.
           annotation: Utiliser un journal des modifications de conception avec évaluation d'impact.
@@ -1061,13 +1049,13 @@ objects:
       name: General
       description: Top management reviews the QMS at planned intervals to make sure it remains suitable,
         adequate, effective and aligned with strategy.
-      annotation: Hold a management review at least once a year.
+      annotation: Hold management reviews at planned intervals, typically once a year.
       translations:
         fr:
           name: Généralités
           description: La direction revoit le SMQ à intervalles planifiés pour s'assurer qu'il est approprié,
             adapté, efficace et aligné sur la stratégie.
-          annotation: Organiser une revue de direction au moins annuelle.
+          annotation: Organiser des revues de direction à intervalles planifiés, généralement une fois par an.
     - urn: urn:intuitem:risk:req_node:iso9001-2015:9.3.2
       assessable: true
       depth: 3
@@ -1080,7 +1068,7 @@ objects:
       annotation: 'Prepare review inputs: audit results, KPIs, incident summary.'
       translations:
         fr:
-          name: Éléments d'entrée
+          name: Éléments d'entrée de la revue de direction
           description: Prendre en compte l'état des actions, les changements de contexte, la performance
             (satisfaction, objectifs, processus, non-conformités, surveillance, audits, prestataires),
             les ressources, l'efficacité des actions risques/opportunités et les opportunités d'amélioration.
@@ -1096,7 +1084,7 @@ objects:
       annotation: Document decisions, actions and improvement plans.
       translations:
         fr:
-          name: Éléments de sortie
+          name: Éléments de sortie de la revue de direction
           description: Inclure les décisions et actions relatives aux opportunités d'amélioration, aux
             besoins de changements du SMQ et aux besoins en ressources. Conserver les preuves.
           annotation: Documenter les décisions, actions et plans d'amélioration.
@@ -1149,10 +1137,10 @@ objects:
       name: Continual improvement
       description: Continually improve the suitability, adequacy and effectiveness of the QMS, using analysis
         and evaluation results and management review outputs.
-      annotation: Assess QMS maturity every year and feed improvements into the plans.
+      annotation: Assess QMS maturity periodically and feed improvements into the plans.
       translations:
         fr:
           name: Amélioration continue
           description: Améliorer en continu la pertinence, l'adéquation et l'efficacité du SMQ en prenant
             en compte les résultats d'analyse/évaluation et les sorties de revue de direction.
-          annotation: Évaluer annuellement la maturité du SMQ et intégrer les améliorations dans les plans.
+          annotation: Évaluer périodiquement la maturité du SMQ et intégrer les améliorations dans les plans.
