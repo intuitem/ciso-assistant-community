@@ -39,6 +39,7 @@ export const FIELD_KEYS = new Set([
 	'bia',
 	'breach_type',
 	'builtin',
+	'can_connect_apps',
 	'catalog',
 	'category',
 	'change_summary',

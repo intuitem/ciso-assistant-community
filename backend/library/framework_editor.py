@@ -69,6 +69,14 @@ EDITOR_FRAMEWORK_KEYS = {
     "field_visibility",
 }
 
+# Audit defaults the editor sets. Not in EDITOR_FRAMEWORK_KEYS: a payload
+# without them (older client) keeps the document's values.
+EDITOR_SCORING_KEYS = (
+    "score_calculation_method",
+    "anchor_na_to_target",
+    "target_score",
+)
+
 QUESTION_KEYS = {
     "type",
     "text",
@@ -157,6 +165,11 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
         ),
         "outcomes_definition": framework.get("outcomes_definition"),
         "field_visibility": framework.get("field_visibility") or {},
+        "score_calculation_method": framework.get(
+            "score_calculation_method", "average"
+        ),
+        "anchor_na_to_target": bool(framework.get("anchor_na_to_target")),
+        "target_score": framework.get("target_score"),
         "urn_namespace": urn.split(":")[1] if urn.startswith("urn:") else "custom",
         "ref_id": framework.get("ref_id"),
     }
@@ -269,6 +282,29 @@ def _dedup_leaf(leaf: str, taken: set) -> str:
 def _clean(mapping: dict) -> dict:
     """Drop None values so the document (and its YAML export) stays lean."""
     return {key: value for key, value in mapping.items() if value is not None}
+
+
+def _apply_scoring_defaults(framework: dict, meta: dict) -> None:
+    """Write the editor's audit defaults, leaving out what it clears."""
+    if "score_calculation_method" in meta:
+        from core.models import ComplianceAssessment
+
+        method = meta["score_calculation_method"]
+        if method not in ComplianceAssessment.CalculationMethod.values:
+            raise BuilderError("Unknown score calculation method")
+    target = meta.get("target_score")
+    if target is not None and (
+        isinstance(target, bool) or not isinstance(target, (int, float))
+    ):
+        raise BuilderError("The target score must be a number")
+    anchor = meta.get("anchor_na_to_target")
+    if anchor is not None and not isinstance(anchor, bool):
+        raise BuilderError("Anchoring N/A to the target must be true or false")
+    for key in EDITOR_SCORING_KEYS:
+        if key in meta:
+            framework.pop(key, None)
+            if meta[key] is not None and meta[key] is not False:
+                framework[key] = meta[key]
 
 
 def editor_doc_to_framework_object(
@@ -608,6 +644,7 @@ def editor_doc_to_framework_object(
             }
         )
     )
+    _apply_scoring_defaults(framework, meta)
     if meta.get("ref_id"):
         framework["ref_id"] = meta["ref_id"]
     framework["urn"] = framework_urn

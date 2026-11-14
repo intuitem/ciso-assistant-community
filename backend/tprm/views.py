@@ -1107,6 +1107,15 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_entity"),
+                folder=folder,
+            ):
+                return Response(
+                    {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+                )
+
             # Parse the entities text
             lines = [line.strip() for line in entities_text.split("\n") if line.strip()]
             created_entities = []

@@ -89,6 +89,14 @@
 		helpText={m.keepLocalLoginHelpText()}
 	/>
 {/if}
+{#if page.data.user?.is_admin}
+	<Checkbox
+		{form}
+		field="can_connect_apps"
+		label={m.canConnectApps()}
+		helpText={m.canConnectAppsHelpText()}
+	/>
+{/if}
 {#if shape.expiry_date && !page.data.object?.is_superuser}
 	<TextField
 		type="date"
