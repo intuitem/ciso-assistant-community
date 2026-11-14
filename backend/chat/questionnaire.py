@@ -783,7 +783,8 @@ def _search_folder_evidence(
             "source_type": (c.payload or {}).get("source_type", ""),
             "object_type": (c.payload or {}).get("object_type", ""),
             "object_id": (c.payload or {}).get("object_id"),
-            "name": (c.payload or {}).get("name", ""),
+            "name": (c.payload or {}).get("name")
+            or (c.payload or {}).get("filename", ""),
             "ref_id": (c.payload or {}).get("ref_id", ""),
             "framework": (c.payload or {}).get("framework", ""),
             "urn": (c.payload or {}).get("urn", ""),
