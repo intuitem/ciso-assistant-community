@@ -114,10 +114,13 @@
 		if (showing) shown.add(column);
 		else shown.delete(column);
 		// The pane grows with its columns rather than squeezing the task names.
+		// Not clamped: view.paneWidth is the width asked for and may pass the limits,
+		// so hiding columns then showing them again ends where it started. Only
+		// what is shown is clamped (see paneWidth).
 		const width = COLUMNS[column].width * (showing ? 1 : -1);
 		updateView({
 			columns: OPTIONAL_COLUMNS.filter((name) => shown.has(name)),
-			paneWidth: clampPaneWidth(view.paneWidth + width)
+			paneWidth: view.paneWidth + width
 		});
 	}
 
@@ -175,8 +178,9 @@
 	const orderedColumns: Column[] = $derived(view.columnOrder.map((id) => ({ id, ...COLUMNS[id] })));
 
 	function resetColumns() {
-		const { columns, columnOrder } = defaultViewSettings();
-		updateView({ columns, columnOrder });
+		// The width too: it follows the columns shown.
+		const { columns, columnOrder, paneWidth } = defaultViewSettings();
+		updateView({ columns, columnOrder, paneWidth });
 	}
 
 	// Reordering: drag a header onto another one to take its place. Pointer
@@ -248,12 +252,14 @@
 
 	// Task pane resizing: drag the handle on its right edge.
 	let containerWidth = $state(0);
-	// Always leave some of the calendar visible, whatever the stored width.
-	const paneWidth = $derived(
-		containerWidth
-			? Math.max(PANE_WIDTH.min, Math.min(view.paneWidth, containerWidth - 160))
-			: view.paneWidth
-	);
+	// What is shown: the width asked for, brought within the limits, and always
+	// leaving some of the calendar visible.
+	const paneWidth = $derived.by(() => {
+		const wanted = clampPaneWidth(view.paneWidth);
+		return containerWidth
+			? Math.max(PANE_WIDTH.min, Math.min(wanted, containerWidth - 160))
+			: wanted;
+	});
 
 	function startResize(event: PointerEvent) {
 		const handle = event.currentTarget as HTMLElement;
