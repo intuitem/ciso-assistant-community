@@ -103,7 +103,16 @@ class IndexedDocumentWriteSerializer(BaseModelSerializer):
             "chunk_count",
             "error_message",
             "indexed_at",
+            # What a document is a copy of decides who may read it and which
+            # folder it follows: only the indexer sets it, never an API client.
+            "source_type",
+            "source_content_type",
+            "source_object_id",
         ]
+
+    def create(self, validated_data):
+        validated_data["source_type"] = IndexedDocument.SourceType.CUSTOM
+        return super().create(validated_data)
 
 
 class QuestionnaireRunReadSerializer(BaseModelSerializer):
