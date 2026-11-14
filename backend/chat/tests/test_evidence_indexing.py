@@ -120,3 +120,24 @@ def test_only_the_published_document_revision_is_indexed(ingest, remove, documen
     v2.save()
     index_document_revision(v2)
     assert not IndexedDocument.objects.exists()
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.remove_document_chunks")
+@patch("chat.tasks.ingest_document")
+def test_nightly_catch_up_indexes_what_signals_missed(
+    ingest, remove, evidence, document
+):
+    from chat.signals import index_missing_documents
+
+    document.revisions.first().publish()
+    revision = EvidenceRevision.objects.create(evidence=evidence)
+    _attach(revision, "policy.txt")
+
+    assert index_missing_documents() == (1, 1)
+    assert set(IndexedDocument.objects.values_list("source_type", flat=True)) == {
+        IndexedDocument.SourceType.EVIDENCE,
+        IndexedDocument.SourceType.DOCUMENT,
+    }
+    index_missing_documents()
+    assert IndexedDocument.objects.count() == 2 and ingest.call_count == 2

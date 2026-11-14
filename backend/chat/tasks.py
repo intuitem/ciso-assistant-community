@@ -6,7 +6,8 @@ import structlog
 import uuid
 
 from django.utils import timezone
-from huey.contrib.djhuey import db_task
+from huey import crontab
+from huey.contrib.djhuey import db_periodic_task, db_task
 
 logger = structlog.get_logger(__name__)
 
@@ -165,6 +166,22 @@ def remove_model_object(app_label: str, model_name: str, object_id: str):
     except Exception as e:
         logger.error(
             "Failed to remove %s.%s/%s: %s", app_label, model_name, object_id, e
+        )
+
+
+@db_periodic_task(crontab(hour="3", minute="15"))
+def index_missing_documents_nightly():
+    """Catch up on documents the signals missed (chat disabled, worker down)."""
+    from django.conf import settings
+
+    from global_settings.utils import ff_is_enabled
+
+    from .signals import index_missing_documents
+
+    if settings.ENABLE_CHAT and ff_is_enabled("chat_mode"):
+        evidence, documents = index_missing_documents()
+        logger.info(
+            "Checked documents for indexing", evidence=evidence, documents=documents
         )
 
 

@@ -218,6 +218,27 @@ def index_document_revision(revision):
     _queue(revision, IndexedDocument.SourceType.DOCUMENT, file, filename, mime_type)
 
 
+def index_missing_documents(folder_id=None):
+    """Queue every evidence attachment and published document not yet indexed."""
+    from core.models import EvidenceRevision
+    from doc_management.models import DocumentRevision
+
+    evidence = EvidenceRevision.objects.exclude(attachment="").exclude(
+        attachment__isnull=True
+    )
+    documents = DocumentRevision.objects.filter(
+        status=DocumentRevision.Status.PUBLISHED
+    )
+    if folder_id:
+        evidence = evidence.filter(folder_id=folder_id)
+        documents = documents.filter(folder_id=folder_id)
+    for revision in evidence.iterator():
+        index_evidence_revision(revision)
+    for revision in documents.iterator():
+        index_document_revision(revision)
+    return evidence.count(), documents.count()
+
+
 # Do NOT call connect_signals() at module level.
 # It is called from ChatConfig.ready() in apps.py, which ensures
 # all models are fully loaded before we try to resolve them.
