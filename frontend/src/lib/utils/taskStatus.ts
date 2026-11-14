@@ -49,10 +49,54 @@ export function occurrenceState(status: string | null | undefined, late: boolean
 	return 'none';
 }
 
+/**
+ * The status of a period holding several occurrences, null when it holds none.
+ * Same rule as the control plan's (TaskTemplateViewSet._aggregate_status), so a
+ * month reads alike in both: cancelled occurrences count only when all are, all
+ * completed is completed, any progress is in progress.
+ */
+export function aggregateStatus(statuses: string[]): string | null {
+	if (!statuses.length) return null;
+	const active = statuses.filter((status) => status !== 'cancelled');
+	if (!active.length) return 'cancelled';
+	if (active.every((status) => status === 'completed')) return 'completed';
+	if (active.some((status) => status === 'in_progress' || status === 'completed'))
+		return 'in_progress';
+	return active.includes('pending') ? 'pending' : active[0];
+}
+
 /** Open and due before today, in the browser's time zone. Due today is not late yet. */
 export function isOccurrenceLate(occurrence: { status: string; due_date: string | null }): boolean {
 	const { status, due_date } = occurrence;
 	if (!due_date || !OPEN_STATUSES.includes(status)) return false;
 	const due = due_date.includes('T') ? localIsoDate(new Date(due_date)) : due_date;
 	return due < localIsoDate(new Date());
+}
+
+// What calls for attention first, then what is done, under way, to come, dropped.
+const STATE_ORDER: OccurrenceState[] = [
+	'overdue',
+	'completed',
+	'in_progress',
+	'planned',
+	'cancelled',
+	'none'
+];
+
+/**
+ * What a period holding several occurrences is made of: how many are drawn in
+ * each state, without the states it has none of.
+ */
+export function countOccurrenceStates(
+	occurrences: { status: string; due_date: string | null }[]
+): [OccurrenceState, number][] {
+	const counts = new Map<OccurrenceState, number>();
+	for (const occurrence of occurrences) {
+		const state = occurrenceState(occurrence.status, isOccurrenceLate(occurrence));
+		counts.set(state, (counts.get(state) ?? 0) + 1);
+	}
+	return STATE_ORDER.filter((state) => counts.has(state)).map((state) => [
+		state,
+		counts.get(state)!
+	]);
 }

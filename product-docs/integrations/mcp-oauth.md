@@ -260,10 +260,24 @@ claude mcp add --transport http ciso-assistant https://<your-instance>/mcp
 Then run `/mcp` in Claude Code, pick **ciso-assistant** and choose
 **Authenticate**. A browser opens on the CISO Assistant login page.
 
+#### ChatGPT
+
+Add a custom connector (MCP server) in ChatGPT, with the URL ending in `/mcp`
+and OAuth authentication. ChatGPT registers itself, then opens CISO Assistant
+to sign in and approve it.
+
+ChatGPT also asks for the `email` scope. Apps that register themselves only
+get `openid` and `mcp`, so CISO Assistant leaves `email` out and gives the app
+the other two: it never sees the user's email address, and works without it.
+Like Copilot Studio, ChatGPT runs in its provider's cloud and must reach your
+instance from the internet.
+
 #### Other clients
 
 Any MCP client that supports OAuth works the same way: give it the URL ending
-in `/mcp` and no token. To test the setup without an AI client, use the
+in `/mcp` and no token. A client that asks for more scopes than it may have,
+such as `profile` or `offline_access`, gets the ones it may have instead of an
+error. To test the setup without an AI client, use the
 [MCP Inspector](https://github.com/modelcontextprotocol/inspector):
 
 ```bash
