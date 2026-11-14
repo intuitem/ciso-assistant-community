@@ -4,6 +4,7 @@ import json
 import sys
 from rich import print as rprint
 from ..client import make_get_request, get_paginated_results, found_line
+from ..resolvers import _is_uuid
 from ..utils.response_formatter import (
     success_response,
     error_response,
@@ -1187,10 +1188,7 @@ async def get_requirement_assessments(
         # If compliance assessment specified, resolve it
         if compliance_assessment_id_or_name:
             # Try to resolve as compliance assessment name/ID
-            if (
-                "-" in compliance_assessment_id_or_name
-                and len(compliance_assessment_id_or_name) == 36
-            ):
+            if _is_uuid(compliance_assessment_id_or_name):
                 params["compliance_assessment"] = compliance_assessment_id_or_name
             else:
                 # Look up compliance assessment by name
@@ -1309,7 +1307,7 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
 
         # If study specified, resolve it
         if study_id_or_name:
-            if "-" in study_id_or_name and len(study_id_or_name) == 36:
+            if _is_uuid(study_id_or_name):
                 params["quantitative_risk_study"] = study_id_or_name
             else:
                 # Look up study by name
@@ -1371,7 +1369,7 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
 
         # If scenario specified, resolve it
         if scenario_id_or_name:
-            if "-" in scenario_id_or_name and len(scenario_id_or_name) == 36:
+            if _is_uuid(scenario_id_or_name):
                 params["quantitative_risk_scenario"] = scenario_id_or_name
             else:
                 # Look up scenario by name
@@ -1490,6 +1488,8 @@ async def get_task_template_details(task_id: str):
     Args:
         task_id: Task template ID
     """
+    if not _is_uuid(task_id):
+        return f"Error: task template ID must be a UUID, got {task_id!r}"
     try:
         res = make_get_request(f"/task-templates/{task_id}/")
 

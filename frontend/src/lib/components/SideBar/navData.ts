@@ -119,6 +119,12 @@ export const navData = {
 					name: 'idpGroups',
 					fa_icon: 'fa-solid fa-id-badge',
 					href: '/idp-groups'
+				},
+				{
+					name: 'connectedApps',
+					fa_icon: 'fa-solid fa-plug',
+					href: '/connected-apps',
+					adminOnly: true
 				}
 			]
 		},

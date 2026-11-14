@@ -3,7 +3,6 @@
 import uuid
 
 import requests
-from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
@@ -12,13 +11,12 @@ from allauth.idp.oidc.models import Client
 from allauth.socialaccount.models import SocialApp
 
 from iam.models import (
-    ALLOWED_PERMISSION_APPS,
-    IGNORED_PERMISSIONS,
     Folder,
     Role,
     RoleAssignment,
     ServiceAccount,
     User,
+    get_permission_catalog,
 )
 from core.net_safety import BlockedRequestError, DnsLookupError
 from iam.oidc_federation import check_social_app_live
@@ -32,8 +30,7 @@ UNSET = object()
 def get_selectable_permissions():
     """Permissions a service account may be granted — same catalog RBAC uses."""
     return (
-        Permission.objects.filter(content_type__app_label__in=ALLOWED_PERMISSION_APPS)
-        .exclude(IGNORED_PERMISSIONS)
+        get_permission_catalog()
         .select_related("content_type")
         .order_by("content_type__app_label", "content_type__model", "codename")
     )

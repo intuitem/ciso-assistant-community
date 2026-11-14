@@ -33,6 +33,8 @@
 		label={m.permissions()}
 		optionsEndpoint="permissions"
 		optionsLabelField="action_label"
+		optionsDetailField="codename"
+		searchable
 		groupBy={[{ field: 'content_type', path: ['app_label'] }, { field: 'normalized_model' }]}
 		cacheLock={cacheLocks['permissions']}
 		bind:cachedValue={formDataCache['permissions']}

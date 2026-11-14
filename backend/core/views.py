@@ -4310,8 +4310,11 @@ class VulnerabilityViewSet(BaseModelViewSet):
 
         sla_anchor = sla_policy.get("sla_anchor", "detected_at")
 
-        object_ids = RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
-        accessible = Vulnerability.objects.filter(id__in=object_ids)
+        accessible = Vulnerability.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
+        ).filter(
+            id__in=RoleAssignment.get_changeable_object_ids(request.user, Vulnerability)
+        )
 
         # Backfill missing detected_at from created_at
         accessible.filter(detected_at__isnull=True).update(
@@ -6131,6 +6134,19 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
+def request_viewable_folders(request):
+    """
+    The folders a filter may offer as choices: those the requester can view.
+    django-filter passes no request when a filter is built outside a view;
+    nobody is asking then, so nothing is a valid choice.
+    """
+    if request is None:
+        return Folder.objects.none()
+    return Folder.objects.filter(
+        id__in=RoleAssignment.get_viewable_object_ids(request.user, Folder)
+    )
+
+
 class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
@@ -6166,9 +6182,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     # Only viewable domains are valid choices, so a hidden domain's id gets the
     # same 400 as a made-up one.
     recurrent_task_folder = df.ModelChoiceFilter(
-        queryset=lambda request: Folder.objects.filter(
-            id__in=RoleAssignment.get_viewable_object_ids(request.user, Folder)
-        ),
+        queryset=request_viewable_folders,
         method="filter_recurrent_task_folder",
     )
     linked_models = df.MultipleChoiceFilter(

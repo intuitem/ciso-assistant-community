@@ -544,6 +544,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "iam.mcp_tokens.MCPTokenMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -1000,6 +1001,38 @@ if not IDP_OIDC_PRIVATE_KEY:
             logger.warning(
                 "could not persist the OIDC signing key, keeping it in memory: %s", exc
             )
+
+IDP_OIDC_ADAPTER = "iam.oidc_adapter.CISOOIDCAdapter"
+
+# OAuth Dynamic Client Registration (RFC 7591), for MCP clients such as Copilot
+# Studio. Off by default: once on, anyone can register a client.
+OAUTH_DCR_ENABLED = os.environ.get("OAUTH_DCR_ENABLED", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+IDP_OIDC_DCR_ENABLED = OAUTH_DCR_ENABLED
+# Copilot Studio cannot present an initial access token.
+IDP_OIDC_DCR_REQUIRES_INITIAL_ACCESS_TOKEN = False
+OAUTH_DCR_ALLOWED_REDIRECT_HOSTS = [
+    host.strip().lower()
+    for host in os.environ.get("OAUTH_DCR_ALLOWED_REDIRECT_HOSTS", "").split(",")
+    if host.strip()
+]
+
+# allauth issues a new refresh token at each refresh, so this is an idle limit:
+# an app unused for this many days must sign in again. 0 = never expires.
+OAUTH_REFRESH_TOKEN_IDLE_DAYS = int(
+    os.environ.get("OAUTH_REFRESH_TOKEN_IDLE_DAYS", "30")
+)
+IDP_OIDC_REFRESH_TOKEN_EXPIRES_IN = OAUTH_REFRESH_TOKEN_IDLE_DAYS * 24 * 3600 or None
+
+# An app's access token is what an MCP server sees; the app refreshes it at
+# the authorization server.
+IDP_OIDC_ACCESS_TOKEN_EXPIRES_IN = 3600
+# Client ID Metadata Documents make the backend fetch a URL the client chooses:
+# off until reviewed.
+IDP_OIDC_CIMD_ENABLED = False
 
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]

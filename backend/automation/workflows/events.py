@@ -28,6 +28,7 @@ from iam.models import Folder
 
 from core.reads import subtree_folder_ids
 from core.reads import validate_filter_tree as _validate_filter_tree
+from . import authz
 from .models import Condition, WorkflowInstance, WorkflowNode, WorkflowTrigger
 
 logger = structlog.get_logger(__name__)
@@ -123,6 +124,7 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
         workflow__is_active=True,
     ).select_related("workflow")
     state_cache = {}
+    visible_to = {}
     for trigger in triggers:
         # Hard security boundary: the event's object must live within the
         # workflow's folder subtree, regardless of user filters. Events from
@@ -161,6 +163,16 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
         if version.run_as is None:
             # No run identity, no automatic execution.
             _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_NO_IDENTITY)
+            continue
+        # Second boundary: the run receives the payload, field values
+        # included, so only deliver an event whose object the run identity
+        # could read through the API. The folder subtree alone is not enough:
+        # a role may see the folder without holding view_<model> in it.
+        if version.run_as_id not in visible_to:
+            visible_to[version.run_as_id] = _identity_can_view(
+                version.run_as, event_key, payload, effective_folder
+            )
+        if not visible_to[version.run_as_id]:
             continue
         # One run per (trigger, user action, object): a save that writes
         # several LogEntries for one object is one run, while a bulk edit still
@@ -333,6 +345,35 @@ def _fetch_object(payload, state_cache):
         obj = None
     state_cache[key] = obj
     return obj
+
+
+def _identity_can_view(identity, event_key, payload, folder_id):
+    """Whether ``identity`` may view the object an event is about.
+
+    The event key names the model (``<model>.<verb>``) for CUD and custom
+    events alike; the object is ``object_id`` (CUD) or ``id`` (custom). While
+    the row exists, the API's own row-visibility rule decides; once it is gone
+    (a deleted event), ``view_<model>`` on the event's folder. Fails closed."""
+    from django.contrib.contenttypes.models import ContentType
+
+    try:
+        lookup = {"model": event_key.partition(".")[0]}
+        if payload.get("app_label"):
+            lookup["app_label"] = payload["app_label"]
+        content_type = ContentType.objects.filter(**lookup).first()
+        model = content_type.model_class() if content_type else None
+        if model is None:
+            return False
+        rows = model.objects.filter(pk=payload.get("object_id") or payload.get("id"))
+        if rows.exists():
+            return rows.filter(pk__in=authz.viewable_ids(identity, model)).exists()
+        folder = Folder.objects.filter(id=folder_id).first()
+        return folder is not None and authz.can(
+            identity, f"view_{content_type.model}", folder
+        )
+    # Dispatch must never break the producer.
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _compare(condition, runtime):
