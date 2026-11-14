@@ -141,3 +141,23 @@ def test_nightly_catch_up_indexes_what_signals_missed(
     }
     index_missing_documents()
     assert IndexedDocument.objects.count() == 2 and ingest.call_count == 2
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.catch_up_indexing")
+def test_turning_chat_mode_on_triggers_catch_up(catch_up, evidence):
+    from chat.signals import _catch_up_when_chat_turned_on, _remember_chat_mode
+    from global_settings.models import GlobalSettings
+
+    flags = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
+
+    def save(chat_mode):
+        flags.value = {**flags.value, "chat_mode": chat_mode}
+        _remember_chat_mode(GlobalSettings, flags)
+        flags.save()
+        _catch_up_when_chat_turned_on(GlobalSettings, flags)
+
+    save(False)
+    save(True)
+    save(True)
+    assert catch_up.call_count == 1

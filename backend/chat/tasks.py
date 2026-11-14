@@ -169,6 +169,17 @@ def remove_model_object(app_label: str, model_name: str, object_id: str):
         )
 
 
+@db_task()
+def catch_up_indexing():
+    """Queue evidence attachments and published documents missing from the index."""
+    from .signals import index_missing_documents
+
+    evidence, documents = index_missing_documents()
+    logger.info(
+        "Checked documents for indexing", evidence=evidence, documents=documents
+    )
+
+
 @db_periodic_task(crontab(hour="3", minute="15"))
 def index_missing_documents_nightly():
     """Catch up on documents the signals missed (chat disabled, worker down)."""
@@ -176,13 +187,8 @@ def index_missing_documents_nightly():
 
     from global_settings.utils import ff_is_enabled
 
-    from .signals import index_missing_documents
-
     if settings.ENABLE_CHAT and ff_is_enabled("chat_mode"):
-        evidence, documents = index_missing_documents()
-        logger.info(
-            "Checked documents for indexing", evidence=evidence, documents=documents
-        )
+        catch_up_indexing.call_local()
 
 
 @db_task()

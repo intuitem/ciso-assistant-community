@@ -5,7 +5,7 @@ when they are created, updated, or deleted.
 
 import structlog
 
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 
 logger = structlog.get_logger(__name__)
@@ -80,6 +80,34 @@ def connect_signals():
             transaction.on_commit(lambda: remove_model_object(app, name, obj_id))
 
     _connect_source_signals(ff_is_enabled)
+
+    from global_settings.models import GlobalSettings
+
+    pre_save.connect(_remember_chat_mode, sender=GlobalSettings, weak=False)
+    post_save.connect(_catch_up_when_chat_turned_on, sender=GlobalSettings, weak=False)
+
+
+def _chat_mode(value):
+    return isinstance(value, dict) and bool(value.get("chat_mode"))
+
+
+def _remember_chat_mode(sender, instance, **kwargs):
+    if instance.name != sender.Names.FEATURE_FLAGS:
+        return
+    previous = sender.objects.filter(pk=instance.pk).values_list("value", flat=True)
+    instance._chat_mode_was_on = _chat_mode(previous.first())
+
+
+def _catch_up_when_chat_turned_on(sender, instance, **kwargs):
+    if instance.name != sender.Names.FEATURE_FLAGS or not _chat_mode(instance.value):
+        return
+    if getattr(instance, "_chat_mode_was_on", False):
+        return
+    from django.db import transaction
+
+    from .tasks import catch_up_indexing
+
+    transaction.on_commit(catch_up_indexing)
 
 
 def _connect_source_signals(ff_is_enabled):
