@@ -81,8 +81,8 @@
 	const todayLabel = `${m.today()} — ${formatDate(today)}`;
 
 	// A month holding several occurrences cannot lead to one of them: it opens, and
-	// its occurrences are listed under the grid. Only a history with such a month
-	// has that line.
+	// its occurrences are listed in a panel under its year. A history without such
+	// a month has nothing to open.
 	const opens = $derived([...byMonth.values()].some((month) => month.length > 1));
 
 	// The open month starts as the ringed occurrence's. A choice holds while the
@@ -96,8 +96,8 @@
 	});
 	const open = $derived.by(() => {
 		const month = openKey === null ? undefined : byMonth.get(openKey);
-		return month && month.length > 1
-			? { label: monthLabel(openKey as string), occurrences: month }
+		return openKey !== null && month && month.length > 1
+			? { key: openKey, label: monthLabel(openKey), occurrences: month }
 			: null;
 	});
 
@@ -106,6 +106,14 @@
 	}
 
 	const RING = 'ring-2 ring-offset-1 ring-surface-950-50';
+	const TODAY_TINT = 'rounded-sm bg-violet-100/60 dark:bg-violet-900/30';
+
+	// The open month and its panel are drawn as one region: one fill, one outline.
+	// The outline is what tells the state: the fill alone is too faint for that.
+	const REGION = 'border border-surface-600-400 bg-surface-100-900';
+	// The tab stands where the cell's padding was (its border and padding add up to
+	// it), and runs one pixel into the panel below, over the panel's top border.
+	const TAB = `relative z-10 -mb-px rounded-t-sm border-b-0 px-px pt-px pb-[3px] ${REGION}`;
 
 	// The states under the names the legend gives them.
 	const stateLabel = (state: OccurrenceState) =>
@@ -135,6 +143,29 @@
 	>
 {/snippet}
 
+{#snippet panel(month: { key: string; label: string; occurrences: Occurrence[] })}
+	<!-- Under the month's own year: nothing sits between a month and its occurrences. -->
+	<tr>
+		<td class="p-0"></td>
+		<td colspan="12" class="p-0 pb-1">
+			<!-- A corner the tab stands on is square. -->
+			<div
+				id="{uid}-month"
+				class="flex flex-wrap items-center gap-1 rounded-sm px-2 py-1.5 text-xs text-surface-600-400 {REGION} {month.key ===
+					'' || month.key.endsWith('-01')
+					? 'rounded-tl-none'
+					: ''} {month.key.endsWith('-12') ? 'rounded-tr-none' : ''}"
+				data-testid="occurrence-history-month"
+			>
+				<span class="me-1">{month.label}</span>
+				{#each month.occurrences as occurrence (occurrence.id)}
+					{@render square(occurrence, 'w-5 shrink-0', dayOf(occurrence))}
+				{/each}
+			</div>
+		</td>
+	</tr>
+{/snippet}
+
 {#snippet monthCell(key: string)}
 	{@const month = byMonth.get(key) ?? []}
 	{#if month.length === 0}
@@ -147,31 +178,40 @@
 		{@const status = aggregateStatus(month.map((occurrence) => occurrence.status))}
 		{@const late = month.some(isOccurrenceLate)}
 		{@const marked = month.some((occurrence) => occurrence.id === markedId)}
-		{@const isOpen = key === openKey}
+		{@const isOpen = open?.key === key}
 		{@const title = `${monthLabel(key)} — ${countOccurrenceStates(month)
 			.map(([state, count]) => `${stateLabel(state)} ×${count}`)
 			.join(' · ')}${marked && markedLabel ? ` (${markedLabel})` : ''}`}
-		<button
-			type="button"
-			class="@container flex h-5 w-full cursor-pointer items-center justify-center rounded-sm {OCCURRENCE_STYLES[
-				occurrenceState(status, late)
-			]} {marked ? RING : ''}"
-			{title}
-			aria-label={title}
-			aria-expanded={isOpen}
-			aria-controls="{uid}-month"
-			data-late={late ? '' : undefined}
-			onclick={() => toggle(key)}
-		>
-			<!-- Shown where it fits: in a narrow panel the tooltip alone carries the
-			     count, as in the control plan's compact view. -->
-			<span class="hidden text-[10px] font-semibold text-surface-900-100 @min-[20px]:inline"
-				>×{month.length}</span
+		<div class={isOpen ? TAB : ''}>
+			<!-- While the month is open the ring is on the occurrence itself, in the
+			     panel right below: the cell carries it only when closed. -->
+			<button
+				type="button"
+				class="@container flex h-5 w-full cursor-pointer flex-col items-center justify-center gap-px rounded-sm text-surface-900-100 {OCCURRENCE_STYLES[
+					occurrenceState(status, late)
+				]} {marked && !isOpen ? RING : ''}"
+				{title}
+				aria-label={title}
+				aria-expanded={isOpen}
+				aria-controls={isOpen ? `${uid}-month` : undefined}
+				data-late={late ? '' : undefined}
+				onclick={() => toggle(key)}
 			>
-		</button>
-		<!-- Under the open month: what the line below the grid lists. Clear of the
-		     ring, which the open month often carries too. -->
-		<div class="mt-1 h-0.5 rounded-full {isOpen ? 'bg-surface-950-50' : ''}"></div>
+				<!-- Shown where it fits: in a narrow panel the tooltip alone carries the
+				     count, as in the control plan's compact view. -->
+				<span class="hidden text-[10px] leading-none font-semibold @min-[20px]:inline"
+					>×{month.length}</span
+				>
+				<!-- What tells a cell that opens from one that leads to its occurrence:
+				     pointing down the month opens below, pointing up it closes. -->
+				<span
+					class="border-x-[3px] border-t-4 border-x-transparent border-t-current {isOpen
+						? 'rotate-180'
+						: ''}"
+					aria-hidden="true"
+				></span>
+			</button>
+		</div>
 	{/if}
 {/snippet}
 
@@ -213,9 +253,11 @@
 				>
 				{#each MONTHS as month (month.number)}
 					{@const key = `${year}-${month.number}`}
+					{@const isOpen = open?.key === key}
+					<!-- The open month's tab fills the cell, in place of today's tint. -->
 					<td
-						class="p-0.5 align-top {key === thisMonth
-							? 'rounded-sm bg-violet-100/60 dark:bg-violet-900/30'
+						class="align-top {isOpen ? 'p-0' : 'p-0.5'} {key === thisMonth && !isOpen
+							? TODAY_TINT
 							: ''}"
 					>
 						{#if byMonth.has(key) || isCovered(key)}
@@ -224,6 +266,9 @@
 					</td>
 				{/each}
 			</tr>
+			{#if open?.key.startsWith(`${year}-`)}
+				{@render panel(open)}
+			{/if}
 		{/each}
 		{#if undated.length}
 			<!-- Without a date there is no month to sit under: a row of its own. -->
@@ -232,28 +277,19 @@
 					scope="row"
 					class="p-0 pt-1 text-left align-top text-xs font-normal text-surface-600-400">--</th
 				>
-				<td class="p-0.5 align-top">{@render monthCell('')}</td>
+				<td class="align-top {open?.key === '' ? 'p-0' : 'p-0.5'}">{@render monthCell('')}</td>
 			</tr>
+			{#if open?.key === ''}
+				{@render panel(open)}
+			{/if}
 		{/if}
 	</tbody>
 </table>
-{#if opens}
-	<!-- The open month, one square per occurrence. The line stays when no month is
-	     open, so the page under it does not move. -->
-	<div
-		id="{uid}-month"
-		class="flex min-h-6 w-96 max-w-full flex-wrap items-center gap-1 pt-1 text-xs text-surface-600-400"
-		data-testid="occurrence-history-month"
-	>
-		{#if open}
-			<span class="me-1">{open.label}</span>
-			{#each open.occurrences as occurrence (occurrence.id)}
-				{@render square(occurrence, 'w-5 shrink-0', dayOf(occurrence))}
-			{/each}
-		{:else}
-			<span class="text-surface-500">{m.occurrenceHistorySelectMonth()}</span>
-		{/if}
-	</div>
+{#if opens && !open}
+	<!-- What the carets are for, while no month is open. -->
+	<p class="pt-1 text-xs text-surface-500" data-testid="occurrence-history-hint">
+		{m.occurrenceHistorySelectMonth()}
+	</p>
 {/if}
 <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-surface-600-400 pt-1">
 	{#each HISTORY_STATUSES as status (status)}
