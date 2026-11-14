@@ -87,6 +87,44 @@ def indexed_payload_types() -> dict[str, Any]:
     return types
 
 
+def _unreadable_document_ids(scope, folders) -> list[str]:
+    """Evidence and managed-document chunks also need read access to their source."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from .models import IndexedDocument
+
+    rows = IndexedDocument.objects.filter(
+        folder_id__in=folders,
+        source_type__in=[
+            IndexedDocument.SourceType.EVIDENCE,
+            IndexedDocument.SourceType.DOCUMENT,
+        ],
+    ).values_list("id", "folder_id", "source_content_type_id")
+    readable = {}
+    denied = []
+    for doc_id, folder_id, ct_id in rows:
+        if ct_id not in readable:
+            readable[ct_id] = _source_folder_ids(
+                scope, ContentType.objects.get_for_id(ct_id).model_class()
+            )
+        if str(folder_id) not in readable[ct_id]:
+            denied.append(str(doc_id))
+    return denied
+
+
+def _source_folder_ids(scope, model_class) -> set[str]:
+    if model_class is None:
+        return set()
+    folders = set(scope.folder_ids_for(model_class))
+    if model_class._meta.label == "doc_management.DocumentRevision":
+        permission = Permission.objects.get(codename="view_published_documentcontainer")
+        folders |= {
+            str(fid)
+            for fid in RoleAssignment.get_allowed_folder_ids(scope.user, permission)
+        }
+    return folders
+
+
 def _user_partition_filter(scope, source_type, object_type) -> Optional[Filter]:
     """
     One clause per indexed type: that type AND the folders where the user holds
@@ -101,6 +139,11 @@ def _user_partition_filter(scope, source_type, object_type) -> Optional[Filter]:
         folders = scope.folder_ids_for(model_class)
         if not folders:
             continue
+        denied = (
+            _unreadable_document_ids(scope, folders)
+            if payload_type == "document_chunk"
+            else []
+        )
         clauses.append(
             Filter(
                 must=[
@@ -108,7 +151,10 @@ def _user_partition_filter(scope, source_type, object_type) -> Optional[Filter]:
                         key="object_type", match=MatchValue(value=payload_type)
                     ),
                     FieldCondition(key="folder_id", match=MatchAny(any=folders)),
-                ]
+                ],
+                must_not=[FieldCondition(key="document_id", match=MatchAny(any=denied))]
+                if denied
+                else None,
             )
         )
 
@@ -230,7 +276,7 @@ def search(
             "source_type": r.payload.get("source_type", ""),
             "object_type": r.payload.get("object_type", ""),
             "object_id": r.payload.get("object_id"),
-            "name": r.payload.get("name", ""),
+            "name": r.payload.get("name") or r.payload.get("filename", ""),
             "ref_id": r.payload.get("ref_id", ""),
             "framework": r.payload.get("framework", ""),
             "urn": r.payload.get("urn", ""),

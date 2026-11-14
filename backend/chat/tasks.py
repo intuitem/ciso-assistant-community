@@ -73,6 +73,24 @@ def ingest_document(document_id: str):
 
         client.upsert(collection_name=COLLECTION_NAME, points=points)
 
+        folder_id = (
+            IndexedDocument.objects.filter(id=doc.id)
+            .values_list("folder_id", flat=True)
+            .first()
+        )
+        if folder_id is None:
+            client.delete(
+                collection_name=COLLECTION_NAME,
+                points_selector=_document_filter([document_id]),
+            )
+            return
+        if folder_id != doc.folder_id:
+            client.set_payload(
+                collection_name=COLLECTION_NAME,
+                payload={"folder_id": str(folder_id)},
+                points=_document_filter([document_id]),
+            )
+
         doc.status = IndexedDocument.Status.INDEXED
         doc.chunk_count = len(chunks)
         doc.indexed_at = timezone.now()
@@ -191,27 +209,45 @@ def index_missing_documents_nightly():
         catch_up_indexing.call_local()
 
 
-@db_task()
+def _document_filter(document_ids):
+    from qdrant_client.models import FieldCondition, Filter, MatchAny
+
+    return Filter(
+        must=[FieldCondition(key="document_id", match=MatchAny(any=document_ids))]
+    )
+
+
+@db_task(retries=3, retry_delay=60)
 def remove_document_chunks(document_id: str):
     """Remove an indexed document's chunks from the vector store."""
     from .rag import COLLECTION_NAME, get_qdrant_client
-    from qdrant_client.models import Filter, FieldCondition, MatchValue
 
     try:
         get_qdrant_client().delete(
             collection_name=COLLECTION_NAME,
-            points_selector=Filter(
-                must=[
-                    FieldCondition(
-                        key="document_id", match=MatchValue(value=document_id)
-                    )
-                ]
-            ),
+            points_selector=_document_filter([document_id]),
         )
     except Exception as e:
         logger.error(
             "Failed to remove document chunks", document_id=document_id, error=e
         )
+        raise
+
+
+@db_task(retries=3, retry_delay=60)
+def move_document_chunks(document_ids: list[str], folder_id: str):
+    """Point indexed documents' chunks at their new folder."""
+    from .rag import COLLECTION_NAME, get_qdrant_client
+
+    try:
+        get_qdrant_client().set_payload(
+            collection_name=COLLECTION_NAME,
+            payload={"folder_id": folder_id},
+            points=_document_filter(document_ids),
+        )
+    except Exception as e:
+        logger.error("Failed to move document chunks", folder_id=folder_id, error=e)
+        raise
 
 
 def _resolve_folder_id(obj) -> str:

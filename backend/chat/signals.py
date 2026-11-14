@@ -107,7 +107,7 @@ def _catch_up_when_chat_turned_on(sender, instance, **kwargs):
 
     from .tasks import catch_up_indexing
 
-    transaction.on_commit(catch_up_indexing)
+    transaction.on_commit(catch_up_indexing, robust=True)
 
 
 def _connect_source_signals(ff_is_enabled):
@@ -133,6 +133,42 @@ def _connect_source_signals(ff_is_enabled):
         def on_source_delete(sender, instance, **kwargs):
             _drop_indexed(_indexed_for(instance))
 
+    for parent_path, source_path, lookup in (
+        ("core.Evidence", "core.EvidenceRevision", "evidence"),
+        (
+            "doc_management.DocumentContainer",
+            "doc_management.DocumentRevision",
+            "document__container",
+        ),
+    ):
+        try:
+            parent, source = apps.get_model(parent_path), apps.get_model(source_path)
+        except LookupError:
+            continue
+
+        @receiver(post_save, sender=parent, weak=False)
+        def on_parent_save(sender, instance, source=source, lookup=lookup, **kwargs):
+            _follow_folder(instance, source.objects.filter(**{lookup: instance}))
+
+
+def _follow_folder(parent, revisions):
+    from django.contrib.contenttypes.models import ContentType
+    from django.db import transaction
+
+    from .models import IndexedDocument
+    from .tasks import move_document_chunks
+
+    stale = IndexedDocument.objects.filter(
+        source_content_type=ContentType.objects.get_for_model(revisions.model),
+        source_object_id__in=revisions.values("id"),
+    ).exclude(folder_id=parent.folder_id)
+    doc_ids = [str(i) for i in stale.values_list("id", flat=True)]
+    if not doc_ids:
+        return
+    stale.update(folder_id=parent.folder_id)
+    folder_id = str(parent.folder_id)
+    transaction.on_commit(lambda: move_document_chunks(doc_ids, folder_id))
+
 
 def _indexed_for(source):
     from django.contrib.contenttypes.models import ContentType
@@ -155,7 +191,8 @@ def _drop_indexed(docs):
     for doc in docs:
         transaction.on_commit(lambda d=str(doc.id): remove_document_chunks(d))
         if doc.file.name.startswith(owned_prefix):
-            doc.file.delete(save=False)
+            storage, name = doc.file.storage, doc.file.name
+            transaction.on_commit(lambda s=storage, n=name: s.delete(n))
         doc.delete()
 
 
@@ -192,13 +229,13 @@ def index_evidence_revision(revision):
     """Queue a revision's attachment for indexing unless that file is already indexed."""
     from .models import IndexedDocument
 
-    if not revision.attachment:
-        return
-    mime_type = _supported_type(revision.attachment.name)
-    if not mime_type:
-        return
     previous = _indexed_for(revision)
-    if previous.filter(file=revision.attachment.name).exists():
+    mime_type = revision.attachment and _supported_type(revision.attachment.name)
+    if not mime_type:
+        _drop_indexed(previous)
+        return
+    current = previous.filter(file=revision.attachment.name)
+    if current.exclude(status=IndexedDocument.Status.FAILED).exists():
         return
     _drop_indexed(previous)
     _queue(
@@ -227,8 +264,10 @@ def index_document_revision(revision):
             source_object_id__in=siblings.values("id"),
         )
     )
-    if _indexed_for(revision).exists():
+    own = _indexed_for(revision)
+    if own.exclude(status=IndexedDocument.Status.FAILED).exists():
         return
+    _drop_indexed(own)
 
     filename = f"{revision.document.display_name} v{revision.version_number}"
     if revision.source == revision.Source.AUTHORED and revision.content.strip():
@@ -238,32 +277,51 @@ def index_document_revision(revision):
         mime_type = "text/plain"
     elif revision.source == revision.Source.UPLOADED and revision.file:
         mime_type = _supported_type(revision.file.name)
-        if not mime_type:
-            return
         file = revision.file.name
     else:
+        mime_type = None
+    if not mime_type:
         return
     _queue(revision, IndexedDocument.SourceType.DOCUMENT, file, filename, mime_type)
 
 
 def index_missing_documents(folder_id=None):
-    """Queue every evidence attachment and published document not yet indexed."""
+    """Reconcile the index with evidence attachments and published documents."""
+    from django.contrib.contenttypes.models import ContentType
+    from django.db.models import Q
+
     from core.models import EvidenceRevision
     from doc_management.models import DocumentRevision
 
-    evidence = EvidenceRevision.objects.exclude(attachment="").exclude(
-        attachment__isnull=True
+    from .models import IndexedDocument
+
+    def indexed(model):
+        return IndexedDocument.objects.filter(
+            source_content_type=ContentType.objects.get_for_model(model)
+        ).values("source_object_id")
+
+    evidence = EvidenceRevision.objects.filter(
+        ~Q(attachment="") & Q(attachment__isnull=False)
+        | Q(id__in=indexed(EvidenceRevision))
     )
     documents = DocumentRevision.objects.filter(
-        status=DocumentRevision.Status.PUBLISHED
+        Q(status=DocumentRevision.Status.PUBLISHED)
+        | Q(id__in=indexed(DocumentRevision))
     )
     if folder_id:
         evidence = evidence.filter(folder_id=folder_id)
         documents = documents.filter(folder_id=folder_id)
-    for revision in evidence.iterator():
-        index_evidence_revision(revision)
-    for revision in documents.iterator():
-        index_document_revision(revision)
+    for revisions, index in (
+        (evidence, index_evidence_revision),
+        (documents, index_document_revision),
+    ):
+        for revision in revisions.iterator():
+            try:
+                index(revision)
+            except Exception as e:
+                logger.warning(
+                    "Failed to index revision", revision_id=revision.id, error=e
+                )
     return evidence.count(), documents.count()
 
 
