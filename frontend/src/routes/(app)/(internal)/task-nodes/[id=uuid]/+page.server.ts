@@ -48,8 +48,8 @@ export const load: PageServerLoad = async (event) => {
 	if (node?.is_recurrent && taskTemplateId) {
 		const [occurrences, previous, next] = await Promise.all([
 			fetchOccurrenceHistory(event.fetch, taskTemplateId),
-			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, { id: node.id, dueDate }, true) : null,
-			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, { id: node.id, dueDate }, false) : null
+			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, dueDate, true) : null,
+			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, dueDate, false) : null
 		]);
 		history = [...occurrences.pastOccurrences, ...occurrences.upcomingOccurrences].map(
 			({ id, due_date, status }) => ({ id, due_date, status })

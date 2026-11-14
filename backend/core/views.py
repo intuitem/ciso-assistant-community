@@ -6123,6 +6123,19 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
+def request_viewable_folders(request):
+    """
+    The folders a filter may offer as choices: those the requester can view.
+    django-filter passes no request when a filter is built outside a view;
+    nobody is asking then, so nothing is a valid choice.
+    """
+    if request is None:
+        return Folder.objects.none()
+    return Folder.objects.filter(
+        id__in=RoleAssignment.get_viewable_object_ids(request.user, Folder)
+    )
+
+
 class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
@@ -6158,9 +6171,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     # Only viewable domains are valid choices, so a hidden domain's id gets the
     # same 400 as a made-up one.
     recurrent_task_folder = df.ModelChoiceFilter(
-        queryset=lambda request: Folder.objects.filter(
-            id__in=RoleAssignment.get_viewable_object_ids(request.user, Folder)
-        ),
+        queryset=request_viewable_folders,
         method="filter_recurrent_task_folder",
     )
     linked_models = df.MultipleChoiceFilter(

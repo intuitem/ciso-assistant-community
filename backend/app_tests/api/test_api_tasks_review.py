@@ -7,13 +7,14 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.models import AppliedControl, TaskNode, TaskTemplate
 from core.utils import RoleCodename
-from core.views import TaskTemplateViewSet
+from core.views import AppliedControlFilterSet, TaskTemplateViewSet
 from iam.models import Folder, Role, RoleAssignment, User
 
 REVIEW_URL = "/api/task-templates/yearly_review/"
@@ -473,6 +474,18 @@ class TestAppliedControlsOfADomainPlan:
         assert status_for(str(hidden.id)) == 400
         assert status_for(str(uuid.uuid4())) == 400
 
+    def test_without_a_request_no_domain_is_a_valid_choice(self):
+        folder = Folder.objects.create(
+            name="Any", parent_folder=Folder.get_root_folder()
+        )
+        filterset = AppliedControlFilterSet(
+            data={"recurrent_task_folder": str(folder.id)},
+            queryset=AppliedControl.objects.all(),
+        )
+
+        assert not filterset.is_valid()
+        assert "recurrent_task_folder" in filterset.errors
+
 
 @pytest.mark.django_db
 class TestOccurrenceWindow:
@@ -507,3 +520,20 @@ class TestOccurrenceWindow:
 
         assert before == [str(nodes[2].id), str(nodes[1].id)]
         assert after == [str(nodes[4].id), str(nodes[5].id)]
+
+    def test_a_task_has_one_occurrence_per_due_date(self):
+        # Why "before" and "after" a due date miss no neighbour: the database
+        # refuses a second occurrence of the task on that date.
+        template = _make_template()
+        _make_node(template, date(2026, 3, 10))
+
+        with pytest.raises(IntegrityError), transaction.atomic():
+            TaskNode.objects.bulk_create(
+                [
+                    TaskNode(
+                        task_template=template,
+                        folder=template.folder,
+                        due_date=date(2026, 3, 10),
+                    )
+                ]
+            )

@@ -10,11 +10,15 @@ export interface OccurrenceSummary {
 	evidence_reviewed?: string[];
 }
 
-// A recurrent task's history is read at a glance rather than paged through, so the
-// strip pulls a window of past occurrences in one go. Upcoming ones are bounded by
-// the sync horizon anyway, so a small page covers them.
+// A recurrent task's history is read at a glance rather than paged through, so it
+// pulls a window of past occurrences in one go, and the upcoming ones the sync
+// horizon holds: about a year of them, some fifty at most.
+//
+// Both windows hold more than a month of daily occurrences. A task has at most
+// one occurrence per day, so the current month is always whole: only the month at
+// the far end of a window can be cut (see wholeMonths).
 const PAST_WINDOW = 120;
-const UPCOMING_WINDOW = 12;
+const UPCOMING_WINDOW = 60;
 
 interface Occurrences {
 	results: OccurrenceSummary[];
@@ -41,6 +45,18 @@ async function fetchOccurrences(
 	}
 }
 
+/**
+ * A window without the month at its far end when it filled up: the cut may fall
+ * within that month, and the history draws a month from all its occurrences or
+ * not at all.
+ */
+function wholeMonths({ results, count }: Occurrences): OccurrenceSummary[] {
+	if (count <= results.length) return results;
+	const monthOf = (occurrence: OccurrenceSummary) => occurrence.due_date?.slice(0, 7);
+	const cut = monthOf(results[results.length - 1]);
+	return results.filter((occurrence) => monthOf(occurrence) !== cut);
+}
+
 /** The occurrences of a task shown in its history: recent past ones and the next ones. */
 export async function fetchOccurrenceHistory(
 	fetch: typeof globalThis.fetch,
@@ -58,8 +74,8 @@ export async function fetchOccurrenceHistory(
 		});
 	const [past, upcoming] = await Promise.all([window(true), window(false)]);
 	return {
-		pastOccurrences: past.results,
-		upcomingOccurrences: upcoming.results,
+		pastOccurrences: wholeMonths(past),
+		upcomingOccurrences: wholeMonths(upcoming),
 		upcomingCount: upcoming.count,
 		// Half a history would mislead as much as none.
 		occurrencesFailed: past.failed || upcoming.failed
@@ -67,28 +83,23 @@ export async function fetchOccurrenceHistory(
 }
 
 /**
- * The occurrence of the same task just before or just after the current one,
- * ordered by due date then id, so occurrences due the same day are reached too.
+ * The occurrence of the same task due just before or just after a date, if any.
+ * A task has at most one occurrence per due date (unique constraint), so the
+ * strict comparison skips none.
  */
 export async function fetchNeighbour(
 	fetch: typeof globalThis.fetch,
 	taskTemplateId: string,
-	current: { id: string; dueDate: string },
+	dueDate: string,
 	before: boolean
 ): Promise<{ occurrence: OccurrenceSummary | null; failed: boolean }> {
-	// shortcut: more than 50 occurrences due the same day hide the next day's, upgrade to a cursor if that ever happens
 	const { results, failed } = await fetchOccurrences(fetch, {
 		task_template: taskTemplateId,
-		[before ? 'due_date__lte' : 'due_date__gte']: current.dueDate,
-		ordering: before ? '-due_date,-id' : 'due_date,id',
-		limit: '50'
+		[before ? 'due_date__lt' : 'due_date__gt']: dueDate,
+		ordering: before ? '-due_date' : 'due_date',
+		limit: '1'
 	});
-	const occurrence = results.find((candidate) => {
-		const due = candidate.due_date?.slice(0, 10) ?? '';
-		if (due !== current.dueDate) return true;
-		return before ? candidate.id < current.id : candidate.id > current.id;
-	});
-	return { occurrence: occurrence ?? null, failed };
+	return { occurrence: results[0] ?? null, failed };
 }
 
 /** An occurrence date in the user's locale, or '--'. */

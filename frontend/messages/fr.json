@@ -3010,6 +3010,7 @@
 	"occurrenceHistory": "Historique des occurrences",
 	"noOccurrenceHistory": "Cette tâche n'a pas encore été exécutée.",
 	"occurrenceHistoryUnavailable": "L'historique des occurrences n'a pas pu être chargé.",
+	"occurrenceHistorySelectMonth": "Sélectionnez un mois pour voir ses occurrences.",
 	"moreUpcoming": "{count} autres à venir",
 	"allOccurrences": "Toutes les occurrences",
 	"taskTemplate": "Tâche",
