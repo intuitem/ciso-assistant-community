@@ -129,8 +129,10 @@ class IndexedDocument(AbstractBaseModel, FolderMixin):
         INDEXED = "indexed", _("Indexed")
         FAILED = "failed", _("Failed")
 
+    # Evidence attachments are indexed in place: match EvidenceRevision.attachment.
     file = models.FileField(
         upload_to="rag_documents/",
+        max_length=500,
         validators=[validate_file_size, validate_file_name],
         verbose_name=_("File"),
     )

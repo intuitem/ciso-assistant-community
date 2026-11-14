@@ -158,3 +158,36 @@ def test_truncation_does_not_leave_a_trailing_space_before_the_extension():
 def test_a_name_that_is_all_extension_is_still_bounded():
     sanitized = sanitize_file_name("x." + "y" * 300, max_length=50)
     assert len(sanitized) == 50
+
+
+@pytest.mark.parametrize("letter", ["a", "é", "я", "文"])
+def test_a_stored_name_fits_on_disk(letter):
+    """A filesystem counts bytes, and an accent or an ideogram is several."""
+    stored = _sanitized(letter * 250 + ".pdf")
+
+    assert len(stored.encode()) <= 247
+    assert stored.endswith(".pdf")
+    # Cut between characters, never through one.
+    assert set(stored.removesuffix(".pdf")) == {letter}
+
+
+def test_a_name_within_the_limit_is_stored_as_uploaded():
+    name = "a" * 243 + ".pdf"
+    assert len(name.encode()) == 247
+    assert _sanitized(name) == name
+    assert _sanitized("a" + name) == name
+
+
+def test_a_stored_name_leaves_room_for_the_suffix_of_a_duplicate(tmp_path):
+    """Django renames the second file of the same name: that one must fit too."""
+    from django.core.files.base import ContentFile
+    from django.core.files.storage import FileSystemStorage
+
+    storage = FileSystemStorage(location=tmp_path)
+    stored = _sanitized("я" * 250 + ".pdf")
+    first = storage.save(stored, ContentFile(b"one"))
+    second = storage.save(stored, ContentFile(b"two"))
+
+    assert first == stored and second != first
+    assert len(second.encode()) <= 255
+    assert storage.exists(first) and storage.exists(second)

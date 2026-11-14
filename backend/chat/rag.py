@@ -89,33 +89,58 @@ def indexed_payload_types() -> dict[str, Any]:
 
 def _readable_document_ids(scope, folders) -> list[str]:
     """Indexed documents the user may read; evidence and managed documents also need their source."""
+    key = frozenset(folders)
+    if key not in scope._document_ids:
+        scope._document_ids[key] = _compute_readable_document_ids(scope, folders)
+    return scope._document_ids[key]
+
+
+def _compute_readable_document_ids(scope, folders) -> list[str]:
     from django.contrib.contenttypes.models import ContentType
+    from django.db.models import Exists, OuterRef, Q
+
+    from core.models import EvidenceRevision
+    from doc_management.models import DocumentRevision
 
     from .models import IndexedDocument
 
-    gated = {IndexedDocument.SourceType.EVIDENCE, IndexedDocument.SourceType.DOCUMENT}
-    rows = IndexedDocument.objects.filter(folder_id__in=folders).values_list(
-        "id", "folder_id", "source_type", "source_content_type_id"
+    Source = IndexedDocument.SourceType
+    # Copies of other objects are checked against the source as it is now, not
+    # against what was copied onto the indexed document: a source deleted, moved,
+    # replaced or unpublished without the index following is unreadable at once.
+    gated = (
+        (Source.EVIDENCE, EvidenceRevision, Q(attachment=OuterRef("file"))),
+        (
+            Source.DOCUMENT,
+            DocumentRevision,
+            Q(status=DocumentRevision.Status.PUBLISHED),
+        ),
     )
-    source_folders = {}
-    readable = []
-    for doc_id, folder_id, source_type, ct_id in rows:
-        if source_type in gated:
-            if ct_id is None:
-                continue
-            if ct_id not in source_folders:
-                source_folders[ct_id] = _source_folder_ids(
-                    scope, ContentType.objects.get_for_id(ct_id).model_class()
-                )
-            if str(folder_id) not in source_folders[ct_id]:
-                continue
-        readable.append(str(doc_id))
-    return readable
+    docs = IndexedDocument.objects.filter(folder_id__in=folders)
+    readable = list(
+        docs.exclude(source_type__in=[source_type for source_type, _, _ in gated])
+        .values_list("id", flat=True)
+        .order_by()
+    )
+    for source_type, model, still_indexed in gated:
+        source = model.objects.filter(
+            still_indexed,
+            id=OuterRef("source_object_id"),
+            folder_id__in=_source_folder_ids(scope, model),
+        )
+        readable += (
+            docs.filter(
+                Exists(source),
+                source_type=source_type,
+                source_content_type=ContentType.objects.get_for_model(model),
+            )
+            .values_list("id", flat=True)
+            .order_by()
+        )
+    return [str(doc_id) for doc_id in readable]
 
 
 def _source_folder_ids(scope, model_class) -> set[str]:
-    if model_class is None:
-        return set()
     folders = set(scope.folder_ids_for(model_class))
     if model_class._meta.label == "doc_management.DocumentRevision":
         permission = Permission.objects.get(codename="view_published_documentcontainer")
@@ -145,8 +170,9 @@ def _user_partition_filter(scope, source_type, object_type) -> Optional[Filter]:
             readable = _readable_document_ids(scope, folders)
             if not readable:
                 continue
+            # object_id is the document id on chunks, and is payload-indexed
             scope_condition = FieldCondition(
-                key="document_id", match=MatchAny(any=readable)
+                key="object_id", match=MatchAny(any=readable)
             )
         clauses.append(
             Filter(

@@ -22,6 +22,31 @@ def evidence(db):
     return Evidence.objects.create(name="AI policy", folder=domain)
 
 
+def _scope_with(role, folder):
+    from chat.scoping import ReadScope
+    from iam.models import RoleAssignment, User, UserGroup
+
+    user = User.objects.create(email=f"{role.name}@test.local")
+    group = UserGroup.objects.create(folder=folder, name=f"{role.name}-group")
+    assignment = RoleAssignment.objects.create(
+        user_group=group,
+        role=role,
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    assignment.perimeter_folders.add(folder)
+    group.user_set.add(user)
+    return ReadScope(user)
+
+
+def _other_domain():
+    return Folder.objects.create(
+        name="Other",
+        parent_folder=Folder.get_root_folder(),
+        content_type=Folder.ContentType.DOMAIN,
+    )
+
+
 def _attach(revision, name):
     revision.set_new_attachment(
         SimpleUploadedFile(name, b"policy text", content_type="text/plain")
@@ -184,13 +209,15 @@ def test_cleared_or_failed_attachments_are_reconciled(ingest, remove, evidence):
 
     index_evidence_revision(revision)
     retried = IndexedDocument.objects.get()
-    assert retried.id != failed.id and ingest.call_count == 2
+    assert retried.id == failed.id and ingest.call_count == 2
+    assert retried.status == IndexedDocument.Status.PENDING
+    remove.assert_not_called()
 
     revision.attachment = None
     revision.save()
     index_evidence_revision(revision)
     assert not IndexedDocument.objects.exists()
-    assert remove.call_count == 2
+    assert remove.call_count == 1
 
 
 @pytest.mark.django_db(transaction=True)
@@ -223,33 +250,22 @@ def test_chunks_need_read_access_to_their_source(evidence):
     from django.contrib.auth.models import Permission
 
     from chat.rag import _readable_document_ids
-    from chat.scoping import ReadScope
-    from iam.models import Role, RoleAssignment, User, UserGroup
+    from iam.models import Role
 
+    revision = EvidenceRevision.objects.create(evidence=evidence)
+    _attach(revision, "policy.pdf")
     doc = IndexedDocument.objects.create(
         folder=evidence.folder,
-        file="policy.pdf",
+        file=revision.attachment.name,
         filename="policy.pdf",
         content_type="application/pdf",
         source_type=IndexedDocument.SourceType.EVIDENCE,
         source_content_type=ContentType.objects.get_for_model(EvidenceRevision),
-        source_object_id=EvidenceRevision.objects.create(evidence=evidence).id,
+        source_object_id=revision.id,
     )
 
     def user_with(role):
-        user = User.objects.create(email=f"{role.name}@test.local")
-        group = UserGroup.objects.create(
-            folder=evidence.folder, name=f"{role.name}-group"
-        )
-        assignment = RoleAssignment.objects.create(
-            user_group=group,
-            role=role,
-            folder=Folder.get_root_folder(),
-            is_recursive=True,
-        )
-        assignment.perimeter_folders.add(evidence.folder)
-        group.user_set.add(user)
-        return ReadScope(user)
+        return _scope_with(role, evidence.folder)
 
     chunks_only = Role.objects.create(
         name="chunks-only", folder=Folder.get_root_folder()
@@ -295,8 +311,180 @@ def test_catch_up_resubmits_stuck_pending_documents(ingest, evidence):
         source_type=IndexedDocument.SourceType.CHAT,
     )
     IndexedDocument.objects.filter(id=stuck.id).update(
-        created_at=timezone.now() - timedelta(hours=2)
+        updated_at=timezone.now() - timedelta(hours=2)
     )
     index_missing_documents()
     ingest.assert_called_once_with(str(stuck.id))
     assert fresh.status == IndexedDocument.Status.PENDING
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.ingest_document")
+def test_long_attachment_names_are_indexed(ingest, evidence):
+    revision = EvidenceRevision.objects.create(evidence=evidence)
+    _attach(revision, "a" * 150 + ".txt")
+    index_evidence_revision(revision)
+
+    doc = IndexedDocument.objects.get()
+    assert doc.file.name == revision.attachment.name
+    assert len(doc.file.name) > 100
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.ingest_document")
+def test_indexing_failure_does_not_fail_the_save(ingest, evidence):
+    revision = EvidenceRevision.objects.create(evidence=evidence)
+    _attach(revision, "policy.txt")
+    with patch.object(IndexedDocument, "save", side_effect=RuntimeError("down")):
+        index_evidence_revision(revision)
+
+    assert not IndexedDocument.objects.exists()
+    ingest.assert_not_called()
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.remove_document_chunks")
+@patch("chat.tasks.ingest_document")
+def test_chunks_are_checked_against_the_live_source(ingest, remove, evidence, document):
+    """What the index copied may have gone stale: the source decides, as it is now."""
+    import uuid
+
+    from chat.rag import _readable_document_ids
+    from chat.scoping import ReadScope
+    from doc_management.models import DocumentRevision
+    from iam.models import Role
+
+    revision = EvidenceRevision.objects.create(evidence=evidence)
+    _attach(revision, "policy.txt")
+    index_evidence_revision(revision)
+    published = document.revisions.first()
+    published.publish()
+    index_document_revision(published)
+    from_evidence = IndexedDocument.objects.get(
+        source_type=IndexedDocument.SourceType.EVIDENCE
+    )
+    from_document = IndexedDocument.objects.get(
+        source_type=IndexedDocument.SourceType.DOCUMENT
+    )
+
+    user = _scope_with(Role.objects.get(name="BI-RL-AUD"), evidence.folder).user
+    folders = [str(evidence.folder_id)]
+
+    def readable():
+        return set(_readable_document_ids(ReadScope(user), folders))
+
+    both = {str(from_evidence.id), str(from_document.id)}
+    assert readable() == both
+
+    # None of these writes fires a signal, so the index does not follow.
+    this_revision = EvidenceRevision.objects.filter(pk=revision.pk)
+    this_revision.update(attachment="replaced.txt")
+    assert readable() == {str(from_document.id)}
+    this_revision.update(attachment=from_evidence.file.name)
+
+    this_revision.update(folder=_other_domain())
+    assert readable() == {str(from_document.id)}
+    this_revision.update(folder=evidence.folder)
+    assert readable() == both
+
+    DocumentRevision.objects.filter(pk=published.pk).update(
+        status=DocumentRevision.Status.DEPRECATED
+    )
+    assert readable() == {str(from_evidence.id)}
+
+    IndexedDocument.objects.filter(pk=from_evidence.pk).update(
+        source_object_id=uuid.uuid4()
+    )
+    assert readable() == set()
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.move_document_chunks")
+@patch("chat.tasks.remove_document_chunks")
+@patch("chat.tasks.ingest_document")
+def test_catch_up_realigns_folders_and_drops_orphans(ingest, remove, move, evidence):
+    import uuid
+
+    from chat.signals import index_missing_documents
+
+    revision = EvidenceRevision.objects.create(evidence=evidence)
+    _attach(revision, "policy.txt")
+    index_evidence_revision(revision)
+    doc = IndexedDocument.objects.get()
+
+    IndexedDocument.objects.filter(pk=doc.pk).update(folder=_other_domain())
+    index_missing_documents()
+    doc.refresh_from_db()
+    assert doc.folder_id == evidence.folder_id
+    move.assert_called_once_with([str(doc.id)], str(evidence.folder_id))
+
+    # Their evidence is gone, and no signal said so.
+    IndexedDocument.objects.filter(pk=doc.pk).update(source_object_id=uuid.uuid4())
+    unsourced = IndexedDocument.objects.create(
+        folder=evidence.folder,
+        file="orphan.txt",
+        filename="orphan.txt",
+        content_type="text/plain",
+        source_type=IndexedDocument.SourceType.EVIDENCE,
+    )
+    chat_upload = IndexedDocument.objects.create(
+        folder=evidence.folder,
+        file="chat.txt",
+        filename="chat.txt",
+        content_type="text/plain",
+        source_type=IndexedDocument.SourceType.CHAT,
+    )
+    index_missing_documents()
+
+    left = set(IndexedDocument.objects.values_list("id", flat=True))
+    assert chat_upload.id in left and not {doc.id, unsourced.id} & left
+    assert {call.args[0] for call in remove.call_args_list} == {
+        str(doc.id),
+        str(unsourced.id),
+    }
+    # The attachment itself is still there, so it is indexed afresh.
+    assert IndexedDocument.objects.get(source_object_id=revision.id).id != doc.id
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("chat.tasks.remove_document_chunks")
+@patch("chat.tasks.ingest_document")
+def test_saves_while_chat_is_off_drop_the_indexed_copy(ingest, remove, evidence):
+    from chat.signals import _sync_source
+
+    revision = EvidenceRevision.objects.create(evidence=evidence)
+    _attach(revision, "policy.txt")
+    _sync_source(revision, index_evidence_revision, True)
+    doc = IndexedDocument.objects.get()
+
+    _sync_source(revision, index_evidence_revision, False)
+    assert not IndexedDocument.objects.exists()
+    remove.assert_called_once_with(str(doc.id))
+    assert revision.attachment.storage.exists(revision.attachment.name)
+
+
+@pytest.mark.django_db
+def test_api_clients_cannot_claim_a_source(evidence, document):
+    """A forged link to a published revision would pass its content off as the document."""
+    from chat.serializers import IndexedDocumentWriteSerializer
+    from doc_management.models import DocumentRevision
+
+    serializer = IndexedDocumentWriteSerializer(
+        data={
+            "folder": str(evidence.folder_id),
+            "file": SimpleUploadedFile("forged.txt", b"not the policy"),
+            "filename": "AI policy v1",
+            "content_type": "text/plain",
+            "source_type": IndexedDocument.SourceType.DOCUMENT,
+            "source_content_type": ContentType.objects.get_for_model(
+                DocumentRevision
+            ).id,
+            "source_object_id": str(document.revisions.first().id),
+        },
+        context={},
+    )
+    serializer.is_valid(raise_exception=True)
+    doc = serializer.save()
+
+    assert doc.source_type == IndexedDocument.SourceType.CUSTOM
+    assert doc.source_content_type is None and doc.source_object_id is None

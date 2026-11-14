@@ -126,8 +126,7 @@ def _connect_source_signals(ff_is_enabled):
 
         @receiver(post_save, sender=model_class, weak=False)
         def on_source_save(sender, instance, index=index, **kwargs):
-            if ff_is_enabled("chat_mode"):
-                index(instance)
+            _sync_source(instance, index, ff_is_enabled("chat_mode"))
 
         @receiver(post_delete, sender=model_class, weak=False)
         def on_source_delete(sender, instance, **kwargs):
@@ -149,6 +148,15 @@ def _connect_source_signals(ff_is_enabled):
         @receiver(post_save, sender=parent, weak=False)
         def on_parent_save(sender, instance, source=source, lookup=lookup, **kwargs):
             _follow_folder(instance, source.objects.filter(**{lookup: instance}))
+
+
+def _sync_source(source, index, chat_enabled):
+    if chat_enabled:
+        index(source)
+    else:
+        # Nothing is indexed while chat is off, but a copy this save may have
+        # made stale must not outlive it; the catch-up re-indexes.
+        _drop_indexed(_indexed_for(source))
 
 
 def _follow_folder(parent, revisions):
@@ -203,7 +211,7 @@ def _queue(source, source_type, file, filename, content_type):
     from .models import IndexedDocument
     from .tasks import ingest_document
 
-    doc = IndexedDocument.objects.create(
+    doc = IndexedDocument(
         folder=source.folder,
         file=file,
         filename=filename,
@@ -212,8 +220,51 @@ def _queue(source, source_type, file, filename, content_type):
         source_content_type=ContentType.objects.get_for_model(source),
         source_object_id=source.id,
     )
+    # Indexing must not fail the upload or publication that triggered it: the
+    # nightly catch-up queues whatever is missing.
+    try:
+        with transaction.atomic():
+            doc.save()
+    except Exception:
+        logger.exception(
+            "Failed to queue document for indexing",
+            source_object_id=str(source.id),
+        )
+        # A copy written before the row failed is ours to remove; the source's
+        # own file (evidence attachment, uploaded revision) never is.
+        if doc.file.name and doc.file.name.startswith(
+            IndexedDocument.file.field.upload_to
+        ):
+            try:
+                doc.file.storage.delete(doc.file.name)
+            except Exception:
+                logger.exception("Failed to remove unindexed copy", file=doc.file.name)
+        return
     transaction.on_commit(lambda: ingest_document(str(doc.id)))
     logger.info("Queued document for indexing", filename=filename)
+
+
+def _refresh(doc, source):
+    """Keep an indexed document that still matches its source: follow the source's
+    folder, and resubmit a failed one in place rather than re-creating its row and file."""
+    from django.db import transaction
+    from django.utils import timezone
+
+    from .models import IndexedDocument
+    from .tasks import ingest_document, move_document_chunks
+
+    if doc.folder_id != source.folder_id:
+        folder_id = str(source.folder_id)
+        IndexedDocument.objects.filter(pk=doc.pk).update(folder_id=folder_id)
+        transaction.on_commit(lambda: move_document_chunks([str(doc.id)], folder_id))
+    if doc.status != IndexedDocument.Status.FAILED:
+        return
+    IndexedDocument.objects.filter(pk=doc.pk).update(
+        status=IndexedDocument.Status.PENDING,
+        error_message="",
+        updated_at=timezone.now(),
+    )
+    transaction.on_commit(lambda: ingest_document(str(doc.id)))
 
 
 def _supported_type(name):
@@ -234,8 +285,10 @@ def index_evidence_revision(revision):
     if not mime_type:
         _drop_indexed(previous)
         return
-    current = previous.filter(file=revision.attachment.name)
-    if current.exclude(status=IndexedDocument.Status.FAILED).exists():
+    current = previous.filter(file=revision.attachment.name).first()
+    if current:
+        _drop_indexed(previous.exclude(pk=current.pk))
+        _refresh(current, revision)
         return
     _drop_indexed(previous)
     _queue(
@@ -264,10 +317,10 @@ def index_document_revision(revision):
             source_object_id__in=siblings.values("id"),
         )
     )
-    own = _indexed_for(revision)
-    if own.exclude(status=IndexedDocument.Status.FAILED).exists():
+    own = _indexed_for(revision).first()
+    if own:
+        _refresh(own, revision)
         return
-    _drop_indexed(own)
 
     filename = f"{revision.document.display_name} v{revision.version_number}"
     if revision.source == revision.Source.AUTHORED and revision.content.strip():
@@ -314,6 +367,19 @@ def index_missing_documents(folder_id=None):
     if folder_id:
         evidence = evidence.filter(folder_id=folder_id)
         documents = documents.filter(folder_id=folder_id)
+    # Sources deleted while nothing was listening (chat disabled, older versions)
+    # are in neither queryset: their indexed copies would otherwise stay forever.
+    for model, source_type in (
+        (EvidenceRevision, IndexedDocument.SourceType.EVIDENCE),
+        (DocumentRevision, IndexedDocument.SourceType.DOCUMENT),
+    ):
+        orphans = IndexedDocument.objects.filter(source_type=source_type).exclude(
+            source_content_type=ContentType.objects.get_for_model(model),
+            source_object_id__in=model.objects.values("id"),
+        )
+        if folder_id:
+            orphans = orphans.filter(folder_id=folder_id)
+        _drop_indexed(orphans)
     for revisions, index in (
         (evidence, index_evidence_revision),
         (documents, index_document_revision),
@@ -329,7 +395,7 @@ def index_missing_documents(folder_id=None):
 
     stuck = IndexedDocument.objects.filter(
         status=IndexedDocument.Status.PENDING,
-        created_at__lt=timezone.now() - timedelta(hours=1),
+        updated_at__lt=timezone.now() - timedelta(hours=1),
     )
     if folder_id:
         stuck = stuck.filter(folder_id=folder_id)

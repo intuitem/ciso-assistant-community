@@ -2,6 +2,8 @@
 
 from django.db import migrations, models
 
+import core.validators
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -21,6 +23,19 @@ class Migration(migrations.Migration):
                 ],
                 max_length=20,
                 verbose_name="Source type",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="indexeddocument",
+            name="file",
+            field=models.FileField(
+                max_length=500,
+                upload_to="rag_documents/",
+                validators=[
+                    core.validators.validate_file_size,
+                    core.validators.validate_file_name,
+                ],
+                verbose_name="File",
             ),
         ),
     ]

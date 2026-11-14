@@ -210,10 +210,15 @@ def index_missing_documents_nightly():
 
 
 def _document_filter(document_ids):
-    from qdrant_client.models import FieldCondition, Filter, MatchAny
+    from qdrant_client.models import FieldCondition, Filter, MatchAny, MatchValue
 
+    # object_id carries the document id on chunks and, unlike document_id, has a
+    # payload index (init_qdrant).
     return Filter(
-        must=[FieldCondition(key="document_id", match=MatchAny(any=document_ids))]
+        must=[
+            FieldCondition(key="object_type", match=MatchValue(value="document_chunk")),
+            FieldCondition(key="object_id", match=MatchAny(any=document_ids)),
+        ]
     )
 
 
