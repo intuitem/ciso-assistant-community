@@ -63,6 +63,7 @@ def ingest_document(document_id: str):
                     "document_id": str(doc.id),
                     "chunk_index": chunk.index,
                     "filename": doc.filename,
+                    "name": doc.filename,
                     **chunk.metadata,
                 },
             )
@@ -164,6 +165,29 @@ def remove_model_object(app_label: str, model_name: str, object_id: str):
     except Exception as e:
         logger.error(
             "Failed to remove %s.%s/%s: %s", app_label, model_name, object_id, e
+        )
+
+
+@db_task()
+def remove_document_chunks(document_id: str):
+    """Remove an indexed document's chunks from the vector store."""
+    from .rag import COLLECTION_NAME, get_qdrant_client
+    from qdrant_client.models import Filter, FieldCondition, MatchValue
+
+    try:
+        get_qdrant_client().delete(
+            collection_name=COLLECTION_NAME,
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="document_id", match=MatchValue(value=document_id)
+                    )
+                ]
+            ),
+        )
+    except Exception as e:
+        logger.error(
+            "Failed to remove document chunks", document_id=document_id, error=e
         )
 
 

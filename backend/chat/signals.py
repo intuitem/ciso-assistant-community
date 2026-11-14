@@ -79,66 +79,143 @@ def connect_signals():
             obj_id = str(instance.id)
             transaction.on_commit(lambda: remove_model_object(app, name, obj_id))
 
-    # Auto-ingest evidence attachments when a new revision is uploaded
-    _connect_evidence_signal(ff_is_enabled)
+    _connect_source_signals(ff_is_enabled)
 
 
-def _connect_evidence_signal(ff_is_enabled):
-    """Connect signal to auto-ingest evidence file attachments."""
+def _connect_source_signals(ff_is_enabled):
+    """Keep the index in step with evidence attachments and published documents."""
     from django.apps import apps
 
-    try:
-        EvidenceRevision = apps.get_model("core", "EvidenceRevision")
-    except LookupError:
-        logger.warning(
-            "EvidenceRevision model not found, skipping evidence auto-ingest signal"
+    for model_path, index in (
+        ("core.EvidenceRevision", index_evidence_revision),
+        ("doc_management.DocumentRevision", index_document_revision),
+    ):
+        try:
+            model_class = apps.get_model(model_path)
+        except LookupError:
+            logger.warning("%s not found, skipping document indexing", model_path)
+            continue
+
+        @receiver(post_save, sender=model_class, weak=False)
+        def on_source_save(sender, instance, index=index, **kwargs):
+            if ff_is_enabled("chat_mode"):
+                index(instance)
+
+        @receiver(post_delete, sender=model_class, weak=False)
+        def on_source_delete(sender, instance, **kwargs):
+            _drop_indexed(_indexed_for(instance))
+
+
+def _indexed_for(source):
+    from django.contrib.contenttypes.models import ContentType
+
+    from .models import IndexedDocument
+
+    return IndexedDocument.objects.filter(
+        source_content_type=ContentType.objects.get_for_model(source),
+        source_object_id=source.id,
+    )
+
+
+def _drop_indexed(docs):
+    from django.db import transaction
+
+    from .models import IndexedDocument
+    from .tasks import remove_document_chunks
+
+    owned_prefix = IndexedDocument.file.field.upload_to
+    for doc in docs:
+        transaction.on_commit(lambda d=str(doc.id): remove_document_chunks(d))
+        if doc.file.name.startswith(owned_prefix):
+            doc.file.delete(save=False)
+        doc.delete()
+
+
+def _queue(source, source_type, file, filename, content_type):
+    from django.contrib.contenttypes.models import ContentType
+    from django.db import transaction
+
+    from .models import IndexedDocument
+    from .tasks import ingest_document
+
+    doc = IndexedDocument.objects.create(
+        folder=source.folder,
+        file=file,
+        filename=filename,
+        content_type=content_type,
+        source_type=source_type,
+        source_content_type=ContentType.objects.get_for_model(source),
+        source_object_id=source.id,
+    )
+    transaction.on_commit(lambda: ingest_document(str(doc.id)))
+    logger.info("Queued document for indexing", filename=filename)
+
+
+def _supported_type(name):
+    import mimetypes
+
+    from .extractors import get_extractor
+
+    mime_type, _ = mimetypes.guess_type(name)
+    return mime_type if mime_type and get_extractor(mime_type) else None
+
+
+def index_evidence_revision(revision):
+    """Queue a revision's attachment for indexing unless that file is already indexed."""
+    from .models import IndexedDocument
+
+    if not revision.attachment:
+        return
+    mime_type = _supported_type(revision.attachment.name)
+    if not mime_type:
+        return
+    previous = _indexed_for(revision)
+    if previous.filter(file=revision.attachment.name).exists():
+        return
+    _drop_indexed(previous)
+    _queue(
+        revision,
+        IndexedDocument.SourceType.EVIDENCE,
+        revision.attachment.name,
+        revision.filename(),
+        mime_type,
+    )
+
+
+def index_document_revision(revision):
+    """Index only the published revision of a managed document, dropping the others."""
+    from django.contrib.contenttypes.models import ContentType
+    from django.core.files.base import ContentFile
+
+    from .models import IndexedDocument
+
+    siblings = revision.document.revisions.exclude(pk=revision.pk)
+    if revision.status != revision.Status.PUBLISHED:
+        _drop_indexed(_indexed_for(revision))
+        return
+    _drop_indexed(
+        IndexedDocument.objects.filter(
+            source_content_type=ContentType.objects.get_for_model(revision),
+            source_object_id__in=siblings.values("id"),
         )
+    )
+    if _indexed_for(revision).exists():
         return
 
-    @receiver(post_save, sender=EvidenceRevision, weak=False)
-    def on_evidence_revision_save(sender, instance, created, **kwargs):
-        if not created or not ff_is_enabled("chat_mode"):
-            return
-        if not instance.attachment:
-            return
-
-        from django.contrib.contenttypes.models import ContentType
-
-        from .models import IndexedDocument
-        from .tasks import ingest_document
-
-        # Determine content type from file name
-        import mimetypes
-
-        mime_type, _ = mimetypes.guess_type(instance.attachment.name)
+    filename = f"{revision.document.display_name} v{revision.version_number}"
+    if revision.source == revision.Source.AUTHORED and revision.content.strip():
+        file = ContentFile(
+            f"# {filename}\n\n{revision.content}".encode(), name=f"{revision.id}.txt"
+        )
+        mime_type = "text/plain"
+    elif revision.source == revision.Source.UPLOADED and revision.file:
+        mime_type = _supported_type(revision.file.name)
         if not mime_type:
             return
-
-        # Only ingest supported file types
-        from .extractors import get_extractor
-
-        if not get_extractor(mime_type):
-            return
-
-        # Avoid duplicate indexing for same attachment
-        ct = ContentType.objects.get_for_model(EvidenceRevision)
-        if IndexedDocument.objects.filter(
-            source_content_type=ct,
-            source_object_id=instance.id,
-        ).exists():
-            return
-
-        doc = IndexedDocument.objects.create(
-            folder=instance.folder,
-            file=instance.attachment,
-            filename=instance.attachment.name.split("/")[-1],
-            content_type=mime_type,
-            source_type=IndexedDocument.SourceType.EVIDENCE,
-            source_content_type=ct,
-            source_object_id=instance.id,
-        )
-        ingest_document(str(doc.id))
-        logger.info("Auto-queued evidence attachment for indexing: %s", doc.filename)
+        file = revision.file.name
+    else:
+        return
+    _queue(revision, IndexedDocument.SourceType.DOCUMENT, file, filename, mime_type)
 
 
 # Do NOT call connect_signals() at module level.

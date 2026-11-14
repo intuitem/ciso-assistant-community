@@ -120,6 +120,7 @@ class IndexedDocument(AbstractBaseModel, FolderMixin):
     class SourceType(models.TextChoices):
         CHAT = "chat", _("Chat upload")
         EVIDENCE = "evidence", _("Evidence attachment")
+        DOCUMENT = "document", _("Managed document")
         CUSTOM = "custom", _("Custom upload")
 
     class Status(models.TextChoices):

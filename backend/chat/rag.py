@@ -320,7 +320,9 @@ def format_context(results: list[dict], expanded: list[dict] | None = None) -> s
 
     for i, r in enumerate(results, 1):
         source_label = r.get("framework") or r.get("object_type", "unknown")
-        ref = r.get("ref_id", "")
+        ref = r.get("ref_id", "") or (
+            r.get("name", "") if r.get("object_type") == "document_chunk" else ""
+        )
         header = f"[Source {i}: {source_label}"
         if ref:
             header += f" - {ref}"
