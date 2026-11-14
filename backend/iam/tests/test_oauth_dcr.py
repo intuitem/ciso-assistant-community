@@ -71,6 +71,14 @@ def _authorize_params(
 def _access_token(
     client, oauth_client, knox_token, resource=None, scope="openid mcp"
 ) -> str:
+    return _token_response(client, oauth_client, knox_token, resource, scope)[
+        "access_token"
+    ]
+
+
+def _token_response(
+    client, oauth_client, knox_token, resource=None, scope="openid mcp"
+) -> dict:
     verifier = secrets.token_urlsafe(48)
     challenge = (
         base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
@@ -92,7 +100,7 @@ def _access_token(
     }
     if resource:
         data["resource"] = resource
-    return client.post(TOKEN_URL, data).json()["access_token"]
+    return client.post(TOKEN_URL, data).json()
 
 
 def _register(client: Client) -> None:
@@ -173,6 +181,46 @@ def test_unknown_resource_does_not_issue_a_code(client, knox_token):
 def test_mcp_resource_is_accepted(client, knox_token):
     oauth_client = _make_client(self_registered=True)
     assert _access_token(client, oauth_client, knox_token, resource=mcp_resource())
+
+
+def test_scopes_the_client_may_not_have_are_dropped(client, knox_token):
+    # ChatGPT asks for every scope the metadata advertises, and more
+    oauth_client = _make_client(self_registered=True)
+    data = _token_response(
+        client,
+        oauth_client,
+        knox_token,
+        resource=mcp_resource(),
+        scope="openid profile email offline_access mcp",
+    )
+    assert set(data["scope"].split()) == {"openid", "mcp"}
+    auth = {"HTTP_AUTHORIZATION": f"Bearer {data['access_token']}"}
+    assert client.get("/api/folders/", **auth).status_code == 200
+
+
+def test_the_consent_page_keeps_the_dropped_scopes_out(client, knox_token):
+    oauth_client = _make_client(self_registered=True, skip_consent=False)
+    client.cookies["token"] = knox_token
+    response = client.get(
+        AUTHORIZE_URL,
+        _authorize_params(
+            oauth_client, "x" * 43, mcp_resource(), scope="openid profile email mcp"
+        ),
+    )
+    assert response.status_code == 200
+    assert set(response.context["form"]._requested) == {"openid", "mcp"}
+
+
+def test_a_request_with_none_of_the_client_scopes_is_still_refused(client, knox_token):
+    oauth_client = _make_client(self_registered=True)
+    client.cookies["token"] = knox_token
+    response = client.get(
+        AUTHORIZE_URL,
+        _authorize_params(oauth_client, "x" * 43, scope="profile email"),
+    )
+    query = parse_qs(urlsplit(response["Location"]).query)
+    assert "code" not in query
+    assert query["error"] == ["invalid_scope"]
 
 
 def test_a_self_registered_token_without_the_mcp_scope_is_refused(client, knox_token):
