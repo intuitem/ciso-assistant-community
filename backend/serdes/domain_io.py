@@ -370,10 +370,13 @@ def import_terminologies(
 
     missing_names = set(names) - existing_names
     if missing_names:
+        first = Terminology.next_order(field_path)
         Terminology.objects.bulk_create(
             [
-                Terminology(name=name, field_path=field_path, is_visible=True)
-                for name in missing_names
+                Terminology(
+                    name=name, field_path=field_path, is_visible=True, order=first + i
+                )
+                for i, name in enumerate(sorted(missing_names))
             ],
             ignore_conflicts=True,
         )

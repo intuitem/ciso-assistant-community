@@ -125,6 +125,8 @@ class AccreditationReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     status = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    status_hexcolor = serializers.CharField(source="status.hexcolor", default="")
+    category_hexcolor = serializers.CharField(source="category.hexcolor", default="")
     checklist_progress = serializers.SerializerMethodField()
     validation_flows = FieldsRelatedField(
         many=True,
@@ -193,8 +195,8 @@ class ProjectReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     linked_collection = FieldsRelatedField()
     responsibility_matrices = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
-    status = FieldsRelatedField(["id", "name"])
-    health = FieldsRelatedField(["id", "name"])
+    status = FieldsRelatedField(["id", "name", "hexcolor"])
+    health = FieldsRelatedField(["id", "name", "hexcolor"])
 
     class Meta:
         model = Project

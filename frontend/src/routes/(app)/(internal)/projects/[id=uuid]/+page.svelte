@@ -12,6 +12,7 @@
 	import Select from '#lib/components/Forms/Select.svelte';
 	import SliderInput from '#lib/components/Forms/SliderInput.svelte';
 	import ProjectCustomFieldsPanel from '#lib/components/Forms/ProjectCustomFieldsPanel.svelte';
+	import TerminologyBadge from '#lib/components/TerminologyBadge.svelte';
 	import { setContext } from 'svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -117,23 +118,6 @@
 		4: 'bg-gray-100 text-gray-600'
 	};
 	let isPortfolio = $derived(project.kind === 'portfolio');
-
-	const statusColorMap: Record<string, string> = {
-		draft: 'bg-gray-100 text-gray-600',
-		initiated: 'bg-blue-50 text-blue-700',
-		planning: 'bg-indigo-100 text-indigo-700',
-		in_progress: 'bg-blue-100 text-blue-700',
-		on_hold: 'bg-amber-100 text-amber-700',
-		closing: 'bg-purple-100 text-purple-700',
-		closed: 'bg-green-100 text-green-700',
-		cancelled: 'bg-red-100 text-red-600'
-	};
-
-	const healthColorMap: Record<string, string> = {
-		green: 'bg-green-100 text-green-700',
-		amber: 'bg-amber-100 text-amber-700',
-		red: 'bg-red-100 text-red-600'
-	};
 
 	async function patchProject(payload: Record<string, unknown>, section: string) {
 		savingSection = section;
@@ -326,6 +310,11 @@
 	let snapshots = $derived(data.snapshots ?? []);
 	let latestSnapshot = $derived(
 		snapshots.length > 0 ? snapshots[snapshots.length - 1].metrics : null
+	);
+	let healthStripeColor = $derived(
+		/^#[0-9a-fA-F]{6}$/.test(data.healthColors?.[latestSnapshot?.health] ?? '')
+			? data.healthColors[latestSnapshot.health]
+			: ''
 	);
 	let snapshot7dAgo = $derived(
 		snapshots.length >= 8 ? snapshots[snapshots.length - 8].metrics : null
@@ -689,12 +678,11 @@
 					{m.status()}
 				</div>
 				{#if project.status}
-					<span
-						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {statusColorMap[
-							project.status?.name
-						] ?? 'bg-surface-100-900 text-surface-600-400'}"
-						>{safeTranslate(project.status.name)}</span
-					>
+					<TerminologyBadge
+						name={project.status.name}
+						hexcolor={project.status.hexcolor}
+						class="text-sm font-semibold px-3 py-1 rounded-full self-start"
+					/>
 				{:else}
 					<span class="text-surface-500 text-sm italic">—</span>
 				{/if}
@@ -705,12 +693,11 @@
 					{m.projectHealth()}
 				</div>
 				{#if project.health}
-					<span
-						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {healthColorMap[
-							project.health?.name
-						] ?? 'bg-surface-100-900 text-surface-600-400'}"
-						>{safeTranslate(project.health.name)}</span
-					>
+					<TerminologyBadge
+						name={project.health.name}
+						hexcolor={project.health.hexcolor}
+						class="text-sm font-semibold px-3 py-1 rounded-full self-start"
+					/>
 				{:else}
 					<span class="text-surface-500 text-sm italic">—</span>
 				{/if}
@@ -1665,13 +1652,11 @@
 							{m.status()}
 						</div>
 						{#if latestSnapshot?.status}
-							<span
-								class="badge text-sm font-semibold px-3 py-1 rounded-full {statusColorMap[
-									latestSnapshot.status
-								] ?? 'bg-surface-100-900 text-surface-600-400'}"
-							>
-								{safeTranslate(latestSnapshot.status)}
-							</span>
+							<TerminologyBadge
+								name={latestSnapshot.status}
+								hexcolor={data.statusColors?.[latestSnapshot.status]}
+								class="text-sm font-semibold px-3 py-1 rounded-full"
+							/>
 						{:else}
 							<span class="text-surface-500 italic text-sm">—</span>
 						{/if}
@@ -1680,13 +1665,8 @@
 						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div
-							class="absolute top-0 inset-x-0 h-1 {latestSnapshot?.health === 'green'
-								? 'bg-green-500'
-								: latestSnapshot?.health === 'amber'
-									? 'bg-amber-500'
-									: latestSnapshot?.health === 'red'
-										? 'bg-red-500'
-										: 'bg-surface-300-700'}"
+							class="absolute top-0 inset-x-0 h-1 bg-surface-300-700"
+							style={healthStripeColor ? `background-color: ${healthStripeColor}` : undefined}
 						></div>
 						<div
 							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
@@ -1694,13 +1674,11 @@
 							{m.projectHealth()}
 						</div>
 						{#if latestSnapshot?.health}
-							<span
-								class="badge text-sm font-semibold px-3 py-1 rounded-full {healthColorMap[
-									latestSnapshot.health
-								] ?? 'bg-surface-100-900 text-surface-600-400'}"
-							>
-								{safeTranslate(latestSnapshot.health)}
-							</span>
+							<TerminologyBadge
+								name={latestSnapshot.health}
+								hexcolor={data.healthColors?.[latestSnapshot.health]}
+								class="text-sm font-semibold px-3 py-1 rounded-full"
+							/>
 						{:else}
 							<span class="text-surface-500 italic text-sm">—</span>
 						{/if}

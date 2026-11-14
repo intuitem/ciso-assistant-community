@@ -7730,9 +7730,8 @@ class TerminologyReadSerializer(BaseModelSerializer):
 
 
 class TerminologyWriteSerializer(BaseModelSerializer):
-    # Built-in terminologies are seeded at startup; users may only toggle their
-    # visibility, not rename or otherwise modify them.
-    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
+    # Built-in terminologies are seeded at startup: not renamable, but restylable.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible", "hexcolor", "order"}
     builtin = serializers.BooleanField(read_only=True)
 
     def validate_field_path(self, value):
