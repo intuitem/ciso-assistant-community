@@ -91,6 +91,31 @@ def _with_iss(location: str, issuer: str) -> str:
     return urlunsplit(parts._replace(query=urlencode(query)))
 
 
+def _narrow_requested_scopes(request) -> None:
+    """Drop the requested scopes the client may not have, instead of refusing.
+
+    Clients ask for more than they need: ChatGPT asks for what the metadata
+    advertises (openid profile email mcp...), while a self-registered client may
+    only get openid and mcp. allauth refuses any scope outside the client's with
+    invalid_scope; RFC 6749 3.3 lets the server issue fewer, and the token
+    response then states the scopes granted. A request left with none of the
+    client's scopes is untouched, so allauth still refuses it.
+    """
+    requested = (request.GET.get("scope") or "").split()
+    client = Client.objects.filter(id=request.GET.get("client_id") or "").first()
+    if not requested or client is None:
+        return
+    allowed = set(client.get_scopes())
+    kept = [scope for scope in requested if scope in allowed]
+    if not kept or len(kept) == len(requested):
+        return
+    query = request.GET.copy()
+    query["scope"] = " ".join(kept)
+    request.GET = query
+    # allauth reads the parameters from the request URI, not request.GET
+    request.META["QUERY_STRING"] = query.urlencode()
+
+
 def _pending_request(request):
     """(scopes, request info) of the authorization asked for, once its client and
     redirect_uri are valid; None otherwise, and allauth reports the error."""
@@ -191,6 +216,9 @@ class CISOAuthorizationView(AuthorizationView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
+        if request.method == "GET":
+            # the consent POST carries the scopes signed at this GET
+            _narrow_requested_scopes(request)
         if not request.user.is_authenticated:
             user = _user_from_knox_cookie(request)
             if user is not None:
