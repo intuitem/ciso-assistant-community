@@ -3996,8 +3996,8 @@ export const listViewFields = {
 		}
 	},
 	'custom-metric-samples': {
-		head: ['metric_instance', 'timestamp', 'display_value'],
-		body: ['metric_instance', 'timestamp', 'display_value']
+		head: ['metric_instance', 'period', 'display_value', 'timestamp'],
+		body: ['metric_instance', 'period', 'display_value', 'timestamp']
 	},
 	dashboards: {
 		head: ['ref_id', 'name', 'description', 'widget_count', 'labels', 'folder'],

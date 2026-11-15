@@ -1,3 +1,4 @@
+import datetime
 import json
 
 import jsonschema
@@ -570,10 +571,18 @@ class CustomMetricSampleReadSerializer(BaseModelSerializer):
     evidence_revision = FieldsRelatedField(["id", "name", "version"])
     display_value = serializers.SerializerMethodField()
     raw_value = serializers.SerializerMethodField()
+    # The period's first day as a date: a UTC midnight shown as a local
+    # datetime would read as the previous day west of UTC.
+    period = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomMetricSample
         fields = "__all__"
+
+    def get_period(self, obj):
+        if obj.period_start is None:
+            return None
+        return obj.period_start.astimezone(datetime.timezone.utc).date().isoformat()
 
     def get_display_value(self, obj):
         """Get the human-readable display value (with unit)"""

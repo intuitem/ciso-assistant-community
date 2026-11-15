@@ -537,6 +537,35 @@ class TestPeriodOnEnteredValues:
         instance = MetricInstance.objects.get(id=instance.id)
         assert instance.raw_value() == 60
 
+    def test_the_list_ranks_a_past_period_typed_later_below_the_current_one(
+        self, frozen
+    ):  # noqa: F811
+        es = make_domain("Spain")
+        instance = make_instance(es, make_definition())
+        for moment, period, value in (
+            (at(2026, 5, 3), at(2026, 5, 1), 100),
+            (at(2026, 5, 4), at(2026, 4, 1), 98),
+        ):
+            data = {
+                "metric_instance": str(instance.id),
+                "timestamp": moment.isoformat(),
+                "period_start": period.isoformat(),
+                "value": {"result": value},
+            }
+            response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
+            assert response.status_code == 201, response.data
+        response = call(
+            CustomMetricSampleViewSet,
+            "get",
+            "list",
+            {"metric_instance": str(instance.id)},
+            admin(),
+        )
+        assert response.status_code == 200
+        rows = response.data["results"]
+        assert [r["period"] for r in rows] == ["2026-05-01", "2026-04-01"]
+        assert [r["raw_value"] for r in rows] == [100, 98]
+
     def test_a_future_period_is_refused(self, frozen):  # noqa: F811
         es = make_domain("Spain")
         instance = make_instance(es, make_definition())
