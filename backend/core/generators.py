@@ -1111,6 +1111,10 @@ def gen_audit_context(
             "name": audit.name or "-",
             "description": audit.description or "-",
             "ref_id": audit.ref_id or "-",
+            "observation": audit.observation or "",
+            "version": audit.version or "",
+            # Default templates still say "project"; it is the perimeter now.
+            "project": audit.perimeter.name if audit.perimeter else "",
             "framework": {
                 "name": audit.framework.name or "-",
                 "description": audit.framework.description or "-",
