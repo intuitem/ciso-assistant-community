@@ -55,6 +55,18 @@ kubectl get ingress -n ciso-assistant
 
 The backend pod runs migrations on startup; allow it ~30s before checking the frontend.
 
+## Uploaded files
+
+`backend.persistence.localStorage.enabled` is `true` by default: the chart creates a volume (`size` 5Gi by default, with `storageClass`, `accessMode` or an `existingClaim` to override) shared by the backend and Huey containers. It holds every uploaded file: evidences, attachments, chat documents. Keep it on: without it, each container writes to its own ephemeral path, the backend and Huey stop seeing the same files, and uploads are lost on restart.
+
+## Service accounts signing key
+
+[Service accounts](../integrations/service-accounts.md) federated with an external identity provider use tokens signed by the backend. Left empty, `backend.config.oidcProvider.privateKey` makes the chart generate an RSA key on first install and keep it in the `<release>-backend-oidc` secret, shared by every replica and kept across restarts. To bring your own key, set `privateKey` (PEM) or point `existingSecret` at a secret holding it under the `idp-oidc-private-key` key.
+
+## Overriding the container command
+
+`backend.command` / `backend.args` and `frontend.command` / `frontend.args` replace the image entrypoint and arguments, for instance to wrap the process in a startup script. Empty, the image defaults apply. The Huey worker has its own `backend.huey.command` and `backend.huey.args`, which run `run_huey` by default.
+
 ## AI assistant (chat / RAG)
 
 The in-product AI assistant needs two things wired in the chart: the `ENABLE_CHAT` flag on the backend and a reachable [Qdrant](https://qdrant.tech/) vector database for retrieval-augmented generation. Setting `qdrant.enabled: true` deploys the official [Qdrant chart](https://github.com/qdrant/qdrant-helm) as a dependency (a StatefulSet with persistent storage and health probes) and injects `QDRANT_URL` automatically.

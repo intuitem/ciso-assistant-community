@@ -78,6 +78,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 * reference\_link - URL reference; also accepted as `link`
 * observation&#x20;
 * filtering\_labels - pipe- or comma-separated label names (created if missing)
+* lifecycle\_stage - the asset's lifecycle stage, by name (`phasing_out` or `Phasing out`); also accepted as `lifecycle`
 * parent\_assets -comma- or pipe-separated list of parent asset `ref_id` values; parent links are resolved after all assets in the file are created, so forward references are supported
 * security\_objectives
   * confidentiality: 3,integrity: 2,availability: 1,...

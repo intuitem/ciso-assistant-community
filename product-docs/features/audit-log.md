@@ -24,6 +24,12 @@ The page is a single table of every recorded change across the instance:
 
 Filter by **action** and **content type**, and search by **actor** or **folder**. Open a row to see the full entry, including the object it referred to and the per-field `old → new` changes.
 
+### Downloading the log
+
+**Export** opens **Export options**: a **CSV file** or an **Excel workbook**, either for the **Current view (filtered)**, with the active filters and search, or for the **Entire table**. Each row carries the timestamp, actor, action, model, object ID and name, folder, the field changes and the source IP address.
+
+The Excel export is capped at 100,000 rows (`AUDITLOG_EXPORT_XLSX_MAX_ROWS` on the backend); above it, narrow the filters or use CSV, which has no cap.
+
 ## Per-object audit trail
 
 The **object audit trail** brings that same history to a single object's detail page, so you don't have to scan the instance-wide log to answer "what happened to *this* control?".

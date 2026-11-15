@@ -44,6 +44,19 @@ A document's content comes from one of three sources, chosen when you create it:
 
 All three share the same versioning, lifecycle, languages, classification, and links — they differ only in where the content lives.
 
+### Diagrams in Markdown
+
+Authored documents, and the Markdown fields of the platform (descriptions, observations, …) can carry [Mermaid](https://mermaid.js.org/) diagrams: flowcharts, sequence diagrams, state diagrams and the other Mermaid types. Write the diagram in a fenced code block tagged `mermaid`:
+
+````markdown
+```mermaid
+flowchart LR
+  Request --> Review --> Approval
+```
+````
+
+The block is drawn as a diagram wherever the Markdown is shown, including the live preview of the editor. Document PDFs render it too, on export and on publication, up to 20 diagrams per document (100,000 characters of diagram source in all); beyond, the remaining blocks stay as code. A block that doesn't parse keeps its source text, so a typo never hides the content.
+
 ## Lifecycle and versioning
 
 Each language version moves through its own lifecycle — **Draft → In review → Change requested → Validated → Published → Deprecated** — and every saved change produces a new revision (`v1`, `v2`, …) rather than overwriting the previous text. The **Version history** sidebar lets you read any past revision and diff two of them.

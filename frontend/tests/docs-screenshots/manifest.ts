@@ -137,6 +137,15 @@ export const shots: Shot[] = [
 		act: openDetail('compliance-assessments', 'AUD.2026.01')
 	},
 	{
+		slug: 'control-plan',
+		// A fixed window: the rolling default follows today and drifts past the fixture's dates.
+		url: '/tasks-review?start_month=3&start_year=2026&end_month=12&end_year=2026',
+		usedBy: ['features/control-plan.md'],
+		act: async (page) => {
+			await page.getByTestId('control-plan-preset-thisYear').waitFor();
+		}
+	},
+	{
 		slug: 'audit-tree-filters',
 		url: '/compliance-assessments',
 		usedBy: ['concepts/audits.md'],
