@@ -203,11 +203,10 @@ class CISOAuthorizationView(AuthorizationView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["self_registered"] = is_self_registered(context["client"])
-        # where this request redirects: loopback apps pick a new port per login, so
-        # the registered URIs can differ, and only a remote host helps the user judge
-        host = urlsplit(self._request_info.get("redirect_uri") or "").hostname
-        context["redirect_host"] = host
-        context["redirect_local"] = host in LOOPBACK_HOSTS
+        # this request's URI: a loopback app's port differs from its registered one
+        redirect_uri = self._request_info.get("redirect_uri") or ""
+        context["redirect_uri"] = redirect_uri
+        context["redirect_local"] = urlsplit(redirect_uri).hostname in LOOPBACK_HOSTS
         form = context["form"]
         if form.mcp_request and form.writes:
             context["write_choices"] = [

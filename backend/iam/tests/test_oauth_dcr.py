@@ -257,11 +257,15 @@ def test_consent_page_warns_about_self_registered_clients(client, knox_token):
     assert REDIRECT_URI.encode() not in response.content
 
 
-def test_consent_page_shows_the_port_free_loopback_and_remote_hosts(client, knox_token):
+def test_consent_page_shows_this_requests_redirect(client, knox_token):
     # a reused registration: the port of this login differs from the saved one
     oauth_client = _make_client(self_registered=True, skip_consent=False)
     oauth_client.set_redirect_uris(
-        ["http://127.0.0.1:49572/callback", "https://app.example.com/cb?x=1"]
+        [
+            "http://127.0.0.1:49572/callback",
+            "https://app.example.com/cb?x=1",
+            "https://app.example.com:8443/other",
+        ]
     )
     oauth_client.save()
     client.cookies["token"] = knox_token
@@ -274,7 +278,8 @@ def test_consent_page_shows_the_port_free_loopback_and_remote_hosts(client, knox
 
     params["redirect_uri"] = "https://app.example.com/cb?x=1"
     remote = client.get(AUTHORIZE_URL, params).content
-    assert b"<code>app.example.com</code>" in remote
+    assert b"<code>https://app.example.com/cb?x=1</code>" in remote
+    assert b"/other" not in remote
     assert b"an app on this computer" not in remote
     assert b"127.0.0.1" not in remote
 
