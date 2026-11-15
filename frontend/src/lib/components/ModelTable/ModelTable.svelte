@@ -1064,10 +1064,12 @@
 
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
-			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
-					a.type === 'delete'
-						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
-						: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`)
+			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter(
+					(a) =>
+						(!a.adminOnly || user?.is_admin) &&
+						(a.type === 'delete'
+							? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
+							: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`))
 				)
 			: []
 	);

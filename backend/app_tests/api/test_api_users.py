@@ -1459,6 +1459,122 @@ class TestBatchActionGuards:
         target.refresh_from_db()
         assert target.is_active is True
 
+    def _batch_connect_apps(self, client, users, value):
+        return client.post(
+            reverse("users-batch-action"),
+            {
+                "action": "change_field",
+                "ids": [str(u.id) for u in users],
+                "field": "can_connect_apps",
+                "value": value,
+            },
+            format="json",
+        )
+
+    @pytest.mark.parametrize("caller", ["viewer", "domain_changer"])
+    @pytest.mark.parametrize(
+        "field, value", [("first_name", "Renamed"), ("can_connect_apps", "true")]
+    )
+    def test_batch_needs_change_user_where_the_target_lives(
+        self, escalation_env, caller, field, value
+    ):
+        """Seeing a user is not editing one: without change_user on Global, where
+        users live, every row is refused before the serializer runs."""
+        target = User.objects.create_user("batch.iam@tests.com", is_published=True)
+        if caller == "viewer":
+            user = _make_user_manager("batch.viewer@tests.com", ["view_user"])
+        else:
+            # change_user, but on a domain: Global's view_user still shows the target
+            user = _make_user_manager("batch.dc@tests.com", ["view_user"])
+            domain = Folder.objects.create(
+                name="batch domain",
+                parent_folder=Folder.get_root_folder(),
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            role = Role.objects.create(name="batch domain changer", folder=domain)
+            role.permissions.set(Permission.objects.filter(codename="change_user"))
+            group = UserGroup.objects.create(
+                name="batch domain changers", folder=domain
+            )
+            ra = RoleAssignment.objects.create(
+                user_group=group, role=role, is_recursive=True, folder=domain
+            )
+            ra.perimeter_folders.add(domain)
+            group.user_set.add(user)
+
+        response = _client_for(user).post(
+            reverse("users-batch-action"),
+            {
+                "action": "change_field",
+                "ids": [str(target.id)],
+                "field": field,
+                "value": value,
+            },
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["succeeded"] == []
+        assert response.json()["failed"] == [
+            {"id": str(target.id), "name": str(target), "error": "Permission denied"}
+        ]
+        target.refresh_from_db()
+        assert target.first_name != "Renamed"
+        assert target.can_connect_apps is False
+
+    def test_change_user_on_global_is_enough_for_a_plain_field(self, escalation_env):
+        # control for the refusal above: same call, caller holding change_user
+        target = User.objects.create_user("batch.ok@tests.com", is_published=True)
+        response = escalation_env.manager_client.post(
+            reverse("users-batch-action"),
+            {
+                "action": "change_field",
+                "ids": [str(target.id)],
+                "field": "first_name",
+                "value": "Renamed",
+            },
+            format="json",
+        )
+        assert len(response.json()["succeeded"]) == 1
+        target.refresh_from_db()
+        assert target.first_name == "Renamed"
+
+    def test_user_manager_cannot_batch_change_app_connections(self, escalation_env):
+        target = User.objects.create_user("batch.mcp@tests.com", is_published=True)
+
+        response = self._batch_connect_apps(
+            escalation_env.manager_client, [target], "true"
+        )
+
+        assert response.json()["succeeded"] == []
+        assert response.json()["failed"][0]["error"] == {
+            "can_connect_apps": ["connectAppsRequiresAdmin"]
+        }
+        target.refresh_from_db()
+        assert target.can_connect_apps is False
+
+    def test_admin_batch_toggles_app_connections_and_revokes_them(self, escalation_env):
+        from allauth.idp.oidc.models import Token
+
+        from iam.tests.test_mcp_access import _client, _token
+
+        users = [
+            User.objects.create_user(f"batch.mcp{i}@tests.com", is_published=True)
+            for i in range(2)
+        ]
+        on = self._batch_connect_apps(escalation_env.admin_client, users, "true")
+        assert len(on.json()["succeeded"]) == 2
+        _token(_client(), users[0])
+
+        off = self._batch_connect_apps(escalation_env.admin_client, users, "false")
+
+        assert len(off.json()["succeeded"]) == 2
+        assert not User.objects.filter(
+            pk__in=[u.pk for u in users], can_connect_apps=True
+        ).exists()
+        # same revocation as unticking the box on the user form
+        assert not Token.objects.filter(user=users[0]).exists()
+
 
 @pytest.mark.django_db
 class TestLastAdminWriteTimeRecheck:
