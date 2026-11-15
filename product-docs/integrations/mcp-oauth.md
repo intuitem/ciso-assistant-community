@@ -199,7 +199,8 @@ administrator decides so.
    connections (MCP)**. To let users allow apps to create, update or delete
    data, also turn on **AI apps may change data (MCP)**.
 2. Allow the users who may connect an app: in **Organization** > **Users**,
-   edit a user and tick **Can connect AI apps (MCP)**. The users list has a
+   edit a user and tick **Can connect AI apps (MCP)**. This applies to
+   administrators too, including your own account. The users list has a
    column showing who can connect.
 
 Unticking a user, or deactivating them, disconnects all their apps at once.
@@ -413,6 +414,13 @@ the whole instance. The page says which. See
 [Turn MCP on and choose who may connect](#turn-mcp-on-and-choose-who-may-connect).
 
 <figure><img src="../.gitbook/assets/mcp-oauth-refused.png" alt=""><figcaption><p>The refusal page when AI app connections are off for the instance. <strong>Back to the app</strong> tells the app the user refused</p></figcaption></figure>
+
+#### "Your administrator has not allowed your account to connect AI apps"
+
+This shows under **Connected apps** in **My profile > Settings** when the
+feature is on for the instance but **Can connect AI apps (MCP)** is not ticked
+on your user. Administrators start without it too. See
+[Turn MCP on and choose who may connect](#turn-mcp-on-and-choose-who-may-connect).
 
 #### The app keeps asking to sign in again
 
