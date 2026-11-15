@@ -17,14 +17,27 @@ def _converter():
 
 
 def test_converter_rejects_duplicate_metric_ref_id():
+    with pytest.raises(ValueError, match="Duplicate ref_id 'M1'"):
+        _converter()._handle_metric_definitions(
+            _metric_sheet("M1", "M1"), {"objects": {}}, 0, False
+        )
+
+
+def _metric_sheet(*ref_ids):
     ws = openpyxl.Workbook().active
     ws.append(["ref_id", "name"])
-    ws.append(["M1", "First"])
-    ws.append(["M1", "Second"])
-    obj = {"meta": {"base_urn": "urn:test:risk:metric"}, "content_sheet": ws}
+    for ref_id in ref_ids:
+        ws.append([ref_id, "Metric"])
+    return {"meta": {"base_urn": "urn:test:risk:metric"}, "content_sheet": ws}
 
-    with pytest.raises(ValueError, match="Duplicate ref_id 'M1'"):
-        _converter()._handle_metric_definitions(obj, {"objects": {}}, 0, False)
+
+def test_converter_rejects_duplicate_metric_ref_id_across_sheets():
+    converter = _converter()
+    library = {"objects": {}}
+    converter._handle_metric_definitions(_metric_sheet("M1"), library, 0, False)
+
+    with pytest.raises(ValueError, match="Duplicate ref_id 'm1'"):
+        converter._handle_metric_definitions(_metric_sheet("m1"), library, 0, False)
 
 
 @pytest.mark.django_db

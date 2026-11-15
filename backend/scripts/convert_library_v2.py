@@ -1667,7 +1667,10 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
 def _handle_metric_definitions(obj, library, compat_mode, verbose):
     """Process a metric_definitions object block into the library."""
     metric_definitions = []
-    seen_urns = set()
+    seen_urns = {
+        str(existing["urn"]).lower()
+        for existing in library["objects"].get("metric_definitions", [])
+    }
     base_urn = obj["meta"].get("base_urn")
     header, rows_with_data = parse_content_rows(obj["content_sheet"])
     if not header:
