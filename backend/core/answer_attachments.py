@@ -159,6 +159,7 @@ def promote_to_evidence(attachment, user):
             attachment_hash=attachment.file_hash,
             original_filename=attachment.filename,
             folder_id=attachment.folder_id,
+            uploaded_by=attachment.uploaded_by,
         )
         attachment.promoted_to = evidence
         attachment.save(update_fields=["promoted_to", "updated_at"])

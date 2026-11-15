@@ -242,6 +242,7 @@
 						label={safeTranslate(objective)}
 						helpText={Object.hasOwn(m, `${objective}HelpText`) ? m[`${objective}HelpText`]() : ''}
 						valuePath="{typeConfig.recoveryKey}.objectives.{objective}.value"
+						enabledUnits={['days', 'hours', 'minutes', 'seconds']}
 					/>
 				{/each}
 			</div>

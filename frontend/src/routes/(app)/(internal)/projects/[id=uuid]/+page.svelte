@@ -12,6 +12,7 @@
 	import Select from '#lib/components/Forms/Select.svelte';
 	import SliderInput from '#lib/components/Forms/SliderInput.svelte';
 	import ProjectCustomFieldsPanel from '#lib/components/Forms/ProjectCustomFieldsPanel.svelte';
+	import { setContext } from 'svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -44,24 +45,28 @@
 		currency: z.string().nullable().optional()
 	});
 
-	function snapshotWorkspaceFields(p: any) {
+	// Linked ids come from the raw object (`linkedIds`), not from the read data, which
+	// masks the objects the user cannot see: a section save sends them back untouched.
+	function snapshotWorkspaceFields(p: any, linkedIds: Record<string, any>) {
 		return {
 			kind: p.kind ?? 'project',
-			parent_project: p.parent_project?.id ?? null,
-			status: p.status?.id ?? null,
-			health: p.health?.id ?? null,
+			parent_project: linkedIds.parent_project ?? null,
+			status: linkedIds.status ?? null,
+			health: linkedIds.health ?? null,
 			priority: p.priority ?? null,
-			linked_collection: p.linked_collection?.id ?? null,
-			responsibility_matrices: (p.responsibility_matrices ?? []).map((m: any) => m.id),
-			filtering_labels: (p.filtering_labels ?? []).map((l: any) => l.id),
-			owner: p.owner?.id ?? null,
-			sponsor: p.sponsor?.id ?? null,
+			linked_collection: linkedIds.linked_collection ?? null,
+			responsibility_matrices: linkedIds.responsibility_matrices ?? [],
+			filtering_labels: linkedIds.filtering_labels ?? [],
+			owner: linkedIds.owner ?? null,
+			sponsor: linkedIds.sponsor ?? null,
 			currency: p.currency ?? ''
 		};
 	}
+	// This page edits an existing project: its pickers keep the links the user cannot see.
+	setContext('formKeepsHiddenLinks', true);
 
 	const workspaceForm = superForm(
-		defaults(snapshotWorkspaceFields(data.data), zod(workspaceFieldsSchema)),
+		defaults(snapshotWorkspaceFields(data.data, data.linkedIds), zod(workspaceFieldsSchema)),
 		{
 			dataType: 'json',
 			SPA: true,
@@ -70,7 +75,7 @@
 	);
 
 	function resetWorkspaceFields() {
-		workspaceForm.form.set(snapshotWorkspaceFields(project));
+		workspaceForm.form.set(snapshotWorkspaceFields(project, data.linkedIds));
 	}
 
 	const { form: workspaceFormData } = workspaceForm;

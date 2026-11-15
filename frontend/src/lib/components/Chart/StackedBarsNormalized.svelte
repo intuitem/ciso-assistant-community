@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { complianceResultColorMap as c } from '#lib/utils/constants.js';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 	import { m } from '#paraglide/messages.js';
 	interface Props {
@@ -24,7 +26,13 @@
 		names,
 		uuids,
 		title = '',
-		colors = ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
+		colors = [
+			c.not_assessed,
+			c.partially_compliant,
+			c.non_compliant,
+			c.compliant,
+			c.not_applicable
+		],
 		seriesNames = [
 			'not assessed',
 			'partially compliant',
@@ -133,7 +141,7 @@
 						formatter: (params) => {
 							// Find the index of the hovered item and show full name
 							const index = params[0].dataIndex;
-							return names[index];
+							return escapeHtml(names[index]);
 						}
 					}
 				}),

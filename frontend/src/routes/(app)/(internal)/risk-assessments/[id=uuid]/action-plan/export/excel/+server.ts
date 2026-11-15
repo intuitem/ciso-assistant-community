@@ -2,9 +2,9 @@ import { BASE_API_URL } from '#lib/utils/constants.js';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-export const GET: RequestHandler = async ({ fetch, params }) => {
+export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const URLModel = 'risk-assessments';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/action_plan_excel/`;
+	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/action_plan_excel/${url.search}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

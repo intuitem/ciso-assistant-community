@@ -8,6 +8,6 @@ body: |
   - Naam: ${object_name}
   - Domein: ${folder_name}
 
-  Meld u aan op uw CISO Assistant-portaal om het te beoordelen: [Naar CISO Assistant](${ciso_assistant_url})
+  Meld u aan op uw CISO Assistant-portaal om het te beoordelen: [Item beoordelen](${object_url})
 
   Bedankt.

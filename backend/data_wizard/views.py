@@ -32,7 +32,6 @@ from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
-from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
     AppliedControl,
@@ -91,11 +90,7 @@ from core.utils import (
     unescape_excel_formula,
 )
 from data_wizard.arm_helpers import process_arm_file
-from data_wizard.cyfun_helpers import (
-    CYFUN_LIBRARY_URN,
-    LEVEL_TO_GROUP,
-    process_cyfun_file,
-)
+from data_wizard.cyfun_helpers import LEVEL_TO_GROUP, process_cyfun_file
 from ebios_rm.models import (
     AttackPath,
     EbiosRMStudy,
@@ -339,11 +334,11 @@ def _parse_time_to_seconds(s: str) -> int | None:
         return int(s)
     except ValueError:
         pass
-    m = re.fullmatch(r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", s)
+    m = re.fullmatch(r"(?:(\d+)[dj])?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", s)
     if not m or not any(m.groups()):
         return None
-    h, mn, sc = (int(x) if x else 0 for x in m.groups())
-    return h * 3600 + mn * 60 + sc
+    d, h, mn, sc = (int(x) if x else 0 for x in m.groups())
+    return d * 86400 + h * 3600 + mn * 60 + sc
 
 
 def _get_security_objective_scale() -> list:
@@ -3611,6 +3606,23 @@ class ProcessingRecordConsumer(RecordConsumer):
                 update_data[field] = record_data.get(field, [])
         return update_data
 
+    @cached_property
+    def nature_index(self) -> dict[str, UUID]:
+        # Exports write the display label, so match the internal name or any translation.
+        terms = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.PROCESSING_NATURE
+        )
+        index: dict[str, UUID] = {}
+        for term in terms:
+            names = {str(term)}
+            for value in (term.translations or {}).values():
+                names.add(value.get("name") if isinstance(value, dict) else value)
+            for name in names:
+                if isinstance(name, str) and name.strip():
+                    index.setdefault(name.strip().lower(), term.id)
+        index.update({term.name.strip().lower(): term.id for term in terms})
+        return index
+
     def create_context(self):
         return None, None
 
@@ -3658,18 +3670,24 @@ class ProcessingRecordConsumer(RecordConsumer):
             "dpia_reference": record.get("dpia_reference", ""),
         }
 
-        # Resolve M2M: nature (by name)
+        # Resolve M2M: nature (by name or translated label)
+        missing_natures = []
         record_processing_nature = record.get("processing_nature")
         if record_processing_nature:
             nature_names = [
                 nature_name.strip()
                 for nature_name in str(record_processing_nature).split(",")
+                if nature_name.strip()
+            ]
+            missing_natures = [
+                n for n in nature_names if n.lower() not in self.nature_index
             ]
             data["nature"] = list(
-                Terminology.objects.filter(
-                    field_path=Terminology.FieldPath.PROCESSING_NATURE,
-                    name__in=nature_names,
-                ).values_list("id", flat=True)
+                dict.fromkeys(
+                    self.nature_index[n.lower()]
+                    for n in nature_names
+                    if n.lower() in self.nature_index
+                )
             )
 
         # Resolve M2M: controllers (by entity name)
@@ -3711,6 +3729,12 @@ class ProcessingRecordConsumer(RecordConsumer):
         if label_ids:
             data["filtering_labels"] = label_ids
 
+        if missing_natures:
+            return data, Error(
+                record=record,
+                error=f"Unknown processing nature: {', '.join(missing_natures)}",
+                is_warning=True,
+            )
         return data, None
 
 
@@ -5118,17 +5142,18 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        library_urn = parsed["library_urn"]
+        loaded_library = LoadedLibrary.objects.filter(urn=library_urn).first()
         if loaded_library is not None and (
             StoredLibrary.objects.filter(
-                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+                urn=library_urn, version__gt=loaded_library.version
             ).exists()
         ):
             # The import relies on the scoring settings of the current library
             # (calculation method, visibility...): update the library first.
             return fail("CyfunLibraryOutdated")
         if loaded_library is None:
-            stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+            stored_library = StoredLibrary.objects.filter(urn=library_urn).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
             error = stored_library.load()
@@ -5136,7 +5161,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_2025_URN)
+            framework = Framework.objects.get(urn=parsed["framework_urn"])
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 

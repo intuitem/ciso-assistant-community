@@ -43,6 +43,8 @@ In CISO Assistant, **risk treatment is combined with the risk assessment** rathe
 
 Scenarios can be defined directly from the risk-assessment view or separately via the scenarios view. The same scenario can be reused across multiple studies.
 
+On the assessment page, the **Selection** bar above the scenario table narrows the assessment to the scenarios you choose, for example those that are not within tolerance. The matrices, the action plan and the exports then follow the same selection. See [Scenario selection](../features/scenario-selection.md).
+
 ## Risk levels: inherent, current, residual
 
 CISO Assistant tracks three risk levels for each scenario, reflecting where the organisation stands along the treatment journey:
@@ -74,3 +76,4 @@ Most organisations define an official matrix to be used for all risk assessments
 - [Vocabulary → Threat / Risk assessment](../introduction/vocabulary.md)
 - [Security exceptions](security-exceptions.md)
 - [Risk trajectory](../features/risk-trajectory.md)
+- [Scenario selection](../features/scenario-selection.md)

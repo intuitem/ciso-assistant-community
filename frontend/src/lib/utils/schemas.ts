@@ -406,7 +406,9 @@ export const ValidationFlowSchema = z.object({
 	policies: z.array(z.string()).optional(),
 	processings: z.array(z.string()).optional(),
 	accreditations: z.array(z.string()).optional(),
-	contracts: z.array(z.string()).optional()
+	contracts: z.array(z.string()).optional(),
+	requirement_assessments: z.array(z.string()).optional(),
+	risk_scenarios: z.array(z.string()).optional()
 });
 
 export const ReferenceControlSchema = z.object({
@@ -541,6 +543,7 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
+	can_connect_apps: z.boolean().optional(),
 	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
@@ -550,6 +553,7 @@ export const UserEditSchema = z.object({
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
 	language: z.string().optional().default(''),
+	can_connect_apps: z.boolean().optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.iso.date()])
@@ -736,6 +740,7 @@ export const GeneralSettingsSchema = z.object({
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
+	evidence_four_eyes: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
 	show_get_started: z.boolean().default(true).optional(),
 	personal_folders: z.boolean().default(false).optional(),
@@ -816,6 +821,8 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	idp_groups: z.boolean().optional(),
+	mcp: z.boolean().optional(),
+	mcp_write: z.boolean().optional(),
 	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	workflows: z.boolean().optional(),
@@ -845,6 +852,7 @@ export const FeatureFlagsSchema = z.object({
 	commitment_management: z.boolean().optional(),
 	findings_from_requirements: z.boolean().optional(),
 	dora: z.boolean().optional(),
+	nis2: z.boolean().optional(),
 	external_ratings: z.boolean().optional(),
 	jit_provisioning: z.boolean().optional()
 });
@@ -1039,6 +1047,7 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
+	is_active: z.boolean().optional().default(true),
 	tier: z.string().uuid().optional().nullable(),
 	tier_note: z.string().optional(),
 	owner: z.string().uuid().optional().array().optional(),
@@ -1191,7 +1200,6 @@ export const processingSchema = z.object({
 	status: z.string().optional(),
 	dpia_required: z.boolean().optional(),
 	dpia_reference: z.string().optional(),
-	has_sensitive_personal_data: z.boolean().optional(),
 	role: z.string().optional(),
 	controllers: z.string().uuid().optional().array().optional(),
 	nature: z.string().optional().array().optional(),
@@ -1459,6 +1467,14 @@ export const ebiosRMSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
+// the user picks the destination domain (folder); it defaults to the source's
+export const ebiosRMDuplicateSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	version: z.string().optional(),
+	folder: z.string().optional()
+});
+
 export const fearedEventsSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
@@ -1696,7 +1712,15 @@ export const IncidentSchema = z.object({
 		})
 		.optional(),
 	resolution: z.string().optional().default(''),
-	is_bcp_activated: z.boolean().optional().nullable()
+	is_bcp_activated: z.boolean().optional().nullable(),
+	root_cause: z.string().optional().nullable(),
+	nis2_significant: z.boolean().optional().nullable(),
+	nis2_malicious_intent: z.string().optional().nullable(),
+	nis2_cross_border_impact: z.string().optional().nullable(),
+	nis2_early_warning_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_notification_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_final_report_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_reference: z.string().max(255).optional().default('')
 });
 
 export const DoraIncidentReportSchema = z.object({
@@ -2255,16 +2279,47 @@ export const IdPGroupSchema = z.object({
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
-export const ServiceAccountSchema = z.object({
-	name: z.string().min(1).max(100),
-	description: z.string().optional().nullable(),
-	authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
-	permissions: z.array(z.number()).optional(),
-	role: z.string().uuid().optional().nullable(),
-	folders: z.array(z.string().uuid()).min(1),
-	is_recursive: z.boolean().default(true),
-	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+export const IdentityProviderSchema = z.object({
+	name: z.string().min(1).max(40),
+	provider_id: z
+		.string()
+		.min(1)
+		.max(200)
+		.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+	client_id: z.string().min(1).max(191),
+	server_url: z.string().url().max(1024)
 });
+
+export const ServiceAccountSchema = z
+	.object({
+		name: z.string().min(1).max(100),
+		description: z.string().optional().nullable(),
+		authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
+		identity_source: z.enum(['local', 'federated']).default('local'),
+		social_app: z.coerce.number().int().positive().optional().nullable(),
+		federated_subject: z.string().max(255).optional().nullable(),
+		permissions: z.array(z.number()).optional(),
+		role: z.string().uuid().optional().nullable(),
+		folders: z.array(z.string().uuid()).min(1),
+		is_recursive: z.boolean().default(true),
+		expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+	})
+	// Mirrors the backend check: both are required together for a federated account.
+	// A blank input reaches us as null (superforms nullifies empty strings), so a
+	// per-field min(1) would never fire.
+	.superRefine((data, ctx) => {
+		if (data.identity_source !== 'federated') return;
+		if (data.social_app == null) {
+			ctx.addIssue({ code: 'custom', path: ['social_app'], message: 'socialAppRequired' });
+		}
+		if (!data.federated_subject) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['federated_subject'],
+				message: 'federatedSubjectRequired'
+			});
+		}
+	});
 
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
@@ -2295,6 +2350,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'idp-groups': IdPGroupSchema,
+	'identity-providers': IdentityProviderSchema,
 	'service-accounts': ServiceAccountSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
@@ -2323,6 +2379,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'data-contractors': dataContractorSchema,
 	'data-transfers': dataTransferSchema,
 	'ebios-rm': ebiosRMSchema,
+	'ebios-rm_duplicate': ebiosRMDuplicateSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
 	stakeholders: StakeholderSchema,

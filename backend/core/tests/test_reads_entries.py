@@ -157,3 +157,105 @@ class TestReadEntry:
         assert entry.skip_unrated == frozenset()
         assert entry.select_related == [] and entry.prefetch_related == []
         assert entry.readable_fields() == [*BASE_READ_FIELDS, "status"]
+
+
+@pytest.mark.django_db
+class TestRequirementAssignmentEntry:
+    def setup_assignment(self):
+        from core.models import (
+            Actor,
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssignment,
+            Team,
+        )
+        from iam.models import Folder, User
+        from tprm.models import Entity, Representative
+
+        domain = Folder.objects.create(
+            name="Assignment domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        framework = Framework.objects.create(
+            name="Assigned", urn="urn:test:risk:framework:assigned", folder=domain
+        )
+        perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        direct = User.objects.create_user(email="direct@example.com")
+        leader = User.objects.create_user(email="leader@example.com")
+        member = User.objects.create_user(email="member@example.com")
+        rep_user = User.objects.create_user(email="rep@example.com")
+        User.objects.create_user(email="bystander@example.com")
+        team = Team.objects.create(name="Team", leader=leader)
+        team.members.add(member)
+        entity = Entity.objects.create(name="Vendor")
+        Representative.objects.create(
+            entity=entity, email="rep@example.com", user=rep_user
+        )
+        Representative.objects.create(entity=entity, email="noaccount@example.com")
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=audit, folder=domain
+        )
+        assignment.actor.set(
+            [
+                Actor.objects.get(user=direct),
+                Actor.objects.get(team=team),
+                Actor.objects.get(entity=entity),
+            ]
+        )
+        return domain
+
+    def read(self, domain, viewable=None):
+        from core.reads import (
+            ReadScope,
+            accessible_folder_ids,
+            build_queryset,
+            subtree_folder_ids,
+        )
+
+        scope = ReadScope(
+            folder_ids=subtree_folder_ids(domain),
+            viewable=viewable,
+            related_folder_ids=accessible_folder_ids(domain),
+        )
+        config = {"model": "requirement_assignment", "include": ["users"]}
+        entry, _fields, queryset = build_queryset(config, scope)
+        row = queryset.get()
+        return {name: resolve(row) for name, resolve in entry.computed.items()} | {
+            "users": entry.optional_computed["users"](row)
+        }
+
+    def test_framework_and_audit_folder_come_from_the_audit(self):
+        domain = self.setup_assignment()
+        row = self.read(domain)
+        assert row["framework"]["urn"] == "urn:test:risk:framework:assigned"
+        assert row["audit_folder"] == str(domain.id)
+
+    def test_users_resolve_users_teams_and_entity_representatives(self):
+        domain = self.setup_assignment()
+        emails = sorted(user["email"] for user in self.read(domain)["users"])
+        assert emails == [
+            "direct@example.com",
+            "leader@example.com",
+            "member@example.com",
+            "rep@example.com",
+        ]
+
+    def test_users_the_identity_cannot_view_are_left_out(self):
+        from iam.models import User
+
+        domain = self.setup_assignment()
+
+        def viewable(model):
+            queryset = model.objects.all()
+            if model is User:
+                queryset = queryset.exclude(email="leader@example.com")
+            return queryset.values_list("id", flat=True)
+
+        emails = {user["email"] for user in self.read(domain, viewable)["users"]}
+        assert "leader@example.com" not in emails
+        assert "member@example.com" in emails

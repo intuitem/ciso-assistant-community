@@ -10,8 +10,8 @@ export const GET: RequestHandler = async ({ fetch, params, locals }) => {
 	if (!(await locals.getUser())) error(401, 'Unauthorized');
 
 	const paths = [
-		`${BASE_API_URL}/quick-form-responses/${params.id}/attachments/${params.attachmentId}/download/`,
-		`${BASE_API_URL}/my-requests/${params.id}/attachments/${params.attachmentId}/download/`
+		`${BASE_API_URL}/quick-form-responses/${params.id}/attachments/${encodeURIComponent(params.attachmentId)}/download/`,
+		`${BASE_API_URL}/my-requests/${params.id}/attachments/${encodeURIComponent(params.attachmentId)}/download/`
 	];
 	for (const path of paths) {
 		const res = await fetch(path);

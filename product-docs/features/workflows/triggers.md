@@ -103,7 +103,9 @@ Starts when an object is created, updated or deleted inside CISO Assistant.
 
 ### When this happens
 
-A select grouped by object kind, offering `created`, `updated` and `deleted` for each. Anything audited by the platform is available: applied controls, findings, vulnerabilities, audits, requirement assessments, risk acceptances, validation flows, entities, users, personal access tokens and more.
+A select grouped by object kind, offering `created`, `updated` and `deleted` for each. Anything audited by the platform is available: applied controls, findings, vulnerabilities, audits, requirement assessments, requirement assignments, risk acceptances, validation flows, entities, users, personal access tokens and more.
+
+Links set after creation (a requirement assignment's actors, an audit's authors) arrive as an `updated` event of their own. The link field's new value is `add` or `delete`: to react when actors are added to an assignment, including at its creation, listen to `requirementassignment.updated` with `actor`, **Only when changed**, `eq` `add`. Without that filter, every status change starts a run too.
 
 ### Filters
 

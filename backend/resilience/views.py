@@ -550,6 +550,11 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     search_fields = ["bia__name", "asset__name"]
     ordering = ["asset"]
 
+    def _get_fieldsrelated_map(self, serializer):
+        """`children_assets` names every asset below the assessed one, including ones
+        the user cannot see: it is masked like the direct links."""
+        return {**super()._get_fieldsrelated_map(serializer), "children_assets": Asset}
+
     def get_queryset(self):
         return (
             super()

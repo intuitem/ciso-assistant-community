@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 	import { mountThemeAwareChart, isDarkTheme } from '#lib/utils/echartsTheme.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -130,11 +131,11 @@
 						tooltip: {
 							formatter: function (params) {
 								return (
-									params.value[3].split('-')[0] +
+									escapeHtml(params.value[3].split('-')[0]) +
 									' - ' +
-									safeTranslate(params.value[3].split('-')[1]) +
+									escapeHtml(safeTranslate(params.value[3].split('-')[1])) +
 									`<br/>${m.criticalitySemiColon()} ` +
-									params.value[0]
+									escapeHtml(params.value[0])
 								);
 							}
 						},

@@ -53,19 +53,19 @@
 		<div class="flex flex-col space-y-2">
 			<a
 				href="/processings/{processing.id}/export/xlsx"
-				class="btn preset-filled-primary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				data-testid="export-processing-button"
 			>
-				<i class="fa-solid fa-download mr-2"></i>
+				<i class="fa-solid fa-download mr-2 text-sky-500"></i>
 				{m.exportButton()} XLSX
 			</a>
 			{#if page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
-					<i class="fa-solid fa-check-circle mr-2"></i>
+					<i class="fa-solid fa-check-circle mr-2 text-amber-500"></i>
 					{m.requestValidation()}
 				</button>
 			{/if}

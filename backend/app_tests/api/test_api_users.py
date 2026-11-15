@@ -1,15 +1,19 @@
+from importlib import import_module
 from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from django.apps import apps as django_apps
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.serializers import UserWriteSerializer
+from core.serializers import UserReadSerializer, UserWriteSerializer
 from core.startup import ensure_user_creator_group
-from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+from core.models import Actor
+from core.views import UserFilter, UserViewSet
+from iam.models import Folder, IdPGroup, Role, RoleAssignment, User, UserGroup
 
 
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
@@ -1753,3 +1757,593 @@ class TestGlobalUserCreatorGroup:
         )
         assert placed.status_code == status.HTTP_200_OK, placed.content
         assert analysts.user_set.filter(pk=recruit.pk).exists()
+
+
+@pytest.mark.django_db
+class TestUserFullView:
+    """Every domain member sees users through `view_user`, ambient on the root
+    folder. Sign-in and administration fields need the full view of the user: being
+    them, or holding `view_user_full` or `change_user` on their folder (see the
+    full-view-permissions ADR)."""
+
+    TARGET_EXPIRY = "2030-01-01"
+    # Spelled out rather than imported, so dropping a field from the serializer's
+    # list fails here.
+    FULL_VIEW_FIELDS = {
+        "is_superuser",
+        "has_mfa_enabled",
+        "expiry_date",
+        "keep_local_login",
+        "is_scim_managed",
+        "is_jit_provisioned",
+        "observation",
+    }
+    # Base view only: the ambient baseline role, a domain Reader, the Global
+    # analyst, approver and user creator groups, a custom role holding only
+    # `view_user` on Global, and one holding `change_user` on a domain only.
+    VIEWERS = [
+        "ambient",
+        "reader",
+        "global_analyst",
+        "global_approver",
+        "creator",
+        "base_only",
+        "domain_changer",
+    ]
+    # Full view through `view_user_full` or `change_user` on Global.
+    FULL_VIEWERS = [
+        "superuser",
+        "manager",
+        "full_viewer",
+        "change_only",
+        "global_reader",
+    ]
+
+    @pytest.fixture
+    def env(self, authenticated_client):
+        domain = Folder.objects.create(
+            name="full view domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+
+        # Sorts before admin@tests.com, so a superuser-first order is visible.
+        target = User.objects.create_user("aaron.target@tests.com")
+        target.expiry_date = self.TARGET_EXPIRY
+        target.keep_local_login = True
+        target.observation = "contractor, leaves in January"
+        target.save()
+        idp_group = IdPGroup.objects.create(name="sg-contractors")
+        target.idp_groups.add(idp_group)
+        # Users live in Global, which is where a custom user manager role applies.
+        assert target.folder_id == Folder.get_root_folder().id
+        # Sorts first by email, so an order that drops `-is_active` shows.
+        User.objects.create_user("aardvark.inactive@tests.com", is_active=False)
+
+        root = Folder.get_root_folder()
+
+        # The Auditee role holds no user permission: its view of users is ambient.
+        ambient = User.objects.create_user("ambient@tests.com")
+        auditees = UserGroup.objects.get(name="BI-UG-ADE", folder=domain)
+        assert not auditees.roleassignment_set.filter(
+            role__permissions__codename__in=["view_user", "view_user_full"]
+        ).exists()
+        auditees.user_set.add(ambient)
+
+        reader = User.objects.create_user("reader@tests.com")
+        UserGroup.objects.get(name="BI-UG-AUD", folder=domain).user_set.add(reader)
+
+        global_analyst = User.objects.create_user("global.analyst@tests.com")
+        UserGroup.objects.get(name="BI-UG-ANA", folder=root).user_set.add(
+            global_analyst
+        )
+        global_approver = User.objects.create_user("global.approver@tests.com")
+        UserGroup.objects.get(name="BI-UG-GAP", folder=root).user_set.add(
+            global_approver
+        )
+        ensure_user_creator_group()
+        creator = User.objects.create_user("creator@tests.com")
+        UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
+        base_only = _make_user_manager("base.only@tests.com", ["view_user"])
+        # `change_user` gives the full view of the users where it applies. Users live
+        # in Global, so on a domain it gives none. Auditee membership brings the
+        # ambient view of users.
+        domain_changer = User.objects.create_user("domain.changer@tests.com")
+        auditees.user_set.add(domain_changer)
+        changer_role = Role.objects.create(name="domain user changers", folder=root)
+        changer_role.permissions.set(
+            Permission.objects.filter(codename__in=["view_user", "change_user"])
+        )
+        changers = UserGroup.objects.create(name="domain user changers", folder=domain)
+        changers_ra = RoleAssignment.objects.create(
+            user_group=changers, role=changer_role, is_recursive=True, folder=domain
+        )
+        changers_ra.perimeter_folders.add(domain)
+        changers.user_set.add(domain_changer)
+
+        global_reader = User.objects.create_user("global.reader@tests.com")
+        UserGroup.objects.get(name="BI-UG-GAD", folder=root).user_set.add(global_reader)
+        # Not superusers: the full view from view_user_full, change_user, or both.
+        manager = _make_user_manager(
+            "manager@tests.com", ["view_user", "view_user_full", "change_user"]
+        )
+        full_viewer = _make_user_manager(
+            "full.viewer@tests.com", ["view_user", "view_user_full"]
+        )
+        change_only = _make_user_manager(
+            "change.only@tests.com", ["view_user", "change_user"]
+        )
+
+        users = {
+            "ambient": ambient,
+            "reader": reader,
+            "global_analyst": global_analyst,
+            "global_approver": global_approver,
+            "creator": creator,
+            "base_only": base_only,
+            "domain_changer": domain_changer,
+        }
+        full_viewers = {
+            "manager": manager,
+            "full_viewer": full_viewer,
+            "change_only": change_only,
+            "global_reader": global_reader,
+        }
+        return SimpleNamespace(
+            domain=domain,
+            target=target,
+            idp_group=idp_group,
+            admin_client=authenticated_client,
+            full_viewers={
+                "superuser": authenticated_client,
+                **{name: _client_for(user) for name, user in full_viewers.items()},
+            },
+            clients={name: _client_for(user) for name, user in users.items()},
+            users=users,
+        )
+
+    @staticmethod
+    def _rows(response):
+        assert response.status_code == status.HTTP_200_OK, response.content
+        data = response.data
+        return data["results"] if isinstance(data, dict) else data
+
+    def _payloads(self, client, user):
+        """The user as served by the list, the detail and the edit-form read."""
+        listed = {
+            row["email"]: row for row in self._rows(client.get(reverse(API_ENDPOINT)))
+        }
+        detail = client.get(reverse("users-detail", args=[user.id]))
+        write = client.get(reverse("users-object", args=[user.id]))
+        assert detail.status_code == status.HTTP_200_OK, detail.content
+        assert write.status_code == status.HTTP_200_OK, write.content
+        return [listed[user.email], detail.data, write.data]
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_viewer_gets_base_fields_only(self, env, viewer):
+        for payload in self._payloads(env.clients[viewer], env.target):
+            assert payload["email"] == env.target.email
+            assert payload["is_active"] is True
+            assert not self.FULL_VIEW_FIELDS & set(payload)
+
+        write = self._payloads(env.clients[viewer], env.target)[2]
+        assert "user_groups" not in write and "is_local" not in write
+
+    @pytest.mark.parametrize("full_viewer", FULL_VIEWERS)
+    def test_full_viewer_gets_full_record(self, env, full_viewer):
+        payloads = self._payloads(env.full_viewers[full_viewer], env.target)
+        assert "is_local" in payloads[2] and "user_groups" in payloads[2]
+        for payload in payloads:
+            assert self.FULL_VIEW_FIELDS <= set(payload)
+            assert payload["expiry_date"] == self.TARGET_EXPIRY
+            assert payload["keep_local_login"] is True
+            assert payload["observation"] == "contractor, leaves in January"
+            assert payload["is_superuser"] is False
+
+    @pytest.mark.parametrize("viewer", [*VIEWERS, "global_reader"])
+    def test_idp_groups_follow_their_own_permission(self, env, viewer):
+        """IdP groups are not a full-view field: like any related object, each one
+        is masked for whoever can't read it (`view_idpgroup`, administrators only)."""
+        client = env.clients.get(viewer) or env.full_viewers[viewer]
+        for payload in self._payloads(client, env.target)[:2]:
+            assert payload["idp_groups"] == [{}]
+        for payload in self._payloads(env.admin_client, env.target)[:2]:
+            assert [group["str"] for group in payload["idp_groups"]] == [
+                env.idp_group.name
+            ]
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_self_gets_own_full_record(self, env, viewer):
+        user = env.users[viewer]
+        payloads = self._payloads(env.clients[viewer], user)
+        assert "is_local" in payloads[2] and "user_groups" in payloads[2]
+        for payload in payloads:
+            assert self.FULL_VIEW_FIELDS <= set(payload)
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    @pytest.mark.parametrize(
+        "query",
+        [
+            "keep_local_login=true",
+            f"expiry_date={TARGET_EXPIRY}",
+            "expiry_date__gte=2029-12-31",
+            "expiry_date__lt=2031-01-01",
+            "expiry_date__isnull=false",
+        ],
+    )
+    def test_full_view_filters_match_fully_viewed_users_only(self, env, viewer, query):
+        url = f"{reverse(API_ENDPOINT)}?{query}"
+        assert env.target.email not in {
+            row["email"] for row in self._rows(env.clients[viewer].get(url))
+        }
+        for client in env.full_viewers.values():
+            assert env.target.email in {
+                row["email"] for row in self._rows(client.get(url))
+            }
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_full_view_filter_matches_own_record(self, env, viewer):
+        user = env.users[viewer]
+        user.keep_local_login = True
+        user.save()
+        url = f"{reverse(API_ENDPOINT)}?keep_local_login=true"
+        assert user.email in {
+            row["email"] for row in self._rows(env.clients[viewer].get(url))
+        }
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_viewer_order_reveals_no_full_view_field(self, env, viewer):
+        client = env.clients[viewer]
+
+        def emails(query):
+            return [
+                row["email"]
+                for row in self._rows(client.get(f"{reverse(API_ENDPOINT)}?{query}"))
+            ]
+
+        rows = self._rows(client.get(reverse(API_ENDPOINT)))
+        default = [row["email"] for row in rows]
+        # Superusers are not listed first.
+        assert default == [
+            row["email"]
+            for row in sorted(rows, key=lambda r: (not r["is_active"], r["email"]))
+        ]
+        for field in ("is_superuser", "expiry_date", "keep_local_login"):
+            assert emails(f"ordering={field}") == default
+            assert emails(f"ordering=-{field}") == default
+
+    def test_folder_members_order_reveals_no_full_view_field(self, env):
+        """`/api/folders/<id>/users/` lists a domain's members to its managers,
+        who don't have the full view of users."""
+        manager = User.objects.create_user("domain.manager@tests.com")
+        UserGroup.objects.get(name="BI-UG-DMA", folder=env.domain).user_set.add(manager)
+        analysts = UserGroup.objects.get(name="BI-UG-ANA", folder=env.domain)
+        analysts.user_set.add(User.objects.create_user("a.plain@tests.com"))
+        secret = User.objects.create_user("c.secret@tests.com")
+        secret.is_superuser = True
+        secret.keep_local_login = True
+        secret.save()
+        analysts.user_set.add(secret)
+
+        client = _client_for(manager)
+        url = reverse("user-perms-on-folder-list", args=[env.domain.id])
+
+        def emails(query):
+            return [row["email"] for row in self._rows(client.get(f"{url}?{query}"))]
+
+        by_email = emails("ordering=email")
+        # Out of alphabetical order if the superuser flag were sorted on.
+        assert by_email.index(secret.email) > by_email.index("a.plain@tests.com")
+        for field in ("is_superuser", "keep_local_login", "expiry_date"):
+            assert emails(f"ordering=-{field},email") == by_email
+
+    def test_rows_follow_view_user(self, env):
+        client = env.clients["base_only"]
+        listed = self._rows(client.get(reverse(API_ENDPOINT)))
+        assert env.target.email in {row["email"] for row in listed}
+        detail = client.get(reverse("users-detail", args=[env.target.id]))
+        assert detail.status_code == status.HTTP_200_OK
+        found = self._rows(client.get(f"{reverse('users-autocomplete')}?search=aaron"))
+        assert env.target.email in {row["email"] for row in found}
+        actors = self._rows(client.get(reverse("actors-list")))
+        assert str(Actor.objects.get(user=env.target).id) in {
+            str(row["id"]) for row in actors
+        }
+
+        # Without it, other users stay out of sight.
+        nobody = _client_for(User.objects.create_user("nobody@tests.com"))
+        listed = self._rows(nobody.get(reverse(API_ENDPOINT)))
+        assert env.target.email not in {row["email"] for row in listed}
+        detail = nobody.get(reverse("users-detail", args=[env.target.id]))
+        assert detail.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_full_view_alone_grants_no_rows(self, env):
+        user = _make_user_manager("full.only@tests.com", ["view_user_full"])
+        assert env.target.id not in set(
+            RoleAssignment.get_viewable_object_ids(user, User)
+        )
+        client = _client_for(user)
+        listed = self._rows(client.get(reverse(API_ENDPOINT)))
+        assert {row["email"] for row in listed} == {user.email}
+        detail = client.get(reverse("users-detail", args=[env.target.id]))
+        assert detail.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_builtin_role_grants(self, env):
+        def codenames(role):
+            return set(
+                Role.objects.get(name=role).permissions.values_list(
+                    "codename", flat=True
+                )
+            )
+
+        for role in ("BI-RL-ADM", "BI-RL-AUD"):
+            assert {"view_user", "view_user_full"} <= codenames(role)
+        for role in ("BI-RL-BSL", "BI-RL-ANA", "BI-RL-APP", "BI-RL-DMA", "BI-RL-UCR"):
+            assert "view_user" in codenames(role)
+            assert "view_user_full" not in codenames(role)
+
+    @pytest.mark.parametrize(
+        "serializer_class", [UserReadSerializer, UserWriteSerializer]
+    )
+    def test_hidden_without_request(self, env, serializer_class):
+        assert not self.FULL_VIEW_FIELDS & set(serializer_class(env.target).data)
+
+    def test_full_view_filter_without_request_matches_nothing(self, env):
+        filterset = UserFilter(
+            data={"keep_local_login": True}, queryset=User.objects.all()
+        )
+        assert not filterset.qs.exists()
+
+    def test_picker_skips_the_check_on_every_row(self, env):
+        # Pickers query on every keystroke and don't order on full-view fields, so
+        # they skip checking the full view of every row; listings run it.
+        with patch.object(UserViewSet, "_has_full_view_of", side_effect=AssertionError):
+            found = self._rows(
+                env.admin_client.get(f"{reverse('users-autocomplete')}?search=aaron")
+            )
+            with pytest.raises(AssertionError):
+                env.admin_client.get(reverse(API_ENDPOINT))
+        assert env.target.email in {row["email"] for row in found}
+
+    def test_full_viewer_order_keeps_full_view_fields(self, env):
+        def emails(query):
+            return [
+                row["email"]
+                for row in self._rows(
+                    env.admin_client.get(f"{reverse(API_ENDPOINT)}?{query}")
+                )
+            ]
+
+        assert emails("")[0] == "admin@tests.com"
+        assert emails("ordering=is_superuser")[-1] == "admin@tests.com"
+
+
+@pytest.mark.django_db
+class TestViewUserFullMigration:
+    """The upgrade keeps what custom roles serve, except through Global's default
+    role, which every member holds."""
+
+    @staticmethod
+    def _grant():
+        import_module(
+            "iam.migrations.0033_user_view_full_permission"
+        ).grant_view_user_full(django_apps, None)
+
+    def test_custom_roles_with_view_user_keep_the_full_record(self):
+        root = Folder.get_root_folder()
+        view_user = Permission.objects.get(codename="view_user")
+        full = Permission.objects.get(codename="view_user_full")
+
+        custom = Role.objects.create(name="access reviewers", folder=root)
+        custom.permissions.add(view_user)
+        unrelated = Role.objects.create(name="asset readers", folder=root)
+        default = Role.objects.create(name="custom default", folder=root)
+        default.permissions.add(view_user)
+        Folder.objects.filter(pk=root.pk).update(default_role=default)
+        baseline = Role.objects.get(name="BI-RL-BSL")
+        baseline.permissions.add(view_user)
+
+        self._grant()
+
+        assert custom.permissions.filter(pk=full.pk).exists()
+        assert not unrelated.permissions.filter(pk=full.pk).exists()
+        assert not default.permissions.filter(pk=full.pk).exists()
+        # Builtin roles are startup's business.
+        assert not baseline.permissions.filter(pk=full.pk).exists()
+
+    def test_creates_the_permission_when_missing(self):
+        # The migration runs before post_migrate creates Meta.permissions.
+        Permission.objects.filter(codename="view_user_full").delete()
+        custom = Role.objects.create(
+            name="access reviewers", folder=Folder.get_root_folder()
+        )
+        custom.permissions.add(Permission.objects.get(codename="view_user"))
+        self._grant()
+        full = Permission.objects.get(
+            codename="view_user_full",
+            content_type__app_label="iam",
+            content_type__model="user",
+        )
+        assert full.name == "Can view users' full record"
+        assert custom.permissions.filter(pk=full.pk).exists()
+
+    def test_rerun_is_harmless(self):
+        custom = Role.objects.create(
+            name="access reviewers", folder=Folder.get_root_folder()
+        )
+        custom.permissions.add(Permission.objects.get(codename="view_user"))
+        self._grant()
+        self._grant()
+        assert custom.permissions.filter(codename="view_user_full").count() == 1
+
+
+@pytest.fixture
+def third_party_env(app_config, authenticated_client):
+    """A vendor entity in domain A with one third-party representative, an
+    analyst on A, and an analyst on an unrelated domain B (who still reaches
+    Global's baseline role, which carries `view_user`)."""
+    from tprm.models import Entity, Representative
+
+    domains = {}
+    for name in ("vendor domain", "other domain"):
+        domains[name] = Folder.objects.create(
+            name=name,
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domains[name])
+    vendor_domain, other_domain = domains["vendor domain"], domains["other domain"]
+
+    entity = Entity.objects.create(name="Vendor Co", folder=vendor_domain)
+    third_party = User.objects.create_user("rep@vendor.test", is_third_party=True)
+    Representative.objects.create(
+        entity=entity, email=third_party.email, user=third_party
+    )
+
+    def analyst_on(domain, email):
+        user = User.objects.create_user(email)
+        UserGroup.objects.get(name="BI-UG-ANA", folder=domain).user_set.add(user)
+        return user
+
+    analyst = analyst_on(vendor_domain, "analyst.vendor@tests.com")
+    outsider = analyst_on(other_domain, "analyst.other@tests.com")
+    return SimpleNamespace(
+        vendor_domain=vendor_domain,
+        other_domain=other_domain,
+        entity=entity,
+        third_party=third_party,
+        analyst=analyst,
+        outsider=outsider,
+        admin_client=authenticated_client,
+    )
+
+
+def _emails(response) -> set[str]:
+    assert response.status_code == status.HTTP_200_OK, response.content
+    rows = (
+        response.data["results"] if isinstance(response.data, dict) else response.data
+    )
+    return {row["email"] for row in rows}
+
+
+@pytest.mark.django_db
+class TestThirdPartyUserVisibility:
+    """A third-party user sits in Global, where the baseline role grants
+    `view_user` to every member. It must show only to those who can view one of
+    its representatives or have the full view of users where it sits, and to
+    itself."""
+
+    def test_member_elsewhere_does_not_see_third_party(self, third_party_env):
+        env = third_party_env
+        client = _client_for(env.outsider)
+
+        listed = _emails(client.get(reverse("users-list")))
+        assert env.third_party.email not in listed
+        # Internal users are listed as before.
+        assert env.analyst.email in listed
+
+        assert env.third_party.email not in _emails(
+            client.get(reverse("users-autocomplete"))
+        )
+        retrieved = client.get(reverse("users-detail", args=[env.third_party.id]))
+        assert retrieved.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_analyst_on_entity_domain_sees_third_party(self, third_party_env):
+        env = third_party_env
+        client = _client_for(env.analyst)
+
+        assert env.third_party.email in _emails(client.get(reverse("users-list")))
+        assert env.third_party.email in _emails(
+            client.get(reverse("users-autocomplete"))
+        )
+        retrieved = client.get(reverse("users-detail", args=[env.third_party.id]))
+        assert retrieved.status_code == status.HTTP_200_OK
+
+    def test_admin_sees_third_party(self, third_party_env):
+        env = third_party_env
+        assert env.third_party.email in _emails(
+            env.admin_client.get(reverse("users-list"))
+        )
+
+    def test_user_manager_sees_third_party_without_representative_access(
+        self, third_party_env
+    ):
+        """`change_user` where the user sits is enough, even with no
+        `view_representative` anywhere."""
+        env = third_party_env
+        manager = _make_user_manager(
+            "user.manager@tests.com", ["view_user", "change_user"]
+        )
+        listed = _emails(_client_for(manager).get(reverse("users-list")))
+        assert env.third_party.email in listed
+
+    def test_full_viewer_sees_every_third_party(self, third_party_env):
+        """`view_user_full` where the users sit is enough: an access review lists
+        every account, those whose representative is gone included."""
+        env = third_party_env
+        viewer = _make_user_manager(
+            "full.viewer@tests.com", ["view_user", "view_user_full"]
+        )
+        orphan = User.objects.create_user("orphan@vendor.test", is_third_party=True)
+        listed = _emails(_client_for(viewer).get(reverse("users-list")))
+        assert {env.third_party.email, orphan.email} <= listed
+
+    def test_third_party_with_no_representative_is_hidden_from_members(
+        self, third_party_env
+    ):
+        env = third_party_env
+        orphan = User.objects.create_user("orphan@vendor.test", is_third_party=True)
+        assert orphan.email not in _emails(
+            _client_for(env.analyst).get(reverse("users-list"))
+        )
+        assert orphan.email in _emails(env.admin_client.get(reverse("users-list")))
+
+    def test_third_party_sees_themself(self, third_party_env):
+        env = third_party_env
+        client = _client_for(env.third_party)
+
+        assert env.third_party.email in _emails(client.get(reverse("users-list")))
+        retrieved = client.get(reverse("users-detail", args=[env.third_party.id]))
+        assert retrieved.status_code == status.HTTP_200_OK
+
+    def test_entity_assessment_picker_query(self, third_party_env):
+        """EntityAssessmentForm loads representatives from
+        users?is_third_party=true&representative__entity=<entity>."""
+        env = third_party_env
+        params = {"is_third_party": "true", "representative__entity": env.entity.id}
+
+        assert _emails(_client_for(env.analyst).get(reverse("users-list"), params)) == {
+            env.third_party.email
+        }
+        assert (
+            _emails(_client_for(env.outsider).get(reverse("users-list"), params))
+            == set()
+        )
+
+    def test_names_on_readable_objects_still_render(self, third_party_env):
+        """Masking of related users reads IAM on its own, not this queryset:
+        a readable assessment still names its representative."""
+        from tprm.models import EntityAssessment
+
+        env = third_party_env
+        assessment = EntityAssessment.objects.create(
+            name="Vendor review", folder=env.other_domain, entity=env.entity
+        )
+        assessment.representatives.add(env.third_party)
+
+        response = _client_for(env.outsider).get(
+            reverse("entity-assessments-detail", args=[assessment.id])
+        )
+        assert response.status_code == status.HTTP_200_OK, response.content
+        assert response.json()["representatives"] == [
+            {"id": str(env.third_party.id), "str": str(env.third_party)}
+        ]

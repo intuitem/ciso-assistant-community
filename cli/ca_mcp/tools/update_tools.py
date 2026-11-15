@@ -617,7 +617,7 @@ async def update_risk_scenario(
 
             resolved_threats = []
             for threat in threats:
-                if "-" in threat and len(threat) == 36:
+                if _is_uuid(threat):
                     resolved_threats.append(threat)
                 else:
                     threat_res = make_get_request("/threats/", params={"name": threat})
@@ -1306,7 +1306,7 @@ async def update_quantitative_risk_scenario(
 
             resolved_threats = []
             for threat in threats:
-                if "-" in threat and len(threat) == 36:
+                if _is_uuid(threat):
                     resolved_threats.append(threat)
                 else:
                     threat_res = make_get_request("/threats/", params={"name": threat})

@@ -23,6 +23,13 @@ type FormField = {
 const lazySearchText = (label: string): string =>
 	String(label).split('/').pop()!.split(' - ').pop()!;
 
+export function optionLocator(page: Page, field: Locator, name: string): Locator {
+	return field
+		.getByRole('option', { name })
+		.or(page.locator('ul.portaled-options:visible').getByRole('option', { name }))
+		.first();
+}
+
 export class FormContent {
 	readonly formTitle: Locator;
 	readonly saveButton: Locator;
@@ -50,12 +57,8 @@ export class FormContent {
 		);
 	}
 
-	// Options may render inside the field or, with portalDropdown, in a listbox portaled to <body>
 	private optionLocator(field: FormField, name: string): Locator {
-		return field.locator
-			.getByRole('option', { name })
-			.or(this.page.locator('ul.portaled-options:visible').getByRole('option', { name }))
-			.first();
+		return optionLocator(this.page, field.locator, name);
 	}
 
 	async fill(values: { [k: string]: any }) {

@@ -213,7 +213,11 @@ def test_risk_assessment_duplicate_with_scenarios_requires_scenario_rights(domai
     role = Role.objects.create(name="ra-only", folder=Folder.get_root_folder())
     role.permissions.set(
         Permission.objects.filter(
-            codename__in=["view_riskassessment", "add_riskassessment"]
+            codename__in=[
+                "view_riskassessment",
+                "add_riskassessment",
+                "view_perimeter",
+            ]
         )
     )
     assignment = RoleAssignment.objects.create(

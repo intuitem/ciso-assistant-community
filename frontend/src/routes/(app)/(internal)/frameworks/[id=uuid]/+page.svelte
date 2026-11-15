@@ -103,7 +103,7 @@
 
 		<div class="flex flex-col gap-2 shrink-0 w-64">
 			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/report/">{m.insights()}</a>
-			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/excel-template/">
+			<a class="btn btn-quiet" href="/frameworks/{fw.id}/excel-template/">
 				{m.downloadExcelTemplate()}
 			</a>
 			<p class="text-xs text-surface-600-400 leading-snug mt-1">

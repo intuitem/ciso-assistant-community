@@ -91,6 +91,15 @@ def get_config():
     config["license_expiration"] = questionary.text(
         "License expiration date (YYYY-MM-DD): ", default="2030-01-01" ).ask()
 
+    # Shared cache, opt-in: one more container for the operator to run
+    config["memcached"] = {
+        "enabled": questionary.confirm(
+            "Would you like to run memcached as a cache shared by the backend workers? "
+            "Without it, each worker counts login rate limits on its own.",
+            default=False,
+        ).ask()
+    }
+
     # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
         "Enable debug mode?", default=False

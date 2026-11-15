@@ -78,13 +78,16 @@ export class SideBar {
 	}
 
 	async click(parent: string, tab: string, waitForURL = true) {
-		if (!(await this.page.getByTestId('accordion-item-' + tab.substring(1)).isVisible())) {
-			await this.page
-				.getByTestId('accordion-item-' + parent.toLowerCase().replace(' ', '-'))
-				.click();
-		}
-		await expect(this.page.getByTestId('accordion-item-' + tab.substring(1))).toBeVisible();
-		await this.page.getByTestId('accordion-item-' + tab.substring(1)).click();
-		waitForURL ? await this.page.waitForURL(tab) : null;
+		// Retried: a click that lands during a post-create redirect is undone by that redirect.
+		const item = this.page.getByTestId('accordion-item-' + tab.substring(1));
+		await expect(async () => {
+			if (!(await item.isVisible())) {
+				await this.page
+					.getByTestId('accordion-item-' + parent.toLowerCase().replace(' ', '-'))
+					.click();
+			}
+			await item.click({ timeout: 2000 });
+			if (waitForURL) await this.page.waitForURL(tab, { timeout: 5000 });
+		}).toPass({ timeout: 30000 });
 	}
 }
