@@ -73,9 +73,14 @@
 			error = m.forPeriod();
 			return;
 		}
+		// The value is dated on the picked day; today's keeps the current time
+		// (a later hour would be refused as future).
+		const today = new Date().toISOString().slice(0, 10);
+		const timestamp =
+			byPeriod && periodDay !== today ? new Date(`${periodDay}T12:00:00Z`) : new Date();
 		const body: Record<string, unknown> = {
 			metric_instance: metricInstance.id,
-			timestamp: new Date().toISOString(),
+			timestamp: timestamp.toISOString(),
 			observation: observation || null
 		};
 		if (isQualitative) {
