@@ -265,7 +265,6 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'nis2_final_report_at',
 	'nis2_notification_at',
 	'occurred_at',
-	'period',
 	'published_date',
 	'read_at',
 	'rejected_at',

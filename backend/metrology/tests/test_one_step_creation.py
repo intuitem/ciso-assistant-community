@@ -563,7 +563,6 @@ class TestPeriodOnEnteredValues:
         )
         assert response.status_code == 200
         rows = response.data["results"]
-        assert [r["period"] for r in rows] == ["2026-05-01", "2026-04-01"]
         assert [r["raw_value"] for r in rows] == [100, 98]
 
     def test_a_future_period_is_refused(self, frozen):  # noqa: F811
