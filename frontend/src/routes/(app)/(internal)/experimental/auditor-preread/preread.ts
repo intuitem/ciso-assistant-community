@@ -79,6 +79,27 @@ export const SECTIONS = [
 	{ key: 'a.8', label: 'A.8 Technological', test: (s: string) => s.startsWith('a.8.') }
 ];
 
+export const sectionOf = (suffix: string) => SECTIONS.find((s) => s.test(suffix)) ?? SECTIONS[0];
+
+export const KINDS: Record<string, { label: string; icon: string }> = {
+	document: { label: 'Document', icon: 'fa-solid fa-file-lines' },
+	record: { label: 'Record', icon: 'fa-solid fa-clipboard-list' },
+	technical: { label: 'Technical export', icon: 'fa-solid fa-terminal' },
+	observation: { label: 'Observed on site', icon: 'fa-solid fa-eye' }
+};
+
+export const STAGES: Record<number, string> = {
+	1: 'Stage 1: documentation review',
+	2: 'Stage 2: implementation, tested on samples'
+};
+
+/** Older than the widest freshness window this requirement asks for. */
+export function isStale(updatedAt: string | null, guidance: Guidance | null, now = Date.now()) {
+	const windows = (guidance?.requests ?? []).map((r) => r.fresh_days ?? 0).filter(Boolean);
+	if (!updatedAt || !windows.length) return false;
+	return now - Date.parse(updatedAt) > Math.max(...windows) * 86_400_000;
+}
+
 export interface RequestRow {
 	item: PrereadItem;
 	label: string;

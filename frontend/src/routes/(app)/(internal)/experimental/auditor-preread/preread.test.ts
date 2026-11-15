@@ -46,3 +46,20 @@ describe('auditor pre-read lists', () => {
 		expect(lines[1].split('\t')).toHaveLength(7);
 	});
 });
+
+describe('isStale', () => {
+	const g = {
+		questions: [],
+		requests: [{ label: 'r', kind: 'record', fresh_days: 30 }],
+		sampling: null,
+		interviewees: [],
+		pitfalls: []
+	};
+	const now = Date.parse('2026-11-15T00:00:00Z');
+	it('flags evidence older than the widest window', async () => {
+		const { isStale } = await import('./preread');
+		expect(isStale('2026-09-01T00:00:00Z', g, now)).toBe(true);
+		expect(isStale('2026-11-01T00:00:00Z', g, now)).toBe(false);
+		expect(isStale('2020-01-01T00:00:00Z', { ...g, requests: [] }, now)).toBe(false);
+	});
+});
