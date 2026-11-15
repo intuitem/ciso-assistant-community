@@ -15823,6 +15823,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
+    @action(detail=True, methods=["get"], url_path="auditor_preread")
+    def auditor_preread(self, request, pk):
+        """Experimental: what a certification auditor will ask per requirement."""
+        from core.auditor_preread import auditor_preread
+
+        return Response(auditor_preread(self.get_object(), request.user))
+
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         compliance_assessment = self.get_object()
