@@ -1419,7 +1419,16 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         return f"Error in get_quantitative_risk_hypotheses: {str(e)}"
 
 
-_WEEKDAY_NAMES = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Sun"}
+_WEEKDAY_NAMES = {
+    0: "Sun",
+    1: "Mon",
+    2: "Tue",
+    3: "Wed",
+    4: "Thu",
+    5: "Fri",
+    6: "Sat",
+    7: "Sun",
+}
 
 
 def _format_schedule(schedule):
@@ -2155,7 +2164,7 @@ async def get_documents(
         search: Search term (matches document name or description)
     """
     try:
-        from ..resolvers import resolve_folder_id, resolve_id_or_name
+        from ..resolvers import resolve_folder_id, resolve_policy_id
 
         params = {}
         filters = {}
@@ -2170,7 +2179,7 @@ async def get_documents(
             params["locale"] = locale
             filters["locale"] = locale
         if policy:
-            params["container__policies"] = resolve_id_or_name(policy, "/policies/")
+            params["container__policies"] = resolve_policy_id(policy)
             filters["policy"] = policy
         if search:
             params["search"] = search

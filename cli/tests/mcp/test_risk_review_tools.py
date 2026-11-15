@@ -13,7 +13,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
 
-from ca_mcp import resolvers  # noqa: E402
+from ca_mcp import resolvers, server  # noqa: E402
 from ca_mcp.tools import update_tools, write_tools  # noqa: E402
 
 UUID_A = "11111111-1111-1111-1111-111111111111"
@@ -672,7 +672,7 @@ class TestCreateDocument:
                     "id": UUID_A,
                     "name": "AI policy",
                     "display_name": "AI policy",
-                    "current_revision": {"id": UUID_D, "version_number": 1},
+                    "current_revision": UUID_D,
                 },
             )
         )
@@ -682,7 +682,7 @@ class TestCreateDocument:
             patch.object(write_tools, "make_patch_request", patch_req),
             patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
             patch.object(write_tools, "resolve_folder_id", return_value=UUID_PE),
-            patch.object(resolvers, "resolve_id_or_name", return_value=UUID_B),
+            patch.object(resolvers, "resolve_policy_id", return_value=UUID_B),
         ):
             result = run(
                 write_tools.create_document(
@@ -716,7 +716,7 @@ class TestCreateDocument:
     def test_minimal_payload_no_content_patch(self):
         post = Mock(
             return_value=_response(
-                201, {"id": UUID_A, "name": "Doc", "current_revision": {"id": UUID_D}}
+                201, {"id": UUID_A, "name": "Doc", "current_revision": UUID_D}
             )
         )
         patch_req = Mock()
@@ -732,6 +732,18 @@ class TestCreateDocument:
             {"name": "Doc", "description": "", "document_type": "policy"},
         )
         patch_req.assert_not_called()
+
+    def test_document_workflow_tools_are_destructive(self):
+        for tool in (
+            server.submit_document_for_review,
+            server.approve_document,
+            server.request_document_changes,
+            server.publish_document,
+        ):
+            assert server._annotations(tool, is_read=False).destructive_hint
+        assert not server._annotations(
+            server.create_document_draft, is_read=False
+        ).destructive_hint
 
     def test_invalid_document_type(self):
         post = Mock()
@@ -1325,6 +1337,30 @@ class TestUpdateTools:
             ),
         ):
             result = run(update_tools.update_document(document_id=UUID_A, content="x"))
+        assert "locked" in result
+
+    def test_update_document_reports_metadata_saved_before_content_error(self):
+        responses = [
+            _response(200, {"id": UUID_A, "display_name": "New name"}),
+            _response(400, text="This revision is locked."),
+        ]
+        with (
+            patch.object(update_tools, "make_patch_request", side_effect=responses),
+            patch.object(
+                update_tools, "resolve_managed_document_id", return_value=UUID_A
+            ),
+            patch.object(
+                update_tools,
+                "_get_latest_revision",
+                return_value=({"id": UUID_D}, None),
+            ),
+        ):
+            result = run(
+                update_tools.update_document(
+                    document_id=UUID_A, name="New name", content="x"
+                )
+            )
+        assert "Updated document: New name" in result
         assert "locked" in result
 
     def test_update_document_no_fields(self):

@@ -376,14 +376,17 @@ async def update_document(
         if content is not None:
             revision, error = _get_latest_revision(resolved_id)
             if error:
-                return error
+                return "; ".join(results + [error])
             rev_res = make_patch_request(
                 f"/document-revisions/{revision['id']}/", {"content": content}
             )
             if rev_res.status_code != 200:
-                return (
-                    f"Error updating document content: {rev_res.status_code} - "
-                    f"{rev_res.text}"
+                return "; ".join(
+                    results
+                    + [
+                        f"Error updating document content: {rev_res.status_code} - "
+                        f"{rev_res.text}"
+                    ]
                 )
             results.append(
                 f"Updated content (revision {revision.get('version_number', '?')})"
@@ -1517,7 +1520,8 @@ async def update_task_template(
             .. Sunday=7)
         schedule_weeks_of_month: Which week(s) of the month, for a given
             weekday (1=first .. 4=fourth, -1=last)
-        schedule_months_of_year: Months of the year (1=January .. 12=December)
+        schedule_months_of_year: Months of the year (1=January .. 12=December),
+            YEARLY only
         schedule_end_date: Date the recurrence ends (YYYY-MM-DD)
         schedule_occurrences: Number of occurrences before the recurrence stops
         schedule_overdue_behavior: DELAY_NEXT | NO_IMPACT (default NO_IMPACT)
@@ -1652,6 +1656,8 @@ async def update_task_node(
     """
     try:
         if task_node_id:
+            if not _is_uuid(task_node_id):
+                return f"Error: task_node_id must be a UUID, got '{task_node_id}'"
             resolved_id = task_node_id
         elif task_template and due_date:
             resolved_template_id = resolve_task_template_id(task_template)

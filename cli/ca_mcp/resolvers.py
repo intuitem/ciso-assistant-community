@@ -603,6 +603,29 @@ def resolve_incident_id(incident_name_or_id: str) -> str:
     return matches[0]["id"]
 
 
+def resolve_policy_id(policy_name_or_id: str) -> str:
+    """Resolve a policy name or UUID to its UUID (search, then exact name match)."""
+    if _is_uuid(policy_name_or_id):
+        return policy_name_or_id
+
+    results, error = fetch_all_results(
+        "/policies/",
+        params={"search": policy_name_or_id},
+        max_items=None,
+    )
+    if error:
+        raise ValueError(f"Policy '{policy_name_or_id}' API error: {error}")
+
+    matches = [r for r in results if r.get("name") == policy_name_or_id]
+    if not matches:
+        raise ValueError(f"Policy '{policy_name_or_id}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous policy name '{policy_name_or_id}', found {len(matches)}"
+        )
+    return matches[0]["id"]
+
+
 def resolve_managed_document_id(document_name_or_id: str) -> str:
     """Resolve a managed document's name or UUID to its UUID.
 

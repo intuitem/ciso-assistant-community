@@ -79,9 +79,14 @@ class TestBuildSchedule:
         assert error is None
         assert schedule == {"interval": 2, "frequency": "WEEKLY"}
 
+    def test_months_of_year_requires_yearly(self):
+        schedule, error = write_tools._build_schedule("MONTHLY", 1, months_of_year=[1])
+        assert schedule is None
+        assert "YEARLY" in error
+
     def test_all_fields(self):
         schedule, error = write_tools._build_schedule(
-            frequency="MONTHLY",
+            frequency="YEARLY",
             interval=1,
             days_of_week=[1, 3],
             weeks_of_month=[1, -1],
@@ -93,7 +98,7 @@ class TestBuildSchedule:
         assert error is None
         assert schedule == {
             "interval": 1,
-            "frequency": "MONTHLY",
+            "frequency": "YEARLY",
             "days_of_week": [1, 3],
             "weeks_of_month": [1, -1],
             "months_of_year": [1, 6],
@@ -257,6 +262,12 @@ class TestFormatSchedule:
             "(overdue: DELAY_NEXT)"
         )
 
+    def test_saved_sunday_is_zero(self):
+        formatted = read_tools._format_schedule(
+            {"interval": 1, "frequency": "WEEKLY", "days_of_week": [0]}
+        )
+        assert formatted == "Every 1 Weekly; on Sun"
+
     def test_no_impact_overdue_behavior_is_not_shown(self):
         formatted = read_tools._format_schedule(
             {"interval": 1, "frequency": "DAILY", "overdue_behavior": "NO_IMPACT"}
@@ -322,6 +333,16 @@ class TestUpdateTaskNode:
             f"/task-nodes/{UUID_D}/",
             {"status": "completed", "observation": "# Review report\n\nAll good."},
         )
+
+    def test_rejects_non_uuid_task_node_id(self):
+        with self._patch_ok() as patch_req:
+            result = run(
+                update_tools.update_task_node(
+                    task_node_id=f"../task-templates/{UUID_A}", status="completed"
+                )
+            )
+        patch_req.assert_not_called()
+        assert "must be a UUID" in result
 
     def test_by_task_template_and_exact_due_date(self):
         fake = _router({"/task-nodes/": [{"id": UUID_D, "due_date": "2026-01-15"}]})

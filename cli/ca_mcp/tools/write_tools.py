@@ -1481,6 +1481,12 @@ def _build_schedule(
             f"Must be one of: {', '.join(SCHEDULE_OVERDUE_BEHAVIORS)}",
         )
 
+    if months_of_year is not None and frequency != "YEARLY":
+        return (
+            None,
+            "Error: schedule_months_of_year only applies to schedule_frequency YEARLY",
+        )
+
     schedule = {"interval": interval, "frequency": frequency}
     if days_of_week is not None:
         schedule["days_of_week"] = days_of_week
@@ -1551,7 +1557,8 @@ async def create_task_template(
             .. Sunday=7)
         schedule_weeks_of_month: Which week(s) of the month, for a given
             weekday (1=first .. 4=fourth, -1=last)
-        schedule_months_of_year: Months of the year (1=January .. 12=December)
+        schedule_months_of_year: Months of the year (1=January .. 12=December),
+            YEARLY only
         schedule_end_date: Date the recurrence ends (YYYY-MM-DD)
         schedule_occurrences: Number of occurrences before the recurrence stops
         schedule_overdue_behavior: DELAY_NEXT | NO_IMPACT (default NO_IMPACT)
@@ -2119,7 +2126,7 @@ async def create_document(
     This creates the document and its first (draft) revision in one call. The
     content can be edited later with update_document as long as the revision
     stays a draft (or has changes requested) — once submitted for review or
-    published, a new draft must be created first (not yet exposed via MCP).
+    published, call create_document_draft first.
 
     Args:
         name: Document name
@@ -2134,7 +2141,7 @@ async def create_document(
             that policy's document container instead of creating a new one)
     """
     try:
-        from ..resolvers import resolve_id_or_name
+        from ..resolvers import resolve_policy_id
 
         if document_type not in DOCUMENT_TYPES:
             return f"Error: Invalid document_type '{document_type}'. Must be one of: {', '.join(DOCUMENT_TYPES)}"
@@ -2155,7 +2162,7 @@ async def create_document(
         if template_used is not None:
             payload["template_used"] = template_used
         if policy is not None:
-            payload["policy"] = resolve_id_or_name(policy, "/policies/")
+            payload["policy"] = resolve_policy_id(policy)
 
         res = make_post_request("/managed-documents/", payload)
 
@@ -2165,11 +2172,14 @@ async def create_document(
         document = res.json()
         document_id = document.get("id")
         label = document.get("display_name") or document.get("name") or name
-        revision = document.get("current_revision") or {}
-        revision_id = revision.get("id") if isinstance(revision, dict) else None
-        version = revision.get("version_number", 1) if isinstance(revision, dict) else 1
+        revision_id = document.get("current_revision")
 
-        if content is not None and revision_id:
+        if content is not None:
+            if not revision_id:
+                return (
+                    f"Created document: {label} (ID: {document_id}) but failed to "
+                    "set content: no revision returned"
+                )
             rev_res = make_patch_request(
                 f"/document-revisions/{revision_id}/", {"content": content}
             )
@@ -2179,7 +2189,7 @@ async def create_document(
                     f"set content: {rev_res.status_code} - {rev_res.text}"
                 )
 
-        return f"Created document: {label} (ID: {document_id}, revision: {version})"
+        return f"Created document: {label} (ID: {document_id}, revision: 1)"
     except Exception as e:
         return f"Error in create_document: {str(e)}"
 
