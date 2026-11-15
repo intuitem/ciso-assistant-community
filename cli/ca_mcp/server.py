@@ -42,11 +42,13 @@ from .tools.read_tools import (
     get_quantitative_risk_hypotheses,
     get_task_templates,
     get_task_template_details,
+    get_task_nodes,
     get_vulnerabilities,
     get_vulnerability,
     get_asset_classes,
     get_users,
     get_teams,
+    get_documents,
 )
 
 from .tools.aggregate_tools import count_objects
@@ -89,10 +91,17 @@ from .tools.write_tools import (
     create_evidence,
     create_incident,
     create_timeline_entry,
+    create_document,
+    submit_document_for_review,
+    approve_document,
+    request_document_changes,
+    publish_document,
+    create_document_draft,
 )
 
 from .tools.update_tools import (
     update_team,
+    update_document,
     update_folder,
     update_user,
     update_evidence,
@@ -107,6 +116,7 @@ from .tools.update_tools import (
     update_quantitative_risk_scenario,
     update_quantitative_risk_hypothesis,
     update_task_template,
+    update_task_node,
     delete_task_template,
     update_vulnerability,
     delete_vulnerability,
@@ -207,11 +217,13 @@ READ_TOOLS = [
     get_quantitative_risk_hypotheses,
     get_task_templates,
     get_task_template_details,
+    get_task_nodes,
     get_vulnerabilities,
     get_vulnerability,
     get_asset_classes,
     get_users,
     get_teams,
+    get_documents,
     get_all_audits_with_metrics,
     get_audit_gap_analysis,
     get_audit_global_score,
@@ -241,6 +253,8 @@ CREATE_TOOLS = [
     import_stored_library,
     create_folder,
     create_team,
+    create_document,
+    create_document_draft,
     create_perimeter,
     create_asset,
     create_threat,
@@ -299,6 +313,12 @@ UPDATE_TOOLS = [
     update_quantitative_risk_scenario,
     update_quantitative_risk_hypothesis,
     update_task_template,
+    update_task_node,
+    update_document,
+    submit_document_for_review,
+    approve_document,
+    request_document_changes,
+    publish_document,
     update_entity,
     update_entity_assessment,
     update_representative,
@@ -334,6 +354,16 @@ ALSO_NEEDS = {
     refresh_quantitative_risk_study_simulations.__name__: {actions.CREATE},
     # same: the decision is a POST on the version
     review_evidence.__name__: {actions.CREATE},
+    # same: each step is a POST on the revision
+    **{
+        tool.__name__: {actions.CREATE}
+        for tool in (
+            submit_document_for_review,
+            approve_document,
+            request_document_changes,
+            publish_document,
+        )
+    },
 }
 
 
@@ -368,7 +398,9 @@ def _annotations(fn, is_read):
             read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )
     # review_: overwrites an earlier decision and the evidence status
-    if name.startswith(("update_", "sync_", "review_")):
+    if name.startswith(
+        ("update_", "sync_", "review_", "submit_", "approve_", "request_", "publish_")
+    ):
         return ToolAnnotations(
             read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )
