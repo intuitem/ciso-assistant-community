@@ -13,11 +13,13 @@ CISO Assistant works with that workbook in both directions:
 
 ## Importing a filled workbook
 
-The import accepts the official **CyFun 2025** self-assessment tools, in any of the three editions — **BASIC**, **IMPORTANT**, or **ESSENTIAL**. Nothing is inferred from the file name: the workbook is recognised by its sheets and headers, so renamed or re-saved copies work fine. The older CyFun 2023 workbook is not supported and is rejected with a clear error.
+The import accepts the official **CyFun 2025** self-assessment tools, in any of the three editions — **BASIC**, **IMPORTANT**, or **ESSENTIAL** — and the older **CyFun 2023** tool. Nothing is inferred from the file name: the workbook is recognised by its sheets and headers, so renamed or re-saved copies work fine.
+
+The CyFun 2023 tool holds the three levels in one workbook, with every score preset to 1. The import keeps the highest level whose **Details** sheet was filled in (differs from the blank tool), and builds the audit on the **CCB CyFun 2023** framework at that level.
 
 One import creates one new audit:
 
-1. The **CyFun 2025** framework library is loaded automatically if it isn't already. If an older version is loaded, the import stops with `CyfunLibraryOutdated`: update the library first, since the import relies on its scoring settings.
+1. The matching framework library (**CyFun 2025** or **CyFun 2023**) is loaded automatically if it isn't already. If an older version is loaded, the import stops with `CyfunLibraryOutdated`: update the library first, since the import relies on its scoring settings.
 2. The assurance level is detected from the workbook content, and the audit's implementation group is set to match (basic, important, or essential), so the audit scopes to exactly the requirements of that edition.
 3. For every requirement row, the **Documentation Score** and **Implementation Score** land on the matching requirement assessment, and scoring — including the documentation score — is switched on for the audit automatically. Global and per-category maturity scores are then computed by the platform as usual.
 4. Rows marked `N/A` in the workbook become **Not applicable** results.

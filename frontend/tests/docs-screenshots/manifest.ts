@@ -137,6 +137,28 @@ export const shots: Shot[] = [
 		act: openDetail('compliance-assessments', 'AUD.2026.01')
 	},
 	{
+		slug: 'audit-tree-filters',
+		url: '/compliance-assessments',
+		usedBy: ['concepts/audits.md'],
+		act: async (page) => {
+			await openDetail('compliance-assessments', 'AUD.2026.01')(page);
+			await page.getByRole('button', { name: 'Filters' }).first().click();
+			await page.locator('[data-scope="popover"][data-part="content"]').first().waitFor();
+		},
+		clip: (page) => page.locator('[data-scope="popover"][data-part="content"]').first()
+	},
+	{
+		slug: 'audit-export-options',
+		url: '/compliance-assessments',
+		usedBy: ['concepts/audits.md'],
+		act: async (page) => {
+			await openDetail('compliance-assessments', 'AUD.2026.01')(page);
+			await page.getByTestId('export-button').click();
+			await page.getByTestId('export-modal').waitFor();
+		},
+		clip: (page) => page.getByTestId('export-modal')
+	},
+	{
 		slug: 'risk-assessment-detail',
 		url: '/risk-assessments',
 		usedBy: ['concepts/risk-assessments.md', 'guides/first-risk-assessment.md'],
