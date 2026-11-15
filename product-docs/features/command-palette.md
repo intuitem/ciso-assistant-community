@@ -33,13 +33,19 @@ Every destination reachable from the sidebar — Domains, Audits, Risks, Applied
 
 The list is automatically pruned by the same **feature-flag visibility** that hides sidebar sections — if your instance has the privacy module disabled, _Processings_ and _Personal data_ never show up in the palette either.
 
+### Create
+
+Type `+` to switch to creation: the list shows **Create** entries, one per kind of object you are allowed to add; keep typing to narrow them down. Picking one opens its list page with the creation form already open.
+
 ### Actions
 
-A small group of non-navigation commands. Today it contains:
+Type `/` to list the commands only, or type a command's keyword in the normal search:
 
-- **Open assistant** — opens the chat assistant. Visible only when the `chat_mode` [feature flag](../configuration/settings/feature-flags.md) is on.
+- **Search** (`/search …`) — runs a [universal search](search.md) for the text after the keyword.
+- **Ask AI** (`/ask …`) — opens the chat assistant and sends it your question. Visible only when the `chat_mode` [feature flag](../configuration/settings/feature-flags.md) is on.
+- **AI engine (Chat)** — opens the chat assistant, also only with `chat_mode` on.
 
-More actions are expected here over time — the palette is designed to host shortcut commands that don't fit the sidebar.
+Picking a command that expects text, without text, keeps the palette open and waits for it (_type what to act on…_). The footer of the palette recalls the two prefixes: `+` **create**, `/` **commands**.
 
 ## Keyboard controls
 
