@@ -20,7 +20,7 @@ Set them in the object's **Labels** field. Typing a label that doesn't exist yet
 
 **Extra > Labels** lists every label with its **Usage**: how many objects carry it. Filter the list on **Usage** to clean up:
 
-- **Unused** — labels no object carries any more.
+- **Unused** — labels no object you can view carries. A label used only on objects outside your reach still shows here, so check with an administrator before deleting it.
 - **Used once or twice** — often typos or one-offs.
 - **Look-alikes** — labels that differ only by case, hyphens or underscores, such as `PCI-scope` and `pci_scope`.
 

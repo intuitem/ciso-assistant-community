@@ -61,7 +61,7 @@ The backend pod runs migrations on startup; allow it ~30s before checking the fr
 
 ## Service accounts signing key
 
-[Service accounts](../integrations/service-accounts.md) federated with an external identity provider use tokens signed by the backend. Left empty, `backend.config.oidcProvider.privateKey` makes the chart generate an RSA key on first install and keep it in the `<release>-backend-oidc` secret, shared by every replica and kept across restarts. To bring your own key, set `privateKey` (PEM) or point `existingSecret` at a secret holding it under the `idp-oidc-private-key` key.
+[Service accounts](../integrations/service-accounts.md) federated with an external identity provider use tokens signed by the backend. Left empty, `backend.config.oidcProvider.privateKey` makes the chart generate an RSA key on first install and keep it in the `<release>-backend-oidc` secret, shared by every replica and kept across restarts. The chart reads that secret from the cluster: when the manifests are rendered without cluster access (`helm template`, some GitOps tools), every render generates a new key, which invalidates the tokens issued before. In that case set `privateKey` or `existingSecret`. To bring your own key, set `privateKey` (PEM) or point `existingSecret` at a secret holding it under the `idp-oidc-private-key` key.
 
 ## Overriding the container command
 

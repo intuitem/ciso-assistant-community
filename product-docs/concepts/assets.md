@@ -40,7 +40,7 @@ The distinction matters for risk work: scenarios typically express _what can hap
 
 An asset's **Lifecycle** says where it stands: _Planned_, _Implementing_, _Active_, _Phasing out_, _Retired_ or _Archived_. It is optional, and shows as a column and a filter on the assets list, so a review can leave retired assets aside or chase the ones being phased out. To move several assets at once, select them and use **Change lifecycle** in the batch actions.
 
-The stages are a [terminology](terminology.md) (`asset.lifecycle_stage`): rename them, hide some, or add your own. The lifecycle is carried by the [data import](../configuration/data-import.md#assets) (`lifecycle_stage` column) and by [domain export/import](../features/domain-export-import.md).
+The stages are a [terminology](terminology.md) (`asset.lifecycle_stage`): rename them, hide some, or add your own. The lifecycle is carried by the [data import](../configuration/data-import.md#assets) (`lifecycle_stage` column; only visible stages are recognised, so make a hidden stage visible before importing assets that use it) and by [domain export/import](../features/domain-export-import.md).
 
 ## Related
 

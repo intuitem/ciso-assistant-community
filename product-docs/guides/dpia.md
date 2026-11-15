@@ -100,7 +100,7 @@ If the DPIA was already carried out in the [CNIL's PIA software](https://www.cni
 * the PIA's measures become applied controls, reusing an existing control with the same name (case aside) rather than creating a duplicate;
 * the message after the import counts the answers and new applied controls, and lists what could not be imported, such as evaluation comments or answers with no matching question.
 
-Review the draft, complete it, then submit it as in step 6: nothing is written on the processing before the DPIA is accepted. The import needs a DPIA form that follows the CNIL questionnaire, such as the shipped one or a copy of it, a PIA built on the CNIL default structure, and no DPIA draft already in progress on the processing.
+Review the draft, complete it, then submit it as in step 6: nothing is written on the processing before the DPIA is accepted. The import needs a DPIA form that follows the CNIL questionnaire, such as the shipped one or a copy of it, a PIA built on the CNIL default structure, and no DPIA draft already in progress on the processing. Since the import creates applied controls, it also needs permission to add applied controls in the processing's domain.
 
 ## 8. Accept the DPIA
 

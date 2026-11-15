@@ -739,20 +739,20 @@ Once connected, try these example prompts:
 - "Add a timeline entry: mitigation applied at 14:30"
 - "Link the post-mortem task to that incident"
 
-The incident tools (`create_incident`, `update_incident`, `create_timeline_entry`, `update_timeline_entry`) take the incident's task definitions as `task_templates`, by ID or name.
+`create_incident` and `update_incident` take the incident's task definitions as `task_templates`, by ID or name; `create_timeline_entry` and `update_timeline_entry` add and edit its timeline.
 
 **Risk review:**
 
 - "Set the risk tolerance of the 2026 risk assessment to 2 and move it to in review"
 - "Make Alice the owner of every high-risk scenario in that assessment"
 
-`update_risk_assessment` and `update_perimeter` change an assessment's or perimeter's properties; owners and other actors can be given by email or name, not only by ID.
+`update_risk_assessment` and `update_perimeter` change an assessment's or perimeter's properties (status, tolerance, dates, a perimeter's default assignees). Where a tool takes actors, such as the owners of `update_risk_scenario` and `update_applied_control`, they can be given by email or name, not only by ID.
 
 **Evidence from a local file** (stdio only):
 
 - "Create an evidence from ~/Downloads/pentest-2026.pdf and link it to the firewall control"
 
-`create_evidence` uploads one local file per call. It is only offered over the local stdio transport: over HTTP the path would point at the server's disk. The server checks the file type and size, and an evidence whose upload fails is deleted. Screenshots pasted into the chat work only when the client saved them on disk and shows their path, as Claude Code does.
+`create_evidence` uploads one local file per call. It is only offered over the local stdio transport: over HTTP the path would point at the server's disk. The server checks the file type and size. When the upload fails, the new evidence is deleted; when the outcome is unknown (a network error after the file was sent), the evidence is kept and the tool gives its ID: check whether it holds the file before trying again, to avoid a duplicate. Screenshots pasted into the chat work only when the client saved them on disk and shows their path, as Claude Code does.
 
 **EBIOS RM:**
 

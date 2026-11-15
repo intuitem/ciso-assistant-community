@@ -14,7 +14,9 @@ Word templates carry additional risk:
 - **Template injection** — `.docx` templates are rendered with a Jinja2-based engine. A crafted template can contain expressions that are evaluated on the server, which an attacker could abuse to read data or run unintended logic during export (server-side template injection).
 - **Malicious macros** — `.docx` files can embed VBA macros that execute on the machine of whoever opens the exported document. A booby-trapped template effectively ships malware to every report recipient.
 
-Document layout templates and PDF report templates carry the same **template injection** consideration: `.html` templates are rendered server-side with Django's template engine before the PDF is produced, so a crafted template could evaluate unintended expressions.
+Document layout templates carry the same **template injection** consideration: `.html` templates are rendered server-side with Django's template engine before the PDF is produced, so a crafted template could evaluate unintended expressions.
+
+PDF report templates are `.typ` files compiled by Typst, not by Django. The risk there is the content rather than the engine: a template decides what every audit PDF says, including the attestations people sign, so review it as you would an official form.
 
 Keep this permission limited to trusted administrators, only upload templates from sources you control, and review any template before activating it.
 {% endhint %}

@@ -28,7 +28,7 @@ Loading needs permission to add domains. It is refused when:
 
 ## Remove it
 
-Delete the demo domain from the domains list: everything the demo created goes with it. You can then load it again, for instance after an upgrade that enriched the dataset.
+Delete the demo domain from the domains list: the domain and everything in it go with it. The feature flags the demo turned on stay on: turn off the ones you don't need in the [feature flags](../configuration/settings/feature-flags.md). You can then load it again, for instance after an upgrade that enriched the dataset.
 
 {% hint style="info" %}
 The demo is fictional but realistic. Keep it on a test or evaluation instance, or delete it before going live, so it doesn't mix with your own data in dashboards and exports.

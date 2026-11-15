@@ -61,7 +61,7 @@ With the **NIS2 notification** [feature flag](../configuration/settings/feature-
 - **Suspected malicious intent** and **Cross-border impact** — _Yes_, _No_ or _Uncertain_.
 - **Early warning sent at**, **Incident notification sent at**, **Final report sent at**, and the **Notification reference** the CSIRT gave you.
 
-For a significant incident, the page shows a **Regulatory follow-up** block with the three NIS2 stages, clocked from the moment the incident was reported (or created): **Early warning (24h)**, **Incident notification (72h)**, and **Final report (1 month)** after the notification. Each stage reads **Due** with its deadline, or **Sent** with the date you entered; an overdue stage stands out. [Data breaches](privacy-register.md) linked to the incident join the block with their **GDPR breach notification (72h)**.
+For a significant incident, the page shows a **Regulatory follow-up** block with the three NIS2 stages, clocked from the moment the incident was reported (or created): **Early warning (24h)**, **Incident notification (72h)**, and **Final report (1 month)** after the notification, or, while no notification date is recorded, one month after the 72-hour deadline. Each stage reads **Due** with its deadline, or **Sent** with the date you entered; an overdue stage stands out. [Data breaches](privacy-register.md) linked to the incident join the block with their **GDPR breach notification (72h)**.
 
 **Export** then offers the **NIS2 notification worksheet**: a PDF pre-filled from the incident, following the CCB notification form, with the 24h / 72h / 1-month timeline and the fields still to complete. A data breach has its own **Notification worksheet (art. 33)**, on the breach page.
 

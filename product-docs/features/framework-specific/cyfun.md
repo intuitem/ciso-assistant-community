@@ -15,7 +15,7 @@ CISO Assistant works with that workbook in both directions:
 
 The import accepts the official **CyFun 2025** self-assessment tools, in any of the three editions — **BASIC**, **IMPORTANT**, or **ESSENTIAL** — and the older **CyFun 2023** tool. Nothing is inferred from the file name: the workbook is recognised by its sheets and headers, so renamed or re-saved copies work fine.
 
-The CyFun 2023 tool holds the three levels in one workbook, with every score preset to 1. The import keeps the highest level whose **Details** sheet was filled in (differs from the blank tool), and builds the audit on the **CCB CyFun 2023** framework at that level.
+The CyFun 2023 tool holds the three levels in one workbook, with every score preset to 1. The import keeps the highest level whose **Details** sheet was filled in (differs from the blank tool), and builds the audit on the **CCB CyFun 2023** framework at that level. A workbook where every score is still 1 and no comment was added reads as blank, and the import stops with `EmptyCyfunWorkbook`: add a comment on the level you assessed before importing it.
 
 One import creates one new audit:
 

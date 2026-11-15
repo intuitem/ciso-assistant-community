@@ -19,7 +19,7 @@ Click **Relations graph** on the detail page. A drawer opens with the object and
 - **Click** a linked object to expand its own links, and again to collapse them. **Expand all** opens the next level for up to ten objects at once.
 - **Open the object page** on a selected object jumps to it.
 - The graph goes **3 hops** from the starting object and holds up to **100 objects**. Past either limit it tells you so: open that object's page to explore from there, or collapse a branch first.
-- **Per relation** sets how many objects to draw per relation (5 by default) before the rest collapse into a `+N` node; click it to open them.
+- **Per relation** sets how many objects to draw per relation (5 by default) before the rest collapse into a `+N` node; click it to open them. The server sends at most 25 objects per relation: for a relation with more, open the object page to see them all.
 - **Filter by type** hides kinds of objects you don't need; **Toggle labels** and **Toggle width** (**Widen** / **Narrow**) adjust the view.
 - **Start over** collapses everything, restores the filters and reloads.
 

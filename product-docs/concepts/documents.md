@@ -55,7 +55,7 @@ flowchart LR
 ```
 ````
 
-The block is drawn as a diagram wherever the Markdown is shown, including the live preview of the editor. Document PDFs render it too, on export and on publication, up to 20 diagrams per document (100,000 characters of diagram source in all); beyond, the remaining blocks stay as code. A block that doesn't parse keeps its source text, so a typo never hides the content.
+The block is drawn as a diagram wherever the Markdown is shown, including the live preview of the editor. Document PDFs render it too, on export and on publication, up to 20 diagrams per document, 20,000 characters per diagram and 100,000 characters of diagram source in all; a block past any of these limits stays as code. A block that doesn't parse keeps its source text, so a typo never hides the content.
 
 ## Lifecycle and versioning
 

@@ -156,7 +156,7 @@ See [Comments](../features/comments.md) for the full feature reference — proce
 
 - **Applied controls**: **With applied controls** or **Without applied controls**.
 - **Evidence**: **With evidences** or **Without evidences**, counting evidences attached directly or through applied controls.
-- **Only assessable** hides section headings.
+- **Only assessable** hides the non-assessable entries that have nothing below them; section headings that hold requirements stay visible.
 
 <figure><img src="../.gitbook/assets/audit-tree-filters.png" alt=""><figcaption><p>The <strong>Filters</strong> panel of the requirement tree, with the <strong>Applied controls</strong> and <strong>Evidence</strong> coverage filters</p></figcaption></figure>
 
@@ -172,12 +172,12 @@ The **Evidences** button lists every evidence of the audit: those attached to th
 
 ### Insights
 
-When the framework defines them (see [outcome rules](../configuration/authoring/library-builder.md#add-outcome-rules)), the **Insights** block shows a tile per rule:
+When the framework defines them (see [outcome rules](../configuration/authoring/library-builder.md#add-outcome-rules)), the **Insights** block shows their results. The yes/no and number rules share one verdicts tile, counting the verdicts met; open it to see each rule. Two kinds of rule get a tile of their own:
 
 - **Maturity level** — the level reached, and a grid of each level (and section) as **Met**, **Not met**, **Pending: some requirements not assessed** or **Not in the audit scope**, with the requirements blocking the next level. On these frameworks, selecting a level on the audit form also selects the levels below it, since they are needed to tell which level is reached.
 - **Weakest link** — the rating of each node and the weighted score per section.
 
-These tiles show to whoever sees the audit's **Result**.
+These tiles show to whoever sees the audit's **Result**. When the audit has threats, or the advanced analytics feature is on, the block also links to the potential threats and the advanced analytics.
 
 ### Exports
 
