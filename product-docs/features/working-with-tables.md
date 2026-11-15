@@ -18,6 +18,17 @@ Search is scoped to the table you're on and isn't remembered between visits — 
 
 The **Filters** button opens a panel of per-column filters tailored to the model — status, domain, owner, priority, labels, and so on. Pick one or more values and the table narrows to matching rows. A small count next to the **Filters** button shows how many filters are active, and **Reset filters** clears them all.
 
+### Date filters
+
+Date columns — **Created at**, **Updated at**, ETA, due and expiry dates, and others depending on the table — filter on a range rather than a value. Each date filter offers:
+
+- **Quick ranges** — **Today**, **This week**, **This month**, **This quarter**, **This year**, **Last 7 days**, **Last 30 days**, **Last month**, **Last year**, **Overdue**, **Next 7 days**, **Next 30 days**, **Next 90 days**.
+- **Year** — one click for any of the last six years.
+- **Specific dates** — **On**, **Before**, **After**, **On or before**, **On or after**, or **Between** two dates.
+- **Not set** — rows where the date is empty, such as applied controls without an ETA.
+
+A quick range is turned into concrete dates when you pick it: a remembered or shared _Last 30 days_ keeps the dates it had that day, and reads back as **Between**. Pick it again to move the window. On the third-party list, the **Last assessment** filter also offers **Never assessed**.
+
 {% hint style="info" %}
 **Filters are remembered in your browser, per table.** Set a filter on applied controls, navigate away, come back — it's still applied. The selection is stored locally on standalone list pages, so each table reopens the way you left it.
 
@@ -26,7 +37,7 @@ Two things override a remembered filter: opening the table through a **link that
 
 ## Sorting
 
-Click a **column header** to sort by it; click again to flip ascending ↔ descending. An arrow on the header shows the active sort and its direction. Only one column sorts at a time.
+Click a **column header** to sort by it; click again to flip ascending ↔ descending. An arrow on the header shows the active sort and its direction. Only one column sorts at a time. The sort is remembered per table in your browser.
 
 ### Why some columns aren't sortable
 
@@ -103,11 +114,11 @@ When the same change has to land on many rows, models that opt in grow a **leadi
 | **Remove M2M** | _Removes_ specific values from a many-to-many, keeping the rest |
 | **Change folder** | Reassigns the rows' [domain](../concepts/domains.md) |
 | **Group** | A submenu bundling related actions under one button |
-| **Merge** | Combines selected rows into one (today: applied controls) |
+| **Merge** | Combines selected rows into one: applied controls, or [labels](labels.md) |
 
 Most actions open a confirmation modal — a count and explicit confirm for **Delete**, a dropdown of valid values for **Change field**, a searchable list for the M2M actions, a domain picker for **Change folder** — so a 200-row change is never an accident. Validation runs through the model's normal write rules, the same ones that protect a single edit.
 
-Batch actions are **opt-in per model**. Applied controls have the richest set; risk scenarios, vulnerabilities, evidences, tasks, assets and others carry subsets. Sensitive surfaces like users, frameworks and folders deliberately ship without bulk actions, and requirement assessments have no bulk delete by design (they're children of audits).
+Batch actions are **opt-in per model**. Applied controls have the richest set, including **Change ETA** to set one target date on many controls; risk scenarios, vulnerabilities, evidences, tasks, assets and others carry subsets. Sensitive surfaces like users, frameworks and folders deliberately ship without bulk actions, and requirement assessments have no bulk delete by design (they're children of audits).
 
 ## What's remembered in your browser
 
@@ -119,7 +130,7 @@ Your table preferences are stored **locally, per browser and per device** — th
 | **Columns** shown and their order | Yes, per table |
 | **Rows per page** and current page | Yes, per table |
 | **Search** text | No — clears each visit |
-| **Sort** column | No — resets to the table's default each visit |
+| **Sort** column | Yes, per table |
 
 ## Related
 

@@ -4,7 +4,7 @@ description: Choose how dates are displayed across the application
 
 # Date format
 
-The date format is a personal preference: each user picks how dates are shown, and the choice applies only to their own session — it does not change anything for other users.
+The date format is a personal preference: each user picks how dates are shown, and the choice applies only to their own session — it does not change anything for other users. Administrators can set the default, and align every user on it once (see [below](#set-a-default-for-the-organisation)).
 
 ## Change your date format
 
@@ -18,6 +18,12 @@ The change takes effect immediately and applies everywhere dates appear — tabl
 {% hint style="info" %}
 This setting controls how dates are **displayed**. The date picker used when you enter or edit a date in a form is provided by your browser and follows your browser's locale — its appearance is not affected by this setting.
 {% endhint %}
+
+## Set a default for the organisation
+
+Administrators set the format new users start with in the [general settings](settings/general.md), under **Date format**: pick the **Default date format** and save.
+
+To align everyone already on the instance, click **Force date format for all users** below it. It applies the **saved** default (save first if you just changed it), after two confirmations, and overwrites every user's current choice. It is a one-off: users can pick another format in their preferences afterwards.
 
 ## Available formats
 
