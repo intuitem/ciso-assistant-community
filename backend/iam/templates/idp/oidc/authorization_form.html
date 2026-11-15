@@ -34,8 +34,12 @@
     {% if self_registered %}
       <div class="warning">
         <strong>{% translate "You are adding a new app." %}</strong>
-        {% translate "Your administrator has not checked it. Only approve if you started this connection and you trust where it sends you back:" %}
-        <ul>{% for uri in client.get_redirect_uris %}<li><code>{{ uri }}</code></li>{% endfor %}</ul>
+        {% if redirect_local %}
+          {% translate "Your administrator has not checked it. Only approve if you started this connection: it sends you back to an app on this computer." %}
+        {% else %}
+          {% translate "Your administrator has not checked it. Only approve if you started this connection and you trust where it sends you back:" %}
+          <ul><li><code>{{ redirect_host }}</code></li></ul>
+        {% endif %}
       </div>
     {% endif %}
     <form method="post" action="{% url 'idp:oidc:authorization' %}">
