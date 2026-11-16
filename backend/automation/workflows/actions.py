@@ -1494,12 +1494,13 @@ class ReadObjectsAction(BaseAction):
 
 @dataclass(frozen=True)
 class UpdateEntry:
-    """One UPDATABLE_MODELS entry, drawn on one line: automation may record
-    that time passed and may attach work, but may not render the judgment.
+    """One UPDATABLE_MODELS entry. Assessment verdicts (results, scores,
+    treatments) stay off the registry; lifecycle statuses are the customer's
+    process, so any of the column's choices may be written.
 
-    ``fields`` is what a run may write; ``allowed_values`` narrows a field to
-    the values that are facts rather than decisions. Plain columns only —
-    anything whose transition lives outside save() stays off the registry.
+    ``fields`` is what a run may write; ``allowed_values`` narrows a field when
+    a value would bypass logic outside save(). Plain columns only — anything
+    whose transition lives outside save() stays off the registry.
     """
 
     model: type[Model]
@@ -1590,8 +1591,6 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     "evidence": UpdateEntry(
         model=Evidence,
         fields=["status", "expiry_date", "description"],
-        # A lapsed date and a missing file are facts; approving is not.
-        allowed_values={"status": frozenset({"expired", "missing"})},
         m2m_fields={"owner": _ACTOR, "filtering_labels": _LABELS},
     ),
     "incident": UpdateEntry(
@@ -1634,8 +1633,6 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "expiration_date",
             "observation",
         ],
-        # Granting or refusing an exception stays human; expiring it is a date.
-        allowed_values={"status": frozenset({"expired", "deprecated"})},
         m2m_fields={"owners": _ACTOR, "evidences": _EVIDENCES},
     ),
     "entity": UpdateEntry(
@@ -1661,22 +1658,6 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "ref_id",
             "observation",
         ],
-        # All but `dismissed`: that one is a person judging it harmless.
-        allowed_values={
-            "status": frozenset(
-                {
-                    "--",
-                    "identified",
-                    "confirmed",
-                    "assigned",
-                    "in_progress",
-                    "mitigated",
-                    "resolved",
-                    "closed",
-                    "deprecated",
-                }
-            )
-        },
         m2m_fields={
             "owner": _ACTOR,
             "applied_controls": _CONTROLS,

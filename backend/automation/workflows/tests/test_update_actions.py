@@ -1,5 +1,5 @@
-"""update_object: mostly about what it refuses. Results, scores, treatments
-and approvals stay human."""
+"""update_object: mostly about what it refuses. Results, scores and
+treatments stay human; statuses follow the customer's process."""
 
 import uuid
 from datetime import timedelta
@@ -236,61 +236,50 @@ class TestIntegrityGuardrail:
         assert "risk_acceptance" not in UPDATABLE_MODELS
         assert "validation_flow" not in UPDATABLE_MODELS
 
-    def test_exception_may_expire_but_never_be_approved(self):
+    def test_exception_status_is_writable(self):
         domain = make_domain("Exception")
         exception = SecurityException.objects.create(name="SE", folder=domain)
-        approve = update_flow(
+        flow = update_flow(
             domain,
             {
                 "model": "security_exception",
                 "id": str(exception.id),
-                "fields": {"status": "approved"},
+                "fields": {"status": "in_review"},
             },
         )
-        assert start_instance(approve).status == WorkflowInstance.Status.FAILED
-
-        expire = update_flow(
-            domain,
-            {
-                "model": "security_exception",
-                "id": str(exception.id),
-                "fields": {"status": "expired"},
-            },
-        )
-        assert start_instance(expire).status == WorkflowInstance.Status.COMPLETED
+        assert start_instance(flow).status == WorkflowInstance.Status.COMPLETED
         exception.refresh_from_db()
-        assert exception.status == "expired"
+        assert exception.status == "in_review"
 
-    def test_evidence_may_expire_but_never_be_approved(self):
+    def test_evidence_status_is_writable(self):
         domain = make_domain("Evidence review")
         evidence = Evidence.objects.create(name="Report", folder=domain)
-        approve = update_flow(
+        flow = update_flow(
             domain,
             {
                 "model": "evidence",
                 "id": str(evidence.id),
-                "fields": {"status": "approved"},
+                "fields": {"status": "in_review"},
             },
         )
-        assert start_instance(approve).status == WorkflowInstance.Status.FAILED
-
-        expire = update_flow(
-            domain,
-            {
-                "model": "evidence",
-                "id": str(evidence.id),
-                "fields": {"status": "expired"},
-            },
-        )
-        assert start_instance(expire).status == WorkflowInstance.Status.COMPLETED
+        assert start_instance(flow).status == WorkflowInstance.Status.COMPLETED
         evidence.refresh_from_db()
-        assert evidence.status == "expired"
+        assert evidence.status == "in_review"
 
     def test_risk_treatment_is_not_writable(self):
         assert "treatment" not in UPDATABLE_MODELS["risk_scenario"].fields
         assert not {"inherent_level", "current_level", "residual_level"} & set(
             UPDATABLE_MODELS["risk_scenario"].fields
         )
+
+    def test_builder_offers_choices_and_fenced_values(self):
+        from automation.workflows.actions import _writable_values
+
+        assert "to_do" in _writable_values(
+            UPDATABLE_MODELS["applied_control"], "status"
+        )
+        assert "dismissed" in _writable_values(UPDATABLE_MODELS["finding"], "status")
+        assert _writable_values(UPDATABLE_MODELS["evidence"], "description") is None
 
     def test_no_entry_may_write_name(self):
         assert not [key for key, e in UPDATABLE_MODELS.items() if "name" in e.fields]
@@ -533,7 +522,7 @@ class TestUpdateValidation:
         }
         assert codes == {"action_update_missing_id", "action_update_field_not_writable"}
 
-    def test_fenced_value_is_refused_at_publish(self):
+    def test_value_outside_choices_is_refused_at_publish(self):
         codes = {
             c
             for c, _ in validate_update_config(
@@ -542,7 +531,7 @@ class TestUpdateValidation:
                         "type": "update_object",
                         "model": "security_exception",
                         "id": "{{payload.object_id}}",
-                        "fields": {"status": "approved"},
+                        "fields": {"status": "not_a_status"},
                     }
                 )
             )

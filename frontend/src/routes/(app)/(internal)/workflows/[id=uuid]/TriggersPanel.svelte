@@ -4,6 +4,7 @@
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { translateEventKey } from '#lib/utils/i18n.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
@@ -156,7 +157,9 @@
 							{relativeTime(registration.last_run_at)}
 						</span>
 					{:else if registration.type === 'internal_event'}
-						<span class="badge preset-tonal font-mono text-[9px]">{registration.event_key}</span>
+						<span class="badge preset-tonal text-[9px]"
+							>{translateEventKey(registration.event_key)}</span
+						>
 						<span
 							class="text-surface-500"
 							title="{m.triggerLastFired()}: {formatWhen(registration.last_triggered_at)}"

@@ -240,8 +240,6 @@ See [Create or update in bulk](actions.md#create-or-update-in-bulk).
 
 | Object | Status restriction |
 |---|---|
-| Evidence | `expired`, `missing` only |
-| Security exception | `expired`, `deprecated` only |
 | Audit, risk assessment, entity assessment, findings binder | Planning states: `planned`, `in_progress`, `in_review`, `done`, `deprecated` |
 | Requirement assessment | Status, dates, observation. Never result or score |
 | Document revision | Content and change summary while still a draft |

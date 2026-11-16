@@ -305,11 +305,11 @@ The object must be inside the workflow's subtree and changeable by the run ident
 | Model | Writable fields | Relations |
 |---|---|---|
 | `applied_control` | status, priority, effort, start_date, eta, expiry_date, description, ref_id, link, observation | owner, evidences, assets, filtering_labels |
-| `evidence` | status (`expired`, `missing` only), expiry_date, description | owner, filtering_labels |
+| `evidence` | status, expiry_date, description | owner, filtering_labels |
 | `incident` | description, ref_id, link | owners, assets, applied_controls, filtering_labels |
 | `asset` | description, ref_id, reference_link, observation | owner, security_exceptions, filtering_labels |
 | `vulnerability` | status, severity, description, ref_id, eta, due_date | applied_controls, assets, security_exceptions, filtering_labels |
-| `security_exception` | status (`expired`, `deprecated` only), severity, description, ref_id, expiration_date, observation | owners, evidences |
+| `security_exception` | status, severity, description, ref_id, expiration_date, observation | owners, evidences |
 | `entity` | description, ref_id, mission, reference_link | filtering_labels |
 | `findings_assessment` | status (planning states), eta, due_date, description, ref_id, observation | evidences, filtering_labels |
 | `finding` | status, severity, priority, eta, due_date, description, ref_id, observation | owner, applied_controls, evidences, filtering_labels |
