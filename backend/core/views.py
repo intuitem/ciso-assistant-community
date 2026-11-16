@@ -2583,6 +2583,20 @@ class ContentTypeListView(APIView):
 # Risk Assessment
 
 
+def deprecated_assessment_filter(parent: str):
+    """Yes/no on the parent assessment being deprecated, as the analytics summary counts it."""
+
+    def method(queryset, name, value):
+        deprecated = Q(**{f"{parent}__status": Assessment.Status.DEPRECATED})
+        return (
+            queryset.filter(deprecated)
+            if value
+            else exclude_deprecated_parent(queryset, parent)
+        )
+
+    return df.BooleanFilter(method=method, label="Deprecated assessment")
+
+
 class PerimeterFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(
         queryset=Folder.objects.all(),
@@ -8333,6 +8347,7 @@ class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
+    deprecated_assessment = deprecated_assessment_filter("risk_assessment")
     # Multi-value level filters: the matrix levels are dynamic (no fixed choices),
     # so we validate that values are integers without constraining them to a choice set.
     current_level = IntegerInFilter(field_name="current_level", widget=QueryArrayWidget)
@@ -17891,6 +17906,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         return Response(analytics_data, status=status.HTTP_200_OK)
 
 
+class RequirementAssessmentFilterSet(GenericFilterSet):
+    deprecated_assessment = deprecated_assessment_filter("compliance_assessment")
+
+    class Meta:
+        model = RequirementAssessment
+        fields = {
+            "folder": ["exact"],
+            "folder__name": ["exact"],
+            "evidences": ["exact"],
+            "compliance_assessment": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+            "requirement__urn": ["exact"],
+            "requirement__ref_id": ["exact"],
+            "result": ["exact"],
+            "extended_result": ["exact"],
+            "compliance_assessment__ref_id": ["exact"],
+            "compliance_assessment__perimeter": ["exact"],
+            "compliance_assessment__perimeter__name": ["exact"],
+            "compliance_assessment__assets__ref_id": ["exact"],
+            "requirement__assessable": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+        }
+
+
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirement assessments to be viewed or edited.
@@ -17961,25 +18002,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
-    filterset_fields = {
-        "folder": ["exact"],
-        "folder__name": ["exact"],
-        "evidences": ["exact"],
-        "compliance_assessment": ["exact"],
-        "applied_controls": ["exact"],
-        "security_exceptions": ["exact"],
-        "requirement__urn": ["exact"],
-        "requirement__ref_id": ["exact"],
-        "result": ["exact"],
-        "extended_result": ["exact"],
-        "compliance_assessment__ref_id": ["exact"],
-        "compliance_assessment__perimeter": ["exact"],
-        "compliance_assessment__perimeter__name": ["exact"],
-        "compliance_assessment__assets__ref_id": ["exact"],
-        "requirement__assessable": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-    }
+    filterset_class = RequirementAssessmentFilterSet
     search_fields = [
         "requirement__name",
         "requirement__description",
@@ -19587,6 +19610,7 @@ class FindingFilterSet(GenericFilterSet):
     requirement_assessment = NullableModelChoiceFilter(
         queryset=RequirementAssessment.objects.all()
     )
+    deprecated_assessment = deprecated_assessment_filter("findings_assessment")
 
     class Meta:
         model = Finding
@@ -19759,28 +19783,40 @@ class FindingViewSet(BaseModelViewSet):
         return Response({"results": {"nodes": nodes, "links": links}})
 
 
+class IncidentFilterSet(GenericFilterSet):
+    nis2_overdue = df.BooleanFilter(method="filter_nis2_overdue", label="NIS2 overdue")
+
+    def filter_nis2_overdue(self, queryset, name, value):
+        late = nis2_overdue_incidents(queryset)
+        return late if value else queryset.exclude(pk__in=late.values("pk"))
+
+    class Meta:
+        model = Incident
+        fields = {
+            "folder": ["exact"],
+            "status": ["exact"],
+            "severity": ["exact"],
+            "qualifications": ["exact"],
+            "detection": ["exact"],
+            "owners": ["exact"],
+            "entities": ["exact"],
+            "assets": ["exact"],
+            "vulnerabilities": ["exact"],
+            "applied_controls": ["exact"],
+            "task_templates": ["exact"],
+            "risk_scenarios": ["exact"],
+            "filtering_labels": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+            "reported_at": ["exact"],
+            "nis2_significant": ["exact"],
+        }
+
+
 class IncidentViewSet(ExportMixin, BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = {
-        "folder": ["exact"],
-        "status": ["exact"],
-        "severity": ["exact"],
-        "qualifications": ["exact"],
-        "detection": ["exact"],
-        "owners": ["exact"],
-        "entities": ["exact"],
-        "assets": ["exact"],
-        "vulnerabilities": ["exact"],
-        "applied_controls": ["exact"],
-        "task_templates": ["exact"],
-        "risk_scenarios": ["exact"],
-        "filtering_labels": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-        "reported_at": ["exact"],
-        "nis2_significant": ["exact"],
-    }
+    filterset_class = IncidentFilterSet
 
     def get_queryset(self):
         return (

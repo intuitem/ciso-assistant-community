@@ -1655,27 +1655,39 @@ def get_metrics(user: User, folder_id):
         return model.objects.filter(id__in=object_ids)
 
     viewable_controls = viewable_items(AppliedControl, folder_id)
-    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id)
+    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id).exclude(
+        status=Assessment.Status.DEPRECATED
+    )
     viewable_compliance_assessments = restrict_to_respondent_assignments(
         user,
         viewable_items(ComplianceAssessment, folder_id),
         "requirement_assignments__actor__in",
     )
-    viewable_risk_scenarios = viewable_items(RiskScenario, folder_id)
+    viewable_risk_scenarios = exclude_deprecated_parent(
+        viewable_items(RiskScenario, folder_id), "risk_assessment"
+    )
     viewable_threats = viewable_items(Threat, folder_id)
     viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
     viewable_evidences = viewable_items(Evidence, folder_id)
     viewable_requirement_assessments = restrict_to_respondent_assignments(
         user,
-        viewable_items(RequirementAssessment, folder_id),
+        exclude_deprecated_parent(
+            viewable_items(RequirementAssessment, folder_id), "compliance_assessment"
+        ),
         "assignments__actor__in",
     )
+    from privacy.models import RightRequest
+    from tprm.models import Contract, EntityAssessment
+
+    today = date.today()
+    soon = today + timedelta(days=30)
+    unfinished = [Assessment.Status.DONE, Assessment.Status.DEPRECATED]
     controls_count = viewable_controls.count()
     missed_eta_count = (
         viewable_controls.filter(
             eta__lt=date.today(),
         )
-        .exclude(status="active")
+        .exclude(status__in=CONTROLS_NOT_PENDING)
         .count()
     )
 
@@ -1688,7 +1700,9 @@ def get_metrics(user: User, folder_id):
             "active": viewable_controls.filter(status="active").count(),
             "degraded": viewable_controls.filter(status="degraded").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
-            "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
+            "p1": viewable_controls.filter(priority=1)
+            .exclude(status__in=CONTROLS_NOT_PENDING)
+            .count(),
             "eta_missed": missed_eta_count,
             "no_status": viewable_controls.filter(
                 Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
@@ -1710,6 +1724,16 @@ def get_metrics(user: User, folder_id):
             .distinct()
             .count(),
             "acceptances": viewable_risk_acceptances.count(),
+            "expired_acceptances": viewable_risk_acceptances.filter(
+                state="accepted", expiry_date__lt=today
+            ).count(),
+            "overdue_assessments": viewable_risk_assessments.filter(due_date__lt=today)
+            .exclude(status__in=unfinished)
+            .count(),
+            # Still approved past their end date: the risk is back on the clock.
+            "expired_exceptions": viewable_items(SecurityException, folder_id)
+            .filter(status=SecurityException.Status.APPROVED, expiration_date__lt=today)
+            .count(),
         },
         "compliance": {
             "used_frameworks": viewable_compliance_assessments.values("framework_id")
@@ -1721,6 +1745,21 @@ def get_metrics(user: User, folder_id):
             ).count(),
             "evidences": viewable_evidences.count(),
             "expired_evidences": viewable_evidences.filter(status="expired").count(),
+            "expiring_evidences": viewable_evidences.filter(
+                expiry_date__gte=today, expiry_date__lte=soon
+            )
+            .exclude(status="expired")
+            .count(),
+            "evidences_to_review": viewable_evidences.filter(
+                revisions__in=EvidenceRevision.current_with_content().filter(
+                    review_status=EvidenceRevision.ReviewStatus.PENDING
+                )
+            )
+            .distinct()
+            .count(),
+            "overdue_audits": viewable_compliance_assessments.filter(due_date__lt=today)
+            .exclude(status__in=unfinished)
+            .count(),
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
@@ -1736,12 +1775,41 @@ def get_metrics(user: User, folder_id):
             "open_incidents": viewable_items(Incident, folder_id)
             .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
             .count(),
-            "open_findings": viewable_items(Finding, folder_id)
+            "open_findings": exclude_deprecated_parent(
+                viewable_items(Finding, folder_id), "findings_assessment"
+            )
             .exclude(status__in=FINDING_CLOSED_STATUSES)
             .count(),
             "overdue_tasks": overdue_task_templates(
                 viewable_items(TaskTemplate, folder_id)
             ).count(),
+            "nis2_overdue_incidents": nis2_overdue_incidents(
+                viewable_items(Incident, folder_id)
+            ).count(),
+            "overdue_vulnerabilities": viewable_items(Vulnerability, folder_id)
+            .annotate(**Vulnerability.sla_state_annotations(today))
+            .filter(sla_state="overdue")
+            .count(),
+        },
+        "third_party": {
+            "overdue_assessments": viewable_items(EntityAssessment, folder_id)
+            .filter(due_date__lt=today)
+            .exclude(status__in=unfinished)
+            .count(),
+            "ending_contracts": viewable_items(Contract, folder_id)
+            .filter(
+                status=Contract.Status.ACTIVE,
+                end_date__gte=today,
+                end_date__lte=soon,
+            )
+            .count(),
+        },
+        "privacy": {
+            # GDPR gives a month: flag them a week ahead, and once late.
+            "right_requests_due": viewable_items(RightRequest, folder_id)
+            .filter(due_date__lte=today + timedelta(days=7))
+            .exclude(status="done")
+            .count(),
         },
         "csf_functions": csf_functions(user, folder_id),
         # Root snapshots cover the whole organisation, not a single domain.
@@ -1841,6 +1909,27 @@ def overdue_task_templates(templates):
             due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
         ).values("task_template_id"),
     )
+
+
+# Controls nothing is waiting on: in place, or retired.
+CONTROLS_NOT_PENDING = [AppliedControl.Status.ACTIVE, AppliedControl.Status.DEPRECATED]
+
+
+def exclude_deprecated_parent(qs, parent: str):
+    """Drop the children of a deprecated assessment; those without a parent stay."""
+    return qs.exclude(**{f"{parent}__status": Assessment.Status.DEPRECATED})
+
+
+def nis2_overdue_incidents(incidents):
+    """Significant incidents whose next NIS2 stage is past due: the incident list's "nis2_overdue" filter."""
+    late = [
+        incident.pk
+        for incident in incidents.filter(nis2_significant=True).exclude(
+            status=Incident.Status.DISMISSED
+        )
+        if (stage := incident.nis2_next_stage()) and stage["overdue"]
+    ]
+    return incidents.filter(pk__in=late)
 
 
 FINDING_CLOSED_STATUSES = [
