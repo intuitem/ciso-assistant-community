@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import (
+    AutoRefIdMixin,
     AbstractBaseModel,
     NameDescriptionMixin,
 )
@@ -202,7 +203,9 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return self.display_short
 
 
-class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class MetricInstance(
+    AutoRefIdMixin, NameDescriptionMixin, FolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
@@ -216,6 +219,9 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         on_delete=models.PROTECT,
         verbose_name=_("Metric definition"),
     )
+    auto_ref_id_prefix = "MET"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )

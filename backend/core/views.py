@@ -8803,7 +8803,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     model = RiskAcceptance
     serializer_class = RiskAcceptanceWriteSerializer
     filterset_class = RiskAcceptanceFilterSet
-    search_fields = ["name", "description", "justification"]
+    search_fields = ["name", "description", "justification", "ref_id"]
 
     def perform_create(self, serializer):
         instance = super().perform_create(serializer)
@@ -12730,6 +12730,8 @@ class EvidenceViewSet(BaseModelViewSet):
     """
     API endpoint that allows evidences to be viewed or edited.
     """
+
+    search_fields = ["name", "description", "ref_id"]
 
     model = Evidence
     filterset_class = EvidenceFilterSet

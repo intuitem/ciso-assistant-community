@@ -1214,6 +1214,8 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
     API endpoint that allows entity assessments to be viewed or edited.
     """
 
+    search_fields = ["name", "description", "ref_id"]
+
     model = EntityAssessment
     export_config = {
         "filename": "entity_assessments_export",

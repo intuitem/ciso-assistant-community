@@ -1,3 +1,4 @@
+import re
 import uuid
 from typing import TYPE_CHECKING
 
@@ -181,6 +182,128 @@ class AbstractBaseModel(models.Model):
         self._validate_char_max_lengths()
         self.clean()
         super().save(*args, **kwargs)
+
+
+# Admin-set prefix: letters, digits, "-" or "_", at most 8 characters.
+AUTO_REF_ID_PREFIX_RE = re.compile(r"^[A-Za-z0-9_-]{1,8}$")
+
+
+def _general_settings() -> dict:
+    from global_settings.models import GlobalSettings
+
+    return (
+        GlobalSettings.objects.filter(name="general")
+        .values_list("value", flat=True)
+        .first()
+        or {}
+    )
+
+
+class AutoRefIdMixin:
+    """Fills a blank ref_id on creation, numbered within its parent, when the
+    `auto_ref_id` general setting is on. List it first in the model's bases;
+    a plain mixin so it does not replace the Meta the model inherits."""
+
+    auto_ref_id_prefix: str = ""
+    auto_ref_id_parent: str = "folder"
+
+    @classmethod
+    def current_auto_ref_id_prefix(cls, general: dict | None = None) -> str:
+        """The admin's override while auto ref_id is on, else the built-in prefix."""
+        general = _general_settings() if general is None else general
+        if general.get("auto_ref_id"):
+            overrides = general.get("auto_ref_id_prefixes") or {}
+            return overrides.get(cls._meta.model_name) or cls.auto_ref_id_prefix
+        return cls.auto_ref_id_prefix
+
+    def next_ref_id(self, prefix: str) -> str:
+        prefix = f"{prefix}."
+        taken = (
+            type(self)
+            .objects.filter(
+                **{f"{self.auto_ref_id_parent}_id": self._ref_id_parent_id},
+                ref_id__startswith=prefix,
+            )
+            .values_list("ref_id", flat=True)
+        )
+        numbers = [int(r[len(prefix) :]) for r in taken if r[len(prefix) :].isdigit()]
+        return f"{prefix}{max(numbers, default=0) + 1:02d}"
+
+    @property
+    def _ref_id_parent_id(self):
+        return getattr(self, f"{self.auto_ref_id_parent}_id")
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and not self.ref_id:
+            general = _general_settings()
+            if general.get("auto_ref_id"):
+                with transaction.atomic():
+                    # Lock the parent so concurrent creations in it get distinct numbers.
+                    parent_model = self._meta.get_field(
+                        self.auto_ref_id_parent
+                    ).related_model
+                    list(
+                        parent_model.objects.select_for_update()
+                        .filter(pk=self._ref_id_parent_id)
+                        .values_list("pk", flat=True)
+                    )
+                    self.ref_id = self.next_ref_id(
+                        self.current_auto_ref_id_prefix(general)
+                    )
+                    return super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
+
+
+def auto_ref_id_models() -> dict:
+    """{model_name: model} of every model that can get an automatic ref_id."""
+    from django.apps import apps
+
+    return {
+        m._meta.model_name: m
+        for m in apps.get_models()
+        if issubclass(m, AutoRefIdMixin)
+    }
+
+
+def backfill_auto_ref_ids() -> int:
+    """Number the existing objects whose ref_id is blank, oldest first, after the
+    highest number already used in their parent. Filled ref_ids are left alone."""
+    from collections import defaultdict
+
+    general = _general_settings()
+    updated = 0
+    with transaction.atomic():
+        for model in auto_ref_id_models().values():
+            prefix = f"{model.current_auto_ref_id_prefix(general)}."
+            parent = f"{model.auto_ref_id_parent}_id"
+            # _base_manager: custom default managers may hide rows that still need an id.
+            blanks = list(
+                model._base_manager.select_for_update()
+                .filter(models.Q(ref_id="") | models.Q(ref_id__isnull=True))
+                .order_by("created_at", "pk")
+                .only("pk", parent)
+            )
+            if not blanks:
+                continue
+            last = defaultdict(int)
+            parents = {getattr(o, parent) for o in blanks}
+            in_parents = models.Q(**{f"{parent}__in": parents - {None}})
+            if None in parents:
+                in_parents |= models.Q(**{f"{parent}__isnull": True})
+            for parent_id, ref_id in (
+                model._base_manager.filter(in_parents, ref_id__startswith=prefix)
+                .values_list(parent, "ref_id")
+                .iterator()
+            ):
+                if ref_id[len(prefix) :].isdigit():
+                    last[parent_id] = max(last[parent_id], int(ref_id[len(prefix) :]))
+            for obj in blanks:
+                last[getattr(obj, parent)] += 1
+                obj.ref_id = f"{prefix}{last[getattr(obj, parent)]:02d}"
+            # shortcut: bulk_update skips save() and signals (no audit log entry per object).
+            model._base_manager.bulk_update(blanks, ["ref_id"], batch_size=500)
+            updated += len(blanks)
+    return updated
 
 
 class NameDescriptionMixin(AbstractBaseModel):

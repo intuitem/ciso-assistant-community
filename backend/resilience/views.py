@@ -171,6 +171,7 @@ def asset_dependency_graph(user, assessments):
 
 
 class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
+    search_fields = ["name", "description", "ref_id"]
     model = BusinessImpactAnalysis
     filterset_fields = [
         "folder",
