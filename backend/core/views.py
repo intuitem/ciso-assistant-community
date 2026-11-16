@@ -15828,7 +15828,56 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """Experimental: what a certification auditor will ask per requirement."""
         from core.auditor_preread import auditor_preread
 
-        return Response(auditor_preread(self.get_object(), request.user))
+        return Response(
+            auditor_preread(
+                self.get_object(), request.user, request.query_params.get("guide")
+            )
+        )
+
+    @action(detail=True, methods=["post"], url_path="auditor_preread/pair")
+    def auditor_preread_pair(self, request, pk):
+        """Experimental: mark an evidence as answering one auditor request."""
+        from core.auditor_preread import pair_request
+
+        audit = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_requirementassessment"),
+            folder=audit.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        error = pair_request(
+            audit, request.user, request.data, request.data.get("guide")
+        )
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], url_path="auditor_preread_audits")
+    def auditor_preread_audits(self, request):
+        """Experimental: audits an audit guide applies to, by framework."""
+        from core.auditor_preread import resolve_guide
+
+        audits = self.get_queryset().select_related("framework", "folder", "perimeter")
+        fits = {}
+        for framework in {a.framework for a in audits if a.framework}:
+            fits[framework.id] = resolve_guide(framework)
+        return Response(
+            [
+                {
+                    "id": a.id,
+                    "name": a.name,
+                    "status": a.status,
+                    "framework": a.framework.name,
+                    "folder": {"str": str(a.folder)} if a.folder else None,
+                    "perimeter": {"str": str(a.perimeter)} if a.perimeter else None,
+                    "exact": fit["exact"],
+                    "coverage": round(fit["coverage"], 3),
+                }
+                for a in audits
+                if (fit := fits.get(a.framework_id)) and fit["applies"]
+            ]
+        )
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):

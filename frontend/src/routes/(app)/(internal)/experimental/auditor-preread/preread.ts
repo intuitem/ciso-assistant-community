@@ -27,11 +27,15 @@ export interface FiledEvidence {
 	updated_at: string | null;
 	/** Linked to this requirement, not only to another one asking the same document. */
 	here: boolean;
+	/** Paired by hand rather than through the request's reference control. */
+	manual: boolean;
 }
 
 export interface PrereadItem {
 	id: string;
 	urn_suffix: string;
+	/** Guide entry this requirement maps to; differs from urn_suffix on a projected framework. */
+	guide_key: string | null;
 	ref_id: string;
 	name: string;
 	result: string;
@@ -116,6 +120,9 @@ export const SECTIONS = [
 	{ key: 'a.8', label: 'A.8 Technological', test: (s: string) => s.startsWith('a.8.') }
 ];
 
+/** The guide entry an item answers to, for grouping by section or session. */
+export const keyOf = (i: PrereadItem) => i.guide_key ?? i.urn_suffix;
+
 export const sectionOf = (suffix: string) => SECTIONS.find((s) => s.test(suffix)) ?? SECTIONS[0];
 
 export const KINDS: Record<string, { label: string; icon: string }> = {
@@ -169,7 +176,7 @@ export function requestList(items: PrereadItem[]): RequestRow[] {
 				rows.set(key, {
 					items: [item],
 					...r,
-					filed: r.reference_control ? (item.filed?.[r.id] ?? []) : null
+					filed: r.reference_control || item.filed?.[r.id] ? (item.filed?.[r.id] ?? []) : null
 				});
 			} else {
 				if (!row.items.includes(item)) row.items.push(item);
@@ -192,10 +199,12 @@ export interface Session {
 
 /** Stage 2 sessions in running order, each with its requirements and the people it needs. */
 export function sessionPlan(items: PrereadItem[], sessions: Session[]) {
-	const bySuffix = new Map(items.map((i) => [i.urn_suffix, i]));
+	// Several requirements of a projected framework can share one entry (4.2 a, 4.2 b).
+	const byKey = new Map<string, PrereadItem[]>();
+	for (const i of items) byKey.set(keyOf(i), [...(byKey.get(keyOf(i)) ?? []), i]);
 	return sessions
 		.map((session) => {
-			const reqs = session.members.flatMap((m) => bySuffix.get(m) ?? []);
+			const reqs = session.members.flatMap((m) => byKey.get(m) ?? []);
 			const people = [...new Set(reqs.flatMap((r) => r.guidance?.interviewees ?? []))];
 			return { session, reqs, people };
 		})

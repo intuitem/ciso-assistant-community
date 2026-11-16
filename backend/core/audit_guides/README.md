@@ -48,6 +48,18 @@ runs the days: by topic, each session with the same people. Every entry
 belongs to exactly one session (tested). A session may carry its own
 `requests` and `pitfalls`, as the opening meeting does.
 
+A guide also applies to a framework with another URN (a licensed copy, a
+translation) when its entries land there by requirement number: each
+assessable requirement maps by URN suffix or ref_id, falling back to the
+parent number (`4.2 a)` -> `4.2`). It applies on its own when at least 90% of
+the guide lands and that covers half the framework; otherwise the page offers
+it (`?guide=<framework urn>`).
+
+Evidence can be paired with a request by hand (`EvidenceRequestLink`: evidence,
+guide framework URN, entry, request id). The link belongs to the evidence, so it
+holds at every audit where that evidence shows up; it counts like a match
+through the request's reference control.
+
 Findings from earlier audits (Stage 1, internal audit) come from the
 findings assessments: any `Finding` linked to the requirement, or to a
 requirement assessment of any audit on the same framework. An open one at

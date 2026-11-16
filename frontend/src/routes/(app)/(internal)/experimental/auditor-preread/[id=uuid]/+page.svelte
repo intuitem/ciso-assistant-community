@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { replaceState } from '$app/navigation';
+	import { invalidateAll, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -18,6 +18,7 @@
 		requestList,
 		requestListTsv,
 		sectionOf,
+		keyOf,
 		sessionPlan,
 		type PrereadItem,
 		type Readiness
@@ -100,11 +101,11 @@
 	);
 	const visible = $derived(
 		beforeSection.filter(
-			(i) => section === 'all' || SECTIONS.find((s) => s.key === section)!.test(i.urn_suffix)
+			(i) => section === 'all' || SECTIONS.find((s) => s.key === section)!.test(keyOf(i))
 		)
 	);
 	const grouped = $derived(
-		SECTIONS.map((s) => ({ ...s, items: visible.filter((i) => s.test(i.urn_suffix)) })).filter(
+		SECTIONS.map((s) => ({ ...s, items: visible.filter((i) => s.test(keyOf(i))) })).filter(
 			(g) => g.items.length
 		)
 	);
@@ -168,6 +169,25 @@
 		}
 	}
 
+	let pairing: string | null = $state(null);
+	let pairError = $state('');
+
+	/** Mark (or unmark) an evidence as answering one request, then reload the pre-read. */
+	async function pair(raId: string, request: string, evidence: string, remove = false) {
+		pairing = `${request}:${evidence}`;
+		pairError = '';
+		const guide = page.url.searchParams.get('guide');
+		const res = await fetch(`/experimental/auditor-preread/${data.audit.id}/pair`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ requirement_assessment: raId, request, evidence, remove, guide })
+		});
+		if (res.ok) await invalidateAll();
+		else
+			pairError = res.status === 403 ? 'You cannot edit this audit.' : 'The pairing was not saved.';
+		pairing = null;
+	}
+
 	const pct = (n: number) => (items.length ? (100 * n) / items.length : 0);
 	const ageLabel = (iso: string | null) => (iso ? iso.slice(0, 10) : 'no revision');
 </script>
@@ -226,21 +246,28 @@
 			{#if data.preread.supported && items.length}
 				<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
 					{#each SHOWN as r (r)}
+						{@const on = readinessFilter === r}
 						<button
-							class="group text-left rounded-base px-3 pt-2 pb-2.5 border-b-[3px] transition {readinessFilter ===
-							r
-								? `bg-surface-100-900 ${STYLE[r].border}`
-								: 'border-transparent hover:bg-surface-100-900'}"
-							aria-pressed={readinessFilter === r}
-							title={readinessFilter === r
-								? 'Show all'
-								: `Show ${READINESS[r].label.toLowerCase()} only`}
-							onclick={() => (readinessFilter = readinessFilter === r ? 'all' : r)}
+							class="group relative text-left rounded-base border px-3 pt-2 pb-2.5 transition disabled:opacity-50 disabled:cursor-default {on
+								? `bg-surface-100-900 shadow-sm ${STYLE[r].border}`
+								: 'border-surface-200-800 enabled:hover:border-surface-400-600 enabled:hover:bg-surface-100-900'}"
+							aria-pressed={on}
+							disabled={!counts[r] && !on}
+							title={on ? 'Show all requirements' : `Show ${READINESS[r].label.toLowerCase()} only`}
+							onclick={() => (readinessFilter = on ? 'all' : r)}
 						>
+							<i
+								class="fa-solid {on
+									? 'fa-xmark text-surface-700-300'
+									: 'fa-filter text-surface-400 group-enabled:group-hover:text-surface-600-400'} absolute top-2 right-2.5 text-xs"
+								aria-hidden="true"
+							></i>
 							<span class="block text-3xl font-semibold tabular-nums leading-none">{counts[r]}</span
 							>
 							<span class="flex items-center gap-1.5 mt-1.5 text-sm text-surface-600-400">
 								{@render dot(r)}{READINESS[r].label}
+								{#if on}<span class="text-xs font-medium text-surface-700-300">· Filtering</span
+									>{/if}
 							</span>
 						</button>
 					{/each}
@@ -258,8 +285,8 @@
 						{/each}
 					</div>
 					<span class="text-xs text-surface-500">
-						{items.length} requirements. Readiness is an estimate from the evidence linked to the audit
-						and its quality checks.
+						{items.length} requirements. Click a count to show only those. Readiness is an estimate from
+						the evidence linked to the audit and its quality checks.
 					</span>
 				</div>
 			{/if}
@@ -267,10 +294,33 @@
 	</header>
 
 	{#if !data.preread.supported}
-		<p class="card preset-tonal-warning p-4">
-			There is no auditor guidance for this framework yet. Only ISO/IEC 27001:2022 is covered.
-		</p>
+		<div class="card preset-tonal-warning p-4 flex flex-col gap-2">
+			<p>
+				There is no auditor guidance for this framework yet. Only ISO/IEC 27001:2022 is covered,
+				including copies of it with the same requirement numbers.
+			</p>
+			{#if data.preread.suggestion}
+				{@const s = data.preread.suggestion}
+				<p class="text-sm">
+					Its numbering partly matches the ISO/IEC 27001:2022 guide: {Math.round(s.coverage * 100)}%
+					of the guide lands on {s.matched} of its {s.total} requirements.
+					<a class="anchor" href="?guide={encodeURIComponent(s.framework_urn)}"
+						>Apply the guide anyway</a
+					>
+				</p>
+			{/if}
+		</div>
 	{:else}
+		{#if data.preread.guide && !data.preread.guide.exact}
+			<p class="text-sm text-surface-600-400 flex items-center gap-2">
+				<i class="fa-solid fa-shuffle"></i>
+				ISO/IEC 27001:2022 guidance applied by requirement number: {data.preread.guide.matched} of
+				{data.preread.guide.total} requirements matched. Lettered items share their parent's guidance.
+			</p>
+		{/if}
+		{#if pairError}
+			<p class="card preset-tonal-error p-3 text-sm" role="alert">{pairError}</p>
+		{/if}
 		<!-- Toolbar -->
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-wrap items-center gap-2">
@@ -310,7 +360,7 @@
 			</div>
 			<div class="flex flex-wrap gap-1.5 text-sm" role="group" aria-label="Section">
 				{#each [{ key: 'all', label: 'All sections', test: () => true }, ...SECTIONS] as s (s.key)}
-					{@const n = beforeSection.filter((i) => s.test(i.urn_suffix)).length}
+					{@const n = beforeSection.filter((i) => s.test(keyOf(i))).length}
 					<button
 						class="rounded-full px-3 py-1 border {section === s.key
 							? 'preset-filled-primary-500 border-transparent'
@@ -399,9 +449,7 @@
 							class="flex flex-wrap items-start gap-x-3 gap-y-2 p-5 border-b border-surface-200-800"
 						>
 							<div class="flex flex-col gap-1 min-w-0 grow">
-								<span class="text-xs text-surface-600-400"
-									>{sectionOf(selected.urn_suffix).label}</span
-								>
+								<span class="text-xs text-surface-600-400">{sectionOf(keyOf(selected)).label}</span>
 								<h2 class="text-xl font-semibold leading-tight">
 									<span class="font-mono text-primary-600-400 mr-2">{selected.ref_id}</span
 									>{selected.name}
@@ -584,9 +632,14 @@
 												class="flex flex-col divide-y divide-surface-200-800 border border-surface-200-800 rounded-base bg-surface-50-950"
 											>
 												{#each g.requests as r (r.id)}
-													{@const filed = r.reference_control
-														? (selected.filed?.[r.id] ?? [])
-														: null}
+													{@const filed =
+														selected.filed?.[r.id] ?? (r.reference_control ? [] : null)}
+													{@const candidates =
+														r.kind === 'observation'
+															? []
+															: selected.evidences.filter(
+																	(e) => e.name && !filed?.some((f) => f.id === e.id)
+																)}
 													<li class="flex flex-col gap-1.5 p-2.5 text-sm">
 														<span class="flex gap-3">
 															<i
@@ -626,6 +679,17 @@
 																				title="Linked under another requirement that asks for the same document"
 																				>· filed elsewhere in the audit</span
 																			>{/if}
+																		{#if e.manual}
+																			<span class="text-surface-600-400">· paired by hand</span>
+																			<button
+																				class="text-surface-500 hover:text-error-600-400 disabled:opacity-50"
+																				title="Unpair: this evidence does not answer this request"
+																				aria-label="Unpair {e.name ?? 'evidence'}"
+																				disabled={pairing !== null}
+																				onclick={() => pair(selected.id, r.id, e.id, true)}
+																				><i class="fa-solid fa-xmark"></i></button
+																			>
+																		{/if}
 																	</li>
 																{/each}
 															</ul>
@@ -633,6 +697,28 @@
 															<span class="pl-7 text-xs text-error-600-400"
 																><i class="fa-solid fa-circle-xmark mr-1"></i>Not on file</span
 															>
+														{/if}
+														{#if candidates.length}
+															<label
+																class="pl-7 flex items-center gap-2 text-xs text-surface-600-400"
+															>
+																<i class="fa-solid fa-link"></i>
+																<span class="sr-only">Pair an evidence with: {r.label}</span>
+																<select
+																	class="select py-0.5 px-2 text-xs w-auto max-w-full"
+																	disabled={pairing !== null}
+																	onchange={(ev) => {
+																		const id = ev.currentTarget.value;
+																		ev.currentTarget.value = '';
+																		if (id) pair(selected.id, r.id, id);
+																	}}
+																>
+																	<option value="">Answered by…</option>
+																	{#each candidates as e (e.id)}
+																		<option value={e.id}>{e.name}</option>
+																	{/each}
+																</select>
+															</label>
 														{/if}
 													</li>
 												{/each}

@@ -14512,3 +14512,31 @@ auditlog.register(LoadedLibrary, exclude_fields=common_exclude)
 auditlog.register(RiskMatrix, exclude_fields=common_exclude)
 auditlog.register(CustomEmailTemplate, exclude_fields=common_exclude)
 auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)
+
+
+class EvidenceRequestLink(AbstractBaseModel):
+    """Experimental: an evidence marked by hand as answering one request of an
+    audit guide. Keyed by the guide, not the audit, so it holds at every audit
+    where the evidence shows up."""
+
+    IAM_SCOPE_FIELD = "evidence"
+
+    evidence = models.ForeignKey(
+        Evidence, on_delete=models.CASCADE, related_name="guide_request_links"
+    )
+    # Framework URN the guide is written for, entry (requirement number) and
+    # request id inside it; ids are never reused, so the link stays stable.
+    guide = models.CharField(max_length=255)
+    entry = models.CharField(max_length=64)
+    request = models.CharField(max_length=16)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["evidence", "guide", "entry", "request"],
+                name="unique_evidence_request_link",
+            )
+        ]

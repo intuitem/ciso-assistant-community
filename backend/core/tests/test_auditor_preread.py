@@ -12,9 +12,12 @@ from core.auditor_preread import (
     REQUEST_NOT_ON_FILE,
     STALE_EVIDENCE,
     auditor_preread,
+    guide_key,
     load_audit_guides,
     load_audit_sessions,
+    pair_request,
     readiness,
+    resolve_guide,
 )
 from core.models import (
     AppliedControl,
@@ -184,3 +187,61 @@ def test_evidence_through_applied_control_is_counted_and_attributed():
     assert item["filed"]["r2"][0]["here"] is True
     assert [f["source"] for f in item["prior_findings"]] == ["Stage 1"]
     assert item["readiness"] == "gap" and OPEN_FINDING in item["reasons"]
+
+
+def test_guide_key_falls_back_to_the_parent_number():
+    keys = {"4.2", "4.3", "9.3.2", "a.5.18"}
+    assert guide_key("4.2 a)", "urn:x:req_node:copy:4.2.a", keys) == "4.2"
+    assert guide_key("A.5.18", "urn:x:req_node:copy:node-12", keys) == "a.5.18"
+    assert guide_key("Clause 9.3.2 f)", "urn:x:req_node:copy:n7", keys) == "9.3.2"
+    assert guide_key("5", "urn:x:req_node:copy:5", keys) is None
+
+
+@pytest.mark.django_db
+def test_guide_projects_on_a_copy_and_pairs_by_hand():
+    root = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root, name="copy")
+    copy = Framework.objects.create(
+        name="ISO copy", urn="urn:custom:risk:framework:iso-copy", folder=root
+    )
+    # Same numbers as the built-in standard, other URNs and ref_id spelling.
+    for i, key in enumerate(load_audit_guides()[ISO]):
+        RequirementNode.objects.create(
+            framework=copy,
+            urn=f"urn:custom:risk:req_node:iso-copy:n{i}",
+            ref_id=key.upper() if key.startswith("a.") else f"Clause {key}",
+            name=key,
+            assessable=True,
+            folder=root,
+        )
+    fit = resolve_guide(copy)
+    assert fit["applies"] and not fit["exact"] and fit["coverage"] == 1
+    audit = ComplianceAssessment.objects.create(
+        name="copy",
+        framework=copy,
+        perimeter=Perimeter.objects.create(name="p", folder=folder),
+        folder=folder,
+    )
+    audit.create_requirement_assessments()
+    ra = audit.requirement_assessments.get(requirement__ref_id="A.5.18")
+    review = Evidence.objects.create(name="Access review Q3", folder=folder)
+    ra.evidences.add(review)
+    user = User.objects.create_superuser(email="copy@test.local", password="x")
+
+    pair = {"requirement_assessment": ra.id, "request": "r1", "evidence": review.id}
+    assert pair_request(audit, user, pair) is None
+    assert pair_request(audit, user, {**pair, "request": "r99"}) == "unknownRequest"
+    other = Evidence.objects.create(name="Unrelated", folder=folder)
+    assert (
+        pair_request(audit, user, {**pair, "evidence": other.id}) == "unknownEvidence"
+    )
+
+    preread = auditor_preread(audit, user)
+    item = next(i for i in preread["items"] if i["id"] == ra.id)
+    assert preread["guide"]["exact"] is False and item["guide_key"] == "a.5.18"
+    assert [(e["name"], e["manual"]) for e in item["filed"]["r1"]] == [
+        ("Access review Q3", True)
+    ]
+    assert pair_request(audit, user, {**pair, "remove": True}) is None
+    items = auditor_preread(audit, user)["items"]
+    assert "r1" not in next(i for i in items if i["id"] == ra.id)["filed"]

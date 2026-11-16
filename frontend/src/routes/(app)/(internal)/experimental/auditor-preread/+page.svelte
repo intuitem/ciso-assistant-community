@@ -6,7 +6,7 @@
 	let query = $state('');
 	const audits = $derived(
 		data.audits.filter((a: any) =>
-			[a.name, a.folder?.str, a.perimeter?.str]
+			[a.name, a.framework, a.folder?.str, a.perimeter?.str]
 				.join(' ')
 				.toLowerCase()
 				.includes(query.trim().toLowerCase())
@@ -32,20 +32,15 @@
 		</ul>
 	</header>
 
-	{#if !data.frameworks.length}
-		<div class="card preset-tonal-warning p-4 flex gap-3 items-start">
-			<i class="fa-solid fa-book mt-1"></i>
-			<p>
-				ISO/IEC 27001:2022 is not loaded. Load it from the
-				<a class="anchor" href="/libraries">libraries</a>, then create an audit on it.
-			</p>
-		</div>
-	{:else if !data.audits.length}
+	{#if !data.audits.length}
 		<div
 			class="card border border-dashed border-surface-300-700 p-8 text-center text-surface-600-400 flex flex-col gap-2 items-center"
 		>
 			<i class="fa-solid fa-clipboard-question text-3xl"></i>
-			<p>No ISO/IEC 27001:2022 audit you can view yet.</p>
+			<p>
+				No ISO/IEC 27001:2022 audit you can view yet. Audits on a copy of the standard with the same
+				requirement numbers show up here too.
+			</p>
 			<a class="btn btn-sm preset-filled-primary-500" href="/compliance-assessments">Go to audits</a
 			>
 		</div>
@@ -64,7 +59,7 @@
 				/>
 			</label>
 			<span class="text-sm text-surface-600-400 tabular-nums"
-				>{audits.length} ISO/IEC 27001:2022 audit{audits.length === 1 ? '' : 's'}</span
+				>{audits.length} audit{audits.length === 1 ? '' : 's'}</span
 			>
 		</div>
 		<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -82,6 +77,13 @@
 						{/if}
 					</div>
 					<dl class="text-sm grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-surface-600-400">
+						<dt><i class="fa-solid fa-book" title="Framework"></i></dt>
+						<dd class="truncate">
+							{audit.framework}{#if !audit.exact}<span
+									class="ml-1.5 text-xs"
+									title="The guide is applied by requirement number">· matched by number</span
+								>{/if}
+						</dd>
 						<dt><i class="fa-solid fa-sitemap" title="Domain"></i></dt>
 						<dd class="truncate">{audit.folder?.str ?? '—'}</dd>
 						<dt><i class="fa-solid fa-cubes" title="Perimeter"></i></dt>

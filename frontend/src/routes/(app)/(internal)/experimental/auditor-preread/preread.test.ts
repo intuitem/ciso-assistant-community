@@ -26,6 +26,7 @@ const item = (ref: string, readiness: PrereadItem['readiness'], who: string[]): 
 	findings: [],
 	prior_findings: [],
 	filed: {},
+	guide_key: null,
 	readiness,
 	reasons: []
 });
@@ -57,7 +58,7 @@ describe('auditor pre-read lists', () => {
 			i.filed = filed;
 			return i;
 		};
-		const ev = { id: 'e1', name: 'Review', updated_at: null, here: true };
+		const ev = { id: 'e1', name: 'Review', updated_at: null, here: true, manual: false };
 		const rows = requestList([shared('9.3', 400, { r9: [ev] }), shared('5.1', 200, { r9: [ev] })]);
 		expect(rows).toHaveLength(1);
 		expect(rows[0].items.map((i) => i.ref_id)).toEqual(['9.3', '5.1']);
@@ -83,6 +84,19 @@ describe('auditor pre-read lists', () => {
 		expect(plan.map((s) => s.session.id)).toEqual(['open', 'b']);
 		expect(plan[1].reqs.map((r) => r.ref_id)).toEqual(['A.2', 'A.1']);
 		expect(plan[1].people).toEqual(['hr', 'ciso']);
+	});
+
+	it('groups several requirements of a projected framework under one entry', () => {
+		const a = { ...item('4.2 a)', 'gap', []), guide_key: '4.2' };
+		const b = { ...item('4.2 b)', 'weak', []), id: 'x', guide_key: '4.2' };
+		const plan = sessionPlan([a, b], [{ id: 'ctx', label: 'Context', members: ['4.2'] }]);
+		expect(plan[0].reqs.map((r) => r.ref_id)).toEqual(['4.2 a)', '4.2 b)']);
+	});
+
+	it('shows a hand-paired request as filed even without a reference control', () => {
+		const i = item('A.9', 'weak', []);
+		i.filed = { r1: [{ id: 'e', name: 'Export', updated_at: null, here: true, manual: true }] };
+		expect(requestList([i])[0].filed).toHaveLength(1);
 	});
 
 	it('escapes tabs in the TSV export', () => {
