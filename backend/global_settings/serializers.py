@@ -289,11 +289,9 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {"disabled_email_templates": "Must be a list of template keys."}
                     )
-            if key == "chat_temperature_enabled":
+            if key in ("chat_temperature_enabled", "auto_lock_overdue_assessments"):
                 if not isinstance(value, bool):
-                    raise serializers.ValidationError(
-                        {"chat_temperature_enabled": "Must be a boolean."}
-                    )
+                    raise serializers.ValidationError({key: "Must be a boolean."})
             if key == "chat_temperature":
                 try:
                     temp = float(value)
