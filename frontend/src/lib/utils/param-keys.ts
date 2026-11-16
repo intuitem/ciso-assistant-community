@@ -423,5 +423,5 @@ export const FILTER_KEYS = new Set([
 	'updated_at',
 	'usage',
 	'validation_deadline',
-	'within_tolerance',
+	'within_tolerance'
 ]);
