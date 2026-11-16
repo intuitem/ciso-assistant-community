@@ -14,6 +14,9 @@ class IamConfig(AppConfig):
 
         self._patch_client_check_secret(ServiceAccount)
 
+        # tags audit entries made through an AI app
+        import iam.mcp_tokens  # noqa: F401
+
     def _patch_client_check_secret(self, ServiceAccount):
         """adapter hook for multi-secret/grace-period support."""
         from allauth.idp.oidc.models import Client

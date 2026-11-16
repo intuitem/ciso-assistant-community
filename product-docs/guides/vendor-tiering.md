@@ -82,6 +82,22 @@ Nothing stops you from loading both forms, or adding your own. A vendor has one 
 
 Mixing methods across vendors makes tiers hard to compare. Pick one form for the organisation and keep the other for a deliberate change of method.
 
+## Tier solutions and let vendors follow
+
+A vendor that supplies one critical solution and ten minor ones should be tiered on the critical one. To work that way:
+
+1. Load **Solution tiering** from **Libraries**, and assess solutions with it as you do vendors. Each solution keeps its own **Tier history**.
+2. On **Third parties > Criticality**, set **From solutions to vendors**:
+   - **Off** — solution and vendor tiers stay independent.
+   - **Suggest** — the vendor's **Tier** card shows the tier its most critical active solution calls for (_Its solutions call for at least_), and you decide.
+   - **Raise automatically** — the vendor's tier is raised whenever a solution's tier changes or a solution is reactivated. Switching to it lists how many vendors sit below what their solutions call for and raises them at once, after confirmation.
+
+A vendor's tier is never lowered automatically. Raises are recorded in its tier history as **Raised by a solution**.
+
+## Set a compliance target per tier
+
+On **Third parties > Criticality**, give each tier a **Compliance target**: the questionnaire compliance, in percent, that a vendor of this tier is expected to reach. The **Vendor posture** tab of **Third parties > Overview** then shows which vendors fall below their tier's target. See [Vendor posture](../concepts/third-party-risk.md#vendor-posture).
+
 ## Customize the tiering
 
 What to change depends on how far your method departs from the shipped one.

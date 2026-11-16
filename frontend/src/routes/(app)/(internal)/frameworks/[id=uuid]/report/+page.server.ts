@@ -5,9 +5,11 @@ import type { PageServerLoad } from './$types';
 export const load = (async ({ fetch, params, url }) => {
 	const ig = url.searchParams.get('implementation_group');
 	const campaign = url.searchParams.get('campaign');
+	const statuses = url.searchParams.get('statuses');
 	const reportUrl = new URL(`${BASE_API_URL}/frameworks/${params.id}/report/`);
 	if (ig) reportUrl.searchParams.set('implementation_group', ig);
 	if (campaign) reportUrl.searchParams.set('campaign', campaign);
+	if (statuses) reportUrl.searchParams.set('statuses', statuses);
 
 	// Stream the report so the page shell can render immediately with a
 	// spinner; the body fills in once the API responds. For large frameworks

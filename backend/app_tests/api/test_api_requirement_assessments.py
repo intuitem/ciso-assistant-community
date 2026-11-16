@@ -122,7 +122,11 @@ class TestRequirementAssessmentsAuthenticated:
                 # the API correctly strips score from the response.
             },
             {
-                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                "folder": {
+                    "id": str(test.folder.id),
+                    "str": test.folder.name,
+                    "content_type": test.folder.content_type,
+                },
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
@@ -300,7 +304,11 @@ class TestRequirementAssessmentsAuthenticated:
                 "score": 3,
             },
             {
-                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                "folder": {
+                    "id": str(test.folder.id),
+                    "str": test.folder.name,
+                    "content_type": test.folder.content_type,
+                },
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,

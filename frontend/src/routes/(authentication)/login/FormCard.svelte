@@ -108,7 +108,7 @@
 					data={data?.form}
 					dataType="form"
 					validators={zod(loginSchema)}
-					action="?/login&next={page.url.searchParams.get('next') || '/'}"
+					action="?/login&next={encodeURIComponent(page.url.searchParams.get('next') || '/')}"
 				>
 					{#snippet children({ form })}
 						<TextField type="email" {form} field="username" label={m.email()} />

@@ -2347,6 +2347,7 @@ export const listViewFields = {
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
+			'canConnectApps',
 			'is_third_party',
 			'hasMfaEnabled'
 		],
@@ -2359,6 +2360,7 @@ export const listViewFields = {
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
+			'can_connect_apps',
 			'is_third_party',
 			'has_mfa_enabled'
 		],
@@ -2383,8 +2385,28 @@ export const listViewFields = {
 		body: ['name', 'user_groups']
 	},
 	'service-accounts': {
-		head: ['name', 'clientId', 'secretPreview', 'isActive', 'expiryDate', 'createdAt'],
-		body: ['name', 'client_id', 'secret_preview', 'is_active', 'expiry_date', 'created_at']
+		head: [
+			'name',
+			'identitySource',
+			'clientId',
+			'secretPreview',
+			'isActive',
+			'expiryDate',
+			'createdAt'
+		],
+		body: [
+			'name',
+			'identity_source',
+			'client_id',
+			'secret_preview',
+			'is_active',
+			'expiry_date',
+			'created_at'
+		]
+	},
+	'identity-providers': {
+		head: ['name', 'providerId', 'clientId'],
+		body: ['name', 'provider_id', 'client_id']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -4176,6 +4198,8 @@ export interface BatchActionConfig {
 	// A change_field value fixed by config ("mark as read") rather than picked by the
 	// user. Mutually exclusive with optionsEndpoint: skips the picker.
 	value?: string;
+	// Hidden from non-admins; the backend refuses them on its own (UX only).
+	adminOnly?: boolean;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
 	inputType?: 'date';
@@ -4244,6 +4268,27 @@ export const quickFilterPresets: Partial<
 };
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	// Only the MCP flag: UserWriteSerializer keeps it admin-only, and turning it
+	// off revokes the users' app connections (iam/models.py _revoke_lost_app_access).
+	users: [
+		{
+			type: 'change_field',
+			label: 'allowAppConnections',
+			icon: 'fa-solid fa-plug-circle-check',
+			field: 'can_connect_apps',
+			value: 'true',
+			adminOnly: true
+		},
+		{
+			type: 'change_field',
+			label: 'blockAppConnections',
+			icon: 'fa-solid fa-plug-circle-xmark',
+			field: 'can_connect_apps',
+			value: 'false',
+			adminOnly: true,
+			confirmMessage: 'blockAppConnectionsConfirm'
+		}
+	],
 	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
 	notifications: [
 		{

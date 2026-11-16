@@ -1,6 +1,14 @@
 import knox.views as knox_views  # type: ignore[import-untyped]
 from django.urls import include, path
 
+from .connected_apps import (
+    AllConnectedAppsView,
+    ConnectedAppDetailView,
+    ConnectedAppGroupView,
+    ConnectedAppsView,
+    UserConnectedAppView,
+)
+from .mcp_tokens import MCPAccessView
 from .views import (
     AuthTokenDetailView,
     PersonalAccessTokenViewSet,
@@ -15,6 +23,7 @@ from .views import (
     SCIMTokenViewSet,
     SCIMTokenDeleteView,
     ServiceAccountViewSet,
+    SocialAppViewSet,
 )
 
 urlpatterns = [
@@ -43,6 +52,28 @@ urlpatterns = [
         AuthTokenDetailView.as_view(),
         name="auth-token-detail",
     ),
+    path("connected-apps/", ConnectedAppsView.as_view(), name="connected-apps"),
+    path("mcp/access/", MCPAccessView.as_view(), name="mcp-access"),
+    path(
+        "connected-apps/all/",
+        AllConnectedAppsView.as_view(),
+        name="connected-apps-all",
+    ),
+    path(
+        "connected-apps/all/<uuid:user_id>/<str:client_id>/",
+        UserConnectedAppView.as_view(),
+        name="connected-apps-user",
+    ),
+    path(
+        "connected-apps/apps/<str:client_id>/",
+        ConnectedAppGroupView.as_view(),
+        name="connected-apps-group",
+    ),
+    path(
+        "connected-apps/<str:pk>/",
+        ConnectedAppDetailView.as_view(),
+        name="connected-app-detail",
+    ),
     path(
         "service-accounts/",
         ServiceAccountViewSet.as_view({"get": "list", "post": "create"}),
@@ -69,6 +100,18 @@ urlpatterns = [
         "service-accounts/<uuid:pk>/rotate-secret/",
         ServiceAccountViewSet.as_view({"post": "rotate_secret"}),
         name="service-account-rotate-secret",
+    ),
+    path(
+        "social-apps/",
+        SocialAppViewSet.as_view({"get": "list", "post": "create"}),
+        name="social-apps",
+    ),
+    path(
+        "social-apps/<int:pk>/",
+        SocialAppViewSet.as_view(
+            {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}
+        ),
+        name="social-app-detail",
     ),
     path("scim-token/", SCIMTokenViewSet.as_view(), name="scim-token"),
     path(

@@ -151,6 +151,7 @@
 * [General tips](guides/general-tips.md)
 * Getting started
   * [Initial setup](guides/initial-setup.md)
+  * [Exploring with demo data](guides/demo-data.md)
   * [Creating your first perimeter](guides/first-perimeter.md)
   * [Creating your first audit](guides/first-audit.md)
   * [Creating your first risk assessment](guides/first-risk-assessment.md)
@@ -220,6 +221,8 @@
 * [Scenario selection](features/scenario-selection.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
+* [Labels](features/labels.md)
+* [Relations graph](features/relations-graph.md)
 * [Workflow builder](features/workflows/README.md)
   * [Cheat sheet](features/workflows/cheat-sheet.md)
   * [Triggers](features/workflows/triggers.md)
@@ -247,11 +250,16 @@
 ## AI and Integrations
 
 * [Overview](integrations/README.md)
+* [API reference](integrations/api.md)
+* [Generating a PAT](integrations/pat.md)
+* [Service accounts](integrations/service-accounts.md)
+* [Identity providers (for service accounts)](integrations/identity-providers.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [Microsoft Sentinel](integrations/sentinel.md)
 * [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
+  * [MCP sign-in with OAuth](integrations/mcp-oauth.md)
 * [Power BI connector](integrations/powerbi.md)
 * [n8n node](integrations/n8n.md)
 * [Third-party integrations](integrations/third-party/README.md)

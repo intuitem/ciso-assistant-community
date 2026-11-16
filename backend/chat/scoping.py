@@ -26,6 +26,8 @@ class ReadScope:
         self._model_folder_ids: dict[str, list[str]] = {}
         self._folder_ids: list[str] | None = None
         self._respondent_folder_ids: set | None = None
+        # Indexed documents readable per folder set, see rag._readable_document_ids
+        self._document_ids: dict[frozenset, list[str]] = {}
 
     def _respondent_folders(self, model_class) -> set:
         if model_class._meta.label not in RESPONDENT_SCOPED_MODELS:

@@ -59,6 +59,19 @@ The decision also carries onto linked **security exceptions**: _Accepted_ moves 
 
 The status is the audit-trail field that gets cited in evidence reports — "policy v3 was _Accepted_ by Jane Doe on 2026-03-12" is what makes the decision provable later.
 
+## The Validations page
+
+**Validations** in the sidebar is a personal inbox: _Approve what is waiting on you, follow up on what you sent._ It has four tabs, each with its count:
+
+- **Received** — flows **Submitted** to you, waiting for your decision.
+- **Sent** — flows you requested that are still open (submitted or with changes requested).
+- **History** — closed flows you took part in, as requester or approver: accepted, rejected, revoked, expired or dropped.
+- **All** — every flow you can see, as a regular table with filters.
+
+The page opens on the first tab with something in it. Each card shows the flow, its linked objects and its status, with the actions open to you: the approver can approve, reject or request changes, and later revoke an approval; the requester can resubmit after changes or drop the flow. Cards show the 100 most recent flows; the **All** tab holds the rest.
+
+To start a flow, open an audit, a policy or another object and use **Request validation**.
+
 ## Approver — user, not actor
 
 Most ownership/assignment fields across the platform hold an **actor** (which can resolve to a user, a team, or an entity). The validation-flow **approver** is the deliberate exception: it's a foreign key to a **User** directly. Approval is a personal accountability act — _"a named individual signed off"_ — and a team can't approve in the same way it can co-own work.

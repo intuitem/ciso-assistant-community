@@ -110,6 +110,12 @@ Parameters:
 * Target value: expected target of this metric for this specific domain. This is handy as you can have different targets of the same metric definition according to the domain.
 * Assigned to: actor responsible for the metric instance and its updates.
 
+### Measuring an applied control
+
+A metric instance can be linked to the [applied controls](applied-controls.md) it measures: _Percentage of endpoints with EDR_ for the EDR deployment control, _Mean time to patch_ for the patch management one. The link is many-to-many, so one metric can measure several controls and a control can have several metrics.
+
+Set it from the applied control's detail page, on its **Metrics Instances** tab: create a new metric instance already linked to the control, or select existing ones. The tab then lists how the control is measured, next to its evidences and other links.
+
 ## Metric sample
 
 This is the actual data of the metric instance on a given timestamp.&#x20;
