@@ -7,7 +7,7 @@ guidance:
       - {stage: 2, text: "What happens when a device is lost or stolen? Walk me through the last case."}
     requests:
       - {label: "Endpoint or acceptable use policy covering company and personal devices", kind: document}
-      - {label: "MDM or endpoint management export: device list with encryption, OS version and last check-in", kind: technical, fresh_days: 30}
+      - {label: "MDM or endpoint management export: device list with encryption, OS version and last check-in", kind: technical, fresh_days: 40}
       - {label: "Lost or stolen device records with remote wipe evidence", kind: record}
     sampling: {size: "5 to 10 devices", population: "managed endpoint inventory", method: "pick devices from the MDM list and from people met on site, compare compliance status with the policy"}
     interviewees: [endpoint, staff]
@@ -21,10 +21,10 @@ guidance:
       - {stage: 2, text: "Show me the list of admin accounts on your identity provider, cloud console and production servers today."}
       - {stage: 2, text: "Do administrators use a separate account for admin work, or their everyday account?"}
     requests:
-      - {label: "Inventory of privileged accounts, including service and break-glass accounts, with named owners", kind: record, fresh_days: 30}
+      - {label: "Inventory of privileged accounts, including service and break-glass accounts, with named owners", kind: record, fresh_days: 40}
       - {label: "Approval tickets for privileged access granted in the audit period", kind: record}
-      - {label: "Last privileged access review with reviewer, decisions and removals applied", kind: record, fresh_days: 120}
-      - {label: "Live export of admin role members from the IdP and main cloud tenant", kind: technical, fresh_days: 7}
+      - {label: "Last privileged access review with reviewer, decisions and removals applied", kind: record, fresh_days: 100}
+      - {label: "Live export of admin role members from the IdP and main cloud tenant", kind: technical, fresh_days: 40}
     sampling: {size: "5 privileged accounts", population: "current admin role members across IdP, cloud and production", method: "trace each to an approval and a review entry; check for leavers and shared logins"}
     interviewees: [iam, ciso]
     pitfalls:
@@ -38,7 +38,7 @@ guidance:
       - {stage: 2, text: "How do you control access to shared drives and SharePoint sites holding confidential data?"}
     requests:
       - {label: "Role or permission matrix for key applications", kind: document}
-      - {label: "Export of permissions on a confidential share or site", kind: technical, fresh_days: 30}
+      - {label: "Export of permissions on a confidential share or site", kind: technical, fresh_days: 40}
       - {label: "Access review evidence for one business application", kind: record, fresh_days: 200}
     sampling: {size: "3 to 5 users", population: "users of one critical application", method: "compare actual permissions with role matrix and job title"}
     interviewees: [iam, staff]
@@ -47,11 +47,12 @@ guidance:
       - "Role matrix exists on paper but application permissions were granted ad hoc"
   a.8.4:
     questions:
+      - {stage: 1, text: "Who may read or change source code, and where is that rule written for each repository?"}
       - {stage: 2, text: "Who has write access to your source code repositories, and how is that reviewed?"}
       - {stage: 2, text: "Can a developer push directly to the main branch? Show me the branch protection settings."}
     requests:
-      - {label: "Repository access list with roles per repo or group", kind: technical, fresh_days: 30}
-      - {label: "Branch protection or merge rule screenshots for production repositories", kind: technical, fresh_days: 30}
+      - {label: "Repository access list with roles per repo or group", kind: technical, fresh_days: 40}
+      - {label: "Branch protection or merge rule screenshots for production repositories", kind: technical, fresh_days: 40}
       - {label: "Offboarding evidence removing a leaver from the code platform", kind: record}
     sampling: {size: "2 to 3 repositories + 3 leavers", population: "production code repos and recent leavers with dev access", method: "check protection settings and confirm leaver accounts removed"}
     interviewees: [dev]
@@ -66,8 +67,8 @@ guidance:
       - {stage: 2, text: "How do you handle legacy protocols and apps that cannot do MFA?"}
     requests:
       - {label: "Authentication standard: password rules, MFA scope, lockout", kind: document}
-      - {label: "IdP conditional access or MFA policy configuration export", kind: technical, fresh_days: 30}
-      - {label: "Report of accounts without MFA registered", kind: technical, fresh_days: 30}
+      - {label: "IdP conditional access or MFA policy configuration export", kind: technical, fresh_days: 40}
+      - {label: "Report of accounts without MFA registered", kind: technical, fresh_days: 40}
     sampling: {size: "3 to 5 systems", population: "internet-facing and critical apps", method: "test login flow and confirm SSO or MFA is enforced"}
     interviewees: [iam]
     pitfalls:
@@ -76,11 +77,12 @@ guidance:
       - "Some SaaS tools use local logins outside SSO with weak passwords"
   a.8.6:
     questions:
+      - {stage: 1, text: "Which resources do you track for capacity, and what thresholds trigger action?"}
       - {stage: 2, text: "How do you know when a critical system is running out of storage, CPU or licences before it fails?"}
       - {stage: 2, text: "Show me a capacity alert and what was done about it."}
     requests:
-      - {label: "Monitoring dashboard or thresholds for critical systems", kind: technical, fresh_days: 30}
-      - {label: "Capacity review or planning minutes, or ticket resulting from a capacity alert", kind: record, fresh_days: 365}
+      - {label: "Monitoring dashboard or thresholds for critical systems", kind: technical, fresh_days: 40}
+      - {label: "Capacity review or planning minutes, or ticket resulting from a capacity alert", kind: record, fresh_days: 400}
     sampling: null
     interviewees: [infra]
     pitfalls:
@@ -88,13 +90,14 @@ guidance:
       - "Past incident caused by full disk or quota with no follow-up capacity action"
   a.8.7:
     questions:
+      - {stage: 1, text: "What is your malware protection approach across endpoints, servers, email and cloud?"}
       - {stage: 2, text: "What anti-malware or EDR covers your endpoints and servers, and how do you know none are missing it?"}
       - {stage: 2, text: "Show me the last malware detection and how it was handled."}
       - {stage: 2, text: "How do staff learn to spot phishing, and what happens when they report one?"}
     requests:
-      - {label: "EDR console export: coverage, agent health, outdated agents", kind: technical, fresh_days: 30}
-      - {label: "Detection or quarantine events with handling tickets", kind: record, fresh_days: 90}
-      - {label: "Email filtering configuration and phishing awareness records", kind: record, fresh_days: 365}
+      - {label: "EDR console export: coverage, agent health, outdated agents", kind: technical, fresh_days: 40}
+      - {label: "Detection or quarantine events with handling tickets", kind: record, fresh_days: 100}
+      - {label: "Email filtering configuration and phishing awareness records", kind: record, fresh_days: 400}
     sampling: {size: "5 devices + 2 detections", population: "asset inventory and EDR alerts", method: "reconcile inventory against EDR agents; trace detections to closure"}
     interviewees: [sec_ops, endpoint, staff]
     pitfalls:
@@ -107,9 +110,9 @@ guidance:
       - {stage: 2, text: "Take this critical from three months ago: when was it found, when fixed, and how did you verify the fix?"}
     requests:
       - {label: "Vulnerability management procedure with severity based SLAs", kind: document}
-      - {label: "Latest internal and external vulnerability scan reports", kind: technical, fresh_days: 30}
-      - {label: "Latest penetration test report and remediation tracker", kind: record, fresh_days: 365}
-      - {label: "Patch compliance report for servers and endpoints", kind: technical, fresh_days: 30}
+      - {label: "Latest internal and external vulnerability scan reports", kind: technical, fresh_days: 40}
+      - {label: "Latest penetration test report and remediation tracker", kind: record, fresh_days: 400}
+      - {label: "Patch compliance report for servers and endpoints", kind: technical, fresh_days: 40}
     sampling: {size: "5 to 10 high or critical findings", population: "scan and pentest findings in the audit period", method: "check detection date, ticket, fix date versus SLA, rescan evidence; exceptions need risk acceptance"}
     interviewees: [sec_ops, infra]
     pitfalls:
@@ -123,7 +126,7 @@ guidance:
       - {stage: 2, text: "Here is a production server: show me its current settings against the baseline."}
     requests:
       - {label: "Hardening baselines or templates (for example CIS based) per platform, with version and review date", kind: document}
-      - {label: "Configuration compliance or drift report from a tool (Intune, GPO, CSPM, Ansible, Terraform state)", kind: technical, fresh_days: 30}
+      - {label: "Configuration compliance or drift report from a tool (Intune, GPO, CSPM, Ansible, Terraform state)", kind: technical, fresh_days: 40}
       - {label: "Records of deviations from baseline with approval", kind: record}
     sampling: {size: "3 to 5 systems", population: "critical servers, network devices and cloud accounts", method: "compare live configuration to the documented baseline"}
     interviewees: [infra, sec_ops]
@@ -138,7 +141,7 @@ guidance:
       - {stage: 2, text: "How are disks and devices wiped or destroyed when retired, and by whom?"}
     requests:
       - {label: "Retention and deletion schedule per data category", kind: document}
-      - {label: "Deletion logs or purge job outputs from a key system", kind: record, fresh_days: 365}
+      - {label: "Deletion logs or purge job outputs from a key system", kind: record, fresh_days: 400}
       - {label: "Certificates of destruction or wipe reports for retired media", kind: record}
       - {label: "Contract clauses or attestations of deletion from SaaS and cloud providers", kind: document}
     sampling: {size: "3 to 5 retired devices + 1 data category", population: "assets disposed in audit period", method: "trace asset tag to wipe or destruction certificate; check records older than retention period are gone"}
@@ -154,8 +157,8 @@ guidance:
       - {stage: 2, text: "Which users see full card numbers or IDs in the application, and why?"}
     requests:
       - {label: "Data masking or pseudonymisation rules mapped to data classification", kind: document}
-      - {label: "Screenshot of masked fields in application or non-production database", kind: technical, fresh_days: 90}
-      - {label: "Role configuration showing who can unmask data", kind: technical, fresh_days: 90}
+      - {label: "Screenshot of masked fields in application or non-production database", kind: technical, fresh_days: 100}
+      - {label: "Role configuration showing who can unmask data", kind: technical, fresh_days: 100}
     sampling: {size: "1 to 2 datasets", population: "non-production copies and reporting extracts", method: "inspect records for unmasked personal or sensitive data"}
     interviewees: [dev, dpo]
     pitfalls:
@@ -168,8 +171,8 @@ guidance:
       - {stage: 2, text: "Who reviews DLP alerts and what did the last ones lead to?"}
     requests:
       - {label: "DLP policy or rule set: monitored channels, data types, block or alert actions", kind: document}
-      - {label: "DLP tool configuration export (M365 Purview, CASB, endpoint)", kind: technical, fresh_days: 30}
-      - {label: "DLP alert log and triage records", kind: record, fresh_days: 90}
+      - {label: "DLP tool configuration export (M365 Purview, CASB, endpoint)", kind: technical, fresh_days: 40}
+      - {label: "DLP alert log and triage records", kind: record, fresh_days: 100}
     sampling: {size: "5 alerts", population: "DLP events in last quarter", method: "check each was reviewed and closed with a decision"}
     interviewees: [sec_ops, endpoint]
     pitfalls:
@@ -183,9 +186,9 @@ guidance:
       - {stage: 2, text: "Could ransomware with admin rights delete or encrypt your backups?"}
     requests:
       - {label: "Backup policy or schedule per system with RPO and retention", kind: document}
-      - {label: "Backup job reports showing success and failures", kind: technical, fresh_days: 30}
-      - {label: "Restore test records with date, scope, outcome and duration", kind: record, fresh_days: 365}
-      - {label: "Evidence of immutable or offline copy configuration", kind: technical, fresh_days: 90}
+      - {label: "Backup job reports showing success and failures", kind: technical, fresh_days: 40}
+      - {label: "Restore test records with date, scope, outcome and duration", kind: record, fresh_days: 400}
+      - {label: "Evidence of immutable or offline copy configuration", kind: technical, fresh_days: 100}
     sampling: {size: "3 to 5 systems", population: "critical systems in the asset register", method: "check each appears in backup jobs, verify recent success and at least one restore test"}
     interviewees: [infra]
     pitfalls:
@@ -194,12 +197,13 @@ guidance:
       - "Failed jobs recurring for weeks with no ticket"
   a.8.14:
     questions:
+      - {stage: 1, text: "Which services need redundancy, and how did you derive that from their availability requirements?"}
       - {stage: 2, text: "Which systems must stay available, and what redundancy do they have?"}
       - {stage: 2, text: "Have you tested a failover? Show me the result."}
     requests:
       - {label: "Availability requirements per critical service (from BIA or risk assessment)", kind: document}
       - {label: "Architecture diagram showing redundant components, zones or sites", kind: document}
-      - {label: "Failover test report", kind: record, fresh_days: 365}
+      - {label: "Failover test report", kind: record, fresh_days: 400}
     sampling: null
     interviewees: [infra]
     pitfalls:
@@ -212,8 +216,8 @@ guidance:
       - {stage: 2, text: "Who can delete or alter logs, and how would you know?"}
     requests:
       - {label: "Logging standard: sources, event types, retention", kind: document}
-      - {label: "List of log sources onboarded to the SIEM or log platform", kind: technical, fresh_days: 30}
-      - {label: "Log retention settings and access rights to the log store", kind: technical, fresh_days: 90}
+      - {label: "List of log sources onboarded to the SIEM or log platform", kind: technical, fresh_days: 40}
+      - {label: "Log retention settings and access rights to the log store", kind: technical, fresh_days: 100}
     sampling: {size: "3 to 5 systems", population: "critical assets", method: "confirm each sends logs, retrieve a specific historic event within retention"}
     interviewees: [sec_ops, infra]
     pitfalls:
@@ -227,8 +231,8 @@ guidance:
       - {stage: 2, text: "Who looks at alerts outside working hours?"}
     requests:
       - {label: "Monitoring procedure: use cases, alert severities, response times, on-call", kind: document}
-      - {label: "SIEM or MDR alert rules list and coverage", kind: technical, fresh_days: 30}
-      - {label: "Alert triage tickets or MDR monthly reports", kind: record, fresh_days: 90}
+      - {label: "SIEM or MDR alert rules list and coverage", kind: technical, fresh_days: 40}
+      - {label: "Alert triage tickets or MDR monthly reports", kind: record, fresh_days: 100}
     sampling: {size: "5 to 10 alerts", population: "alerts raised in last 3 months", method: "check each was triaged within target time and outcome recorded"}
     interviewees: [sec_ops]
     pitfalls:
@@ -237,9 +241,10 @@ guidance:
       - "No baseline of normal activity, so 'anomalous' is undefined"
   a.8.17:
     questions:
+      - {stage: 1, text: "Which time source do your systems use, and where is that standard documented?"}
       - {stage: 2, text: "Which time source do your systems use, and how do you know they agree?"}
     requests:
-      - {label: "NTP configuration on domain controllers, network devices and cloud", kind: technical, fresh_days: 90}
+      - {label: "NTP configuration on domain controllers, network devices and cloud", kind: technical, fresh_days: 100}
     sampling: {size: "2 to 3 systems", population: "servers and network devices", method: "compare system time and NTP source settings"}
     interviewees: [infra]
     pitfalls:
@@ -247,11 +252,12 @@ guidance:
       - "Mixed time zones in logs without UTC normalisation, making correlation hard"
   a.8.18:
     questions:
+      - {stage: 1, text: "Which tools let an admin bypass normal security controls, and who may use them?"}
       - {stage: 2, text: "Which tools can override system or security controls here, and who can run them?"}
       - {stage: 2, text: "How do you stop a normal user from running admin tools or scripting engines?"}
     requests:
       - {label: "List of restricted utility programs and who is authorised", kind: document}
-      - {label: "Application control or local admin restriction configuration", kind: technical, fresh_days: 90}
+      - {label: "Application control or local admin restriction configuration", kind: technical, fresh_days: 100}
     sampling: null
     interviewees: [iam, sec_ops]
     pitfalls:
@@ -259,11 +265,12 @@ guidance:
       - "No list of what is considered a privileged utility"
   a.8.19:
     questions:
+      - {stage: 1, text: "Who may install software on production systems, and from which approved sources?"}
       - {stage: 2, text: "Can a user install software on their laptop? Show me."}
       - {stage: 2, text: "How is software installed on production servers approved and tracked?"}
     requests:
       - {label: "Approved software list or catalogue", kind: document}
-      - {label: "Installed software inventory report from endpoint management", kind: technical, fresh_days: 30}
+      - {label: "Installed software inventory report from endpoint management", kind: technical, fresh_days: 40}
       - {label: "Change tickets for software installed on production", kind: record}
     sampling: {size: "3 to 5 endpoints", population: "managed endpoints", method: "compare installed software with the approved list"}
     interviewees: [endpoint, staff]
@@ -272,13 +279,14 @@ guidance:
       - "Browser extensions not controlled"
   a.8.20:
     questions:
+      - {stage: 1, text: "Show me your current network diagram. Where are the trust boundaries and remote access paths?"}
       - {stage: 2, text: "Show me your current network diagram and tell me when it was last updated."}
       - {stage: 2, text: "How are firewall rules reviewed, and when was the last review?"}
       - {stage: 2, text: "How is admin access to network devices controlled?"}
     requests:
       - {label: "Up-to-date network diagram including cloud and remote access", kind: document}
-      - {label: "Firewall rule review record with removals", kind: record, fresh_days: 365}
-      - {label: "Firewall or security group rule export", kind: technical, fresh_days: 30}
+      - {label: "Firewall rule review record with removals", kind: record, fresh_days: 400}
+      - {label: "Firewall or security group rule export", kind: technical, fresh_days: 40}
     sampling: {size: "5 to 10 rules", population: "firewall and security group rules", method: "check each has a business justification and owner; look for any-any rules"}
     interviewees: [network]
     pitfalls:
@@ -287,11 +295,12 @@ guidance:
       - "Management interfaces reachable from the internet"
   a.8.21:
     questions:
+      - {stage: 1, text: "Which network services do you buy or run, and what security terms did you set for each?"}
       - {stage: 2, text: "Which network services do you buy (internet, SD-WAN, VPN, DNS), and what security terms are in those contracts?"}
       - {stage: 2, text: "How do you check the provider is meeting the agreed service levels?"}
     requests:
       - {label: "Network service contracts or SLAs with security clauses", kind: document}
-      - {label: "Provider service reports or review minutes", kind: record, fresh_days: 365}
+      - {label: "Provider service reports or review minutes", kind: record, fresh_days: 400}
     sampling: null
     interviewees: [network, proc]
     pitfalls:
@@ -299,11 +308,12 @@ guidance:
       - "Provider reports received but never reviewed"
   a.8.22:
     questions:
+      - {stage: 1, text: "How is your network split into zones, and what decides which zone a system lands in?"}
       - {stage: 2, text: "How are guest, user, server, and management networks separated?"}
       - {stage: 2, text: "Connect me to guest Wi-Fi: can I reach any internal system?"}
     requests:
       - {label: "Network segmentation diagram with VLANs, zones and trust levels", kind: document}
-      - {label: "Inter-zone firewall rules or ACLs", kind: technical, fresh_days: 90}
+      - {label: "Inter-zone firewall rules or ACLs", kind: technical, fresh_days: 100}
     sampling: {size: "1 to 2 tests", population: "network zones", method: "observe a connection attempt from guest or user zone to a restricted zone"}
     interviewees: [network]
     pitfalls:
@@ -316,8 +326,8 @@ guidance:
       - {stage: 2, text: "Does filtering still apply when staff work from home off VPN?"}
     requests:
       - {label: "Web filtering policy with blocked categories", kind: document}
-      - {label: "Filtering tool configuration (secure web gateway, DNS filter, firewall)", kind: technical, fresh_days: 90}
-      - {label: "Block event logs or reports", kind: record, fresh_days: 90}
+      - {label: "Filtering tool configuration (secure web gateway, DNS filter, firewall)", kind: technical, fresh_days: 100}
+      - {label: "Block event logs or reports", kind: record, fresh_days: 100}
     sampling: {size: "2 to 3 devices", population: "office and remote devices", method: "live test of a blocked category or test URL"}
     interviewees: [network, staff]
     pitfalls:
@@ -330,8 +340,8 @@ guidance:
       - {stage: 2, text: "Show me encryption at rest for this database and in transit for this web app."}
     requests:
       - {label: "Cryptography policy including key management", kind: document}
-      - {label: "Key and certificate inventory with owners and expiry", kind: record, fresh_days: 90}
-      - {label: "Encryption settings screenshots (KMS, disk, TLS scan result)", kind: technical, fresh_days: 90}
+      - {label: "Key and certificate inventory with owners and expiry", kind: record, fresh_days: 100}
+      - {label: "Encryption settings screenshots (KMS, disk, TLS scan result)", kind: technical, fresh_days: 100}
     sampling: {size: "3 systems", population: "systems storing or transmitting confidential data", method: "verify encryption setting and protocol versions"}
     interviewees: [infra, sec_ops, dev]
     pitfalls:
@@ -344,7 +354,7 @@ guidance:
       - {stage: 2, text: "Take this recent release: show me the security steps it went through."}
     requests:
       - {label: "Secure development policy or SDLC description", kind: document}
-      - {label: "Evidence trail for one release: requirements, review, tests, approval", kind: record, fresh_days: 180}
+      - {label: "Evidence trail for one release: requirements, review, tests, approval", kind: record, fresh_days: 200}
     sampling: {size: "2 to 3 releases", population: "releases in audit period", method: "trace release from ticket to deployment and check security gates"}
     interviewees: [dev, ciso]
     pitfalls:
@@ -352,11 +362,12 @@ guidance:
       - "Low-code or scripts outside the official SDLC"
   a.8.26:
     questions:
+      - {stage: 1, text: "How are security requirements captured for a new application or a major change?"}
       - {stage: 2, text: "How do security requirements get into a new application or feature you build or buy?"}
       - {stage: 2, text: "Show me the security requirements captured for your last new system."}
     requests:
       - {label: "Security requirements template or checklist for projects and acquisitions", kind: document}
-      - {label: "Completed requirements for one recent project or SaaS acquisition", kind: record, fresh_days: 365}
+      - {label: "Completed requirements for one recent project or SaaS acquisition", kind: record, fresh_days: 400}
     sampling: {size: "2 projects", population: "new systems or major changes in audit period", method: "check security requirements were defined and verified"}
     interviewees: [dev, proc]
     pitfalls:
@@ -368,7 +379,7 @@ guidance:
       - {stage: 2, text: "Show me how a recent design was reviewed against them."}
     requests:
       - {label: "Secure architecture principles or reference architecture", kind: document}
-      - {label: "Architecture or threat model review for a recent system", kind: record, fresh_days: 365}
+      - {label: "Architecture or threat model review for a recent system", kind: record, fresh_days: 400}
     sampling: null
     interviewees: [dev]
     pitfalls:
@@ -381,8 +392,8 @@ guidance:
       - {stage: 2, text: "How do you track and update vulnerable third-party libraries?"}
     requests:
       - {label: "Secure coding guideline (for example OWASP based) per language", kind: document}
-      - {label: "SAST and dependency scan results from the pipeline", kind: technical, fresh_days: 30}
-      - {label: "Developer secure coding training records", kind: record, fresh_days: 365}
+      - {label: "SAST and dependency scan results from the pipeline", kind: technical, fresh_days: 40}
+      - {label: "Developer secure coding training records", kind: record, fresh_days: 400}
       - {label: "Exceptions to blocking findings with risk acceptance", kind: record}
     sampling: {size: "3 to 5 merged pull requests", population: "merges to main branch in last 3 months", method: "check peer review, scan result and handling of findings"}
     interviewees: [dev]
@@ -392,11 +403,12 @@ guidance:
       - "No dependency or secret scanning"
   a.8.29:
     questions:
+      - {stage: 1, text: "Which security tests must pass before a release, and who signs off?"}
       - {stage: 2, text: "What security testing happens before a release goes live, and who signs off?"}
       - {stage: 2, text: "Show me the acceptance test evidence for the last significant release."}
     requests:
       - {label: "Test plan or criteria including security tests", kind: document}
-      - {label: "Security test results (DAST, pentest, functional security tests) for a recent release", kind: record, fresh_days: 365}
+      - {label: "Security test results (DAST, pentest, functional security tests) for a recent release", kind: record, fresh_days: 400}
     sampling: {size: "2 to 3 releases", population: "major releases in audit period", method: "check security tests ran and acceptance was signed before deployment"}
     interviewees: [dev]
     pitfalls:
@@ -404,6 +416,7 @@ guidance:
       - "No acceptance criteria, so failed tests do not block go-live"
   a.8.30:
     questions:
+      - {stage: 1, text: "Which development do you outsource, and what security terms apply to it?"}
       - {stage: 2, text: "Do you use external developers? What security terms are in their contracts?"}
       - {stage: 2, text: "How do you check the code they deliver?"}
     requests:
@@ -416,11 +429,12 @@ guidance:
       - "No review of delivered code; contract silent on security"
   a.8.31:
     questions:
+      - {stage: 1, text: "How are development, test and production kept apart, and who may access each?"}
       - {stage: 2, text: "How are development, test and production separated, and who can access production?"}
       - {stage: 2, text: "Can a developer change production directly? Show me."}
     requests:
       - {label: "Environment diagram showing separate accounts, subscriptions or networks", kind: document}
-      - {label: "Production access list", kind: technical, fresh_days: 30}
+      - {label: "Production access list", kind: technical, fresh_days: 40}
     sampling: null
     interviewees: [dev, infra]
     pitfalls:
@@ -433,7 +447,7 @@ guidance:
       - {stage: 2, text: "How do you detect a change that bypassed the process?"}
     requests:
       - {label: "Change management procedure", kind: document}
-      - {label: "Change log or ticket export for audit period", kind: record, fresh_days: 30}
+      - {label: "Change log or ticket export for audit period", kind: record, fresh_days: 40}
       - {label: "Emergency change records with retrospective approval", kind: record}
     sampling: {size: "10 to 25 changes", population: "changes in audit period, including emergency ones", method: "auditor picks from the full list or from system logs, then checks approval, testing and separation of approver and implementer"}
     interviewees: [service_desk, dev]
@@ -443,6 +457,7 @@ guidance:
       - "Emergency changes never reviewed after the fact"
   a.8.33:
     questions:
+      - {stage: 1, text: "What are your rules for using production data in test, and who approves exceptions?"}
       - {stage: 2, text: "Where does your test data come from, and is any of it real production data?"}
       - {stage: 2, text: "If production data is copied to test, who approves it and when is it removed?"}
     requests:
@@ -455,9 +470,10 @@ guidance:
       - "Copies never deleted after testing"
   a.8.34:
     questions:
+      - {stage: 1, text: "How do you plan and approve audits or tests that touch live systems?"}
       - {stage: 2, text: "When auditors or pentesters test live systems, how do you plan and control that access?"}
     requests:
-      - {label: "Rules of engagement or authorisation for the last penetration test or technical audit", kind: record, fresh_days: 365}
+      - {label: "Rules of engagement or authorisation for the last penetration test or technical audit", kind: record, fresh_days: 400}
       - {label: "Evidence that temporary auditor or tester accounts were removed", kind: record}
     sampling: null
     interviewees: [sec_ops, auditor]

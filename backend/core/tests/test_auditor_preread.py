@@ -31,6 +31,8 @@ PEOPLE = {
     "service_desk", "sec_ops", "dev", "staff",
 }  # fmt: skip
 TODAY = date(2026, 11, 15)
+WINDOWS = {40, 100, 200, 400}
+STAGE2_ONLY = {"5.1", "10.1", "10.2"}
 GUIDE = {"requests": [{"label": "a", "kind": "record", "fresh_days": 200}, {"label": "b", "kind": "document"}]}  # fmt: skip
 
 
@@ -52,6 +54,9 @@ def test_iso27001_guidance_covers_every_assessable_node():
         assert all(q["stage"] in (1, 2) and q["text"] for q in g["questions"]), key
         assert all(r["kind"] in KINDS and r["label"] for r in g["requests"]), key
         assert set(g["interviewees"]) <= PEOPLE, key
+        assert all(r.get("fresh_days", 400) in WINDOWS for r in g["requests"]), key
+        if key not in STAGE2_ONLY:
+            assert any(q["stage"] == 1 for q in g["questions"]), key
 
 
 def test_readiness_states():
@@ -62,6 +67,11 @@ def test_readiness_states():
     state, reasons = readiness("compliant", GUIDE, [ev(300)], [], TODAY)
     assert state == "weak"
     assert {STALE_EVIDENCE, FEWER_EVIDENCES_THAN_REQUESTS} <= set(reasons)
+    seen = {"label": "c", "kind": "observation"}
+    on_site = {"requests": [*GUIDE["requests"], seen]}
+    assert readiness("compliant", on_site, [ev(10), ev(20)], [], TODAY) == ("ready", [])
+    monthly = {"requests": [*GUIDE["requests"], {"label": "d", "kind": "technical", "fresh_days": 40}]}  # fmt: skip
+    assert STALE_EVIDENCE in readiness("compliant", monthly, [ev(60)] * 3, [], TODAY)[1]
     errors = [{"severity": "error", "msgid": "x", "msg": "x"}]
     assert readiness("compliant", GUIDE, [ev(1), ev(1)], errors, TODAY)[0] == "gap"
 

@@ -520,7 +520,7 @@
 									{@render title(
 										'fa-solid fa-scale-balanced',
 										'Requested vs. on file',
-										`${g.requests.length} requested · ${selected.evidences.length} on file`
+										`${g.requests.filter((r) => r.kind !== 'observation').length} to file · ${selected.evidences.length} on file`
 									)}
 									<div
 										class="grid grid-cols-1 xl:grid-cols-2 gap-4 rounded-container bg-surface-100-900 p-3"

@@ -58,13 +58,16 @@ def readiness(ra_result, guidance, evidences, findings, today) -> tuple[str, lis
         reasons.append(QUALITY_ERROR)
     if ra_result == RequirementAssessment.Result.NOT_ASSESSED:
         reasons.append(NOT_ASSESSED)
-    requests = guidance.get("requests") or []
+    # What the auditor watches on site is never a linked evidence.
+    requests = [r for r in guidance.get("requests") or [] if r["kind"] != "observation"]
     windows = [r["fresh_days"] for r in requests if r.get("fresh_days")]
     newest = max((e["updated_at"] for e in evidences if e["updated_at"]), default=None)
+    # shortcut: requests are not matched to evidences yet, so the tightest window
+    # applies to the newest evidence; check per request once they are matched.
     if (
         evidences
         and windows
-        and (newest is None or newest.date() < today - timedelta(days=max(windows)))
+        and (newest is None or newest.date() < today - timedelta(days=min(windows)))
     ):
         reasons.append(STALE_EVIDENCE)
     if evidences and len(evidences) < len(requests):

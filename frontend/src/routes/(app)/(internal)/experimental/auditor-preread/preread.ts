@@ -66,7 +66,7 @@ export const REASONS: Record<string, string> = {
 	non_compliant: 'Assessed as non-compliant',
 	quality_error: 'Audit quality check raises an error',
 	not_assessed: 'Not assessed yet',
-	stale_evidence: 'Newest evidence is older than the freshness window',
+	stale_evidence: 'Newest evidence is older than the tightest freshness window',
 	fewer_evidences_than_requests: 'Fewer evidences linked than records requested',
 	quality_warning: 'Audit quality check raises a warning'
 };

@@ -34,12 +34,12 @@ guidance:
   "4.3":
     questions:
       - {stage: 1, text: "Read me your scope statement. Which locations, teams, products and systems are in, and what is excluded?"}
-      - {stage: 1, text: "Where something is excluded, how do you control the interfaces and dependencies with that excluded part?"}
+      - {stage: 1, text: "Where something is left out, how do you handle the connections and hand-offs with it?"}
       - {stage: 2, text: "This team or site I saw on your org chart: is it in scope? Show me how the scope document says so."}
     requests:
       - {label: "ISMS scope statement (documented, approved, versioned)", kind: document}
-      - {label: "Interfaces and dependencies list, including outsourced and cloud services", kind: document}
-      - {label: "Network or architecture diagram matching the scope boundary", kind: technical}
+      - {label: "List of links and hand-offs with what sits outside scope, including outsourced and cloud services", kind: document}
+      - {label: "Network or architecture diagram matching the scope boundary", kind: technical, fresh_days: 400}
     sampling: null
     interviewees: [ciso, top, it_lead]
     pitfalls:
@@ -48,7 +48,7 @@ guidance:
       - "Cloud providers and remote workers ignored when drawing the boundary"
   "4.4":
     questions:
-      - {stage: 1, text: "Show me how your ISMS processes fit together and how they interact."}
+      - {stage: 1, text: "Show me how your ISMS processes connect: which outputs feed which inputs?"}
       - {stage: 2, text: "How do you know the ISMS is maintained and improved, not just documented? Give me an example of something that changed this year."}
     requests:
       - {label: "ISMS manual or process map showing processes, owners and interactions", kind: document}
@@ -62,7 +62,7 @@ guidance:
     questions:
       - {stage: 2, text: "What is your personal role in the ISMS? Tell me in your own words what the security objectives are."}
       - {stage: 2, text: "Give me an example where you allocated budget or people to information security in the last year."}
-      - {stage: 2, text: "How do you make sure security requirements are built into business processes, not bolted on afterwards?"}
+      - {stage: 2, text: "How does security show up in the way the business already runs, such as budgeting, projects or purchasing?"}
     requests:
       - {label: "Evidence of resources approved for the ISMS (budget line, headcount, tool purchase)", kind: record, fresh_days: 400}
       - {label: "Top management communications on information security (all-hands slide, memo, intranet post)", kind: record, fresh_days: 400}
@@ -76,7 +76,7 @@ guidance:
   "5.2":
     questions:
       - {stage: 1, text: "Show me your information security policy. Who approved it and when?"}
-      - {stage: 1, text: "Where does the policy commit to meeting requirements and to continual improvement, and how does it frame objectives?"}
+      - {stage: 1, text: "Read me the lines that set the policy's intent. Does it say how objectives are set, and does it promise to keep getting better?"}
       - {stage: 2, text: "How did staff and relevant external parties get this policy? Show me."}
     requests:
       - {label: "Information security policy, signed or approved by top management, with version and date", kind: document}
@@ -85,11 +85,11 @@ guidance:
     interviewees: [top, ciso, staff]
     pitfalls:
       - "Policy approved by the CISO only, not by top management"
-      - "Policy is a long technical document instead of a short statement of intent, or lacks the commitment to continual improvement"
+      - "Policy is a long technical document instead of a short statement of intent, or makes no promise to keep improving"
       - "Policy not reviewed since the 2013 version, still references the old Annex A"
   "5.3":
     questions:
-      - {stage: 1, text: "Who is accountable for the ISMS conforming to the standard, and who reports its performance to top management?"}
+      - {stage: 1, text: "Who answers for the ISMS meeting the standard, and who briefs top management on how it is doing?"}
       - {stage: 2, text: "Show me where security responsibilities are written into job descriptions or a RACI."}
       - {stage: 2, text: "You are listed as owner of this process. Tell me what you do as owner."}
     requests:
@@ -103,11 +103,11 @@ guidance:
       - "Nobody formally assigned to report ISMS performance to top management"
   "6.1.1":
     questions:
-      - {stage: 1, text: "How did the issues from 4.1 and the requirements from 4.2 feed into identifying risks and opportunities for the ISMS itself?"}
+      - {stage: 1, text: "Take your context issues and stakeholder expectations: which risks and opportunities for the ISMS itself did they produce?"}
       - {stage: 2, text: "Show me one opportunity you identified and what you did with it."}
     requests:
       - {label: "Register of ISMS-level risks and opportunities (distinct from or part of the information security risk register)", kind: document}
-      - {label: "Action plan showing how these actions are integrated and their effectiveness evaluated", kind: record}
+      - {label: "Plan of actions on ISMS risks and opportunities, showing which ISMS process carries each and how you will know it worked", kind: record, fresh_days: 400}
     sampling: null
     interviewees: [ciso, risk]
     pitfalls:
@@ -116,7 +116,7 @@ guidance:
   "6.1.2":
     questions:
       - {stage: 1, text: "Walk me through your risk assessment methodology: criteria for acceptance, how you score likelihood and consequence."}
-      - {stage: 1, text: "How do you ensure repeated assessments give consistent, comparable results?"}
+      - {stage: 1, text: "If two people scored the same risk a year apart, why would they land on the same answer?"}
       - {stage: 2, text: "Show me the latest risk assessment. When was it done and what triggered it?"}
       - {stage: 2, text: "For this risk, who is the owner? Let me ask them about it."}
     requests:
@@ -132,7 +132,7 @@ guidance:
   "6.1.3":
     questions:
       - {stage: 1, text: "Show me your Statement of Applicability. For each excluded Annex A control, why is it excluded?"}
-      - {stage: 1, text: "How did you compare your chosen controls with Annex A to confirm nothing necessary was missed?"}
+      - {stage: 1, text: "You picked your controls from your risks. How did you then check Annex A for anything you overlooked?"}
       - {stage: 2, text: "Who approved the risk treatment plan and accepted the residual risks?"}
       - {stage: 2, text: "This control says implemented in the SoA. Show me it working."}
     requests:
@@ -151,8 +151,8 @@ guidance:
       - {stage: 2, text: "Where are you against these objectives today? Show me the data."}
       - {stage: 2, text: "What happens when an objective is missed?"}
     requests:
-      - {label: "Information security objectives with targets, owners, resources, deadlines and measurement method", kind: document}
-      - {label: "Progress tracking against objectives (dashboard or report)", kind: record, fresh_days: 120}
+      - {label: "Objectives list: target, owner, budget or people, due date and how progress is measured", kind: document}
+      - {label: "Progress tracking against objectives (dashboard or report)", kind: record, fresh_days: 100}
     sampling: null
     interviewees: [ciso, top]
     pitfalls:
@@ -173,6 +173,7 @@ guidance:
       - "Reorganisation or scope extension done without any recorded plan or impact assessment"
   "7.1":
     questions:
+      - {stage: 1, text: "How did you decide what the ISMS needs in people, budget and tools, and where is that recorded?"}
       - {stage: 2, text: "How did you determine what resources the ISMS needs? Is anything you asked for still missing?"}
       - {stage: 2, text: "How much of your working time actually goes to the ISMS?"}
     requests:
@@ -185,9 +186,9 @@ guidance:
       - "Resource needs never formally assessed or discussed in management review"
   "7.2":
     questions:
-      - {stage: 1, text: "How did you define the competence required for roles that affect security?"}
+      - {stage: 1, text: "For admins, developers and the ISMS team, what skills did you decide each role needs?"}
       - {stage: 2, text: "Show me the competence evidence for your ISMS manager and internal auditor."}
-      - {stage: 2, text: "When you identified a competence gap, what did you do and how did you check it worked?"}
+      - {stage: 2, text: "Tell me about someone who lacked a skill their role needs. What did you do, and how do you know it helped?"}
     requests:
       - {label: "Competence matrix or requirements per security role", kind: document}
       - {label: "Training certificates, CVs or qualifications for key ISMS roles", kind: record}
@@ -200,6 +201,7 @@ guidance:
       - "Competence requirements not defined for admins or developers"
   "7.3":
     questions:
+      - {stage: 1, text: "What must every person in scope know about security, and where is that set out?"}
       - {stage: 2, text: "What does the information security policy mean for your daily work?"}
       - {stage: 2, text: "What would you do if you clicked a suspicious link or lost your laptop?"}
     requests:
@@ -212,10 +214,10 @@ guidance:
       - "Contractors and new joiners missing from completion records"
   "7.4":
     questions:
-      - {stage: 1, text: "Show me how you decided what to communicate on security, to whom, when, and by whom."}
+      - {stage: 1, text: "Which security topics do you talk about inside and outside the company, with whom, and who speaks for you?"}
       - {stage: 2, text: "Give me an example of a security communication to an external party, such as a customer or authority."}
     requests:
-      - {label: "Communication plan or matrix (what, when, with whom, who, how)", kind: document}
+      - {label: "Communication plan or matrix (topic, audience, timing, channel, owner)", kind: document}
       - {label: "Examples of internal and external security communications", kind: record, fresh_days: 400}
     sampling: null
     interviewees: [ciso, legal]
@@ -236,7 +238,7 @@ guidance:
       - "Procedures listed in the master list that do not exist or are drafts"
   "7.5.2":
     questions:
-      - {stage: 1, text: "How do you identify, format, review and approve documents? Show me the version history of one."}
+      - {stage: 1, text: "How does a document get its name, version and owner, and who signs it off before it is published? Show me the history of one."}
       - {stage: 2, text: "Who approved this policy revision and where is that recorded?"}
     requests:
       - {label: "Document control procedure (naming, versioning, approval, review frequency)", kind: document}
@@ -248,12 +250,13 @@ guidance:
       - "Different versions of the same policy in circulation (intranet vs shared drive)"
   "7.5.3":
     questions:
+      - {stage: 1, text: "How are ISMS documents approved, versioned, distributed and retired, and how long do you keep records?"}
       - {stage: 2, text: "How do you make sure people use the current version and obsolete versions are withdrawn?"}
-      - {stage: 2, text: "How are records protected, retained and eventually disposed of?"}
-      - {stage: 2, text: "How do you control external documents, such as standards or supplier documentation?"}
+      - {stage: 2, text: "Where do records live, who can alter them, and when do you delete them?"}
+      - {stage: 2, text: "How do you keep track of documents you did not write, such as standards or supplier manuals?"}
     requests:
       - {label: "Record retention schedule", kind: document}
-      - {label: "Access rights on the ISMS document repository", kind: technical}
+      - {label: "Access rights on the ISMS document repository", kind: technical, fresh_days: 400}
     sampling: {size: "2-3 documents", population: "documents found at point of use during the tour", method: "compare against the current master list version"}
     interviewees: [ciso, it_lead]
     pitfalls:
@@ -261,23 +264,25 @@ guidance:
       - "Everyone has edit rights on the ISMS repository"
   "8.1":
     questions:
-      - {stage: 2, text: "How do you plan and control the processes that deliver your risk treatment? Show me the criteria for one of them."}
+      - {stage: 1, text: "Which processes, including outsourced ones, did you identify as needing planning and control for security?"}
+      - {stage: 2, text: "Pick a process that delivers a risk treatment action: what does done right look like, and how do you check it?"}
       - {stage: 2, text: "Which processes are outsourced, and how do you control them?"}
-      - {stage: 2, text: "Show me how an unplanned change was handled and how its effects were contained."}
+      - {stage: 2, text: "Tell me about a change that did not go to plan. What did you do about the side effects?"}
     requests:
-      - {label: "List of externally provided processes, products or services relevant to the ISMS and their controls", kind: document}
-      - {label: "Operational records showing processes carried out as planned (e.g. backup logs, patch reports)", kind: record, fresh_days: 90}
+      - {label: "List of outsourced processes and bought-in services the ISMS depends on, with how each is controlled", kind: document}
+      - {label: "Operational records showing processes carried out as planned (e.g. backup logs, patch reports)", kind: record, fresh_days: 100}
     sampling: {size: "3-5 processes", population: "operational security processes and outsourced services", method: "check criteria exist and records prove execution"}
     interviewees: [it_lead, ciso, proc]
     pitfalls:
-      - "Outsourced IT or cloud services not identified as externally provided processes, so no control over them"
-      - "Processes run but no retained evidence they were carried out as planned"
+      - "Outsourced IT or cloud services not listed as outsourced processes, so nothing controls them"
+      - "Processes run, but nothing kept to prove they ran when and how they should"
   "8.2":
     questions:
+      - {stage: 1, text: "Are the results of each risk assessment cycle kept, or only today's register?"}
       - {stage: 2, text: "How often do you reassess risks, and what triggers an unscheduled reassessment?"}
       - {stage: 2, text: "Show me the assessment you did after your last significant change."}
     requests:
-      - {label: "Risk assessment results from planned intervals (last two cycles)", kind: record, fresh_days: 400}
+      - {label: "Risk assessment results from each scheduled cycle (last two)", kind: record, fresh_days: 400}
       - {label: "Ad-hoc risk assessment following a significant change or incident", kind: record}
     sampling: {size: "1-2 changes", population: "significant changes in the last 12 months", method: "check a risk assessment was triggered and recorded"}
     interviewees: [risk]
@@ -286,10 +291,11 @@ guidance:
       - "Results not retained, only the current snapshot of the register"
   "8.3":
     questions:
+      - {stage: 1, text: "Which treatment actions are due before Stage 2, and which are already done?"}
       - {stage: 2, text: "Show me progress on the risk treatment plan. Which actions are complete and how do you know they work?"}
       - {stage: 2, text: "What happens to treatment actions that miss their deadline?"}
     requests:
-      - {label: "Risk treatment plan status report", kind: record, fresh_days: 120}
+      - {label: "Risk treatment plan status report", kind: record, fresh_days: 100}
       - {label: "Evidence of completed treatment actions", kind: record}
     sampling: {size: "3-5 treatment actions", population: "actions due in the last 12 months", method: "verify completion evidence and update of residual risk"}
     interviewees: [risk, ciso]
@@ -298,22 +304,23 @@ guidance:
       - "Large backlog of overdue actions with no escalation"
   "9.1":
     questions:
-      - {stage: 1, text: "What do you measure, how, how often, and who analyses the results?"}
+      - {stage: 1, text: "Which numbers tell you the ISMS is working, where do they come from, and who looks at them?"}
       - {stage: 2, text: "Show me the latest measurement results and what decision they led to."}
-      - {stage: 2, text: "How do you evaluate the effectiveness of the ISMS, not just activity counts?"}
+      - {stage: 2, text: "Which of these numbers would move if a control stopped working?"}
     requests:
-      - {label: "Measurement plan or KPI catalogue (what, method, frequency, owner, analyst)", kind: document}
-      - {label: "Latest KPI / metrics report with analysis", kind: record, fresh_days: 120}
+      - {label: "KPI catalogue: each metric with its source, cadence, who collects it and who interprets it", kind: document}
+      - {label: "Latest KPI / metrics report with analysis", kind: record, fresh_days: 100}
     sampling: {size: "2-3 metrics", population: "KPIs in the measurement plan", method: "check data source, frequency met and results used"}
     interviewees: [ciso, sec_ops]
     pitfalls:
       - "Metrics count activity (number of trainings) without saying anything about effectiveness"
       - "Results collected but never analysed or reported to management"
-      - "Who measures and who analyses is not defined"
+      - "Nobody named for collecting or interpreting the metrics"
   "9.2.1":
     questions:
+      - {stage: 1, text: "Has a full internal audit been carried out yet, and which parts of the ISMS did it cover?"}
       - {stage: 2, text: "Show me the last internal audit report. Did it cover all of the ISMS clauses and the applicable Annex A controls?"}
-      - {stage: 2, text: "How did you check the internal audit was done against both the standard and your own requirements?"}
+      - {stage: 2, text: "Did the audit test your own procedures as well as the standard? Where does the report show it?"}
     requests:
       - {label: "Internal audit report(s) with findings, covering the full ISMS before Stage 2", kind: record, fresh_days: 400}
       - {label: "Internal audit checklists and evidence notes", kind: record, fresh_days: 400}
@@ -327,20 +334,21 @@ guidance:
     questions:
       - {stage: 1, text: "Show me your audit programme. How did you decide frequency and coverage?"}
       - {stage: 2, text: "Who are your internal auditors, and how do you ensure they don't audit their own work?"}
-      - {stage: 2, text: "How were the results reported to relevant management?"}
+      - {stage: 2, text: "Who received the audit report, and what did they do with it?"}
     requests:
       - {label: "Internal audit programme covering the 3-year certification cycle", kind: document}
-      - {label: "Audit plans with criteria and scope for each audit", kind: record, fresh_days: 400}
+      - {label: "Plan of each internal audit: what was checked and against which requirements", kind: record, fresh_days: 400}
       - {label: "Auditor independence and competence evidence", kind: record}
     sampling: null
     interviewees: [auditor, ciso]
     pitfalls:
       - "ISMS manager audits the processes they run, breaking objectivity"
-      - "Programme does not consider importance of processes or results of previous audits"
+      - "Every area audited at the same pace, ignoring which processes matter most and where the last audit found problems"
       - "Sites or departments in scope never audited"
   "9.3.1":
     questions:
-      - {stage: 2, text: "When was the last management review, who attended, and how often do you hold it?"}
+      - {stage: 1, text: "When was the last management review, and who attended?"}
+      - {stage: 2, text: "How often do you hold the review, and was one skipped or postponed this cycle?"}
       - {stage: 2, text: "Was the management review done before this certification audit?"}
     requests:
       - {label: "Management review minutes with date and attendance", kind: record, fresh_days: 400}
@@ -352,22 +360,24 @@ guidance:
       - "Top management absent, review done by the CISO alone"
   "9.3.2":
     questions:
-      - {stage: 2, text: "Show me where the minutes cover each required input, including changes in interested parties' needs."}
+      - {stage: 1, text: "Show me the agenda of the last management review. Where is each expected input covered?"}
+      - {stage: 2, text: "Show me where the minutes discuss what customers, regulators and other stakeholders now expect."}
       - {stage: 2, text: "How did audit results, nonconformities, metrics and risk status feed the discussion?"}
     requests:
-      - {label: "Management review input pack (status of previous actions, context changes, interested party changes, performance, audits, risks, opportunities)", kind: record, fresh_days: 400}
+      - {label: "Management review input pack (follow-up of last actions, what changed inside and outside, performance and audit results, risks, improvement ideas)", kind: record, fresh_days: 400}
       - {label: "Mapping of review agenda items to each required input", kind: document}
     sampling: null
     interviewees: [ciso, top]
     pitfalls:
-      - "One or more required inputs missing, typically changes in interested parties' needs (new in 2022) or feedback from interested parties"
+      - "One or more required inputs missing, typically what stakeholders now expect (added in 2022) or the feedback they gave"
       - "Status of actions from the previous review not tracked"
   "9.3.3":
     questions:
-      - {stage: 2, text: "What decisions came out of the last review, and where are they tracked?"}
+      - {stage: 1, text: "What decisions came out of the last management review, and where are they tracked?"}
+      - {stage: 2, text: "Which review decisions changed the ISMS scope, resources or objectives?"}
       - {stage: 2, text: "Show me one decision from the review that has been implemented."}
     requests:
-      - {label: "Management review outputs: decisions on improvements and changes, with action owners", kind: record, fresh_days: 400}
+      - {label: "Management review outputs: what was decided, who owns each action, and by when", kind: record, fresh_days: 400}
       - {label: "Action tracker showing follow-up of review decisions", kind: record, fresh_days: 200}
     sampling: {size: "2-3 actions", population: "decisions from the last management review", method: "verify implementation evidence"}
     interviewees: [top, ciso]
@@ -385,12 +395,12 @@ guidance:
     interviewees: [ciso]
     pitfalls:
       - "Improvement only reactive, through nonconformities, with no evidence of proactive enhancements"
-      - "No measurable change in ISMS suitability or effectiveness between audits"
+      - "Nothing in the ISMS measurably better than at the last audit"
   "10.2":
     questions:
       - {stage: 2, text: "Walk me through a nonconformity from discovery to closure. How did you find the root cause?"}
       - {stage: 2, text: "How did you check the corrective action actually worked?"}
-      - {stage: 2, text: "Did you check whether similar nonconformities exist elsewhere?"}
+      - {stage: 2, text: "Could the same problem be happening in another team or system? How did you check?"}
     requests:
       - {label: "Nonconformity and corrective action register", kind: record, fresh_days: 200}
       - {label: "Root cause analysis records for closed nonconformities", kind: record}

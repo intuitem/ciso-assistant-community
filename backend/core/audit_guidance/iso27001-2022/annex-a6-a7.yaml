@@ -9,7 +9,7 @@ guidance:
       - {label: "Screening procedure with checks per role or risk level", kind: document}
       - {label: "Screening evidence for sampled hires (ID, right to work, references, criminal check where lawful)", kind: record}
       - {label: "Contract clauses or attestations requiring suppliers to screen their staff", kind: document}
-      - {label: "HR starter list for the audit period with start dates", kind: record, fresh_days: 30}
+      - {label: "HR starter list for the audit period with start dates", kind: record, fresh_days: 40}
     sampling: {size: "5 to 10 starters, at least 2 in privileged or IT roles, plus 2 contractors", population: "starters in the last 12 months", method: "compare screening completion date to start date and to the checks required for the role"}
     interviewees: [hr, proc]
     pitfalls:
@@ -36,9 +36,9 @@ guidance:
       - {stage: 2, text: "Tell me, without looking it up, how you would report a suspicious email here."}
     requests:
       - {label: "Awareness and training plan with topics per audience", kind: document}
-      - {label: "Training completion report from the LMS for all staff", kind: record, fresh_days: 90}
-      - {label: "Phishing simulation results and follow-up actions", kind: record, fresh_days: 180}
-      - {label: "Role-based training records for the ISMS team and privileged users", kind: record}
+      - {label: "Training completion report from the LMS for all staff", kind: record, fresh_days: 100}
+      - {label: "Phishing simulation results and follow-up actions", kind: record, fresh_days: 200}
+      - {label: "Role-based training records for the ISMS team and privileged users", kind: record, fresh_days: 400}
     sampling: {size: "5 to 10 staff from different departments", population: "current headcount", method: "trace each name to a completion record and ask each a short awareness question during interviews"}
     interviewees: [staff, ciso, hr]
     pitfalls:
@@ -60,12 +60,13 @@ guidance:
       - "Incidents caused by staff closed in the incident log with no link to an HR outcome or a documented decision not to act"
   a.6.5:
     questions:
+      - {stage: 1, text: "Which obligations continue after someone leaves or changes role, and how are they told?"}
       - {stage: 2, text: "When someone leaves, how are they reminded of what still binds them, such as confidentiality?"}
       - {stage: 2, text: "Show me the exit record for this leaver: what was returned and what was said to them?"}
     requests:
       - {label: "Leaver procedure or exit checklist covering continuing obligations", kind: document}
       - {label: "Completed exit checklists or exit letters for sampled leavers", kind: record}
-      - {label: "HR leaver list for the audit period with last working days", kind: record, fresh_days: 30}
+      - {label: "HR leaver list for the audit period with last working days", kind: record, fresh_days: 40}
     sampling: {size: "5 to 10 leavers, including 1 mover and 1 contractor", population: "leavers and role changes in the last 12 months", method: "check obligations were restated, assets returned and access removed on or before the last day"}
     interviewees: [hr, iam]
     pitfalls:
@@ -91,7 +92,7 @@ guidance:
       - {stage: 2, text: "Can staff work from another country, and who approves that?"}
     requests:
       - {label: "Remote working policy or section of the acceptable use policy", kind: document}
-      - {label: "Endpoint compliance report showing encryption, screen lock and VPN or ZTNA posture", kind: technical, fresh_days: 30}
+      - {label: "Endpoint compliance report showing encryption, screen lock and VPN or ZTNA posture", kind: technical, fresh_days: 40}
       - {label: "Approvals for working from abroad", kind: record}
     sampling: {size: "3 to 5 remote workers", population: "staff working partly or fully remotely", method: "check device compliance in the management console and ask each how they handle calls and printing at home"}
     interviewees: [staff, endpoint, ciso]
@@ -101,12 +102,13 @@ guidance:
       - "Staff work from other countries for weeks without approval or a check of local legal constraints"
   a.6.8:
     questions:
+      - {stage: 1, text: "How should staff report a security event, and how did you tell them about those channels?"}
       - {stage: 2, text: "If I saw something suspicious right now, how would I report it, and how fast would someone respond?"}
       - {stage: 2, text: "Show me reports from staff in the last few months and what was done with them."}
     requests:
       - {label: "Event reporting procedure and the channels advertised to staff", kind: document}
-      - {label: "Ticket or mailbox log of staff-reported events with triage outcome", kind: record, fresh_days: 90}
-      - {label: "Phishing report button statistics", kind: technical, fresh_days: 90}
+      - {label: "Ticket or mailbox log of staff-reported events with triage outcome", kind: record, fresh_days: 100}
+      - {label: "Phishing report button statistics", kind: technical, fresh_days: 100}
     sampling: {size: "5 reported events", population: "events reported by staff in the last 6 months", method: "trace each report from receipt to triage decision and feedback to the reporter"}
     interviewees: [staff, sec_ops]
     pitfalls:
@@ -121,7 +123,7 @@ guidance:
     requests:
       - {label: "Site list and floor plans marking secure zones and entry points", kind: document}
       - {label: "Site tour: doors, windows, fire exits and loading areas on the perimeter", kind: observation}
-      - {label: "Current ISO 27001 certificate or SOC 2 report for hosting or colocation providers, with scope covering the used regions", kind: record, fresh_days: 365}
+      - {label: "Current ISO 27001 certificate or SOC 2 report for hosting or colocation providers, with scope covering the used regions", kind: record, fresh_days: 400}
     sampling: null
     interviewees: [facilities, ciso]
     pitfalls:
@@ -130,11 +132,12 @@ guidance:
       - "Provider SOC 2 report collected but its scope does not cover the region or service actually used"
   a.7.2:
     questions:
+      - {stage: 1, text: "Which entry points to your sites are controlled, and how are badges, keys and visitors handled on paper?"}
       - {stage: 2, text: "How do visitors get in, who escorts them, and how long do you keep the visitor log?"}
       - {stage: 2, text: "When were badge rights to the server room last reviewed, and who removed the ones no longer needed?"}
     requests:
-      - {label: "Visitor log for a recent period", kind: record, fresh_days: 30}
-      - {label: "Badge system export of people with access to restricted zones", kind: technical, fresh_days: 30}
+      - {label: "Visitor log for a recent period", kind: record, fresh_days: 40}
+      - {label: "Badge system export of people with access to restricted zones", kind: technical, fresh_days: 40}
       - {label: "Records of the last physical access rights review", kind: record, fresh_days: 200}
       - {label: "Site tour: reception, badge readers, tailgating behaviour at entry points", kind: observation}
     sampling: {size: "5 leavers and 5 badge holders for restricted zones", population: "badge database and leavers in the last 12 months", method: "check leaver badges were disabled on the last day and that each restricted-zone holder has a role justification"}
@@ -145,6 +148,7 @@ guidance:
       - "Visitor log incomplete, with no exit times or host names"
   a.7.3:
     questions:
+      - {stage: 1, text: "Which rooms did you mark as needing extra protection, and how did you choose them?"}
       - {stage: 2, text: "Which rooms hold sensitive information or equipment, and how are they protected from casual view and entry?"}
       - {stage: 2, text: "Is there anything in public building directories or signage that tells outsiders where the sensitive rooms are?"}
     requests:
@@ -162,7 +166,7 @@ guidance:
       - {stage: 2, text: "Can you retrieve footage from last Tuesday morning for this door right now?"}
     requests:
       - {label: "Coverage map of cameras, alarm zones and sensors against secure areas", kind: document}
-      - {label: "Alarm and intrusion test log with dates and results", kind: record, fresh_days: 90}
+      - {label: "Alarm and intrusion test log with dates and results", kind: record, fresh_days: 100}
       - {label: "CCTV retention and access rules, with privacy notice and signage", kind: document}
       - {label: "Live retrieval of a recorded clip from a chosen date", kind: observation}
     sampling: {size: "2 to 3 alarm events", population: "alarms and out-of-hours events in the last 6 months", method: "trace each event to a response record and check response time against the defined target"}
@@ -186,11 +190,12 @@ guidance:
       - "Cardboard and spare equipment stored in the server room, adding fire load"
   a.7.6:
     questions:
+      - {stage: 1, text: "What rules apply inside your secure areas, and who are they shown to?"}
       - {stage: 2, text: "What rules apply inside secure areas, for example on phones, photography and lone working?"}
       - {stage: 2, text: "How is a third-party engineer supervised when they work in the server room?"}
     requests:
       - {label: "Rules for working in secure areas, posted and documented", kind: document}
-      - {label: "Server room access log or sign-in sheet for third parties", kind: record, fresh_days: 90}
+      - {label: "Server room access log or sign-in sheet for third parties", kind: record, fresh_days: 100}
       - {label: "Site tour: posted rules and state of the secure area", kind: observation}
     sampling: {size: "3 third-party visits", population: "secure area visits in the last 6 months", method: "check each was authorised in advance and escorted"}
     interviewees: [facilities, infra]
@@ -199,12 +204,13 @@ guidance:
       - "Server room used as storage, so many people have a reason to enter"
   a.7.7:
     questions:
+      - {stage: 1, text: "Show me your clear desk and clear screen rule. Does it cover home and shared workspaces?"}
       - {stage: 2, text: "What is the rule for desks and screens when people step away, and how do you check it is followed?"}
       - {stage: 2, text: "What happens to documents left on the printer?"}
     requests:
       - {label: "Clear desk and clear screen policy", kind: document}
-      - {label: "Screen lock timeout setting from the device management console", kind: technical, fresh_days: 30}
-      - {label: "Records of clear desk walk-arounds and follow-up", kind: record, fresh_days: 180}
+      - {label: "Screen lock timeout setting from the device management console", kind: technical, fresh_days: 40}
+      - {label: "Records of clear desk walk-arounds and follow-up", kind: record, fresh_days: 200}
       - {label: "Site tour: unattended desks, printers, whiteboards and unlocked screens", kind: observation}
     sampling: {size: "10 to 15 desks and the shared printers", population: "open-plan areas visited during the tour", method: "observe at random times, ideally at lunch or end of day"}
     interviewees: [staff, facilities]
@@ -214,10 +220,11 @@ guidance:
       - "No lockable storage provided, so the policy cannot be followed"
   a.7.8:
     questions:
+      - {stage: 1, text: "How did you decide where critical equipment sits and what protects it from damage and overlooking?"}
       - {stage: 2, text: "Why is this equipment placed where it is, and what protects it from damage and unauthorised viewing?"}
     requests:
       - {label: "Site tour: rack layout, cooling, equipment positioning and screens facing windows", kind: observation}
-      - {label: "Environmental monitoring readings for temperature and humidity in equipment rooms", kind: technical, fresh_days: 30}
+      - {label: "Environmental monitoring readings for temperature and humidity in equipment rooms", kind: technical, fresh_days: 40}
     sampling: null
     interviewees: [facilities, infra]
     pitfalls:
@@ -225,11 +232,12 @@ guidance:
       - "Equipment room with no temperature monitoring or alerting"
   a.7.9:
     questions:
+      - {stage: 1, text: "What are the rules for laptops, phones and media used outside your premises?"}
       - {stage: 2, text: "How do you protect laptops and other assets that leave the office, and what happens when one is lost?"}
       - {stage: 2, text: "Show me the last lost or stolen device report and the actions taken."}
     requests:
       - {label: "Rules for assets used off site, in the acceptable use or remote working policy", kind: document}
-      - {label: "Device encryption and remote wipe compliance report", kind: technical, fresh_days: 30}
+      - {label: "Device encryption and remote wipe compliance report", kind: technical, fresh_days: 40}
       - {label: "Lost or stolen device incident records", kind: record}
     sampling: {size: "5 devices from the asset register", population: "laptops and mobiles issued to staff", method: "check encryption status and remote wipe enrollment in the management console"}
     interviewees: [endpoint, staff]
@@ -242,7 +250,7 @@ guidance:
       - {stage: 2, text: "Show me the technical control that blocks or encrypts USB storage."}
     requests:
       - {label: "Removable media and storage media handling rules", kind: document}
-      - {label: "Endpoint policy blocking or encrypting removable storage, with exceptions list", kind: technical, fresh_days: 30}
+      - {label: "Endpoint policy blocking or encrypting removable storage, with exceptions list", kind: technical, fresh_days: 40}
       - {label: "Register or transfer log for media carrying sensitive data, such as backup tapes", kind: record}
     sampling: {size: "3 exceptions or media transfers", population: "approved USB exceptions and physical media transfers in the last 12 months", method: "check approval, encryption and return or destruction"}
     interviewees: [endpoint, sec_ops]
@@ -251,6 +259,7 @@ guidance:
       - "Exception list grows over time with no expiry or review"
   a.7.11:
     questions:
+      - {stage: 1, text: "Which utilities do your critical systems depend on, and what backs each one up?"}
       - {stage: 2, text: "What happens to the server room and network if mains power fails for two hours?"}
       - {stage: 2, text: "When was the UPS or generator last tested under load?"}
     requests:
@@ -264,6 +273,7 @@ guidance:
       - "Single internet line or cooling unit with no risk entry or fallback"
   a.7.12:
     questions:
+      - {stage: 1, text: "Where are your power and network cables documented, and which runs did you decide to protect?"}
       - {stage: 2, text: "Where do your power and network cables run, and could someone tap or damage them without being noticed?"}
     requests:
       - {label: "Site tour: patch panels, cable trunking and comms cupboards", kind: observation}
@@ -275,6 +285,7 @@ guidance:
       - "Unlabelled patching, so nobody can say what an active port in a meeting room connects to"
   a.7.13:
     questions:
+      - {stage: 1, text: "Which equipment has scheduled maintenance, and who is allowed to carry it out?"}
       - {stage: 2, text: "Who maintains your critical equipment, how often, and how do you control their access to it?"}
       - {stage: 2, text: "What happens to data on equipment that goes away for repair?"}
     requests:
@@ -288,11 +299,12 @@ guidance:
       - "Disks sent for warranty replacement without being wiped first"
   a.7.14:
     questions:
+      - {stage: 1, text: "What is your procedure before equipment holding data is reused, returned or thrown away?"}
       - {stage: 2, text: "Take me through what happens to a laptop from the moment it is retired to its disposal."}
       - {stage: 2, text: "How do you know your disposal provider actually destroyed what you gave them?"}
     requests:
       - {label: "Disposal and reuse procedure covering wiping or destruction methods", kind: document}
-      - {label: "Certificates of destruction from the disposal provider", kind: record, fresh_days: 365}
+      - {label: "Certificates of destruction from the disposal provider", kind: record, fresh_days: 400}
       - {label: "Wipe logs for reissued devices", kind: record}
       - {label: "Site tour: storage of retired equipment awaiting disposal", kind: observation}
     sampling: {size: "5 disposed or reissued devices", population: "assets marked retired in the last 12 months", method: "trace serial numbers from the asset register to a wipe log or destruction certificate"}
