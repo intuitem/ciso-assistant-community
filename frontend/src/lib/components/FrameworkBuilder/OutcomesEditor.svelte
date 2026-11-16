@@ -489,7 +489,7 @@
 			index
 				? 'opacity-50'
 				: ''}"
-			draggable="true"
+			draggable="false"
 			onmousedown={drag.recordMousedown}
 			ondragstart={(e) => drag.handleDragStart(e, index)}
 			ondragover={drag.handleDragOver}

@@ -23728,9 +23728,9 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         return qs
 
     def destroy(self, request, *args, **kwargs):
-        """Deletion is narrow by design. A draft may be deleted; a submitted or
-        in-review request may not — it is dropped, which leaves a record; a closed
-        one is administrator-only, because the decision has been made."""
+        """Deletion is narrow by design. A draft may be deleted; past that, only an
+        administrator may delete (e.g. test answers). Others drop the request, which
+        leaves a record."""
         response = self.get_object()
         if not response.is_deletable(request.user):
             return Response(

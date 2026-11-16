@@ -108,3 +108,9 @@ function modalService() {
 		clear: () => set([])
 	};
 }
+
+/** Styled, awaitable replacement for window.confirm. Dismissal resolves to false. */
+export const confirmModal = (modalStore: ModalStore, body: string, title?: string) =>
+	new Promise<boolean>((resolve) =>
+		modalStore.trigger({ type: 'confirm', title, body, response: (r) => resolve(r === true) })
+	);

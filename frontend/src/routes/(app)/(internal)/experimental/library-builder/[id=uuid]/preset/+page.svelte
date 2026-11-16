@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 	import { onMount, onDestroy } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
@@ -8,6 +9,8 @@
 	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '#lib/utils/modelTargets.js';
 	import TranslationsEditor from '../../TranslationsEditor.svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
+
+	const modalStore = getModalStore();
 
 	const toastStore = getToastStore();
 
@@ -339,7 +342,7 @@
 		draft.steps = next;
 	}
 
-	function removeStep(i: number) {
+	async function removeStep(i: number) {
 		if (!draft) return;
 		const step = draft.steps[i];
 		const owned = draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
@@ -351,7 +354,7 @@
 						s: owned.length === 1 ? '' : 's'
 					})
 				: m.lbPresetDeleteStepConfirm({ title: step.title });
-		if (!confirm(msg)) return;
+		if (!(await confirmModal(modalStore, msg))) return;
 		// Drop owned scaffolds
 		const ownedRefs = new Set(owned.map((s) => s.ref).filter(Boolean));
 		draft.scaffolded_objects = draft.scaffolded_objects.filter((s) => s.step_ref_id !== step.key);
