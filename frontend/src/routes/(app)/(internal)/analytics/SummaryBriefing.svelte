@@ -133,7 +133,7 @@
 					count: metrics.operations?.open_findings,
 					label: m.briefingOpenFindings(),
 					hint: m.briefingOpenFindingsHint(),
-					href: '/findings?status=--&status=identified&status=confirmed&status=assigned&status=in_progress&deprecated_assessment=false',
+					href: '/findings?status=--&status=identified&status=confirmed&status=assigned&status=in_progress&inactive_assessment=false',
 					trend: 'findings_open'
 				},
 				{
@@ -420,7 +420,7 @@
 		<div class="stat">
 			<dt>{m.sumpageNonCompliantItems()}</dt>
 			<dd>
-				<a href="/requirement-assessments?result=non_compliant&deprecated_assessment=false" class="stat-link">
+				<a href="/requirement-assessments?result=non_compliant&inactive_assessment=false" class="stat-link">
 					<span class="stat-number"
 						><AnimatedNumber value={metrics.compliance?.non_compliant_items ?? 0} countUp /></span
 					>
@@ -445,7 +445,7 @@
 					{/if}
 					{#if metrics.compliance?.partially_compliant_items}
 						<a
-							href="/requirement-assessments?result=partially_compliant&deprecated_assessment=false"
+							href="/requirement-assessments?result=partially_compliant&inactive_assessment=false"
 							class="whitespace-nowrap rounded-full bg-warning-500/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-warning-800-200 hover:bg-warning-500/25"
 							>{m.briefingPartialCount({
 								count: fmt(metrics.compliance.partially_compliant_items)
@@ -458,7 +458,7 @@
 		<div class="stat">
 			<dt>{m.riskScenarios()}</dt>
 			<dd>
-				<a href="/risk-scenarios/?deprecated_assessment=false" class="stat-link">
+				<a href="/risk-scenarios/?inactive_assessment=false" class="stat-link">
 					<span class="stat-number"><AnimatedNumber value={scenarios} countUp /></span>
 					<span class="stat-context"
 						>{m.briefingInAssessments({ count: fmt(metrics.risk?.assessments) })}</span
@@ -475,7 +475,7 @@
 					{/if}
 					{#if metrics.risk?.high_current}
 						<a
-							href="/risk-scenarios?top_level=current&deprecated_assessment=false"
+							href="/risk-scenarios?top_level=current&inactive_assessment=false"
 							class="whitespace-nowrap rounded-full bg-error-500/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-error-700-300 hover:bg-error-500/20"
 							>{fmt(metrics.risk.high_current)} {m.briefingHighRisks()}</a
 						>
@@ -650,7 +650,7 @@
 								</span>
 							{/if}
 							<a
-								href="/risk-scenarios?top_level={row.key}&deprecated_assessment=false"
+								href="/risk-scenarios?top_level={row.key}&inactive_assessment=false"
 								class="risk-box min-w-0 rounded-xl border px-3.5 py-3 {down
 									? 'col-start-1'
 									: ''} {riskTone[row.key].box}"

@@ -939,21 +939,22 @@ class BuiltinMetricSample(AbstractBaseModel):
         from core.helpers import (
             CONTROLS_NOT_PENDING,
             FINDING_CLOSED_STATUSES,
+            INACTIVE_ASSESSMENT,
             _compute_progress_by_assessment,
-            exclude_deprecated_parent,
+            exclude_inactive_parent,
             filter_top_risk_levels,
             overdue_task_templates,
         )
 
-        summary_scenarios = exclude_deprecated_parent(
+        summary_scenarios = exclude_inactive_parent(
             scope(RiskScenario.objects.all()), "risk_assessment"
         )
-        requirement_assessments = exclude_deprecated_parent(
+        requirement_assessments = exclude_inactive_parent(
             scope(RequirementAssessment.objects.all()), "compliance_assessment"
         )
         assessed = list(
             _compute_progress_by_assessment(
-                audits_qs.values_list("id", flat=True)
+                audits_qs.exclude(INACTIVE_ASSESSMENT).values_list("id", flat=True)
             ).values()
         )
         return {
@@ -986,7 +987,7 @@ class BuiltinMetricSample(AbstractBaseModel):
             "incidents_open": incidents.exclude(
                 status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED]
             ).count(),
-            "findings_open": exclude_deprecated_parent(
+            "findings_open": exclude_inactive_parent(
                 scope(Finding.objects.all()), "findings_assessment"
             )
             .exclude(status__in=FINDING_CLOSED_STATUSES)

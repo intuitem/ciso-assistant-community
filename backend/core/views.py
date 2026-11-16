@@ -2583,18 +2583,15 @@ class ContentTypeListView(APIView):
 # Risk Assessment
 
 
-def deprecated_assessment_filter(parent: str):
-    """Yes/no on the parent assessment being deprecated, as the analytics summary counts it."""
+def inactive_assessment_filter(parent: str):
+    """Yes/no on the parent assessment being a draft (no status) or deprecated,
+    as the analytics summary leaves them out."""
 
     def method(queryset, name, value):
-        deprecated = Q(**{f"{parent}__status": Assessment.Status.DEPRECATED})
-        return (
-            queryset.filter(deprecated)
-            if value
-            else exclude_deprecated_parent(queryset, parent)
-        )
+        inactive = inactive_parent(parent)
+        return queryset.filter(inactive) if value else queryset.exclude(inactive)
 
-    return df.BooleanFilter(method=method, label="Deprecated assessment")
+    return df.BooleanFilter(method=method, label="Draft or deprecated assessment")
 
 
 class PerimeterFilter(GenericFilterSet):
@@ -8347,7 +8344,7 @@ class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
-    deprecated_assessment = deprecated_assessment_filter("risk_assessment")
+    inactive_assessment = inactive_assessment_filter("risk_assessment")
     # Multi-value level filters: the matrix levels are dynamic (no fixed choices),
     # so we validate that values are integers without constraining them to a choice set.
     current_level = IntegerInFilter(field_name="current_level", widget=QueryArrayWidget)
@@ -17907,7 +17904,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
 
 class RequirementAssessmentFilterSet(GenericFilterSet):
-    deprecated_assessment = deprecated_assessment_filter("compliance_assessment")
+    inactive_assessment = inactive_assessment_filter("compliance_assessment")
 
     class Meta:
         model = RequirementAssessment
@@ -19610,7 +19607,7 @@ class FindingFilterSet(GenericFilterSet):
     requirement_assessment = NullableModelChoiceFilter(
         queryset=RequirementAssessment.objects.all()
     )
-    deprecated_assessment = deprecated_assessment_filter("findings_assessment")
+    inactive_assessment = inactive_assessment_filter("findings_assessment")
 
     class Meta:
         model = Finding

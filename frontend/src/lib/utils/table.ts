@@ -1094,11 +1094,11 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 	}
 };
 
-// Children of a deprecated assessment, left out of the analytics summary counts.
-export const DEPRECATED_ASSESSMENT_FILTER: ListViewFilterConfig = {
+// Children of a draft (no status) or deprecated assessment, left out of the analytics summary.
+export const INACTIVE_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'deprecatedAssessment',
+		label: 'inactiveAssessment',
 		options: YES_NO_OPTIONS,
 		multiple: false
 	}
@@ -2085,7 +2085,7 @@ export const listViewFields = {
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
 			top_level: TOP_RISK_LEVEL_FILTER,
-			deprecated_assessment: DEPRECATED_ASSESSMENT_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2523,7 +2523,7 @@ export const listViewFields = {
 			requirement__assessable: IS_ASSESSABLE_FILTER,
 			result: REQUIREMENT_ASSESSMENT_RESULT_FILTER,
 			compliance_assessment__perimeter: PERIMETER_FILTER,
-			deprecated_assessment: DEPRECATED_ASSESSMENT_FILTER
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER
 		}
 	},
 	evidences: {
@@ -3530,7 +3530,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			findings_assessment: FINDINGS_BINDER_FILTER,
-			deprecated_assessment: DEPRECATED_ASSESSMENT_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,

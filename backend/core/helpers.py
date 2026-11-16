@@ -1656,14 +1656,14 @@ def get_metrics(user: User, folder_id):
 
     viewable_controls = viewable_items(AppliedControl, folder_id)
     viewable_risk_assessments = viewable_items(RiskAssessment, folder_id).exclude(
-        status=Assessment.Status.DEPRECATED
+        INACTIVE_ASSESSMENT
     )
     viewable_compliance_assessments = restrict_to_respondent_assignments(
         user,
         viewable_items(ComplianceAssessment, folder_id),
         "requirement_assignments__actor__in",
     )
-    viewable_risk_scenarios = exclude_deprecated_parent(
+    viewable_risk_scenarios = exclude_inactive_parent(
         viewable_items(RiskScenario, folder_id), "risk_assessment"
     )
     viewable_threats = viewable_items(Threat, folder_id)
@@ -1671,7 +1671,7 @@ def get_metrics(user: User, folder_id):
     viewable_evidences = viewable_items(Evidence, folder_id)
     viewable_requirement_assessments = restrict_to_respondent_assignments(
         user,
-        exclude_deprecated_parent(
+        exclude_inactive_parent(
             viewable_items(RequirementAssessment, folder_id), "compliance_assessment"
         ),
         "assignments__actor__in",
@@ -1681,7 +1681,6 @@ def get_metrics(user: User, folder_id):
 
     today = date.today()
     soon = today + timedelta(days=30)
-    unfinished = [Assessment.Status.DONE, Assessment.Status.DEPRECATED]
     controls_count = viewable_controls.count()
     missed_eta_count = (
         viewable_controls.filter(
@@ -1727,9 +1726,9 @@ def get_metrics(user: User, folder_id):
             "expired_acceptances": viewable_risk_acceptances.filter(
                 state="accepted", expiry_date__lt=today
             ).count(),
-            "overdue_assessments": viewable_risk_assessments.filter(due_date__lt=today)
-            .exclude(status__in=unfinished)
-            .count(),
+            "overdue_assessments": viewable_risk_assessments.filter(
+                due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES
+            ).count(),
             # Still approved past their end date: the risk is back on the clock.
             "expired_exceptions": viewable_items(SecurityException, folder_id)
             .filter(status=SecurityException.Status.APPROVED, expiration_date__lt=today)
@@ -1757,9 +1756,9 @@ def get_metrics(user: User, folder_id):
             )
             .distinct()
             .count(),
-            "overdue_audits": viewable_compliance_assessments.filter(due_date__lt=today)
-            .exclude(status__in=unfinished)
-            .count(),
+            "overdue_audits": viewable_compliance_assessments.filter(
+                due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES
+            ).count(),
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
@@ -1775,7 +1774,7 @@ def get_metrics(user: User, folder_id):
             "open_incidents": viewable_items(Incident, folder_id)
             .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
             .count(),
-            "open_findings": exclude_deprecated_parent(
+            "open_findings": exclude_inactive_parent(
                 viewable_items(Finding, folder_id), "findings_assessment"
             )
             .exclude(status__in=FINDING_CLOSED_STATUSES)
@@ -1793,8 +1792,7 @@ def get_metrics(user: User, folder_id):
         },
         "third_party": {
             "overdue_assessments": viewable_items(EntityAssessment, folder_id)
-            .filter(due_date__lt=today)
-            .exclude(status__in=unfinished)
+            .filter(due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES)
             .count(),
             "ending_contracts": viewable_items(Contract, folder_id)
             .filter(
@@ -1915,9 +1913,26 @@ def overdue_task_templates(templates):
 CONTROLS_NOT_PENDING = [AppliedControl.Status.ACTIVE, AppliedControl.Status.DEPRECATED]
 
 
-def exclude_deprecated_parent(qs, parent: str):
-    """Drop the children of a deprecated assessment; those without a parent stay."""
-    return qs.exclude(**{f"{parent}__status": Assessment.Status.DEPRECATED})
+# Assessments with no status are drafts; with deprecated ones, the summary leaves them out.
+INACTIVE_ASSESSMENT = Q(status__isnull=True) | Q(status=Assessment.Status.DEPRECATED)
+# Started or not, still expected to finish.
+OPEN_ASSESSMENT_STATUSES = [
+    Assessment.Status.PLANNED,
+    Assessment.Status.IN_PROGRESS,
+    Assessment.Status.IN_REVIEW,
+]
+
+
+def inactive_parent(parent: str) -> Q:
+    """Children of a draft or deprecated assessment; those without a parent are not."""
+    return Q(**{f"{parent}__isnull": False}) & (
+        Q(**{f"{parent}__status__isnull": True})
+        | Q(**{f"{parent}__status": Assessment.Status.DEPRECATED})
+    )
+
+
+def exclude_inactive_parent(qs, parent: str):
+    return qs.exclude(inactive_parent(parent))
 
 
 def nis2_overdue_incidents(incidents):
@@ -2024,7 +2039,13 @@ def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    object_ids = _respondent_scoped_audit_ids(user, scoped_folder)
+    object_ids = (
+        ComplianceAssessment.objects.filter(
+            id__in=_respondent_scoped_audit_ids(user, scoped_folder)
+        )
+        .exclude(INACTIVE_ASSESSMENT)
+        .values_list("id", flat=True)
+    )
     progresses = list(_compute_progress_by_assessment(object_ids).values())
     progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {

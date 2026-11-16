@@ -8105,7 +8105,7 @@
 	"briefingTierSoon": "Coming up",
 	"briefingMore": "+{count} more",
 	"briefingShowLess": "Show less",
-	"deprecatedAssessment": "Deprecated assessment",
+	"inactiveAssessment": "Draft or deprecated assessment",
 	"briefingOpenIncidentsHint": "Not closed or dismissed yet",
 	"briefingEtaMissedHint": "Applied controls still not active after their ETA",
 	"briefingP1Hint": "Highest priority, not yet active",

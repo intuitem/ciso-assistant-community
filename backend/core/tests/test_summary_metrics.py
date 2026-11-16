@@ -290,7 +290,7 @@ def test_attention_counts_match_their_list_filters(admin_client, domain):  # noq
 
 
 @pytest.mark.django_db
-def test_deprecated_items_and_their_children_are_left_out(admin_client, domain):  # noqa: F811
+def test_draft_and_deprecated_assessments_are_left_out(admin_client, domain):  # noqa: F811
     from core.models import Assessment
     from metrology.models import BuiltinMetricSample
 
@@ -306,10 +306,18 @@ def test_deprecated_items_and_their_children_are_left_out(admin_client, domain):
     five = copy.deepcopy(RISK_MATRIX_JSON_DEFINITION)
     five["risk"] = [dict(five["risk"][0], abbreviation=str(i)) for i in range(5)]
     _scenarios(domain, five, [(4, 2)])
+    seven = copy.deepcopy(RISK_MATRIX_JSON_DEFINITION)
+    seven["risk"] = [dict(seven["risk"][0], abbreviation=str(i)) for i in range(7)]
+    _scenarios(domain, seven, [(6, 6)])
+    RiskAssessment.objects.filter(name="ra7").update(status=None)  # a draft
     old = FindingsAssessment.objects.create(
         name="old", folder=domain, status=Assessment.Status.DEPRECATED
     )
-    live = FindingsAssessment.objects.create(name="live", folder=domain)
+    live = FindingsAssessment.objects.create(
+        name="live", folder=domain, status=Assessment.Status.IN_PROGRESS
+    )
+    draft = FindingsAssessment.objects.create(name="draft", folder=domain, status=None)
+    Finding.objects.create(name="in draft", folder=domain, findings_assessment=draft)
     Finding.objects.create(name="in old", folder=domain, findings_assessment=old)
     Finding.objects.create(name="in live", folder=domain, findings_assessment=live)
     Finding.objects.create(name="unbound", folder=domain)
@@ -332,15 +340,15 @@ def test_deprecated_items_and_their_children_are_left_out(admin_client, domain):
     def listed(url):
         return sorted(r["name"] for r in admin_client.get(url).json()["results"])
 
-    assert listed("/api/findings/?deprecated_assessment=false") == [
+    assert listed("/api/findings/?inactive_assessment=false") == [
         "in live",
         "unbound",
     ]
-    assert listed("/api/findings/?deprecated_assessment=true") == ["in old"]
-    assert len(listed("/api/risk-scenarios/?deprecated_assessment=false")) == 1
+    assert listed("/api/findings/?inactive_assessment=true") == ["in draft", "in old"]
+    assert len(listed("/api/risk-scenarios/?inactive_assessment=false")) == 1
     assert (
         admin_client.get(
-            "/api/requirement-assessments/?deprecated_assessment=false"
+            "/api/requirement-assessments/?inactive_assessment=false"
         ).status_code
         == 200
     )
