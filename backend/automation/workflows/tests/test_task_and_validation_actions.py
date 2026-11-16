@@ -313,6 +313,29 @@ class TestCreatingAValidationFlow:
         assert instance.status == WorkflowInstance.Status.FAILED
         assert not ValidationFlow.objects.filter(folder=domain).exists()
 
+    def test_a_requester_who_cannot_see_the_flow_is_refused(
+        self, domain, audit
+    ) -> None:
+        """The API only serves flows the user can view, updates included, so a
+        requester with change but not view could not open the flow to answer."""
+        blind = User.objects.create(email=f"b-{uuid.uuid4()}@test.example")
+        grant(blind, domain, ["change_validationflow"])
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {
+                        "requester": str(blind.id),
+                        "compliance_assessments": str(audit.id),
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not ValidationFlow.objects.filter(folder=domain).exists()
+
     def test_two_requesters_are_refused_rather_than_silently_halved(
         self, domain, audit
     ):

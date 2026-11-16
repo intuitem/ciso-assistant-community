@@ -960,8 +960,9 @@ def _construct_validation_flow(kwargs, params, instance):
     requesters = _rows_for(User, params.get("requester"), instance, "requester")
     if len(requesters) > 1:
         raise FatalActionError("create_object: 'requester' names one user, not several")
-    if requesters and not authz.can(
-        requesters[0], "change_validationflow", kwargs["folder"]
+    if requesters and not all(
+        authz.can(requesters[0], codename, kwargs["folder"])
+        for codename in ["view_validationflow", "change_validationflow"]
     ):
         raise FatalActionError(
             "create_object: 'requester' cannot act on validation flows in this domain"

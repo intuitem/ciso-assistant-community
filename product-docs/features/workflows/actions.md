@@ -267,7 +267,7 @@ Four of these are where a run files what an external system reported, and each i
 * **External rating** (`entity_score`) is one reading per provider per day, dated. Turn on **Update when it already exists** and a re-run on the same day corrects that day's reading instead of failing on the duplicate.
 * **Timeline Entry** (`timeline_entry`) adds an observation to an incident without touching its status or severity.
 * **Task** (`task_template`) attaches work. A run creates a dated, assigned task and the occurrence that puts it on the board; recurrence stays something you set up by hand.
-* **Validation flow** (`validation_flow`) asks for sign-off. Name an `approver` and what is being validated — audits, evidences, policies, findings assessments or security exceptions. The requester is the run's own identity unless you name a `requester`. That user must be able to change validation flows in the domain, since only the requester can answer a request for changes.
+* **Validation flow** (`validation_flow`) asks for sign-off. Name an `approver` and what is being validated — audits, evidences, policies, findings assessments or security exceptions. The requester is the run's own identity unless you name a `requester`. That user must be able to view and change validation flows in the domain, since only the requester can answer a request for changes.
 * **Right Request** (`right_request`) opens a request in **New**. Closing it stays with whoever handles it.
 
 ### Create or update in bulk
