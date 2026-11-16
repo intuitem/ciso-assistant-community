@@ -286,6 +286,8 @@
 	"evidenceFourEyes": "Four-eyes review of evidences",
 	"reviewEvidences": "Review evidences",
 	"evidenceFourEyesHelpText": "When enabled, whoever uploaded a file cannot approve or reject it",
+	"autoLockOverdueAssessments": "Auto-lock overdue assessments",
+	"autoLockOverdueAssessmentsHelpText": "When enabled, audits from a campaign or a third-party assessment are locked and moved to \"In review\" the night after their due date",
 	"showWarningExternalLinks": "Show warning for external links",
 	"showWarningExternalLinksHelpText": "When enabled, users will see a warning before opening external links",
 	"enforceMfa": "Enforce multi-factor authentication",

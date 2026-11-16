@@ -270,6 +270,8 @@
 	"evidenceFourEyes": "Double contrôle des preuves",
 	"reviewEvidences": "Examiner les preuves",
 	"evidenceFourEyesHelpText": "Lorsque cette option est activée, la personne qui a déposé un fichier ne peut ni l'approuver ni le rejeter",
+	"autoLockOverdueAssessments": "Verrouillage automatique des évaluations en retard",
+	"autoLockOverdueAssessmentsHelpText": "Lorsque cette option est activée, les audits issus d'une campagne ou d'une évaluation de tiers sont verrouillés et passés « En revue » la nuit suivant leur date d'échéance",
 	"showWarningExternalLinks": "Afficher un avertissement pour les liens externes",
 	"showWarningExternalLinksHelpText": "Lorsqu'activé, les utilisateurs verront un avertissement avant d'ouvrir des liens externes",
 	"enforceMfa": "Imposer l'authentification multi-facteurs",

@@ -67,6 +67,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         "mapping_max_depth": 3,
         "allow_self_validation": False,
         "evidence_four_eyes": False,
+        "auto_lock_overdue_assessments": False,
         "show_warning_external_links": True,
         "show_get_started": True,
         "personal_folders": False,

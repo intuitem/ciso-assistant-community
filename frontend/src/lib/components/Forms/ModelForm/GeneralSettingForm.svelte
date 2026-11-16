@@ -746,6 +746,12 @@
 					label={m.evidenceFourEyes()}
 					helpText={m.evidenceFourEyesHelpText()}
 				/>
+				<Checkbox
+					{form}
+					field="auto_lock_overdue_assessments"
+					label={m.autoLockOverdueAssessments()}
+					helpText={m.autoLockOverdueAssessmentsHelpText()}
+				/>
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>

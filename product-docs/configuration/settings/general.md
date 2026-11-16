@@ -34,6 +34,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 - **Allow self-validation** — whether a user can validate workflows they themselves created. Off by default for separation-of-duty reasons.
 - **Four-eyes review of evidences** — when on, whoever uploaded an evidence file cannot approve or reject it in the [evidence review](../../concepts/evidence.md#review). Next to **Allow self-validation**, under **Workflows**.
+- **Auto-lock overdue assessments**: when on, audits that belong to a campaign or a third-party assessment are locked and moved to **In review** the night after their due date passes. Audits already **Done** or **Deprecated** are left as they are. Off by default, under **Workflows**.
 - **Show warning on external links** — interstitial prompt before opening links that leave the platform.
 - **Enforce MFA** — make multi-factor authentication mandatory for every user account.
 - **Allow assignments to entities** — whether requirements and tasks can be assigned to third-party entities (not just internal users).
