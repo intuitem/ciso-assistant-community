@@ -6413,7 +6413,7 @@
 	"webhookUrlHintNode": "POST JSON to this URL to start the workflow at this trigger.",
 	"workflowTriggers": "Triggers",
 	"noTriggersYet": "No triggers yet. Drop a trigger node on the canvas and publish to enable it.",
-	"triggersAppearOnPublish": "Event and schedule triggers start switched off after publishing: turn them on here.",
+	"triggersAppearOnPublish": "New event and schedule triggers start switched off after publishing: turn them on here. Existing ones keep their state.",
 	"triggerEnabled": "Enabled",
 	"triggerDisabled": "Disabled",
 	"publishToObtainHookUrl": "Publish this workflow to get its webhook URL.",

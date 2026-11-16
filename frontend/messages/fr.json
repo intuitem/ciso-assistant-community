@@ -6990,7 +6990,7 @@
 	"webhookUrlHintNode": "Envoyez un POST JSON à cette URL pour démarrer le workflow à ce déclencheur.",
 	"workflowTriggers": "Déclencheurs",
 	"noTriggersYet": "Aucun déclencheur. Déposez un nœud déclencheur sur le canevas puis publiez pour l'activer.",
-	"triggersAppearOnPublish": "Les déclencheurs sur événement et planifiés sont désactivés à la publication : activez-les ici.",
+	"triggersAppearOnPublish": "Les nouveaux déclencheurs sur événement et planifiés sont désactivés à la publication : activez-les ici. Les déclencheurs existants gardent leur état.",
 	"triggerEnabled": "Activé",
 	"triggerDisabled": "Désactivé",
 	"publishToObtainHookUrl": "Publiez ce workflow pour obtenir l'URL de son webhook.",

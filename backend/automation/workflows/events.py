@@ -109,7 +109,7 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0, inlin
     `inline` narrows to inline (True) or queued (False) triggers; None takes both."""
     from global_settings.utils import ff_is_enabled
 
-    from .engine import EngineError, create_instance
+    from .engine import EngineError, _fail_instance, create_instance
     from .tasks import run_instance_task
 
     if not ff_is_enabled("workflows"):
@@ -124,13 +124,11 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0, inlin
         event_key=event_key,
         workflow__is_active=True,
     ).select_related("workflow")
-    if inline is True:
-        triggers = triggers.filter(config__inline=True)
-    elif inline is False:
-        triggers = triggers.exclude(config__inline=True)
     state_cache = {}
     visible_to = {}
     for trigger in triggers:
+        if inline is not None and bool((trigger.config or {}).get("inline")) != inline:
+            continue
         # Hard security boundary: the event's object must live within the
         # workflow's folder subtree, regardless of user filters. Events from
         # models that carry no folder count as root-scoped, so only workflows
@@ -212,6 +210,9 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0, inlin
                     instance=str(instance.id),
                     exc_info=True,
                 )
+                _fail_instance(instance, "Run stopped by an unexpected error")
+            # The run may have changed the object later filters read.
+            state_cache.clear()
         else:
             run_instance_task(str(instance.id))
         _bookkeep(trigger, WorkflowTrigger.Result.TRIGGERED, fired=True)
@@ -455,10 +456,13 @@ def forward_log_entry(sender, instance, created, **kwargs):
     key = make_event_key(instance.content_type.model, verb)
     # Cheap indexed gate: one query per audited save, no enqueue when nothing
     # listens for this key.
-    listening = WorkflowTrigger.objects.filter(
-        type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=key
-    )
-    if not listening.exists():
+    inline_flags = {
+        bool((config or {}).get("inline"))
+        for config in WorkflowTrigger.objects.filter(
+            type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=key
+        ).values_list("config", flat=True)
+    }
+    if not inline_flags:
         return
 
     from .engine import current_trigger_depth
@@ -466,13 +470,6 @@ def forward_log_entry(sender, instance, created, **kwargs):
 
     origin_depth = current_trigger_depth.get()
     log_entry_id = instance.pk
-    inline_listening = listening.filter(config__inline=True).exists()
-    if listening.exclude(config__inline=True).exists():
-        transaction.on_commit(
-            lambda: dispatch_internal_event_task(log_entry_id, origin_depth, False)
-        )
-    if not inline_listening:
-        return
 
     def dispatch_inline():
         try:
@@ -482,7 +479,13 @@ def forward_log_entry(sender, instance, created, **kwargs):
                 "inline event dispatch failed", log_entry=log_entry_id, exc_info=True
             )
 
-    transaction.on_commit(dispatch_inline)
+    # Inline first: a failing enqueue below must not stop it.
+    if True in inline_flags:
+        transaction.on_commit(dispatch_inline)
+    if False in inline_flags:
+        transaction.on_commit(
+            lambda: dispatch_internal_event_task(log_entry_id, origin_depth, False)
+        )
 
 
 def payload_from_log_entry(log_entry):

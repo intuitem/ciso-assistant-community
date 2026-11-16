@@ -5,6 +5,7 @@ import yaml
 
 from core.models import Evidence
 from automation.workflows.import_export import import_workflow
+from automation.workflows.models import WorkflowInstance
 from automation.workflows.tests.helpers import publisher_user
 from automation.workflows.tests.test_update_actions import make_domain
 
@@ -14,7 +15,11 @@ LIBRARIES = Path(__file__).resolve().parents[3] / "library" / "libraries"
 def install(stem, domain, inline=True):
     path = LIBRARIES / f"workflow-operations-{stem}.yaml"
     entry = yaml.safe_load(path.read_text())["objects"]["workflows"][0]
-    entry["graph"]["nodes"][0]["trigger_config"]["inline"] = inline
+    config = entry["graph"]["nodes"][0]["trigger_config"]
+    if inline is None:
+        del config["inline"]
+    else:
+        config["inline"] = inline
     workflow, _warnings = import_workflow(entry, domain, user=publisher_user())
     workflow.draft_version.publish(publisher_user())
     workflow.triggers.update(enabled=True)
@@ -65,6 +70,7 @@ def test_failed_inline_run_does_not_break_the_save(
         evidence = Evidence.objects.create(name="Report", folder=domain)
     evidence.refresh_from_db()
     assert evidence.status == "draft"
+    assert WorkflowInstance.objects.get().status == WorkflowInstance.Status.FAILED
 
 
 def inline_errors(domain, mutate):
@@ -112,8 +118,9 @@ def test_inline_needs_an_event_trigger_and_a_boolean(domain, config):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("queued_inline", [False, None])
 def test_only_inline_triggers_run_in_the_request(
-    domain, monkeypatch, django_capture_on_commit_callbacks
+    domain, monkeypatch, django_capture_on_commit_callbacks, queued_inline
 ):
     from automation.workflows import tasks
 
@@ -123,15 +130,17 @@ def test_only_inline_triggers_run_in_the_request(
     class Recorder:
         def __call__(self, *args):
             queued.append(args)
+            return real.call_local(*args)
 
         def call_local(self, *args):
             return real.call_local(*args)
 
     monkeypatch.setattr(tasks, "dispatch_internal_event_task", Recorder())
     install("evidence-default-status", domain)
-    install("evidence-default-status", domain, inline=False)
+    install("evidence-default-status", domain, inline=queued_inline)
     with django_capture_on_commit_callbacks(execute=True):
         evidence = Evidence.objects.create(name="Report", folder=domain)
     evidence.refresh_from_db()
     assert evidence.status == "in_review"
     assert [args[2] for args in queued] == [False]
+    assert WorkflowInstance.objects.count() == 2
