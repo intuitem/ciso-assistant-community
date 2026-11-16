@@ -7,17 +7,24 @@ import yaml
 from core.auditor_preread import (
     FEWER_EVIDENCES_THAN_REQUESTS,
     NOTHING_LINKED,
+    OPEN_FINDING,
+    OPEN_MINOR_FINDING,
+    REQUEST_NOT_ON_FILE,
     STALE_EVIDENCE,
     auditor_preread,
-    load_guidance,
+    load_audit_guides,
+    load_audit_sessions,
     readiness,
 )
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
+    Finding,
+    FindingsAssessment,
     Framework,
     Perimeter,
+    ReferenceControl,
     RequirementNode,
 )
 from iam.models import Folder, User
@@ -47,7 +54,11 @@ def test_iso27001_guidance_covers_every_assessable_node():
         for n in framework["requirement_nodes"]
         if n.get("assessable")
     }
-    guidance = load_guidance()[ISO]
+    guidance = load_audit_guides()[ISO]
+    key_library = yaml.safe_load(
+        (LIBRARY.parent / "key-reference-controls.yaml").read_text()
+    )
+    key_controls = {c["urn"] for c in key_library["objects"]["reference_controls"]}
     assert set(guidance) == suffixes
     for key, g in guidance.items():
         assert g["questions"] and g["requests"], key
@@ -57,6 +68,32 @@ def test_iso27001_guidance_covers_every_assessable_node():
         assert all(r.get("fresh_days", 400) in WINDOWS for r in g["requests"]), key
         if key not in STAGE2_ONLY:
             assert any(q["stage"] == 1 for q in g["questions"]), key
+        for section, prefix in (
+            ("questions", "q"),
+            ("requests", "r"),
+            ("pitfalls", "p"),
+        ):
+            ids = [x["id"] for x in g[section]]
+            assert len(set(ids)) == len(ids), key
+            assert all(i[0] == prefix and i[1:].isdigit() for i in ids), key
+        linked = [
+            r["reference_control"] for r in g["requests"] if "reference_control" in r
+        ]
+        # One request per document: two sharing it would be filed by the same evidence.
+        assert len(set(linked)) == len(linked) and set(linked) <= key_controls, key
+        assert all(0 < r["min"] <= r["max"] and r["unit"] for r in g["sampling"]), key
+
+
+def test_iso27001_sessions_cover_every_entry_once():
+    sessions = load_audit_sessions()[ISO]
+    members = [m for s in sessions for m in s["members"]]
+    assert sorted(members) == sorted(load_audit_guides()[ISO])
+    assert len({s["id"] for s in sessions}) == len(sessions)
+    for s in sessions:
+        assert s["label"], s["id"]
+        assert all(r["kind"] in KINDS and r["label"] for r in s.get("requests", [])), s[
+            "id"
+        ]
 
 
 def test_readiness_states():
@@ -72,6 +109,18 @@ def test_readiness_states():
     assert readiness("compliant", on_site, [ev(10), ev(20)], [], TODAY) == ("ready", [])
     monthly = {"requests": [*GUIDE["requests"], {"label": "d", "kind": "technical", "fresh_days": 40}]}  # fmt: skip
     assert STALE_EVIDENCE in readiness("compliant", monthly, [ev(60)] * 3, [], TODAY)[1]
+    ok = [ev(10), ev(20)]
+    potential_nc = [{"severity": 2, "open": True}]
+    assert readiness("compliant", GUIDE, ok, [], TODAY, potential_nc) == ("gap", [OPEN_FINDING])  # fmt: skip
+    to_watch = [{"severity": 1, "open": True}]
+    assert readiness("compliant", GUIDE, ok, [], TODAY, to_watch) == ("weak", [OPEN_MINOR_FINDING])  # fmt: skip
+    closed = [{"severity": 3, "open": False}]
+    assert readiness("compliant", GUIDE, ok, [], TODAY, closed) == ("ready", [])
+    paired = {"requests": [{"id": "r1", "label": "p", "kind": "document", "reference_control": "u", "fresh_days": 40}]}  # fmt: skip
+    filed_old = {"r1": [{"id": 1, **ev(100)}]}
+    assert readiness("compliant", paired, [], [], TODAY, (), filed_old) == ("weak", [STALE_EVIDENCE])  # fmt: skip
+    assert readiness("compliant", paired, [], [], TODAY, (), {"r1": [{"id": 1, **ev(5)}]}) == ("ready", [])  # fmt: skip
+    assert REQUEST_NOT_ON_FILE in readiness("compliant", paired, [{"id": 2, **ev(5)}], [], TODAY, (), {"r1": []})[1]  # fmt: skip
     errors = [{"severity": "error", "msgid": "x", "msg": "x"}]
     assert readiness("compliant", GUIDE, [ev(1), ev(1)], errors, TODAY)[0] == "gap"
 
@@ -97,12 +146,30 @@ def test_evidence_through_applied_control_is_counted_and_attributed():
     )
     audit.create_requirement_assessments()
     ra = audit.requirement_assessments.get()
-    control = AppliedControl.objects.create(name="JML process", folder=folder)
+    recert = ReferenceControl.objects.create(
+        name="Recertification",
+        urn="urn:intuitem:risk:function:doc-pol:proc.recertification",
+        folder=root,
+    )
+    control = AppliedControl.objects.create(
+        name="JML process", folder=folder, reference_control=recert
+    )
     via_control = Evidence.objects.create(name="Access review Q3", folder=folder)
     direct = Evidence.objects.create(name="JML procedure", folder=folder)
     control.evidences.add(via_control)
     ra.applied_controls.add(control)
     ra.evidences.add(direct)
+    stage1 = FindingsAssessment.objects.create(
+        name="Stage 1", category="audit", perimeter=audit.perimeter, folder=folder
+    )
+    Finding.objects.create(
+        name="No review record",
+        findings_assessment=stage1,
+        requirement_node=ra.requirement,
+        severity=2,
+        status="identified",
+        folder=folder,
+    )
 
     user = User.objects.create_superuser(email="preread@test.local", password="x")
     item = auditor_preread(audit, user)["items"][0]
@@ -113,3 +180,7 @@ def test_evidence_through_applied_control_is_counted_and_attributed():
     assert by_name["JML procedure"]["direct"] is True
     assert by_name["JML procedure"]["via_controls"] == []
     assert NOTHING_LINKED not in item["reasons"]
+    assert [e["name"] for e in item["filed"]["r2"]] == ["Access review Q3"]
+    assert item["filed"]["r2"][0]["here"] is True
+    assert [f["source"] for f in item["prior_findings"]] == ["Stage 1"]
+    assert item["readiness"] == "gap" and OPEN_FINDING in item["reasons"]

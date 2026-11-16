@@ -1,0 +1,57 @@
+# Stage 2 runs by topic, not in standard order: each session walks related
+# clauses and controls with the same people. Every entry belongs to exactly one.
+# Annex A sessions follow the ISO/IEC 27002:2022 "operational capabilities"
+# attribute: each control sits in a session named after one of its values.
+framework_urn: urn:intuitem:risk:framework:iso27001-2022
+sessions:
+  - id: opening
+    label: "Opening meeting"
+    members: []
+    requests:
+      - {id: r1, label: "What changed since Stage 1: scope, organisation, sites, systems, key suppliers", kind: document}
+      - {id: r2, label: "Each Stage 1 finding with the action taken and its evidence", kind: record}
+      - {id: r3, label: "Current Statement of Applicability, dated, with the reason for each exclusion", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.soa}
+      - {id: r4, label: "A named contact reachable for the whole audit, sent with the documents ahead of day 1", kind: document}
+      - {id: r5, label: "Complaints about the certified scope and how they were handled; use of the certification mark once certified", kind: record}
+      - {id: r6, label: "Progress on the controls the Statement of Applicability showed as planned or in progress at Stage 1", kind: record}
+    pitfalls:
+      - {id: p1, text: "Documents not ready at the opening meeting, or shared over an unprotected channel"}
+      - {id: p2, text: "An in-scope system not in its production state on the day can be taken out of scope"}
+      - {id: p3, text: "What was only stated at Stage 1 is now expected as a record: signatures, test results, logs"}
+  - {id: context, label: "Context and scope", members: ["4.1", "4.2", "4.3", "4.4"]}
+  - id: leadership
+    label: "Leadership and governance"
+    members: ["5.1", "5.2", "5.3", a.5.1, a.5.2, a.5.3, a.5.4, a.5.5, a.5.6, a.5.8]
+  - id: risk
+    label: "Risk, objectives and planning"
+    members: ["6.1.1", "6.1.2", "6.1.3", "6.2", "6.3", "8.1", "8.2", "8.3"]
+  - {id: support, label: "Support", members: ["7.1", "7.2", "7.3", "7.4", "7.5.1", "7.5.2", "7.5.3"]}
+  - {id: people, label: "Human resource security", members: [a.6.1, a.6.2, a.6.3, a.6.4, a.6.5, a.6.6]}
+  - {id: assets, label: "Asset management", members: [a.5.9, a.5.11, a.7.8, a.7.9, a.7.10, a.7.14]}
+  - id: information
+    label: "Information protection"
+    members: [a.5.10, a.5.12, a.5.13, a.5.14, a.8.1, a.8.10, a.8.11, a.8.12, a.8.33, a.8.34]
+  - {id: threats, label: "Threat and vulnerability management", members: [a.5.7, a.8.8]}
+  - id: incidents
+    label: "Information security event management"
+    members: [a.5.24, a.5.25, a.5.26, a.5.27, a.5.28, a.6.8, a.8.15, a.8.16, a.8.17]
+  - id: continuity
+    label: "Continuity"
+    members: [a.5.37, a.8.6, a.8.13, a.8.14, a.5.29, a.5.30]
+  - {id: access, label: "Identity and access management", members: [a.5.15, a.5.16, a.5.17, a.5.18, a.8.2, a.8.3, a.8.5]}
+  - {id: configuration, label: "Secure configuration", members: [a.8.9, a.8.19, a.8.24]}
+  - id: network
+    label: "System and network security"
+    members: [a.8.20, a.8.21, a.8.22, a.8.23, a.8.7, a.6.7, a.8.18]
+  - id: development
+    label: "Application security"
+    members: [a.8.4, a.8.25, a.8.26, a.8.27, a.8.28, a.8.29, a.8.30, a.8.31, a.8.32]
+  - id: physical
+    label: "Physical security (site tour)"
+    members: [a.7.1, a.7.2, a.7.3, a.7.4, a.7.5, a.7.6, a.7.7, a.7.11, a.7.12, a.7.13]
+  - {id: suppliers, label: "Supplier relationships security", members: [a.5.19, a.5.20, a.5.21, a.5.22, a.5.23]}
+  - {id: compliance, label: "Legal, compliance and assurance", members: [a.5.31, a.5.32, a.5.33, a.5.34, a.5.35, a.5.36]}
+  - id: performance
+    label: "Performance evaluation"
+    members: ["9.1", "9.2.1", "9.2.2", "9.3.1", "9.3.2", "9.3.3"]
+  - {id: improvement, label: "Improvement and Stage 1 follow-up", members: ["10.1", "10.2"]}

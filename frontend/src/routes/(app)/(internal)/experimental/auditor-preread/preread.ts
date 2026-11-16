@@ -1,11 +1,32 @@
 export type Readiness = 'gap' | 'weak' | 'ready' | 'excluded' | 'no_guidance';
 
 export interface Guidance {
-	questions: { stage: 1 | 2; text: string }[];
-	requests: { label: string; kind: string; fresh_days?: number }[];
-	sampling: { size: string; population?: string; method?: string } | null;
+	questions: { id: string; stage: 1 | 2; text: string }[];
+	requests: {
+		id: string;
+		label: string;
+		kind: string;
+		fresh_days?: number;
+		reference_control?: string;
+	}[];
+	sampling: {
+		min: number;
+		max: number;
+		unit: string;
+		population?: string;
+		method?: string;
+		note?: string;
+	}[];
 	interviewees: string[];
-	pitfalls: string[];
+	pitfalls: { id: string; text: string }[];
+}
+
+export interface FiledEvidence {
+	id: string;
+	name: string | null;
+	updated_at: string | null;
+	/** Linked to this requirement, not only to another one asking the same document. */
+	here: boolean;
 }
 
 export interface PrereadItem {
@@ -28,6 +49,19 @@ export interface PrereadItem {
 	}[];
 	applied_controls: { id: string; name: string | null; status: string; eta: string | null }[];
 	findings: { severity: 'error' | 'warning'; msgid: string; msg: string }[];
+	/** Findings raised on this requirement by any audit of the framework (Stage 1, internal). */
+	prior_findings: {
+		id: string;
+		ref_id: string | null;
+		name: string;
+		severity: number;
+		status: string;
+		open: boolean;
+		source: string | null;
+		reported_at: string | null;
+	}[];
+	/** Request id -> evidences matched through its reference control, newest first. */
+	filed: Record<string, FiledEvidence[]>;
 	readiness: Readiness;
 	reasons: string[];
 }
@@ -62,11 +96,14 @@ export const READINESS: Record<Readiness, { label: string; rank: number }> = {
 };
 
 export const REASONS: Record<string, string> = {
+	open_finding: 'Open finding from an earlier audit, potential nonconformity',
+	open_minor_finding: 'Open point to watch from an earlier audit',
 	nothing_linked: 'No evidence linked',
 	non_compliant: 'Assessed as non-compliant',
 	quality_error: 'Audit quality check raises an error',
 	not_assessed: 'Not assessed yet',
-	stale_evidence: 'Newest evidence is older than the tightest freshness window',
+	stale_evidence: 'A requested record is older than its freshness window',
+	request_not_on_file: 'A requested document or record is not on file',
 	fewer_evidences_than_requests: 'Fewer evidences linked than records requested',
 	quality_warning: 'Audit quality check raises a warning'
 };
@@ -93,26 +130,76 @@ export const STAGES: Record<number, string> = {
 	2: 'Stage 2: implementation, tested on samples'
 };
 
-/** Older than the widest freshness window this requirement asks for. */
+export const tooOld = (updatedAt: string | null, days: number, now = Date.now()) =>
+	!!updatedAt && now - Date.parse(updatedAt) > days * 86_400_000;
+
+/** Unpaired evidence against the tightest window of the requests that cannot be paired. */
 export function isStale(updatedAt: string | null, guidance: Guidance | null, now = Date.now()) {
-	const windows = (guidance?.requests ?? []).map((r) => r.fresh_days ?? 0).filter(Boolean);
-	if (!updatedAt || !windows.length) return false;
-	return now - Date.parse(updatedAt) > Math.max(...windows) * 86_400_000;
+	const windows = (guidance?.requests ?? [])
+		.filter((r) => !r.reference_control)
+		.map((r) => r.fresh_days ?? 0)
+		.filter(Boolean);
+	return windows.length > 0 && tooOld(updatedAt, Math.min(...windows), now);
 }
 
 export interface RequestRow {
-	item: PrereadItem;
+	/** Every requirement asking for it; one row per document, however many ask. */
+	items: PrereadItem[];
+	id: string;
 	label: string;
 	kind: string;
 	fresh_days?: number;
+	reference_control?: string;
+	/** Matched evidences, or null when the request cannot be matched automatically. */
+	filed: FiledEvidence[] | null;
 }
 
-/** Every record requested, worst readiness first, then in standard order. */
+const rank = (i: PrereadItem) => READINESS[i.readiness].rank;
+/** The requirement in the worst state among those asking for this record. */
+export const worstOf = (row: RequestRow) => row.items.reduce((a, i) => (rank(i) < rank(a) ? i : a));
+
+/** Every record requested once, worst readiness first, then in standard order. */
 export function requestList(items: PrereadItem[]): RequestRow[] {
-	return items
-		.filter((i) => i.guidance && i.readiness !== 'excluded')
-		.flatMap((item) => item.guidance!.requests.map((r) => ({ item, ...r })))
-		.sort((a, b) => READINESS[a.item.readiness].rank - READINESS[b.item.readiness].rank);
+	const rows = new Map<string, RequestRow>();
+	for (const item of items.filter((i) => i.guidance && i.readiness !== 'excluded')) {
+		for (const r of item.guidance!.requests) {
+			const key = r.reference_control ?? `${item.id}:${r.id}`;
+			const row = rows.get(key);
+			if (!row) {
+				rows.set(key, {
+					items: [item],
+					...r,
+					filed: r.reference_control ? (item.filed?.[r.id] ?? []) : null
+				});
+			} else {
+				if (!row.items.includes(item)) row.items.push(item);
+				// The tightest cadence any requirement asks for is the one to meet.
+				if (r.fresh_days && (!row.fresh_days || r.fresh_days < row.fresh_days))
+					row.fresh_days = r.fresh_days;
+			}
+		}
+	}
+	return [...rows.values()].sort((a, b) => rank(worstOf(a)) - rank(worstOf(b)));
+}
+
+export interface Session {
+	id: string;
+	label: string;
+	members: string[];
+	requests?: Guidance['requests'];
+	pitfalls?: Guidance['pitfalls'];
+}
+
+/** Stage 2 sessions in running order, each with its requirements and the people it needs. */
+export function sessionPlan(items: PrereadItem[], sessions: Session[]) {
+	const bySuffix = new Map(items.map((i) => [i.urn_suffix, i]));
+	return sessions
+		.map((session) => {
+			const reqs = session.members.flatMap((m) => bySuffix.get(m) ?? []);
+			const people = [...new Set(reqs.flatMap((r) => r.guidance?.interviewees ?? []))];
+			return { session, reqs, people };
+		})
+		.filter((s) => s.reqs.length || s.session.requests?.length);
 }
 
 /** Requirements grouped by interviewee, busiest first. */
@@ -129,18 +216,32 @@ export function interviewPlan(items: PrereadItem[]): [string, PrereadItem[]][] {
 
 /** Tab-separated, ready to paste into a spreadsheet. */
 export function requestListTsv(rows: RequestRow[]): string {
-	const head = ['Readiness', 'Ref', 'Requirement', 'Request', 'Kind', 'Max age (days)', 'Owner'];
+	const head = [
+		'Readiness',
+		'Ref',
+		'Requirement',
+		'Request',
+		'Kind',
+		'Max age (days)',
+		'Owner',
+		'On file'
+	];
 	const clean = (s: string) => s.replace(/[\t\n]/g, ' ');
 	return [
 		head,
 		...rows.map((r) => [
-			READINESS[r.item.readiness].label,
-			r.item.ref_id,
-			r.item.name,
+			READINESS[worstOf(r).readiness].label,
+			r.items.map((i) => i.ref_id).join(', '),
+			r.items.map((i) => i.name).join('; '),
 			r.label,
 			r.kind,
 			r.fresh_days ? String(r.fresh_days) : '',
-			PEOPLE[r.item.guidance?.interviewees[0] ?? ''] ?? ''
+			PEOPLE[r.items[0].guidance?.interviewees[0] ?? ''] ?? '',
+			r.filed === null
+				? ''
+				: r.filed.length
+					? r.filed.map((e) => e.name ?? '').join('; ')
+					: 'missing'
 		])
 	]
 		.map((cols) => cols.map(clean).join('\t'))

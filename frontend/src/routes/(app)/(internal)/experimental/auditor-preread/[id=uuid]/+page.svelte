@@ -13,9 +13,12 @@
 		STAGES,
 		interviewPlan,
 		isStale,
+		tooOld,
+		worstOf,
 		requestList,
 		requestListTsv,
 		sectionOf,
+		sessionPlan,
 		type PrereadItem,
 		type Readiness
 	} from '../preread';
@@ -65,7 +68,7 @@
 		no_guidance: 'No auditor guidance for this requirement yet.'
 	};
 
-	let view: 'req' | 'requests' | 'interviews' = $state('req');
+	let view: 'req' | 'sessions' | 'requests' | 'interviews' = $state('req');
 	let readinessFilter: Readiness | 'all' = $state('all');
 	let section = $state('all');
 	let stage: 0 | 1 | 2 = $state(0);
@@ -114,13 +117,14 @@
 	const selected = $derived(visible[selectedIndex]);
 	const requests = $derived(requestList(visible));
 	const interviews = $derived(interviewPlan(visible));
+	const sessions = $derived(sessionPlan(visible, data.preread.sessions ?? []));
 	const filtered = $derived(
 		readinessFilter !== 'all' || section !== 'all' || stage !== 0 || query.trim() !== ''
 	);
 
 	async function select(id: string, focus = false) {
 		selectedId = id;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		url.searchParams.set('req', id);
 		replaceState(url, {});
 		await tick();
@@ -322,7 +326,7 @@
 
 		<!-- Tabs -->
 		<div class="flex gap-1 border-b border-surface-200-800" role="tablist">
-			{#each [['req', 'By requirement', 'fa-solid fa-list-check', visible.length], ['requests', 'Evidence request list', 'fa-solid fa-folder-open', requests.length], ['interviews', 'Interview plan', 'fa-solid fa-people-group', interviews.length]] as const as [key, label, icon, n] (key)}
+			{#each [['req', 'By requirement', 'fa-solid fa-list-check', visible.length], ['sessions', 'Audit sessions', 'fa-solid fa-calendar-day', sessions.length], ['requests', 'Evidence request list', 'fa-solid fa-folder-open', requests.length], ['interviews', 'Interview plan', 'fa-solid fa-people-group', interviews.length]] as const as [key, label, icon, n] (key)}
 				<button
 					role="tab"
 					aria-selected={view === key}
@@ -366,7 +370,12 @@
 										onclick={() => select(item.id)}
 									>
 										<span class="font-mono text-xs text-surface-600-400">{item.ref_id}</span>
-										<span class="leading-snug">{item.name}</span>
+										<span class="leading-snug"
+											>{item.name}{#if item.prior_findings.some((f) => f.open)}<i
+													class="fa-solid fa-flag text-error-500 text-xs ml-1.5"
+													title="Open finding from an earlier audit"
+												></i>{/if}</span
+										>
 										{@render dot(item.readiness)}
 									</button>
 								</li>
@@ -458,12 +467,49 @@
 								</div>
 							</div>
 
+							{#if selected.prior_findings.length}
+								<section class="flex flex-col gap-2">
+									{@render title(
+										'fa-solid fa-flag',
+										'Raised at an earlier audit',
+										'Followed up first: bring the action taken and its evidence'
+									)}
+									<ul class="flex flex-col divide-y divide-surface-200-800 text-sm">
+										{#each selected.prior_findings as f (f.id)}
+											<li class="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
+												<i
+													class="fa-solid {f.open
+														? 'fa-flag text-error-500'
+														: 'fa-check text-success-500'} text-xs"
+												></i>
+												<a class="anchor grow" href="/findings/{f.id}"
+													>{f.ref_id ? `${f.ref_id} ` : ''}{f.name}</a
+												>
+												<span class="text-xs text-surface-600-400"
+													>{safeTranslate(
+														['undefined', 'info', 'low', 'medium', 'high', 'critical'][
+															f.severity + 1
+														] ?? ''
+													)} · {safeTranslate(f.status)}{f.source ? ` · ${f.source}` : ''}</span
+												>
+											</li>
+										{/each}
+									</ul>
+								</section>
+							{/if}
+
 							{#if g}
+								{@const pairedIds = new Set(
+									Object.values(selected.filed ?? {})
+										.flat()
+										.map((e) => e.id)
+								)}
+								{@const unpaired = selected.evidences.filter((e) => !pairedIds.has(e.id))}
 								<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
 									<section class="flex flex-col gap-3">
 										{@render title('fa-solid fa-comments', 'What the auditor will ask')}
 										<ol class="flex flex-col gap-3 border-l-2 border-primary-500/50 pl-4">
-											{#each g.questions as q, i (i)}
+											{#each g.questions as q (q.id)}
 												<li class="flex gap-3 items-start">
 													<span
 														class="shrink-0 mt-0.5 rounded px-1.5 text-[11px] font-mono font-semibold leading-5 {q.stage ===
@@ -481,17 +527,24 @@
 										<div class="flex flex-col gap-2">
 											{@render title('fa-solid fa-vials', 'How they will check it')}
 											{@render heading('fa-solid fa-layer-group', 'Sample')}
-											{#if g.sampling}
+											{#if g.sampling.length}
+												{@const s = g.sampling[0]}
+												<!-- shortcut: rows of one requirement share population and method today; group by them if that changes -->
 												<div
 													class="rounded-base bg-surface-100-900 p-3 text-sm flex flex-col gap-1"
 												>
-													<span class="font-semibold">{g.sampling.size}</span>
-													{#if g.sampling.population}
-														<span class="text-surface-600-400">From {g.sampling.population}</span>
+													<span class="font-semibold"
+														>{g.sampling
+															.map(
+																(r) => `${r.min === r.max ? r.min : `${r.min}–${r.max}`} ${r.unit}`
+															)
+															.join(' + ')}</span
+													>
+													{#if s.note}<span class="text-surface-600-400">{s.note}</span>{/if}
+													{#if s.population}
+														<span class="text-surface-600-400">From {s.population}</span>
 													{/if}
-													{#if g.sampling.method}<span class="first-letter:uppercase"
-															>{g.sampling.method}</span
-														>{/if}
+													{#if s.method}<span class="first-letter:uppercase">{s.method}</span>{/if}
 												</div>
 											{:else}
 												<p class="text-sm text-surface-600-400">
@@ -520,7 +573,7 @@
 									{@render title(
 										'fa-solid fa-scale-balanced',
 										'Requested vs. on file',
-										`${g.requests.filter((r) => r.kind !== 'observation').length} to file · ${selected.evidences.length} on file`
+										`${g.requests.filter((r) => r.kind !== 'observation').length} to file · ${Object.values(selected.filed ?? {}).filter((f) => f.length).length} matched · ${unpaired.length} other on file`
 									)}
 									<div
 										class="grid grid-cols-1 xl:grid-cols-2 gap-4 rounded-container bg-surface-100-900 p-3"
@@ -530,19 +583,55 @@
 											<ul
 												class="flex flex-col divide-y divide-surface-200-800 border border-surface-200-800 rounded-base bg-surface-50-950"
 											>
-												{#each g.requests as r, i (i)}
-													<li class="flex gap-3 p-2.5 text-sm">
-														<i
-															class="{KINDS[r.kind]?.icon ??
-																'fa-solid fa-file'} text-surface-500 mt-0.5 w-4 text-center"
-															title={KINDS[r.kind]?.label ?? r.kind}
-														></i>
-														<span class="grow">{r.label}</span>
-														{#if r.fresh_days}
-															<span
-																class="shrink-0 text-xs text-surface-600-400 tabular-nums"
-																title="The most recent one should be younger than this"
-																>≤ {r.fresh_days} d</span
+												{#each g.requests as r (r.id)}
+													{@const filed = r.reference_control
+														? (selected.filed?.[r.id] ?? [])
+														: null}
+													<li class="flex flex-col gap-1.5 p-2.5 text-sm">
+														<span class="flex gap-3">
+															<i
+																class="{KINDS[r.kind]?.icon ??
+																	'fa-solid fa-file'} text-surface-500 mt-0.5 w-4 text-center"
+																title={KINDS[r.kind]?.label ?? r.kind}
+															></i>
+															<span class="grow">{r.label}</span>
+															{#if r.fresh_days}
+																<span
+																	class="shrink-0 text-xs text-surface-600-400 tabular-nums"
+																	title="The most recent one should be younger than this"
+																	>≤ {r.fresh_days} d</span
+																>
+															{/if}
+														</span>
+														{#if filed?.length}
+															<ul class="pl-7 flex flex-col gap-1 text-xs">
+																{#each filed as e (e.id)}
+																	{@const old = r.fresh_days && tooOld(e.updated_at, r.fresh_days)}
+																	<li class="flex flex-wrap items-baseline gap-x-2">
+																		<i class="fa-solid fa-check text-success-500"></i>
+																		{#if e.name}<a class="anchor" href="/evidences/{e.id}"
+																				>{e.name}</a
+																			>{:else}<span class="italic text-surface-600-400"
+																				>Evidence you cannot view</span
+																			>{/if}
+																		<span
+																			class="tabular-nums {old
+																				? 'text-warning-700-300'
+																				: 'text-surface-600-400'}"
+																			>{#if old}<i class="fa-solid fa-clock-rotate-left mr-1"
+																				></i>{/if}{ageLabel(e.updated_at)}</span
+																		>
+																		{#if !e.here}<span
+																				class="text-surface-600-400"
+																				title="Linked under another requirement that asks for the same document"
+																				>· filed elsewhere in the audit</span
+																			>{/if}
+																	</li>
+																{/each}
+															</ul>
+														{:else if filed}
+															<span class="pl-7 text-xs text-error-600-400"
+																><i class="fa-solid fa-circle-xmark mr-1"></i>Not on file</span
 															>
 														{/if}
 													</li>
@@ -550,12 +639,15 @@
 											</ul>
 										</section>
 										<section class="flex flex-col gap-2">
-											{@render heading('fa-solid fa-paperclip', 'You have on file')}
-											{#if selected.evidences.length}
+											{@render heading(
+												'fa-solid fa-paperclip',
+												pairedIds.size ? 'Also on file, not matched' : 'You have on file'
+											)}
+											{#if unpaired.length}
 												<ul
 													class="flex flex-col divide-y divide-surface-200-800 border border-surface-200-800 rounded-base bg-surface-50-950"
 												>
-													{#each selected.evidences as e (e.id)}
+													{#each unpaired as e (e.id)}
 														{@const via = e.via_controls.map(
 															(id) =>
 																selected.applied_controls.find((c) => c.id === id)?.name ??
@@ -604,11 +696,15 @@
 												<div
 													class="rounded-base border border-dashed border-surface-300-700 bg-surface-50-950 p-4 text-sm text-surface-600-400 flex flex-col gap-1"
 												>
-													<span>Nothing linked yet.</span>
-													<span
-														>Attach evidence to the applied controls of this requirement, or to the
-														requirement itself.</span
-													>
+													{#if pairedIds.size}
+														<span>Every linked evidence answers a request on the left.</span>
+													{:else}
+														<span>Nothing linked yet.</span>
+														<span
+															>Attach evidence to the applied controls of this requirement, or to
+															the requirement itself.</span
+														>
+													{/if}
 												</div>
 											{/if}
 											{#if selected.applied_controls.length}
@@ -648,12 +744,12 @@
 											'Where auditors usually find something'
 										)}
 										<ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-											{#each g.pitfalls as p, i (i)}
+											{#each g.pitfalls as p (p.id)}
 												<li
 													class="flex gap-2.5 rounded-base border border-surface-200-800 p-3 leading-snug"
 												>
 													<i class="fa-solid fa-magnifying-glass text-primary-500 mt-0.5 text-xs"
-													></i>{p}
+													></i>{p.text}
 												</li>
 											{/each}
 										</ul>
@@ -687,13 +783,99 @@
 					</article>
 				{/if}
 			</div>
+		{:else if view === 'sessions'}
+			<div class="flex flex-col gap-3">
+				<p class="text-sm text-surface-600-400 max-w-3xl">
+					Stage 2 runs by topic, not in standard order: each session walks related clauses and
+					controls with the same people. Prepare one folder and one owner per session.
+				</p>
+				<ol class="flex flex-col gap-3">
+					{#each sessions as { session, reqs, people }, n (session.id)}
+						{@const byState = SHOWN.map(
+							(r) => [r, reqs.filter((x) => x.readiness === r).length] as const
+						)}
+						{@const asks = reqs.reduce(
+							(sum, r) =>
+								sum + (r.guidance?.requests.filter((q) => q.kind !== 'observation').length ?? 0),
+							0
+						)}
+						<li class="card border border-surface-200-800 p-4 flex flex-col gap-3">
+							<header class="flex flex-wrap items-start gap-x-4 gap-y-2">
+								<span
+									class="size-7 shrink-0 rounded-full bg-surface-200-800 grid place-items-center text-xs font-semibold tabular-nums"
+									>{n + 1}</span
+								>
+								<div class="flex flex-col grow">
+									<h3 class="font-semibold">{session.label}</h3>
+									<span class="text-xs text-surface-600-400 tabular-nums"
+										>{reqs.length
+											? `${reqs.length} requirement${reqs.length > 1 ? 's' : ''} · ${asks} records to file`
+											: `${session.requests?.length ?? 0} items to have ready`}</span
+									>
+								</div>
+								<span class="flex gap-1.5 text-xs">
+									{#each byState as [r, k] (r)}
+										{#if k}<span class="flex items-center gap-1 tabular-nums"
+												>{@render dot(r)}{k}</span
+											>{/if}
+									{/each}
+								</span>
+							</header>
+							{#if people.length}
+								<div class="flex flex-wrap gap-1.5">
+									{#each people as w (w)}
+										<span
+											class="text-xs rounded-full border border-surface-300-700 px-2.5 py-1 flex items-center gap-1.5"
+											><i class="fa-solid fa-user text-surface-500 text-[10px]"></i>{PEOPLE[w] ??
+												w}</span
+										>
+									{/each}
+								</div>
+							{/if}
+							{#if reqs.length}
+								<ul class="text-sm grid grid-cols-1 md:grid-cols-2 gap-x-4 -mx-1">
+									{#each reqs as r (r.id)}
+										<li>
+											<button
+												class="w-full flex gap-2 items-center text-left rounded px-1 py-1 hover:bg-surface-100-900"
+												onclick={() => openRequirement(r.id)}
+											>
+												{@render dot(r.readiness)}
+												<span class="font-mono text-xs w-14 shrink-0 text-surface-600-400"
+													>{r.ref_id}</span
+												>
+												<span class="leading-snug">{r.name}</span>
+											</button>
+										</li>
+									{/each}
+								</ul>
+							{/if}
+							{#if session.requests?.length}
+								<ul class="text-sm flex flex-col gap-1">
+									{#each session.requests as q (q.id)}
+										<li class="flex gap-2">
+											<i class="{KINDS[q.kind]?.icon ?? 'fa-solid fa-file'} mt-1 text-surface-500"
+											></i>{q.label}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+							{#each session.pitfalls ?? [] as p (p.id)}
+								<p class="text-sm text-warning-700-300 flex gap-2">
+									<i class="fa-solid fa-triangle-exclamation mt-1"></i>{p.text}
+								</p>
+							{/each}
+						</li>
+					{/each}
+				</ol>
+			</div>
 		{:else if view === 'requests'}
 			<div class="flex flex-col gap-3">
 				<div class="flex flex-wrap items-center gap-3">
 					<p class="text-sm text-surface-600-400 max-w-3xl">
-						Every record the auditor is likely to ask for, worst readiness first. Excluded
-						requirements are left out. Copy it into a spreadsheet to share with owners ahead of the
-						audit.
+						Every record the auditor is likely to ask for, once, worst readiness first. A document
+						asked by several requirements shows on one row. Excluded requirements are left out. Copy
+						it into a spreadsheet to share with owners ahead of the audit.
 					</p>
 					<button class="btn btn-sm preset-filled-primary-500 ml-auto" onclick={copyRequests}>
 						<i class="fa-solid {copied ? 'fa-check' : 'fa-copy'}"></i>{copied
@@ -713,24 +895,48 @@
 						<tbody>
 							{#each requests as r, i (i)}
 								<tr class="hover:bg-surface-100-900">
-									<td>{@render dot(r.item.readiness)}</td>
-									<td class="font-mono text-xs whitespace-nowrap">
-										<button class="anchor" onclick={() => openRequirement(r.item.id)}
-											>{r.item.ref_id}</button
-										>
+									<td>{@render dot(worstOf(r).readiness)}</td>
+									<td class="font-mono text-xs">
+										<span class="flex flex-wrap gap-x-2 max-w-40">
+											{#each r.items as it (it.id)}
+												<button
+													class="anchor whitespace-nowrap"
+													title={it.name}
+													onclick={() => openRequirement(it.id)}>{it.ref_id}</button
+												>
+											{/each}
+										</span>
 									</td>
 									<td>{r.label}</td>
 									<td class="whitespace-nowrap text-surface-600-400">
 										<i class="{KINDS[r.kind]?.icon ?? 'fa-solid fa-file'} mr-1"></i>{KINDS[r.kind]
 											?.label ?? r.kind}
 									</td>
-									<td class="tabular-nums text-surface-600-400"
+									<td class="tabular-nums whitespace-nowrap text-surface-600-400"
 										>{r.fresh_days ? `${r.fresh_days} d` : ''}</td
 									>
 									<td class="whitespace-nowrap"
-										>{PEOPLE[r.item.guidance?.interviewees[0] ?? ''] ?? ''}</td
+										>{PEOPLE[r.items[0].guidance?.interviewees[0] ?? ''] ?? ''}</td
 									>
-									<td class="text-right tabular-nums">{r.item.evidences.length}</td>
+									<td class="text-right whitespace-nowrap">
+										{#if r.filed === null}
+											<span
+												class="text-surface-500"
+												title="No reference control to match on: check the evidence linked to the requirement"
+												>—</span
+											>
+										{:else if r.filed.length}
+											{@const old = r.fresh_days && tooOld(r.filed[0].updated_at, r.fresh_days)}
+											<span
+												class="tabular-nums {old ? 'text-warning-700-300' : 'text-success-700-300'}"
+												title={r.filed.map((e) => e.name ?? 'Evidence you cannot view').join('\n')}
+												><i class="fa-solid {old ? 'fa-clock-rotate-left' : 'fa-check'} mr-1"></i>{r
+													.filed.length}</span
+											>
+										{:else}
+											<span class="text-error-600-400">Missing</span>
+										{/if}
+									</td>
 								</tr>
 							{/each}
 						</tbody>
