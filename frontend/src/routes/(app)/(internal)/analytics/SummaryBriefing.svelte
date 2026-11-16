@@ -420,7 +420,10 @@
 		<div class="stat">
 			<dt>{m.sumpageNonCompliantItems()}</dt>
 			<dd>
-				<a href="/requirement-assessments?result=non_compliant&inactive_assessment=false" class="stat-link">
+				<a
+					href="/requirement-assessments?result=non_compliant&inactive_assessment=false"
+					class="stat-link"
+				>
 					<span class="stat-number"
 						><AnimatedNumber value={metrics.compliance?.non_compliant_items ?? 0} countUp /></span
 					>
