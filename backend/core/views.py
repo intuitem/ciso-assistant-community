@@ -17906,7 +17906,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 class RequirementAssessmentFilterSet(GenericFilterSet):
     inactive_assessment = inactive_assessment_filter("compliance_assessment")
 
-    class Meta:
+    class Meta(GenericFilterSet.Meta):
         model = RequirementAssessment
         fields = {
             "folder": ["exact"],
@@ -19787,7 +19787,7 @@ class IncidentFilterSet(GenericFilterSet):
         late = nis2_overdue_incidents(queryset)
         return late if value else queryset.exclude(pk__in=late.values("pk"))
 
-    class Meta:
+    class Meta(GenericFilterSet.Meta):
         model = Incident
         fields = {
             "folder": ["exact"],

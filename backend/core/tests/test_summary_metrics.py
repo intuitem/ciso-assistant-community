@@ -213,6 +213,28 @@ def test_attention_counts_match_their_list_filters(admin_client, domain):  # noq
         reported_at=timezone.now() - timedelta(days=4),
         status=Incident.Status.DISMISSED,
     )
+    Incident.objects.create(
+        name="closed",
+        folder=domain,
+        nis2_significant=True,
+        reported_at=timezone.now() - timedelta(days=4),
+        status=Incident.Status.CLOSED,
+    )
+    # 30h in: the 24h early warning is missed while the 72h notification is still ahead.
+    Incident.objects.create(
+        name="missed warning",
+        folder=domain,
+        nis2_significant=True,
+        reported_at=timezone.now() - timedelta(hours=30),
+    )
+    # The notification went out, so the missed early warning no longer counts.
+    Incident.objects.create(
+        name="superseded",
+        folder=domain,
+        nis2_significant=True,
+        reported_at=timezone.now() - timedelta(days=4),
+        nis2_notification_at=timezone.now() - timedelta(days=2),
+    )
     Vulnerability.objects.create(name="late", folder=domain, due_date=past)
     Vulnerability.objects.create(
         name="fixed", folder=domain, due_date=past, status=Vulnerability.Status.FIXED
@@ -248,13 +270,16 @@ def test_attention_counts_match_their_list_filters(admin_client, domain):  # noq
     RiskAssessment.objects.update(due_date=past)
     Evidence.objects.create(name="soon", folder=domain, expiry_date=ahead)
     Evidence.objects.create(name="later", folder=domain, expiry_date=far)
+    Evidence.objects.create(
+        name="marked expired", folder=domain, expiry_date=ahead, status="expired"
+    )
     Contract.objects.create(
         name="ending", folder=domain, status=Contract.Status.ACTIVE, end_date=ahead
     )
     Contract.objects.create(name="draft", folder=domain, end_date=ahead)
 
     data = admin_client.get("/api/get_metrics/").json()["results"]
-    assert data["operations"]["nis2_overdue_incidents"] == 1
+    assert data["operations"]["nis2_overdue_incidents"] == 2
     assert data["operations"]["overdue_vulnerabilities"] == 1
     assert data["privacy"]["right_requests_due"] == 1
     assert data["risk"]["expired_acceptances"] == 1
@@ -270,7 +295,10 @@ def test_attention_counts_match_their_list_filters(admin_client, domain):  # noq
         return [r["name"] for r in admin_client.get(url).json()["results"]]
 
     soon = ahead + timedelta(days=20)
-    assert listed("/api/incidents/?nis2_overdue=true") == [late.name]
+    assert sorted(listed("/api/incidents/?nis2_overdue=true")) == [
+        late.name,
+        "missed warning",
+    ]
     assert listed("/api/vulnerabilities/?state=overdue") == ["late"]
     assert listed(
         f"/api/privacy/right-requests/?due_date__lte={today + timedelta(days=7)}&status=new&status=in_progress&status=on_hold"
@@ -283,7 +311,17 @@ def test_attention_counts_match_their_list_filters(admin_client, domain):  # noq
     ) == ["lapsed"]
     assert listed(
         f"/api/evidences/?expiry_date__gte={today}&expiry_date__lte={soon}"
+        "&status=draft&status=missing&status=in_review&status=approved&status=rejected"
     ) == ["soon"]
+    # The two filtersets declared here keep GenericFilterSet's multi-value relations.
+    other = Folder.objects.create(
+        name="other",
+        parent_folder=Folder.get_root_folder(),
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    both = f"folder={domain.id}&folder={other.id}"
+    assert len(listed(f"/api/incidents/?{both}")) == 6
+    assert admin_client.get(f"/api/requirement-assessments/?{both}").status_code == 200
     assert listed(
         f"/api/contracts/?status=active&end_date__gte={today}&end_date__lte={soon}"
     ) == ["ending"]

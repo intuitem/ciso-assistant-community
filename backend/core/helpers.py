@@ -1676,6 +1676,7 @@ def get_metrics(user: User, folder_id):
         ),
         "assignments__actor__in",
     )
+    from core.utils import get_respondent_scoped_folder_ids
     from privacy.models import RightRequest
     from tprm.models import Contract, EntityAssessment
 
@@ -1749,11 +1750,14 @@ def get_metrics(user: User, folder_id):
             )
             .exclude(status="expired")
             .count(),
+            # Only those this user can review: change access, outside respondent scope.
             "evidences_to_review": viewable_evidences.filter(
+                id__in=RoleAssignment.get_changeable_object_ids(user, Evidence),
                 revisions__in=EvidenceRevision.current_with_content().filter(
                     review_status=EvidenceRevision.ReviewStatus.PENDING
-                )
+                ),
             )
+            .exclude(folder_id__in=get_respondent_scoped_folder_ids(user))
             .distinct()
             .count(),
             "overdue_audits": viewable_compliance_assessments.filter(
@@ -1936,14 +1940,34 @@ def exclude_inactive_parent(qs, parent: str):
 
 
 def nis2_overdue_incidents(incidents):
-    """Significant incidents whose next NIS2 stage is past due: the incident list's "nis2_overdue" filter."""
-    late = [
-        incident.pk
-        for incident in incidents.filter(nis2_significant=True).exclude(
-            status=Incident.Status.DISMISSED
+    """Open significant incidents with a NIS2 stage past due that no later stage has
+    superseded (a missed early warning stops counting once the notification is sent):
+    the incident list's "nis2_overdue" filter."""
+    # A fresh, narrow queryset: the deadlines need a few columns, not the list's prefetches.
+    candidates = (
+        Incident.objects.filter(
+            pk__in=incidents.values("pk"),
+            nis2_significant=True,
+            nis2_final_report_at__isnull=True,
         )
-        if (stage := incident.nis2_next_stage()) and stage["overdue"]
-    ]
+        .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
+        .only(
+            "reported_at",
+            "created_at",
+            "nis2_significant",
+            "nis2_early_warning_at",
+            "nis2_notification_at",
+            "nis2_final_report_at",
+        )
+    )
+    late = []
+    for incident in candidates:
+        stages = incident.nis2_deadlines()
+        if any(
+            stage["overdue"] and not any(later["done_at"] for later in stages[i + 1 :])
+            for i, stage in enumerate(stages)
+        ):
+            late.append(incident.pk)
     return incidents.filter(pk__in=late)
 
 

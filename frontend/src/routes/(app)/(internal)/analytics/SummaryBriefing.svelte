@@ -39,7 +39,7 @@
 		(
 			[
 				featureflags.incidents !== false &&
-					featureflags.nis2 && {
+					featureflags.nis2 === true && {
 						tier: 'now',
 						count: metrics.operations?.nis2_overdue_incidents,
 						label: m.briefingNis2Overdue(),
@@ -149,7 +149,7 @@
 					count: metrics.compliance?.expiring_evidences,
 					label: m.briefingExpiringEvidences(),
 					hint: m.briefingExpiringEvidencesHint(),
-					href: `/evidences/?expiry_date__gte=${today}&expiry_date__lte=${inDays(30)}`
+					href: `/evidences/?expiry_date__gte=${today}&expiry_date__lte=${inDays(30)}&status=draft&status=missing&status=in_review&status=approved&status=rejected`
 				},
 				featureflags.tprm !== false &&
 					featureflags.contracts !== false && {
