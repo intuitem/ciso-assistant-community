@@ -339,6 +339,7 @@ export const FILTER_KEYS = new Set([
 	'gravity',
 	'health',
 	'impact',
+	'inactive_assessment',
 	'is_active',
 	'is_assigned',
 	'is_business_function',
@@ -367,6 +368,7 @@ export const FILTER_KEYS = new Set([
 	'metric_instance',
 	'nature',
 	'next_occurrence_status',
+	'nis2_overdue',
 	'object_type',
 	'origin',
 	'overdue',
@@ -421,5 +423,5 @@ export const FILTER_KEYS = new Set([
 	'updated_at',
 	'usage',
 	'validation_deadline',
-	'within_tolerance'
+	'within_tolerance',
 ]);
