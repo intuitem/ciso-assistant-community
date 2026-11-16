@@ -355,12 +355,19 @@
 					})
 				: m.lbPresetDeleteStepConfirm({ title: step.title });
 		if (!(await confirmModal(modalStore, msg))) return;
+		// A save may have replaced the draft while the modal was open: match by key, not index.
+		if (!draft) return;
 		// Drop owned scaffolds
-		const ownedRefs = new Set(owned.map((s) => s.ref).filter(Boolean));
+		const ownedRefs = new Set(
+			draft.scaffolded_objects
+				.filter((s) => s.step_ref_id === step.key)
+				.map((s) => s.ref)
+				.filter(Boolean)
+		);
 		draft.scaffolded_objects = draft.scaffolded_objects.filter((s) => s.step_ref_id !== step.key);
 		// Clear target_ref on any step that focused on a deleted scaffold
 		draft.steps = draft.steps
-			.filter((_, idx) => idx !== i)
+			.filter((s) => s.key !== step.key)
 			.map((s) => (s.target_ref && ownedRefs.has(s.target_ref) ? { ...s, target_ref: null } : s));
 	}
 
