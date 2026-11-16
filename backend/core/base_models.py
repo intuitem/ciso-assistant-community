@@ -199,34 +199,64 @@ def _general_settings() -> dict:
     )
 
 
+def _ref_id_number(ref_id: str, prefix: str) -> int | None:
+    """N of a ref_id shaped `<prefix>N` (prefix compared case-insensitively, as the
+    uniqueness check does), None for anything else."""
+    if ref_id[: len(prefix)].upper() != prefix.upper():
+        return None
+    suffix = ref_id[len(prefix) :]
+    return int(suffix) if suffix.isascii() and suffix.isdigit() else None
+
+
+def _lock_parents(model, parent_ids) -> None:
+    """Serialize ref_id allocation per parent. NO KEY UPDATE, unlike a plain FOR
+    UPDATE, does not block the foreign-key inserts other objects make in the parent."""
+    ids = [pk for pk in parent_ids if pk is not None]
+    if ids:
+        list(
+            model.objects.select_for_update(no_key=True)
+            .filter(pk__in=ids)
+            .order_by("pk")
+            .values_list("pk", flat=True)
+        )
+
+
 class AutoRefIdMixin:
     """Fills a blank ref_id on creation, numbered within its parent, when the
     `auto_ref_id` general setting is on. List it first in the model's bases;
-    a plain mixin so it does not replace the Meta the model inherits."""
+    a plain mixin so it does not replace the Meta the model inherits.
+
+    A model whose save() derives the parent defines `resolve_auto_ref_id_parent()`
+    so the number is taken in the parent the object is saved in."""
 
     auto_ref_id_prefix: str = ""
     auto_ref_id_parent: str = "folder"
 
     @classmethod
     def current_auto_ref_id_prefix(cls, general: dict | None = None) -> str:
-        """The admin's override while auto ref_id is on, else the built-in prefix."""
+        """The admin's override while auto ref_id is on, else the built-in prefix.
+        Proxies (Policy) share their table, hence their concrete model's prefix."""
+        concrete = cls._meta.concrete_model
         general = _general_settings() if general is None else general
         if general.get("auto_ref_id"):
             overrides = general.get("auto_ref_id_prefixes") or {}
-            return overrides.get(cls._meta.model_name) or cls.auto_ref_id_prefix
-        return cls.auto_ref_id_prefix
+            return (
+                overrides.get(concrete._meta.model_name) or concrete.auto_ref_id_prefix
+            )
+        return concrete.auto_ref_id_prefix
 
     def next_ref_id(self, prefix: str) -> str:
         prefix = f"{prefix}."
+        # _base_manager: a proxy's default manager (Policy) hides rows sharing the sequence.
         taken = (
             type(self)
-            .objects.filter(
+            ._base_manager.filter(
                 **{f"{self.auto_ref_id_parent}_id": self._ref_id_parent_id},
-                ref_id__startswith=prefix,
+                ref_id__istartswith=prefix,
             )
             .values_list("ref_id", flat=True)
         )
-        numbers = [int(r[len(prefix) :]) for r in taken if r[len(prefix) :].isdigit()]
+        numbers = [n for r in taken if (n := _ref_id_number(r, prefix)) is not None]
         return f"{prefix}{max(numbers, default=0) + 1:02d}"
 
     @property
@@ -237,15 +267,12 @@ class AutoRefIdMixin:
         if self._state.adding and not self.ref_id:
             general = _general_settings()
             if general.get("auto_ref_id"):
+                if resolve := getattr(self, "resolve_auto_ref_id_parent", None):
+                    resolve()
                 with transaction.atomic():
-                    # Lock the parent so concurrent creations in it get distinct numbers.
-                    parent_model = self._meta.get_field(
-                        self.auto_ref_id_parent
-                    ).related_model
-                    list(
-                        parent_model.objects.select_for_update()
-                        .filter(pk=self._ref_id_parent_id)
-                        .values_list("pk", flat=True)
+                    _lock_parents(
+                        self._meta.get_field(self.auto_ref_id_parent).related_model,
+                        [self._ref_id_parent_id],
                     )
                     self.ref_id = self.next_ref_id(
                         self.current_auto_ref_id_prefix(general)
@@ -255,13 +282,14 @@ class AutoRefIdMixin:
 
 
 def auto_ref_id_models() -> dict:
-    """{model_name: model} of every model that can get an automatic ref_id."""
+    """{model_name: model} of every model that can get an automatic ref_id.
+    Proxies are left out: they share their concrete model's table and sequence."""
     from django.apps import apps
 
     return {
         m._meta.model_name: m
         for m in apps.get_models()
-        if issubclass(m, AutoRefIdMixin)
+        if issubclass(m, AutoRefIdMixin) and not m._meta.proxy
     }
 
 
@@ -276,27 +304,34 @@ def backfill_auto_ref_ids() -> int:
         for model in auto_ref_id_models().values():
             prefix = f"{model.current_auto_ref_id_prefix(general)}."
             parent = f"{model.auto_ref_id_parent}_id"
+            blank = models.Q(ref_id="") | models.Q(ref_id__isnull=True)
             # _base_manager: custom default managers may hide rows that still need an id.
+            parents = set(
+                model._base_manager.filter(blank).values_list(parent, flat=True)
+            )
+            if not parents:
+                continue
+            # Same parent lock as creation, taken before reading the sequences.
+            _lock_parents(
+                model._meta.get_field(model.auto_ref_id_parent).related_model, parents
+            )
             blanks = list(
                 model._base_manager.select_for_update()
-                .filter(models.Q(ref_id="") | models.Q(ref_id__isnull=True))
+                .filter(blank)
                 .order_by("created_at", "pk")
                 .only("pk", parent)
             )
-            if not blanks:
-                continue
             last = defaultdict(int)
-            parents = {getattr(o, parent) for o in blanks}
             in_parents = models.Q(**{f"{parent}__in": parents - {None}})
             if None in parents:
                 in_parents |= models.Q(**{f"{parent}__isnull": True})
             for parent_id, ref_id in (
-                model._base_manager.filter(in_parents, ref_id__startswith=prefix)
+                model._base_manager.filter(in_parents, ref_id__istartswith=prefix)
                 .values_list(parent, "ref_id")
                 .iterator()
             ):
-                if ref_id[len(prefix) :].isdigit():
-                    last[parent_id] = max(last[parent_id], int(ref_id[len(prefix) :]))
+                if (n := _ref_id_number(ref_id, prefix)) is not None:
+                    last[parent_id] = max(last[parent_id], n)
             for obj in blanks:
                 last[getattr(obj, parent)] += 1
                 obj.ref_id = f"{prefix}{last[getattr(obj, parent)]:02d}"

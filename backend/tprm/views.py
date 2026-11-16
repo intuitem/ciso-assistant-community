@@ -1220,6 +1220,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
     export_config = {
         "filename": "entity_assessments_export",
         "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
             "version": {"source": "version", "label": "version", "escape": True},
             "description": {

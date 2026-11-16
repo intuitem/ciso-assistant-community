@@ -8484,11 +8484,15 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs) -> None:
+    def resolve_auto_ref_id_parent(self) -> None:
+        """An assessment left on the root folder lands in its perimeter's domain."""
         if self.perimeter and (
             not self.folder or self.folder == Folder.get_root_folder()
         ):
             self.folder = self.perimeter.folder
+
+    def save(self, *args, **kwargs) -> None:
+        self.resolve_auto_ref_id_parent()
         return super().save(*args, **kwargs)
 
 

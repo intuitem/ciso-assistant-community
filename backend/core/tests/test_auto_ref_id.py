@@ -202,3 +202,38 @@ def test_models_that_gained_a_ref_id(domains):
     set_auto_ref_id(True)
     assert Evidence.objects.create(name="e", folder=domains[0]).ref_id == "EVD.01"
     assert RiskAcceptance.objects.create(name="r", folder=domains[0]).ref_id == "RAC.01"
+
+
+@pytest.mark.django_db
+def test_assessment_numbered_in_its_perimeter_domain(domains):
+    from core.models import Perimeter
+
+    set_auto_ref_id(True)
+    a = domains[0]
+    FindingsAssessment.objects.create(name="existing", folder=a)  # FA.01 in A
+    perimeter = Perimeter.objects.create(name="p", folder=a)
+    fa = FindingsAssessment.objects.create(
+        name="via perimeter", folder=Folder.get_root_folder(), perimeter=perimeter
+    )
+    assert (fa.folder_id, fa.ref_id) == (a.id, "FA.02")
+
+
+@pytest.mark.django_db
+def test_policies_share_the_applied_control_sequence(domains):
+    from core.base_models import auto_ref_id_models
+    from core.models import Policy
+
+    set_auto_ref_id(True)
+    set_prefixes({"appliedcontrol": "CTRL"})
+    AppliedControl.objects.create(name="c", folder=domains[0])
+    assert Policy.objects.create(name="p", folder=domains[0]).ref_id == "CTRL.02"
+    assert "policy" not in auto_ref_id_models()
+
+
+@pytest.mark.django_db
+def test_numbering_ignores_case_and_non_ascii_digits(domains):
+    set_auto_ref_id(True)
+    a = domains[0]
+    AppliedControl.objects.create(name="lower", folder=a, ref_id="ac.03")
+    AppliedControl.objects.create(name="sup", folder=a, ref_id="AC.²")
+    assert AppliedControl.objects.create(name="c", folder=a).ref_id == "AC.04"
