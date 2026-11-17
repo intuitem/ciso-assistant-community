@@ -284,10 +284,17 @@ class AutoRefIdMixin:
                         self._meta.get_field(self.auto_ref_id_parent).related_model,
                         [self._ref_id_parent_id],
                     )
-                    self.ref_id = self.next_ref_id(
-                        self.current_auto_ref_id_prefix(general)
+                    blank, self.ref_id = (
+                        self.ref_id,
+                        self.next_ref_id(self.current_auto_ref_id_prefix(general)),
                     )
-                    return super().save(*args, **kwargs)
+                    try:
+                        return super().save(*args, **kwargs)
+                    except Exception:
+                        # A retry of this instance must allocate again, not keep a number
+                        # someone else may get meanwhile.
+                        self.ref_id = blank
+                        raise
         return super().save(*args, **kwargs)
 
 

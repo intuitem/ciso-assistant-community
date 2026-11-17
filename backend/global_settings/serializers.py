@@ -262,6 +262,8 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 validated_data["value"][key] = _normalize_organisation_score_scale(
                     value
                 )
+            if key == "auto_ref_id" and not isinstance(value, bool):
+                raise serializers.ValidationError({"auto_ref_id": "Must be a boolean."})
             if key == "auto_ref_id_prefixes":
                 validated_data["value"][key] = _validate_auto_ref_id_prefixes(value)
             if key == "builtin_metrics_retention_days":

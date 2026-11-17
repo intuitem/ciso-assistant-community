@@ -9230,7 +9230,11 @@ class RiskScenario(
         )
         nb_scenarios = len(scenarios_ref_ids) + 1
         candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_scenarios + 1)]
-        return next(x for x in candidates if x not in scenarios_ref_ids)
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in scenarios_ref_ids if r}
+        )
 
     def parent_perimeter(self):
         return self.risk_assessment.perimeter

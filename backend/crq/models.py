@@ -515,7 +515,11 @@ class QuantitativeRiskScenario(AutoRefIdMixin, NameDescriptionMixin, FolderMixin
         ]
         nb_scenarios = len(scenarios_ref_ids) + 1
         candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_scenarios + 1)]
-        return next(x for x in candidates if x not in scenarios_ref_ids)
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in scenarios_ref_ids if r}
+        )
 
     @property
     def inherent_ale(self):
@@ -675,7 +679,11 @@ class QuantitativeRiskHypothesis(
         ]
         nb_hypotheses = len(hypotheses_ref_ids) + 1
         candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_hypotheses + 1)]
-        return next(x for x in candidates if x not in hypotheses_ref_ids)
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in hypotheses_ref_ids if r}
+        )
 
     class Meta:
         verbose_name = _("Quantitative Risk Hypothesis")

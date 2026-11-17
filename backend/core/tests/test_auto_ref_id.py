@@ -273,3 +273,32 @@ def test_global_search_keeps_an_exact_ref_id_past_the_cap(domains, monkeypatch):
     client.force_authenticate(admin)
     response = client.get("/api/search/", {"q": "AC.01", "type": "applied-controls"})
     assert "c1" in [r["name"] for r in response.json()["results"]]
+
+
+@pytest.mark.django_db
+def test_failed_save_gives_the_number_back(domains):
+    set_auto_ref_id(True)
+    control = AppliedControl(name="x" * 201, folder=domains[0])
+    with pytest.raises(Exception):
+        control.save()
+    assert not control.ref_id
+
+
+@pytest.mark.django_db
+def test_auto_ref_id_setting_must_be_boolean():
+    from rest_framework.exceptions import ValidationError
+
+    from global_settings.serializers import GeneralSettingsSerializer
+
+    gs, _ = GlobalSettings.objects.get_or_create(name="general", defaults={"value": {}})
+    with pytest.raises(ValidationError):
+        GeneralSettingsSerializer().update(gs, {"value": {"auto_ref_id": "false"}})
+
+
+@pytest.mark.django_db
+def test_legacy_generator_ignores_prefix_case(domains):
+    set_auto_ref_id(True)
+    study = QuantitativeRiskStudy.objects.create(name="s", folder=domains[0])
+    QuantitativeRiskScenario.objects.create(name="q", quantitative_risk_study=study)
+    set_prefixes({"quantitativeriskscenario": "qr"})
+    assert QuantitativeRiskScenario.get_default_ref_id(study) == "qr.02"

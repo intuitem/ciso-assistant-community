@@ -999,7 +999,11 @@ class AttackPath(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
         )
         nb_attack_paths = len(attack_paths_ref_ids) + 1
         candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_attack_paths + 1)]
-        return next(x for x in candidates if x not in attack_paths_ref_ids)
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in attack_paths_ref_ids if r}
+        )
 
     @property
     def form_display_name(self):
@@ -1222,7 +1226,11 @@ class OperatingMode(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
         ]
         nb_operating_modes = len(operating_modes_ref_ids) + 1
         candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_operating_modes + 1)]
-        return next(x for x in candidates if x not in operating_modes_ref_ids)
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in operating_modes_ref_ids if r}
+        )
 
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
