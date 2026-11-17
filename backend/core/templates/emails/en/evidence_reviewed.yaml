@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Evidence '${evidence_name}': ${decision}"
+body: |
+  Hello,
+
+  An evidence you own has been reviewed:
+
+  - Name: ${evidence_name}
+  - Status: ${decision}
+  - Reviewed by: ${actor_name}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view it: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

@@ -181,7 +181,7 @@ def validate_yaml_extra_locales(data):
                 raise ValueError(f"(validate_yaml_extra_locales) Locale data for \"{loc_code}\" must be a non-empty dict (entry #{i})")
 
             # Optional fields: warn if missing or empty
-            for req_field in ["framework_name", "description", "copyright"]:
+            for req_field in ["framework_name", "description"]:
                 if req_field not in loc_data or str(loc_data[req_field]).strip() == "":
                     print(f"⚠️  [WARNING] (validate_yaml_extra_locales) Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
 
@@ -363,7 +363,7 @@ def validate_excel_data(wb):
             
             ws = wb[sheet]
             loc_data = extract_kv_from_base_sheet(ws)
-            for field in ["framework_name", "description", "copyright"]:
+            for field in ["framework_name", "description"]:
                 if not loc_data.get(field, "") or loc_data.get(field, "").strip() == "":
                     print(f"⚠️  [WARNING] (validate_excel_data) Missing or empty \"{field}\" in locale \"{loc}\" (Sheet: \"{sheet}\")")
                     
@@ -452,11 +452,10 @@ def format_excel_data_as_config(wb):
             localized_data = extract_kv_from_base_sheet(ws)
             extra_locales_dict[locale].update({
                 "framework_name": localized_data.get("framework_name", ""),
-                "description": localized_data.get("description", ""),
-                "copyright": localized_data.get("copyright", "")
+                "description": localized_data.get("description", "")
             })
             
-            for field in ["framework_name", "description", "copyright"]:
+            for field in ["framework_name", "description"]:
                 value = localized_data.get(field, "")
                 if not value or str(value).strip() == "":
                     extra_locales_dict[locale].pop(field, None)
@@ -482,6 +481,11 @@ def format_excel_data_as_config(wb):
         "packager": base_data.get("packager"),
         "framework_sheet_base_name": base_data.get("framework_sheet_base_name"),
         "implementation_groups_sheet_base_name": base_data.get("implementation_groups_sheet_base_name"),
+        "answers_sheet_base_name": base_data.get("answers_sheet_base_name"),
+        "scores_sheet_base_name": base_data.get("scores_sheet_base_name"),
+        "threats_sheet_base_name": base_data.get("threats_sheet_base_name"),
+        "reference_controls_sheet_base_name": base_data.get("reference_controls_sheet_base_name"),
+        "urn_prefix_sheet_base_name": base_data.get("urn_prefix_sheet_base_name"),
         "implementation_groups": implementation_groups if implementation_groups else None,
         "extra_locales": extra_locales
     }
@@ -573,6 +577,11 @@ def create_excel(data, output_excel=None):
     packager = data["packager"]
     framework_sheet_base = data["framework_sheet_base_name"]
     impl_group_base = data.get("implementation_groups_sheet_base_name")
+    answers_base = data.get("answers_sheet_base_name")
+    scores_base = data.get("scores_sheet_base_name")
+    threats_base = data.get("threats_sheet_base_name")
+    reference_controls_base = data.get("reference_controls_sheet_base_name")
+    urn_prefix_base = data.get("urn_prefix_sheet_base_name")
     impl_groups = data.get("implementation_groups", [])
 
     wb = Workbook()
@@ -603,8 +612,6 @@ def create_excel(data, output_excel=None):
                     ws1.append([f"name[{loc_code}]", loc_data["framework_name"]])
                 if "description" in loc_data and str(loc_data["description"]).strip():
                     ws1.append([f"description[{loc_code}]", loc_data["description"]])
-                if "copyright" in loc_data and str(loc_data["copyright"]).strip():
-                    ws1.append([f"copyright[{loc_code}]", loc_data["copyright"]])
 
     # Main sheet: framework_meta
     framework_meta_sheet = wb.create_sheet(f"{framework_sheet_base}_meta")
@@ -616,6 +623,10 @@ def create_excel(data, output_excel=None):
     framework_meta_sheet.append(["description", description])
     if impl_group_base:
         framework_meta_sheet.append(["implementation_groups_definition", impl_group_base])
+    if answers_base:
+        framework_meta_sheet.append(["answers_definition", answers_base])
+    if scores_base:
+        framework_meta_sheet.append(["scores_definition", scores_base])
 
     # Add extra_locales to framework_meta sheet
     if extra_locales:
@@ -719,7 +730,112 @@ def create_excel(data, output_excel=None):
                             impl_content_sheet.cell(row=row_num, column=name_col, value=texts["name"])
                         if desc_col:
                             impl_content_sheet.cell(row=row_num, column=desc_col, value=texts["description"])
-                            
+
+
+    # Answers sheets
+    if answers_base:
+        answers_meta_sheet = wb.create_sheet(f"{answers_base}_meta")
+        answers_meta_sheet.append(["type", "answers"])
+        answers_meta_sheet.append(["name", answers_base])
+
+        answers_content_sheet = wb.create_sheet(f"{answers_base}_content")
+        answers_header = ["id", "question_type", "question_choices"]
+
+        if extra_locales:
+            for locale_entry in extra_locales:
+                if locale in locale_entry.keys():  # Ignore if the extra locale is the same as the framework's locale
+                    continue
+                for loc_code in locale_entry.keys():
+                    answers_header.append(f"question_choices[{loc_code}]")
+
+        answers_content_sheet.append(answers_header)
+
+
+    # Scores sheets
+    if scores_base:
+        scores_meta_sheet = wb.create_sheet(f"{scores_base}_meta")
+        scores_meta_sheet.append(["type", "scores"])
+        scores_meta_sheet.append(["name", scores_base])
+
+        scores_content_sheet = wb.create_sheet(f"{scores_base}_content")
+        scores_header = ["score", "name", "description"]
+
+        if extra_locales:
+            for locale_entry in extra_locales:
+                if locale in locale_entry.keys():  # Ignore if the extra locale is the same as the framework's locale
+                    continue
+                for loc_code in locale_entry.keys():
+                    scores_header.extend([
+                        f"name[{loc_code}]",
+                        f"description[{loc_code}]"
+                    ])
+
+        scores_content_sheet.append(scores_header)
+
+
+    # Threats sheets
+    if threats_base:
+        threats_meta_sheet = wb.create_sheet(f"{threats_base}_meta")
+        threats_meta_sheet.append(["type", "threats"])
+        threats_meta_sheet.append(["base_urn", f"urn:intuitem:risk:threat:{urn_root}"])
+
+        threats_content_sheet = wb.create_sheet(f"{threats_base}_content")
+        threats_header = ["ref_id", "name", "description", "annotation"]
+
+        if extra_locales:
+            for locale_entry in extra_locales:
+                if locale in locale_entry.keys():  # Ignore if the extra locale is the same as the framework's locale
+                    continue
+                for loc_code in locale_entry.keys():
+                    threats_header.extend([
+                        f"name[{loc_code}]",
+                        f"description[{loc_code}]",
+                        f"annotation[{loc_code}]"
+                    ])
+
+        threats_content_sheet.append(threats_header)
+
+
+    # Reference controls sheets
+    if reference_controls_base:
+        reference_controls_meta_sheet = wb.create_sheet(f"{reference_controls_base}_meta")
+        reference_controls_meta_sheet.append(["type", "reference_controls"])
+        reference_controls_meta_sheet.append(["base_urn", f"urn:intuitem:risk:function:{urn_root}"])
+
+        reference_controls_content_sheet = wb.create_sheet(f"{reference_controls_base}_content")
+        reference_controls_header = [
+            "ref_id", "name", "category", "csf_function", "description", "annotation"
+        ]
+
+        if extra_locales:
+            for locale_entry in extra_locales:
+                if locale in locale_entry.keys():  # Ignore if the extra locale is the same as the framework's locale
+                    continue
+                for loc_code in locale_entry.keys():
+                    reference_controls_header.extend([
+                        f"name[{loc_code}]",
+                        f"description[{loc_code}]",
+                        f"annotation[{loc_code}]"
+                    ])
+
+        reference_controls_content_sheet.append(reference_controls_header)
+
+
+    # URN prefix sheets
+    if urn_prefix_base:
+        urn_prefix_meta_sheet = wb.create_sheet(f"{urn_prefix_base}_meta")
+        urn_prefix_meta_sheet.append(["type", "urn_prefix"])
+
+        urn_prefix_content_sheet = wb.create_sheet(f"{urn_prefix_base}_content")
+        urn_prefix_content_sheet.append(["prefix_id", "prefix_value"])
+
+        prefix_id = 1
+        if threats_base:
+            urn_prefix_content_sheet.append([prefix_id, f"urn:intuitem:risk:threat:{urn_root}"])
+            prefix_id += 1
+        if reference_controls_base:
+            urn_prefix_content_sheet.append([prefix_id, f"urn:intuitem:risk:function:{urn_root}"])
+
 
     try:
         wb.save(output_excel)

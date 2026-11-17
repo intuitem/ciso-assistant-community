@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getBuilderContext, type NodePreset } from './builder-state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		parent: string | null;

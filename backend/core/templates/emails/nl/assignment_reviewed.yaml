@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Uw opdracht voor '${assessment_name}' is ${decision}"
+body: |
+  Hallo,
+
+  Uw opdracht voor de volgende audit is beoordeeld:
+
+  - Audit: ${assessment_name}
+  - Beslissing: ${decision}
+  ${reviewer_observation}
+
+  Meld u aan op uw CISO Assistant-portaal voor meer details: [Naar CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
+
+  Bedankt.

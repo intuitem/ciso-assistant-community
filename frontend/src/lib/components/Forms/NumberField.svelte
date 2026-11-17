@@ -3,12 +3,12 @@
 
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	import type { CacheLock } from '$lib/utils/types';
+	import type { CacheLock } from '#lib/utils/types.js';
 
 	interface Props {
 		class?: string;
 		label?: string | undefined;
-		step?: number;
+		step?: number | 'any';
 		field: string;
 		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
 		helpText?: string | undefined;

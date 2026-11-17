@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { m } from '$paraglide/messages';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import Overlay from '$lib/components/PortalEditor/Overlay.svelte';
-	import { confirmDeleteForm } from '$lib/utils/portalActions';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import Overlay from '#lib/components/PortalEditor/Overlay.svelte';
+	import { confirmDeleteForm } from '#lib/utils/portalActions.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -47,7 +47,13 @@
 		</div>
 		<div class="flex items-center gap-2">
 			<a href="/portal-editor/{p.id}" class="btn btn-sm preset-tonal">{m.edit()}</a>
-			<form method="POST" action="?/deletePortal" use:enhance>
+			<form
+				method="POST"
+				action="?/deletePortal"
+				use:enhance={() =>
+					({ update }) =>
+						update({ navigate: false })}
+			>
 				<input type="hidden" name="id" value={p.id} />
 				<button
 					type="button"
@@ -117,7 +123,14 @@
 		<h2 class="text-lg font-bold">
 			{creating === 'public' ? m.newPublicPortal() : m.newInternalPortal()}
 		</h2>
-		<form method="POST" action="?/createPortal" use:enhance class="space-y-3">
+		<form
+			method="POST"
+			action="?/createPortal"
+			use:enhance={() =>
+				({ update }) =>
+					update({ navigate: false })}
+			class="space-y-3"
+		>
 			<input type="hidden" name="visibility" value={creating} />
 			<label class="block text-sm">
 				<span class="block text-surface-600-400">{m.name()}</span>

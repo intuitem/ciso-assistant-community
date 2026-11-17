@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Seit ${expired_since} ${expired_since_unit} abgelaufene Nachweise"
+body: |
+  Hallo,
+
+  Anzahl der seit ${expired_since} ${expired_since_unit} abgelaufenen Nachweise: ${evidence_count}
+
+  ${evidence_list}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Nachweise zu prüfen und zu aktualisieren: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

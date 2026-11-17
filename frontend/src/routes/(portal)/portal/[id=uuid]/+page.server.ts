@@ -1,9 +1,11 @@
-import { defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import { URL_MODEL, type ModelInfo } from '$lib/utils/types';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo, URL_MODEL_MAP, urlParamModelSelectFields } from '#lib/utils/crud.js';
+import { hasPermissionAnywhere } from '#lib/utils/access-control.js';
+import { canUseTile } from '#lib/utils/portalTileAccess.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { URL_MODEL, type ModelInfo } from '#lib/utils/types.js';
 import { type Actions, error, fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -25,10 +27,31 @@ async function buildCreateForm(urlModel: string, fetch: typeof globalThis.fetch)
 	return { createForm, model };
 }
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/content/`);
 	if (!res.ok) error(404, 'Portal not found');
 	const portal = await res.json();
+
+	// Hide tiles that would only error for this viewer (no permission, unreadable document).
+	// UX only: the API still enforces every action behind a tile.
+	const user = await locals.getUser();
+	const items = (portal.sections ?? []).flatMap((s: any) => s.items ?? []);
+	const hasDocumentTile = items.some(
+		(i: any) => i.target?.model === 'documents' && i.target?.document
+	);
+	const catalogRes = hasDocumentTile
+		? await fetch(`${BASE_API_URL}/document-containers/catalog/`)
+		: null;
+	const access = {
+		has: (codename: string) => hasPermissionAnywhere(user, codename),
+		modelName: (urlModel: string) => URL_MODEL_MAP[urlModel]?.name,
+		readableDocuments: new Set<string>(
+			catalogRes?.ok ? (await catalogRes.json()).map((c: any) => c.id) : []
+		)
+	};
+	portal.sections = (portal.sections ?? [])
+		.map((s: any) => ({ ...s, items: (s.items ?? []).filter((i: any) => canUseTile(i, access)) }))
+		.filter((s: any) => s.items.length);
 
 	const createModels = [
 		...new Set(
@@ -49,6 +72,18 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	return { portal, createForms };
 };
 
+// The tile launch banner prints this verbatim, so hand it the backend's message
+// rather than the JSON envelope around it.
+const readError = async (res: Response) => {
+	const body = await res.text();
+	try {
+		const parsed = JSON.parse(body);
+		return parsed?.detail ?? parsed?.error ?? body;
+	} catch {
+		return body;
+	}
+};
+
 export const actions: Actions = {
 	create: async (event) => {
 		const urlModel = event.url.searchParams.get('model');
@@ -56,6 +91,23 @@ export const actions: Actions = {
 			return fail(400, { error: 'invalid model' });
 		}
 		return defaultWriteFormAction({ event, urlModel, action: 'create', doRedirect: false });
+	},
+	launchQuickForm: async ({ params, request, fetch }) => {
+		const data = await request.formData();
+		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/launch-quick-form/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				item: data.get('item'),
+				folder: data.get('folder') || undefined,
+				name: data.get('name') || undefined
+			})
+		});
+		if (!res.ok) return fail(res.status, { error: await readError(res) });
+		// resumed/ref_id drive the "we handed you your draft back" banner; dropping them
+		// here made that banner unreachable from a tile.
+		const { redirect, resumed, ref_id } = await res.json();
+		return { redirect, resumed, ref_id };
 	},
 	launchAssessment: async ({ params, request, fetch }) => {
 		const data = await request.formData();
@@ -67,7 +119,7 @@ export const actions: Actions = {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ item, folder, name })
 		});
-		if (!res.ok) return fail(res.status, { error: await res.text() });
+		if (!res.ok) return fail(res.status, { error: await readError(res) });
 		const { redirect } = await res.json();
 		return { redirect };
 	}

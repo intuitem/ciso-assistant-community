@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import DirectoryFilePicker from '$lib/components/BatchUpload/DirectoryFilePicker.svelte';
-	import ConflictStrategyPicker from '$lib/components/BatchUpload/ConflictStrategyPicker.svelte';
-	import BatchUploadQueueTable from '$lib/components/BatchUpload/BatchUploadQueueTable.svelte';
-	import BatchUploadResults from '$lib/components/BatchUpload/BatchUploadResults.svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import DirectoryFilePicker from '#lib/components/BatchUpload/DirectoryFilePicker.svelte';
+	import ConflictStrategyPicker from '#lib/components/BatchUpload/ConflictStrategyPicker.svelte';
+	import BatchUploadQueueTable from '#lib/components/BatchUpload/BatchUploadQueueTable.svelte';
+	import BatchUploadResults from '#lib/components/BatchUpload/BatchUploadResults.svelte';
 	import type {
 		ConflictStrategy,
 		FileEntry,
 		BatchResponse,
 		BatchSummary,
 		BatchResultRow
-	} from '$lib/components/BatchUpload/types';
+	} from '#lib/components/BatchUpload/types.js';
 	import type { PageData } from './$types';
 
 	interface Props {

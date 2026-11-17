@@ -10,13 +10,12 @@ from privacy.models import (
     DataRecipient,
     DataContractor,
     DataTransfer,
-    ProcessingNature,
     RightRequest,
     DataBreach,
     ART6_LAWFUL_BASIS_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
 )
-from core.models import Actor
+from core.models import Actor, Terminology
 from iam.models import Folder
 from tprm.models import Entity
 from core.constants import COUNTRY_CHOICES
@@ -105,7 +104,17 @@ class Command(BaseCommand):
             )
 
         # Get processing natures
-        processing_natures = list(ProcessingNature.objects.all())
+        processing_natures = list(
+            Terminology.objects.filter(
+                field_path=Terminology.FieldPath.PROCESSING_NATURE, is_visible=True
+            )
+        )
+        category_terms = {
+            t.name: t
+            for t in Terminology.objects.filter(
+                field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY, is_visible=True
+            )
+        }
         if not processing_natures:
             self.stdout.write(
                 self.style.WARNING(
@@ -210,7 +219,6 @@ class Command(BaseCommand):
                 author=random.choice(actors) if actors else None,
                 dpia_required=dpia_required,
                 dpia_reference=f"DPIA-{i + 1:04d}" if dpia_required else "",
-                has_sensitive_personal_data=False,  # Will be updated if sensitive data added
             )
 
             # Assign actors (0-3)
@@ -271,12 +279,15 @@ class Command(BaseCommand):
             )
 
             for category in selected_categories:
+                term = category_terms.get(category)
+                if term is None:
+                    continue
                 is_sensitive = category in sensitive_categories
                 PersonalData.objects.create(
                     processing=processing,
                     name=f"Personal Data - {category}",
                     description=f"Description for {category}",
-                    category=category,
+                    category=term,
                     retention=f"{random.randint(1, 7)} years",
                     deletion_policy=random.choice(
                         [choice[0] for choice in PersonalData.DELETION_POLICY_CHOICES]
@@ -530,9 +541,13 @@ class Command(BaseCommand):
             ).count()
             self.stdout.write(f"  {status_label}: {count}")
 
-        sensitive_count = Processing.objects.filter(
-            name__startswith="TEST-", has_sensitive_personal_data=True
-        ).count()
+        sensitive_count = (
+            Processing.objects.filter(
+                name__startswith="TEST-", personal_data__is_sensitive=True
+            )
+            .distinct()
+            .count()
+        )
         self.stdout.write(f"\nWith Sensitive Personal Data: {sensitive_count}")
 
         dpia_count = Processing.objects.filter(
@@ -626,13 +641,12 @@ class Command(BaseCommand):
         self.stdout.write(f"\nTop Personal Data Categories:")
         category_counts = {}
         for pd in PersonalData.objects.filter(processing__name__startswith="TEST-"):
-            category_counts[pd.category] = category_counts.get(pd.category, 0) + 1
+            label = str(pd.category)
+            category_counts[label] = category_counts.get(label, 0) + 1
 
-        for category, count in sorted(
+        for label, count in sorted(
             category_counts.items(), key=lambda x: x[1], reverse=True
         )[:5]:
-            # Get label from choices
-            label = dict(PersonalData.PERSONAL_DATA_CHOICES).get(category, category)
             self.stdout.write(f"  {label}: {count}")
 
         self.stdout.write("=" * 60)

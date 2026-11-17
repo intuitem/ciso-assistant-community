@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { TreeViewNode } from './types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		nodes: TreeViewNode[];

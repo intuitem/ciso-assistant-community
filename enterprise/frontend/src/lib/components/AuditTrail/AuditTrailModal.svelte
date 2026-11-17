@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import { onMount } from 'svelte';
 
 	type M2MChange = { type: 'm2m'; operation: string; objects: string[] };
@@ -36,7 +36,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	let entries: AuditEntry[] = $state([]);

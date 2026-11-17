@@ -25,7 +25,7 @@ def app_config():
 
 @pytest.fixture
 def authenticated_client(app_config):
-    admin = User.objects.create_superuser("admin@tests.com", is_published=True)
+    admin = User.objects.create_superuser("admin@tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -49,14 +49,12 @@ def framework_with_questions(app_config):
         locale="en",
         default_locale=True,
         folder=root,
-        is_published=True,
     )
     fw = Framework.objects.create(
         name="Answers Test Framework",
         urn="urn:test:answers:fw",
         folder=root,
         library=lib,
-        is_published=True,
         locale="en",
         default_locale=True,
     )

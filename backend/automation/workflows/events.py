@@ -1,0 +1,573 @@
+"""Internal event triggers: start workflows when something happens
+inside CISO Assistant.
+
+Two halves:
+
+- `dispatch_internal_event(...)` — the generic seam. Any producer (today the
+  auditlog CUD mirror, later portal actions or other app events) calls it with
+  a string event key and a payload; matching enabled triggers start their
+  workflow's published version.
+- The CUD producer — a post_save receiver on auditlog's LogEntry (connected in
+  apps.ready), mirroring webhooks/signals.py. LogEntry is the broadest hook:
+  it covers every audited model, catches m2m changes, and carries the
+  field-level old→new diff that transition filters need.
+
+Loop containment: runs carry a trigger_depth; changes made by a run at depth
+d dispatch events at depth d, which start instances at depth d+1, capped at
+MAX_TRIGGER_DEPTH.
+
+Inline ("Run immediately") triggers run in the process where the event
+happened, not on the worker. Within a request they wait for the view to return (see
+`hold_inline_runs` and middleware.py); elsewhere they run at commit.
+"""
+
+import contextlib
+import contextvars
+from datetime import timedelta
+
+from django.db import transaction
+from django.utils import timezone
+
+import structlog
+
+from iam.models import Folder
+
+from core.reads import subtree_folder_ids
+from core.reads import validate_filter_tree as _validate_filter_tree
+from . import authz
+from .models import Condition, WorkflowInstance, WorkflowNode, WorkflowTrigger
+
+logger = structlog.get_logger(__name__)
+
+MAX_TRIGGER_DEPTH = 5
+
+# How long one user action's events keep collapsing into its first run.
+COALESCE_WINDOW = timedelta(minutes=5)
+
+CUD_ACTIONS = ["created", "updated", "deleted"]
+
+# Events a model emits itself, beyond create/update/delete. A CUD event cannot say
+# "this request was submitted": answering a question saves the row too, so a trigger
+# would fire on every keystroke's worth of progress and have to filter by status.
+# A named key makes the trigger say what it means, which is what a starter workflow
+# has to teach.
+CUSTOM_EVENTS = [
+    {
+        "key": "quickformresponse.submitted",
+        "model": "quickformresponse",
+        "action": "submitted",
+    },
+    {
+        "key": "quickformresponse.closed",
+        "model": "quickformresponse",
+        "action": "closed",
+    },
+]
+
+VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
+
+
+def _log_entry_verb(action):
+    """Map an auditlog LogEntry.Action to its CUD event verb, or None for
+    non-CUD actions (e.g. ACCESS). auditlog imported lazily like elsewhere."""
+    from auditlog.models import LogEntry
+
+    return {
+        LogEntry.Action.CREATE: "created",
+        LogEntry.Action.UPDATE: "updated",
+        LogEntry.Action.DELETE: "deleted",
+    }.get(action)
+
+
+def make_event_key(model_name, verb):
+    """Canonical internal-event key format. Keep producer and consumer in step
+    by minting keys through here only."""
+    return f"{model_name}.{verb}"
+
+
+def event_key_catalog():
+    """All CUD event keys, derived from the auditlog registry so new model
+    registrations appear automatically."""
+    from auditlog.registry import auditlog
+
+    keys = []
+    for model in sorted(auditlog.get_models(), key=lambda m: m._meta.model_name):
+        # Skip the workflow engine's own bookkeeping models: triggering on them
+        # is either circular (instances) or pointless (graph rows). Keyed on
+        # the defining module, not the app label, since the engine now shares
+        # the `automation` app with unrelated models (e.g. posture).
+        if model.__module__ == "automation.workflows.models":
+            continue
+        for action in CUD_ACTIONS:
+            keys.append(
+                {
+                    "key": make_event_key(model._meta.model_name, action),
+                    "model": model._meta.model_name,
+                    "action": action,
+                }
+            )
+    keys.extend(CUSTOM_EVENTS)
+    return keys
+
+
+def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0, inline=None):
+    """Match triggers and start workflows. Returns started instances.
+    `inline` narrows to inline (True) or queued (False) triggers; None takes both."""
+    from global_settings.utils import ff_is_enabled
+
+    from .engine import EngineError, _fail_instance, create_instance
+    from .tasks import run_instance_task
+
+    if not ff_is_enabled("workflows"):
+        # Flag off means off: application events fall through silently, same
+        # as when no trigger matches.
+        return []
+
+    started = []
+    triggers = WorkflowTrigger.objects.filter(
+        type=WorkflowTrigger.Type.INTERNAL_EVENT,
+        enabled=True,
+        event_key=event_key,
+        workflow__is_active=True,
+    ).select_related("workflow")
+    state_cache = {}
+    visible_to = {}
+    for trigger in triggers:
+        if inline is not None and bool((trigger.config or {}).get("inline")) != inline:
+            continue
+        # Hard security boundary: the event's object must live within the
+        # workflow's folder subtree, regardless of user filters. Events from
+        # models that carry no folder count as root-scoped, so only workflows
+        # whose scope includes the root folder may receive them — never a
+        # bypass.
+        effective_folder = (
+            str(folder_id)
+            if folder_id is not None
+            else str(Folder.get_root_folder().id)
+        )
+        if effective_folder not in _workflow_scope(trigger.workflow):
+            continue
+        filters = (trigger.config or {}).get("filters") or {}
+        if not _filters_match(filters, payload, state_cache):
+            continue
+
+        if origin_depth + 1 > MAX_TRIGGER_DEPTH:
+            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_DEPTH)
+            logger.warning(
+                "event trigger skipped: chain depth exceeded",
+                trigger=str(trigger.id),
+                event_key=event_key,
+                origin_depth=origin_depth,
+            )
+            continue
+        version = trigger.workflow.published_version
+        entry = None
+        if version is not None:
+            entry = version.nodes.filter(
+                type=WorkflowNode.Type.TRIGGER, ref=trigger.node_ref
+            ).first()
+        if version is None or entry is None:
+            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_UNPUBLISHED)
+            continue
+        if version.run_as is None:
+            # No run identity, no automatic execution.
+            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_NO_IDENTITY)
+            continue
+        # Second boundary: the run receives the payload, field values
+        # included, so only deliver an event whose object the run identity
+        # could read through the API. The folder subtree alone is not enough:
+        # a role may see the folder without holding view_<model> in it.
+        if version.run_as_id not in visible_to:
+            visible_to[version.run_as_id] = _identity_can_view(
+                version.run_as, event_key, payload, effective_folder
+            )
+        if not visible_to[version.run_as_id]:
+            continue
+        # One run per (trigger, user action, object): a save that writes
+        # several LogEntries for one object is one run, while a bulk edit still
+        # gets a run per object. Windowed, not unique-constrained: the cid can
+        # come from an inbound x-correlation-id header, and a client reusing
+        # one must not silence a trigger for good.
+        cid = (payload or {}).get("cid") or ""
+        try:
+            with transaction.atomic():
+                if cid and _already_running(trigger, cid, payload):
+                    _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_COALESCED)
+                    continue
+                instance = create_instance(
+                    version,
+                    trigger=WorkflowInstance.Trigger.INTERNAL_EVENT,
+                    payload=payload,
+                    entry_node=entry,
+                    trigger_registration=trigger,
+                    trigger_depth=origin_depth + 1,
+                    trigger_cid=cid,
+                )
+        except EngineError:
+            _bookkeep(trigger, WorkflowTrigger.Result.ERROR)
+            continue
+        if (trigger.config or {}).get("inline"):
+            try:
+                run_instance_task.call_local(str(instance.id))
+            except Exception:
+                # The user's save is already committed; a failed run must not 500 it.
+                logger.error(
+                    "inline workflow run failed",
+                    instance=str(instance.id),
+                    exc_info=True,
+                )
+                _fail_instance(instance, "Run stopped by an unexpected error")
+            # The run may have changed the object later filters read.
+            state_cache.clear()
+        else:
+            run_instance_task(str(instance.id))
+        _bookkeep(trigger, WorkflowTrigger.Result.TRIGGERED, fired=True)
+        started.append(instance)
+    return started
+
+
+def _already_running(trigger, cid, payload):
+    """Locks the trigger row first: two dispatch workers must not both read
+    "nothing started yet" for the same user action."""
+    WorkflowTrigger.objects.select_for_update().filter(pk=trigger.pk).first()
+    return trigger.instances.filter(
+        trigger_cid=cid,
+        payload__object_id=(payload or {}).get("object_id"),
+        created_at__gte=timezone.now() - COALESCE_WINDOW,
+    ).exists()
+
+
+def _bookkeep(trigger, result, fired=False):
+    from django.db.models import F
+
+    updates = {"last_result": result, "last_triggered_at": timezone.now()}
+    if fired:
+        updates["trigger_count"] = F("trigger_count") + 1
+    WorkflowTrigger.objects.filter(id=trigger.id).update(**updates)
+
+
+def _workflow_scope(workflow):
+    # String ids: additional_data serializes folder_id as str.
+    return {str(fid) for fid in subtree_folder_ids(workflow.folder)}
+
+
+# ---------- filter tree validation ----------
+
+
+def validate_filter_tree(tree):
+    """Shape-check an event filter tree: the shared read grammar, with the
+    condition operators this app's Condition model declares."""
+    _validate_filter_tree(tree, ops=VALID_FILTER_OPS)
+
+
+# ---------- filter tree evaluation ----------
+
+
+def _filters_match(tree, payload, state_cache):
+    if not tree or (not tree.get("conditions") and not tree.get("children")):
+        return True
+    return _evaluate_group(tree, payload, state_cache)
+
+
+def _evaluate_group(group, payload, state_cache):
+    results = [
+        _evaluate_condition(condition, payload, state_cache)
+        for condition in group.get("conditions", [])
+    ]
+    results += [
+        _evaluate_group(child, payload, state_cache)
+        for child in group.get("children", [])
+    ]
+    if not results:
+        return True
+    operator = group.get("operator", "and")
+    if operator == "or":
+        return any(results)
+    if operator == "not":
+        return not all(results)
+    return all(results)
+
+
+def _evaluate_condition(condition, payload, state_cache):
+    field = condition.get("field", "")
+    changes = payload.get("changes") or {}
+
+    if condition.get("changed"):
+        # Transition semantics: the field must have changed in THIS operation
+        # and its new value must satisfy the condition.
+        if field not in changes:
+            return False
+        return _compare(condition, _new_value(changes[field]))
+
+    # State semantics: evaluate against the live object; deleted objects fall
+    # back to the diff's old values.
+    if payload.get("operation") == "deleted":
+        if field in changes:
+            return _compare(condition, _old_value(changes[field]))
+        return False
+    value = _current_value(field, payload, state_cache)
+    if value is _MISSING:
+        return False
+    return _compare(condition, value)
+
+
+_MISSING = object()
+
+
+def _new_value(diff):
+    """A diff's new value; a many-to-many change reads as its operation, `add` or `delete`."""
+    if isinstance(diff, dict):
+        return diff.get("operation")
+    return diff[1]
+
+
+def _old_value(diff):
+    return None if isinstance(diff, dict) else diff[0]
+
+
+def _current_value(field, payload, state_cache):
+    obj = _fetch_object(payload, state_cache)
+    if obj is None:
+        # Object gone or unfetchable: best effort via the diff's new values.
+        new_values = payload.get("new_values") or {}
+        return new_values.get(field, _MISSING)
+    if field == "folder":
+        return str(getattr(obj, "folder_id", "") or "")
+    if field == "filtering_labels":
+        if not hasattr(obj, "filtering_labels"):
+            return _MISSING
+        return list(obj.filtering_labels.values_list("label", flat=True))
+    if not hasattr(obj, field):
+        return _MISSING
+    return getattr(obj, field)
+
+
+def _fetch_object(payload, state_cache):
+    key = (payload.get("model"), payload.get("object_id"))
+    if key in state_cache:
+        return state_cache[key]
+    obj = None
+    try:
+        from django.contrib.contenttypes.models import ContentType
+
+        # ContentType is only unique per (app_label, model); model-name-only
+        # resolution picks an arbitrary app on a cross-app name collision.
+        # The producer sends app_label; model-only stays as a fallback for
+        # payloads predating it.
+        lookup = {"model": payload.get("model")}
+        if payload.get("app_label"):
+            lookup["app_label"] = payload["app_label"]
+        content_type = ContentType.objects.filter(**lookup).first()
+        if content_type is not None:
+            obj = (
+                content_type.model_class()
+                .objects.filter(pk=payload.get("object_id"))
+                .first()
+            )
+    except Exception:  # noqa: BLE001 — matching must never break the producer
+        obj = None
+    state_cache[key] = obj
+    return obj
+
+
+def _identity_can_view(identity, event_key, payload, folder_id):
+    """Whether ``identity`` may view the object an event is about.
+
+    The event key names the model (``<model>.<verb>``) for CUD and custom
+    events alike; the object is ``object_id`` (CUD) or ``id`` (custom). While
+    the row exists, the API's own row-visibility rule decides; once it is gone
+    (a deleted event), ``view_<model>`` on the event's folder. Fails closed."""
+    from django.contrib.contenttypes.models import ContentType
+
+    try:
+        lookup = {"model": event_key.partition(".")[0]}
+        if payload.get("app_label"):
+            lookup["app_label"] = payload["app_label"]
+        content_type = ContentType.objects.filter(**lookup).first()
+        model = content_type.model_class() if content_type else None
+        if model is None:
+            return False
+        rows = model.objects.filter(pk=payload.get("object_id") or payload.get("id"))
+        if rows.exists():
+            return rows.filter(pk__in=authz.viewable_ids(identity, model)).exists()
+        folder = Folder.objects.filter(id=folder_id).first()
+        return folder is not None and authz.can(
+            identity, f"view_{content_type.model}", folder
+        )
+    # Dispatch must never break the producer.
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _compare(condition, runtime):
+    op = condition.get("op", "eq")
+    expected = condition.get("value")
+
+    if op == "is_null":
+        return runtime is None or runtime == ""
+    if runtime is None:
+        return False
+
+    # Numeric comparison when both sides parse as numbers.
+    if op in ("gt", "lt", "gte", "lte"):
+        try:
+            runtime_num, expected_num = float(runtime), float(expected)
+        except TypeError, ValueError:
+            return False
+        return {
+            "gt": runtime_num > expected_num,
+            "lt": runtime_num < expected_num,
+            "gte": runtime_num >= expected_num,
+            "lte": runtime_num <= expected_num,
+        }[op]
+
+    if isinstance(runtime, list):
+        # M2M subjects (filtering_labels): membership semantics.
+        values = [str(item) for item in runtime]
+        if op == "contains":
+            return str(expected) in values
+        if op == "not_in":
+            return str(expected) not in values
+        if op == "eq":
+            return values == [str(expected)]
+        return False
+
+    runtime_str = str(runtime)
+    if op == "eq":
+        return runtime_str == str(expected)
+    if op == "neq":
+        return runtime_str != str(expected)
+    if op == "in":
+        return runtime_str in [part.strip() for part in str(expected).split(",")]
+    if op == "not_in":
+        return runtime_str not in [part.strip() for part in str(expected).split(",")]
+    if op == "contains":
+        return str(expected) in runtime_str
+    return False
+
+
+# ---------- inline runs ----------
+
+# Inline dispatches (callables) committed during a request, waiting for its
+# view to return. None outside a request (workers, commands): there they run at
+# commit.
+_held_inline_dispatches = contextvars.ContextVar(
+    "workflow_held_inline_dispatches", default=None
+)
+
+
+@contextlib.contextmanager
+def hold_inline_runs():
+    """Start the inline runs committed inside the block once it exits.
+
+    A view keeps writing after the commit that fires the event: it may save
+    the instance it holds in memory, whose stale values would overwrite what
+    the run wrote, or add what the run should see (an evidence's first
+    revision). Held until the view returns, a run starts from what the request
+    saved and nothing in the request writes over it."""
+    held = []
+    token = _held_inline_dispatches.set(held)
+    try:
+        yield
+    finally:
+        # Reset first: events the runs themselves fire are dispatched at once.
+        _held_inline_dispatches.reset(token)
+        for dispatch, event in held:
+            run_inline(dispatch, event=event)
+
+
+def run_inline(dispatch, *, event):
+    """Call `dispatch` (an inline dispatch, from a commit callback) now, or once
+    the request's view has returned when inside one. `event` names it in logs."""
+    held = _held_inline_dispatches.get()
+    if held is not None:
+        held.append((dispatch, event))
+        return
+    try:
+        dispatch()
+    except Exception:
+        # The save is committed; a failed dispatch must not fail the request.
+        logger.error("inline event dispatch failed", event=event, exc_info=True)
+
+
+def dispatch_named_event(event_key, payload, folder_id):
+    """At commit, start the workflows listening to an event a model emits
+    itself (CUSTOM_EVENTS): inline triggers through run_inline, as a save's
+    are, the others right away."""
+    # Inline first: a failing queued dispatch must not stop it.
+    transaction.on_commit(
+        lambda: run_inline(
+            lambda: dispatch_internal_event(event_key, payload, folder_id, inline=True),
+            event=event_key,
+        )
+    )
+    transaction.on_commit(
+        lambda: dispatch_internal_event(event_key, payload, folder_id, inline=False)
+    )
+
+
+# ---------- CUD producer (auditlog mirror) ----------
+
+
+def forward_log_entry(sender, instance, created, **kwargs):
+    """post_save receiver on auditlog.LogEntry — see apps.ready()."""
+    from auditlog.models import LogEntry
+    from django.db import transaction
+
+    if not created or instance.action == LogEntry.Action.ACCESS:
+        return
+    verb = _log_entry_verb(instance.action)
+    if verb is None or instance.content_type_id is None:
+        return
+    key = make_event_key(instance.content_type.model, verb)
+    # Cheap indexed gate: one query per audited save, no enqueue when nothing
+    # listens for this key.
+    inline_flags = {
+        bool((config or {}).get("inline"))
+        for config in WorkflowTrigger.objects.filter(
+            type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=key
+        ).values_list("config", flat=True)
+    }
+    if not inline_flags:
+        return
+
+    from .engine import current_trigger_depth
+    from .tasks import dispatch_internal_event_task
+
+    origin_depth = current_trigger_depth.get()
+    log_entry_id = instance.pk
+
+    # Inline first: a failing enqueue below must not stop it.
+    if True in inline_flags:
+        transaction.on_commit(
+            lambda: run_inline(
+                lambda: dispatch_internal_event_task.call_local(
+                    log_entry_id, origin_depth, True
+                ),
+                event=f"{key} (log entry {log_entry_id})",
+            )
+        )
+    if False in inline_flags:
+        transaction.on_commit(
+            lambda: dispatch_internal_event_task(log_entry_id, origin_depth, False)
+        )
+
+
+def payload_from_log_entry(log_entry):
+    changes = log_entry.changes_dict or {}
+    additional = log_entry.additional_data or {}
+    verb = _log_entry_verb(log_entry.action)
+    return {
+        "event_key": make_event_key(log_entry.content_type.model, verb),
+        "model": log_entry.content_type.model,
+        "app_label": log_entry.content_type.app_label,
+        "operation": verb,
+        "object_id": str(log_entry.object_pk),
+        "object_repr": log_entry.object_repr,
+        "changes": changes,
+        "new_values": {field: _new_value(diff) for field, diff in changes.items()},
+        "cid": log_entry.cid or "",
+        "folder_id": additional.get("folder_id"),
+        "actor_email": getattr(log_entry.actor, "email", None),
+        "timestamp": log_entry.timestamp.isoformat() if log_entry.timestamp else None,
+    }

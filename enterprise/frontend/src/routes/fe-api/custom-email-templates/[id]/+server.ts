@@ -1,9 +1,9 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 	const body = await request.text();
-	const endpoint = `${BASE_API_URL}/custom-email-templates/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/custom-email-templates/${encodeURIComponent(params.id)}/`;
 	const res = await fetch(endpoint, {
 		method: 'PATCH',
 		body,
@@ -22,7 +22,7 @@ export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 };
 
 export const DELETE: RequestHandler = async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/custom-email-templates/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/custom-email-templates/${encodeURIComponent(params.id)}/`;
 	const res = await fetch(endpoint, {
 		method: 'DELETE'
 	});

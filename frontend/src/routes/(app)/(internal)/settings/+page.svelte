@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
-	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
-	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
-	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
-	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
-	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
+	import GeneralSettings from '#lib/components/Settings/GeneralSettings.svelte';
+	import SSOSettings from '#lib/components/Settings/SSOSettings.svelte';
+	import FeatureFlagsSettings from '#lib/components/Settings/FeatureFlagsSettings.svelte';
+	import NotificationChannelsSettings from '#lib/components/Settings/NotificationChannelsSettings.svelte';
+	import WebhooksSettings from '#lib/components/Settings/WebhooksSettings.svelte';
+	import VulnerabilitySlaSettings from '#lib/components/Settings/VulnerabilitySlaSettings.svelte';
+	import SecIntelFeedsSettings from '#lib/components/Settings/SecIntelFeedsSettings.svelte';
+	import MailerSettings from '#lib/components/Settings/MailerSettings.svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -28,12 +30,22 @@
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
-		<Tabs.Trigger value="vulnerabilitySla"
-			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
-		>
+		{#if page.data?.featureflags?.notification_center}
+			<Tabs.Trigger value="notificationChannels"
+				><i class="fa-solid fa-bell"></i> {m.notifications()}</Tabs.Trigger
+			>
+		{/if}
+		{#if page.data?.featureflags?.vulnerability_sla}
+			<Tabs.Trigger value="vulnerabilitySla"
+				><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Trigger value="secIntelFeeds"
 			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
+		{#if data.mailerSettings}
+			<Tabs.Trigger value="mailer"><i class="fa-solid fa-envelope"></i> {m.mailer()}</Tabs.Trigger>
+		{/if}
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
@@ -69,9 +81,21 @@
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} />
 	</Tabs.Content>
-	<Tabs.Content value="vulnerabilitySla">
-		<VulnerabilitySlaSettings {data} />
-	</Tabs.Content>
+	{#if page.data?.featureflags?.notification_center}
+		<Tabs.Content value="notificationChannels">
+			<NotificationChannelsSettings />
+		</Tabs.Content>
+	{/if}
+	{#if page.data?.featureflags?.vulnerability_sla}
+		<Tabs.Content value="vulnerabilitySla">
+			<VulnerabilitySlaSettings {data} />
+		</Tabs.Content>
+	{/if}
+	{#if data.mailerSettings}
+		<Tabs.Content value="mailer">
+			<MailerSettings {data} />
+		</Tabs.Content>
+	{/if}
 	<Tabs.Content value="secIntelFeeds">
 		<SecIntelFeedsSettings {data} />
 	</Tabs.Content>

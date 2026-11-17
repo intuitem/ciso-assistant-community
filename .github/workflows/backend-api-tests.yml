@@ -37,7 +37,7 @@ jobs:
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -50,6 +50,8 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
@@ -112,6 +114,8 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Find Test Files
         id: set-matrix
         working-directory: ${{ env.BACKEND_DIR }}
@@ -131,7 +135,7 @@ jobs:
         backend: [sqlite, postgres]
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -150,6 +154,8 @@ jobs:
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0

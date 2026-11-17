@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '#lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 
 	let { data } = $props();
 
@@ -20,7 +20,9 @@
 		annual_cost: 'cost',
 		control_impact: 'controlImpact',
 		eta: 'eta',
-		quantitative_risk_scenarios: 'scenarios'
+		quantitative_risk_scenarios: 'scenarios',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 
 	const appliedControls: TableSource = {
@@ -64,8 +66,8 @@
 			<Anchor
 				breadcrumbAction="push"
 				href={`/applied-controls/flash-mode?quantitative_risk_studies=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-				class="btn text-white bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+				class="btn btn-quiet h-fit"
+				><i class="fa-solid fa-bolt mr-2 text-orange-500"></i> {m.flashMode()}</Anchor
 			>
 		</div>
 	</div>
@@ -78,6 +80,8 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/quantitative-risk-studies/{page.params.id}/action-plan"
+			columnSelector={true}
+			columnStateKey="applied-controls:quantitative-risk-action-plan"
 			fields={[
 				'name',
 				'status',

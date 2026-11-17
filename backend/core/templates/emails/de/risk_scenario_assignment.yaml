@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Ihnen wurde '${scenario_name}' zugewiesen"
+body: |
+  Hallo,
+
+  Ihnen wurde folgendes Risikoszenario zugewiesen:
+
+  - Name: ${scenario_name}
+  - Beschreibung: ${scenario_description}
+  - Referenz-ID: ${scenario_ref_id}
+  - Risikobewertung: ${risk_assessment_name}
+  - Behandlung: ${scenario_treatment}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um dieses Risikoszenario anzuzeigen und zu bearbeiten: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

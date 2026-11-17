@@ -1,6 +1,6 @@
 <script lang="ts">
-	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
-	import { m } from '$paraglide/messages';
+	import GraphExplorer from '#lib/components/DataViz/GraphExplorer.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Props {

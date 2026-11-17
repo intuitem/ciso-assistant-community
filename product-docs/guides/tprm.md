@@ -74,6 +74,10 @@ Click "Add contract" to initiate adding a new contract for the entity.
 
 ![Add New Contract](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2FhLVvBdoDyaNiZmFPgBPi4z%2F6wnHEsiqdhnp1rHRfmnUyS_doc.png?alt=media\&token=c7664085-74f2-430e-adb9-8d781681fe71)
 
+{% hint style="info" %}
+With the **dora** [feature flag](../configuration/settings/feature-flags.md) on, the contract form also has a **Contract type**: **Standalone arrangement** (the default), **Overarching arrangement** (a framework agreement that other contracts hang off) or **Subsequent or associated arrangement**. To attach a contract to a framework agreement, create the overarching contract first, then pick it under **More** > **Overarching Contract** on the subordinate one; only contracts of type _Overarching arrangement_ are offered there. The type feeds the [DORA register of information](../features/framework-specific/dora.md).
+{% endhint %}
+
 #### 13. Access Entity Assessments
 
 Click "Entity assessments" to view assessments related to the entity.
@@ -137,3 +141,12 @@ Click "Save" to apply the changes made to the questionnaire.
 Click "Send questionnaire" to distribute the assessment to the representatives.
 
 ![Send Questionnaire](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2FhLVvBdoDyaNiZmFPgBPi4z%2Fpi9Lsg6LYnG1eFxw5k4P7t_doc.png?alt=media\&token=ac3a71bc-3d0f-49e7-b671-b47a3aad744a)
+
+## Where to go from here
+
+The walkthrough above covers one third party, assessed once. A few things worth knowing once you're running this at scale:
+
+- **Reassessing** — don't start from scratch next round. **New revision** on the assessment carries the previous answers, results and evidences into a fresh one, in the same workspace. See [Revisions](../concepts/third-party-risk.md#revisions).
+- **Assessing many vendors at once** — a [third-party campaign](../features/campaigns.md) sends the same questionnaire to a whole set of third parties and gives you one page to watch the round from.
+- **Knowing who's overdue** — the entity list carries a **Last assessment** column, and third parties never assessed can be filtered out of the register in one click.
+- **Outside-in scores** — if you subscribe to a rating service, record its readings on the entity as [external ratings](../concepts/third-party-risk.md#external-ratings) so they sit next to the questionnaire answers.

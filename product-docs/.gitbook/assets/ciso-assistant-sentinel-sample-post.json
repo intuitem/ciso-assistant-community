@@ -1,0 +1,54 @@
+[
+  {
+    "activity_id": 3,
+    "category_uid": 6,
+    "class_uid": 6003,
+    "type_uid": 600303,
+    "severity_id": 1,
+    "status_id": 1,
+    "time": 1792487667512,
+    "metadata": {
+      "version": "1.8.0",
+      "product": {
+        "name": "CISO Assistant",
+        "vendor_name": "intuitem"
+      },
+      "correlation_uid": "9b1e4c2a-7f3d-4e8b-a6c5-1d2f3e4a5b6c"
+    },
+    "actor": {
+      "user": {
+        "uid": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+        "email_addr": "jane.doe@example.com"
+      }
+    },
+    "api": {
+      "operation": "update",
+      "service": {
+        "name": "appliedcontrol"
+      }
+    },
+    "src_endpoint": {
+      "ip": "203.0.113.42"
+    },
+    "resources": [
+      {
+        "type": "appliedcontrol",
+        "uid": "3f2b8c1e-6d4a-4b7e-9a1c-2e5f7d8b9c01",
+        "name": "Enforce MFA on all admin accounts"
+      }
+    ],
+    "unmapped": {
+      "changes": {
+        "status": [
+          "in_progress",
+          "active"
+        ],
+        "eta": [
+          "2026-10-31",
+          "2026-10-15"
+        ]
+      },
+      "folder_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"
+    }
+  }
+]

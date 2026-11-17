@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { Actions } from '@sveltejs/kit';
 import { fail } from 'assert';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {

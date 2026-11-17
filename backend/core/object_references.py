@@ -1,0 +1,164 @@
+"""Questions that point at an object already in the platform."""
+
+import uuid
+
+from django.apps import apps
+from django.db.models import Q
+
+#: Widening this widens what a requester may enumerate.
+REFERENCEABLE = {
+    "applied_control": {"model": "core.AppliedControl", "label": "name"},
+    "asset": {"model": "core.Asset", "label": "name"},
+    "risk_scenario": {"model": "core.RiskScenario", "label": "name"},
+    "vulnerability": {"model": "core.Vulnerability", "label": "name"},
+    "perimeter": {"model": "core.Perimeter", "label": "name"},
+    "entity": {"model": "tprm.Entity", "label": "name"},
+    "solution": {
+        "model": "tprm.Solution",
+        "label": "name",
+        "folder": "provider_entity__folder",
+    },
+    "processing": {"model": "privacy.Processing", "label": "name"},
+}
+
+
+class ReferenceError_(Exception):
+    """`code` goes in the response, `detail` in the log — never exception text."""
+
+    def __init__(self, code: str, detail: str = ""):
+        self.code = code
+        self.detail = detail
+        super().__init__(detail or code)
+
+
+def config_for(question):
+    config = question.config if isinstance(question.config, dict) else {}
+    key = config.get("model")
+    entry = REFERENCEABLE.get(key)
+    if entry is None:
+        raise ReferenceError_(
+            "unknownReferenceModel", f"unknown reference model '{key}'"
+        )
+    return key, entry, bool(config.get("multiple"))
+
+
+def _queryset(entry, folder, user=None):
+    """Bounded by the folder chain and by what the caller may already view."""
+    from iam.models import RoleAssignment
+
+    model = apps.get_model(entry["model"])
+    path = entry.get("folder", "folder")
+    ancestors = [folder] + list(folder.get_parent_folders())
+    qs = model.objects.filter(**{f"{path}__in": ancestors})
+    if path != "folder":
+        qs = qs.select_related(path)
+    if user is None:
+        return qs
+    viewable = RoleAssignment.get_viewable_object_ids(user, model)
+    return qs.filter(Q(id__in=viewable) | Q(**{path: folder}))
+
+
+def options_for(question, folder, search="", limit=50, user=None, subject=None):
+    """`config.subject_field` names the subject's relation holding objects of this
+    model (a processing's `associated_controls`): those come first, flagged."""
+    key, entry, _multiple = config_for(question)
+    qs = _queryset(entry, folder, user)
+    label_field = entry["label"]
+    if search:
+        qs = qs.filter(**{f"{label_field}__icontains": search})
+    config = question.config if isinstance(question.config, dict) else {}
+    related = getattr(subject, config.get("subject_field") or "", None)
+    # Only a relation to this very model: the name comes from the library.
+    ours = (
+        qs.filter(pk__in=related.all())
+        if getattr(related, "model", None) is qs.model
+        else qs.none()
+    )
+    first = list(ours.order_by(label_field)[:limit])
+    rest = qs.exclude(pk__in=[o.pk for o in first]).order_by(label_field)
+    results = [{**_row(o, entry), "on_subject": True} for o in first]
+    results += [_row(o, entry) for o in rest[: limit - len(first)]]
+    return {"model": key, "results": results}
+
+
+def _row(obj, entry):
+    ref_id = getattr(obj, "ref_id", None)
+    label = getattr(obj, entry["label"], "") or str(obj)
+    folder = obj
+    for part in entry.get("folder", "folder").split("__"):
+        folder = getattr(folder, part, None)
+    return {
+        "id": str(obj.id),
+        "label": f"{ref_id} - {label}" if ref_id else label,
+        "folder": folder.name if folder else None,
+    }
+
+
+def validate_ids(question, folder, ids, user=None):
+    """Reject ids the caller could not have been offered."""
+    key, entry, multiple = config_for(question)
+    if not isinstance(ids, list) or any(not isinstance(i, str) for i in ids):
+        raise ReferenceError_(
+            "referenceMustBeListOfIds", "object references must be a list of ids"
+        )
+    # Parsed before the query: a malformed value reaching a UUID `id__in` lookup raises
+    # Django's ValidationError, which callers of this function do not catch.
+    for i in ids:
+        try:
+            uuid.UUID(i)
+        except ValueError, AttributeError, TypeError:
+            raise ReferenceError_(
+                "referenceMustBeListOfIds", f"not a uuid: {i}"
+            ) from None
+    if not multiple and len(ids) > 1:
+        raise ReferenceError_(
+            "onlyOneObjectAllowed", "this question accepts a single object"
+        )
+    if not ids:
+        return []
+    found = set(
+        str(pk)
+        for pk in _queryset(entry, folder, user)
+        .filter(id__in=ids)
+        .values_list("id", flat=True)
+    )
+    unknown = [i for i in ids if i not in found]
+    if unknown:
+        raise ReferenceError_(
+            "unreachableObjectReference", f"unreachable object reference: {unknown[0]}"
+        )
+    return ids
+
+
+def labels_for(question, folder, ids, user=None):
+    """Ids back to labels, scoped like the options: an out-of-reach id stops resolving."""
+    if not ids:
+        return []
+    _key, entry, _multiple = config_for(question)
+    by_id = {str(o.id): o for o in _queryset(entry, folder, user).filter(id__in=ids)}
+    return [
+        _row(by_id[i], entry) if i in by_id else {"id": i, "label": i, "folder": None}
+        for i in ids
+    ]
+
+
+def subject_question_error(quick_form: dict) -> str | None:
+    """Why a form document's `subject_question_urn` cannot name a subject, or
+    None. It must point at a single-object reference question of the form."""
+    urn = str(quick_form.get("subject_question_urn") or "").lower()
+    if not urn:
+        return None
+    for page in quick_form.get("pages") or []:
+        for q_urn, question in (page.get("questions") or {}).items():
+            if str(q_urn).lower() != urn:
+                continue
+            question = question or {}
+            config = question.get("config") or {}
+            if question.get("type") != "object_reference":
+                return "subject_question_urn must point at an object reference question"
+            if config.get("multiple"):
+                return "subject_question_urn must point at a single-object question"
+            if config.get("model") not in REFERENCEABLE:
+                return "subject_question_urn points at an unknown reference model"
+            return None
+    return "subject_question_urn does not match any question of the form"

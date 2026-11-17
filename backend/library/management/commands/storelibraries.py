@@ -80,7 +80,6 @@ class Command(BaseCommand):
                 locale=library.locale,
                 name=library.name,
                 description=library.description,
-                is_published=True,
                 annotation=library.annotation,
                 copyright=library.copyright,
                 provider=library.provider,

@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 
-import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	const model = getModelInfo('incidents');
@@ -18,7 +18,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
 	const data = await res.json();

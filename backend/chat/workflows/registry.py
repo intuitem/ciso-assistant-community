@@ -17,12 +17,14 @@ def _get_workflows() -> list[Workflow]:
     from .risk_treatment import RiskTreatmentWorkflow
     from .evidence_guidance import EvidenceGuidanceWorkflow
     from .ebios_rm_assist import EbiosRMAssistWorkflow
+    from .import_document import ImportDocumentWorkflow
 
     return [
         SuggestControlsWorkflow(),
         RiskTreatmentWorkflow(),
         EvidenceGuidanceWorkflow(),
         EbiosRMAssistWorkflow(),
+        ImportDocumentWorkflow(),
     ]
 
 

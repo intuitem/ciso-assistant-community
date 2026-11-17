@@ -1,9 +1,9 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params, fetch }) => {
-	const res = await fetch(`${BASE_API_URL}/public/documents/${params.token}/`);
+	const res = await fetch(`${BASE_API_URL}/public/documents/${encodeURIComponent(params.token)}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 502, 'Not found');
 	const headers = new Headers();
 	for (const h of ['content-type', 'content-disposition', 'content-length']) {

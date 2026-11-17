@@ -1,6 +1,6 @@
 <script lang="ts">
-	import TrustPortal from '$lib/components/TrustPortal/TrustPortal.svelte';
-	import { m } from '$paraglide/messages';
+	import TrustPortal from '#lib/components/TrustPortal/TrustPortal.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

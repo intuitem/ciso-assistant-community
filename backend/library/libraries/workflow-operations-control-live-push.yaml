@@ -1,0 +1,60 @@
+urn: urn:intuitem:risk:library:workflow-operations-control-live-push
+locale: en
+ref_id: workflow-operations-control-live-push
+name: Control went live — push it to an external system
+description: Posts a small JSON payload to your ITSM or chat webhook when a control becomes active. Set
+  the target URL, and provide the itsm_token secret when you install it.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-control-live-push:workflow:control-live-push
+    schema_version: 1
+    ref_id: control-live-push
+    name: Control went live — push it to an external system
+    description: Posts a small JSON payload to your ITSM or chat webhook when a control becomes active.
+      Set the target URL, and provide the itsm_token secret when you install it.
+    requires:
+      secrets:
+      - itsm_token
+    graph:
+      variables:
+      - key: target_url
+        type: string
+        default_value: https://example.com/hooks/ciso-assistant
+      nodes:
+      - ref: on_active
+        type: trigger
+        label: Control became active
+        trigger_config:
+          type: internal_event
+          event_key: appliedcontrol.updated
+          filters:
+            operator: and
+            conditions:
+            - field: status
+              op: eq
+              value: active
+              changed: true
+      - ref: push
+        type: action
+        label: POST to the external system
+        action_config:
+          type: http_request
+          method: POST
+          url: '{{target_url}}'
+          timeout: 15
+          headers:
+            Content-Type: application/json
+            Authorization: Bearer {{secrets.itsm_token}}
+          body: '{"control": "{{payload.object_repr}}", "status": "active", "date": "{{today}}"}'
+      - ref: done
+        type: end
+      edges:
+      - source: on_active
+        target: push
+      - source: push
+        target: done

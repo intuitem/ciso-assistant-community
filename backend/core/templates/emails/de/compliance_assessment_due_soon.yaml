@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Audits in ${days_remaining} ${days_remaining_unit} fällig"
+body: |
+  Hallo,
+
+  Anzahl der in ${days_remaining} ${days_remaining_unit} fälligen Audits: ${assessment_count}
+
+  ${assessment_list}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Audits zu prüfen und abzuschließen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

@@ -43,7 +43,6 @@ def framework_with_questions(app_config):
         name="Backup Test Framework",
         urn="urn:test:backup:fw",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -53,7 +52,6 @@ def framework_with_questions(app_config):
         ref_id="BK-REQ",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     # Single-choice question
     q_sc = Question.objects.create(
@@ -64,7 +62,6 @@ def framework_with_questions(app_config):
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q_sc,
@@ -75,7 +72,6 @@ def framework_with_questions(app_config):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q_sc,
@@ -86,7 +82,6 @@ def framework_with_questions(app_config):
         compute_result="false",
         order=1,
         folder=folder,
-        is_published=True,
     )
 
     # Multiple-choice question
@@ -98,7 +93,6 @@ def framework_with_questions(app_config):
         type=Question.Type.MULTIPLE_CHOICE,
         order=1,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q_mc,
@@ -109,7 +103,6 @@ def framework_with_questions(app_config):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q_mc,
@@ -120,7 +113,6 @@ def framework_with_questions(app_config):
         compute_result="true",
         order=1,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q_mc,
@@ -131,7 +123,6 @@ def framework_with_questions(app_config):
         compute_result="false",
         order=2,
         folder=folder,
-        is_published=True,
     )
 
     # Text question
@@ -143,7 +134,6 @@ def framework_with_questions(app_config):
         type=Question.Type.TEXT,
         order=2,
         folder=folder,
-        is_published=True,
     )
 
     return {

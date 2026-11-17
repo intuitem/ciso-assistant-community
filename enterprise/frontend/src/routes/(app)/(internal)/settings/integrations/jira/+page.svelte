@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { copy } from '@svelte-put/copy';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import type { ActionData, PageData } from './$types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import FieldMapper from '#lib/components/Forms/FieldMapper.svelte';
+	import { ASSET_LOCAL_FIELDS } from '#lib/components/Forms/integrationModels.js';
 	import { z } from 'zod';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { describeTestFailure } from '#lib/utils/integration-test.js';
 
 	interface Props {
 		data: PageData;
@@ -42,7 +44,8 @@
 				project_key: z.string().optional(),
 				issue_type: z.string().optional(),
 				field_map: z.record(z.string(), z.any()).default({}).optional(),
-				value_map: z.record(z.string(), z.any()).default({}).optional()
+				value_map: z.record(z.string(), z.any()).default({}).optional(),
+				models: z.record(z.string(), z.any()).default({}).optional()
 			})
 		})
 		.superRefine((data, ctx) => {
@@ -69,7 +72,7 @@
 
 	let showApiTokenField = $state(!data?.config?.has_api_token);
 	let showWebhookSecretField = $state(!data?.config?.has_webhook_secret);
-	let testConnectionState: { loading: boolean; success?: boolean } = $state({
+	let testConnectionState: { loading: boolean; success?: boolean; detail?: string } = $state({
 		loading: false,
 		success: undefined
 	});
@@ -166,7 +169,11 @@
 										configuration_id: page.data?.config?.id
 									})
 								});
-								testConnectionState = { loading: false, success: response.ok };
+								testConnectionState = {
+									loading: false,
+									success: response.ok,
+									detail: response.ok ? '' : await describeTestFailure(response)
+								};
 							}}>{m.testConnection()}</button
 						>
 						<div class="flex items-center">
@@ -175,7 +182,11 @@
 							{:else if testConnectionState.success === true}
 								<span class="text-success-700-300 font-semibold">{m.connectionSuccessful()}</span>
 							{:else if testConnectionState.success === false}
-								<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
+								<span class="text-error-500 font-semibold"
+									>{m.connectionFailed()}{testConnectionState.detail
+										? `: ${testConnectionState.detail}`
+										: ''}</span
+								>
 							{/if}
 						</div>
 					</span>
@@ -239,18 +250,17 @@
 						description={m.jiraIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.jiraField()}
 						tableHelpText={m.jiraTableHelpText()}
-						onMapsChange={({ field_map, value_map }) => {
-							// Top-level reassignment so the writable store fires .set() and
-							// every formFieldProxy(settings.field_map.*) subscriber re-reads.
-							$formStore = {
-								...$formStore,
-								settings: {
-									...$formStore.settings,
-									field_map,
-									value_map
-								}
-							};
-						}}
+					/>
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id || $formStore.id}
+						modelKey="asset"
+						valuePathPrefix="settings.models.asset"
+						localFields={ASSET_LOCAL_FIELDS}
+						initialConfig={page.data?.config?.settings?.models?.asset}
+						title={m.assets()}
+						remoteFieldLabel={m.jiraField()}
+						tableHelpText={m.jiraTableHelpText()}
 					/>
 				{/if}
 				<button

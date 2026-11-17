@@ -12,8 +12,8 @@ description:
   across CISO Assistant reference these controls to drive applied-control suggestions.
   URN namespace preserved from the legacy `doc-pol` library."
 copyright: "\xA9 intuitem - 2026"
-version: 7
-publication_date: 2026-04-19
+version: 9
+publication_date: 2026-10-30
 provider: intuitem
 packager: intuitem
 translations:
@@ -1290,6 +1290,8 @@ objects:
 
         Data Sanitization
 
+        Sanitization before reassignment or reuse
+
         Compliance with Legal and Regulatory Requirements
 
         Documentation and Record Keeping
@@ -1304,7 +1306,7 @@ objects:
           description:
             "R\xF4les et responsabilit\xE9s\nIdentification des actifs \xE0\
             \ mettre au rebut\nM\xE9thodes de mise au rebut s\xE9curis\xE9e\nEffacement\
-            \ des donn\xE9es\nConformit\xE9 aux exigences l\xE9gales et r\xE9glementaires\n\
+            \ des donn\xE9es\nEffacement avant r\xE9attribution ou r\xE9utilisation\nConformit\xE9 aux exigences l\xE9gales et r\xE9glementaires\n\
             Documentation et tenue des registres\nV\xE9rification et audit"
         de:
           name: Verfahren zur sicheren Entsorgung
@@ -1316,6 +1318,8 @@ objects:
 
             Datenbereinigung (Data Sanitization)
 
+            Bereinigung vor Neuzuweisung oder Wiederverwendung
+
             Einhaltung gesetzlicher und regulatorischer Anforderungen
 
             Dokumentation und Aufbewahrung von Nachweisen
@@ -1326,7 +1330,7 @@ objects:
           description:
             "Funciones y responsabilidades\nIdentificaci\xF3n de activos\
             \ para su eliminaci\xF3n\nM\xE9todos de eliminaci\xF3n segura\nSaneado de\
-            \ datos\nCumplimiento de los requisitos legales y reglamentarios\nDocumentaci\xF3\
+            \ datos\nSaneado antes de la reasignaci\xF3n o reutilizaci\xF3n\nCumplimiento de los requisitos legales y reglamentarios\nDocumentaci\xF3\
             n y mantenimiento de registros\nVerificaci\xF3n y auditor\xEDa"
       typical_evidence:
         - Procedure document
@@ -1696,18 +1700,27 @@ objects:
       name: Internal and external audit policy
       category: policy
       csf_function: govern
-      description: Protection of audit information
+      description: "Audit programme: scope, frequency, auditor independence and audit types
+        (configuration, architecture, code review, penetration testing)
+
+        Protection of audit information"
       annotation: A.8.34
       translations:
         fr:
           name: "Politique d\u2019audit interne et externe"
-          description: "Protection des informations d\u2019audit"
+          description: "Programme d\u2019audit : p\xE9rim\xE8tre, fr\xE9quence, ind\xE9pendance\
+            \ des auditeurs et types d\u2019audit (configuration, architecture, revue de code,\
+            \ test d\u2019intrusion)\nProtection des informations d\u2019audit"
         de:
           name: Interne und externe Auditrichtlinie
-          description: Schutz von Auditinformationen
+          description: "Auditprogramm: Umfang, H\xE4ufigkeit, Unabh\xE4ngigkeit der Auditoren\
+            \ und Auditarten (Konfiguration, Architektur, Code-Review, Penetrationstest)\n\
+            Schutz von Auditinformationen"
         es:
           name: "Pol\xEDtica de auditor\xEDa interna y externa"
-          description: "Protecci\xF3n de la informaci\xF3n de auditor\xEDa"
+          description: "Programa de auditor\xEDa: alcance, frecuencia, independencia de\
+            \ los auditores y tipos de auditor\xEDa (configuraci\xF3n, arquitectura, revisi\xF3\
+            n de c\xF3digo, prueba de intrusi\xF3n)\nProtecci\xF3n de la informaci\xF3n de auditor\xEDa"
       typical_evidence:
         - Signed policy document
         - Audit programme linkage
@@ -2120,7 +2133,7 @@ objects:
           description:
             "Politique d\xE9finissant les principes de s\xE9curit\xE9 de\
             \ l'architecture r\xE9seau, segmentation, filtrage, acc\xE8s distants et\
-            \ supervision."
+            \ supervision, y compris la revue p\xE9riodique des r\xE8gles de filtrage."
         de:
           name: Richtlinie zum Management der Netzwerksicherheit
         es:
@@ -2132,7 +2145,8 @@ objects:
         - Annual review records
       description:
         Policy defining the security principles for network architecture,
-        segmentation, filtering, remote access and monitoring.
+        segmentation, filtering, remote access and monitoring, including periodic
+        review of filtering rules.
     - urn: urn:intuitem:risk:function:doc-pol:pol.accept
       ref_id: POL.ACCEPT
       name: Acceptable use policy
@@ -6317,3 +6331,347 @@ objects:
             \ penales, referencias, cualificaciones e integridad financiera cuando proceda.\n\
             Coordinaci\xF3n con RR.HH., asesor\xEDa jur\xEDdica y requisitos de protecci\xF3\
             n de datos."
+    - urn: urn:intuitem:risk:function:doc-pol:doc.product_techdoc
+      ref_id: DOC.PRODUCT_TECHDOC
+      name: Product technical documentation file
+      category: process
+      csf_function: govern
+      description: 'Per-product technical documentation covering security features and architecture,
+        design and development decisions, cybersecurity risk assessment, vulnerability handling
+        and update procedures, and the support period.
+
+        Kept up to date and retained for the duration of the support period.'
+      typical_evidence:
+      - Technical documentation file per product
+      - Documentation review and update records
+      - Traceability to risk assessment and design decisions
+      annotation: 'cra: Article 31, Annex VII
+
+        iso-27002: 8.25'
+      translations:
+        fr:
+          name: Dossier de documentation technique produit
+          description: "Documentation technique par produit couvrant les fonctions et l'architecture\
+            \ de s\xE9curit\xE9, les d\xE9cisions de conception et de d\xE9veloppement, l'analyse\
+            \ de risque cyber, les proc\xE9dures de traitement des vuln\xE9rabilit\xE9s et de\
+            \ mise \xE0 jour, et la p\xE9riode de support.\nMaintenue \xE0 jour et conserv\xE9\
+            e pendant toute la p\xE9riode de support."
+        de:
+          name: Technische Produktdokumentation
+          description: "Technische Dokumentation je Produkt zu Sicherheitsfunktionen und -architektur,\
+            \ Design- und Entwicklungsentscheidungen, Cyberrisikoanalyse, Schwachstellenbehandlungs-\
+            \ und Update-Verfahren sowie zum Supportzeitraum.\nAktuell gehalten und \xFCber den\
+            \ gesamten Supportzeitraum aufbewahrt."
+        es:
+          name: "Expediente de documentaci\xF3n t\xE9cnica del producto"
+          description: "Documentaci\xF3n t\xE9cnica por producto que cubre las funciones y la\
+            \ arquitectura de seguridad, las decisiones de dise\xF1o y desarrollo, el an\xE1lisis\
+            \ de riesgos cibern\xE9ticos, los procedimientos de gesti\xF3n de vulnerabilidades\
+            \ y de actualizaci\xF3n, y el per\xEDodo de soporte.\nMantenida al d\xEDa y conservada\
+            \ durante todo el per\xEDodo de soporte."
+    - urn: urn:intuitem:risk:function:doc-pol:proc.product_conformity
+      ref_id: PROC.PRODUCT_CONFORMITY
+      name: Product conformity assessment procedure
+      category: procedure
+      csf_function: govern
+      description: 'Determination and execution of the conformity assessment route applicable
+        to each product, drawing up and maintenance of the EU declaration of conformity and CE
+        marking.
+
+        Identification of the competent market surveillance authorities and of interaction and
+        notification duties.'
+      typical_evidence:
+      - Conformity assessment records per product
+      - EU declaration of conformity
+      - Register of applicable authorities and notification channels
+      annotation: 'cra: Articles 28, 30, 32, Annex V, Annex VIII'
+      translations:
+        fr:
+          name: "Proc\xE9dure d'\xE9valuation de la conformit\xE9 produit"
+          description: "D\xE9termination et ex\xE9cution de la proc\xE9dure d'\xE9valuation de\
+            \ la conformit\xE9 applicable \xE0 chaque produit, \xE9tablissement et maintien de\
+            \ la d\xE9claration UE de conformit\xE9 et du marquage CE.\nIdentification des autorit\xE9\
+            s de surveillance du march\xE9 comp\xE9tentes et des obligations d'interaction et\
+            \ de notification."
+        de:
+          name: "Verfahren zur Konformit\xE4tsbewertung von Produkten"
+          description: "Festlegung und Durchf\xFChrung des f\xFCr jedes Produkt geltenden Konformit\xE4\
+            tsbewertungsverfahrens, Erstellung und Pflege der EU-Konformit\xE4tserkl\xE4rung und\
+            \ der CE-Kennzeichnung.\nIdentifikation der zust\xE4ndigen Markt\xFCberwachungsbeh\xF6\
+            rden sowie der Interaktions- und Meldepflichten."
+        es:
+          name: "Procedimiento de evaluaci\xF3n de la conformidad del producto"
+          description: "Determinaci\xF3n y ejecuci\xF3n del procedimiento de evaluaci\xF3n de\
+            \ la conformidad aplicable a cada producto, elaboraci\xF3n y mantenimiento de la declaraci\xF3\
+            n UE de conformidad y del marcado CE.\nIdentificaci\xF3n de las autoridades de vigilancia\
+            \ del mercado competentes y de las obligaciones de interacci\xF3n y notificaci\xF3\
+            n."
+    - urn: urn:intuitem:risk:function:doc-pol:doc.product_support
+      ref_id: DOC.PRODUCT_SUPPORT
+      name: Product support period and end-of-life commitment
+      category: process
+      csf_function: govern
+      description: 'Customer-facing commitment per product on the support period during which
+        security updates are provided, end-of-life dates and lifecycle milestones.
+
+        Communication of end of support and of user obligations at end-of-life.'
+      typical_evidence:
+      - Published support and end-of-life policy per product
+      - Support period register with end dates
+      - Customer end-of-support notifications
+      annotation: 'cra: Article 13, Annex II
+
+        iso-27002: 8.8'
+      translations:
+        fr:
+          name: Engagement de support produit et de fin de vie
+          description: "Engagement par produit, communiqu\xE9 aux clients, sur la p\xE9riode de\
+            \ support pendant laquelle les mises \xE0 jour de s\xE9curit\xE9 sont fournies, les\
+            \ dates de fin de vie et les jalons du cycle de vie.\nCommunication de la fin du support\
+            \ et des obligations des utilisateurs en fin de vie."
+        de:
+          name: Zusage zu Produktsupportzeitraum und End-of-Life
+          description: 'Kundengerichtete Zusage je Produkt zum Supportzeitraum, in dem Sicherheitsupdates
+            bereitgestellt werden, zu End-of-Life-Terminen und Lebenszyklus-Meilensteinen.
+
+            Kommunikation des Supportendes und der Nutzerpflichten am Ende des Lebenszyklus.'
+        es:
+          name: Compromiso de soporte y fin de vida del producto
+          description: "Compromiso por producto, comunicado a los clientes, sobre el per\xEDodo\
+            \ de soporte durante el cual se proporcionan actualizaciones de seguridad, las fechas\
+            \ de fin de vida y los hitos del ciclo de vida.\nComunicaci\xF3n del fin del soporte\
+            \ y de las obligaciones de los usuarios al final de la vida \xFAtil."
+    - urn: urn:intuitem:risk:function:doc-pol:tech.admin_network
+      ref_id: TECH.ADMIN_NETWORK
+      name: Dedicated administration network and trust core
+      category: technical
+      csf_function: protect
+      description: 'Dedicated administration network, physically or logically separated from
+        the production and user networks, from which all technical administration is
+        performed. Administration interfaces are reachable only from this network, admin
+        flows are filtered, and admin protocols are encrypted and authenticated.
+
+        Identification of the trust core (directories, identity providers, PKI,
+        administration and security tooling) with dedicated administration resources and
+        accounts, and no remote administration from outside the administration network.'
+      typical_evidence:
+      - Administration network architecture diagram
+      - List of trust core resources
+      - Filtering rules for administration flows
+      annotation: 'iso-27002: 8.2, 8.22'
+      translations:
+        fr:
+          name: Réseau d'administration dédié et cœur de confiance
+          description: 'Réseau d''administration dédié, séparé physiquement ou logiquement des
+            réseaux de production et des utilisateurs, depuis lequel toute l''administration
+            technique est réalisée. Les interfaces d''administration ne sont joignables que
+            depuis ce réseau, les flux d''administration sont filtrés et les protocoles
+            d''administration sont chiffrés et authentifiés.
+
+            Identification du cœur de confiance (annuaires, fournisseurs d''identité, IGC,
+            outils d''administration et de sécurité), doté de ressources et de comptes
+            d''administration dédiés, sans administration à distance depuis l''extérieur du
+            réseau d''administration.'
+        de:
+          name: Dediziertes Administrationsnetz und Vertrauenskern
+          description: 'Dediziertes Administrationsnetz, physisch oder logisch von Produktions-
+            und Benutzernetzen getrennt, über das die gesamte technische Administration
+            erfolgt. Administrationsschnittstellen sind nur aus diesem Netz erreichbar,
+            Administrationsflüsse werden gefiltert, Administrationsprotokolle sind
+            verschlüsselt und authentifiziert.
+
+            Identifikation des Vertrauenskerns (Verzeichnisdienste, Identitätsanbieter, PKI,
+            Administrations- und Sicherheitswerkzeuge) mit dedizierten
+            Administrationsressourcen und -konten, ohne Fernadministration von außerhalb des
+            Administrationsnetzes.'
+        es:
+          name: Red de administración dedicada y núcleo de confianza
+          description: 'Red de administración dedicada, separada física o lógicamente de las
+            redes de producción y de usuarios, desde la que se realiza toda la administración
+            técnica. Las interfaces de administración solo son accesibles desde esta red, los
+            flujos de administración se filtran y los protocolos de administración están
+            cifrados y autenticados.
+
+            Identificación del núcleo de confianza (directorios, proveedores de identidad,
+            PKI, herramientas de administración y de seguridad) con recursos y cuentas de
+            administración dedicados, sin administración remota desde fuera de la red de
+            administración.'
+    - urn: urn:intuitem:risk:function:doc-pol:tech.ddos_protection
+      ref_id: TECH.DDOS_PROTECTION
+      name: DDoS protection capability
+      category: technical
+      csf_function: protect
+      description: 'Protection of exposed services against distributed denial-of-service
+        attacks, through an anti-DDoS service from the hosting or network provider or a
+        dedicated scrubbing / CDN service, with traffic thresholds, alerting and an
+        activation procedure.'
+      typical_evidence:
+      - Anti-DDoS service contract or configuration
+      - Protected services and thresholds list
+      - Activation and escalation procedure
+      annotation: 'iso-27002: 8.20'
+      translations:
+        fr:
+          name: Protection contre les dénis de service distribués (DDoS)
+          description: 'Protection des services exposés contre les attaques par déni de service
+            distribué, au moyen d''un service anti-DDoS de l''hébergeur ou de l''opérateur
+            réseau, ou d''un service dédié de filtrage / CDN, avec seuils de trafic, alertes
+            et procédure d''activation.'
+        de:
+          name: DDoS-Schutz
+          description: 'Schutz exponierter Dienste vor verteilten Denial-of-Service-Angriffen
+            durch einen Anti-DDoS-Dienst des Hosting- oder Netzanbieters oder einen
+            dedizierten Scrubbing- / CDN-Dienst, mit Verkehrsschwellen, Alarmierung und
+            Aktivierungsverfahren.'
+        es:
+          name: Protección contra denegación de servicio distribuida (DDoS)
+          description: 'Protección de los servicios expuestos contra ataques de denegación de
+            servicio distribuida, mediante un servicio anti-DDoS del proveedor de alojamiento
+            o de red, o un servicio dedicado de depuración / CDN, con umbrales de tráfico,
+            alertas y procedimiento de activación.'
+    - urn: urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
+      ref_id: TECH.APP_AUTH_HARDENING
+      name: Application authentication hardening
+      category: technical
+      csf_function: protect
+      description: 'Protections built into exposed applications and APIs: rate limiting and
+        anti-automation on sensitive endpoints, lockout or progressive delay after repeated
+        failed logins, automatic expiry of inactive sessions, and storage of passwords with
+        a salted, deliberately slow hashing function (Argon2, scrypt, bcrypt, PBKDF2).'
+      typical_evidence:
+      - Rate limiting and lockout configuration
+      - Session timeout settings
+      - Password storage design or code review record
+      annotation: 'iso-27002: 8.5, 8.26'
+      translations:
+        fr:
+          name: Durcissement de l'authentification applicative
+          description: 'Protections intégrées aux applications et API exposées : limitation du
+            débit et protection contre l''automatisation sur les points d''accès sensibles,
+            blocage ou délai progressif après des échecs de connexion répétés, expiration
+            automatique des sessions inactives, et stockage des mots de passe avec une
+            fonction de hachage salée et volontairement lente (Argon2, scrypt, bcrypt,
+            PBKDF2).'
+        de:
+          name: Härtung der Anwendungsauthentifizierung
+          description: 'In exponierte Anwendungen und APIs integrierte Schutzmaßnahmen:
+            Ratenbegrenzung und Schutz vor Automatisierung an sensiblen Endpunkten, Sperre
+            oder progressive Verzögerung nach wiederholten Fehlanmeldungen, automatischer
+            Ablauf inaktiver Sitzungen und Speicherung von Passwörtern mit einer gesalzenen,
+            bewusst langsamen Hashfunktion (Argon2, scrypt, bcrypt, PBKDF2).'
+        es:
+          name: Refuerzo de la autenticación de aplicaciones
+          description: 'Protecciones integradas en las aplicaciones y API expuestas: limitación
+            de tasa y protección contra la automatización en los puntos de acceso sensibles,
+            bloqueo o retardo progresivo tras intentos de conexión fallidos repetidos,
+            caducidad automática de las sesiones inactivas y almacenamiento de contraseñas con
+            una función de hash con sal y deliberadamente lenta (Argon2, scrypt, bcrypt,
+            PBKDF2).'
+    - urn: urn:intuitem:risk:function:doc-pol:doc.privacy_notice
+      ref_id: DOC.PRIVACY_NOTICE
+      name: Privacy notice
+      category: policy
+      csf_function: govern
+      description: 'Information given to data subjects when their personal data is collected:
+        controller and DPO contact, purposes and legal bases, recipients, transfers,
+        retention periods, and their rights with how to exercise them.'
+      typical_evidence:
+      - Published privacy notice
+      - Collection forms showing the notice
+      - Review records
+      annotation: 'gdpr-art-13, gdpr-art-14
+
+        iso-27002: 5.34'
+      translations:
+        fr:
+          name: Mentions d'information sur la protection des données
+          description: 'Informations fournies aux personnes concernées lors de la collecte de
+            leurs données personnelles : identité du responsable de traitement et contact du
+            DPO, finalités et bases légales, destinataires, transferts, durées de
+            conservation, ainsi que leurs droits et les modalités pour les exercer.'
+        de:
+          name: Datenschutzhinweise
+          description: 'Informationen für betroffene Personen bei der Erhebung ihrer
+            personenbezogenen Daten: Verantwortlicher und Kontakt des
+            Datenschutzbeauftragten, Zwecke und Rechtsgrundlagen, Empfänger, Übermittlungen,
+            Speicherdauer sowie ihre Rechte und deren Ausübung.'
+        es:
+          name: Aviso de privacidad
+          description: 'Información facilitada a los interesados cuando se recogen sus datos
+            personales: responsable del tratamiento y contacto del DPD, finalidades y bases
+            jurídicas, destinatarios, transferencias, plazos de conservación, y sus derechos
+            con la forma de ejercerlos.'
+    - urn: urn:intuitem:risk:function:doc-pol:pol.data_location
+      ref_id: POL.DATA_LOCATION
+      name: Data location and hosting policy
+      category: policy
+      csf_function: govern
+      description: 'Rules on where systems and data may be hosted and processed: approved
+        jurisdictions (e.g. within the EU), exposure to extraterritorial laws, requirements
+        on hosting and cloud providers (including security qualifications or certifications
+        such as SecNumCloud or EUCS where required), and conditions for transfers outside
+        approved jurisdictions.'
+      typical_evidence:
+      - Signed policy document
+      - Hosting location register per system
+      - Provider qualification or certification records
+      annotation: 'iso-27002: 5.23, 5.31'
+      translations:
+        fr:
+          name: Politique de localisation des données et d'hébergement
+          description: 'Règles fixant où les systèmes et les données peuvent être hébergés et
+            traités : juridictions autorisées (par exemple au sein de l''UE), exposition aux
+            lois extraterritoriales, exigences envers les hébergeurs et fournisseurs de cloud
+            (y compris qualifications ou certifications de sécurité telles que SecNumCloud ou
+            EUCS lorsqu''elles sont requises), et conditions des transferts hors des
+            juridictions autorisées.'
+        de:
+          name: Richtlinie zu Datenstandort und Hosting
+          description: 'Regeln, wo Systeme und Daten gehostet und verarbeitet werden dürfen:
+            zugelassene Rechtsräume (z. B. innerhalb der EU), Exposition gegenüber
+            extraterritorialen Gesetzen, Anforderungen an Hosting- und Cloud-Anbieter
+            (einschließlich Sicherheitsqualifizierungen oder -zertifizierungen wie SecNumCloud
+            oder EUCS, sofern erforderlich) und Bedingungen für Übermittlungen außerhalb
+            zugelassener Rechtsräume.'
+        es:
+          name: Política de ubicación de los datos y de alojamiento
+          description: 'Reglas sobre dónde pueden alojarse y tratarse los sistemas y los datos:
+            jurisdicciones autorizadas (por ejemplo, dentro de la UE), exposición a leyes
+            extraterritoriales, requisitos para los proveedores de alojamiento y de nube
+            (incluidas cualificaciones o certificaciones de seguridad como SecNumCloud o EUCS
+            cuando se exijan), y condiciones de las transferencias fuera de las jurisdicciones
+            autorizadas.'
+    - urn: urn:intuitem:risk:function:doc-pol:proc.domain_mgmt
+      ref_id: PROC.DOMAIN_MGMT
+      name: Domain name management procedure
+      category: procedure
+      csf_function: protect
+      description: 'Inventory and protection of the organization''s domain names: choice of
+        trusted top-level domains and registrars, protection of registrar accounts (MFA,
+        registry lock), renewal tracking, defensive registration of look-alike domains and
+        monitoring for typosquatting.'
+      typical_evidence:
+      - Domain name inventory with owners and expiry dates
+      - Registrar account security settings
+      - Look-alike domain monitoring reports
+      translations:
+        fr:
+          name: Procédure de gestion des noms de domaine
+          description: 'Inventaire et protection des noms de domaine de l''organisation : choix
+            d''extensions et de bureaux d''enregistrement de confiance, protection des
+            comptes auprès du bureau d''enregistrement (MFA, verrouillage au registre), suivi
+            des renouvellements, enregistrement défensif de noms de domaine proches et
+            surveillance du typosquatting.'
+        de:
+          name: Verfahren zur Verwaltung von Domainnamen
+          description: 'Inventar und Schutz der Domainnamen der Organisation: Wahl
+            vertrauenswürdiger Top-Level-Domains und Registrare, Schutz der Registrar-Konten
+            (MFA, Registry Lock), Überwachung der Verlängerungen, defensive Registrierung
+            ähnlicher Domains und Überwachung auf Typosquatting.'
+        es:
+          name: Procedimiento de gestión de nombres de dominio
+          description: 'Inventario y protección de los nombres de dominio de la organización:
+            elección de dominios de primer nivel y registradores de confianza, protección de
+            las cuentas del registrador (MFA, bloqueo de registro), seguimiento de las
+            renovaciones, registro defensivo de dominios similares y vigilancia del
+            typosquatting.'

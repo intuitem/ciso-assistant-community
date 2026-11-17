@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Achterstallige taken (${task_count})"
+body: |
+  Hallo,
+
+  De volgende taken zijn achterstallig en staan nog open:
+
+  ${task_list}
+
+  Meld u aan op uw CISO Assistant-portaal om deze taken af te ronden of bij te werken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

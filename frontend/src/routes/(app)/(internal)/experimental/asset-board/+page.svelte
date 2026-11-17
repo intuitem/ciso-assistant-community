@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import { createPickerForm } from '#lib/components/AssetGraph/picker.js';
 	import AssetBoard from './AssetBoard.svelte';
 	import type { PageData } from './$types';
 
@@ -10,16 +12,16 @@
 
 	let { data }: Props = $props();
 
-	let selectedFolderId = $state(data.selectedFolderId ?? '');
+	const folderPicker = createPickerForm('folder', data.selectedFolderId || null);
 
-	function handleFolderChange() {
-		const url = new URL(page.url);
-		if (selectedFolderId) {
-			url.searchParams.set('folder', selectedFolderId);
+	function handleFolderChange(folderId: string | null) {
+		const url = new URL(page.url.href);
+		if (folderId) {
+			url.searchParams.set('folder', folderId);
 		} else {
 			url.searchParams.delete('folder');
 		}
-		goto(url, { replaceState: false, invalidateAll: true });
+		goto(url, { replace: false, refreshAll: true });
 	}
 </script>
 
@@ -34,18 +36,16 @@
 			experimental
 		</span>
 		<div class="flex-1"></div>
-		<label class="text-sm font-medium text-surface-700-300" for="board-folder">Domain:</label>
-		<select
-			id="board-folder"
-			bind:value={selectedFolderId}
-			onchange={handleFolderChange}
-			class="rounded-lg border-surface-300-700 bg-surface-100-900 text-surface-700-300 sm:text-sm"
-		>
-			<option value="">Select a domain</option>
-			{#each data.folders as folder}
-				<option value={folder.id}>{folder.str || folder.name}</option>
-			{/each}
-		</select>
+		<span class="text-sm font-medium text-surface-700-300">Domain:</span>
+		<div class="w-80">
+			<FolderTreeSelect
+				form={folderPicker.form}
+				field="folder"
+				writePermission={null}
+				nullable
+				onChange={handleFolderChange}
+			/>
+		</div>
 	</div>
 
 	<div class="flex-1 min-h-0">
@@ -53,6 +53,8 @@
 			{#key data.selectedFolderId}
 				<AssetBoard
 					assets={data.assets}
+					externalAssets={data.externalAssets}
+					hiddenAssetIds={data.hiddenAssetIds}
 					folderId={data.selectedFolderId}
 					assetModel={data.assetModel}
 					deleteForm={data.assetDeleteForm}

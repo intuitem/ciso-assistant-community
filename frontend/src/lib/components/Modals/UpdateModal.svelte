@@ -1,17 +1,17 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import * as m from '#paraglide/messages.js';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import type { ModelInfo } from '$lib/utils/types';
+	import type { ModelInfo } from '#lib/utils/types.js';
 
 	const modalStore: ModalStore = getModalStore();
 
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {

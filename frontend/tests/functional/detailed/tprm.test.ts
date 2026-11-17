@@ -2,8 +2,7 @@ import type { Locator } from '@playwright/test';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
-import { SideBar } from '../../utils/sidebar.js';
+import { m } from '#paraglide/messages.js';
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -11,7 +10,6 @@ let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 const entityAssessment = {
 	name: 'Test entity assessment',
 	// folder is inherited from the entity via initialData, no need to specify it
-	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
 	representatives: 'third-party@tests.com'
@@ -153,6 +151,8 @@ test('user can create representatives, solutions and entity assessments inside e
 		await page.goto('/analytics/tprm');
 		await page.locator('body[data-hydrated="true"]').waitFor();
 		await expect(page.locator('#page-title')).toHaveText('Overview');
+		await expect(page.getByTestId('vendor-posture')).toBeVisible();
+		await page.getByTestId('tab-assessments').click();
 		const cards = page.getByTestId('cards-list').locator('div');
 		await expect(page.getByTestId('no-data-available')).not.toBeVisible();
 		await expect(cards.first().getByTestId('provider')).toContainText(
@@ -183,7 +183,6 @@ test('user can create representatives, solutions and entity assessments inside e
 test('third-party representative can set their password', async ({ sideBar, mailer, page }) => {
 	test.slow();
 	await test.step('set password and log in as third party representative', async () => {
-		await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
 		const welcomeMail = await mailer.getEmailBySubject('Welcome to CISO Assistant!');
 		await welcomeMail.hasWelcomeEmailDetails();
 		await welcomeMail.hasEmailRecipient('third-party@tests.com');
@@ -224,8 +223,9 @@ test('third-party representative can set their password', async ({ sideBar, mail
 		await expect(setLoginPage.page).toHaveURL('/auditee-dashboard');
 
 		// logout to prevent sessions conflicts
-		const passwordPageSideBar = new SideBar(setPasswordPage);
-		await passwordPageSideBar.logout();
+		await setPasswordPage.getByTestId('respondent-avatar').click();
+		await setPasswordPage.getByTestId('logout-button').click();
+		await expect(setPasswordPage).toHaveURL(/^.*\/login$/);
 	});
 });
 
@@ -277,7 +277,7 @@ test('third-party representative can fill their assigned audit', async ({
 		await page.getByTestId('create-evidence-button').click();
 		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('form-input-name').fill('tp-evidence');
-		await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
+		await expect(page.getByTestId('form-input-filtering-labels')).toHaveCount(0);
 		let objectCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
 			'The evidence object has been successfully created' + /.+/.source
 		);
@@ -292,8 +292,36 @@ test('third-party representative can fill their assigned audit', async ({
 	await test.step('check that selected evidences were updated', async () => {
 		await page.getByTestId('select-evidence-button').click();
 		await expect(page.getByTestId('modal-title')).toBeVisible();
-		await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
+		await expect(page.getByTestId('form-input-evidences').locator('div.multiselect')).toContainText(
+			/.*tp-evidence.*/
+		);
 		await page.getByTestId('cancel-button').click();
+	});
+
+	await test.step('third party respondent can track a task from my tasks', async () => {
+		await page.getByTestId('task-templates-accordion-trigger').click();
+		await page.getByTestId('add-task-template-button').click();
+		await page.getByTestId('form-input-name').fill('tp-task');
+		const taskCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
+			'The task object has been successfully created' + /.+/.source
+		);
+		await page.getByTestId('save-button').click();
+		await taskCreatedToast;
+
+		await page.getByTestId('respondent-tasks').click();
+		await page.waitForURL('/my-tasks');
+		await expect(page.getByTestId('respondent-tasks')).toHaveAttribute('aria-current', 'page');
+		const row = page.getByTestId('my-tasks-table').getByRole('row', { name: /tp-task/ });
+		const statusSaved = page.waitForResponse((r) => r.url().includes('updateStatus'));
+		await row.getByTestId('task-status').selectOption('in_progress');
+		await statusSaved;
+		await page.reload();
+		await expect(row.getByTestId('task-status')).toHaveValue('in_progress');
+
+		await row.getByRole('link', { name: 'tp-task' }).click();
+		await page.waitForURL(/\/auditee-assessments\/.+task=/);
+		await expect(page.getByRole('cell', { name: 'tp-task' })).toBeVisible();
+		await expect(page.getByTestId('respondent-home')).toHaveAttribute('aria-current', 'page');
 	});
 });
 

@@ -73,6 +73,7 @@ def serialize_preset_to_draft(preset: Preset) -> dict:
         "journey_meta": {
             "name": preset.name,
             "description": preset.description or "",
+            "translations": preset.translations or {},
         },
         "scaffolded_objects": list(preset.scaffolded_objects or []),
         "steps": list(preset.steps or []),
@@ -111,6 +112,9 @@ def validate_draft(draft: Any, strict: bool = True) -> dict:
     if not name and strict:
         raise ValidationError({"journey_meta.name": "Name is required."})
     description = _coerce_str(meta.get("description"), "journey_meta.description")
+    meta_translations = meta.get("translations")
+    if meta_translations is not None and not isinstance(meta_translations, dict):
+        raise ValidationError({"journey_meta.translations": "Must be an object."})
 
     scaffolds_in = draft.get("scaffolded_objects")
     if scaffolds_in is None:
@@ -127,7 +131,11 @@ def validate_draft(draft: Any, strict: bool = True) -> dict:
     steps = _validate_steps(steps_in, refs, strict=strict)
 
     return {
-        "journey_meta": {"name": name, "description": description},
+        "journey_meta": {
+            "name": name,
+            "description": description,
+            "translations": meta_translations or {},
+        },
         "scaffolded_objects": scaffolds,
         "steps": steps,
     }

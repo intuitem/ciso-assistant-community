@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getRequirementTitle } from '$lib/utils/helpers';
-	import { getOptions } from '$lib/utils/crud';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { getRequirementTitle } from '#lib/utils/helpers.js';
+	import { getOptions } from '#lib/utils/crud.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		ref_id: string;
@@ -119,7 +119,7 @@
 			<i class="text-xs fa-solid fa-info-circle"></i> Learn more
 		</div>
 		<div
-			class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
+			class="card p-2 preset-outlined-primary-500 text-sm flex flex-row cursor-auto {classesShowInfo(
 				showInfo
 			)}"
 		>

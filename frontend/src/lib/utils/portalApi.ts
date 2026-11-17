@@ -1,5 +1,5 @@
 // Shared server-side helpers for the portal-editor route actions/loaders.
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
 
 type Fetch = typeof globalThis.fetch;

@@ -6,14 +6,14 @@
 	import SideBarToggle from './SideBarToggle.svelte';
 	import { writable } from 'svelte/store';
 
-	import { getCookie, setCookie } from '$lib/utils/cookies';
-	import { driverInstance, tableHandlers, getStartedTrigger } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import { getCookie, setCookie } from '#lib/utils/cookies.js';
+	import { driverInstance, tableHandlers, getStartedTrigger } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 
-	import { invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
-	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
-	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
+	import { refreshAll } from '$app/navigation';
+	import { page } from '$app/state';
+	import FirstLoginModal from '#lib/components/Modals/FirstLoginModal.svelte';
+	import { breadcrumbs, goto } from '#lib/utils/breadcrumbs.js';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
 	import { getFlash } from 'sveltekit-flash-message';
@@ -23,7 +23,7 @@
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		open: boolean;
@@ -32,7 +32,7 @@
 
 	let { open = $bindable(), sideBarVisibleItems }: Props = $props();
 
-	const user = $page.data?.user;
+	const user = page.data?.user;
 
 	// id is not needed, just to help us with authoring
 	// this is not great, but couldn't find a way for i18n while separating the file.
@@ -242,9 +242,18 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.firstTimeLoginModalTitle(),
-			body: m.firstTimeLoginModalDescription()
+			body: m.firstTimeLoginModalDescription(),
+			response: dismissOnboarding
 		};
 		modalStore.trigger(modal);
+	}
+
+	function dismissOnboarding(): void {
+		if (user?.preferences?.ui?.onboarding_dismissed) return;
+		fetch('/fe-api/user-preferences', {
+			method: 'PATCH',
+			body: JSON.stringify({ ui: { onboarding_dismissed: true } })
+		});
 	}
 
 	const loading = writable(false);
@@ -253,8 +262,11 @@
 		$loading = true;
 		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
 		if (!response.ok) {
-			if (response.status === 500) {
+			const { error } = await response.json().catch(() => ({}));
+			if (error === 'demoDataAlreadyLoaded') {
 				flash.set({ type: 'error', message: m.demoDataAlreadyImported() });
+			} else if (error === 'demoDomainNameTaken') {
+				flash.set({ type: 'error', message: m.demoDomainNameTaken() });
 			} else {
 				flash.set({ type: 'error', message: m.errorOccuredDuringImport() });
 			}
@@ -270,7 +282,7 @@
 			breadcrumbAction: 'replace'
 		});
 
-		invalidateAll();
+		refreshAll();
 		Object.values($tableHandlers).forEach((handler) => {
 			handler.invalidate();
 		});
@@ -292,7 +304,9 @@
 
 	onMount(() => {
 		const showFirstLoginModal =
-			getCookie('show_first_login_modal') === 'true' && user.accessible_domains.length === 0;
+			getCookie('show_first_login_modal') === 'true' &&
+			!user.preferences?.ui?.onboarding_dismissed &&
+			user.accessible_domains.length === 0;
 		// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
 		// Later, we will have tours for domain managers, analysts etc.
 		if (showFirstLoginModal && user.is_admin) {

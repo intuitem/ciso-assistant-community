@@ -1,16 +1,16 @@
 <script lang="ts">
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -68,7 +68,7 @@
 				const actionData = result.data || result;
 				toastStore.trigger({
 					message: actionData.message || 'Synchronization complete',
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 5000
 				});
 				// Redirect to the risk assessment
@@ -79,7 +79,7 @@
 				const actionData = result.data || result;
 				toastStore.trigger({
 					message: actionData.message || 'Synchronization failed',
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 5000
 				});
 			}
@@ -87,7 +87,7 @@
 			console.error('Sync error:', error);
 			toastStore.trigger({
 				message: 'An error occurred during synchronization',
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 5000
 			});
 		}

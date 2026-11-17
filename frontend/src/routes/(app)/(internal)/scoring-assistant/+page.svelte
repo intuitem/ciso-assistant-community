@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
+	import type { RiskMatrixJsonDefinition } from '#lib/utils/types.js';
 	import Selector from './selector.svelte';
 	import { average, forms } from './utils';
-	import { isDark } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { data, risk_matrices = data.risk_matrices } = $props();
 

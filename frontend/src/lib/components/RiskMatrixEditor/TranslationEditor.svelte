@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { isDark } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
-	import { LOCALE_MAP, language } from '$lib/utils/locales';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { m } from '#paraglide/messages.js';
+	import { LOCALE_MAP, language } from '#lib/utils/locales.js';
 
 	interface Level {
 		id: number;

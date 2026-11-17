@@ -1,0 +1,460 @@
+urn: urn:intuitem:risk:library:mapping-anssi-mss-v2-and-recyf
+locale: fr
+ref_id: mapping-anssi-mss-v2-and-recyf
+name: 'ANSSI - MonServiceSécurisé : référentiel de mesures V2 <-> ReCyF'
+description: 'Mapping between ANSSI - MonServiceSécurisé : référentiel de mesures V2 and ReCyF, taken
+  from the correspondence table published by MonServiceSécurisé (correspondanceMesuresV2VersReCyf, commit
+  1362dc4). Measures without a ReCyF counterpart in that table are left unmapped.'
+copyright: |-
+  Copyright ANSSI - Agence nationale de la sécurité des systèmes d'information (https://cyber.gouv.fr)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+version: 1
+publication_date: 2026-10-27
+provider: ANSSI
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:anssi-mss-v2
+- urn:intuitem:risk:library:recyf
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-mss-v2-and-recyf
+    ref_id: mapping-anssi-mss-v2-and-recyf
+    name: 'ANSSI - MonServiceSécurisé : référentiel de mesures V2 <-> ReCyF'
+    description: 'Mapping between ANSSI - MonServiceSécurisé : référentiel de mesures V2 and ReCyF, taken
+      from the correspondence table published by MonServiceSécurisé (correspondanceMesuresV2VersReCyf,
+      commit 1362dc4). Measures without a ReCyF counterpart in that table are left unmapped.'
+    source_framework_urn: urn:intuitem:risk:framework:anssi-mss-v2
+    target_framework_urn: urn:intuitem:risk:framework:recyf
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:conformite.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.c.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:contrat.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:contrat.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:rh.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:rh.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.17
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:phys.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:phys.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:phys.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:phys.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.10
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.1
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.2
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.3
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.5
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.6
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.7
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.9
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.8
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.10
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.11
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.12
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      relationship: intersect
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.5
+      relationship: intersect
+      rationale: semantic

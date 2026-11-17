@@ -1,11 +1,17 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { discardBody } from '#lib/utils/responses.js';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
-import { getModelInfo, urlParamModelSelectFields, urlParamModelVerboseName } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
+import {
+	getModelInfo,
+	urlParamModelSelectFields,
+	urlParamModelVerboseName
+} from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { handleErrorResponse } from '#lib/utils/actions.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import type { ModelInfo } from '#lib/utils/types.js';
 import { type Actions } from '@sveltejs/kit';
 import { fail, message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -63,7 +69,27 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	}
 
-	return { createRiskAnalysisForm, riskModel, syncPreview };
+	const ebiosRmStudyDuplicateForm = await superValidate(
+		{
+			// keep the prefilled name within the 200-char limit once " (copy)" is added
+			name: `${(data.name ?? '').slice(0, 193)} (copy)`,
+			description: data.description ?? '',
+			version: data.version ?? '',
+			ref_id: data.ref_id ?? '',
+			folder: data.folder?.id ?? data.folder ?? ''
+		},
+		zod(modelSchema('ebios-rm_duplicate')),
+		{ errors: false }
+	);
+	const ebiosRmStudyDuplicateModel = getModelInfo('ebios-rm_duplicate');
+
+	return {
+		createRiskAnalysisForm,
+		riskModel,
+		syncPreview,
+		ebiosRmStudyDuplicateForm,
+		ebiosRmStudyDuplicateModel
+	};
 };
 
 export const actions: Actions = {
@@ -76,6 +102,8 @@ export const actions: Actions = {
 		});
 		if (!stepRes.ok) {
 			console.error(await stepRes.text());
+		} else {
+			await discardBody(stepRes);
 		}
 
 		// Create the risk assessment
@@ -98,11 +126,15 @@ export const actions: Actions = {
 		const writtenObject = await createRes.json();
 
 		// Auto-sync from EBIOS RM study
-		await event.fetch(`${BASE_API_URL}/risk-assessments/${writtenObject.id}/sync_from_ebios_rm/`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({})
-		});
+		const syncRes = await event.fetch(
+			`${BASE_API_URL}/risk-assessments/${writtenObject.id}/sync_from_ebios_rm/`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({})
+			}
+		);
+		await discardBody(syncRes);
 
 		// Flash success and let ModelForm handle the redirect (closes modal)
 		const modelVerboseName = urlParamModelVerboseName('risk-assessments');
@@ -116,6 +148,41 @@ export const actions: Actions = {
 			event
 		);
 		return message(form, { redirect: `/risk-assessments/${writtenObject.id}` });
+	},
+	duplicate: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return;
+
+		const form = await superValidate(formData, zod(modelSchema('ebios-rm_duplicate')));
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/duplicate/`;
+		const response = await event.fetch(endpoint, {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		});
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const res = await response.json();
+		const newId = res.results?.id;
+
+		const modelVerboseName = urlParamModelVerboseName('ebios-rm');
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDuplicateObject({
+					object: safeTranslate(modelVerboseName).toLowerCase()
+				})
+			},
+			event
+		);
+
+		if (newId) {
+			return message(form, { redirect: `/ebios-rm/${newId}` });
+		}
+		return { form };
 	},
 	changeStepState: async (event) => {
 		const formData = await event.request.formData();
@@ -147,6 +214,7 @@ export const actions: Actions = {
 			console.error(response);
 			return fail(400, { form });
 		}
+		await discardBody(res);
 
 		return { success: true, form };
 	}

@@ -1,0 +1,499 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iso27090-2026
+locale: en
+ref_id: iso27090-2026
+name: "ISO 27090-2026 \u2014 Cybersecurity \u2014 Artificial intelligence \u2014 Addressing\
+  \ security threats and compromises to AI systems outline"
+description: "Outline of ISO/IEC 27090:2026 \u2014 guidance on security threats and\
+  \ compromises specific to AI systems: application of information security to AI\
+  \ (clause 5), types of potential compromise (clause 6), mitigations and their interactions\
+  \ (clause 7), and AI-specific versions of conventional attacks (Annex B).\nClause\
+  \ numbers and titles follow the official table of contents; descriptions marked\
+  \ [unofficial] are intuitem summaries based on public sources, not ISO text.\nYou\
+  \ can purchase the standard for full details."
+copyright: ISO - You can purchase the standard for full details.
+version: 1
+publication_date: 2026-10-22
+provider: ISO
+packager: intuitem
+objects:
+  frameworks:
+  - urn: urn:intuitem:risk:framework:iso27090-2026
+    ref_id: iso27090-2026
+    name: "ISO 27090-2026 \u2014 Cybersecurity \u2014 Artificial intelligence \u2014\
+      \ Addressing security threats and compromises to AI systems outline"
+    description: "Outline of ISO/IEC 27090:2026 \u2014 guidance on security threats\
+      \ and compromises specific to AI systems: application of information security\
+      \ to AI (clause 5), types of potential compromise (clause 6), mitigations and\
+      \ their interactions (clause 7), and AI-specific versions of conventional attacks\
+      \ (Annex B).\nClause numbers and titles follow the official table of contents;\
+      \ descriptions marked [unofficial] are intuitem summaries based on public sources,\
+      \ not ISO text.\nYou can purchase the standard for full details."
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: practices
+      name: Security practices
+      description: Application of information security, clause 5
+    - ref_id: threats
+      name: Threats
+      description: Types of potential compromise, clause 6 and Annex B
+    - ref_id: mitigations
+      name: Mitigations
+      description: Mitigations and their interactions, clause 7
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Application of information security
+      description: '[unofficial] Established information security practices (ISO/IEC
+        27001/27002) applied to AI systems; AI-specific threats add to, but do not
+        replace, conventional cybersecurity concerns.'
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      ref_id: '5.1'
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      ref_id: '5.2'
+      name: AI governance programme
+      description: '[unofficial] Govern AI security through an AI governance programme,
+        starting from an inventory of AI systems and their uses, aligned with management
+        system standards such as ISO/IEC 42001 and ISO/IEC 38507.'
+      implementation_groups:
+      - practices
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      ref_id: '5.3'
+      name: Zero trust principles
+      description: '[unofficial] Apply zero trust to AI systems: assume breach, verify
+        and authorize every request, apply least privilege to models, agents and their
+        tools, and protect data in transit.'
+      implementation_groups:
+      - practices
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      ref_id: '5.4'
+      name: Applying software engineering best practices to AI
+      description: '[unofficial] Apply secure software engineering practices (e.g.
+        secure development life cycle, code review, testing) to AI models, data pipelines
+        and the applications that embed them.'
+      implementation_groups:
+      - practices
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      ref_id: '5.5'
+      name: Supply chain management
+      description: '[unofficial] Manage security risks from suppliers, pre-trained
+        models, datasets, libraries and hosted AI services: verify provenance, set
+        security requirements, and understand how providers use submitted inputs and
+        announce model updates.'
+      implementation_groups:
+      - practices
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      ref_id: '5.6'
+      name: Threat modelling
+      description: '[unofficial] Perform threat modelling for each AI system, including
+        AI-specific attacks, to identify the applicable threats and record them in
+        the risk assessment; revisit as the system changes.'
+      implementation_groups:
+      - practices
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:5
+      ref_id: '5.7'
+      name: Red teaming
+      description: '[unofficial] Test AI systems adversarially (e.g. evasion, prompt
+        injection, extraction) before go-live and after significant changes to the
+        model, prompts or data sources, beyond conventional infrastructure testing.'
+      implementation_groups:
+      - practices
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Types of potential compromise to AI systems
+      description: '[unofficial] AI-specific threats; for each, the standard characterizes
+        the threat, its potential consequences, and how it can be detected and mitigated.'
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.1'
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.2'
+      name: Data poisoning attack
+      description: '[unofficial] Address attackers manipulating training data (including
+        operational data later reused for retraining) to alter the AI system''s behaviour,
+        e.g. through data provenance, validation and sanitization.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.3'
+      name: Evasion attack
+      description: '[unofficial] Address inputs altered (possibly imperceptibly) to
+        make the AI system behave incorrectly, e.g. through robustness testing, adversarial
+        training and input anomaly detection.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.4'
+      name: Membership inference
+      description: '[unofficial] Address attackers determining whether a given data
+        record was used to train the model, a confidentiality and privacy risk, e.g.
+        by limiting overfitting and output detail or using differential privacy.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.5'
+      name: Model exfiltration
+      description: '[unofficial] Address attackers recreating a functionally similar
+        model by querying it and observing outputs, which can succeed through legitimate
+        access, e.g. by limiting output detail, monitoring query patterns and throttling.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.6'
+      name: Model inversion
+      description: '[unofficial] Address attackers reconstructing training data, or
+        significant parts of it, from the model''s inputs and outputs, e.g. by limiting
+        output detail and applying privacy-preserving training.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.7'
+      name: Direct model poisoning
+      description: '[unofficial] Address tampering with the model itself (e.g. weights
+        or pre-trained components) during development or operation, e.g. through integrity
+        checks, signing and protected model repositories.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.8'
+      name: Sensitive model output
+      description: '[unofficial] Address model outputs revealing confidential parts
+        of previous inputs, such as training data or other users'' prompts, e.g. through
+        data minimization, output filtering and session isolation.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.9'
+      name: Prompt injection
+      description: '[unofficial] Address crafted content, provided directly or embedded
+        in documents, web pages or tool results, that becomes an instruction to the
+        AI system and triggers unintended behaviour.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.10'
+      name: Output contains injection attacks
+      description: '[unofficial] Address model outputs carrying injection payloads
+        (e.g. scripts, commands, queries) into downstream components; treat model
+        output as untrusted input and validate or encode it.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:6.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:6
+      ref_id: '6.11'
+      name: Considerations for AI systems
+      description: '[unofficial] Address further security considerations specific
+        to AI systems, such as the permissions granted to AI agents and the provenance
+        and lineage of data and models.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Mitigations and their interactions with threats and other applied mitigations
+      description: '[unofficial] Mitigations and how they interact with threats and
+        with each other across the AI system life cycle.'
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.1'
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.2'
+      name: Conflicting interactions of mitigations
+      description: '[unofficial] Identify mitigations that weaken one another (e.g.
+        a defence against one attack increasing exposure to another) and balance them.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.3'
+      name: Continuity of mitigations across the AI life cycle
+      description: '[unofficial] Keep mitigations effective and consistent from design
+        and development through deployment, operation, retraining and retirement.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.4'
+      name: Model and mitigation deterioration over time
+      description: '[unofficial] Monitor and periodically retest models and their
+        mitigations, whose effectiveness can degrade over time as data, models and
+        attack techniques evolve.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.5'
+      name: Logging and monitoring
+      description: '[unofficial] Log and monitor model use (inputs, outputs, tool
+        calls, query patterns) to detect attacks such as model exfiltration and to
+        support incident response.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.6'
+      name: Development environment protection
+      description: '[unofficial] Protect AI development environments, training pipelines,
+        datasets and model artefacts against unauthorized access and tampering.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.7'
+      name: Malicious input detection and filtering
+      description: '[unofficial] Detect and filter malicious, adversarial or out-of-distribution
+        inputs, recognizing that filtering alone is not an authorization model.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.8'
+      name: Throttling model use
+      description: '[unofficial] Limit the rate and volume of model queries to slow
+        down query-based attacks (e.g. extraction, inversion, membership inference)
+        and resource exhaustion.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:7.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:7
+      ref_id: '7.9'
+      name: Optimising the size of the model
+      description: '[unofficial] Choose a model size appropriate to the task to reduce
+        attack surface, memorization of training data and resource exposure.'
+      implementation_groups:
+      - mitigations
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:annex-a
+      assessable: false
+      depth: 1
+      ref_id: Annex A
+      name: Mapping attacks to AI system life cycle and to assets
+      description: '[unofficial] Informative mapping of attacks to the stages of the
+        AI system life cycle and to the AI and ML assets they target, to support asset
+        identification and protection.'
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:a.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-a
+      ref_id: A.1
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:a.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-a
+      ref_id: A.2
+      name: Mapping attacks to the AI system life cycle
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:a.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-a
+      ref_id: A.3
+      name: Asset identification and protection
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:a.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-a
+      ref_id: A.4
+      name: Examples of mapping threats to AI and ML assets
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      assessable: false
+      depth: 1
+      ref_id: Annex B
+      name: AI-specific versions of conventional attacks
+      description: '[unofficial] Informative description of conventional attacks in
+        their AI-specific form.'
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:b.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      ref_id: B.1
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:b.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      ref_id: B.2
+      name: Denial-of-service attacks
+      description: '[unofficial] Address attacks that exhaust AI system resources
+        or degrade service, e.g. computationally expensive (sponge) inputs, through
+        throttling, quotas and resource monitoring.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:b.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      ref_id: B.3
+      name: Supply chain attacks
+      description: '[unofficial] Address attacks delivered through compromised AI
+        supply chain elements such as pre-trained models, datasets, libraries or model
+        hubs.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:b.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      ref_id: B.4
+      name: Backdoor attacks
+      description: '[unofficial] Address hidden triggers or access paths planted in
+        models or their architecture that bypass security measures, e.g. through provenance
+        checks, model scanning and backdoor detection.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:b.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      ref_id: B.5
+      name: Direct model theft
+      description: '[unofficial] Address theft of confidential model parameters (e.g.
+        weights) through direct access to storage or infrastructure, using access
+        control, encryption and secure enclaves.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:b.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      ref_id: B.6
+      name: Direct training data leak
+      description: '[unofficial] Address compromise of the confidentiality of training
+        datasets, using access control, encryption, minimization and de-identification.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:b.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-b
+      ref_id: B.7
+      name: Model input leak
+      description: '[unofficial] Address compromise of the confidentiality of data
+        submitted to the model during operation, such as prompts and inference inputs.'
+      implementation_groups:
+      - threats
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:annex-c
+      assessable: false
+      depth: 1
+      ref_id: Annex C
+      name: Federated machine learning
+      description: '[unofficial] Informative guidance on federated machine learning:
+        its benefits, use cases and security challenges (e.g. poisoned client updates,
+        leakage through shared gradients).'
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:c.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-c
+      ref_id: C.1
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:c.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-c
+      ref_id: C.2
+      name: Federated machine learning benefits and use cases
+    - urn: urn:intuitem:risk:req_node:iso27090-2026:c.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27090-2026:annex-c
+      ref_id: C.3
+      name: Challenges in federated machine learning

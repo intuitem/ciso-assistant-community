@@ -1,5 +1,5 @@
 import { getCSRFToken } from './django.js';
-import { BACKEND_API_EXPOSED_URL } from '$lib/utils/constants';
+import { BACKEND_API_EXPOSED_URL } from '#lib/utils/constants.js';
 
 const BASE_URL = `${BACKEND_API_EXPOSED_URL}`;
 

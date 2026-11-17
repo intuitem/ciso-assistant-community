@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { m } from '$paraglide/messages';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { confirmDeleteForm, savedToastEnhance } from '$lib/utils/portalActions';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { confirmDeleteForm, savedToastEnhance } from '#lib/utils/portalActions.js';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -95,7 +95,13 @@
 							class="btn btn-sm preset-tonal"
 							aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
 						>
-						<form method="POST" action="?/delete" use:enhance>
+						<form
+							method="POST"
+							action="?/delete"
+							use:enhance={() =>
+								({ update }) =>
+									update({ navigate: false })}
+						>
 							<input type="hidden" name="id" value={doc.id} />
 							<button
 								type="button"

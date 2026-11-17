@@ -32,12 +32,6 @@ github:
       forbiddenVariables:
       - ACTIONS_STEP_DEBUG
       - ACTIONS_RUNNER_DEBUG
-    pipelineMustNotLeakSecretsInConfig:
-      enabled: true
-      # Optional. Defaults to looking up `gitleaks` on $PATH.
-      # gitleaksPath: /usr/local/bin/gitleaks
-      # Optional. Defaults to gitleaks's built-in rule catalogue.
-      # gitleaksConfigPath: .gitleaks.toml
     securityJobsMustNotBeWeakened:
       enabled: true
       securityJobPatterns:
@@ -100,4 +94,16 @@ github:
     actionsMustNotBeArchived:
       enabled: true
     actionsMustNotCarryKnownCVEs:
+      enabled: true
+    pipelineMustNotExecuteUnverifiedScripts:
+      enabled: true
+    workflowMustNotExportEntireSecretsContext:
+      enabled: true
+    workflowMustNotWriteUntrustedContentToGitHubEnv:
+      enabled: true
+    actionRefsMustExistUpstream:
+      enabled: true
+    actionsMustNotExecuteMutableRemoteCode:
+      enabled: true
+    checkoutMustNotPersistCredentials:
       enabled: true

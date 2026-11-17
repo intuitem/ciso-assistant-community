@@ -1,27 +1,33 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { complianceResultColorMap, complianceStatusColorMap } from '#lib/utils/constants.js';
 	import {
 		displayScoreColor,
 		formatScoreValue,
 		getFieldVisibility,
 		getRequirementTitle,
 		getSecureRedirect,
-		alignmentColorMap
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+		alignmentColorMap,
+		maturityScore,
+		roundScore
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
-	import { hideSuggestions } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import { hideSuggestions } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import MaturityRing from '#lib/components/ComplianceAssessment/MaturityRing.svelte';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import { countMasked } from '$lib/utils/related-visibility';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import ObjectValidationFlows from '#lib/components/ValidationFlows/ObjectValidationFlows.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import { countMasked } from '#lib/utils/related-visibility.js';
 
 	interface Props {
 		data: PageData;
@@ -67,7 +73,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[data.requirementAssessment.result] === '#000000'
+		complianceResultColorMap[data.requirementAssessment.result] === '#475569'
 			? 'text-white'
 			: 'text-gray-900'
 	);
@@ -77,8 +83,19 @@
 		data.requirementAssessment.effective_max_score ?? data.complianceAssessmentScore.max_score;
 	const min_score =
 		data.requirementAssessment.effective_min_score ?? data.complianceAssessmentScore.min_score ?? 0;
-	const score = data.requirementAssessment.score;
-	const documentationScore = data.requirementAssessment.documentation_score;
+	// An N/A requirement counts for the audit's target on its scale (anchored_score),
+	// shown greyed in place of its stored scores; nothing when the audit leaves N/A out.
+	const notApplicable = Boolean(data.requirementAssessment.not_applicable);
+	const anchoredScore: number | null = data.requirementAssessment.anchored_score ?? null;
+	const score = notApplicable
+		? anchoredScore === null
+			? null
+			: roundScore(anchoredScore)
+		: data.requirementAssessment.score;
+	const documentationScore = notApplicable ? score : data.requirementAssessment.documentation_score;
+	const showScoreRings = notApplicable ? score !== null : data.requirementAssessment.is_scored;
+	const naClass = notApplicable ? 'opacity-60' : '';
+	const naTitle = notApplicable && score !== null ? m.notApplicableCountsAsScore({ score }) : null;
 
 	const fw = data.requirementAssessment.compliance_assessment.framework;
 	const complianceAssessment = data.requirementAssessment.compliance_assessment;
@@ -86,20 +103,27 @@
 		data.viewerRole === 'auditor' ? 'auditor' : 'respondent';
 	const {
 		showAppliedControls,
+		showTaskTemplates,
 		showEvidences,
 		showStatus,
 		showResult,
 		showScore,
 		showDocumentationScore,
 		showRespondentAlignment,
-		showComments
+		showComments,
+		showAnswers
 	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const showFindings = $derived(
+		!!page.data?.featureflags?.findings_from_requirements && !page.data.user.is_third_party
+	);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
+		if (showTaskTemplates) return 'task_templates';
 		if (showEvidences) return 'evidence';
+		if (showFindings) return 'findings';
 		return 'applied_controls';
 	}
 	let group = $state(pickDefaultTab());
@@ -107,7 +131,7 @@
 
 <div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
-		<code class="code">{data.requirement.urn}</code>
+		<code>{data.requirement.urn}</code>
 		{#if showStatus}
 			<span
 				class="badge h-fit"
@@ -154,42 +178,76 @@
 				{/each}
 			</div>
 		{/if}
-		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
-			{#if showScore}
-				<div class="shrink-0 relative">
-					<Progress value={formatScoreValue(score, max_score, false, min_score)} min={0} max={100}>
-						<Progress.Circle class="[--size:--spacing(10)]">
-							<Progress.CircleTrack />
-							<Progress.CircleRange class={displayScoreColor(score, max_score, false, min_score)} />
-						</Progress.Circle>
-						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="text-xs font-bold">{score}</span>
+		{#if data.complianceAssessmentScore.scoring_enabled && showScoreRings}
+			<ScorePair>
+				{#snippet implementation()}
+					{#if showScore}
+						<div
+							class="shrink-0 relative {naClass}"
+							title={naTitle ?? (showDocumentationScore ? m.implementationScore() : m.score())}
+						>
+							<Progress
+								value={formatScoreValue(score, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(score, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{score}</span>
+								</div>
+							</Progress>
 						</div>
-					</Progress>
-				</div>
-			{/if}
-			{#if showDocumentationScore}
-				<div class="shrink-0 relative">
-					<Progress
-						value={formatScoreValue(documentationScore, max_score, false, min_score)}
-						min={0}
-						max={100}
-					>
-						<Progress.Circle class="[--size:--spacing(10)]">
-							<Progress.CircleTrack />
-							<Progress.CircleRange
-								class={displayScoreColor(documentationScore, max_score, false, min_score)}
-							/>
-						</Progress.Circle>
-						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="text-xs font-bold">{documentationScore}</span>
+					{/if}
+				{/snippet}
+				{#snippet documentation()}
+					{#if showDocumentationScore}
+						<div class="shrink-0 relative {naClass}" title={naTitle ?? m.documentationScore()}>
+							<Progress
+								value={formatScoreValue(documentationScore, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(documentationScore, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{documentationScore}</span>
+								</div>
+							</Progress>
 						</div>
-					</Progress>
+					{/if}
+				{/snippet}
+			</ScorePair>
+			{#if showScore && showDocumentationScore && score != null}
+				<div class="shrink-0 {naClass}">
+					<MaturityRing
+						small
+						value={maturityScore(score, documentationScore, min_score)}
+						min={min_score}
+						max={max_score}
+					/>
 				</div>
 			{/if}
 		{/if}
-		<div class="ml-auto shrink-0 self-center">
-			<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
+		<div class="ml-auto shrink-0 self-center flex flex-col gap-2">
+			<ObjectValidationFlows
+				form={data.validationFlowForm}
+				model={data.validationFlowModel}
+				flows={data.validationFlows ?? []}
+			/>
+			<AuditTrailButton
+				model="requirement-assessments"
+				objectId={data.requirementAssessment.id}
+				folderId={data.requirementAssessment.folder?.id ?? page.data.user.root_folder_id}
+			/>
 		</div>
 	</div>
 	{#if data.requirement.description}
@@ -228,7 +286,7 @@
 								<ul class="list-disc ml-4">
 									{#each reference_controls as func}
 										<li>
-											{#if func.id}
+											{#if func.id && !page.data.user.is_third_party}
 												<a class="anchor" href="/reference-controls/{func.id}">
 													{func.str}
 												</a>
@@ -249,7 +307,7 @@
 								<ul class="list-disc ml-4">
 									{#each threats as threat}
 										<li>
-											{#if threat.id}
+											{#if threat.id && !page.data.user.is_third_party}
 												<a class="anchor" href="/threats/{threat.id}">
 													{threat.str}
 												</a>
@@ -291,7 +349,7 @@
 			{/if}
 		</div>
 	{/if}
-	{#if canShowAppliedControls || showEvidences}
+	{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings}
 		<div>
 			<Tabs
 				value={group}
@@ -303,8 +361,14 @@
 					{#if canShowAppliedControls}
 						<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
 					{/if}
+					{#if showTaskTemplates}
+						<Tabs.Trigger value="task_templates">{m.taskTemplates()}</Tabs.Trigger>
+					{/if}
 					{#if showEvidences}
 						<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
+					{/if}
+					{#if showFindings}
+						<Tabs.Trigger value="findings">{m.findings()}</Tabs.Trigger>
 					{/if}
 					<Tabs.Indicator />
 				</Tabs.List>
@@ -321,6 +385,24 @@
 								URLModel="applied-controls"
 								expectedCount={countMasked(data.requirementAssessment.applied_controls)}
 								baseEndpoint="/applied-controls?requirement_assessments={page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
+				{#if showTaskTemplates}
+					<Tabs.Content value="task_templates">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementTaskTemplateHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['task-templates']}
+								hideFilters={true}
+								URLModel="task-templates"
+								expectedCount={countMasked(data.requirementAssessment.task_templates)}
+								baseEndpoint="/task-templates?requirement_assessments={page.data
 									.requirementAssessment.id}"
 							/>
 						</div>
@@ -344,16 +426,39 @@
 						</div>
 					</Tabs.Content>
 				{/if}
+				{#if showFindings}
+					<Tabs.Content value="findings">
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['findings']}
+								hideFilters={true}
+								URLModel="findings"
+								baseEndpoint="/findings?requirement_assessment={page.data.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
 			</Tabs>
 		</div>
 	{/if}
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.questions()}</h1>
-		{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
-			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
-				<p>{question.text} ({safeTranslate(question.type)})</p>
-			</li>
-		{/each}
+		{#if showAnswers}
+			<div data-testid="read-only-answers-field">
+				<Question
+					questions={data.requirementAssessment.requirement.questions}
+					initialValue={data.requirementAssessment.answers ?? {}}
+					field="answers"
+					disabled={true}
+				/>
+			</div>
+		{:else}
+			{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
+				<li class="flex justify-between items-center border rounded-xl p-2 disabled">
+					<p>{question.text} ({safeTranslate(question.type)})</p>
+				</li>
+			{/each}
+		{/if}
 	{/if}
 	{#if data.requirementAssessment.observation}
 		<div class="card p-4 space-y-2 preset-tonal-primary">

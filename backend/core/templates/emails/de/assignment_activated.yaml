@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Ihre Aufgabe für '${assessment_name}' hat begonnen"
+body: |
+  Hallo,
+
+  Ihre Aufgabe für das folgende Audit hat begonnen und kann bearbeitet werden:
+
+  - Audit: ${assessment_name}
+  - Referenzwerk: ${framework_name}
+  - Fällig am: ${due_date}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um mit der Bearbeitung zu beginnen: [CISO Assistant öffnen](${ciso_assistant_url}/auditee-dashboard)
+
+  Vielen Dank.

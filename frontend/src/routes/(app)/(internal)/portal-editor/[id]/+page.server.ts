@@ -1,29 +1,60 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { patchJSON, unwrap } from '$lib/utils/portalApi';
-import { PortalSettingsSchema } from '$lib/utils/schemas';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { patchJSON } from '#lib/utils/portalApi.js';
+import { PortalSettingsSchema } from '#lib/utils/schemas.js';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch, locals }) => {
-	if (!locals.featureflags?.custom_portals) redirect(302, '/');
-	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
+	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
+	const res = await fetch(`${BASE_API_URL}/portals/${encodeURIComponent(params.id)}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
-	const [publicDocuments, snapshots, rawFrameworks, rawFolders] = await Promise.all([
-		fetch(`${BASE_API_URL}/public-documents/`).then(unwrap),
-		fetch(`${BASE_API_URL}/framework-snapshots/`).then(unwrap),
-		fetch(`${BASE_API_URL}/frameworks/`).then(unwrap),
-		fetch(`${BASE_API_URL}/folders/?content_type=DO`).then(unwrap)
-	]);
+	const documentsEnabled = !!(await locals.getFeatureFlags())?.document_management;
+	const [
+		publicDocuments,
+		snapshots,
+		rawFrameworks,
+		rawQuickForms,
+		rawActors,
+		rawPublications,
+		catalogRes
+	] = await Promise.all([
+		fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`),
+		fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
+		fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`),
+		(await locals.getFeatureFlags())?.quick_forms
+			? fetchAllPages(fetch, `${BASE_API_URL}/quick-forms/`)
+			: Promise.resolve([]),
+		(await locals.getFeatureFlags())?.quick_forms
+			? fetchAllPages(fetch, `${BASE_API_URL}/actors/?is_third_party=false`)
+			: Promise.resolve([]),
+		(await locals.getFeatureFlags())?.quick_forms
+			? fetchAllPages(fetch, `${BASE_API_URL}/quick-form-publications/`)
+			: Promise.resolve([]),
+		documentsEnabled
+			? fetch(`${BASE_API_URL}/document-containers/catalog/`).catch(() => null)
+			: Promise.resolve(null)
+	]).catch((e) => {
+		error(e?.status ?? 500, 'Failed to load portal data');
+	});
 	const frameworks = rawFrameworks.map((f: any) => ({
 		id: f.id,
 		name: f.name,
 		implementation_groups_definition: f.implementation_groups_definition ?? [],
 		effective_field_visibility: f.effective_field_visibility ?? null
 	}));
-	const folders = rawFolders.map((f: any) => ({ id: f.id, name: f.name }));
+	const quickForms = rawQuickForms.map((f: any) => ({ id: f.id, name: f.name }));
+	// `type` distinguishes a person from a team or an entity — a reviewer list that
+	// does not say which is which is a list of ambiguous names.
+	const actors = rawActors.map((a: any) => ({
+		id: a.id,
+		name: a.str ?? a.name,
+		type: a.type ?? ''
+	}));
+	const publications = rawPublications.map((p: any) => ({ id: p.id, name: p.name }));
 	const settingsForm = await superValidate(
 		{
 			enabled: portal.enabled,
@@ -36,11 +67,32 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		},
 		zod(PortalSettingsSchema)
 	);
-	return { portal, settingsForm, publicDocuments, snapshots, frameworks, folders };
+	const documentCatalog: { id: string; name: string; ref_id: string; document_type: string }[] =
+		catalogRes?.ok
+			? (await catalogRes.json()).map((c: any) => ({
+					id: c.id,
+					name: c.name,
+					ref_id: c.ref_id,
+					document_type: c.document_type
+				}))
+			: [];
+	return {
+		portal,
+		settingsForm,
+		documentCatalog,
+		publicDocuments,
+		snapshots,
+		frameworks,
+		quickForms,
+		actors,
+		publications,
+		quickFormsEnabled: !!(await locals.getFeatureFlags())?.quick_forms,
+		documentsEnabled
+	};
 };
 
 const patchPortal = (fetch: typeof globalThis.fetch, id: string, body: unknown) =>
-	patchJSON(fetch, `/portals/${id}/`, body);
+	patchJSON(fetch, `/portals/${encodeURIComponent(id)}/`, body);
 
 export const actions: Actions = {
 	uploadDocument: async ({ request, fetch }) => {
@@ -102,14 +154,19 @@ export const actions: Actions = {
 		return { form };
 	},
 	regeneratePublicToken: async ({ params, fetch }) => {
-		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/regenerate-public-token/`, {
-			method: 'POST'
-		});
+		const res = await fetch(
+			`${BASE_API_URL}/portals/${encodeURIComponent(params.id)}/regenerate-public-token/`,
+			{
+				method: 'POST'
+			}
+		);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
 	duplicate: async ({ params, fetch }) => {
-		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/duplicate/`, { method: 'POST' });
+		const res = await fetch(`${BASE_API_URL}/portals/${encodeURIComponent(params.id)}/duplicate/`, {
+			method: 'POST'
+		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		redirect(303, `/portal-editor/${(await res.json()).id}`);
 	}

@@ -9,8 +9,8 @@ class Email {
 
 	constructor(email: Locator) {
 		this.email = email;
-		this.from = email.locator('div:first-child').first();
-		this.to = email.locator('div:first-child > div > div');
+		this.from = email.locator('b[title^="From:"]');
+		this.to = email.locator('.privacy').filter({ hasText: /^\s*To:/ });
 		this.subject = email.locator('.subject');
 	}
 
@@ -29,15 +29,15 @@ class Email {
 	}
 
 	async getFrom() {
-		return (await this.from.innerText()).split('\n')[0];
+		return (await this.from.innerText()).trim();
 	}
 
 	async getTo() {
-		return await this.to.innerText();
+		return (await this.to.innerText()).replace(/^\s*To:\s*/, '').trim();
 	}
 
 	async getSubject() {
-		return await this.subject.innerText();
+		return (await this.subject.innerText()).trim();
 	}
 
 	async open() {
@@ -53,7 +53,7 @@ export class Mailer {
 	constructor(public readonly page: Page) {
 		this.url = 'http://localhost:' + (process.env.MAILER_WEB_SERVER_PORT || 8025);
 		this.emailContent = new MailContent(page);
-		this.emails = this.page.locator('.msglist-message');
+		this.emails = this.page.locator('a.message');
 	}
 
 	async goto() {
@@ -76,11 +76,13 @@ export class Mailer {
 	}
 
 	async getLastEmail() {
+		await expect(this.emails.first()).toBeVisible();
 		return new Email(this.emails.first());
 	}
 
 	async getEmailBySubject(subject: string) {
 		const email = this.emails.filter({ hasText: subject }).first();
+		await expect(email).toBeVisible();
 		return new Email(email);
 	}
 }

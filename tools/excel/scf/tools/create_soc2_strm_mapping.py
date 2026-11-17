@@ -14,6 +14,52 @@ The mapping direction is: SOC2 criteria → SCF control
 import pandas as pd
 from pathlib import Path
 
+# STRM ids -> soc2-2017-rev-2022 node URN suffixes, where the two disagree.
+# The framework URNs stay as they are: a URN dropped from a framework update
+# cascades to the requirement assessments stored on that node.
+STRM_TO_FRAMEWORK_NODE = {
+    "cc3.2.6": "cc3.2.5",
+    "cc3.2.7": "cc3.2.6",
+    "cc3.2.8": "cc3.2.7",
+    "cc3.2.9": "cc3.2.8",
+    "cc6.5.2": "c6.5.1",
+    "pi1.1": "pp1.1",
+    "pi1.2": "pp1.2",
+    "pi1.3": "pp1.3",
+    "pi1.4": "pp1.4",
+    "pi1.5": "pp1.5",
+}
+
+# Points of focus the framework has no node for: their rows move to the parent.
+POF_WITHOUT_NODE = r"^(?:pi1\.\d\.\d+|p[123]\.1\.\d+)$"
+
+# The framework merges these two points of focus into the cc3.2.5 description.
+MERGED_POFS = ["cc3.2.5", "cc3.2.6"]
+
+
+def align_with_framework(relationship_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rewrite STRM source ids onto existing framework nodes.
+
+    A rolled-up or merged row is only an intersect: one point of focus does not
+    establish a node that covers more. Rows the STRM gives for the criterion
+    itself win.
+    """
+    df = relationship_df.copy()
+    rolled_up = df["source_node_id"].str.fullmatch(POF_WITHOUT_NODE)
+    df.loc[rolled_up, "source_node_id"] = (
+        df.loc[rolled_up, "source_node_id"].str.rsplit(".", n=1).str[0]
+    )
+    partial = rolled_up | df["source_node_id"].isin(MERGED_POFS)
+    df.loc[partial, "relationship"] = "intersect"
+    df["source_node_id"] = df["source_node_id"].map(
+        lambda node: STRM_TO_FRAMEWORK_NODE.get(node, node)
+    )
+    # Stable sort: rows from the node itself come first, so they survive the dedup
+    return df.assign(partial=partial).sort_values("partial", kind="stable")[
+        relationship_df.columns
+    ]
+
 
 def convert_pof_to_dotted(ref: str) -> str:
     """
@@ -119,6 +165,8 @@ def create_soc2_mapping(input_csv: Path, output_csv: Path, output_xlsx: Path):
 
     # Lowercase the SCF ref_id (target_node_id)
     relationship_df["target_node_id"] = relationship_df["target_node_id"].str.lower()
+
+    relationship_df = align_with_framework(relationship_df)
 
     # Remove duplicates on source-target pairs (keep first occurrence)
     before_dedup = len(relationship_df)

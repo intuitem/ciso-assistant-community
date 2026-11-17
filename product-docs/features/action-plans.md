@@ -17,7 +17,7 @@ The action plan is available on every assessment that aggregates corrective work
 | [Audit](../concepts/audits.md) (compliance assessment) | Controls that satisfy the audit's requirements | `requirement_assessments` |
 | [Risk assessment](../concepts/risk-assessments.md) | Controls that mitigate the assessment's risk scenarios | `risk_scenarios` |
 | [Quantitative risk study](../concepts/quantitative-risk-studies.md) | Controls referenced by the study's quantitative scenarios | quantitative scenarios |
-| [Findings assessment](../concepts/findings-assessments.md) (incl. asset assessment) | Controls that remediate the assessment's findings | `findings` |
+| [Findings binder](../concepts/findings-assessments.md) (incl. asset assessment) | Controls that remediate the binder's findings | `findings` |
 | [EBIOS RM study](../concepts/ebios-rm.md) | Compliance and risk action plans rolled up across the study | derived report |
 
 In each case the **Action plan** entry sits in the assessment's side menu, on the route `<assessment>/<id>/action-plan`. The list isn't an independent object — it's a live aggregation, so any control you add through the assessment (or anywhere else it gets referenced) shows up here automatically.
@@ -31,6 +31,17 @@ The action-plan table is built on the standard model table, with a column set tu
 - All the usual table affordances apply: search, per-column filters, rows-per-page, sort by any column, multi-select for batch actions, right-click for the context menu — see [Working with tables](working-with-tables.md).
 
 The point is that you can drive prioritisation conversations from this page without exporting anything — sort by priority, filter by status, look at what's overdue, reassign to a different owner, all in place.
+
+### On a risk assessment
+
+The action plan of a risk assessment has two controls of its own, above the table:
+
+- The **Selection** bar narrows the plan to the measures linked to the risk scenarios you select. It is the same bar as on the risk assessment page, and a selection made there follows you here. See [Scenario selection](scenario-selection.md).
+- A three-way switch chooses which measures are listed: **To implement** (the extra controls of the scenarios, shown by default), **Existing** (their existing controls) or **All**.
+
+The budget overview, **Analytics** and **Flash mode** follow both.
+
+<figure><img src="../.gitbook/assets/scenario-selection-action-plan.png" alt=""><figcaption><p>An action plan limited to the scenarios whose <strong>Current level</strong> is <em>4 - high</em>, showing the measures <strong>To implement</strong></p></figcaption></figure>
 
 ## Budget aggregation
 
@@ -55,7 +66,7 @@ A dedicated **Analytics** button (on the compliance and risk action plans) jumps
 
 ## Flash mode
 
-Every action plan also exposes a **Flash mode** button — a streamlined, keyboard-friendly workflow for creating many applied controls in quick succession against the current assessment. See [Flash mode](flash-mode.md) for the full UX; the assessment is passed through as a filter so newly-created controls land already linked to the audit / risk assessment / findings assessment you launched from.
+Every action plan also exposes a **Flash mode** button — a streamlined, keyboard-friendly workflow for creating many applied controls in quick succession against the current assessment. See [Flash mode](flash-mode.md) for the full UX; the assessment is passed through as a filter so newly-created controls land already linked to the audit / risk assessment / findings binder you launched from.
 
 ## Exports
 
@@ -69,9 +80,13 @@ The action plan can be exported for offline review or for handing to stakeholder
 
 PDF exports are templated — they include the assessment metadata at the top and the action-plan table styled for print. Excel and CSV exports are the raw control rows, suitable for further work in a spreadsheet.
 
+On a risk assessment, the PDF and Excel exports list the measures **To implement**, and can be limited to the scenarios of a [selection](scenario-selection.md#exports).
+
 ## Related
 
 - [Applied controls](../concepts/applied-controls.md) — the underlying object and its **financial tracking** mechanics (`build`/`run` cost, amortisation, annual cost).
 - [Flash mode](flash-mode.md) — bulk authoring of controls from inside an action plan.
 - [Kanban mode](kanban-mode.md) — the visual swim-lane alternative for monitoring the same set of controls by status.
-- [Audits](../concepts/audits.md), [Risk assessments](../concepts/risk-assessments.md), [Findings assessments](../concepts/findings-assessments.md), [EBIOS RM](../concepts/ebios-rm.md), [Quantitative risk studies](../concepts/quantitative-risk-studies.md) — the assessments that expose an action plan.
+- [Audits](../concepts/audits.md), [Risk assessments](../concepts/risk-assessments.md), [Findings binders](../concepts/findings-assessments.md), [EBIOS RM](../concepts/ebios-rm.md), [Quantitative risk studies](../concepts/quantitative-risk-studies.md) — the assessments that expose an action plan.
+- [Scenario selection](scenario-selection.md) — narrows a risk assessment and its action plan to chosen scenarios.
+- [Risk trajectory](risk-trajectory.md) — turns the ETAs of a risk assessment's extra controls into a projected date for each scenario's residual risk.

@@ -1,3 +1,6 @@
+{{- if and .Values.backend.mcp.enabled .Values.memcached.enabled (gt (int .Values.backend.replicas) 1) }}
+{{- fail "backend.mcp needs one cache for all backend pods, and the bundled memcached runs one per pod: keep backend.replicas at 1, or set memcached.enabled=false and point the backend at a shared memcached" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,6 +21,9 @@ spec:
     metadata:
       annotations:
         checksum/secret-backend: {{ include (print $.Template.BasePath "/backend/secret.yaml") . | sha256sum }}
+        {{- with .Values.backend.config.oidcProvider.privateKey }}
+        checksum/oidc-private-key: {{ . | sha256sum }}
+        {{- end }}
         {{- with .Values.backend.podAnnotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -47,6 +53,14 @@ spec:
       - name: {{ .Values.backend.name }}
         image: {{ default .Values.global.image.registry .Values.backend.image.registry }}/{{ .Values.backend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.backend.image.tag }}
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.backend.image.imagePullPolicy }}
+        {{- with .Values.backend.command }}
+        command:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.backend.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         env:
           {{- with .Values.backend.env }}
             {{- toYaml . | nindent 10 }}
@@ -108,6 +122,13 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 {{- end }}
                 key: django-secret-key
+          {{- if not (include "ciso-assistant.definesEnv" (dict "env" .Values.backend.env "names" (list "IDP_OIDC_PRIVATE_KEY" "IDP_OIDC_PRIVATE_KEY_FILE"))) }}
+          - name: IDP_OIDC_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "ciso-assistant.idpOidcSecretName" . }}
+                key: idp-oidc-private-key
+          {{- end }}
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
           - name: CISO_ASSISTANT_URL
@@ -152,6 +173,15 @@ spec:
           - name: QDRANT_URL
             value: {{ include "ciso-assistant.qdrantUrl" . }}
           {{- end }}
+          {{- if and .Values.backend.mcp.enabled .Values.backend.mcp.dcr.enabled }}
+          - name: OAUTH_DCR_ENABLED
+            value: "True"
+          {{- with .Values.backend.mcp.dcr.allowedRedirectHosts }}
+          - name: OAUTH_DCR_ALLOWED_REDIRECT_HOSTS
+            value: {{ . | quote }}
+          {{- end }}
+          {{- end }}
+          {{- include "ciso-assistant.memcachedEnv" . | nindent 10 }}
           {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         ports:
           - name: http
@@ -160,6 +190,10 @@ spec:
         volumeMounts:
           - name: tmp-data
             mountPath: /tmp
+          {{- if .Values.memcached.enabled }}
+          - name: memcached-socket
+            mountPath: /run/memcached
+          {{- end }}
           {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
           - name: sqlite-data
             mountPath: /ciso/db
@@ -186,8 +220,14 @@ spec:
       - name: {{ .Values.backend.huey.name }}
         image: {{ default .Values.global.image.registry .Values.backend.image.registry }}/{{ .Values.backend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.backend.image.tag }}
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.backend.image.imagePullPolicy }}
-        command: ["/bin/sh"]
-        args: ["-c", "python manage.py run_huey -w 2 --scheduler-interval 60"]
+        {{- with .Values.backend.huey.command }}
+        command:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.backend.huey.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         env:
           {{- with .Values.backend.huey.env }}
             {{- toYaml . | nindent 10 }}
@@ -207,6 +247,10 @@ spec:
           {{- else }}
           - name: HUEY_FILE_PATH
             value: /tmp/huey.db
+          {{- end }}
+          {{- if .Values.backend.persistence.localStorage.enabled }}
+          - name: LOCAL_STORAGE_DIRECTORY
+            value: /ciso/localStorage
           {{- end }}
           {{- if eq .Values.backend.config.databaseType "pgsql" }}
           - name: DB_HOST
@@ -253,6 +297,13 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 {{- end }}
                 key: django-secret-key
+          {{- if not (include "ciso-assistant.definesEnv" (dict "env" .Values.backend.huey.env "names" (list "IDP_OIDC_PRIVATE_KEY" "IDP_OIDC_PRIVATE_KEY_FILE"))) }}
+          - name: IDP_OIDC_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "ciso-assistant.idpOidcSecretName" . }}
+                key: idp-oidc-private-key
+          {{- end }}
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
           - name: CISO_ASSISTANT_URL
@@ -297,13 +348,22 @@ spec:
           - name: QDRANT_URL
             value: {{ include "ciso-assistant.qdrantUrl" . }}
           {{- end }}
+          {{- include "ciso-assistant.memcachedEnv" . | nindent 10 }}
           {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         volumeMounts:
           - name: tmp-data
             mountPath: /tmp
+          {{- if .Values.memcached.enabled }}
+          - name: memcached-socket
+            mountPath: /run/memcached
+          {{- end }}
           {{- if .Values.backend.persistence.sqlite.enabled }}
           - name: sqlite-data
             mountPath: /ciso/db
+          {{- end }}
+          {{- if .Values.backend.persistence.localStorage.enabled }}
+          - name: localstorage-data
+            mountPath: /ciso/localStorage
           {{- end }}
           {{- if and .Values.backend.huey.extraVolumeMounts (not .Values.backend.extraVolumes) }}
             {{- fail "backend.huey.extraVolumeMounts can't be set without backend.extraVolumes" }}
@@ -320,6 +380,72 @@ spec:
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
+      {{- if .Values.backend.mcp.enabled }}
+      {{- with .Values.backend.mcp }}
+      # no secret, no database and no shared volume: it only forwards each
+      # app's own token to the backend next to it
+      - name: {{ .name }}
+        image: {{ default $.Values.global.image.registry .image.registry }}/{{ .image.repository }}:{{ default (include "ciso-assistant.defaultTag" $) .image.tag }}
+        imagePullPolicy: {{ default $.Values.global.image.imagePullPolicy .image.imagePullPolicy }}
+        env:
+          {{- with .env }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+          - name: CA_MCP_AUTH
+            value: oauth
+          - name: CISO_ASSISTANT_URL
+            value: {{ template "ciso-assistant.url" $ }}
+          - name: API_URL
+            value: http://127.0.0.1:8000/api
+          - name: CA_MCP_TRANSPORT
+            value: streamable-http
+          - name: CA_MCP_HOST
+            value: 0.0.0.0
+          - name: CA_MCP_PORT
+            value: "8001"
+          - name: CA_MCP_ALLOWED_HOSTS
+            # with or without a port: some ingresses keep it in Host
+            value: {{ printf "%s,%s:*" $.Values.global.domain $.Values.global.domain | quote }}
+          - name: HOME
+            value: /tmp
+        ports:
+          - name: mcp
+            containerPort: 8001
+            protocol: TCP
+        volumeMounts:
+          - name: mcp-tmp
+            mountPath: /tmp
+        {{- with .resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.memcached.enabled }}
+      # Shared cache for the backend and Huey containers of this pod, on a unix
+      # socket only (no TCP listener). Socket mode 0777: the backend image runs as
+      # root unless backend.containerSecurityContext sets a user; only the
+      # containers of this pod that mount memcached-socket can reach it.
+      - name: memcached
+        image: {{ .Values.memcached.image.registry }}/{{ .Values.memcached.image.repository }}:{{ .Values.memcached.image.tag }}
+        imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.memcached.image.imagePullPolicy }}
+        args: ["memcached", "-s", "/run/memcached/memcached.sock", "-a", "0777", "-m", {{ .Values.memcached.memoryLimit | quote }}]
+        volumeMounts:
+          - name: memcached-socket
+            mountPath: /run/memcached
+        {{- if .Values.memcached.resources }}
+        resources:
+          {{- toYaml .Values.memcached.resources | nindent 10 }}
+        {{- end }}
+        {{- with .Values.memcached.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.backend.nodeSelector | default .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -336,6 +462,18 @@ spec:
         - name: tmp-data
           emptyDir:
             sizeLimit: 256Mi
+        {{- if .Values.backend.mcp.enabled }}
+        - name: mcp-tmp
+          emptyDir:
+            sizeLimit: 64Mi
+        {{- end }}
+        {{- if .Values.memcached.enabled }}
+        # Holds only memcached's socket.
+        - name: memcached-socket
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
+        {{- end }}
         {{- if .Values.backend.persistence.sqlite.enabled }}
         - name: sqlite-data
           persistentVolumeClaim:

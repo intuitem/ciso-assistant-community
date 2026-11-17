@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { createEventDispatcher } from 'svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		text: string;

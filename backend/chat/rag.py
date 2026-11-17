@@ -7,15 +7,29 @@ and context formatting.
 import structlog
 import os
 import time
-from typing import Any
+from typing import Optional, Any
+
+from django.contrib.auth.models import Permission
 
 from iam.models import Folder, RoleAssignment
-from chat.embedding_models import RERANKER_MODEL as _RERANKER_MODEL
+from chat.embedding_models import INFERENCE_LOCK, RERANKER_MODEL as _RERANKER_MODEL
+from qdrant_client.models import (
+    Document,
+    FieldCondition,
+    Filter,
+    Fusion,
+    FusionQuery,
+    MatchAny,
+    MatchValue,
+    Prefetch,
+)
 
 logger = structlog.get_logger(__name__)
 
 COLLECTION_NAME = "ciso_assistant"
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+BM25_VECTOR = "bm25"
+BM25_MODEL = "qdrant/bm25"
 
 # Cross-encoder re-ranker (cached singleton)
 _reranker = None
@@ -25,13 +39,16 @@ def _get_reranker():
     """Get the cross-encoder re-ranker, loading on first use."""
     global _reranker
     if _reranker is None:
-        try:
-            from sentence_transformers import CrossEncoder
+        with INFERENCE_LOCK:
+            if _reranker is not None:
+                return _reranker
+            try:
+                from sentence_transformers import CrossEncoder
 
-            _reranker = CrossEncoder(_RERANKER_MODEL)
-            logger.info("reranker_loaded", model=_RERANKER_MODEL)
-        except Exception as e:
-            logger.warning("reranker_load_failed", error=e)
+                _reranker = CrossEncoder(_RERANKER_MODEL)
+                logger.info("reranker_loaded", model=_RERANKER_MODEL)
+            except Exception as e:
+                logger.warning("reranker_load_failed", error=e)
     return _reranker
 
 
@@ -42,15 +59,195 @@ def get_qdrant_client():
     return QdrantClient(url=QDRANT_URL)
 
 
-def get_accessible_folder_ids(user) -> list[str]:
+def has_bm25(client) -> bool:
+    """Collections created before the keyword index stay vector-only until recreated."""
+    try:
+        sparse = client.get_collection(COLLECTION_NAME).config.params.sparse_vectors
+    except Exception as e:
+        logger.warning("qdrant_collection_info_failed", error=e)
+        return False
+    return BM25_VECTOR in (sparse or {})
+
+
+def _query_library(client, query, query_vector, query_filter, limit, hybrid):
+    if hybrid:
+        try:
+            return _query_library_hybrid(
+                client, query, query_vector, query_filter, limit
+            )
+        except Exception as e:
+            logger.warning("qdrant_hybrid_search_failed", error=e)
+    return client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_vector,
+        limit=limit,
+        query_filter=query_filter,
+    ).points
+
+
+def _query_library_hybrid(client, query, query_vector, query_filter, limit):
+    return client.query_points(
+        collection_name=COLLECTION_NAME,
+        prefetch=[
+            Prefetch(query=query_vector, filter=query_filter, limit=limit),
+            Prefetch(
+                query=Document(text=query, model=BM25_MODEL),
+                using=BM25_VECTOR,
+                filter=query_filter,
+                limit=limit,
+            ),
+        ],
+        query=FusionQuery(fusion=Fusion.RRF),
+        limit=limit,
+    ).points
+
+
+def get_accessible_folder_ids(user, codename: str = "view_folder") -> list[str]:
     """Get all folder IDs the user has access to, as strings for Qdrant filtering."""
-    root = Folder.get_root_folder()
-    folder_ids = RoleAssignment.get_accessible_folder_ids(
-        folder=root,
-        user=user,
+
+    permission = Permission.objects.get(codename=codename)
+
+    folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, permission)
+    normal_domain_ids = Folder.objects.filter(
+        id__in=folder_id_queryset,
         content_type=Folder.ContentType.DOMAIN,
+    ).values_list("id", flat=True)
+
+    return [str(folder_id) for folder_id in normal_domain_ids]
+
+
+def indexed_payload_types() -> dict[str, Any]:
+    """Qdrant ``object_type`` payload value → the model class it came from."""
+    from django.apps import apps
+
+    from .signals import INDEXED_MODELS
+    from .text import _normalize_model_name
+
+    types = {}
+    for path in INDEXED_MODELS:
+        app_label, model_name = path.split(".")
+        try:
+            types[_normalize_model_name(model_name)] = apps.get_model(
+                app_label, model_name
+            )
+        except LookupError:
+            continue
+    # Uploaded files are indexed as document_chunk, gated by IndexedDocument
+    try:
+        types["document_chunk"] = apps.get_model("chat", "IndexedDocument")
+    except LookupError:
+        # Uploaded-file chunks simply stay unsearchable rather than unscoped
+        logger.debug("indexed_payload_types: IndexedDocument unavailable")
+    return types
+
+
+def _readable_document_ids(scope, folders) -> list[str]:
+    """Indexed documents the user may read; evidence and managed documents also need their source."""
+    key = frozenset(folders)
+    if key not in scope._document_ids:
+        scope._document_ids[key] = _compute_readable_document_ids(scope, folders)
+    return scope._document_ids[key]
+
+
+def _compute_readable_document_ids(scope, folders) -> list[str]:
+    from django.contrib.contenttypes.models import ContentType
+    from django.db.models import Exists, OuterRef, Q
+
+    from core.models import EvidenceRevision
+    from doc_management.models import DocumentRevision
+
+    from .models import IndexedDocument
+
+    Source = IndexedDocument.SourceType
+    # Copies of other objects are checked against the source as it is now, not
+    # against what was copied onto the indexed document: a source deleted, moved,
+    # replaced or unpublished without the index following is unreadable at once.
+    gated = (
+        (Source.EVIDENCE, EvidenceRevision, Q(attachment=OuterRef("file"))),
+        (
+            Source.DOCUMENT,
+            DocumentRevision,
+            Q(status=DocumentRevision.Status.PUBLISHED),
+        ),
     )
-    return [str(fid) for fid in folder_ids]
+    docs = IndexedDocument.objects.filter(folder_id__in=folders)
+    readable = list(
+        docs.exclude(source_type__in=[source_type for source_type, _, _ in gated])
+        .values_list("id", flat=True)
+        .order_by()
+    )
+    for source_type, model, still_indexed in gated:
+        source = model.objects.filter(
+            still_indexed,
+            id=OuterRef("source_object_id"),
+            folder_id__in=_source_folder_ids(scope, model),
+        )
+        readable += (
+            docs.filter(
+                Exists(source),
+                source_type=source_type,
+                source_content_type=ContentType.objects.get_for_model(model),
+            )
+            .values_list("id", flat=True)
+            .order_by()
+        )
+    return [str(doc_id) for doc_id in readable]
+
+
+def _source_folder_ids(scope, model_class) -> set[str]:
+    folders = set(scope.folder_ids_for(model_class))
+    if model_class._meta.label == "doc_management.DocumentRevision":
+        permission = Permission.objects.get(codename="view_published_documentcontainer")
+        folders |= {
+            str(fid)
+            for fid in RoleAssignment.get_allowed_folder_ids(scope.user, permission)
+        }
+    return folders
+
+
+def _user_partition_filter(scope, source_type, object_type) -> Optional[Filter]:
+    """
+    One clause per indexed type: that type AND the folders where the user holds
+    view_<model>. A single folder_id filter would leak types the user's role
+    cannot read (a respondent sees a domain but not its risk scenarios).
+    """
+
+    clauses = []
+    for payload_type, model_class in indexed_payload_types().items():
+        if object_type and payload_type != object_type:
+            continue
+        folders = scope.folder_ids_for(model_class)
+        if not folders:
+            continue
+        scope_condition = FieldCondition(key="folder_id", match=MatchAny(any=folders))
+        if payload_type == "document_chunk":
+            readable = _readable_document_ids(scope, folders)
+            if not readable:
+                continue
+            # object_id is the document id on chunks, and is payload-indexed
+            scope_condition = FieldCondition(
+                key="object_id", match=MatchAny(any=readable)
+            )
+        clauses.append(
+            Filter(
+                must=[
+                    FieldCondition(
+                        key="object_type", match=MatchValue(value=payload_type)
+                    ),
+                    scope_condition,
+                ]
+            )
+        )
+
+    if not clauses:
+        return None
+
+    conditions = [Filter(should=clauses)]
+    if source_type:
+        conditions.append(
+            FieldCondition(key="source_type", match=MatchValue(value=source_type))
+        )
+    return Filter(must=conditions)
 
 
 def search(
@@ -59,19 +256,24 @@ def search(
     top_k: int = 10,
     source_type: str | None = None,
     object_type: str | None = None,
+    scope=None,
+    frameworks: list[str] | None = None,
 ) -> list[dict]:
     """
     Permission-aware semantic search over the vector store.
 
     Searches two partitions and merges results:
-    - User data (models, documents): filtered by accessible folders
-    - Library knowledge (frameworks, threats): shared, no folder filter
+    - User data (models, documents): filtered per object type by view_<model>
+    - Library knowledge (frameworks, threats): shared, no folder filter;
+      ``frameworks`` (names) adds candidates from those frameworks
 
     Results are merged and sorted by score.
     """
-    from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
-
     from .providers import get_embedder
+    from .scoping import ReadScope
+
+    if scope is None:
+        scope = ReadScope(user)
 
     client = get_qdrant_client()
     embedder = get_embedder()
@@ -84,32 +286,18 @@ def search(
 
     # --- Search 1: User data (permission-filtered) ---
     if source_type != "library":
-        accessible_folders = get_accessible_folder_ids(user)
-        user_conditions = [
-            FieldCondition(
-                key="folder_id",
-                match=MatchAny(any=accessible_folders),
-            )
-        ]
-        if source_type:
-            user_conditions.append(
-                FieldCondition(key="source_type", match=MatchValue(value=source_type))
-            )
-        if object_type:
-            user_conditions.append(
-                FieldCondition(key="object_type", match=MatchValue(value=object_type))
-            )
-
-        try:
-            user_results = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=query_vector,
-                limit=fetch_limit,
-                query_filter=Filter(must=user_conditions),
-            )
-            all_results.extend(user_results.points)
-        except Exception as e:
-            logger.error("qdrant_user_search_failed", error=e)
+        user_filter = _user_partition_filter(scope, source_type, object_type)
+        if user_filter is not None:
+            try:
+                user_results = client.query_points(
+                    collection_name=COLLECTION_NAME,
+                    query=query_vector,
+                    limit=fetch_limit,
+                    query_filter=user_filter,
+                )
+                all_results.append(user_results.points)
+            except Exception as e:
+                logger.error("qdrant_user_search_failed", error=e)
 
     # --- Search 2: Library knowledge (shared, no folder filter) ---
     if source_type in (None, "library"):
@@ -121,25 +309,35 @@ def search(
                 FieldCondition(key="object_type", match=MatchValue(value=object_type))
             )
 
-        try:
-            library_results = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=query_vector,
-                limit=fetch_limit,
-                query_filter=Filter(must=library_conditions),
+        library_filters = [Filter(must=library_conditions)]
+        if frameworks:
+            library_filters.append(
+                Filter(
+                    must=[
+                        *library_conditions,
+                        FieldCondition(key="framework", match=MatchAny(any=frameworks)),
+                    ]
+                )
             )
-            all_results.extend(library_results.points)
-        except Exception as e:
-            logger.error("qdrant_library_search_failed", error=e)
+        hybrid = has_bm25(client)
+        for library_filter in library_filters:
+            try:
+                all_results.append(
+                    _query_library(
+                        client, query, query_vector, library_filter, fetch_limit, hybrid
+                    )
+                )
+            except Exception as e:
+                logger.error("qdrant_library_search_failed", error=e)
 
-    # Merge and deduplicate
-    seen_ids = set()
-    merged = []
-    for r in sorted(all_results, key=lambda x: x.score, reverse=True):
-        rid = str(r.id)
-        if rid not in seen_ids:
-            seen_ids.add(rid)
-            merged.append(r)
+    # Partitions score on different scales (cosine, RRF): merge by rank
+    fused, points = {}, {}
+    for result_list in all_results:
+        for rank, r in enumerate(result_list):
+            rid = str(r.id)
+            points.setdefault(rid, r)
+            fused[rid] = fused.get(rid, 0.0) + 1 / (60 + rank)
+    merged = [points[rid] for rid in sorted(fused, key=fused.get, reverse=True)]
 
     # Re-rank with cross-encoder for better relevance
     reranker = _get_reranker()
@@ -147,7 +345,8 @@ def search(
         t0 = time.time()
         pairs = [(query, r.payload.get("text", "")[:512]) for r in merged]
         try:
-            scores = reranker.predict(pairs)
+            with INFERENCE_LOCK:
+                scores = reranker.predict(pairs)
             ranked = sorted(zip(scores, merged), key=lambda x: x[0], reverse=True)
             merged = [r for _, r in ranked[:top_k]]
             logger.info(
@@ -170,7 +369,7 @@ def search(
             "source_type": r.payload.get("source_type", ""),
             "object_type": r.payload.get("object_type", ""),
             "object_id": r.payload.get("object_id"),
-            "name": r.payload.get("name", ""),
+            "name": r.payload.get("name") or r.payload.get("filename", ""),
             "ref_id": r.payload.get("ref_id", ""),
             "framework": r.payload.get("framework", ""),
             "urn": r.payload.get("urn", ""),
@@ -179,74 +378,59 @@ def search(
     ]
 
 
-def graph_expand(results: list[dict], accessible_folder_ids: list[str]) -> list[dict]:
+def graph_expand(results: list[dict], scope) -> list[dict]:
     """
     Expand retrieval results via ORM relations for richer context.
-    Only returns objects in folders the user can access.
+    Every hop is re-checked against the user's read scope — the seed being
+    readable says nothing about what hangs off it.
     """
-    from core.models import AppliedControl, RiskScenario, RequirementAssessment
+    from core.models import Asset, AppliedControl, RiskScenario, RequirementAssessment
+
+    # relation to walk per seed type: (attribute, related model, payload type)
+    hops = {
+        "risk_scenario": (
+            ("applied_controls", AppliedControl, "applied_control"),
+            ("assets", Asset, "asset"),
+        ),
+        "applied_control": (
+            ("risk_scenarios", RiskScenario, "risk_scenario"),
+            (
+                "requirementassessment_set",
+                RequirementAssessment,
+                "requirement_assessment",
+            ),
+        ),
+        "requirement_assessment": (
+            ("applied_controls", AppliedControl, "applied_control"),
+        ),
+    }
+    seeds = {
+        "risk_scenario": RiskScenario,
+        "applied_control": AppliedControl,
+        "requirement_assessment": RequirementAssessment,
+    }
 
     expanded = []
     seen_ids = {r.get("object_id") for r in results if r.get("object_id")}
-    accessible_set = set(accessible_folder_ids)
 
     for result in results:
         obj_type = result.get("object_type")
         obj_id = result.get("object_id")
-        if not obj_id:
+        if not obj_id or obj_type not in seeds:
             continue
 
         try:
-            if obj_type == "risk_scenario":
-                scenario = RiskScenario.objects.select_related("folder").get(id=obj_id)
-                # Related controls
-                for control in scenario.applied_controls.select_related("folder").all():
-                    if (
-                        str(control.folder_id) in accessible_set
-                        and str(control.id) not in seen_ids
+            seed = scope.queryset(seeds[obj_type]).filter(id=obj_id).first()
+            if seed is None:
+                continue
+            for attribute, related_model, payload_type in hops[obj_type]:
+                for obj in getattr(seed, attribute).all():
+                    if str(obj.id) in seen_ids or not scope.can_read(
+                        related_model, obj.id
                     ):
-                        seen_ids.add(str(control.id))
-                        expanded.append(_format_related(control, "applied_control"))
-                # Related assets
-                for asset in scenario.assets.select_related("folder").all():
-                    if (
-                        str(asset.folder_id) in accessible_set
-                        and str(asset.id) not in seen_ids
-                    ):
-                        seen_ids.add(str(asset.id))
-                        expanded.append(_format_related(asset, "asset"))
-
-            elif obj_type == "applied_control":
-                control = AppliedControl.objects.select_related("folder").get(id=obj_id)
-                # Risk scenarios mitigated by this control
-                for scenario in control.risk_scenarios.select_related("folder").all():
-                    if (
-                        str(scenario.folder_id) in accessible_set
-                        and str(scenario.id) not in seen_ids
-                    ):
-                        seen_ids.add(str(scenario.id))
-                        expanded.append(_format_related(scenario, "risk_scenario"))
-                # Requirement assessments linked
-                for ra in control.requirementassessment_set.select_related(
-                    "compliance_assessment__folder"
-                ).all():
-                    folder_id = str(ra.compliance_assessment.folder_id)
-                    if folder_id in accessible_set and str(ra.id) not in seen_ids:
-                        seen_ids.add(str(ra.id))
-                        expanded.append(_format_related(ra, "requirement_assessment"))
-
-            elif obj_type == "requirement_assessment":
-                ra = RequirementAssessment.objects.select_related(
-                    "compliance_assessment__folder"
-                ).get(id=obj_id)
-                for control in ra.applied_controls.select_related("folder").all():
-                    if (
-                        str(control.folder_id) in accessible_set
-                        and str(control.id) not in seen_ids
-                    ):
-                        seen_ids.add(str(control.id))
-                        expanded.append(_format_related(control, "applied_control"))
-
+                        continue
+                    seen_ids.add(str(obj.id))
+                    expanded.append(_format_related(obj, payload_type))
         except Exception as e:
             logger.debug("Graph expansion failed for %s/%s: %s", obj_type, obj_id, e)
 
@@ -275,7 +459,9 @@ def format_context(results: list[dict], expanded: list[dict] | None = None) -> s
 
     for i, r in enumerate(results, 1):
         source_label = r.get("framework") or r.get("object_type", "unknown")
-        ref = r.get("ref_id", "")
+        ref = r.get("ref_id", "") or (
+            r.get("name", "") if r.get("object_type") == "document_chunk" else ""
+        )
         header = f"[Source {i}: {source_label}"
         if ref:
             header += f" - {ref}"

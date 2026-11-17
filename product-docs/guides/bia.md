@@ -82,6 +82,24 @@ Each asset assessment surfaces as a row in the BIA's timeline.
 The three recovery checkboxes drive the **Recovery insights** activity tracker on the BIA header. Each one shows a percentage across all assets in the BIA — your dashboard of "how ready are we" at a glance.
 {% endhint %}
 
+### Add many assets at once
+
+To cover a large scope without filling the form once per asset, use the **Batch add assets** button (layer-group icon next to the create button on the **Asset assessments** table):
+
+1. A picker opens, listing only the assets not yet included in this BIA — with search and pagination (**Show** 10 / 25 / 50 / 100 **entries** per page).
+2. Tick assets on the current page — **Select all** ticks the visible page. The selection always matches what you see: changing page or search clears it.
+3. Click **Batch add assets**. One asset assessment is created per selected asset and a toast confirms the count. The picker stays open and the added assets drop out of the list, so a larger scope is covered page by page, confirm by confirm — then **Close**.
+
+Batch-added assessments start empty — recovery flags unchecked, no extra dependencies, controls, or evidences — so refine each one afterwards. Duplicates are impossible: assets already covered by the BIA are simply not offered again. On a locked BIA the add buttons are hidden, like the removal checkboxes.
+
+### Remove many assets at once
+
+To shrink the scope, tick rows on the **Asset assessments** table and click **Delete** in the toolbar that appears — the same batch action available on other tables. The confirmation dialog recaps how many rows are selected and asks you to type _yes_; deleting an assessment also deletes its escalation thresholds. The **Recovery insights** widget refreshes afterwards. On a locked BIA the checkboxes are unavailable.
+
+### Toggle the recovery flags from the table
+
+Right-click a row of the **Asset assessments** table to flip **Recovery documented**, **Recovery tested**, or **Recovery targets met** without opening the edit form. Each menu entry shows the flag's current state; a click toggles it and refreshes the table and the **Recovery insights** widget. On a locked BIA these entries are disabled.
+
 ## Step 3 — Add escalation thresholds (the time curve)
 
 For each asset assessment, capture how the impact evolves over time. Open the asset assessment's detail page and add thresholds via **Add a step**:
@@ -105,6 +123,16 @@ From the BIA detail page, click **Impact over time** in the actions column. The 
 - Cells: the impact severity at that point, colour-coded by the risk matrix.
 
 This is the key output you'll show to stakeholders — at a glance, "if X breaks, here's how the room turns red as time passes".
+
+### Trace the dependency chain
+
+**Dependencies chain** on the BIA page shows what every assessed asset relies on: its supporting assets down the asset tree, plus the **Extra dependency** links recorded on each asset assessment. Each asset is compared against the objectives it inherits: a supporting asset whose security or recovery capabilities fall short of the objectives of the primary assets above it is a **Cause**; the assets that depend on a cause are **Impacted**. The header counts the **Assessed assets**, assets, domains, **Cross-domain links**, causes and impacted assets. Three views:
+
+- **Dependency flow** — the chain from the assessed assets down, one column per depth. Tick **Only paths to gaps** to keep only the paths that lead to a cause. Click an asset to trace it: **Caused by** lists what drags it down, **Drags down** what it affects, with the **Failing objectives (actual vs expected)**. **Biggest causes** ranks the causes by reach.
+- **Domain map** — the same assets grouped by domain, to see where dependencies cross domain boundaries.
+- **Gap register** — one row per cause, with its domain, failing objectives, **Assessed assets impacted**, **Primary assets impacted** and **Reach**. When nothing fails, it reads _Every capability meets the objective it inherits._
+
+Each asset assessment has the same view, limited to its asset.
 
 ## Step 5 — Generate the Report
 

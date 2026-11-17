@@ -1,11 +1,10 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { json } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
 	const res = await fetch(`${BASE_API_URL}/chat/questionnaire-runs/${params.id}/`);
 	const data = await res.json().catch(() => ({}));
-	return json(data, { status: res.status });
+	return Response.json(data, { status: res.status });
 };
 
 export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
@@ -16,7 +15,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 		body: JSON.stringify(body)
 	});
 	const data = await res.json().catch(() => ({}));
-	return json(data, { status: res.status });
+	return Response.json(data, { status: res.status });
 };
 
 export const DELETE: RequestHandler = async ({ fetch, params }) => {
@@ -27,5 +26,5 @@ export const DELETE: RequestHandler = async ({ fetch, params }) => {
 		return new Response(null, { status: 204 });
 	}
 	const data = await res.json().catch(() => ({}));
-	return json(data, { status: res.status });
+	return Response.json(data, { status: res.status });
 };

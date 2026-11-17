@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DoraReportForm from '../DoraReportForm.svelte';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -27,5 +27,4 @@
 	incidentRef={data.incidentRef}
 	reportId={data.reportId}
 	validation={data.validation}
-	userOptions={data.userOptions}
 />

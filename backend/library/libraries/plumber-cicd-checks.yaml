@@ -1,0 +1,1170 @@
+urn: urn:intuitem:risk:library:plumber-cicd-checks
+locale: en
+ref_id: plumber-cicd-checks
+name: Plumber CI/CD Security Checks
+description: |-
+  CI/CD pipeline security checks performed by Plumber, the open-source CI/CD security scanner for GitLab CI and GitHub Actions (getplumber.io).
+  Each requirement corresponds to a Plumber control (the .plumber.yaml key). Based on plumber v0.6.1 (commit 4804289).
+  https://github.com/getplumber/plumber
+copyright: Plumber contributors - Mozilla Public License 2.0
+version: 2
+publication_date: 2026-10-12
+provider: Plumber
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:plumber-cicd-checks
+    ref_id: plumber-cicd-checks
+    name: Plumber CI/CD Security Checks
+    description: |-
+      CI/CD pipeline security checks performed by Plumber, the open-source CI/CD security scanner for GitLab CI and GitHub Actions. Each assessable requirement is a Plumber control — the ref_id is the .plumber.yaml key that enables it, grouped by Plumber's own control categories. The annotation gives the Plumber control ID and lists the ISSUE codes the control emits, with their severity, remediation and documentation URL.
+      Implementation groups reflect what Plumber actually runs: controls whose rules are implemented but not yet enforced upstream (pending test coverage) are grouped under 'not-enforced' and can only be assessed manually.
+    implementation_groups_definition:
+    - ref_id: github
+      name: GitHub Actions
+      description: Controls Plumber enforces when scanning GitHub Actions workflows and repository
+        settings.
+    - ref_id: gitlab
+      name: GitLab CI
+      description: Controls Plumber enforces when scanning GitLab CI pipelines and project
+        settings.
+    - ref_id: common
+      name: Cross-provider
+      description: Controls Plumber enforces on both GitHub and GitLab — the provider-agnostic
+        core.
+    - ref_id: not-enforced
+      name: Not yet enforced
+      description: Controls implemented in Plumber but held back from enforcement pending
+        test coverage. No scan reports on them; assess them manually or exclude them.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: CI/CD Container Images
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:containerimagemustcomefromauthorizedsources
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:1
+      ref_id: containerImageMustComeFromAuthorizedSources
+      name: Container images must come from authorized sources
+      description: Verifies that container images referenced in the pipeline are pulled only
+        from an authorized registry.
+      annotation: |-
+        Plumber control: CTRL-101.
+        - ISSUE-101 (high) Untrusted image source
+          Use images from an authorized registry configured in .plumber.yaml under containerImageMustComeFromAuthorizedSources.trustedUrls, or add the registry to the authorized list.
+          https://getplumber.io/docs/cli/issues/ISSUE-101
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:containerimagemustnotuseforbiddentags
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:1
+      ref_id: containerImageMustNotUseForbiddenTags
+      name: Container images must not use forbidden reference
+      description: Flags container images referenced by mutable or forbidden tags (such as
+        latest) and, when configured, requires images to be pinned by digest.
+      annotation: |-
+        Plumber control: CTRL-102.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-102 (medium) Forbidden container image tag
+          Pin the image to a specific immutable version tag (e.g., 'python:3.12.1' instead of 'python:latest'). Configure forbidden tags in .plumber.yaml under containerImageMustNotUseForbiddenTags.tags.
+          https://getplumber.io/docs/cli/issues/ISSUE-102
+        - ISSUE-103 (high) Container image is not pinned by digest
+          Pin the image using its digest: 'image: registry.example.com/myimage@sha256:abc123...'. You can find the digest with 'docker inspect --format={{.RepoDigests}} <image>'.
+          https://getplumber.io/docs/cli/issues/ISSUE-103
+      implementation_groups:
+      - github
+      - gitlab
+      - common
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: CI/CD Variables
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:cicdvariablesmustbeprotected
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: cicdVariablesMustBeProtected
+      name: CI/CD variables must be protected
+      description: Verifies that CI/CD settings variables are marked protected so they are
+        not exposed to pipelines running on unprotected branches.
+      annotation: |-
+        Plumber control: CTRL-201.
+        - ISSUE-201 (medium) CI/CD settings variable is not protected
+          Mark the variable protected in Settings > CI/CD > Variables so it is only exposed to pipelines on protected branches and tags.
+          https://getplumber.io/docs/cli/issues/ISSUE-201
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:cicdvariablesmustbemasked
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: cicdVariablesMustBeMasked
+      name: CI/CD variables must be masked
+      description: Verifies that CI/CD settings variables are masked so their values do not
+        print in job logs.
+      annotation: |-
+        Plumber control: CTRL-202.
+        - ISSUE-202 (medium) CI/CD settings variable is not masked
+          Enable masking in Settings > CI/CD > Variables. GitLab requires a value of at least 8 characters; restructure the secret if it cannot be masked by length.
+          https://getplumber.io/docs/cli/issues/ISSUE-202
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustnotenabledebugtrace
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: pipelineMustNotEnableDebugTrace
+      name: Pipeline must not enable debug trace
+      description: Detects pipelines that enable CI debug tracing, which prints masked variable
+        values into job logs.
+      annotation: |-
+        Plumber control: CTRL-203.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-203 (critical) Pipeline enables CI debug trace
+          Remove or set CI_DEBUG_TRACE and CI_DEBUG_SERVICES to 'false' in your .gitlab-ci.yml variables section. These should only be used temporarily for debugging and never committed.
+          https://getplumber.io/docs/cli/issues/ISSUE-203
+      implementation_groups:
+      - github
+      - gitlab
+      - common
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustnotuseunsafevariableexpansion
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: pipelineMustNotUseUnsafeVariableExpansion
+      name: Pipeline must not use unsafe variable expansion
+      description: Detects CI variables expanded in a shell re-interpretation context such
+        as eval or sh -c, where an attacker-controlled value could execute as code.
+      annotation: |-
+        Plumber control: CTRL-204.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-204 (medium) Unsafe variable expansion
+          Avoid passing variables to commands that re-interpret input as shell code. Use the variable in a safe context (e.g. echo, env) or sanitize/allowlist values. Configure dangerousVariables and allowedPatterns in .plumber.yaml under pipelineMustNotUseUnsafeVariableExpansion.
+          https://getplumber.io/docs/cli/issues/ISSUE-204
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustnotoverridejobvariables
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: pipelineMustNotOverrideJobVariables
+      name: Pipeline must not override job variables
+      description: Detects pipeline configuration that redefines a CI/CD variable that should
+        only be set in CI/CD Settings.
+      annotation: |-
+        Plumber control: CTRL-205.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-205 (high) Job variable overrides controlled variable
+          Remove the variable from .gitlab-ci.yml and set it in GitLab CI/CD Settings > Variables instead. Configure the list of controlled variables in .plumber.yaml under pipelineMustNotOverrideJobVariables.variables.
+          https://getplumber.io/docs/cli/issues/ISSUE-205
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotinjectuserinputinscripts
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowMustNotInjectUserInputInScripts
+      name: Workflows must not inject user input in scripts
+      description: Detects workflow run scripts that inline user-controlled template expressions
+        directly, letting attacker-controlled values break out and execute commands.
+      annotation: |-
+        Plumber control: CTRL-207.
+        - ISSUE-207 (critical) Template injection in workflow script
+          Move the template expression into an `env:` binding first, then reference the environment variable from the shell (`"$TITLE"`). Shell expansion of a bound variable quotes the value and neutralises injection payloads.
+          https://getplumber.io/docs/cli/issues/ISSUE-207
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotreenableinsecurecommands
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowMustNotReEnableInsecureCommands
+      name: Workflows must not re-enable insecure commands
+      description: Detects workflows that re-enable the deprecated set-env and add-path workflow
+        commands via ACTIONS_ALLOW_UNSECURE_COMMANDS.
+      annotation: |-
+        Plumber control: CTRL-208.
+        - ISSUE-208 (high) Deprecated workflow commands re-enabled
+          Remove the `ACTIONS_ALLOW_UNSECURE_COMMANDS` environment variable. Use the `$GITHUB_ENV` and `$GITHUB_PATH` files explicitly when you need to propagate values, and validate any untrusted content before writing to them.
+          https://getplumber.io/docs/cli/issues/ISSUE-208
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotwriteuntrustedcontenttogithubenv
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowMustNotWriteUntrustedContentToGitHubEnv
+      name: Workflows must not write untrusted content to $GITHUB_ENV
+      description: Detects workflows that write user-controlled content to GITHUB_ENV or GITHUB_PATH,
+        letting an attacker override variables or hijack later steps.
+      annotation: |-
+        Plumber control: CTRL-209.
+        - ISSUE-209 (high) Untrusted content written to $GITHUB_ENV or $GITHUB_PATH
+          Do not write user-controlled values into `$GITHUB_ENV` or `$GITHUB_PATH`. If you must propagate a value derived from user input, bind it through an `env:` block first (`env: { TITLE: ${{ github.event.issue.title }} }`) and validate/escape it before writing, or pass it as a step output instead. Restrict workflows touching these files to non-PR triggers when possible.
+          https://getplumber.io/docs/cli/issues/ISSUE-209
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnottrustspoofableactorchecks
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowMustNotTrustSpoofableActorChecks
+      name: Workflows must not trust spoofable actor checks
+      description: Detects workflows that gate behaviour on a spoofable actor identity check
+        such as github.actor instead of a cryptographically verified signal.
+      annotation: |-
+        Plumber control: CTRL-210.
+        - ISSUE-210 (high) Workflow gates behaviour on a spoofable actor/bot check
+          Never grant elevated behaviour based on `github.actor` / `github.triggering_actor` alone. For Dependabot-specific flows use the `pull_request` event with a separate privileged workflow triggered by `pull_request_target` only after a manual review, or rely on branch protections. For bots, verify the commit signature/author via git rather than the GitHub actor string.
+          https://getplumber.io/docs/cli/issues/ISSUE-210
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowconditionsmustbesound
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowConditionsMustBeSound
+      name: Workflow conditions must be sound
+      description: 'Detects workflow if: conditions that are logically unsound, such as a
+        tautology, a contradiction, or a bare boolean not wrapped in template braces.'
+      annotation: |-
+        Plumber control: CTRL-211.
+        - ISSUE-211 (medium) Unsound `if:` condition (tautology, contradiction, or missing ${{ }})
+          Review the condition: remove dead branches (`always()` short-circuits OR), wrap every template expression in `${{ … }}`, and prefer simple comparisons over nested constructs. For debugging, `if: ${{ github.event_name == 'push' }}` is safer than `if: github.event_name == 'push'` which often parses as the literal string.
+          https://getplumber.io/docs/cli/issues/ISSUE-211
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowcontainscallsmustbesound
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowContainsCallsMustBeSound
+      name: Workflow contains() calls must be sound
+      description: Detects contains() expressions called with arguments in the wrong order
+        or of incompatible types, which makes the intended check silently never match.
+      annotation: |-
+        Plumber control: CTRL-212.
+        - ISSUE-212 (medium) `contains()` built-in misused (argument order or type)
+          Use `contains(github.ref, 'refs/heads/main')`: the ref is the haystack, the branch name is the needle. For filter lists, convert to a set: `contains(fromJSON('["main", "release"]'), github.ref_name)` makes the intent explicit.
+          https://getplumber.io/docs/cli/issues/ISSUE-212
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotexportentiregithubcontext
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowMustNotExportEntireGitHubContext
+      name: Workflows must not export the entire GitHub context
+      description: Flags workflow steps that serialize the entire github context with toJson,
+        exposing every user-controllable field to whatever consumes the output.
+      annotation: |-
+        Plumber control: CTRL-213.
+        - ISSUE-213 (high) Entire `github` context serialised with toJson(github)
+          Never pass the `github` context whole. Extract the exact fields you need into named `env:` bindings first (`env: { PR_TITLE: ${{ github.event.pull_request.title }} }`), then reference the environment variable from the shell: expansion quotes the value automatically. If the downstream tool genuinely requires JSON, build it explicitly from the named fields with `jq -n --arg title "$PR_TITLE" '{title: $title}'`.
+          https://getplumber.io/docs/cli/issues/ISSUE-213
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustpinpackageinstalls
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowMustPinPackageInstalls
+      name: Workflows must pin package installs
+      description: Detects package installs that neither pin a version nor use a lockfile,
+        so every run resolves whatever is latest at execution time.
+      annotation: |-
+        Plumber control: CTRL-214.
+        - ISSUE-214 (medium) Package installed without a pinned version or lockfile
+          Replace `pip install pkg` with `pip install -r requirements.txt` (with hashes generated via `pip-compile --generate-hashes`) or pin every package explicitly: `pip install 'pkg==1.2.3'`. Replace `npm install pkg` with `npm ci` once the lockfile is committed. Enable Dependabot or Renovate on the locked manifest so upgrades still flow, reviewed, rather than silently.
+          https://getplumber.io/docs/cli/issues/ISSUE-214
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotinjectvarsinscripts
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:2
+      ref_id: workflowMustNotInjectVarsInScripts
+      name: Workflows must not inject vars in scripts
+      description: Detects workflow run scripts that inline vars or inputs template expressions
+        directly instead of binding them through an env variable first.
+      annotation: |-
+        Plumber control: CTRL-215.
+        - ISSUE-215 (low) Maintainer-adjacent template (`vars.*` or `inputs.*`) expanded into a shell script
+          Replace `${{ vars.X }}` / `${{ inputs.X }}` in the `run:` body with an `env:` binding plus `$X` dereference. Example: `env: { REGISTRY: ${{ vars.REGISTRY }} }` at the step, then `docker login "$REGISTRY"` in the script.
+          https://getplumber.io/docs/cli/issues/ISSUE-215
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: CI/CD Secrets
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:reusableworkflowsmustnotinheritsecrets
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      ref_id: reusableWorkflowsMustNotInheritSecrets
+      name: Reusable workflows must not inherit secrets
+      description: 'Detects reusable workflow calls made with secrets: inherit, which forwards
+        every secret visible to the caller regardless of what the reusable workflow needs.'
+      annotation: |-
+        Plumber control: CTRL-302.
+        - ISSUE-302 (high) Reusable workflow called with `secrets: inherit`
+          Replace `secrets: inherit` with an explicit mapping that names only the secrets the reusable workflow needs: `secrets: { NPM_TOKEN: ${{ secrets.NPM_TOKEN }} }`. For internal reusable workflows hosted in the same repository the risk is lower but the principle stands: narrow the scope so a future incident exposes a minimum.
+          https://getplumber.io/docs/cli/issues/ISSUE-302
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotunredactsecretsviafromjson
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      ref_id: workflowMustNotUnredactSecretsViaFromJSON
+      name: Workflows must not unredact secrets via fromJSON
+      description: Detects secrets dereferenced via fromJSON, which bypasses GitHub's log
+        redaction for the resulting sub-fields.
+      annotation: |-
+        Plumber control: CTRL-303.
+        - ISSUE-303 (high) Secret dereferenced via fromJSON bypasses log redaction
+          Pass structured secrets through `env:` bindings that reference each leaf individually (`env: { API_KEY: ${{ secrets.MY_API_KEY }} }`) so log redaction keeps working. If a JSON blob must be split, do it inside a step that never echoes the result and writes only the necessary parts back to the environment.
+          https://getplumber.io/docs/cli/issues/ISSUE-303
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:deployjobsmustuseenvironmentgate
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      ref_id: deployJobsMustUseEnvironmentGate
+      name: Deploy jobs must use an environment gate
+      description: Verifies that deploy and release jobs consuming production secrets declare
+        an environment gate.
+      annotation: |-
+        Plumber control: CTRL-305.
+        - ISSUE-305 (medium) Deploy / release job uses secrets without an `environment:` gate
+          Put production secrets behind environments. Attach the environment to the deploy job (`environment: production`) and configure required reviewers / wait timers on the environment in the repository settings.
+          https://getplumber.io/docs/cli/issues/ISSUE-305
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:githubapptokensmustberevokedonexit
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      ref_id: githubAppTokensMustBeRevokedOnExit
+      name: GitHub App tokens must be revoked on exit
+      description: Detects GitHub App installation tokens minted with revocation disabled,
+        which keeps the token alive after the workflow finishes.
+      annotation: |-
+        Plumber control: CTRL-306.
+        - ISSUE-306 (high) GitHub App token issued with revocation disabled
+          Remove the `skip-token-revoke: true` input (the default is to revoke). Only keep revocation disabled for workflows that legitimately need to hand the token to a downstream step launched after this workflow, and even then, prefer re-minting it fresh in the downstream workflow.
+          https://getplumber.io/docs/cli/issues/ISSUE-306
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:checkoutmustnotpersistcredentials
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      ref_id: checkoutMustNotPersistCredentials
+      name: Checkout must not persist credentials
+      description: Detects checkout steps that persist credentials in .git/config, especially
+        when a later step uploads that path into an artifact.
+      annotation: |-
+        Plumber control: CTRL-307.
+        - ISSUE-307 (low) Checkout persists credentials in .git/config (latent)
+          Add `with: { persist-credentials: false }` on every `uses: actions/checkout@*` step unless the job legitimately needs to push back. When push is required, scope the token with an explicit `permissions:` block.
+          https://getplumber.io/docs/cli/issues/ISSUE-307
+        - ISSUE-310 (high) Persisted checkout credentials packed into an uploaded artifact
+          Add `with: { persist-credentials: false }` on the `actions/checkout@*` step, or upload a scoped path that excludes `.git` (e.g. `path: dist/` instead of `path: .`). When push is required, scope the token with an explicit `permissions:` block.
+          https://getplumber.io/docs/cli/issues/ISSUE-310
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotindexsecretsdynamically
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      ref_id: workflowMustNotIndexSecretsDynamically
+      name: Workflows must not index secrets dynamically
+      description: Detects workflows that read a secret through a dynamic index instead of
+        naming it directly.
+      annotation: |-
+        Plumber control: CTRL-308.
+        - ISSUE-308 (low) Secret accessed via a dynamic index `secrets[expr]`
+          Replace `${{ secrets[env.X] }}` with a direct reference `${{ secrets.EXPECTED_NAME }}`. When a matrix really needs to select among N secrets, split the job into N copies with static names rather than indexing; the verbosity is worth the reviewability.
+          https://getplumber.io/docs/cli/issues/ISSUE-308
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotexportentiresecretscontext
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:3
+      ref_id: workflowMustNotExportEntireSecretsContext
+      name: Workflows must not expose all secrets at once
+      description: Flags workflow steps that serialize the entire secrets context with toJson,
+        exposing every secret the job can access.
+      annotation: |-
+        Plumber control: CTRL-309.
+        - ISSUE-309 (critical) Entire secrets context exported via toJson(secrets)
+          Pass only the specific secrets the step needs, by name: `env: { TOKEN: ${{ secrets.NPM_TOKEN }} }`. If the step forwards credentials to a reusable workflow, name each one in the `secrets:` block of the call rather than using `toJson(secrets)`.
+          https://getplumber.io/docs/cli/issues/ISSUE-309
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Pipeline Composition
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustnotincludehardcodedjobs
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: pipelineMustNotIncludeHardcodedJobs
+      name: Pipeline must not include hardcoded jobs
+      description: Flags pipeline jobs defined directly in the CI configuration instead of
+        sourced from an approved CI/CD component or include.
+      annotation: |-
+        Plumber control: CTRL-401.
+        - ISSUE-401 (medium) Hardcoded job
+          Replace the hardcoded job with a CI/CD component or an include from an approved catalog. Use 'include:' or 'component:' directives in your .gitlab-ci.yml.
+          https://getplumber.io/docs/cli/issues/ISSUE-401
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:externalrefsmustnotcollide
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: externalRefsMustNotCollide
+      name: Includes must not use ambiguous tag/branch refs
+      description: Flags external CI references pinned to a name that exists upstream as both
+        a tag and a branch, since the ambiguity can silently switch which revision runs.
+      annotation: |-
+        Plumber control: CTRL-402.
+        - ISSUE-402 (medium) Reference collides with both a tag and a branch
+          Pin the reference to a 40-character commit SHA (preferred), which is unambiguous. Alternatively, ask the upstream maintainer to remove one of the two colliding refs; keeping both is a supply-chain landmine for every caller.
+          https://getplumber.io/docs/cli/issues/ISSUE-402
+      implementation_groups:
+      - github
+      - gitlab
+      - common
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:includesmustbeuptodate
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: includesMustBeUpToDate
+      name: Includes must be up to date
+      description: Verifies that included CI/CD components and templates use the latest available
+        version.
+      annotation: |-
+        Plumber control: CTRL-403.
+        - ISSUE-403 (low) Outdated template
+          Update the include to use the latest version. Check the component/template repository for the latest release and update the version reference in your .gitlab-ci.yml.
+          https://getplumber.io/docs/cli/issues/ISSUE-403
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:includesmustnotuseforbiddenversions
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: includesMustNotUseForbiddenVersions
+      name: Includes must not use forbidden versions
+      description: Flags included CI/CD components and templates that use a version forbidden
+        by the configuration, such as a mutable branch reference.
+      annotation: |-
+        Plumber control: CTRL-404.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-404 (medium) Forbidden include version
+          Replace the forbidden version with an authorized version format. Use semantic version tags (e.g., '1.2.3' or '~latest') instead of branch names or mutable references as configured in .plumber.yaml.
+          https://getplumber.io/docs/cli/issues/ISSUE-404
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustincludetemplate
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: pipelineMustIncludeTemplate
+      name: Pipeline must include required templates
+      description: Verifies that every CI/CD template required by the configuration is included
+        in the pipeline and that its job keys are not overridden.
+      annotation: |-
+        Plumber control: CTRL-405.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-405 (high) Missing required template
+          Add the required template to your .gitlab-ci.yml using 'include:' with the template path specified in your .plumber.yaml under pipelineMustIncludeTemplate.
+          https://getplumber.io/docs/cli/issues/ISSUE-405
+        - ISSUE-406 (medium) Forbidden override of required template
+          Remove the local overrides on the template's jobs. If customization is needed, check if the template provides variables for configuration instead of overriding job keys directly.
+          https://getplumber.io/docs/cli/issues/ISSUE-406
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustincludecomponent
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: pipelineMustIncludeComponent
+      name: Pipeline must include required components
+      description: Verifies that every CI/CD component required by the configuration is included
+        in the pipeline and that its job keys are not overridden.
+      annotation: |-
+        Plumber control: CTRL-408.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-408 (high) Missing required component
+          Add the required component to your .gitlab-ci.yml using 'include:' with the component path specified in your .plumber.yaml under pipelineMustIncludeComponent.
+          https://getplumber.io/docs/cli/issues/ISSUE-408
+        - ISSUE-409 (medium) Forbidden override of required component
+          Remove the local overrides on the component's jobs. If customization is needed, check if the component provides input variables for configuration instead of overriding job keys directly.
+          https://getplumber.io/docs/cli/issues/ISSUE-409
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:securityjobsmustnotbeweakened
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: securityJobsMustNotBeWeakened
+      name: Security jobs must not be weakened
+      description: 'Detects security jobs weakened by allow_failure, a rules override, or
+        when: manual, any of which can let a critical scan be skipped.'
+      annotation: |-
+        Plumber control: CTRL-410.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-410 (critical) Security job weakened
+          Ensure security jobs run automatically and block the pipeline on failure. Remove allow_failure: true, do not override rules with when: never or when: manual, and do not set when: manual on security jobs.
+          https://getplumber.io/docs/cli/issues/ISSUE-410
+      implementation_groups:
+      - github
+      - gitlab
+      - common
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustnotexecuteunverifiedscripts
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: pipelineMustNotExecuteUnverifiedScripts
+      name: Pipeline must not execute unverified scripts
+      description: Detects pipeline jobs that execute a script without integrity verification,
+        such as piping a remote download directly into a shell.
+      annotation: |-
+        Plumber control: CTRL-411.
+        - ISSUE-411 (high) Unverified script execution
+          Download scripts to a file, verify checksum or signature on the same line, then execute. Avoid piping remote or encoded content directly into a shell. Vendor scripts in-repo or use trusted package managers.
+          https://getplumber.io/docs/cli/issues/ISSUE-411
+      implementation_groups:
+      - github
+      - gitlab
+      - common
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pipelinemustnotusedockerindocker
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: pipelineMustNotUseDockerInDocker
+      name: Pipeline must not use Docker-in-Docker
+      description: Flags CI/CD jobs that use a Docker-in-Docker service, or that configure
+        it with an insecure, TLS-disabled daemon.
+      annotation: |-
+        Plumber control: CTRL-412.
+        - ISSUE-412 (high) Docker-in-Docker service detected
+          Replace Docker-in-Docker with a safer alternative such as Kaniko or Buildah for building container images. These tools do not require privileged mode and avoid the security risks of running a Docker daemon inside a CI container.
+          https://getplumber.io/docs/cli/issues/ISSUE-412
+        - ISSUE-413 (high) Docker-in-Docker with insecure daemon configuration
+          If Docker-in-Docker is required, ensure TLS is enabled: do not set DOCKER_TLS_CERTDIR to an empty string, and use tcp://docker:2376 (TLS) instead of tcp://docker:2375 (plaintext). Prefer Kaniko or Buildah to avoid this pattern entirely.
+          https://getplumber.io/docs/cli/issues/ISSUE-413
+      implementation_groups:
+      - github
+      - gitlab
+      - common
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:componentmustcomefromauthorizedsources
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: componentMustComeFromAuthorizedSources
+      name: Components must come from authorized sources
+      description: 'Verifies that every CI/CD component the pipeline includes comes from a
+        trusted source: an allowlisted pattern, the project''s own root namespace, or the
+        same GitLab instance.'
+      annotation: |-
+        Plumber control: CTRL-414.
+        - ISSUE-414 (high) Untrusted GitLab CI/CD component source
+          Include components only from a trusted source: add it to .plumber.yaml under componentMustComeFromAuthorizedSources.trustedComponents, or rely on trustSameGroupComponents / trustSameInstanceComponents if it already lives in your own namespace or instance, or on trustGitlabOfficialComponents for GitLab's official gitlab.com/components/* and gitlab.com/gitlab-org/* components.
+          https://getplumber.io/docs/cli/issues/ISSUE-414
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:functionmustcomefromauthorizedsources
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: functionMustComeFromAuthorizedSources
+      name: Functions must come from authorized sources
+      description: 'Verifies that every CI/CD function referenced by a job''s run: steps comes
+        from a trusted source: an allowlisted pattern or the project''s own root namespace
+        on the same GitLab instance.'
+      annotation: |-
+        Plumber control: CTRL-415.
+        - ISSUE-415 (high) Untrusted GitLab CI/CD function reference
+          Reference functions only from a trusted source: add it to .plumber.yaml under functionMustComeFromAuthorizedSources.trustedFunctions, or rely on trustSameGroupFunctions if it already lives in your own namespace.
+          https://getplumber.io/docs/cli/issues/ISSUE-415
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustincluderequiredactions
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: workflowMustIncludeRequiredActions
+      name: Workflows must include required actions
+      description: Verifies that every action or reusable workflow declared as required in
+        the configuration is actually referenced by the project's workflows.
+      annotation: |-
+        Plumber control: CTRL-417.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-417 (high) Required action or reusable workflow is missing
+          Add a `uses: <owner>/<repo>[@<ref>]` step that references the required action, or a `jobs.<name>.uses: <owner>/<repo>/.github/workflows/<file>.yml@<ref>` job that calls the required reusable workflow. The exact path declared in `.plumber.yaml` under `workflowMustIncludeRequiredActions` is matched ref-agnostically, so any pinned ref works.
+          https://getplumber.io/docs/cli/issues/ISSUE-417
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowsmustdeclareconcurrency
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: workflowsMustDeclareConcurrency
+      name: Workflows must declare concurrency
+      description: Verifies that workflows declare a concurrency block so concurrent runs
+        on the same ref do not race on caches, artifacts, and external state.
+      annotation: |-
+        Plumber control: CTRL-418.
+        - ISSUE-418 (medium) Workflow has no concurrency block
+          Add a `concurrency` block that groups runs by ref: `concurrency: { group: ${{ github.workflow }}-${{ github.ref }}, cancel-in-progress: true }`. For deploy workflows, keep `cancel-in-progress: false` so an in-flight deploy finishes cleanly.
+          https://getplumber.io/docs/cli/issues/ISSUE-418
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotuseknownmisfeatures
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: workflowMustNotUseKnownMisfeatures
+      name: Workflows must not use known misfeatures
+      description: Detects workflows that use a known-harmful pattern such as legacy Windows
+        shells, inline network installs, or uploading the checkout directory as an artifact.
+      annotation: |-
+        Plumber control: CTRL-419.
+        - ISSUE-419 (medium) Workflow uses a known misfeature pattern
+          Switch Windows jobs to `shell: pwsh`. Vendor dependencies or use a pinned install step with checksums. Never upload the checkout directory as an artefact: upload the build output only.
+          https://getplumber.io/docs/cli/issues/ISSUE-419
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotcontainobfuscation
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: workflowMustNotContainObfuscation
+      name: Workflows must not contain obfuscation
+      description: Detects workflow scripts and expressions that carry invisible or homoglyph
+        characters used to hide what actually executes.
+      annotation: |-
+        Plumber control: CTRL-420.
+        - ISSUE-420 (high) Workflow script contains obfuscation (zero-width / bidi / non-ASCII homoglyphs)
+          Strip non-ASCII characters from workflow scripts and expression references unless strictly necessary (localised strings, user-facing labels). Enable `.gitattributes` pre-commit checks that block zero-width and bidirectional Unicode in source files.
+          https://getplumber.io/docs/cli/issues/ISSUE-420
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:publishworkflowsmustuseoidctrustedpublishing
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: publishWorkflowsMustUseOidcTrustedPublishing
+      name: Publish workflows must use OIDC trusted publishing
+      description: Verifies that publish workflows to PyPI, npm, or Maven Central use OIDC
+        trusted publishing instead of a long-lived static token.
+      annotation: |-
+        Plumber control: CTRL-421.
+        - ISSUE-421 (high) Publish step relies on a static token instead of OIDC trusted publishing
+          Migrate to trusted publishing: for PyPI set a publisher in the project settings and drop the token; for npm use the `--provenance` flag with OIDC; for Maven Central use the Sonatype portal's trusted publishing. Delete the static token once OIDC is live.
+          https://getplumber.io/docs/cli/issues/ISSUE-421
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowsmusthaveexplicitname
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:4
+      ref_id: workflowsMustHaveExplicitName
+      name: Workflows must have an explicit name
+      description: Verifies that every workflow declares a top-level name instead of falling
+        back to its file path in the Actions UI and status checks.
+      annotation: |-
+        Plumber control: CTRL-422.
+        - ISSUE-422 (low) Workflow has no explicit name
+          Add a human-readable `name: <descriptive-name>` at the top of every workflow. Keep the name stable so branch protections and required status checks continue to match after renames.
+          https://getplumber.io/docs/cli/issues/ISSUE-422
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Access and Authorization
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:branchmustbeprotected
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:5
+      ref_id: branchMustBeProtected
+      name: Branch must be protected
+      description: 'Verifies that the analyzed branch is protected and that the protection
+        settings are compliant: direct pushes and force pushes blocked, access levels tight
+        enough, and code owner approval enforced where required.'
+      annotation: |-
+        Plumber control: CTRL-501.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-501 (critical) Branch protection missing
+          Enable branch protection in GitLab: Settings > Repository > Protected Branches. Add the branch with appropriate access levels for push and merge.
+          https://getplumber.io/docs/cli/issues/ISSUE-501
+        - ISSUE-505 (high) Branch protection configuration not compliant
+          Update branch protection settings in GitLab: Settings > Repository > Protected Branches. Ensure force push is disabled, access levels meet the minimum, and code owner approval is required per your .plumber.yaml configuration.
+          https://getplumber.io/docs/cli/issues/ISSUE-505
+      implementation_groups:
+      - github
+      - gitlab
+      - common
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:mergerequestapprovalrulesmustrequireminimumapprovals
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:5
+      ref_id: mergeRequestApprovalRulesMustRequireMinimumApprovals
+      name: MR approval rules must require a minimum number of approvals
+      description: Verifies that every merge request approval rule covering all protected
+        branches requires at least the configured minimum number of approvals.
+      annotation: |-
+        Plumber control: CTRL-502.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        Requires GitLab Premium or higher.
+        - ISSUE-502 (high) Merge request approval rule requires too few approvals
+          Raise the rule's required approvals in Settings > Merge requests > Approval rules to at least your configured minimum, or narrow the rule's scope if it is not meant to cover all protected branches.
+          https://getplumber.io/docs/cli/issues/ISSUE-502
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:mergerequestapprovalsettingsmustbecompliant
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:5
+      ref_id: mergeRequestApprovalSettingsMustBeCompliant
+      name: MR approval settings must be compliant
+      description: Verifies that the project's merge request approval settings (author and
+        committer approval, rule overrides, re-authentication, approval reset on new commits)
+        meet the configured policy.
+      annotation: |-
+        Plumber control: CTRL-503.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        Requires GitLab Premium or higher.
+        - ISSUE-503 (high) MR approval settings are not compliant
+          Tighten the project's approval settings in Settings > Merge requests: prevent approval by the author and by committers, prevent editing approval rules in merge requests, require re-authentication to approve, and remove approvals when new commits are added, as your policy requires.
+          https://getplumber.io/docs/cli/issues/ISSUE-503
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:mergerequestapprovalrulesmustcoverallprotectedbranches
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:5
+      ref_id: mergeRequestApprovalRulesMustCoverAllProtectedBranches
+      name: MR approval rules must cover all protected branches
+      description: Verifies that at least one merge request approval rule applies to every
+        protected branch, so none can be merged without a required approval.
+      annotation: |-
+        Plumber control: CTRL-504.
+        Requires GitLab Premium or higher.
+        - ISSUE-504 (high) No approval rule covers all protected branches
+          Add a merge request approval rule that applies to all protected branches in Settings > Merge requests > Approval rules.
+          https://getplumber.io/docs/cli/issues/ISSUE-504
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:mergerequestsettingsmustbecompliant
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:5
+      ref_id: mergeRequestSettingsMustBeCompliant
+      name: MR settings must be compliant
+      description: Verifies that the project's merge request and merge settings (merge method,
+        squash policy, merge trains, source-branch removal) match the configured policy.
+      annotation: |-
+        Plumber control: CTRL-506.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-506 (medium) MR settings are not compliant
+          Align the project's merge-request settings in Settings > Merge requests with your policy: set the required merge method and squash option, and toggle the merge-train, skipped-pipeline, discussion-resolution, and source-branch-removal options to the expected values.
+          https://getplumber.io/docs/cli/issues/ISSUE-506
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Security Source
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:projectmusthavesecuritypolicysource
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:6
+      ref_id: projectMustHaveSecurityPolicySource
+      name: Project must have a security policy source
+      description: Verifies that the project directly links the expected GitLab security policy
+        project.
+      annotation: |-
+        Plumber control: CTRL-601.
+        Requires GitLab Ultimate or higher.
+        - ISSUE-601 (critical) Missing security policy source on project
+          Link the expected security policy project in Settings > Security & Compliance > Policies (or set it via the API). If your policies are enforced at a parent group and inherited, this project-scoped check will not see them, so link at the project level too or disable this control. Security policies require GitLab Ultimate.
+          https://getplumber.io/docs/cli/issues/ISSUE-601
+      implementation_groups:
+      - gitlab
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Third-party Actions
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionsmustbepinnedbycommitsha
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionsMustBePinnedByCommitSha
+      name: Third-party actions must be pinned by commit SHA
+      description: Requires third-party GitHub Actions to be pinned to a full commit SHA instead
+        of a mutable tag or branch reference.
+      annotation: |-
+        Plumber control: CTRL-701.
+        - ISSUE-701 (high) Third-party action reference is not pinned by commit SHA
+          Replace `uses: owner/action@v4` with `uses: owner/action@<40-char-sha>` and add a `# vX.Y.Z` comment to document the version. Tools like Dependabot's `version-update-strategy: sha-and-version` can automate the update flow. Official GitHub-owned actions (actions/*, github/*) can be excluded if they are in the workflow's trusted boundary.
+          https://getplumber.io/docs/cli/issues/ISSUE-701
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionsmustnotbearchived
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionsMustNotBeArchived
+      name: Actions must not reference archived repositories
+      description: Flags actions hosted in a GitHub repository that has been archived, since
+        it no longer receives maintenance or security fixes.
+      annotation: |-
+        Plumber control: CTRL-702.
+        - ISSUE-702 (high) Action is hosted in an archived repository
+          Replace the action with a maintained fork (audit the fork's owner first) or with an equivalent step implemented inline. If the behaviour is trivial, inlining the shell logic avoids the supply-chain dependency entirely.
+          https://getplumber.io/docs/cli/issues/ISSUE-702
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionsmustnotcarryknowncves
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionsMustNotCarryKnownCVEs
+      name: Actions must not carry known CVEs
+      description: Verifies that the pinned version of every third-party action is free of
+        published security advisories in the GitHub Advisory Database.
+      annotation: |-
+        Plumber control: CTRL-703.
+        - ISSUE-703 (critical) Action version carries a published security advisory
+          Upgrade the action to a version outside the advisory's affected range (the advisory page lists a fixed-in version). Pin by SHA once upgraded so future retags cannot silently revert the fix. Configure Dependabot with `package-ecosystem: github-actions` to receive PR alerts when new advisories land.
+          https://getplumber.io/docs/cli/issues/ISSUE-703
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:containercredentialsmustcomefromsecrets
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: containerCredentialsMustComeFromSecrets
+      name: Container credentials must come from secrets
+      description: Verifies that container registry credentials are referenced from secrets
+        instead of hardcoded as literal values in the workflow.
+      annotation: |-
+        Plumber control: CTRL-704.
+        - ISSUE-704 (critical) Container registry password is hard-coded in the workflow
+          Store the password in a repository, environment, or organization secret and reference it via `${{ secrets.<NAME> }}`. If the password is already exposed in git history, rotate it immediately and purge the literal with `git filter-repo` or a BFG run before re-publishing.
+          https://getplumber.io/docs/cli/issues/ISSUE-704
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:releaseworkflowsmustnotrestoreuntrustedcache
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: releaseWorkflowsMustNotRestoreUntrustedCache
+      name: Release workflows must not restore an untrusted cache
+      description: Flags release and publish jobs that restore a build cache whose key is
+        not scoped to the release ref, closing the cross-branch cache poisoning vector. Conditions
+        are resolved per trigger; a cache condition it cannot resolve is reported as a medium
+        verify-manually finding.
+      annotation: |-
+        Plumber control: CTRL-705.
+        Needs settings in .plumber.yaml before it can be evaluated.
+        - ISSUE-705 (high) Release/publish workflow may consume a poisoned build cache
+          Either disable the cache entirely on release/publish jobs, or scope the `key:` to the ref being released (e.g. `key: release-${{ github.ref_name }}-${{ hashFiles('**/go.sum') }}`) without a `restore-keys:` fallback that reaches into PR-populated entries. Verify artefacts against a checksum after restoring.
+          https://getplumber.io/docs/cli/issues/ISSUE-705
+        - ISSUE-717 (medium) Conditional cache on a release path could not be resolved
+          Make the condition statically checkable: use the `${{ github.event_name != '<publish trigger>' && '<manager>' || '' }}` form (or its == inverse) so the cache is provably off on the publish trigger, split caching into a step whose `if:` excludes the publish trigger, or scope the cache key (and any restore-keys) to the release ref.
+          https://getplumber.io/docs/cli/issues/ISSUE-717
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:dockerfilesmustpinbaseimagebydigest
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: dockerfilesMustPinBaseImageByDigest
+      name: Dockerfiles must pin base images by digest
+      description: Verifies that Dockerfile FROM references pin the base image by SHA256 digest
+        instead of a mutable tag.
+      annotation: |-
+        Plumber control: CTRL-706.
+        - ISSUE-706 (medium) Dockerfile FROM reference is not pinned by digest
+          Replace `FROM image:tag` with `FROM image:tag@sha256:…`. `docker inspect --format='{{index .RepoDigests 0}}' image:tag` prints the digest for the tag you just pulled. Automate refresh with Dependabot or Renovate (`package-ecosystem: docker`, `version-update-strategy: sha-and-version`) so the pin stays current.
+          https://getplumber.io/docs/cli/issues/ISSUE-706
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionrefsmustexistupstream
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionRefsMustExistUpstream
+      name: Actions must pin commits that exist upstream
+      description: Verifies that a pinned action commit SHA actually exists in the action's
+        upstream repository.
+      annotation: |-
+        Plumber control: CTRL-707.
+        - ISSUE-707 (critical) Pinned commit SHA does not belong to the action's repository
+          Replace the reference with a SHA that actually belongs to the action's repository. Use `gh api repos/<owner>/<repo>/commits/<sha>` to verify before committing the change. That endpoint only accepts commit SHAs, so a pin naming an annotated tag object answers 422 there; check it with `gh api repos/<owner>/<repo>/git/tags/<sha>` instead, which also reports the tag name and the commit it points at.
+          https://getplumber.io/docs/cli/issues/ISSUE-707
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionpincommentsmustmatchsha
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionPinCommentsMustMatchSha
+      name: Action pin comments must match the pinned SHA
+      description: Verifies that a `# vX.Y.Z` version comment on a pinned action matches the
+        tag the pinned commit SHA actually corresponds to.
+      annotation: |-
+        Plumber control: CTRL-708.
+        - ISSUE-708 (medium) `# vX.Y.Z` comment does not match the SHA
+          Either update the SHA to the one the tag points at, or update the comment to the tag that actually corresponds to the SHA. `gh api repos/<owner>/<repo>/git/ref/tags/<tag>` returns the SHA the tag resolves to.
+          https://getplumber.io/docs/cli/issues/ISSUE-708
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionpinsmustnotbestale
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionPinsMustNotBeStale
+      name: Action pins must not be stale
+      description: Flags actions pinned to a commit SHA that predates the repository's most
+        recent upstream release.
+      annotation: |-
+        Plumber control: CTRL-709.
+        - ISSUE-709 (low) Action pin is behind the latest upstream release
+          Update the pin to the SHA of the latest release, and refresh the trailing `# vX.Y.Z` comment. Enable Dependabot with `package-ecosystem: github-actions` and `version-update-strategy: sha-and-version` to keep the pins fresh automatically.
+          https://getplumber.io/docs/cli/issues/ISSUE-709
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionsmustnotduplicaterunnerbuiltins
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionsMustNotDuplicateRunnerBuiltins
+      name: Actions must not duplicate runner builtins
+      description: Flags third-party actions that duplicate functionality the GitHub-hosted
+        runner already provides, an unnecessary supply-chain dependency.
+      annotation: |-
+        Plumber control: CTRL-711.
+        - ISSUE-711 (low) Third-party action duplicates functionality already on the runner
+          Replace the action with the equivalent inline shell step using the runner's built-in tooling (`gh pr create`, `gh release`, simple `bash` retry loops). Keeps the workflow readable AND removes a supply-chain link. When the capability is non-trivial (artifact caching, matrix fan-out), prefer the official `actions/*` action over a third-party duplicate.
+          https://getplumber.io/docs/cli/issues/ISSUE-711
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:releaseworkflowsmustsignartefacts
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: releaseWorkflowsMustSignArtefacts
+      name: Release workflows must sign artefacts
+      description: Verifies that release and publish workflows sign the artefacts they produce.
+      annotation: |-
+        Plumber control: CTRL-712.
+        - ISSUE-712 (medium) Release / publish workflow produces unsigned artefacts
+          Add a signing step to the release job: `sigstore/cosign-installer` followed by `cosign sign <artefact>` for container images, `sigstore/gh-action-sigstore-python` for Python wheels, `crazy-max/ghaction-import-gpg` + `gpg --detach-sign` for tarballs, or `--snapshot-github-actions` on goreleaser with the signing pipeline configured. Publish the `.sig` / `.asc` alongside the artefact in the release assets.
+          https://getplumber.io/docs/cli/issues/ISSUE-712
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:githubactionmustcomefromauthorizedsources
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: githubActionMustComeFromAuthorizedSources
+      name: Actions must come from authorized sources
+      description: Verifies that third-party GitHub Actions referenced in workflows come from
+        an authorized owner, org allowlist, or minimum-popularity source.
+      annotation: |-
+        Plumber control: CTRL-713.
+        - ISSUE-713 (high) Action comes from an unauthorized source
+          Use an action from an authorized source. Configure the allowlist in .plumber.yaml under githubActionMustComeFromAuthorizedSources: keep trustGithubOfficialActions on for actions/* and github/*, add trusted owners or actions to trustedGithubActions (exact `owner/repo` or `owner/*`), and optionally set minimumStars to require a popularity threshold. Vendoring the action into a local `./.github/actions/…` directory removes the external dependency entirely.
+          https://getplumber.io/docs/cli/issues/ISSUE-713
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:actionsmustnotexecutemutableremotecode
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:7
+      ref_id: actionsMustNotExecuteMutableRemoteCode
+      name: Actions must not execute mutable remote code
+      description: Detects third-party actions whose own source fetches and executes code
+        from a mutable ref without verifying it against a checksum, including obfuscated fetch-then-execute
+        patterns.
+      annotation: |-
+        Plumber control: CTRL-714.
+        - ISSUE-714 (high) Action fetches and runs remote code from a mutable ref (in the open)
+          Prefer an action that pins its downloads to an immutable ref AND verifies a checksum. Otherwise install the tool yourself from a pinned release, verify it against a checksum committed to your repo, and run it directly; or vendor the action and pin its internal fetch. A fetch that already verifies a pinned checksum is content-pinned and is not flagged here.
+          https://getplumber.io/docs/cli/issues/ISSUE-714
+        - ISSUE-715 (critical) Action obfuscates a remote code fetch/exec
+          Remove the obfuscation. If the action is a dependency, drop or vendor it and replace the hidden fetch with an explicit, pinned, checksum-verified install. An action that must decode data at runtime should not feed that decoded value into a shell or eval.
+          https://getplumber.io/docs/cli/issues/ISSUE-715
+        - ISSUE-716 (low) Action source could not be verified
+          Re-run where the action source is reachable (authenticated token, network access) to get a definitive result, or vendor the action so its source is local and auditable. This finding is informational: it flags an unchecked dependency, not a confirmed problem.
+          https://getplumber.io/docs/cli/issues/ISSUE-716
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Workflow Triggers and Permissions
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowsmustdeclarepermissions
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:8
+      ref_id: workflowsMustDeclarePermissions
+      name: Workflows must declare permissions
+      description: Verifies that workflows declare an explicit permissions block instead of
+        falling back to the repository's default GITHUB_TOKEN permissions.
+      annotation: |-
+        Plumber control: CTRL-801.
+        - ISSUE-801 (medium) Workflow has no explicit `permissions:` block
+          Declare the narrowest permissions explicitly: `permissions: { contents: read }` at the workflow level and widen per-job only when a step needs to push, comment on issues, etc. This enforces the principle of least privilege regardless of the repo default setting.
+          https://getplumber.io/docs/cli/issues/ISSUE-801
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotusedangeroustriggers
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:8
+      ref_id: workflowMustNotUseDangerousTriggers
+      name: Workflows must not use dangerous triggers
+      description: Detects workflows reachable via a trigger that runs with base-repository
+        secrets while being influenceable by an unprivileged caller, combined with checking
+        out fork-controlled code.
+      annotation: |-
+        Plumber control: CTRL-802.
+        - ISSUE-802 (critical) Dangerous workflow trigger
+          Prefer the standard `pull_request` trigger unless access to base-repo secrets is strictly required. If a secret-bearing trigger is necessary, never check out fork content and never render github.event.* / github.head_ref into shell commands. For `workflow_run`, keep the job restricted to non-secret-bearing steps.
+          https://getplumber.io/docs/cli/issues/ISSUE-802
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:workflowmustnotgrantpermissionswriteall
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:8
+      ref_id: workflowMustNotGrantPermissionsWriteAll
+      name: Workflow must not grant write-all permissions
+      description: Detects workflow permissions blocks that grant write-all, giving the GITHUB_TOKEN
+        write access to every API scope.
+      annotation: |-
+        Plumber control: CTRL-803.
+        - ISSUE-803 (high) Excessive workflow permissions
+          Declare the narrowest permissions block that lets the job do its work. Prefer `permissions: { contents: read }` at the workflow level and grant additional scopes only on the jobs that truly need them.
+          https://getplumber.io/docs/cli/issues/ISSUE-803
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:pullrequesttargetmustnotcheckouthead
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:8
+      ref_id: pullRequestTargetMustNotCheckoutHead
+      name: pull_request_target workflows must not check out the PR head
+      description: Detects pull_request_target workflows that explicitly check out the pull
+        request head, combining access to base-repo secrets with PR-author-controlled code.
+      annotation: |-
+        Plumber control: CTRL-804.
+        - ISSUE-804 (critical) pull_request_target workflow explicitly checks out the PR head
+          Either switch to the standard `pull_request` event (runs in the fork's context, no base-repo secrets), or remove the explicit `ref:` input so `actions/checkout` falls back to the base repository's SHA. If cross-context code must be examined, split the job: a small pull_request_target job gathers metadata, then hands off to a separate pull_request workflow that executes the fork code.
+          https://getplumber.io/docs/cli/issues/ISSUE-804
+      implementation_groups:
+      - github
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Repository Hygiene
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:dependabotmustnotallowinsecureexternalcodeexecution
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:9
+      ref_id: dependabotMustNotAllowInsecureExternalCodeExecution
+      name: Dependabot must not allow insecure external code execution
+      description: Detects Dependabot configuration that re-enables insecure external code
+        execution for an update ecosystem.
+      annotation: |-
+        Plumber control: CTRL-901.
+        - ISSUE-901 (critical) Dependabot re-enables insecure external code execution
+          Remove the `insecure-external-code-execution: allow` entry. If a specific ecosystem genuinely requires executing upstream scripts to resolve versions, scope the allowance narrowly with `enable-beta-ecosystems: false` and pair it with a dedicated runner isolation review; do not set it repository-wide.
+          https://getplumber.io/docs/cli/issues/ISSUE-901
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:dependabotecosystemsmusthavecooldown
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:9
+      ref_id: dependabotEcosystemsMustHaveCooldown
+      name: Dependabot ecosystems must have a cooldown
+      description: Verifies that every Dependabot update ecosystem declares a cooldown window
+        before opening pull requests for newly published versions.
+      annotation: |-
+        Plumber control: CTRL-902.
+        - ISSUE-902 (low) Dependabot ecosystem has no cooldown window
+          Add a `cooldown:` block to each update ecosystem: for example `cooldown: { default-days: 3, semver-major-days: 7, include: ["*"] }`. Adjust the window to fit the project's patching tolerance but never skip it for ecosystems that auto-merge.
+          https://getplumber.io/docs/cli/issues/ISSUE-902
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:repositoriesmustconfiguredependencyupdates
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:9
+      ref_id: repositoriesMustConfigureDependencyUpdates
+      name: Repositories must configure dependency updates
+      description: Verifies that repositories with CI/CD workflows configure a dependency
+        update tool such as Dependabot or Renovate.
+      annotation: |-
+        Plumber control: CTRL-903.
+        - ISSUE-903 (medium) Repository has workflows but no dependency update tool
+          Add `.github/dependabot.yml` with at minimum `package-ecosystem: github-actions` and your primary language ecosystem (npm, pip, gomod, etc.). For more configurable flows prefer Renovate: `npx -y renovate-config-validator` validates a `renovate.json` before commit.
+          https://getplumber.io/docs/cli/issues/ISSUE-903
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:repositoriesmustrunsast
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:9
+      ref_id: repositoriesMustRunSAST
+      name: Repositories must run SAST
+      description: Verifies that repositories with CI/CD workflows run a recognized static
+        analysis (SAST) scanner.
+      annotation: |-
+        Plumber control: CTRL-904.
+        - ISSUE-904 (low) No static analysis scanner runs in CI
+          Add a workflow that runs CodeQL (`github/codeql-action/init` + `analyze`, free for public repos), Semgrep, or an equivalent SAST scanner on pushes to the default branch and on pull requests. Enable GitHub's code-scanning alerts so findings open issues rather than sit in log output.
+          https://getplumber.io/docs/cli/issues/ISSUE-904
+      implementation_groups:
+      - not-enforced
+    - urn: urn:intuitem:risk:req_node:plumber-cicd-checks:repositoriesmustpublishsecuritypolicy
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:plumber-cicd-checks:9
+      ref_id: repositoriesMustPublishSecurityPolicy
+      name: Repositories must publish a security policy
+      description: Verifies that repositories with CI/CD workflows publish a SECURITY.md vulnerability
+        disclosure policy.
+      annotation: |-
+        Plumber control: CTRL-905.
+        - ISSUE-905 (low) Repository has no SECURITY.md policy file
+          Add a `SECURITY.md` at the repo root or under `.github/`. GitHub ships a template (New file → security policy). Include: the supported versions, the reporting channel (email / security@ / private advisory), the expected first-response SLA, and any bounty / safe-harbour terms the project honours.
+          https://getplumber.io/docs/cli/issues/ISSUE-905
+      implementation_groups:
+      - not-enforced

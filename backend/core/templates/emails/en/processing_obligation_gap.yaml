@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${processing_count} processing activit(ies) with GDPR record gaps"
+body: |
+  Hello,
+
+  The following processing activities you are assigned to have gaps in the record of processing activities:
+
+  ${gap_list}
+
+  [Open CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

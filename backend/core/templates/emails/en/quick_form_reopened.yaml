@@ -1,0 +1,13 @@
+subject: "CISO Assistant: The quick form '${response_name}' has been reopened"
+body: |
+  Hello,
+
+  The following quick form response was sent back to you for changes:
+
+  - Response: ${response_name}
+  - Form: ${quick_form_name}
+  - Reviewer note: ${observation}
+
+  Please log in to CISO Assistant to update your answers: [Open the form](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Thank you.

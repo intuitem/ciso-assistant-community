@@ -68,6 +68,9 @@ class SendMessageSerializer(serializers.Serializer):
 
     content = serializers.CharField(max_length=10000)
     page_context = serializers.DictField(required=False, default=dict)
+    document_ids = serializers.ListField(
+        child=serializers.UUIDField(), required=False, default=list, max_length=5
+    )
 
     def validate_page_context(self, value):
         """Whitelist page_context keys and sanitize values."""
@@ -100,7 +103,16 @@ class IndexedDocumentWriteSerializer(BaseModelSerializer):
             "chunk_count",
             "error_message",
             "indexed_at",
+            # What a document is a copy of decides who may read it and which
+            # folder it follows: only the indexer sets it, never an API client.
+            "source_type",
+            "source_content_type",
+            "source_object_id",
         ]
+
+    def create(self, validated_data):
+        validated_data["source_type"] = IndexedDocument.SourceType.CUSTOM
+        return super().create(validated_data)
 
 
 class QuestionnaireRunReadSerializer(BaseModelSerializer):

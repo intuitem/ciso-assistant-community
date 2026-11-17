@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
-import { error, type NumericRange } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.text());
+		error(res.status, await res.text());
 	}
 
 	const fileName = `applied-controls-mss-${new Date().toISOString().split('T')[0]}.xlsx`;

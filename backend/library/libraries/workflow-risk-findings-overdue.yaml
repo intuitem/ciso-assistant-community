@@ -1,0 +1,65 @@
+urn: urn:intuitem:risk:library:workflow-risk-findings-overdue
+locale: en
+ref_id: workflow-risk-findings-overdue
+name: Overdue findings — daily digest
+description: Findings whose due date has passed and that are not closed yet, mailed once a day.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-risk-findings-overdue:workflow:findings-overdue
+    schema_version: 1
+    ref_id: findings-overdue
+    name: Overdue findings — daily digest
+    description: Findings whose due date has passed and that are not closed yet, mailed once a day.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: security@example.com
+      nodes:
+      - ref: every_morning
+        type: trigger
+        label: Every day 07:00
+        trigger_config:
+          type: schedule
+          cron_expression: 0 7 * * *
+          timezone: UTC
+      - ref: fetch_overdue
+        type: action
+        label: Past due, still open
+        action_config:
+          type: read_objects
+          model: finding
+          mode: list
+          order_by: due_date
+          limit: 50
+          filters:
+            operator: and
+            conditions:
+            - field: due_date
+              op: lt
+              value: '{{today}}'
+            - field: status
+              op: not_in
+              value: resolved,closed,dismissed,deprecated
+      - ref: send_digest
+        type: action
+        label: Email the digest
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Overdue findings: {{nodes.fetch_overdue.count}}'
+          body: '{{nodes.fetch_overdue.count}} finding(s) were due before {{today}} and are still open.'
+      - ref: done
+        type: end
+      edges:
+      - source: every_morning
+        target: fetch_overdue
+      - source: fetch_overdue
+        target: send_digest
+      - source: send_digest
+        target: done

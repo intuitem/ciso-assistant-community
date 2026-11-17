@@ -3,9 +3,9 @@
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -76,6 +76,7 @@
 
 <TextField
 	type="number"
+	step="1"
 	{form}
 	field="order"
 	cacheLock={cacheLocks['order']}

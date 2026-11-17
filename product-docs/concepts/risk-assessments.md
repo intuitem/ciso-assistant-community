@@ -43,6 +43,8 @@ In CISO Assistant, **risk treatment is combined with the risk assessment** rathe
 
 Scenarios can be defined directly from the risk-assessment view or separately via the scenarios view. The same scenario can be reused across multiple studies.
 
+On the assessment page, the **Selection** bar above the scenario table narrows the assessment to the scenarios you choose, for example those that are not within tolerance. The matrices, the action plan and the exports then follow the same selection. See [Scenario selection](../features/scenario-selection.md).
+
 ## Risk levels: inherent, current, residual
 
 CISO Assistant tracks three risk levels for each scenario, reflecting where the organisation stands along the treatment journey:
@@ -52,6 +54,8 @@ CISO Assistant tracks three risk levels for each scenario, reflecting where the 
 - **Residual risk** — the level expected once all _planned_ applied controls have been implemented. The target state, and the figure used in risk-acceptance decisions.
 
 Each level has its own probability, impact, and overall level fields. The assessment's consistency check flags a scenario whose **residual** risk exceeds its **current** risk (on level, probability, or impact), and also flags a residual lowered below current when no applied control justifies the reduction.
+
+To watch scenarios move through these three levels on the matrix, and project when each will reach its residual level from the ETAs of its extra controls, open [Risk trajectory](../features/risk-trajectory.md) from the assessment.
 
 ## Risk acceptance
 
@@ -70,3 +74,6 @@ Most organisations define an official matrix to be used for all risk assessments
 - [Assets](assets.md)
 - [Applied controls](applied-controls.md)
 - [Vocabulary → Threat / Risk assessment](../introduction/vocabulary.md)
+- [Security exceptions](security-exceptions.md)
+- [Risk trajectory](../features/risk-trajectory.md)
+- [Scenario selection](../features/scenario-selection.md)

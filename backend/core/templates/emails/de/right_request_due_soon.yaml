@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${request_count} Betroffenenanfrage(n) in ${days_remaining} Tag(en) fällig"
+body: |
+  Hallo,
+
+  Die folgenden Betroffenenanfragen sind in ${days_remaining} Tag(en) fällig:
+
+  ${request_list}
+
+  Art. 12 Abs. 3 DSGVO verlangt eine Antwort innerhalb eines Monats nach Eingang. [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

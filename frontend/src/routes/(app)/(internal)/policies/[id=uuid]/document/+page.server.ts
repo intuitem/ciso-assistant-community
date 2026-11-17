@@ -1,11 +1,13 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { pickWorkingRevision } from '#lib/utils/documentRevisions.js';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const { fetch, params, cookies, locals } = event;
 
-	if (!locals.featureflags?.policy_documents) {
+	if (!(await locals.getFeatureFlags())?.policy_documents) {
 		redirect(302, `/policies/${params.id}`);
 	}
 
@@ -23,11 +25,10 @@ export const load: PageServerLoad = async (event) => {
 	// Gracefully degrade if doc_management is unavailable
 	let allDocuments: any[] = [];
 	try {
-		const allDocsRes = await fetch(`${BASE_API_URL}/managed-documents/?policy=${params.id}`);
-		if (allDocsRes.ok) {
-			const allDocsData = await allDocsRes.json();
-			allDocuments = allDocsData.results || [];
-		}
+		allDocuments = await fetchAllPages(
+			fetch,
+			`${BASE_API_URL}/managed-documents/?container__policies=${params.id}`
+		);
 	} catch {
 		// doc_management app may not be available
 	}
@@ -48,34 +49,18 @@ export const load: PageServerLoad = async (event) => {
 	if (document) {
 		// Load revisions
 		try {
-			const revRes = await fetch(
+			revisions = await fetchAllPages(
+				fetch,
 				`${BASE_API_URL}/document-revisions/?document=${document.id}&ordering=-version_number`
 			);
-			if (revRes.ok) {
-				const revData = await revRes.json();
-				revisions = revData.results || [];
-			}
 		} catch {
 			// Gracefully degrade
 		}
 
-		// Load current draft or current_revision content
-		const draft = revisions.find((r: any) => r.status === 'draft');
+		const working = pickWorkingRevision(revisions);
 		try {
-			if (draft) {
-				const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${draft.id}/`);
-				if (fullRes.ok) {
-					currentRevision = await fullRes.json();
-				}
-			} else if (document.current_revision?.id) {
-				const fullRes = await fetch(
-					`${BASE_API_URL}/document-revisions/${document.current_revision.id}/`
-				);
-				if (fullRes.ok) {
-					currentRevision = await fullRes.json();
-				}
-			} else if (revisions.length > 0) {
-				const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${revisions[0].id}/`);
+			if (working) {
+				const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${working.id}/`);
 				if (fullRes.ok) {
 					currentRevision = await fullRes.json();
 				}
@@ -88,7 +73,9 @@ export const load: PageServerLoad = async (event) => {
 	// Load available templates
 	let templates: any[] = [];
 	try {
-		const templatesRes = await fetch(`${BASE_API_URL}/managed-documents/templates/`);
+		const templatesRes = await fetch(
+			`${BASE_API_URL}/managed-documents/templates/?document_type=policy`
+		);
 		if (templatesRes.ok) {
 			templates = await templatesRes.json();
 		}

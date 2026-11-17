@@ -1,16 +1,21 @@
-import type { ComponentType } from 'svelte';
+import type { Component } from 'svelte';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NodeComponent = Component<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NodeProps = Record<string, any>;
 
 export interface TreeViewNode {
 	/** Nodes Unique ID */
 	id: string;
 	/** Main content. accepts HTML or svelte component. */
-	content: string | ComponentType;
+	content: string | NodeComponent;
 	/** Main content props. only used when the Content is a svelte component. */
-	contentProps?: object;
+	contentProps?: NodeProps;
 	/** Lead content. accepts HTML or svelte component. */
-	lead?: string | ComponentType;
+	lead?: string | NodeComponent;
 	/** lead props. only used when the Lead is a svelte component. */
-	leadProps?: object;
+	leadProps?: NodeProps;
 	/** children nodes. */
 	children?: TreeViewNode[];
 	/** Set the input's value. */
