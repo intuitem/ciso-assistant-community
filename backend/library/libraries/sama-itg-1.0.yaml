@@ -24,12 +24,47 @@ objects:
       service providers). It defines the IT governance control domains, subdomains,
       principles and control requirements to identify and address IT-related risks.
       4 control domains / 35 subdomains. Source: https://rulebook.sama.gov.sa/en/information-technology-governance-framework'
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Non-existent
+      description: "\u2022 No documentation.\n\u2022 There is no awareness or attention\
+        \ for certain information technology control."
+    - score: 1
+      name: Ad-hoc
+      description: "\u2022 IT controls is not or partially defined.\n\u2022 IT controls\
+        \ are performed in an inconsistent way.\n\u2022 IT controls are not fully\
+        \ defined."
+    - score: 2
+      name: Repeatable but informal
+      description: "\u2022 The execution of the IT control is based on an informal\
+        \ and unwritten, though standardized, practice."
+    - score: 3
+      name: Structured and formalized
+      description: "\u2022 IT controls are defined, approved and implemented in a\
+        \ structured and formalized way.\n\u2022 The implementation of IT controls\
+        \ can be demonstrated."
+    - score: 4
+      name: Managed and measurable
+      description: "\u2022 The effectiveness of the IT controls are periodically assessed\
+        \ and improved when necessary.\n\u2022 This periodic measurement, evaluations\
+        \ and opportunities for improvement are documented."
+    - score: 5
+      name: Adaptive
+      description: "\u2022 IT controls are subject to a continuous improvement plan."
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1
       assessable: false
       depth: 1
       ref_id: '3.1'
       name: Information Technology Governance and Leadership
+      description: Member Organizations board is ultimately responsible for setting
+        the Information Technology (IT) Governance and ensuring that IT risks are
+        effectively managed within the Member organization. The board of the Member
+        Organization can delegate its IT Governance responsibilities to senior management
+        or IT steering committee (ITSC). The ITSC could be responsible for defining
+        the IT governance and setting the Member Organization's IT strategy.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1
       assessable: false
       depth: 2
@@ -949,6 +984,11 @@ objects:
       depth: 1
       ref_id: '3.2'
       name: IT Risk Management
+      description: IT Risk Management is a continues process of identifying, analyzing,
+        responding, monitoring, and reviewing risks related to IT from process, technology
+        and people perspectives. In order to manage IT risks, Member Organizations
+        should continually identify, assess and reduce IT risks within levels of tolerance
+        set by the Member Organization's senior management.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1
       assessable: false
       depth: 2
@@ -1472,6 +1512,11 @@ objects:
       depth: 1
       ref_id: '3.3'
       name: Operations Management
+      description: IT Operations Management can be defined as the function responsible
+        for continues management and maintenance of the Members Organization's IT
+        applications and infrastructure to ensure delivery of the agreed level of
+        IT services to the business. Thus, IT operations risk factors should be addressed
+        by the Member Organizations through effective management and control.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1
       assessable: false
       depth: 2
@@ -1721,6 +1766,8 @@ objects:
       name: Interdependencies
       description: Interdependencies for critical information assets should be identified
         and managed through governance model to ensure availability of business operations.
+      annotation: 'Note: For more Control Requirements to improve the overall resilience,
+        please refer to the SAMA - BCM Framework.'
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.2-1
       assessable: true
       depth: 3
@@ -3059,6 +3106,11 @@ objects:
       depth: 1
       ref_id: '3.4'
       name: System Change Management
+      description: System change management is a process of defining, designing, testing
+        and implementing changes related to information assets including but not limited
+        to application, software, device and data. Thus, risks factors related to
+        system change management should be addressed by the Member Organizations through
+        adequate implementation of required IT controls.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1
       assessable: false
       depth: 2
@@ -3647,74 +3699,74 @@ objects:
       description: third party testing certification requirement, if applicable, i.e.
         MADA, Tanfeeth, etc.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-3
       description: At a minimum, the following types of testing should be considered
         as part of system change management.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3
+      ref_id: 3.4.5-3.a
+      description: unit testing;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3
+      ref_id: 3.4.5-3.b
+      description: system integration testing (SIT);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3
+      ref_id: 3.4.5-3.c
+      description: stress testing (if applicable);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3
+      ref_id: 3.4.5-3.d
+      description: security testing; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3
+      ref_id: 3.4.5-3.e
+      description: user acceptance testing (UAT).
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-4
-      description: unit testing;
+      description: All changes to information system should be thoroughly tested on
+        a separate test environment in accordance with the approved test cases.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-5
-      description: system integration testing (SIT);
+      description: All changes should be formally tested and accepted by the concern
+        business users.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-6
-      description: stress testing (if applicable);
+      description: Testing should include positive and negative test cases scenarios.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-7
-      description: security testing; and
+      description: The results of UAT should be documented and maintained for future
+        reference purposes.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-8
-      description: user acceptance testing (UAT).
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-9
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
-      ref_id: 3.4.5-9
-      description: All changes to information system should be thoroughly tested on
-        a separate test environment in accordance with the approved test cases.
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-10
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
-      ref_id: 3.4.5-10
-      description: All changes should be formally tested and accepted by the concern
-        business users.
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-11
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
-      ref_id: 3.4.5-11
-      description: Testing should include positive and negative test cases scenarios.
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-12
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
-      ref_id: 3.4.5-12
-      description: The results of UAT should be documented and maintained for future
-        reference purposes.
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-13
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
-      ref_id: 3.4.5-13
       description: The production data should not be utilized for system testing in
         the test environment. Only sanitized data should be used for testing purposes.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.6
