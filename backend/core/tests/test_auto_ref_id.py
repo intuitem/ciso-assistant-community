@@ -237,3 +237,15 @@ def test_numbering_ignores_case_and_non_ascii_digits(domains):
     AppliedControl.objects.create(name="lower", folder=a, ref_id="ac.03")
     AppliedControl.objects.create(name="sup", folder=a, ref_id="AC.²")
     assert AppliedControl.objects.create(name="c", folder=a).ref_id == "AC.04"
+
+
+@pytest.mark.django_db
+def test_findings_without_assessment_share_one_sequence(domains):
+    from core.base_models import backfill_auto_ref_ids
+
+    set_auto_ref_id(False)
+    Finding.objects.create(name="old", folder=domains[0])
+    set_auto_ref_id(True)
+    assert Finding.objects.create(name="new", folder=domains[0]).ref_id == "F.01"
+    backfill_auto_ref_ids()
+    assert Finding.objects.get(name="old").ref_id == "F.02"

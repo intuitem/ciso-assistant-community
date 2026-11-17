@@ -181,6 +181,8 @@
 									preset: 'error'
 								}
 					);
+				} catch {
+					toastStore.trigger({ message: m.backfillRefIdsFailed(), preset: 'error' });
 				} finally {
 					backfillRefIdsInProgress = false;
 				}

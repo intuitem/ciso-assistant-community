@@ -211,6 +211,16 @@ def _ref_id_number(ref_id: str, prefix: str) -> int | None:
 def _lock_parents(model, parent_ids) -> None:
     """Serialize ref_id allocation per parent. NO KEY UPDATE, unlike a plain FOR
     UPDATE, does not block the foreign-key inserts other objects make in the parent."""
+    if None in parent_ids:
+        # Objects without a parent (a finding outside any assessment) have no row to
+        # lock, so their group locks the root folder, always taken before parents.
+        from iam.models import Folder
+
+        list(
+            Folder.objects.select_for_update(no_key=True)
+            .filter(pk=Folder.get_root_folder_id())
+            .values_list("pk", flat=True)
+        )
     ids = [pk for pk in parent_ids if pk is not None]
     if ids:
         list(
@@ -315,16 +325,17 @@ def backfill_auto_ref_ids() -> int:
             _lock_parents(
                 model._meta.get_field(model.auto_ref_id_parent).related_model, parents
             )
+            in_parents = models.Q(**{f"{parent}__in": parents - {None}})
+            if None in parents:
+                in_parents |= models.Q(**{f"{parent}__isnull": True})
+            # Only the locked parents: a row blanked since the scan waits for the next run.
             blanks = list(
                 model._base_manager.select_for_update()
-                .filter(blank)
+                .filter(blank & in_parents)
                 .order_by("created_at", "pk")
                 .only("pk", parent)
             )
             last = defaultdict(int)
-            in_parents = models.Q(**{f"{parent}__in": parents - {None}})
-            if None in parents:
-                in_parents |= models.Q(**{f"{parent}__isnull": True})
             for parent_id, ref_id in (
                 model._base_manager.filter(in_parents, ref_id__istartswith=prefix)
                 .values_list(parent, "ref_id")

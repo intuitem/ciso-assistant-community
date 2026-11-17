@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ fetch }) => {
 	} catch {
 		return Response.json(
 			{ error: 'unexpectedResponseFromServer' },
-			{ status: response.status || 500 }
+			{ status: response.ok ? 502 : response.status }
 		);
 	}
 
