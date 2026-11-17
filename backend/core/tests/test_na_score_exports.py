@@ -134,7 +134,7 @@ class TestCategoryScores:
 
         category = _category(na_audit)
 
-        assert category["average_score"] == pytest.approx(73.3)
+        assert category["average_score"] == pytest.approx(73.33)
         assert category["scored_count"] == 3
         assert category["item_count"] == 3
 

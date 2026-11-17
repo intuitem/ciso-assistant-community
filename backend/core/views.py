@@ -81,6 +81,7 @@ from .generators import (
     risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
+    report_reader_role,
     render_docx_report,
     render_docx_report_bounded,
     DocxRenderCrash,
@@ -88,6 +89,7 @@ from .generators import (
     DocxRenderTimeout,
     DocxTemplateError,
 )
+from .framework_report import visible_layers
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
 
@@ -538,6 +540,26 @@ def escape_csv_row(row):
     return [
         escape_excel_formula(value) if isinstance(value, str) else value
         for value in row
+    ]
+
+
+def export_documentation_and_maturity(audit, ra):
+    """The documentation score as recorded and the maturity score as the audit
+    counts it (Framework Insights' requirement figures), for an audit export.
+    Empty for a not applicable requirement, like its implementation score."""
+    if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+        return [None, None]
+    maturity = audit.requirement_layer_scores(
+        result=ra.result,
+        is_scored=ra.is_scored,
+        score=ra.score,
+        documentation_score=ra.documentation_score,
+        min_score=ra.requirement.min_score,
+        max_score=ra.requirement.max_score,
+    )["maturity_score"]
+    return [
+        ra.documentation_score,
+        None if maturity is None else round_score(maturity),
     ]
 
 
@@ -14631,9 +14653,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "applied_controls",
                 "answers",
             ]
+            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+            # Appended, so the existing columns keep their place; `score` stays
+            # the implementation score.
+            show_documentation_score = compliance_assessment.show_documentation_score
+            if show_documentation_score:
+                columns += ["documentation_score", "maturity_score"]
             writer.writerow(columns)
 
-            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
             reqs = list(
                 compliance_assessment.get_requirement_assessments(
                     include_non_assessable=True
@@ -14670,6 +14697,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         build_answers_dict(req.answers.all()),
                     )
                 )
+                if show_documentation_score:
+                    row += export_documentation_and_maturity(compliance_assessment, req)
                 writer.writerow(escape_csv_row(row))
 
             return response
@@ -14757,6 +14786,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     questions_by_node.get(req_node.id),
                     answers_by_req.get(req.id, {}),
                 )
+
+            if show_documentation_score:
+                # Last, and read by no import: it is computed from the two
+                # scores, which are the ones to edit.
+                entry["maturity_score"] = export_documentation_and_maturity(audit, req)[
+                    1
+                ]
 
             entries.append(entry)
 
@@ -14983,6 +15019,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             charts=wants_charts,
             tz=get_report_timezone(),
             readable=viewable.allows,
+            # Scores this reader may see, so the radar is drawn for them.
+            score_layers=visible_layers(audit, report_reader_role(role, profile)),
         )
         payload, images = audit_context_for_typst(
             context,
