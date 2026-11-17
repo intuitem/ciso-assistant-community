@@ -156,6 +156,14 @@ The **Anchor N/A to target score** checkbox controls how _Not Applicable_ requir
 - **Off** _(default)_ — N/A requirements are excluded from the score entirely.
 - **On** — N/A requirements are included with their score replaced by the **Target score**. Use this when "we're already at our target on this dimension" should count toward the overall maturity, rather than being ignored.
 
+### Score-only audits
+
+When the **Result** (compliance) field is hidden from auditors in [field visibility](#field-visibility), the audit is scored only: CyFun audits are set up this way. Not applicable lives in the result, so those audits get an **Applicable** toggle instead, on by default, in the requirement editor, table mode and the auditee view. Turning it off marks the requirement not applicable; respondents may use it too. A not-applicable requirement shows its score greyed at the value it counts for (_Not applicable: counts as 3_ with N/A anchored to a target of 3), and counts as done in the audit's progress.
+
+### Maturity next to the scores
+
+With the documentation score on, the audit shows each requirement's and section's **Maturity** next to its scores, in the tree, table mode, the editor and the auditee view: the average of the implementation and documentation scores, a missing documentation score counting as the bottom of the scale.
+
 ### Per-requirement scale override
 
 By default every requirement in an audit is scored on the audit's [score scale](#choosing-the-score-scale) (e.g. 0..5). When a framework needs a few requirements scored on a different scale — for example a binary "Yes / No" check inside an otherwise maturity-style framework — those requirements can ship their own scale:

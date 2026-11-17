@@ -60,10 +60,6 @@ test('user can create findings inside a follow up', async ({
 	});
 
 	await test.step('create 2 findings inside follow up', async () => {
-		await findingsAssessmentsPage.viewItemDetail(
-			testObjectsData.findingsAssessmentsPage.build.name
-		);
-
 		await expect(summaryTotal).toHaveText('N/A');
 		await expect(summaryUnresolvedHOC).toHaveText('N/A');
 

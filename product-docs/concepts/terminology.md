@@ -18,6 +18,7 @@ A terminology entry binds a **label** to a **field path** — the specific UI su
 - `qualifications` — qualification tags on incidents, risk scenarios, and BIA escalation thresholds. The word _qualification_ itself can be swapped for _risk category_ across the interface via [General settings](../configuration/settings/general.md#display-and-interface).
 - `accreditation.status` and `accreditation.category` — labels on accreditation records.
 - `entity.relationship` — third-party relationship types.
+- `asset.lifecycle_stage` — the [lifecycle](assets.md#lifecycle) stages of assets (planned, implementing, active, phasing out, retired, archived).
 - `metric_definition.unit` — units shown alongside metric values.
 - `project.status` and `project.health` — workflow labels on projects.
 - `processing.nature` — the nature of a processing activity (collection, storage, disclosure, erasure, …) in the privacy register.

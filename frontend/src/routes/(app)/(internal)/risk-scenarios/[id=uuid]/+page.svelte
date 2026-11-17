@@ -24,6 +24,7 @@
 
 	import { onMount } from 'svelte';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -109,6 +110,7 @@
 				throw new Error('Failed to fetch applied controls sync data');
 			}
 		});
+		const hiddenControls = countMasked(appliedControlsSync.changes);
 		const schema = z.object({ reset_residual: z.boolean().default(false) });
 		const modalComponent: ModalComponent = {
 			ref: SyncToActionsRiskModal,
@@ -120,7 +122,13 @@
 				URLModel: 'risk-scenarios',
 				formAction: action,
 				listProps: {
-					items: appliedControlsSync.changes.map((ac) => ac.name),
+					// The controls the user can see by name, the others as a count.
+					items: [
+						...appliedControlsSync.changes
+							.filter((ac) => !isMaskedPlaceholder(ac))
+							.map((ac) => ac.name),
+						...(hiddenControls ? [m.objectsNotVisible({ count: hiddenControls })] : [])
+					],
 					message: m.theFollowingControlsWillBeMovedToExisting()
 				}
 			}

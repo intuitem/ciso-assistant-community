@@ -8,7 +8,7 @@ import pytest
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.models import Terminology
-from iam.models import Folder
+from iam.models import Folder, Role, RoleAssignment
 from metrology.models import CustomMetricSample, MetricDefinition, MetricInstance
 from metrology.views import (
     CustomMetricSampleViewSet,
@@ -126,12 +126,20 @@ class TestOneStepCreation:
 
     def test_a_member_with_both_rights_creates_in_one_step(self):
         spain = make_domain("Spain")
+        user = member(spain, WRITE)
+        # Linking the library unit needs view on it: members get Global's baseline
+        # reader through its default role, a custom group does not.
+        RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name="BI-RL-BSL"),
+            folder=Folder.get_root_folder(),
+        ).perimeter_folders.add(Folder.get_root_folder())
         response = call(
             MetricInstanceViewSet,
             "post",
             "create",
             one_step(spain),
-            member(spain, WRITE),
+            user,
         )
         assert response.status_code == 201, response.data
 
@@ -528,6 +536,34 @@ class TestPeriodOnEnteredValues:
         assert response.status_code == 201, response.data
         instance = MetricInstance.objects.get(id=instance.id)
         assert instance.raw_value() == 60
+
+    def test_the_list_ranks_a_past_period_typed_later_below_the_current_one(
+        self, frozen
+    ):  # noqa: F811
+        es = make_domain("Spain")
+        instance = make_instance(es, make_definition())
+        for moment, period, value in (
+            (at(2026, 5, 3), at(2026, 5, 1), 100),
+            (at(2026, 5, 4), at(2026, 4, 1), 98),
+        ):
+            data = {
+                "metric_instance": str(instance.id),
+                "timestamp": moment.isoformat(),
+                "period_start": period.isoformat(),
+                "value": {"result": value},
+            }
+            response = call(CustomMetricSampleViewSet, "post", "create", data, admin())
+            assert response.status_code == 201, response.data
+        response = call(
+            CustomMetricSampleViewSet,
+            "get",
+            "list",
+            {"metric_instance": str(instance.id)},
+            admin(),
+        )
+        assert response.status_code == 200
+        rows = response.data["results"]
+        assert [r["raw_value"] for r in rows] == [100, 98]
 
     def test_a_future_period_is_refused(self, frozen):  # noqa: F811
         es = make_domain("Spain")

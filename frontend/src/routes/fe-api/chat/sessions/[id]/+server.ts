@@ -2,7 +2,7 @@ import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
-	const res = await fetch(`${BASE_API_URL}/chat/sessions/${params.id}/`);
+	const res = await fetch(`${BASE_API_URL}/chat/sessions/${encodeURIComponent(params.id)}/`);
 	const responseData = await res.text();
 
 	return new Response(responseData, {
@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 };
 
 export const DELETE: RequestHandler = async ({ fetch, params }) => {
-	const res = await fetch(`${BASE_API_URL}/chat/sessions/${params.id}/`, {
+	const res = await fetch(`${BASE_API_URL}/chat/sessions/${encodeURIComponent(params.id)}/`, {
 		method: 'DELETE'
 	});
 

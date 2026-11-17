@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -68,7 +69,7 @@
 							value: number;
 							percent: number;
 						}) =>
-							`${params.seriesName} <br/>${translateName(params.name)} : ${params.value} (${params.percent}%)`
+							`${escapeHtml(params.seriesName)} <br/>${escapeHtml(translateName(params.name))} : ${params.value} (${params.percent}%)`
 					},
 					series: [
 						{

@@ -33,6 +33,8 @@ The applied control sits at the centre — anything that asks for action **point
 
 Applied controls are fundamental for both compliance and remediation. They can derive from a **reference control** for consistency, or be created independently. They are always defined by the organisation and can be attached to the global domain or to a specific domain.
 
+An applied control can also be linked to the [metric instances](metrics.md#measuring-an-applied-control) that measure it, to follow its effectiveness beyond its status.
+
 ## Status lifecycle
 
 The **status** field is what turns an applied control from a static catalogue entry into a live, trackable piece of work. It's the single signal that drives roll-ups across audits, dashboards, action plans, and reporting — so it's worth understanding how it moves.

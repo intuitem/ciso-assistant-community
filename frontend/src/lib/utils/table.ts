@@ -552,6 +552,18 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const TOP_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'briefingHighRisks',
+		options: [
+			{ label: 'currentRisk', value: 'current' },
+			{ label: 'residualRisk', value: 'residual' }
+		],
+		multiple: false
+	}
+};
+
 export const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1077,6 +1089,25 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'enabled',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+// Children of a draft (no status) or deprecated assessment, left out of the analytics summary.
+export const INACTIVE_ASSESSMENT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'inactiveAssessment',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+export const NIS2_OVERDUE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'briefingNis2Overdue',
 		options: YES_NO_OPTIONS,
 		multiple: false
 	}
@@ -2053,6 +2084,8 @@ export const listViewFields = {
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
+			top_level: TOP_RISK_LEVEL_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2334,6 +2367,7 @@ export const listViewFields = {
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
+			'canConnectApps',
 			'is_third_party',
 			'hasMfaEnabled'
 		],
@@ -2346,6 +2380,7 @@ export const listViewFields = {
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
+			'can_connect_apps',
 			'is_third_party',
 			'has_mfa_enabled'
 		],
@@ -2370,8 +2405,28 @@ export const listViewFields = {
 		body: ['name', 'user_groups']
 	},
 	'service-accounts': {
-		head: ['name', 'clientId', 'secretPreview', 'isActive', 'expiryDate', 'createdAt'],
-		body: ['name', 'client_id', 'secret_preview', 'is_active', 'expiry_date', 'created_at']
+		head: [
+			'name',
+			'identitySource',
+			'clientId',
+			'secretPreview',
+			'isActive',
+			'expiryDate',
+			'createdAt'
+		],
+		body: [
+			'name',
+			'identity_source',
+			'client_id',
+			'secret_preview',
+			'is_active',
+			'expiry_date',
+			'created_at'
+		]
+	},
+	'identity-providers': {
+		head: ['name', 'providerId', 'clientId'],
+		body: ['name', 'provider_id', 'client_id']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -2410,8 +2465,8 @@ export const listViewFields = {
 		}
 	},
 	'quick-form-responses': {
-		head: ['ref_id', 'name', 'quickForm', 'status', 'respondents', 'dueDate', 'domain'],
-		body: ['ref_id', 'name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
+		head: ['ref_id', 'name', 'quickForm', 'status', 'score', 'respondents', 'dueDate', 'domain'],
+		body: ['ref_id', 'name', 'quick_form', 'status', 'score', 'respondents', 'due_date', 'folder'],
 		meta: ['id', 'status'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2467,7 +2522,8 @@ export const listViewFields = {
 			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
 			requirement__assessable: IS_ASSESSABLE_FILTER,
 			result: REQUIREMENT_ASSESSMENT_RESULT_FILTER,
-			compliance_assessment__perimeter: PERIMETER_FILTER
+			compliance_assessment__perimeter: PERIMETER_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER
 		}
 	},
 	evidences: {
@@ -2490,6 +2546,7 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			status: EVIDENCE_STATUS_FILTER,
 			owner: EVIDENCE_OWNER_FILTER,
+			expiry_date: dateFilter('expiry_date'),
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -2638,6 +2695,7 @@ export const listViewFields = {
 		],
 		optionalFields: {
 			head: [
+				'isActive',
 				'tierSetAt',
 				'lastAssessmentDate',
 				'filteringLabels',
@@ -2646,6 +2704,7 @@ export const listViewFields = {
 				'updatedAt'
 			],
 			body: [
+				'is_active',
 				'tier_set_at',
 				'last_assessment_date',
 				'filtering_labels',
@@ -2659,6 +2718,7 @@ export const listViewFields = {
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
 			tier: ENTITY_TIER_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER,
 			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2710,12 +2770,13 @@ export const listViewFields = {
 		head: ['refId', 'name', 'description', 'providerEntity', 'tier', 'labels'],
 		body: ['ref_id', 'name', 'description', 'provider_entity', 'tier', 'filtering_labels'],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['isActive', 'createdAt', 'updatedAt'],
+			body: ['is_active', 'created_at', 'updated_at']
 		},
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			tier: ENTITY_TIER_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
@@ -3469,6 +3530,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			findings_assessment: FINDINGS_BINDER_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
@@ -3518,6 +3580,7 @@ export const listViewFields = {
 			severity: INCIDENT_SEVERITY_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reported_at: dateFilter('reported_at', { isDateTime: true }),
+			nis2_overdue: NIS2_OVERDUE_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -4159,6 +4222,8 @@ export interface BatchActionConfig {
 	// A change_field value fixed by config ("mark as read") rather than picked by the
 	// user. Mutually exclusive with optionsEndpoint: skips the picker.
 	value?: string;
+	// Hidden from non-admins; the backend refuses them on its own (UX only).
+	adminOnly?: boolean;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
 	inputType?: 'date';
@@ -4227,6 +4292,27 @@ export const quickFilterPresets: Partial<
 };
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	// Only the MCP flag: UserWriteSerializer keeps it admin-only, and turning it
+	// off revokes the users' app connections (iam/models.py _revoke_lost_app_access).
+	users: [
+		{
+			type: 'change_field',
+			label: 'allowAppConnections',
+			icon: 'fa-solid fa-plug-circle-check',
+			field: 'can_connect_apps',
+			value: 'true',
+			adminOnly: true
+		},
+		{
+			type: 'change_field',
+			label: 'blockAppConnections',
+			icon: 'fa-solid fa-plug-circle-xmark',
+			field: 'can_connect_apps',
+			value: 'false',
+			adminOnly: true,
+			confirmMessage: 'blockAppConnectionsConfirm'
+		}
+	],
 	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
 	notifications: [
 		{
@@ -4745,6 +4831,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'tier',
 			optionsEndpoint: 'tiers?is_visible=true'
 		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'entities/is_active'
+		},
 		LABELS_BATCH_ACTION,
 		{
 			type: 'change_folder',
@@ -4763,6 +4856,14 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'tier',
 			optionsEndpoint: 'tiers?is_visible=true'
 		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'solutions/is_active'
+		},
+		LABELS_BATCH_ACTION,
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'entity-assessments': [

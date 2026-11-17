@@ -1,4 +1,8 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import {
+	defaultDeleteFormAction,
+	defaultWriteFormAction,
+	REDIRECT_AFTER_CREATE
+} from '#lib/utils/actions.js';
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import {
 	getModelInfo,
@@ -66,16 +70,7 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(
-			event.params.model === 'entity-assessments' ||
-			event.params.model === 'quantitative-risk-hypotheses' ||
-			event.params.model === 'quantitative-risk-studies' ||
-			event.params.model === 'quantitative-risk-scenarios' ||
-			event.params.model === 'risk-assessments' ||
-			event.params.model === 'document-containers' ||
-			// A metric made in one step lands on its page, ready for its first value.
-			event.params.model === 'metric-instances'
-		);
+		const redirectToWrittenObject = REDIRECT_AFTER_CREATE.has(event.params.model!);
 		return defaultWriteFormAction({
 			event,
 			urlModel: event.params.model!,

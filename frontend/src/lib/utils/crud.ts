@@ -1370,6 +1370,22 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: []
 	},
+	'identity-providers': {
+		endpointUrl: 'iam/social-apps',
+		name: 'socialapp',
+		localName: 'identityProvider',
+		localNamePlural: 'identityProviders',
+		verboseName: 'Identity provider',
+		verboseNamePlural: 'Identity providers',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'provider_id' },
+			{ field: 'client_id' },
+			{ field: 'server_url' }
+		],
+		filters: []
+	},
 	'service-accounts': {
 		endpointUrl: 'iam/service-accounts',
 		name: 'serviceaccount',
@@ -1379,14 +1395,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Service accounts',
 		foreignKeyFields: [
 			{ field: 'folders', urlModel: 'folders' },
+			{ field: 'social_app', urlModel: 'identity-providers' },
 			{ field: 'created_by', urlModel: 'users' }
 		],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'identity_source' },
 			{ field: 'client_id' },
 			{ field: 'secret_preview' },
+			{ field: 'social_app' },
+			{ field: 'federated_subject' },
 			{ field: 'is_active' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'is_recursive' },
@@ -1587,6 +1607,24 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Evidence revision',
 		verboseNamePlural: 'Evidence revisions',
 		fileFields: ['attachment'],
+		detailViewFields: [
+			{ field: 'evidence' },
+			{ field: 'version' },
+			{ field: 'folder' },
+			{ field: 'attachment' },
+			{ field: 'size' },
+			{ field: 'attachment_hash' },
+			{ field: 'link' },
+			{ field: 'observation' },
+			{ field: 'task_node' },
+			{ field: 'uploaded_by' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'review_status' },
+			{ field: 'reviewed_by' },
+			{ field: 'reviewed_at', type: 'datetime' },
+			{ field: 'review_comment' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'task_node', urlModel: 'task-nodes' },

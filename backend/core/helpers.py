@@ -9,7 +9,7 @@ from uuid import UUID
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.db.models import Count
+from django.db.models import Case, Count, F, Q, When
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.views import api_settings
@@ -1655,27 +1655,39 @@ def get_metrics(user: User, folder_id):
         return model.objects.filter(id__in=object_ids)
 
     viewable_controls = viewable_items(AppliedControl, folder_id)
-    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id)
+    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id).exclude(
+        INACTIVE_ASSESSMENT
+    )
     viewable_compliance_assessments = restrict_to_respondent_assignments(
         user,
         viewable_items(ComplianceAssessment, folder_id),
         "requirement_assignments__actor__in",
     )
-    viewable_risk_scenarios = viewable_items(RiskScenario, folder_id)
+    viewable_risk_scenarios = exclude_inactive_parent(
+        viewable_items(RiskScenario, folder_id), "risk_assessment"
+    )
     viewable_threats = viewable_items(Threat, folder_id)
     viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
     viewable_evidences = viewable_items(Evidence, folder_id)
     viewable_requirement_assessments = restrict_to_respondent_assignments(
         user,
-        viewable_items(RequirementAssessment, folder_id),
+        exclude_inactive_parent(
+            viewable_items(RequirementAssessment, folder_id), "compliance_assessment"
+        ),
         "assignments__actor__in",
     )
+    from core.utils import get_respondent_scoped_folder_ids
+    from privacy.models import RightRequest
+    from tprm.models import Contract, EntityAssessment
+
+    today = date.today()
+    soon = today + timedelta(days=30)
     controls_count = viewable_controls.count()
     missed_eta_count = (
         viewable_controls.filter(
             eta__lt=date.today(),
         )
-        .exclude(status="active")
+        .exclude(status__in=CONTROLS_NOT_PENDING)
         .count()
     )
 
@@ -1688,16 +1700,40 @@ def get_metrics(user: User, folder_id):
             "active": viewable_controls.filter(status="active").count(),
             "degraded": viewable_controls.filter(status="degraded").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
-            "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
+            "p1": viewable_controls.filter(priority=1)
+            .exclude(status__in=CONTROLS_NOT_PENDING)
+            .count(),
             "eta_missed": missed_eta_count,
+            "no_status": viewable_controls.filter(
+                Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
+            ).count(),
         },
         "risk": {
             "assessments": viewable_risk_assessments.count(),
             "scenarios": viewable_risk_scenarios.count(),
+            "high_inherent": count_top_risk_levels(
+                viewable_risk_scenarios, "inherent_level"
+            ),
+            "high_current": count_top_risk_levels(
+                viewable_risk_scenarios, "current_level"
+            ),
+            "high_residual": count_top_risk_levels(
+                viewable_risk_scenarios, "residual_level"
+            ),
             "threats": viewable_threats.filter(risk_scenarios__isnull=False)
             .distinct()
             .count(),
             "acceptances": viewable_risk_acceptances.count(),
+            "expired_acceptances": viewable_risk_acceptances.filter(
+                state="accepted", expiry_date__lt=today
+            ).count(),
+            "overdue_assessments": viewable_risk_assessments.filter(
+                due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES
+            ).count(),
+            # Still approved past their end date: the risk is back on the clock.
+            "expired_exceptions": viewable_items(SecurityException, folder_id)
+            .filter(status=SecurityException.Status.APPROVED, expiration_date__lt=today)
+            .count(),
         },
         "compliance": {
             "used_frameworks": viewable_compliance_assessments.values("framework_id")
@@ -1709,13 +1745,276 @@ def get_metrics(user: User, folder_id):
             ).count(),
             "evidences": viewable_evidences.count(),
             "expired_evidences": viewable_evidences.filter(status="expired").count(),
+            "expiring_evidences": viewable_evidences.filter(
+                expiry_date__gte=today, expiry_date__lte=soon
+            )
+            .exclude(status="expired")
+            .count(),
+            # Only those this user can review: change access, outside respondent scope.
+            "evidences_to_review": viewable_evidences.filter(
+                id__in=RoleAssignment.get_changeable_object_ids(user, Evidence),
+                revisions__in=EvidenceRevision.current_with_content().filter(
+                    review_status=EvidenceRevision.ReviewStatus.PENDING
+                ),
+            )
+            .exclude(folder_id__in=get_respondent_scoped_folder_ids(user))
+            .distinct()
+            .count(),
+            "overdue_audits": viewable_compliance_assessments.filter(
+                due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES
+            ).count(),
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
+            "partially_compliant_items": viewable_requirement_assessments.filter(
+                result="partially_compliant"
+            ).count(),
+            # Requirements with a verdict: the base of the non-compliant share.
+            "assessed_items": viewable_requirement_assessments.filter(
+                result__in=["compliant", "partially_compliant", "non_compliant"]
+            ).count(),
+        },
+        "operations": {
+            "open_incidents": viewable_items(Incident, folder_id)
+            .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
+            .count(),
+            "open_findings": exclude_inactive_parent(
+                viewable_items(Finding, folder_id), "findings_assessment"
+            )
+            .exclude(status__in=FINDING_CLOSED_STATUSES)
+            .count(),
+            "overdue_tasks": overdue_task_templates(
+                viewable_items(TaskTemplate, folder_id)
+            ).count(),
+            "nis2_overdue_incidents": nis2_overdue_incidents(
+                viewable_items(Incident, folder_id)
+            ).count(),
+            "overdue_vulnerabilities": viewable_items(Vulnerability, folder_id)
+            .annotate(**Vulnerability.sla_state_annotations(today))
+            .filter(sla_state="overdue")
+            .count(),
+        },
+        "third_party": {
+            "overdue_assessments": viewable_items(EntityAssessment, folder_id)
+            .filter(due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES)
+            .count(),
+            "ending_contracts": viewable_items(Contract, folder_id)
+            .filter(
+                status=Contract.Status.ACTIVE,
+                end_date__gte=today,
+                end_date__lte=soon,
+            )
+            .count(),
+        },
+        "privacy": {
+            # GDPR gives a month: flag them a week ahead, and once late.
+            "right_requests_due": viewable_items(RightRequest, folder_id)
+            .filter(due_date__lte=today + timedelta(days=7))
+            .exclude(status="done")
+            .count(),
         },
         "csf_functions": csf_functions(user, folder_id),
+        # Root snapshots cover the whole organisation, not a single domain.
+        "trends": None if folder_id else get_summary_trends(user),
     }
     return data
+
+
+SUMMARY_TREND_DAYS = 30
+# Snapshot keys trended on the analytics summary; computed in
+# metrology.models.BuiltinMetricSample._compute_folder_metrics with the same definitions.
+SUMMARY_TREND_KEYS = [
+    "audits_avg_assessed",
+    "non_compliant_items",
+    "partially_compliant_items",
+    "total_risk_scenarios",
+    "risk_scenarios_high_current",
+    "risk_scenarios_high_residual",
+    "incidents_open",
+    "controls_eta_missed",
+    "controls_p1_pending",
+    "task_templates_overdue",
+    "findings_open",
+    "evidence_expired",
+    "controls_no_status",
+]
+# Models the root snapshot counts: a trend is only shown to users who can see all of them.
+SUMMARY_TREND_MODELS = (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RiskScenario,
+    Incident,
+    Finding,
+    Evidence,
+    TaskNode,
+)
+
+
+def get_summary_trends(user: User):
+    """Daily series of the summary figures from the root folder snapshots.
+
+    The root snapshot is organisation-wide, so it is only returned to users with a
+    recursive view grant on the root folder for every counted model; others get None.
+    """
+    from django.contrib.contenttypes.models import ContentType
+    from metrology.models import BuiltinMetricSample
+
+    from core.utils import get_respondent_scoped_folder_ids
+
+    if get_respondent_scoped_folder_ids(user):
+        return None
+    root = Folder.get_root_folder()
+    for model in SUMMARY_TREND_MODELS:
+        grants = RoleAssignment._get_grant_folder_set(user, ("view", model))
+        if root.id not in grants.recursive_grant_folder_ids:
+            return None
+
+    samples = (
+        BuiltinMetricSample.objects.filter(
+            content_type=ContentType.objects.get_for_model(Folder),
+            object_id=root.id,
+            date__gte=date.today() - timedelta(days=SUMMARY_TREND_DAYS),
+            date__lt=date.today(),
+        )
+        .order_by("date")
+        .values_list("date", "metrics")
+    )
+    # Domain saves don't refresh the root snapshot, so today's point is computed live.
+    live = {
+        **BuiltinMetricSample._compute_summary_metrics(root),
+        "controls_status_breakdown": {
+            "active": AppliedControl.objects.filter(status="active").count()
+        },
+    }
+    samples = [*samples, (date.today(), live)]
+    series = {key: [] for key in ["active_controls", *SUMMARY_TREND_KEYS]}
+    for day, metrics in samples:
+        values = {
+            "active_controls": (metrics.get("controls_status_breakdown") or {}).get(
+                "active"
+            ),
+            **{key: metrics.get(key) for key in SUMMARY_TREND_KEYS},
+        }
+        for key, value in values.items():
+            # Snapshots taken before a metric existed simply lack it.
+            if value is not None:
+                series[key].append([day.isoformat(), value])
+    return series
+
+
+def overdue_task_templates(templates):
+    """Enabled tasks with a past occurrence still open: the task list's "overdue" filter."""
+    return templates.filter(
+        enabled=True,
+        id__in=TaskNode.objects.filter(
+            due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        ).values("task_template_id"),
+    )
+
+
+# Controls nothing is waiting on: in place, or retired.
+CONTROLS_NOT_PENDING = [AppliedControl.Status.ACTIVE, AppliedControl.Status.DEPRECATED]
+
+
+# Assessments with no status are drafts; with deprecated ones, the summary leaves them out.
+INACTIVE_ASSESSMENT = Q(status__isnull=True) | Q(status=Assessment.Status.DEPRECATED)
+# Started or not, still expected to finish.
+OPEN_ASSESSMENT_STATUSES = [
+    Assessment.Status.PLANNED,
+    Assessment.Status.IN_PROGRESS,
+    Assessment.Status.IN_REVIEW,
+]
+
+
+def inactive_parent(parent: str) -> Q:
+    """Children of a draft or deprecated assessment; those without a parent are not."""
+    return Q(**{f"{parent}__isnull": False}) & (
+        Q(**{f"{parent}__status__isnull": True})
+        | Q(**{f"{parent}__status": Assessment.Status.DEPRECATED})
+    )
+
+
+def exclude_inactive_parent(qs, parent: str):
+    return qs.exclude(inactive_parent(parent))
+
+
+def nis2_overdue_incidents(incidents):
+    """Open significant incidents with a NIS2 stage past due that no later stage has
+    superseded (a missed early warning stops counting once the notification is sent):
+    the incident list's "nis2_overdue" filter."""
+    # A fresh, narrow queryset: the deadlines need a few columns, not the list's prefetches.
+    candidates = (
+        Incident.objects.filter(
+            pk__in=incidents.values("pk"),
+            nis2_significant=True,
+            nis2_final_report_at__isnull=True,
+        )
+        .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
+        .only(
+            "reported_at",
+            "created_at",
+            "nis2_significant",
+            "nis2_early_warning_at",
+            "nis2_notification_at",
+            "nis2_final_report_at",
+        )
+    )
+    late = []
+    for incident in candidates:
+        stages = incident.nis2_deadlines()
+        if any(
+            stage["overdue"] and not any(later["done_at"] for later in stages[i + 1 :])
+            for i, stage in enumerate(stages)
+        ):
+            late.append(incident.pk)
+    return incidents.filter(pk__in=late)
+
+
+FINDING_CLOSED_STATUSES = [
+    Finding.Status.DISMISSED,
+    Finding.Status.MITIGATED,
+    Finding.Status.RESOLVED,
+    Finding.Status.CLOSED,
+    Finding.Status.DEPRECATED,
+]
+
+
+def filter_top_risk_levels(scenarios, level_field: str):
+    """Scenarios in the top levels of their own matrix (top 2, or top 1 on matrices of 3 levels or fewer).
+
+    Levels are matrix-relative, so they are compared per matrix rather than merged by name.
+    An unassessed inherent or residual level counts at the current level: nothing shows
+    the risk was lower before controls, or that it was treated.
+    """
+    if level_field in ("inherent_level", "residual_level"):
+        scenarios = scenarios.annotate(
+            effective_level=Case(
+                When(**{f"{level_field}__lt": 0}, then=F("current_level")),
+                default=F(level_field),
+            )
+        )
+        level_field = "effective_level"
+    matrix_ids = scenarios.values_list(
+        "risk_assessment__risk_matrix_id", flat=True
+    ).distinct()
+    q = Q(pk__in=[])
+    for matrix_id, json_def in RiskMatrix.objects.filter(id__in=matrix_ids).values_list(
+        "id", "json_definition"
+    ):
+        n = len((json_def or {}).get("risk", []))
+        if n == 0:
+            continue
+        threshold = n - min(2, max(n // 2, 1))
+        q |= Q(
+            risk_assessment__risk_matrix_id=matrix_id,
+            **{f"{level_field}__gte": threshold},
+        )
+    return scenarios.filter(q)
+
+
+def count_top_risk_levels(scenarios, level_field: str) -> int:
+    return filter_top_risk_levels(scenarios, level_field).count()
 
 
 def _compute_progress_by_assessment(assessment_ids: QuerySet[UUID]) -> dict[UUID, int]:
@@ -1764,11 +2063,18 @@ def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    object_ids = _respondent_scoped_audit_ids(user, scoped_folder)
+    object_ids = (
+        ComplianceAssessment.objects.filter(
+            id__in=_respondent_scoped_audit_ids(user, scoped_folder)
+        )
+        .exclude(INACTIVE_ASSESSMENT)
+        .values_list("id", flat=True)
+    )
     progresses = list(_compute_progress_by_assessment(object_ids).values())
     progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
         "progress_avg": progress_avg,
+        "audits_count": len(progresses),
         "audits_stats": build_audits_stats(user, folder_id, object_ids=object_ids),
     }
 
@@ -2024,7 +2330,10 @@ def acceptances_to_review(user: User):
     return acceptances
 
 
-def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=False):
+def build_scenario_clusters(
+    risk_assessment: RiskAssessment, include_inherent=False, scenarios=None
+):
+    """Scenario ref_ids per matrix cell; `scenarios` narrows it to a selection."""
     risk_matrix = risk_assessment.risk_matrix.parse_json()
     grid = risk_matrix["grid"]
     risk_matrix_current = [
@@ -2037,9 +2346,9 @@ def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=Fa
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
 
-    for ri in RiskScenario.objects.filter(risk_assessment=risk_assessment).order_by(
-        "created_at"
-    ):
+    if scenarios is None:
+        scenarios = RiskScenario.objects.filter(risk_assessment=risk_assessment)
+    for ri in scenarios.order_by("created_at"):
         if ri.current_level >= 0:
             risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.ref_id)
         if ri.residual_level >= 0:

@@ -16,6 +16,8 @@ Word templates carry additional risk:
 
 Document layout templates carry the same **template injection** consideration: `.html` templates are rendered server-side with Django's template engine before the PDF is produced, so a crafted template could evaluate unintended expressions.
 
+PDF report templates are `.typ` files compiled by Typst, not by Django. The risk there is the content rather than the engine: a template decides what every audit PDF says, including the attestations people sign, so review it as you would an official form.
+
 Keep this permission limited to trusted administrators, only upload templates from sources you control, and review any template before activating it.
 {% endhint %}
 
@@ -24,6 +26,7 @@ Three template types live under this setting:
 - **Email templates** — the body and subject of system-generated emails (notifications, invitations, password reset, …).
 - **Word templates** — `.docx` files used as the visual skin for document exports (audit reports, risk-treatment plans, BIA outputs).
 - **Document layout templates** — `.html` files that control the PDF layout of managed documents (cover page, header/footer, branding).
+- **PDF report templates** — `.typ` files ([Typst](https://typst.app/)) that control the layout of the audit PDF reports.
 
 ## Template key and language
 
@@ -51,6 +54,14 @@ Document layout templates control how a managed document is rendered to PDF — 
 When an active template exists for the document's language, the platform renders the document's content into your layout instead of the built-in one — letting you add a **cover page**, **headers and footers**, and your **organisation's logo** (from [Branding](branding.md)). The template receives the document's `title`, rendered `content`, `version`, `document_type`, `date`, and the organisation logo.
 
 Download the built-in default first (from the setting) to use as a starting point, then upload your customised version. The built-in layout is used as a fallback when no active template exists for a language, and also if a custom template contains a disallowed tag or fails to render — a broken template never blocks a document from being published or exported.
+
+## PDF report templates
+
+The audit PDF exports **Audit posture** and **Attestation to countersign** are rendered with Typst. Under **Report templates**, each has an entry (**Audit posture (PDF)**, **Attestation to countersign (PDF)**, template keys `audit_posture` and `audit_attestation`) where you can upload your own `.typ` file per language.
+
+Download the built-in default first and start from it: your template reads the same data. The data is read with `#let d = json(bytes(sys.inputs.data))`, and the charts are loaded with `image("<name>.png")`. The data holds the audit, the export date, the contributors, the requirement rows (result, score, observation, answers, evidences, tasks, applied controls) and their sections; fields hidden from the reader by the audit's [field visibility](../../guides/customize-audit.md#field-visibility) are left out, and listed in `d.hidden_fields`.
+
+If a custom template fails to render, the built-in default is used instead, so a broken template never blocks an export.
 
 ## Operational notes
 

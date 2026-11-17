@@ -5,8 +5,7 @@ import uuid
 import pandas as pd
 
 from core.constants import COUNTRY_CHOICES, EU_COUNTRIES_SET
-from core.models import Actor, Terminology, ValidationFlow
-from core.serializers import ActorReadSerializer
+from core.models import Terminology, ValidationFlow
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -14,6 +13,7 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -21,7 +21,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
-from django.db.models import Case, Count, F, Prefetch, Q, When
+from django.db.models import Case, Count, Exists, F, OuterRef, Prefetch, Q, When
 from itertools import chain
 from collections import defaultdict
 
@@ -30,6 +30,7 @@ from core.generators import breach_notification_context
 from core.typst_render import render_pdf
 from django.utils.text import slugify
 from iam.models import Folder, RoleAssignment
+from iam.utils import ViewableFilter
 from tprm.models import Entity
 
 from .models import (
@@ -140,6 +141,15 @@ class PersonalDataViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Processing not found"},
                 status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_personaldata"),
+            folder=processing.folder,
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
             )
 
         category_terms = {
@@ -325,9 +335,11 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "dpia_required",
         "dpia_required_source",
     ]
+    # The flag is computed on read, so sorting on it goes through an annotation
+    ordering_remap = {"has_sensitive_personal_data": "sensitive_personal_data_sort"}
 
     def get_queryset(self):
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related("folder", "dpia_screening")
@@ -347,6 +359,17 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 ),
             )
         )
+        if "has_sensitive_personal_data" in self.request.query_params.get(
+            "ordering", ""
+        ):
+            qs = qs.annotate(
+                sensitive_personal_data_sort=Exists(
+                    PersonalData.objects.filter(
+                        processing=OuterRef("pk"), is_sensitive=True
+                    )
+                )
+            )
+        return qs
 
     export_config = {
         "fields": {
@@ -639,12 +662,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get all processing assigned_to actors")
     def assigned_to(self, request):
-        return Response(
-            ActorReadSerializer(
-                Actor.objects.filter(assigned_processings__isnull=False).distinct(),
-                many=True,
-            ).data
-        )
+        return Response(self._viewable_actors(assigned_processings__isnull=False))
 
     @action(detail=False, name="Get DPIA requirement choices")
     def dpia_required(self, request):
@@ -1123,12 +1141,7 @@ class RightRequestViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get all right request owners")
     def owner(self, request):
-        return Response(
-            ActorReadSerializer(
-                Actor.objects.filter(assigned_right_requests__isnull=False).distinct(),
-                many=True,
-            ).data
-        )
+        return Response(self._viewable_actors(assigned_right_requests__isnull=False))
 
 
 class DataBreachViewSet(BaseModelViewSet):
@@ -1175,9 +1188,7 @@ class DataBreachViewSet(BaseModelViewSet):
             breach,
             lang,
             tz=get_report_timezone(),
-            readable=lambda obj: RoleAssignment.is_object_readable(
-                request.user, type(obj), obj.id
-            ),
+            readable=ViewableFilter(request.user).allows,
         )
         response = HttpResponse(
             render_pdf("breach_notification.typ", payload),

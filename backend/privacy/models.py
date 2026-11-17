@@ -152,7 +152,6 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     dpia_required_set_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("DPIA requirement set at")
     )
-    has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
@@ -179,13 +178,10 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     def dpia_applies(self) -> bool:
         return self.role in self.DPIA_ROLES
 
-    def update_sensitive_data_flag(self):
-        """Update the has_sensitive_personal_data flag based on associated personal data"""
-        has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
-
-        if has_sensitive != self.has_sensitive_personal_data:
-            self.has_sensitive_personal_data = has_sensitive
-            self.save(update_fields=["has_sensitive_personal_data"])
+    @property
+    def has_sensitive_personal_data(self) -> bool:
+        # Reads the personal_data prefetch when the queryset has one
+        return any(pd.is_sensitive for pd in self.personal_data.all())
 
     def metrics(self):
         return {}
@@ -298,11 +294,6 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
         if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
         super().save(*args, **kwargs)
-
-        # Update the processing's sensitive data flag if needed
-        if self.is_sensitive and not self.processing.has_sensitive_personal_data:
-            self.processing.has_sensitive_personal_data = True
-            self.processing.save(update_fields=["has_sensitive_personal_data"])
 
     @classmethod
     def get_categories_count(cls, filters: dict = {}):

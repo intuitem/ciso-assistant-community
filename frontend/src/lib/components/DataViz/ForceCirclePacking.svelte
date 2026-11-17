@@ -4,7 +4,10 @@
 
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { m } from '#paraglide/messages.js';
 	import type * as echarts from 'echarts';
+	const toastStore = getToastStore();
 	const symbolSizeOffset = 10;
 	interface Props {
 		width?: string;
@@ -186,7 +189,7 @@
 				dataIndex: node.id
 			});
 		} else {
-			alert('No matching nodes found');
+			toastStore.trigger({ message: m.noMatchingNodesFound() });
 		}
 	};
 

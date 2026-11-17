@@ -15,7 +15,8 @@
 		remapGrid,
 		levelsInGroupOrder,
 		type OutcomeRule,
-		type Scale
+		type Scale,
+		scoringDefaultsProblem
 	} from './builder-state';
 	import ScalesEditor from './ScalesEditor.svelte';
 	import type { DraftJSON } from './builder-api';
@@ -281,6 +282,17 @@
 			);
 		return walk($rootNodesStore);
 	});
+
+	const scoringProblem = $derived(scoringDefaultsProblem($frameworkStore));
+
+	// Anchoring needs a target: clearing the target clears it too.
+	function setTargetScore(raw: string) {
+		builder.updateFramework(
+			raw === ''
+				? { target_score: null, anchor_na_to_target: false }
+				: { target_score: Number(raw) }
+		);
+	}
 
 	const hasRequiredEvidence = $derived.by(() => {
 		const walk = (nodes: BuilderNode[]): boolean =>
@@ -603,7 +615,7 @@
 									)}
 									placeholder={m.builderTranslateDescription()}
 									rows="2"
-									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y py-1"
 									onblur={(e) => {
 										builder.updateFramework({
 											translations: withTranslation(
@@ -633,7 +645,7 @@
 								? m.builderFormDescriptionPlaceholder()
 								: m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
-							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y py-1"
 							onblur={(e) => {
 								builder.updateFramework({ description: e.currentTarget.value || null });
 							}}
@@ -697,7 +709,7 @@
 										? m.builderFormAnnotationPlaceholder()
 										: m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
-									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y"
 									onblur={(e) => {
 										builder.updateFramework({ annotation: e.currentTarget.value || null });
 									}}
@@ -790,7 +802,8 @@
 												type="number"
 												value={quickFormScore().min}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
-												onblur={(e) => setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
+												onchange={(e) =>
+													setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
 											/>
 										</label>
 										<label class="block">
@@ -799,7 +812,7 @@
 												type="number"
 												value={quickFormScore().max}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
-												onblur={(e) =>
+												onchange={(e) =>
 													setQuickFormScore({ max: intOr(e.currentTarget.value, 100) })}
 											/>
 										</label>
@@ -884,7 +897,7 @@
 														type="number"
 														value={$frameworkStore.min_score}
 														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-														onblur={(e) => {
+														onchange={(e) => {
 															builder.updateFramework({
 																min_score: parseInt(e.currentTarget.value) || 0
 															});
@@ -897,7 +910,7 @@
 														type="number"
 														value={$frameworkStore.max_score}
 														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-														onblur={(e) => {
+														onchange={(e) => {
 															builder.updateFramework({
 																max_score: parseInt(e.currentTarget.value) || 100
 															});
@@ -919,6 +932,58 @@
 											<p class="text-xs text-surface-500">
 												{m.builderAggregationHint()}
 											</p>
+
+											<!-- Defaults proposed for new audits -->
+											<div
+												class="border-t border-surface-200-800 pt-3 space-y-2"
+												data-testid="framework-audit-defaults"
+											>
+												<div class="grid grid-cols-2 gap-3">
+													<label class="block">
+														<span class="text-xs text-surface-600-400"
+															>{m.scoreCalculationMethod()}</span
+														>
+														<select
+															value={$frameworkStore.score_calculation_method ?? 'average'}
+															class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
+															onchange={(e) =>
+																builder.updateFramework({
+																	score_calculation_method: e.currentTarget.value
+																})}
+														>
+															<option value="average">{m.average()}</option>
+															<option value="sum">{m.sum()}</option>
+															<option value="average_of_averages">{m.averageOfAverages()}</option>
+														</select>
+													</label>
+													<label class="block">
+														<span class="text-xs text-surface-600-400">{m.targetScore()}</span>
+														<input
+															type="number"
+															step="any"
+															value={$frameworkStore.target_score ?? ''}
+															class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+															onchange={(e) => setTargetScore(e.currentTarget.value)}
+														/>
+													</label>
+												</div>
+												<label class="flex items-center gap-2 text-xs text-surface-600-400">
+													<input
+														type="checkbox"
+														class="checkbox"
+														checked={$frameworkStore.anchor_na_to_target ?? false}
+														disabled={$frameworkStore.target_score == null}
+														onchange={(e) =>
+															builder.updateFramework({
+																anchor_na_to_target: e.currentTarget.checked
+															})}
+													/>
+													{m.anchorNaToTarget()}
+												</label>
+												{#if scoringProblem}
+													<p class="text-xs text-error-500">{safeTranslate(scoringProblem)}</p>
+												{/if}
+											</div>
 
 											<!-- Scale entries editor -->
 											<div class="border-t border-surface-200-800 pt-3 space-y-2">
@@ -949,7 +1014,7 @@
 																			type="number"
 																			value={entry.score}
 																			class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																			onblur={(e) => {
+																			onchange={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].score = parseInt(e.currentTarget.value) || 0;
 																				setScaleEntries(entries);
@@ -1237,7 +1302,7 @@
 					{#each $rootNodesStore as bn, i (bn.node.id)}
 						<div
 							class:opacity-50={rootDrag.draggedIndex === i}
-							draggable="true"
+							draggable="false"
 							onmousedown={rootDrag.recordMousedown}
 							ondragstart={(e) => rootDrag.handleDragStart(e, i)}
 							ondragover={rootDrag.handleDragOver}

@@ -1268,6 +1268,15 @@
 										<span class="text-sm font-medium leading-tight">{m.reviewResponses()}</span>
 									</Anchor>
 								{/if}
+								<Anchor
+									breadcrumbAction="push"
+									href={`/evidences/review?compliance_assessment=${data.compliance_assessment.id}`}
+									class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors cursor-pointer text-left"
+									data-testid="review-evidences-button"
+								>
+									<i class="fa-solid fa-file-circle-check text-emerald-500 text-base"></i>
+									<span class="text-sm font-medium leading-tight">{m.reviewEvidences()}</span>
+								</Anchor>
 							</div>
 						</div>
 					{/if}

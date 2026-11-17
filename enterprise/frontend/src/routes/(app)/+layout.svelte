@@ -1,10 +1,12 @@
 <script lang="ts">
+	import Kbd from '#lib/components/utils/Kbd.svelte';
 	import { run } from 'svelte/legacy';
 
 	import CommandPalette from '#lib/components/CommandPalette/CommandPalette.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle/ThemeToggle.svelte';
 	import NotificationBell from '#lib/components/NotificationBell/NotificationBell.svelte';
 	import ChatWidget from '#lib/components/ChatWidget/ChatWidget.svelte';
+	import RespondentShell from '#lib/components/RespondentShell/RespondentShell.svelte';
 	import { safeTranslate, setUseRiskCategoryLabel } from '#lib/utils/i18n.js';
 	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
@@ -45,9 +47,6 @@
 		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
 		children
 	}: Props = $props();
-
-	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-	const modifierKey = isMac ? '⌘' : 'Ctrl';
 
 	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
 
@@ -173,7 +172,11 @@
 	});
 
 	$effect(() => {
-		if (browser && !data?.featureflags?.focus_mode && $focusMode.id) {
+		if (
+			browser &&
+			(!data?.featureflags?.focus_mode || data?.user?.is_third_party) &&
+			($focusMode.id || getCookie('focus_folder_id'))
+		) {
 			clearFocusMode();
 			refreshAll();
 		}
@@ -185,116 +188,119 @@
 </svelte:head>
 
 <!-- App Shell -->
-<div class="overflow-x-clip">
-	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
+{#if data?.user?.is_third_party}
+	<RespondentShell title={safeTranslate(displayTitle)}>
+		{@render children?.()}
+	</RespondentShell>
+{:else}
+	<div class="overflow-x-clip">
+		<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 
-	<div class="sticky top-0 z-50 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
-		{#if data.licenseStatus.status === 'expired'}
-			<aside class="preset-tonal-warning text-center w-full items-center py-2">
-				{m.licenseExpiredMessage()}
-				{#if licenseExpirationMessage}
-					<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
-				{/if}
-			</aside>
-		{:else if licenseAboutToExpire}
-			<aside class="preset-tonal-warning text-center w-full items-center py-2">
-				{#if licenseStatus.days_left === 0}
-					{m.licenseExpiresToday()}
-				{:else if licenseStatus.days_left === 1}
-					{m.licenseExpiresTomorrow()}
-				{:else}
-					{m.licenseExpiresInDays({ days_left: licenseStatus.days_left })}
-				{/if}
-				{#if licenseExpirationMessage}
-					<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
-				{/if}
-			</aside>
-		{/if}
-		<AppBar class="border-b border-surface-200-800 bg-surface-50-950 w-auto">
-			<div class="flex items-start justify-between px-4">
-				<div>
-					<div
-						class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-						id="page-title"
-					>
-						{safeTranslate(displayTitle)}
+		<div class="sticky top-0 z-50 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
+			{#if data.licenseStatus.status === 'expired'}
+				<aside class="preset-tonal-warning text-center w-full items-center py-2">
+					{m.licenseExpiredMessage()}
+					{#if licenseExpirationMessage}
+						<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
+					{/if}
+				</aside>
+			{:else if licenseAboutToExpire}
+				<aside class="preset-tonal-warning text-center w-full items-center py-2">
+					{#if licenseStatus.days_left === 0}
+						{m.licenseExpiresToday()}
+					{:else if licenseStatus.days_left === 1}
+						{m.licenseExpiresTomorrow()}
+					{:else}
+						{m.licenseExpiresInDays({ days_left: licenseStatus.days_left })}
+					{/if}
+					{#if licenseExpirationMessage}
+						<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
+					{/if}
+				</aside>
+			{/if}
+			<AppBar class="border-b border-surface-200-800 bg-surface-50-950 w-auto">
+				<div class="flex items-start justify-between px-4">
+					<div>
+						<div
+							class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+							id="page-title"
+						>
+							{safeTranslate(displayTitle)}
+						</div>
+						{#if displayModelName}
+							<div class="text-sm text-surface-600-400 font-medium">
+								{safeTranslate(displayModelName)}
+							</div>
+						{/if}
+						{#if displayModelDescription}
+							<div class="text-xs text-surface-500 italic">
+								{safeTranslate(displayModelDescription)}
+							</div>
+						{/if}
 					</div>
-					{#if displayModelName}
-						<div class="text-sm text-surface-600-400 font-medium">
-							{safeTranslate(displayModelName)}
-						</div>
-					{/if}
-					{#if displayModelDescription}
-						<div class="text-xs text-surface-500 italic">
-							{safeTranslate(displayModelDescription)}
-						</div>
-					{/if}
-				</div>
-				<div class="flex items-center gap-3 shrink-0">
-					{#if sideBarVisibleItems.notifications && !data?.user?.is_third_party}
-						<NotificationBell />
-					{/if}
-					<ThemeToggle />
-					{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
-						<a
-							href="/portal"
+					<div class="flex items-center gap-3 shrink-0">
+						{#if sideBarVisibleItems.notifications}
+							<NotificationBell />
+						{/if}
+						<ThemeToggle />
+						{#if data?.featureflags?.custom_portals}
+							<a
+								href="/portal"
+								class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+					text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+					transition-all duration-150"
+							>
+								<i class="fa-solid fa-table-cells-large text-surface-500"></i>
+								<span class="hidden sm:inline">{m.portals()}</span>
+							</a>
+						{/if}
+						<button
+							onclick={() => commandPalette?.toggle()}
+							aria-label={m.search()}
+							data-testid="command-palette-trigger"
 							class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
 				text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
-				transition-all duration-150"
+				transition-all duration-150 cursor-pointer"
 						>
-							<i class="fa-solid fa-table-cells-large text-surface-500"></i>
-							<span class="hidden sm:inline">{m.portals()}</span>
-						</a>
-					{/if}
-					<button
-						onclick={() => commandPalette?.toggle()}
-						aria-label={m.search()}
-						data-testid="command-palette-trigger"
-						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
-			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
-			transition-all duration-150 cursor-pointer"
-					>
-						<i class="fa-solid fa-magnifying-glass text-surface-500"></i>
-						<span class="hidden sm:inline text-surface-500">{m.searchEllipsis()}</span>
-						<kbd
-							class="hidden sm:inline-flex items-center rounded border border-surface-200-800 bg-surface-50-950 px-1.5 py-0.5
-				font-mono text-[10px] text-surface-500">{modifierKey}K</kbd
-						>
-					</button>
-					{#if data?.featureflags?.focus_mode}
-						<FocusModeSelector orgTree={data?.orgTree} />
-					{/if}
-					{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
-						<button
-							onclick={() => getStartedTrigger.set(true)}
-							class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
-			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
-						>
-							<i class="fa-solid fa-rocket mr-1"></i>
-							{m.getStarted()}
+							<i class="fa-solid fa-magnifying-glass text-surface-500"></i>
+							<span class="hidden sm:inline text-surface-500">{m.searchEllipsis()}</span>
+							<Kbd keys={['mod', 'K']} class="hidden sm:inline-flex" />
 						</button>
-					{/if}
+						{#if data?.featureflags?.focus_mode}
+							<FocusModeSelector orgTree={data?.orgTree} />
+						{/if}
+						{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
+							<button
+								onclick={() => getStartedTrigger.set(true)}
+								class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
+				ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+				hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+				focus:outline-hidden focus:ring-violet-500 cursor-pointer"
+							>
+								<i class="fa-solid fa-rocket mr-1"></i>
+								{m.getStarted()}
+							</button>
+						{/if}
+					</div>
 				</div>
-			</div>
-			<div class="px-4">
-				<hr class="my-1" />
-				<Breadcrumbs />
-			</div>
-		</AppBar>
+				<div class="px-4">
+					<hr class="my-1" />
+					<Breadcrumbs />
+				</div>
+			</AppBar>
+		</div>
+		<!-- Router Slot -->
+		<CommandPalette bind:this={commandPalette} />
+		{#if page.data.featureflags?.chat_mode}
+			<ChatWidget />
+		{/if}
+		<main
+			class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 dark:from-surface-900 dark:to-surface-950 transition-all duration-300 {classesSidebarOpen(
+				sidebarOpen
+			)}"
+		>
+			{@render children?.()}
+		</main>
+		<!-- ---- / ---- -->
 	</div>
-	<!-- Router Slot -->
-	<CommandPalette bind:this={commandPalette} />
-	{#if page.data.featureflags?.chat_mode}
-		<ChatWidget />
-	{/if}
-	<main
-		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 dark:from-surface-900 dark:to-surface-950 transition-all duration-300 {classesSidebarOpen(
-			sidebarOpen
-		)}"
-	>
-		{@render children?.()}
-	</main>
-	<!-- ---- / ---- -->
-</div>
+{/if}

@@ -19,6 +19,7 @@
 		type ModalStore
 	} from '#lib/components/Modals/stores.js';
 	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import {
 		complianceResultColorMap,
 		complianceResultTailwindColorMap
@@ -60,7 +61,12 @@
 		form: ActionData;
 	}
 
-	let { data, form }: Props = $props();
+	let { data: incoming, form }: Props = $props();
+	// SvelteKit hands the next page's data to this page before unmounting it.
+	let lastData = incoming;
+	const data = $derived.by(() =>
+		incoming.compliance_assessment ? (lastData = incoming) : lastData
+	);
 
 	// Full list, used for the ToC result counts; the input radio filters per-row.
 	const result_options = requirementResultOptions();
@@ -483,7 +489,16 @@
 		navItems.filter((item): item is NavItem & { type: 'assessment' } => item.type === 'assessment')
 	);
 
-	let currentIndex = $state(0);
+	const focusRa = page.url.searchParams.get('ra');
+	const focusTask = page.url.searchParams.get('task');
+	let currentIndex = $state(
+		untrack(() =>
+			Math.max(
+				0,
+				navItems.findIndex((item) => item.data?.id === focusRa)
+			)
+		)
+	);
 	const currentNavItem = $derived(navItems[currentIndex]);
 	const currentItem = $derived(currentNavItem?.type === 'assessment' ? currentNavItem.data : null);
 	const currentSplashNode = $derived(
@@ -676,6 +691,10 @@
 	// --- Modals ---
 	const modalStore: ModalStore = getModalStore();
 
+	// Linked objects the viewer can see; the others come masked and are only counted.
+	const visibleLinks = (items: any[] | undefined): any[] =>
+		(items ?? []).filter((item) => !isMaskedPlaceholder(item));
+
 	function modalMeasureCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -697,7 +716,7 @@
 
 	// Which task's commitment panel is open: the table stays scannable and the
 	// promise is one click away.
-	let expandedTask = $state<string | null>(null);
+	let expandedTask = $state<string | null>(focusTask);
 
 	const REVIEW_STATES = [
 		{ id: 'changes_requested', label: m.reviewChangesRequested(), color: '#ef4444' },
@@ -763,7 +782,10 @@
 		await refreshAll();
 	}
 
-	function modalTaskTemplateCreateForm(createform: SuperForm<any>): void {
+	function modalTaskTemplateCreateForm(
+		createform: SuperForm<any>,
+		folderContentType?: string
+	): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -771,6 +793,9 @@
 				formAction: '?/createTaskTemplate',
 				invalidateAll: true,
 				model: data.taskTemplateModel,
+				// A third-party audit lives in an enclave: offer it, else the prefilled
+				// domain is not in the picker and shows blank.
+				folderContentTypes: folderContentType === 'EN' ? ['DO', 'GL', 'EN'] : undefined,
 				debug: false
 			}
 		};
@@ -850,7 +875,11 @@
 		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce(
 			(acc, requirementAssessment) => {
-				return { ...acc, [requirementAssessment.id]: [] };
+				return {
+					...acc,
+					[requirementAssessment.id]:
+						focusTask && requirementAssessment.id === focusRa ? ['taskTemplates'] : []
+				};
 			},
 			{} as Record<string, string[]>
 		)
@@ -968,13 +997,18 @@
 	import { page } from '$app/state';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 	import CommitmentPanel from '#lib/components/CommitmentPanel/CommitmentPanel.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	// Where the sticky header parks, and how tall it is: the ToC column hangs below it.
 	let stickyTop = $state(0);
 	let headerHeight = $state(0);
 
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);
+		if (focusTask) {
+			setTimeout(() =>
+				document.getElementById(`task-${focusTask}`)?.scrollIntoView({ block: 'center' })
+			);
+		}
 		const appbar = document.querySelector('.sticky.top-0.z-50') as HTMLElement | null;
 		let cleanupAppbar: (() => void) | undefined;
 		if (appbar) {
@@ -994,6 +1028,16 @@
 		};
 	});
 </script>
+
+<!-- Linked objects the viewer cannot see: counted, never named. -->
+{#snippet hiddenLinksNote(items: any[] | undefined)}
+	{@const hidden = countMasked(items ?? [])}
+	{#if hidden > 0}
+		<span class="text-xs text-yellow-700" data-testid="hidden-links-note">
+			{m.objectsNotVisible({ count: hidden })}
+		</span>
+	{/if}
+{/snippet}
 
 <div class="flex flex-col p-4">
 	<div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg w-full h-full space-y-3">
@@ -1785,7 +1829,7 @@
 														</div>
 													{/if}
 													<div class="flex flex-wrap space-x-2 items-center">
-														{#each requirementAssessment.applied_controls ?? [] as ac}
+														{#each visibleLinks(requirementAssessment.applied_controls) as ac}
 															<p class="p-2">
 																<Anchor
 																	class="anchor"
@@ -1796,6 +1840,7 @@
 																</Anchor>
 															</p>
 														{/each}
+														{@render hiddenLinksNote(requirementAssessment.applied_controls)}
 													</div>
 												</Accordion.ItemContent>
 											</Accordion.Item>
@@ -1839,7 +1884,8 @@
 																data-testid="add-task-template-button"
 																onclick={() =>
 																	modalTaskTemplateCreateForm(
-																		requirementAssessment.taskTemplateCreateForm
+																		requirementAssessment.taskTemplateCreateForm,
+																		requirementAssessment.folder?.content_type
 																	)}
 															>
 																<i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}
@@ -1870,8 +1916,12 @@
 																</tr>
 															</thead>
 															<tbody>
-																{#each requirementAssessment.task_templates ?? [] as task}
-																	<tr class="border-b border-surface-100-900">
+																{#each visibleLinks(requirementAssessment.task_templates) as task}
+																	<tr
+																		id="task-{task.id}"
+																		class="border-b border-surface-100-900"
+																		class:bg-primary-100-900={task.id === focusTask}
+																	>
 																		<td class="py-2">
 																			<i class="fa-solid fa-list-check mr-2 text-surface-500"
 																			></i>{task.str}
@@ -1939,6 +1989,7 @@
 																{/each}
 															</tbody>
 														</table>
+														{@render hiddenLinksNote(requirementAssessment.task_templates)}
 													{/if}
 												</Accordion.ItemContent>
 											</Accordion.Item>
@@ -2009,7 +2060,7 @@
 														</div>
 													{/if}
 													<div class="flex flex-wrap space-x-2 items-center">
-														{#each requirementAssessment.evidences ?? [] as evidence}
+														{#each visibleLinks(requirementAssessment.evidences) as evidence}
 															<p class="p-2">
 																<Anchor
 																	class="anchor"
@@ -2021,6 +2072,7 @@
 																</Anchor>
 															</p>
 														{/each}
+														{@render hiddenLinksNote(requirementAssessment.evidences)}
 													</div>
 												</Accordion.ItemContent>
 											</Accordion.Item>

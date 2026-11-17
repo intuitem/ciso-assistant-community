@@ -197,6 +197,23 @@ class TestAuditWordExport:
                 "DOCX archive is missing word/document.xml"
             )
 
+    def test_word_report_prints_audit_observation_and_version(
+        self, admin_client, audit
+    ):
+        """#5275: the default template's audit-level fields must be filled."""
+        audit.observation = "Audit-level observation 5275"
+        audit.version = "9.9-5275"
+        audit.save()
+        url = reverse(
+            "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        with zipfile.ZipFile(io.BytesIO(_read_streaming(response))) as zf:
+            xml = zf.read("word/document.xml").decode()
+        assert "Audit-level observation 5275" in xml
+        assert "9.9-5275" in xml
+
     def test_word_report_embeds_charts(self, admin_client, audit):
         """The five charts must survive the engine-agnostic context handoff.
 

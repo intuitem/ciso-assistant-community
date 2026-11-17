@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
@@ -85,10 +86,10 @@
 								// For links/flows, get node names by index
 								const sourceNode = translatedNodes[params.data.source];
 								const targetNode = translatedNodes[params.data.target];
-								return `${sourceNode.name} → ${targetNode.name}<br/>Count: ${params.value}`;
+								return `${escapeHtml(sourceNode.name)} → ${escapeHtml(targetNode.name)}<br/>Count: ${params.value}`;
 							} else {
 								// For nodes, show the node name and its total count
-								return `${params.name}<br/>Count: ${params.value}`;
+								return `${escapeHtml(params.name)}<br/>Count: ${params.value}`;
 							}
 						}
 					},

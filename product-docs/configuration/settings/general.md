@@ -14,6 +14,10 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 - **Default language** — fallback locale for users who haven't picked a preference and for system-generated emails. Must be one of the languages enabled in the instance build.
 
+## Date format
+
+- **Default date format** — the format new users start with. **Force date format for all users** applies the saved default to every existing user once. See [Date format](../date-format.md#set-a-default-for-the-organisation).
+
 ## Reports
 
 - **Report time zone**: the time zone used for the times printed in reports and exports, `UTC` by default. See [Report time zone](../report-time-zone.md).
@@ -29,6 +33,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 ## Behaviour
 
 - **Allow self-validation** — whether a user can validate workflows they themselves created. Off by default for separation-of-duty reasons.
+- **Four-eyes review of evidences** — when on, whoever uploaded an evidence file cannot approve or reject it in the [evidence review](../../concepts/evidence.md#review). Next to **Allow self-validation**, under **Workflows**.
 - **Show warning on external links** — interstitial prompt before opening links that leave the platform.
 - **Enforce MFA** — make multi-factor authentication mandatory for every user account.
 - **Allow assignments to entities** — whether requirements and tasks can be assigned to third-party entities (not just internal users).

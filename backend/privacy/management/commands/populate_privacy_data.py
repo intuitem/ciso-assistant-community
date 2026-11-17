@@ -219,7 +219,6 @@ class Command(BaseCommand):
                 author=random.choice(actors) if actors else None,
                 dpia_required=dpia_required,
                 dpia_reference=f"DPIA-{i + 1:04d}" if dpia_required else "",
-                has_sensitive_personal_data=False,  # Will be updated if sensitive data added
             )
 
             # Assign actors (0-3)
@@ -542,9 +541,13 @@ class Command(BaseCommand):
             ).count()
             self.stdout.write(f"  {status_label}: {count}")
 
-        sensitive_count = Processing.objects.filter(
-            name__startswith="TEST-", has_sensitive_personal_data=True
-        ).count()
+        sensitive_count = (
+            Processing.objects.filter(
+                name__startswith="TEST-", personal_data__is_sensitive=True
+            )
+            .distinct()
+            .count()
+        )
         self.stdout.write(f"\nWith Sensitive Personal Data: {sensitive_count}")
 
         dpia_count = Processing.objects.filter(

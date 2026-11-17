@@ -641,6 +641,7 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
 
     def validate(self, data):
         """Validate widget grid positioning and convert target_model to target_content_type"""
+        data = super().validate(data)
         position_x = data.get("position_x", 0)
         width = data.get("width", 6)
         height = data.get("height", 2)

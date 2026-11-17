@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
+from django.db.models.functions import Coalesce
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 import django_filters as df
@@ -715,7 +716,9 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
     serializers_module = "metrology.serializers"
     filterset_fields = ["folder", "metric_instance", "evidence_revision"]
     search_fields = ["observation"]
-    ordering = ["-timestamp"]  # Most recent first
+    # Most recent first by the moment a value answers for, as the model and
+    # the current value rank them: a past period typed today sorts as past.
+    ordering = ["-moment", "-timestamp"]
 
     def perform_destroy(self, instance):
         # Same refusal as the write serializer: a derived series is its
@@ -734,6 +737,7 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
+            .annotate(moment=Coalesce("period_start", "timestamp"))
             .select_related(
                 "folder",
                 # EvidenceRevision.__str__ reads self.evidence.name, so the

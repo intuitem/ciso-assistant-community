@@ -36,12 +36,18 @@ def _model_name(log_entry) -> str:
 def _actor(log_entry) -> dict:
     if not (log_entry.actor_id or log_entry.actor_email):
         return {}
-    return {
+    actor = {
         "user": {
             "uid": str(log_entry.actor_id) if log_entry.actor_id else None,
             "email_addr": log_entry.actor_email or None,
         }
     }
+    # made through an AI app (MCP) on the user's behalf
+    via = (log_entry.additional_data or {}).get("via_app")
+    if via:
+        actor["app_name"] = via.get("name")
+        actor["app_uid"] = via.get("client_id")
+    return actor
 
 
 def log_entry_to_ocsf(log_entry) -> dict:
@@ -95,6 +101,7 @@ def log_entry_to_raw(log_entry) -> dict:
         "actor": _actor(log_entry).get("user", {}),
         "remote_addr": log_entry.remote_addr,
         "folder_id": (log_entry.additional_data or {}).get("folder_id"),
+        "via_app": (log_entry.additional_data or {}).get("via_app"),
         "correlation_id": log_entry.cid,
         "timestamp": log_entry.timestamp.isoformat(),
     }

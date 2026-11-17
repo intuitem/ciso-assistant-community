@@ -4,6 +4,7 @@
 	import { consumeCreateIntent } from '#lib/utils/create-intent.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
 	import type { PageData, ActionData } from './$types';
 	import {
 		getModalStore,
@@ -39,6 +40,21 @@
 		modalStore.trigger(modal);
 	}
 
+	// The review queue opens on what the table shows: same filters, same search.
+	let tableFilters: Record<string, any> = $state({});
+	let tableSearch = $state('');
+	const reviewHref = $derived.by(() => {
+		const params = new URLSearchParams();
+		for (const [field, values] of Object.entries(tableFilters)) {
+			if (Array.isArray(values)) {
+				for (const v of values) if (v?.value) params.append(v.param ?? field, v.value);
+			}
+		}
+		if (tableSearch) params.set('search', tableSearch);
+		const search = params.toString();
+		return `/evidences/review${search ? `?${search}` : ''}`;
+	});
+
 	// `THIRD_PARTY_URL_MODEL` overlaps `URL_MODEL`, and for those models this route wins over
 	// `(internal)/[model=urlmodel]` — for internal users too. So the intent lands here.
 	$effect(() => {
@@ -49,7 +65,26 @@
 {#if data.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+			<ModelTable
+				source={data.table}
+				deleteForm={data.deleteForm}
+				{URLModel}
+				onFilterChange={(filters) => (tableFilters = filters)}
+				onQueryChange={(query) => (tableSearch = new URLSearchParams(query).get('search') ?? '')}
+			>
+				{#snippet optButton()}
+					{#if URLModel === 'evidences' && !page.data.user?.is_third_party}
+						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+							<a
+								href={reviewHref}
+								class="inline-block p-3 btn-mini-secondary w-12 text-center focus:relative"
+								title={m.reviewEvidences()}
+								aria-label={m.reviewEvidences()}
+								data-testid="review-evidences-button"><i class="fa-solid fa-clipboard-check"></i></a
+							>
+						</span>
+					{/if}
+				{/snippet}
 				{#snippet addButton()}
 					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">

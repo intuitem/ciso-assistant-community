@@ -26,6 +26,7 @@
 		extendedResultColorMap
 	} from '#lib/utils/constants.js';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import {
 		getFieldVisibility,
@@ -288,6 +289,10 @@
 	let questionnaireMode = $state(questionnaireOnly);
 
 	const modalStore: ModalStore = getModalStore();
+
+	// Linked objects the viewer can see; the others come masked and are only counted.
+	const visibleLinks = (items: any[] | undefined): any[] =>
+		(items ?? []).filter((item) => !isMaskedPlaceholder(item));
 
 	function modalMeasureCreateForm(requirementAssessment: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
@@ -690,6 +695,16 @@
 	</button>
 {/snippet}
 
+<!-- Linked objects the viewer cannot see: counted, never named. -->
+{#snippet hiddenLinksNote(items: any[] | undefined)}
+	{@const hidden = countMasked(items ?? [])}
+	{#if hidden > 0}
+		<span class="text-xs text-yellow-700" data-testid="hidden-links-note">
+			{m.objectsNotVisible({ count: hidden })}
+		</span>
+	{/if}
+{/snippet}
+
 <!-- Related-object panel (controls / evidences): create/select + item list -->
 {#snippet detailPanel(cfg: Record<string, any>)}
 	<div class="card border border-surface-200-800 rounded-lg p-3 space-y-2">
@@ -719,7 +734,7 @@
 		{/if}
 		{#if cfg.items?.length}
 			<div class="flex flex-wrap gap-2">
-				{#each cfg.items as item (item.id)}
+				{#each visibleLinks(cfg.items) as item (item.id)}
 					<Anchor
 						class="inline-flex items-center gap-2 rounded-md border border-surface-200-800 bg-surface-50-950 px-2.5 py-1 text-sm text-surface-800-200 transition-colors hover:border-primary-300-700 hover:bg-primary-50-950"
 						href="{cfg.hrefBase}/{item.id}"
@@ -730,6 +745,7 @@
 						<span class="truncate max-w-[18rem]">{item.str}</span>
 					</Anchor>
 				{/each}
+				{@render hiddenLinksNote(cfg.items)}
 			</div>
 		{:else}
 			<p class="text-surface-400-600 italic text-sm">{cfg.emptyLabel}</p>
@@ -1541,7 +1557,7 @@
 																</p>
 															{:else}
 																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																	{#each requirementAssessment.applied_controls as item (item.id)}
+																	{#each visibleLinks(requirementAssessment.applied_controls) as item (item.id)}
 																		<Anchor
 																			class="anchor"
 																			href="/applied-controls/{item.id}"
@@ -1550,6 +1566,7 @@
 																			<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
 																		</Anchor>
 																	{/each}
+																	{@render hiddenLinksNote(requirementAssessment.applied_controls)}
 																</div>
 															{/if}
 														{/if}
@@ -1563,7 +1580,7 @@
 																</p>
 															{:else}
 																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																	{#each requirementAssessment.evidences as item (item.id)}
+																	{#each visibleLinks(requirementAssessment.evidences) as item (item.id)}
 																		<Anchor
 																			class="anchor"
 																			href="/evidences/{item.id}"
@@ -1573,6 +1590,7 @@
 																			<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
 																		</Anchor>
 																	{/each}
+																	{@render hiddenLinksNote(requirementAssessment.evidences)}
 																</div>
 															{/if}
 														{/if}
