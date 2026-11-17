@@ -249,3 +249,27 @@ def test_findings_without_assessment_share_one_sequence(domains):
     assert Finding.objects.create(name="new", folder=domains[0]).ref_id == "F.01"
     backfill_auto_ref_ids()
     assert Finding.objects.get(name="old").ref_id == "F.02"
+
+
+@pytest.mark.django_db
+def test_global_search_keeps_an_exact_ref_id_past_the_cap(domains, monkeypatch):
+    from rest_framework.test import APIClient
+
+    from core.apps import startup
+    from core.search import SEARCHABLE_MODELS
+    from iam.models import User, UserGroup
+
+    startup(sender=None, **{})
+    entry = next(e for e in SEARCHABLE_MODELS if e["slug"] == "applied-controls")
+    monkeypatch.setitem(entry, "limit", 2)
+    for n in range(1, 5):  # AC.01 is the oldest, so the cap alone would drop it
+        AppliedControl.objects.create(
+            name=f"c{n}", folder=domains[0], ref_id=f"AC.0{n}"
+        )
+
+    admin = User.objects.create_user(email="admin@test.local")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+    client = APIClient()
+    client.force_authenticate(admin)
+    response = client.get("/api/search/", {"q": "AC.01", "type": "applied-controls"})
+    assert "c1" in [r["name"] for r in response.json()["results"]]

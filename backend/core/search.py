@@ -14,7 +14,7 @@ from crq.models import (
     QuantitativeRiskScenario,
     QuantitativeRiskStudy,
 )
-from django.db.models import CharField, Q, TextField, Value
+from django.db.models import Case, CharField, IntegerField, Q, TextField, Value, When
 from django.db.models.functions import Cast, Coalesce, Concat, NullIf, Trim
 from doc_management.models import DocumentContainer
 from ebios_rm.models import AttackPath, EbiosRMStudy, FearedEvent, StrategicScenario
@@ -311,9 +311,20 @@ def global_search(request):
 
         # The cap truncates before ranking, so order first. `id` breaks ties: library
         # imports share one timestamp across thousands of rows.
+        # An exact ref_id would otherwise lose to the many rows sharing its prefix.
+        ordering = ["-updated_at", "id"]
+        if has_ref_id:
+            qs = qs.annotate(
+                ref_id_rank=Case(
+                    When(ref_id__iexact=query, then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
+            )
+            pass  # TEMP
         results = (
             qs.filter(q_filter)
-            .order_by("-updated_at", "id")
+            .order_by(*ordering)
             .values(
                 "id",
                 "name",
