@@ -106,7 +106,9 @@ Default URL: `http://localhost:6333`. Override with the `QDRANT_URL` environment
 .venv/bin/python backend/manage.py index_libraries --sync
 ```
 
-> `index_libraries` parses all YAML files in `backend/library/libraries/` and indexes requirement nodes, threats, and reference controls. This can take a few minutes.
+> `index_libraries` parses all YAML files in `backend/library/libraries/` and indexes requirement nodes, threats, and reference controls. This can take a few minutes. Unchanged entries are skipped, and the nightly catch-up reruns it so new libraries get indexed.
+>
+> Library search combines vectors with BM25 keyword matching (exact terms such as "SBOM"). Collections created before this need `init_qdrant --recreate` followed by both index commands; until then library search stays vector-only. Hybrid search needs Qdrant 1.15.2 or later; older servers fall back to vector-only.
 
 ### Start the background worker
 
