@@ -30,8 +30,8 @@ A few things to keep in mind when reading it:
 - An item with a count of zero is hidden, and so is a group with no items left.
 - Counts cover only the objects you can view.
 - Deprecated items are left out. So are draft assessments (audits, risk assessments, third-party assessments and findings assessments with no status), along with their findings, requirements and risk scenarios: this applies to the headline figures and **Recently updated audits** too. Other items with no status yet, such as applied controls, still count: nothing has been started on them.
-- Items belonging to a module that is turned off in the feature flags are hidden: incidents, NIS2, vulnerabilities, right requests, risk acceptances, security exceptions, tasks, audits, risk assessments, third-party assessments, contracts and findings.
-- **NIS2 deadlines missed** looks at the next open stage of each significant incident: the early warning (24 hours), the incident notification (72 hours) or the final report (one month). Dismissed incidents are left out.
+- Items belonging to a module that is turned off in the feature flags are hidden: incidents, NIS2, vulnerabilities, the vulnerability SLA, right requests, risk acceptances, security exceptions, tasks, audits, risk assessments, third-party assessments, contracts and findings.
+- **NIS2 deadlines missed** looks at the next open stage of each significant incident: the early warning (24 hours), the incident notification (72 hours) or the final report (one month). Closed and dismissed incidents are left out.
 - **Overdue tasks** counts task definitions with at least one overdue occurrence, not the occurrences themselves.
 - The same applied control can appear in several rows: a degraded P1 control past its ETA counts in **Missed ETA**, **Pending P1** and **Degraded controls**.
 - Some rows show a trend line once a few days of daily snapshots exist.

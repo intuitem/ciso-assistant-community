@@ -54,13 +54,15 @@
 					href: '/incidents?status=new&status=ongoing&status=resolved',
 					trend: 'incidents_open'
 				},
-				featureflags.vulnerabilities !== false && {
-					tier: 'now',
-					count: metrics.operations?.overdue_vulnerabilities,
-					label: m.briefingOverdueVulnerabilities(),
-					hint: m.briefingOverdueVulnerabilitiesHint(),
-					href: '/vulnerabilities?state=overdue'
-				},
+				// The SLA flag also hides the list's `state` filter: without it the link opens every vulnerability.
+				featureflags.vulnerabilities !== false &&
+					featureflags.vulnerability_sla !== false && {
+						tier: 'now',
+						count: metrics.operations?.overdue_vulnerabilities,
+						label: m.briefingOverdueVulnerabilities(),
+						hint: m.briefingOverdueVulnerabilitiesHint(),
+						href: '/vulnerabilities?state=overdue'
+					},
 				featureflags.privacy !== false &&
 					featureflags.right_requests !== false && {
 						tier: 'now',
