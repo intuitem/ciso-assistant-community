@@ -854,7 +854,9 @@ def _implementation_groups(value, framework):
 # With `upsert: true` in the config, the action matches an existing row by
 # the entry's `match_on` field (within the instance's folder) and updates it
 # instead of creating a duplicate, which the primitive sync flows need.
-# Entries without an explicit `match_on` match on name.
+# Entries without an explicit `match_on` match on name. `match_scope` adds the
+# parents a row belongs to, compared as given, so an upsert never moves a row
+# from one parent to another.
 CREATABLE_MODELS = {
     "applied_control": {
         "model": AppliedControl,
@@ -918,6 +920,10 @@ CREATABLE_MODELS = {
             ),
         },
         "prepare": _prepare_finding,
+        # A name is not unique enough: audits of one framework in one folder
+        # derive the same names from their requirements, and a name-only match
+        # would move last year's finding into this year's binder.
+        "match_scope": ["findings_assessment", "requirement_assessment"],
         # A bound finding lives in its assessment's folder, as through the API.
         "folder_from": "findings_assessment",
         # Raising on a requirement may create the audit's binder; the Findings
@@ -1403,6 +1409,9 @@ def _upsert_match(entry, kwargs, folder):
         raise ActionError(
             f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
         )
+    # The parents, unlike the match fields, may be absent: an unbound row
+    # matches only unbound rows, and a bound one only rows of the same parent.
+    match.update({key: kwargs.get(key) for key in entry.get("match_scope") or ()})
     rows = entry["model"].objects.filter(folder=folder, **match)
     if entry.get("match_filter") is not None:
         rows = rows.filter(entry["match_filter"])
