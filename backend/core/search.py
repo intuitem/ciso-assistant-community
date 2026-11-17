@@ -101,11 +101,11 @@ SEARCHABLE_MODELS = [
     _search_entry(Finding, "findings", ref_id=True),
     _search_entry(SecurityException, "security-exceptions", ref_id=True),
     _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
-    _search_entry(Evidence, "evidences"),
+    _search_entry(Evidence, "evidences", ref_id=True),
     # The container holds the document's name; its per-locale ManagedDocuments usually don't.
     _search_entry(DocumentContainer, "document-containers", ref_id=True),
     # --- Governance ---
-    _search_entry(RiskAcceptance, "risk-acceptances"),
+    _search_entry(RiskAcceptance, "risk-acceptances", ref_id=True),
     _search_entry(Campaign, "campaigns"),
     _search_entry(Accreditation, "accreditations", ref_id=True),
     _search_entry(Project, "projects", ref_id=True),
@@ -166,7 +166,10 @@ SEARCHABLE_MODELS = [
         ),
     ),
     _search_entry(
-        EntityAssessment, "entity-assessments", extra_search=["entity__name"]
+        EntityAssessment,
+        "entity-assessments",
+        ref_id=True,
+        extra_search=["entity__name"],
     ),
     # --- EBIOS RM ---
     _search_entry(EbiosRMStudy, "ebios-rm", ref_id=True),
@@ -178,7 +181,7 @@ SEARCHABLE_MODELS = [
     _search_entry(DataBreach, "data-breaches", ref_id=True),
     _search_entry(RightRequest, "right-requests", ref_id=True),
     # --- Resilience ---
-    _search_entry(BusinessImpactAnalysis, "business-impact-analysis"),
+    _search_entry(BusinessImpactAnalysis, "business-impact-analysis", ref_id=True),
 ]
 
 
