@@ -301,6 +301,9 @@ PRIVACY_COUNTRY_CHOICES = REGION_CHOICES + COUNTRY_CHOICES
 DATA_LOCATION_CHOICES = PRIVACY_COUNTRY_CHOICES
 REGION_CODES = {code for code, _ in REGION_CHOICES}
 
+# Transfer destinations inside the GDPR area: no chapter V mechanism needed.
+GDPR_INTERNAL_LOCATIONS = EEA_COUNTRIES_SET | REGION_CODES
+
 # Codes with no matching feature in the world map topology, so they are reported
 # alongside the map instead of being silently dropped from it.
 NON_MAPPABLE_COUNTRY_CODES = REGION_CODES | {"x28"}

@@ -42,7 +42,7 @@
 
 	// Regions and "Other Countries" have no feature in the map topology.
 	type Region = { id: string; label: string; count: number; color: string };
-	const regions: Region[] = data.data.country_regions || [];
+	const regions: Region[] = $derived(data.data.country_regions ?? []);
 
 	function regionLabel(region: Region): string {
 		switch (region.id) {

@@ -5,10 +5,9 @@ import uuid
 import pandas as pd
 
 from core.constants import (
-    EEA_COUNTRIES_SET,
+    GDPR_INTERNAL_LOCATIONS,
     NON_MAPPABLE_COUNTRY_CODES,
     PRIVACY_COUNTRY_CHOICES,
-    REGION_CHOICES,
 )
 from core.models import Terminology, ValidationFlow
 from core.views import (
@@ -314,7 +313,7 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
         {
             "id": country,
             "count": count,
-            "color": "#A7CC74" if country in EEA_COUNTRIES_SET else "#F4B83D",
+            "color": "#A7CC74" if country in GDPR_INTERNAL_LOCATIONS else "#F4B83D",
         }
         for country, count in country_counts.items()
         if country and country not in NON_MAPPABLE_COUNTRY_CODES
@@ -323,13 +322,12 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
     # The map topology is keyed on ISO alpha-2, so regions and "Other Countries"
     # have no feature to paint; surface their counts next to it instead.
     labels = dict(PRIVACY_COUNTRY_CHOICES)
-    region_codes = {code for code, _ in REGION_CHOICES}
     regions = [
         {
             "id": code,
             "label": labels.get(code, code),
             "count": country_counts[code],
-            "color": "#A7CC74" if code in region_codes else "#F4B83D",
+            "color": "#A7CC74" if code in GDPR_INTERNAL_LOCATIONS else "#F4B83D",
         }
         for code in sorted(NON_MAPPABLE_COUNTRY_CODES)
         if country_counts.get(code)

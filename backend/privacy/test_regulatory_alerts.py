@@ -283,7 +283,7 @@ def test_transfer_inside_the_eea_needs_no_mechanism(folder, owner):
     processing = Processing.objects.create(name="Hosting", folder=folder)
     processing.assigned_to.set([owner.actor])
     Purpose.objects.create(name="Run the service", processing=processing, folder=folder)
-    for country in ("FR", "NO"):
+    for country in ("FR", "NO", "EU", "EEA"):
         DataTransfer.objects.create(processing=processing, country=country)
     assert processing_obligation_gaps(processing) == []
     check_processing_obligations.call_local()
