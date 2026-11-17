@@ -9,6 +9,7 @@ from typing import List, Dict, Any
 from tprm.models import Entity, Contract, Solution, SolutionSubcontractor
 from tprm.dora_export import IDENTIFIER_PRIORITY, get_entity_identifier
 from core.models import Asset
+from core.constants import REGION_CODES
 from django.db.models import Q
 import re
 
@@ -1228,6 +1229,20 @@ def lint_solutions() -> List[Dict[str, Any]]:
                     "object_name": solution.name,
                 }
             )
+
+        for field in ("data_location_storage", "data_location_processing"):
+            if getattr(solution, field) in REGION_CODES:
+                results.append(
+                    {
+                        "severity": "warning",
+                        "category": "Solutions",
+                        "message": f"Solution '{solution.name}' has a region ({getattr(solution, field)}) as {Solution._meta.get_field(field).verbose_name.lower()}; the register will report it as 'Not applicable'. Set a country for a precise entry.",
+                        "field": field,
+                        "object_type": "solutions",
+                        "object_id": str(solution.id),
+                        "object_name": solution.name,
+                    }
+                )
 
         # Check provider_entity country (mandatory)
         if solution.provider_entity:

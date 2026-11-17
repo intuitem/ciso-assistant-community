@@ -252,3 +252,25 @@ class TestLintSubcontractingChainsDraftExcluded(LintSubcontractingChainsBase):
         )
         results = lint_subcontracting_chains()
         self.assertEqual(len(self._errors(results)), 0)
+
+
+class TestLintSolutionsRegionDataLocation(LintSubcontractingChainsBase):
+    def test_region_data_location_warns_not_applicable(self):
+        from core.models import Asset
+        from tprm.dora_linter import lint_solutions
+
+        asset = Asset.objects.create(
+            name="Payments", folder=self.folder, is_business_function=True
+        )
+        self.solution.assets.add(asset)
+        self.solution.storage_of_data = True
+        self.solution.data_location_storage = "EU"
+        self.solution.data_location_processing = "FR"
+        self.solution.save()
+
+        warnings = [
+            w
+            for w in self._warnings(lint_solutions())
+            if "Not applicable" in w["message"]
+        ]
+        self.assertEqual([w["field"] for w in warnings], ["data_location_storage"])

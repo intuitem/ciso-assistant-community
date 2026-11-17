@@ -18,7 +18,7 @@ from core.models import (
     Terminology,
     FilteringLabelMixin,
 )
-from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
+from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES, DATA_LOCATION_CHOICES
 from custom_fields.host import CustomFieldsMixin
 from core.dora import (
     DORA_ENTITY_TYPE_CHOICES,
@@ -494,14 +494,14 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     )
     data_location_storage = models.CharField(
         max_length=3,
-        choices=COUNTRY_CHOICES,
+        choices=DATA_LOCATION_CHOICES,
         blank=True,
         verbose_name=_("Location of data at rest"),
         help_text=_("Country where data is stored"),
     )
     data_location_processing = models.CharField(
         max_length=3,
-        choices=COUNTRY_CHOICES,
+        choices=DATA_LOCATION_CHOICES,
         blank=True,
         verbose_name=_("Location of data processing"),
         help_text=_("Country where data is processed/managed"),

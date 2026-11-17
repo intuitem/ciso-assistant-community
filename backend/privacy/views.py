@@ -4,7 +4,12 @@ import uuid
 
 import pandas as pd
 
-from core.constants import COUNTRY_CHOICES, EU_COUNTRIES_SET
+from core.constants import (
+    EEA_COUNTRIES_SET,
+    NON_MAPPABLE_COUNTRY_CODES,
+    PRIVACY_COUNTRY_CHOICES,
+    REGION_CHOICES,
+)
 from core.models import Terminology, ValidationFlow
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
@@ -268,7 +273,7 @@ class DataContractorViewSet(BaseModelViewSet):
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
-        return Response(dict(COUNTRY_CHOICES))
+        return Response(dict(PRIVACY_COUNTRY_CHOICES))
 
 
 class DataTransferViewSet(BaseModelViewSet):
@@ -282,7 +287,7 @@ class DataTransferViewSet(BaseModelViewSet):
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
-        return Response(dict(COUNTRY_CHOICES))
+        return Response(dict(PRIVACY_COUNTRY_CHOICES))
 
     @action(detail=False, name="Get transfer mechanism choices")
     def transfer_mechanism(self, request):
@@ -304,17 +309,33 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
     for item in chain(transfer_countries, contractor_countries):
         country_counts[item["country"]] += item["count"]
 
-    # if country code is in EU (GDPR scope) set the dict color to #A7CC74 otherwise to #F4B83D
+    # green inside the EEA (GDPR applies directly), amber for third countries
     countries = [
         {
             "id": country,
             "count": count,
-            "color": "#A7CC74" if country in EU_COUNTRIES_SET else "#F4B83D",
+            "color": "#A7CC74" if country in EEA_COUNTRIES_SET else "#F4B83D",
         }
         for country, count in country_counts.items()
+        if country and country not in NON_MAPPABLE_COUNTRY_CODES
     ]
 
-    return countries
+    # The map topology is keyed on ISO alpha-2, so regions and "Other Countries"
+    # have no feature to paint; surface their counts next to it instead.
+    labels = dict(PRIVACY_COUNTRY_CHOICES)
+    region_codes = {code for code, _ in REGION_CHOICES}
+    regions = [
+        {
+            "id": code,
+            "label": labels.get(code, code),
+            "count": country_counts[code],
+            "color": "#A7CC74" if code in region_codes else "#F4B83D",
+        }
+        for code in sorted(NON_MAPPABLE_COUNTRY_CODES)
+        if country_counts.get(code)
+    ]
+
+    return countries, regions
 
 
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
@@ -1096,11 +1117,14 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                         }
                     )
 
+        countries, regions = agg_countries(
+            viewable_data_transfers, viewable_data_contractors
+        )
+
         return Response(
             {
-                "countries": agg_countries(
-                    viewable_data_transfers, viewable_data_contractors
-                ),
+                "countries": countries,
+                "country_regions": regions,
                 "processings_count": processings_count,
                 "recipients_count": recipients_count,
                 "pd_categories": pd_categories,

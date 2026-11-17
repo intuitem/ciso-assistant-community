@@ -39,6 +39,23 @@
 	const requestColors = requestValues.map(
 		(v: { localName?: string }) => REQUEST_TYPE_COLORS[v.localName ?? ''] ?? '#9ca3af'
 	);
+
+	// Regions and "Other Countries" have no feature in the map topology.
+	type Region = { id: string; label: string; count: number; color: string };
+	const regions: Region[] = data.data.country_regions || [];
+
+	function regionLabel(region: Region): string {
+		switch (region.id) {
+			case 'EU':
+				return m.europeanUnion();
+			case 'EEA':
+				return m.europeanEconomicArea();
+			case 'x28':
+				return m.otherCountries();
+			default:
+				return region.label;
+		}
+	}
 </script>
 
 <div class="grid grid-cols-12 gap-4">
@@ -69,11 +86,28 @@
 			count={data.data.open_data_breaches_count}
 		/>
 	</div>
-	<div class="col-span-7 flex items-center justify-center p-4 bg-surface-50-950 rounded-lg shadow">
-		{#if data?.data?.countries?.length > 0}
-			<WorldMap data={data.data.countries} />
-		{:else}
-			<div class="text-surface-700-300">{m.noDataAvailable()}</div>
+	<div class="col-span-7 flex flex-col p-4 bg-surface-50-950 rounded-lg shadow">
+		<div class="flex flex-1 items-center justify-center">
+			{#if data?.data?.countries?.length > 0}
+				<WorldMap data={data.data.countries} />
+			{:else}
+				<div class="text-surface-700-300">{m.noDataAvailable()}</div>
+			{/if}
+		</div>
+		{#if regions.length > 0}
+			<div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-surface-200-800">
+				<span class="text-xs text-surface-600-400">{m.notShownOnMap()}</span>
+				{#each regions as region (region.id)}
+					<span
+						class="inline-flex items-center gap-1.5 text-xs rounded-full px-2 py-1 bg-surface-100-900"
+					>
+						<span class="size-2 rounded-full shrink-0" style="background-color: {region.color}"
+						></span>
+						<span class="text-surface-700-300">{regionLabel(region)}</span>
+						<span class="font-semibold text-surface-950-50">{region.count}</span>
+					</span>
+				{/each}
+			</div>
 		{/if}
 	</div>
 	<div class="col-span-5 min-h-96 p-4 bg-surface-50-950 rounded-lg shadow">

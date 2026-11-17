@@ -13,6 +13,7 @@ from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
+from core.constants import REGION_CODES
 from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 
@@ -665,14 +666,20 @@ def generate_b_02_02_ict_services(
                 data_location_storage = (
                     "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
                 )
-                if solution.data_location_storage:
+                if (
+                    solution.data_location_storage
+                    and solution.data_location_storage not in REGION_CODES
+                ):
                     data_location_storage = f"eba_GA:{solution.data_location_storage}"
 
                 # c0160: Location of data processing
                 data_location_processing = (
                     "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
                 )
-                if solution.data_location_processing:
+                if (
+                    solution.data_location_processing
+                    and solution.data_location_processing not in REGION_CODES
+                ):
                     data_location_processing = (
                         f"eba_GA:{solution.data_location_processing}"
                     )
