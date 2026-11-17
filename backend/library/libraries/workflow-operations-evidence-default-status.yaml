@@ -1,0 +1,69 @@
+urn: urn:intuitem:risk:library:workflow-operations-evidence-default-status
+locale: en
+ref_id: workflow-operations-evidence-default-status
+name: Evidence — default status In review
+description: Evidence created as Draft moves to In review; any other status picked at creation is kept. Change the
+  status in the last step to fit your process.
+copyright: © intuitem
+version: 1
+publication_date: 2026-11-16
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-evidence-default-status:workflow:evidence-default-status
+    schema_version: 1
+    ref_id: evidence-default-status
+    name: Evidence — default status In review
+    description: Evidence created as Draft moves to In review; any other status picked at creation is kept. Change
+      the status in the last step to fit your process.
+    graph:
+      variables:
+      - key: initial_status
+        type: string
+        default_value: ''
+      nodes:
+      - ref: on_create
+        type: trigger
+        label: Evidence created
+        trigger_config:
+          type: internal_event
+          event_key: evidence.created
+          inline: true
+        input_mapping:
+          initial_status: new_values.status
+      - ref: check_status
+        type: condition
+        label: Status left at Draft?
+        branches:
+        - name: untouched
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: initial_status
+              op: eq
+              value: draft
+        - name: chosen
+          is_default: true
+      - ref: set_status
+        type: action
+        label: Set status
+        action_config:
+          type: update_object
+          model: evidence
+          id: '{{payload.object_id}}'
+          fields:
+            status: in_review
+      - ref: done
+        type: end
+      edges:
+      - source: on_create
+        target: check_status
+      - source: check_status
+        source_branch: untouched
+        target: set_status
+      - source: check_status
+        source_branch: chosen
+        target: done
+      - source: set_status
+        target: done

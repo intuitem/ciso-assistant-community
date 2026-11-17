@@ -11,7 +11,7 @@
 
 <script lang="ts">
 	import { m } from '#paraglide/messages.js';
-	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { safeTranslate, translateEventKey, translateModelName } from '#lib/utils/i18n.js';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
@@ -236,7 +236,7 @@
 		compute: { expressions: [] },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
 		upsert_objects: { model: 'asset', items: '', fields: { name: '' }, on_item_error: 'continue' },
-		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
+		update_object: { model: 'applied_control', id: '{{payload.object_id}}', fields: {}, m2m: {} },
 		attach_evidence: {
 			evidence: '',
 			source: 'text',
@@ -516,7 +516,9 @@
 			if (!map.has(ek.model)) map.set(ek.model, []);
 			map.get(ek.model)!.push(ek);
 		}
-		return [...map.entries()];
+		return [...map.entries()]
+			.map(([model, keys]) => ({ model, label: translateModelName(model), keys }))
+			.sort((a, b) => a.label.localeCompare(b.label));
 	});
 
 	// ---------- internal_event DNF filter builder ----------
@@ -1941,6 +1943,20 @@
 							oninput={onChange}
 						/>
 					</label>
+					{#if actionConfig.id !== '{{payload.object_id}}'}
+						<button
+							type="button"
+							class="self-start text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold"
+							onclick={() => {
+								actionConfig.id = '{{payload.object_id}}';
+								onChange();
+							}}
+						>
+							{m.useTriggeringObject()}
+						</button>
+					{:else}
+						<span class="text-[10px] text-surface-500">{m.triggeringObjectHint()}</span>
+					{/if}
 					{#each updatableEntry?.fields ?? [] as field (field)}
 						{@const allowed = updatableEntry?.allowed_values?.[field]}
 						<label>
@@ -3388,15 +3404,30 @@
 							data-testid="trigger-event-key"
 						>
 							<option value="" disabled hidden></option>
-							{#each eventKeysByModel as [model, keys] (model)}
-								<optgroup label={safeTranslate(model)}>
-									{#each keys as ek (ek.key)}
-										<option value={ek.key}>{ek.action}</option>
+							{#each eventKeysByModel as group (group.model)}
+								<optgroup label={group.label}>
+									{#each group.keys as ek (ek.key)}
+										<option value={ek.key}>
+											{ek.key === triggerConfig.event_key
+												? translateEventKey(ek.key)
+												: safeTranslate(ek.action)}
+										</option>
 									{/each}
 								</optgroup>
 							{/each}
 						</select>
 					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={triggerConfig.inline}
+							onchange={onChange}
+							data-testid="trigger-inline"
+						/>
+						{m.triggerRunInline()}
+					</label>
+					<p class="text-[10px] text-surface-500 leading-relaxed">{m.triggerRunInlineHint()}</p>
 
 					{#if filterRawMode}
 						<label>

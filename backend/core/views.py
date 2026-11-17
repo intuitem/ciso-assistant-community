@@ -22824,7 +22824,7 @@ def emit_quick_form_event(response, action):
     A CUD event cannot express these: answering saves the row too. Deferred to commit.
     `quick_form_ref`/`_urn` travel with the id because a pk does not survive export.
     """
-    from automation.workflows.events import dispatch_internal_event
+    from automation.workflows.events import dispatch_named_event
 
     payload = {
         "id": str(response.id),
@@ -22846,11 +22846,7 @@ def emit_quick_form_event(response, action):
         else None,
         "decided_by": str(response.decided_by_id) if response.decided_by_id else None,
     }
-    transaction.on_commit(
-        lambda: dispatch_internal_event(
-            f"quickformresponse.{action}", payload, response.folder_id
-        )
-    )
+    dispatch_named_event(f"quickformresponse.{action}", payload, response.folder_id)
 
 
 def emit_quick_form_submitted(response):
