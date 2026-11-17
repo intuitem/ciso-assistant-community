@@ -56,17 +56,17 @@ def get_extractor(content_type: str):
 def extract_pdf(file) -> list[Chunk]:
     """Extract text from PDF, splitting by pages/paragraphs."""
     try:
-        import fitz  # PyMuPDF
+        from pypdf import PdfReader
     except ImportError:
-        logger.warning("PyMuPDF not installed, cannot extract PDF")
+        logger.warning("pypdf not installed, cannot extract PDF")
         return []
 
     chunks = []
     file.seek(0)
-    doc = fitz.open(stream=file.read(), filetype="pdf")
+    reader = PdfReader(io.BytesIO(file.read()))
 
-    for page_num, page in enumerate(doc):
-        text = page.get_text().strip()
+    for page_num, page in enumerate(reader.pages):
+        text = page.extract_text().strip()
         if not text:
             continue
 
@@ -104,7 +104,6 @@ def extract_pdf(file) -> list[Chunk]:
                 )
             )
 
-    doc.close()
     return chunks
 
 

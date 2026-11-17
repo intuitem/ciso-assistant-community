@@ -1,6 +1,8 @@
 """The risk assessment report, rendered by Typst."""
 
-import pymupdf
+from io import BytesIO
+
+from pypdf import PdfReader
 import pytest
 
 from core.generators import risk_assessment_context
@@ -202,7 +204,7 @@ def test_inherent_view_appears_only_when_the_flag_supplied_it():
 def test_cover_carries_traceability():
     pdf, payload = _render(_clusters())
     assert payload["generated_at"]
-    cover = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert FakeAssessment.id in cover
 
 
@@ -235,7 +237,7 @@ def test_existing_and_extra_controls_are_both_listed(lang):
     assert row["controls"] == ["Second supplier (Active)"]
     assert row["owners"] == ["Risk owner"]
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Backup power (Active)" in text
     assert "Second supplier (Active)" in text
     assert "Risk owner" in text
@@ -268,7 +270,7 @@ def test_scenario_rows_follow_the_risk_story_order():
     """inherent -> existing controls -> current -> extra controls -> residual."""
     scenario = FakeScenario(existing=["Backup power"], extra=["Second supplier"])
     pdf, _ = _render(_clusters(inherent={}), scenarios=[scenario])
-    full = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    full = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     # Several of these labels also head a summary-table column, so look only at
     # the detail section.
     text = full[full.index("Risk scenarios") :]
@@ -293,13 +295,13 @@ def test_scenario_rows_follow_the_risk_story_order():
 def test_empty_rows_are_omitted():
     _, payload = _render(_clusters(), scenarios=[FakeScenario()])
     pdf, _ = _render(_clusters(), scenarios=[FakeScenario()])
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Existing controls" not in text
     assert "Extra controls" not in text
 
 
 def _text(pdf):
-    return "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    return "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
 
 
 def test_label_standard_switches_the_axis_titles():
@@ -355,29 +357,37 @@ def test_summary_rows_link_to_their_scenario_block():
     scenarios = [FakeScenario(), FakeScenario()]
     pdf, _ = _render(_clusters(), scenarios=scenarios)
 
-    doc = pymupdf.open(stream=pdf, filetype="pdf")
+    reader = PdfReader(BytesIO(pdf))
+    doc = reader.pages
     internal = [
-        link
+        {"page": reader.get_page_number(dest[0].get_object())}
         for page in doc
-        for link in page.get_links()
-        if link["kind"] == pymupdf.LINK_GOTO
+        for annot in page.get("/Annots") or []
+        if (dest := annot.get_object().get("/A", {}).get("/D"))
+        and not isinstance(dest, str)
     ]
     assert len(internal) == len(scenarios), "one link per summary row"
     detail_page = next(
-        i for i, page in enumerate(doc) if "Strength of knowledge" in page.get_text()
+        i
+        for i, page in enumerate(doc)
+        if "Strength of knowledge" in page.extract_text()
     )
     assert all(link["page"] == detail_page for link in internal)
 
 
 def test_summary_table_carries_the_treatment():
     pdf, _ = _render(_clusters(), scenarios=[FakeScenario()])
-    header = pymupdf.open(stream=pdf, filetype="pdf")[
-        next(
-            i
-            for i, page in enumerate(pymupdf.open(stream=pdf, filetype="pdf"))
-            if "Scenario summary" in page.get_text()
-        )
-    ].get_text()
+    header = (
+        PdfReader(BytesIO(pdf))
+        .pages[
+            next(
+                i
+                for i, page in enumerate(PdfReader(BytesIO(pdf)).pages)
+                if "Scenario summary" in page.extract_text()
+            )
+        ]
+        .extract_text()
+    )
     assert "Treatment" in header
 
 
