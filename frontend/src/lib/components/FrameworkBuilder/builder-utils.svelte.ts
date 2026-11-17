@@ -292,6 +292,10 @@ export function createHandleGatedDragHandlers(
 		},
 		recordMousedown(e: MouseEvent) {
 			lastMousedownTarget = e.target;
+			// A permanently draggable row blocks text selection and resizing in its textareas.
+			(e.currentTarget as HTMLElement).draggable = !!(e.target as HTMLElement)?.closest(
+				'[data-drag-handle]'
+			);
 		},
 		handleDragStart(e: DragEvent, index: number) {
 			if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {

@@ -7188,6 +7188,8 @@
 	"quickFormClose": "Close",
 	"quickFormIncomplete": "Answer every required question on every visible page before submitting.",
 	"quickFormAnsweredProgress": "{answered} of {total} questions answered",
+	"onlyDraftsCanBeDeleted": "Only drafts can be deleted. A submitted request can be dropped by its requester, which keeps a record of it, or deleted by an administrator.",
+	"closedRequestsAreAdminOnly": "Only an administrator can delete a closed request.",
 	"quickFormComplete": "All required questions are answered.",
 	"quickFormReopenPrompt": "Note for the respondents (optional)",
 	"quickFormReviewerObservation": "Reviewer note",
