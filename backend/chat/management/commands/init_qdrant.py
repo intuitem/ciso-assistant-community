@@ -5,7 +5,7 @@ Creates the collection with proper vector dimensions and payload indexes.
 
 from django.core.management.base import BaseCommand
 
-from chat.rag import COLLECTION_NAME, get_qdrant_client
+from chat.rag import BM25_VECTOR, COLLECTION_NAME, get_qdrant_client
 
 
 class Command(BaseCommand):
@@ -19,7 +19,13 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        from qdrant_client.models import Distance, VectorParams, PayloadSchemaType
+        from qdrant_client.models import (
+            Distance,
+            Modifier,
+            PayloadSchemaType,
+            SparseVectorParams,
+            VectorParams,
+        )
 
         from chat.providers import get_embedder
 
@@ -55,6 +61,9 @@ class Command(BaseCommand):
                 size=dimensions,
                 distance=Distance.COSINE,
             ),
+            sparse_vectors_config={
+                BM25_VECTOR: SparseVectorParams(modifier=Modifier.IDF)
+            },
         )
 
         # Create payload indexes for efficient filtering
@@ -65,6 +74,7 @@ class Command(BaseCommand):
             "object_type": PayloadSchemaType.KEYWORD,
             "object_id": PayloadSchemaType.KEYWORD,
             "urn": PayloadSchemaType.KEYWORD,
+            "framework": PayloadSchemaType.KEYWORD,
         }
         for field, schema_type in indexes.items():
             client.create_payload_index(

@@ -59,6 +59,17 @@ export const POST: RequestHandler = async ({ fetch, params, request, url }) => {
 			);
 		}
 
+		// The activity's write data, with the ids of every linked object: the list data
+		// masks the ones the user cannot see, and the drawer must send them back.
+		case 'activity-links': {
+			const activityId = requireUuid(body.id, 'id');
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/pmbok/responsibility-matrix-activities/${activityId}/object/`,
+				'GET'
+			);
+		}
+
 		case 'delete-activity': {
 			const activityId = requireUuid(body.id, 'id');
 			return proxy(

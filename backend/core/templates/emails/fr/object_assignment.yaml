@@ -8,6 +8,6 @@ body: |
   - Nom : ${object_name}
   - Domaine : ${folder_name}
 
-  Connectez-vous à votre portail CISO Assistant pour le consulter : [Accéder à CISO Assistant](${ciso_assistant_url})
+  Connectez-vous à votre portail CISO Assistant pour le consulter : [Consulter cet élément](${object_url})
 
   Merci.

@@ -308,11 +308,6 @@
 					total: content.progress?.total_count ?? 0
 				})}
 			</span>
-			{#if content.score !== null && content.score !== undefined}
-				<span
-					><i class="fa-solid fa-star mr-1 text-surface-500"></i>{m.score()}: {content.score}</span
-				>
-			{/if}
 			{#if content.hidden_pages?.length}
 				<span class="text-surface-500"
 					><i class="fa-solid fa-eye-slash mr-1"></i>{m.quickFormHiddenPagesHint()}</span
@@ -808,14 +803,26 @@
 					<i class="fa-solid fa-chevron-left mr-1"></i>{m.previous()}
 				</button>
 				<span class="text-sm text-surface-500">{pageIndex + 1} / {stepCount}</span>
-				<button
-					type="button"
-					class="btn preset-filled-primary-500"
-					disabled={pageIndex >= stepCount - 1}
-					onclick={() => (pageIndex = Math.min(stepCount - 1, pageIndex + 1))}
-				>
-					{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
-				</button>
+				{#if pageIndex >= stepCount - 1 && response.status === 'draft' && (viewerIsRequester || content.can_edit_answers)}
+					<button
+						type="button"
+						class="btn preset-filled-success-500"
+						disabled={busy || !content.progress?.complete}
+						title={content.progress?.complete ? m.quickFormComplete() : m.quickFormIncomplete()}
+						onclick={() => post('setStatus', { status: 'submitted' })}
+					>
+						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
+					</button>
+				{:else}
+					<button
+						type="button"
+						class="btn preset-filled-primary-500"
+						disabled={pageIndex >= stepCount - 1}
+						onclick={() => (pageIndex = Math.min(stepCount - 1, pageIndex + 1))}
+					>
+						{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
+					</button>
+				{/if}
 			</div>
 		{/if}
 	{/if}

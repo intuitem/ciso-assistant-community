@@ -67,7 +67,7 @@ Choose **Result: Level** and the formula returns texts. The **Levels** box lists
 <figure><img src="../../.gitbook/assets/metrics-compose-levels.png" alt="A level formula returning Low or High, the levels list with Low first and High second, and the latest result showing High"><figcaption><p>A threshold turned into levels: the list follows the texts the formula returns, worst first</p></figcaption></figure>
 
 - Each level has a **Ref ID** and a **Name**. The formula may return either.
-- Order the levels from worst to best by dragging them. They fill in the order the texts appear in the formula, so writing the worst outcome first saves a drag. **Higher is better** reads this order: ticked, each level is better than the one before it, so the last is the best; unticked, the first is the best. It decides whether a change of level shows as good or bad news.
+- Order the levels from worst to best by dragging them. They fill in the order the texts appear in the formula, so writing the worst outcome first saves a drag. The **Direction** reads this order: with **Higher is better** each level is better than the one before it, so the last is the best; with **Lower is better** the first is the best; with **No direction** a change of level is neither good nor bad news.
 - Rename a level and the formula's text follows.
 - **Use the levels of…** copies the levels of an existing level metric, so several metrics share one scale. After that, the list no longer follows the formula: write the formula to return those names or references.
 - A text the formula returns that is not a level shows a warning, such as *'Medium' is not one of the levels*.
@@ -78,7 +78,7 @@ A metric whose result is a level cannot be read by another formula: formulas rea
 
 The box on the right runs your formula against the real data as you type, without saving anything:
 
-- the latest value, its unit, and how it moved since the previous period, green when the move is good news according to **Higher is better**, red when it is not;
+- the latest value, its unit, and how it moved since the previous period, green when the move is good news according to the **Direction**, red when it is not, grey for a metric with no direction;
 - a chart of the last twelve periods. Hover a point for its value;
 - the last four periods. A period shows *skipped* when an input had no value for it.
 
@@ -93,7 +93,7 @@ If the formula cannot run, the box says why instead, for example an unknown name
 | **Collection frequency** | How often it computes, and the length of its periods. Proposed: the frequency of the least frequent pick, so a monthly input is not read every day |
 | **Unit** | For a number only |
 | **Target value** | For a number only |
-| **Higher is better** | Whether a rise is good news. For a level, ticked means the last level is the best |
+| **Direction** | **No direction**, **Higher is better** or **Lower is better**: whether a rise is good news. For a level, **Higher is better** means the last level is the best. See [Direction](creating-a-metric.md#direction) |
 
 If no domain can hold every pick for you, the window says "You cannot create metrics in a domain holding all these instances". Pick metrics closer together, or ask for the right to create metrics higher up.
 
@@ -105,7 +105,7 @@ When a definition with exactly the same formula already exists in the domain or 
 
 ## What gets created
 
-- A **metric definition** with one input per picked metric, the formula, and the result type, levels, unit and **Higher is better**.
+- A **metric definition** with one input per picked metric, the formula, and the result type, levels, unit and direction.
 - A **metric instance** of it in the chosen domain, set to read exactly the metrics you picked.
 
 Both are ordinary objects: the definition appears in **Metric definitions**, the instance in **Metric instances**, and the metric can go on a [dashboard](../dashboards.md) like any other.

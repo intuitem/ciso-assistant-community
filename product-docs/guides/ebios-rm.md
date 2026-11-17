@@ -32,10 +32,13 @@ You don't need everything upfront — the editor lets you create objects inline 
    - **Domain** — where the study lives.
    - **Reference entity** — the entity the study focuses on (defaults to the main entity of your instance).
    - **Risk matrix** — the matrix the study will quote against.
-   - **Quotation method** — _Manual_ or _Express_ (default). See [Quotation methods](#quotation-methods) below.
+   - **Quotation method** — _Express (most likely operating mode)_ by default. See [Quotation methods](#quotation-methods) below.
+   - **Classification** — optional protection marking of the study (e.g. _restricted_, _confidential_), from the levels defined in object classifications.
    - **Authors** / **Reviewers** — actors driving the study.
    - **ETA** and **Due date** — optional planning dates.
 3. Save. You land on the study page with the five workshop blocks and their step checklists.
+
+To start a new study from an existing one, click **Duplicate** on the study page. The **Duplicate the EBIOS RM study** dialog asks for a name, reference ID, version, description and domain. Every workshop object is copied (feared events, RO/TO couples, stakeholders, strategic scenarios, attack paths, operational scenarios, operating modes and their kill chains) and its ratings recomputed, while shared objects such as assets, threats, applied controls and elementary actions are referenced. When you copy into another domain, shared objects the target domain cannot see are copied into it. The workshop 5 risk assessment is not copied: generate it again from the copy.
 
 Each workshop block tracks **step status** (`to do` / `in progress` / `done`) per activity. Update them as you progress to keep the dashboard meaningful.
 
@@ -110,6 +113,8 @@ In **Workshop 3 → Ecosystem**, add **Stakeholders**. A stakeholder wraps an **
    - **Maturity** — the stakeholder's cybersecurity maturity (1–4).
    - **Trust** — your trust in the stakeholder (1–4).
 5. The **current criticality** is computed as `(dependency × penetration) / (maturity × trust)`. Higher = more dangerous.
+
+An entity can carry a default profile for these four criteria. On the stakeholder page, the **Criticality assessment** card sets the entity's values beside the current and residual ones, and flags each value that **Differs from the entity default profile**, so a deliberate deviation for this study is easy to spot.
 
 > **Content reuse — third parties**: the entities behind stakeholders are the same `Entity` objects used in [Third-party risk management](../concepts/third-party-risk.md). The criteria entered there (entity-level assessments, contracts, representatives) carry over and inform WS3 scoring.
 
@@ -244,25 +249,44 @@ The Excel export carries the same three layers across its sheets (`1.4.N {audit}
 
 ## Quotation methods
 
-The **Quotation method** set at study creation controls how operational-scenario likelihoods are computed.
+The **Quotation method** set at study creation controls how operational-scenario likelihoods are computed. The first two are variants of the EBIOS RM guide's express method; **Standard** and **Advanced** follow fiche méthode 8 and rate each step of the kill chain.
 
-### Manual
+| Method | Likelihood of the operational scenario |
+|---|---|
+| **Express (direct estimate)** | Typed on the scenario |
+| **Express (most likely operating mode)** | The highest likelihood of its operating modes, each rated directly |
+| **Standard** | The highest of its operating modes, each computed from the **Success probability** of its steps |
+| **Advanced** | Same, with each step also rated for **Technical difficulty** |
+
+Whatever the method, **Forced likelihood** on an operational scenario overrides the computed value (leave it empty to use the computed one), and **Forced gravity** on a strategic scenario overrides the gravity of its feared events. Forced values show with a _Forced (computed: …)_ tooltip, so the gap stays visible.
+
+### Express (direct estimate)
 
 You set each operational scenario's **Likelihood** directly. Operating modes can still be rated for documentation, but the operational scenario's likelihood is whatever you typed. This is the right method when:
 
 - You're running a high-level study and don't want to model individual operating modes in detail.
 - You're following an in-house quotation method that overrides the per-mode logic.
 
-### Express (default)
+### Express (most likely operating mode)
 
-Operating modes are rated individually, and the operational scenario's likelihood is **automatically set to the maximum** likelihood across its operating modes. The propagation happens server-side whenever an operating mode is saved or deleted, and a full sweep runs whenever the study is saved.
+The default. Operating modes are rated individually, and the operational scenario's likelihood is **automatically set to the maximum** likelihood across its operating modes. The propagation happens server-side whenever an operating mode is saved or deleted, and a full sweep runs whenever the study is saved.
 
 Use _Express_ when:
 
 - You want defensible rationales tied to specific kill chains.
 - You're modelling multiple parallel kill chains per scenario and the worst one should drive the headline likelihood.
 
-Switching between methods on an existing study is supported, but only changes propagation behaviour going forward — already-rated scenarios keep their values until something triggers a recompute.
+### Standard and Advanced
+
+Rate each step of an operating mode's graph: a **Success probability** (_Very low_ to _Near certain_) and, in **Advanced**, a **Technical difficulty** (_Negligible_ to _Very high_). The operating mode's likelihood is then computed along the kill chain, as fiche méthode 8 describes:
+
+- A step's **Cumulative probability** is the lower of its own probability and the best of its antecedents; its **Cumulative difficulty** is the higher of its own difficulty and the easiest of its antecedents. An _AND_ step needs all its antecedents, so it takes the weakest one instead.
+- In **Advanced**, the final steps cross the two through the likelihood grid (success probability × technical difficulty).
+- Until every step is rated, the operating mode shows **Rate every step to compute the likelihood**.
+
+The scales and the grid follow the EBIOS RM guide by default. To define your own, customise them on the risk matrix the study uses, in the library builder (see [Customise the EBIOS RM scales](../configuration/authoring/library-builder.md#customise-the-ebios-rm-scales)): every study using that matrix applies them.
+
+Switching methods on an existing study asks for confirmation: likelihoods typed on operational scenarios are replaced by the values computed from their operating modes, and switching back to the direct estimate does not restore them. Forced likelihoods are kept.
 
 ## Reports and exports
 
@@ -301,6 +325,11 @@ The **Excel** export produces a multi-sheet workbook covering every workshop:
 | `4.0 Elementary Actions` | The elementary actions catalogue |
 | `4.1.1 Operational Scenarios` | Operational scenarios with likelihood, gravity, risk level |
 | `4.1.2 Operating Modes` | Operating modes with their kill chains |
+| `5.1 Risk Assessment` | The generated risk assessment |
+| `5.2 Risk Scenarios` | Its risk scenarios |
+| `5.3 Security Measures` | The applied controls of the risk treatment |
+
+The workshop 5 sheets are only present once the risk assessment has been generated.
 
 ### Cross-instance Excel round-trip
 

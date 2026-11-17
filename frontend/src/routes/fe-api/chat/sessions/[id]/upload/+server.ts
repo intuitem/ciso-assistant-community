@@ -21,10 +21,13 @@ export const POST: RequestHandler = async ({ fetch, request, params }) => {
 		forwarded.append('folder_id', folderId);
 	}
 
-	const res = await fetch(`${BASE_API_URL}/chat/sessions/${params.id}/upload/`, {
-		method: 'POST',
-		body: forwarded
-	});
+	const res = await fetch(
+		`${BASE_API_URL}/chat/sessions/${encodeURIComponent(params.id)}/upload/`,
+		{
+			method: 'POST',
+			body: forwarded
+		}
+	);
 
 	const body = await res.text();
 	return new Response(body, {

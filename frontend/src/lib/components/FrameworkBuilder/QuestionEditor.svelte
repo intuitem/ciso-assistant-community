@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import { slide } from 'svelte/transition';
 	import {
 		getBuilderContext,
@@ -18,6 +19,8 @@
 	import ConfirmAction from './ConfirmAction.svelte';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+
+	const modalStore = getModalStore();
 
 	interface Props {
 		question: Question;
@@ -134,7 +137,7 @@
 			newStoredType !== 'multiple_choice' &&
 			question.choices.length > 0
 		) {
-			if (!confirm(m.builderChangeTypeWarning())) return;
+			if (!(await confirmModal(modalStore, m.builderChangeTypeWarning()))) return;
 		}
 		await builder.updateQuestion(question.id, {
 			type: newStoredType,
@@ -237,7 +240,7 @@
 							type="number"
 							value={sliderMin}
 							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-							onblur={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
+							onchange={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
 						/>
 					</label>
 					<label class="block">
@@ -246,7 +249,7 @@
 							type="number"
 							value={sliderMax}
 							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-							onblur={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
+							onchange={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
 						/>
 					</label>
 					<label class="block">
@@ -256,7 +259,7 @@
 							value={sliderStep}
 							min="0"
 							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-							onblur={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
+							onchange={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
 						/>
 					</label>
 				</div>
@@ -368,7 +371,7 @@
 						value={getTranslation(question.translations, lang, 'text')}
 						placeholder={m.builderTranslateQuestion()}
 						rows="2"
-						class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+						class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 						onblur={(e) => {
 							saveField(
 								'translations',
@@ -382,7 +385,7 @@
 					value={question.text ?? ''}
 					placeholder={m.builderQuestionTextPlaceholder()}
 					rows="2"
-					class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+					class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 					onblur={(e) => {
 						saveField('text', e.currentTarget.value);
 					}}
@@ -409,7 +412,7 @@
 						value={question.weight}
 						min="0"
 						class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-						onblur={(e) => {
+						onchange={(e) => {
 							const val = Number(e.currentTarget.value) || 1;
 							saveField('weight', val);
 						}}

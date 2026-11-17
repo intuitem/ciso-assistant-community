@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
@@ -92,24 +93,24 @@
 				// Get labels with fallback to 'unknown'
 				let sourceLabel = sourceNode ? sourceNode.name : 'unknown';
 				let targetLabel = targetNode ? targetNode.name : 'unknown';
-				const value = params.data.value || '';
+				const value = escapeHtml(params.data.value || '');
 
 				// Apply truncation
-				sourceLabel = truncate(sourceLabel);
-				targetLabel = truncate(targetLabel);
+				sourceLabel = escapeHtml(truncate(sourceLabel));
+				targetLabel = escapeHtml(truncate(targetLabel));
 
 				// Return formatted label with src and tgt in bold, value in italic
 				return `<b>${sourceLabel}</b> - <i>${value}</i> - <b>${targetLabel}</b>`;
 			} else if (params.dataType === 'node') {
 				// For nodes, truncate the name
 				const nodeName = params.name || params.data.name || 'unnamed';
-				const truncatedName = truncate(nodeName);
+				const truncatedName = escapeHtml(truncate(nodeName));
 
 				// You can add additional node properties here if needed
 				return `<b>${truncatedName}</b>`;
 			}
 
-			return params.name;
+			return escapeHtml(params.name);
 		};
 	};
 

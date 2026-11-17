@@ -206,7 +206,7 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def updatable_models(self, request):
         """The update_object registry. `allowed_values` travels with it so the
         builder offers the same fenced values the backend enforces."""
-        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS
+        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS, _writable_values
 
         return Response(
             [
@@ -214,8 +214,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     "key": key,
                     "fields": entry.fields,
                     "allowed_values": {
-                        field: sorted(values)
-                        for field, values in entry.allowed_values.items()
+                        field: values
+                        for field in entry.fields
+                        if (values := sorted(_writable_values(entry, field) or []))
                     },
                     "m2m_fields": {
                         name: endpoint
@@ -873,9 +874,10 @@ class WorkflowInstanceViewSet(WorkflowsFeatureGate, BaseModelViewSet):
 
 
 class WebhookRateThrottle(SimpleRateThrottle):
-    """Rate-limit the unauthenticated hook ingress per sender IP. Keyed on the
-    TRAILING X-Forwarded-For entry: the frontend passthrough appends
-    the real client IP last, so the leading (client-supplied) entries are not
+    """Rate-limit the unauthenticated hook ingress per sender IP, resolved like
+    the login rate limits (core.custom_middleware.resolve_client_ip): the
+    TRAILING X-Forwarded-For entry, which the frontend passthrough or the
+    reverse proxy appends; the leading (client-supplied) entries are not
     trusted."""
 
     scope = "workflow_webhook"
@@ -886,10 +888,9 @@ class WebhookRateThrottle(SimpleRateThrottle):
         return getattr(settings, "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min")
 
     def get_cache_key(self, request, view):
-        xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-        ident = (
-            xff.split(",")[-1].strip() if xff else request.META.get("REMOTE_ADDR", "")
-        )
+        from core.custom_middleware import resolve_client_ip
+
+        ident = resolve_client_ip(request)
         return self.cache_format % {"scope": self.scope, "ident": ident or "anon"}
 
 

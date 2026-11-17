@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
+from django.db.models.functions import Coalesce
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 import django_filters as df
@@ -269,6 +270,56 @@ class MetricDefinitionViewSet(BaseModelViewSet):
             }
         )
 
+    # Per user: never cached.
+    @action(detail=False, methods=["get"], url_path="similar")
+    def similar(self, request):
+        """Readable definitions whose name contains the one being typed, with
+        the domains measuring them: the hint under a new metric's name, and
+        the candidates of a merge (``mergeable=1`` leaves out formulas and
+        ``exclude`` the definition being merged)."""
+        from metrology.definitions import similar_definitions
+
+        params = request.query_params
+        return Response(
+            similar_definitions(
+                request.user,
+                params.get("name", ""),
+                params.get("category") or None,
+                exclude=_as_uuid(params.get("exclude")),
+                mergeable=params.get("mergeable") in ("1", "true"),
+            )
+        )
+
+    @action(detail=True, methods=["post"], url_path="merge")
+    def merge(self, request, pk=None):
+        """Move this definition's metrics under another and delete it: two
+        domains defined the same thing, the group keeps one."""
+        from metrology.definitions import MERGE_FIELD, MergeError, merge_definitions
+
+        source = self.get_object()
+        target = MetricDefinition.objects.filter(
+            id=_as_uuid(request.data.get(MERGE_FIELD))
+        ).first()
+        if target is None:
+            return Response(
+                {MERGE_FIELD: ["Pick the definition to merge into"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            moved = merge_definitions(request.user, source, target)
+        except PermissionError:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        except MergeError as e:
+            return Response(
+                {MERGE_FIELD: [e.message]}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response({"into": str(target.id), "moved": moved})
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get default collection frequency choices")
+    def default_collection_frequency(self, request):
+        return Response(dict(MetricInstance.Frequency.choices))
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -458,12 +509,8 @@ class MetricInstanceViewSet(BaseModelViewSet):
         the user may create metrics in; the frequency is the least frequent
         pick's. Instances the user may not read are left out, as if they did
         not exist."""
-        from metrology.compose import (
-            common_domain,
-            creatable_in,
-            least_frequent,
-            readable_instances,
-        )
+        from metrology.compose import common_domain, least_frequent, readable_instances
+        from metrology.definitions import creatable_in
 
         ids = [_as_uuid(i) for i in request.query_params.getlist("instance")]
         found = readable_instances(request.user, [i for i in ids if i is not None])
@@ -526,9 +573,9 @@ class MetricInstanceViewSet(BaseModelViewSet):
             CompositionError,
             compose,
             is_composable,
-            permitted,
             readable_instances,
         )
+        from metrology.definitions import permitted
 
         instance = self.get_object()
         definition = instance.metric_definition
@@ -669,7 +716,9 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
     serializers_module = "metrology.serializers"
     filterset_fields = ["folder", "metric_instance", "evidence_revision"]
     search_fields = ["observation"]
-    ordering = ["-timestamp"]  # Most recent first
+    # Most recent first by the moment a value answers for, as the model and
+    # the current value rank them: a past period typed today sorts as past.
+    ordering = ["-moment", "-timestamp"]
 
     def perform_destroy(self, instance):
         # Same refusal as the write serializer: a derived series is its
@@ -688,6 +737,7 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
+            .annotate(moment=Coalesce("period_start", "timestamp"))
             .select_related(
                 "folder",
                 # EvidenceRevision.__str__ reads self.evidence.name, so the

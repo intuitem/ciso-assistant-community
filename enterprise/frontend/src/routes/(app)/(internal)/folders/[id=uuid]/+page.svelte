@@ -26,8 +26,8 @@
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2 justify-end">
 			<form class="flex justify-end" action={`${page.url.pathname}/export`}>
-				<button type="submit" class="btn preset-filled-primary-500 h-fit">
-					<i class="fa-solid fa-download mr-2"></i>
+				<button type="submit" class="btn btn-quiet h-fit">
+					<i class="fa-solid fa-download mr-2 text-sky-500"></i>
 					{m.exportButton()}
 				</button>
 			</form>

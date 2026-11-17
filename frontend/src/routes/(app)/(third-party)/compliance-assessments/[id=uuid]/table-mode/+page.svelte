@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { roundScore } from '#lib/utils/helpers.js';
+	import { maturityScore, roundScore } from '#lib/utils/helpers.js';
 	import { page } from '$app/state';
 	import Question from '#lib/components/Forms/Question.svelte';
 	import SegmentedControl from '#lib/components/Forms/SegmentedControl.svelte';
@@ -26,10 +26,12 @@
 		extendedResultColorMap
 	} from '#lib/utils/constants.js';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import {
 		getFieldVisibility,
 		isFieldEditable,
+		showApplicabilityToggle,
 		hasComputedResult,
 		hasComputedScore,
 		shouldShowAutoQuestion,
@@ -43,6 +45,8 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import ApplicabilityToggle from '#lib/components/ComplianceAssessment/ApplicabilityToggle.svelte';
+	import NotApplicableScores from '#lib/components/ComplianceAssessment/NotApplicableScores.svelte';
 	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
@@ -152,6 +156,25 @@
 		isFieldEditable(complianceAssessment, 'documentation_score', viewerRole)
 	);
 	const canEditAnswers = $derived(isFieldEditable(complianceAssessment, 'answers', viewerRole));
+	// Score-only audits mark N/A through the applicability toggle.
+	const applicabilityToggle = $derived(
+		Boolean(complianceAssessment.scoring_enabled) &&
+			showApplicabilityToggle(complianceAssessment, viewerRole)
+	);
+	// Applicability whether compliance is shown or not: a score-only audit hides
+	// `result` and reads `not_applicable`; the toggle keeps both in step.
+	function isNotApplicable(ra: Record<string, any>): boolean {
+		return 'result' in ra ? ra.result === 'not_applicable' : Boolean(ra.not_applicable);
+	}
+	async function setApplicability(
+		ra: Record<string, any>,
+		result: 'not_assessed' | 'not_applicable'
+	) {
+		ra.result = result;
+		ra.not_applicable = result === 'not_applicable';
+		// N/A rows are excluded from (or anchored in) the global score
+		if (await update(ra, 'result')) await refreshScores();
+	}
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -266,6 +289,10 @@
 	let questionnaireMode = $state(questionnaireOnly);
 
 	const modalStore: ModalStore = getModalStore();
+
+	// Linked objects the viewer can see; the others come masked and are only counted.
+	const visibleLinks = (items: any[] | undefined): any[] =>
+		(items ?? []).filter((item) => !isMaskedPlaceholder(item));
 
 	function modalMeasureCreateForm(requirementAssessment: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
@@ -668,6 +695,16 @@
 	</button>
 {/snippet}
 
+<!-- Linked objects the viewer cannot see: counted, never named. -->
+{#snippet hiddenLinksNote(items: any[] | undefined)}
+	{@const hidden = countMasked(items ?? [])}
+	{#if hidden > 0}
+		<span class="text-xs text-yellow-700" data-testid="hidden-links-note">
+			{m.objectsNotVisible({ count: hidden })}
+		</span>
+	{/if}
+{/snippet}
+
 <!-- Related-object panel (controls / evidences): create/select + item list -->
 {#snippet detailPanel(cfg: Record<string, any>)}
 	<div class="card border border-surface-200-800 rounded-lg p-3 space-y-2">
@@ -697,7 +734,7 @@
 		{/if}
 		{#if cfg.items?.length}
 			<div class="flex flex-wrap gap-2">
-				{#each cfg.items as item (item.id)}
+				{#each visibleLinks(cfg.items) as item (item.id)}
 					<Anchor
 						class="inline-flex items-center gap-2 rounded-md border border-surface-200-800 bg-surface-50-950 px-2.5 py-1 text-sm text-surface-800-200 transition-colors hover:border-primary-300-700 hover:bg-primary-50-950"
 						href="{cfg.hrefBase}/{item.id}"
@@ -708,6 +745,7 @@
 						<span class="truncate max-w-[18rem]">{item.str}</span>
 					</Anchor>
 				{/each}
+				{@render hiddenLinksNote(cfg.items)}
 			</div>
 		{:else}
 			<p class="text-surface-400-600 italic text-sm">{cfg.emptyLabel}</p>
@@ -721,7 +759,20 @@
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		{@const raScoresDef = ra.effective_scores_definition ?? data.scores.scores_definition}
-		{#if hasComputedScore(ra.requirement.questions)}
+		{#if isNotApplicable(ra)}
+			<!-- Not applicable, computed score or not: what it counts for, greyed. -->
+			<NotApplicableScores
+				value={ra.anchored_score}
+				min={raMin}
+				max={raMax}
+				scoresDefinition={raScoresDef}
+				showImplementation={showScore}
+				showDocumentation={complianceAssessment.show_documentation_score && showDocumentationScore}
+				implementationLabel={complianceAssessment.show_documentation_score
+					? m.implementationScore()
+					: m.score()}
+			/>
+		{:else if hasComputedScore(ra.requirement.questions)}
 			<div class="flex flex-col gap-1">
 				<span class="text-xs font-semibold text-surface-500 italic">{m.score()}</span>
 				<ScoreControl
@@ -732,7 +783,7 @@
 					scoresDefinition={raScoresDef}
 				/>
 			</div>
-		{:else if ra.result !== 'not_applicable'}
+		{:else}
 			<div class="flex flex-row flex-wrap items-start gap-x-6 gap-y-2">
 				<ScorePair>
 					{#snippet implementation()}
@@ -785,6 +836,17 @@
 						{/if}
 					{/snippet}
 				</ScorePair>
+				{#if complianceAssessment.show_documentation_score && showDocumentationScore && ra.is_scored && ra.score != null}
+					<div class="flex flex-col gap-1">
+						<span class="text-xs font-semibold text-surface-500 italic">{m.maturity()}</span>
+						<ScoreControl
+							editable={false}
+							value={roundScore(maturityScore(ra.score, ra.documentation_score, raMin))}
+							min={raMin}
+							max={raMax}
+						/>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	{:else if showScore && showDocumentationScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
@@ -811,6 +873,15 @@
 					/>
 				{/snippet}
 			</ScorePair>
+			{#if ra.score != null}
+				<ScoreControl
+					editable={false}
+					value={roundScore(maturityScore(ra.score, ra.documentation_score, raMin))}
+					min={raMin}
+					max={raMax}
+					label={m.maturity()}
+				/>
+			{/if}
 		</div>
 	{:else if showScore && complianceAssessment.scoring_enabled && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
@@ -1315,6 +1386,13 @@
 															/>
 														</div>
 													{/if}
+													{#if applicabilityToggle && !shallow}
+														<ApplicabilityToggle
+															applicable={!isNotApplicable(requirementAssessment)}
+															disabled={isReadOnly || !canEditScore}
+															onChange={(result) => setApplicability(requirementAssessment, result)}
+														/>
+													{/if}
 													{@render scoreSlot(requirementAssessment)}
 												</div>
 											{/if}
@@ -1479,7 +1557,7 @@
 																</p>
 															{:else}
 																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																	{#each requirementAssessment.applied_controls as item (item.id)}
+																	{#each visibleLinks(requirementAssessment.applied_controls) as item (item.id)}
 																		<Anchor
 																			class="anchor"
 																			href="/applied-controls/{item.id}"
@@ -1488,6 +1566,7 @@
 																			<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
 																		</Anchor>
 																	{/each}
+																	{@render hiddenLinksNote(requirementAssessment.applied_controls)}
 																</div>
 															{/if}
 														{/if}
@@ -1501,7 +1580,7 @@
 																</p>
 															{:else}
 																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																	{#each requirementAssessment.evidences as item (item.id)}
+																	{#each visibleLinks(requirementAssessment.evidences) as item (item.id)}
 																		<Anchor
 																			class="anchor"
 																			href="/evidences/{item.id}"
@@ -1511,6 +1590,7 @@
 																			<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
 																		</Anchor>
 																	{/each}
+																	{@render hiddenLinksNote(requirementAssessment.evidences)}
 																</div>
 															{/if}
 														{/if}

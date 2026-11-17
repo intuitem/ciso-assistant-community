@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${contract_count} contract(s) expiring in ${days_remaining} day(s)"
+body: |
+  Hello,
+
+  The following contracts expire in ${days_remaining} day(s):
+
+  ${contract_list}
+
+  Please review their renewal and the supplier's compliance: [Open CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

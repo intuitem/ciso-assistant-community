@@ -4,6 +4,7 @@
 	import { superForm, defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { setContext } from 'svelte';
 
 	interface Props {
 		assets: string[];
@@ -26,6 +27,9 @@
 		defaults({ assets, applied_controls: appliedControls, vulnerabilities }, zod(schema)),
 		{ dataType: 'json', taintedMessage: false, SPA: true, validators: zod(schema) }
 	);
+	// The node's links come from the saved graph: keep those the user cannot see
+	// unless they remove them (the save accepts them, as they are not new).
+	setContext('formKeepsHiddenLinks', true);
 </script>
 
 <AutocompleteSelect

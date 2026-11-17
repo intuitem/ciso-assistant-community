@@ -101,6 +101,19 @@ def sanitize_file_name(name: str, max_length: int = 255) -> str:
     return name
 
 
+#: A file name holds 255 bytes on the usual filesystems, and Django appends "_"
+#: and seven characters when the name is already taken: leave room for them.
+MAX_STORED_FILE_NAME_BYTES = 255 - 8
+
+
+def _fit_stored_file_name(stem: str, extension: str) -> str:
+    """Cut the stem to fit the name on disk: never the extension, never half a character."""
+    budget = MAX_STORED_FILE_NAME_BYTES - len(f".{extension}".encode())
+    if len(stem.encode()) > budget:
+        stem = stem.encode()[:budget].decode(errors="ignore").rstrip(" .")
+    return f"{stem}.{extension}"
+
+
 def _validate_file_extension_and_sanitize(value, allowed_extensions):
     stem, dot_extension = os.path.splitext(value.name)
     extension = dot_extension.lstrip(".").lower()
@@ -112,7 +125,7 @@ def _validate_file_extension_and_sanitize(value, allowed_extensions):
     if len(value.name) > 256:
         raise ValidationError("File name is too long")
 
-    value.name = (sanitize_file_name(stem) or "file") + "." + extension
+    value.name = _fit_stored_file_name(sanitize_file_name(stem) or "file", extension)
     return value
 
 

@@ -5,7 +5,7 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ params, url, fetch }) => {
 	const format = url.searchParams.get('format') === 'xlsx' ? 'xlsx' : 'csv';
 	const res = await fetch(
-		`${BASE_API_URL}/public/snapshots/${params.token}/export/?format=${format}`
+		`${BASE_API_URL}/public/snapshots/${encodeURIComponent(params.token)}/export/?format=${format}`
 	);
 	if (!res.ok) error(res.status === 404 ? 404 : 502, 'Not found');
 	const headers = new Headers();

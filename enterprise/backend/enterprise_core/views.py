@@ -5,7 +5,7 @@ from django.utils.formats import date_format
 import magic
 import structlog
 from django.db import models, transaction
-from django.db.models import CharField, Value, Case, When
+from django.db.models import CharField, Value, Case, When, Q
 from django.db.models.functions import Coalesce, Lower, Cast, NullIf
 import django_filters as df
 from django.contrib.auth.models import Permission
@@ -34,6 +34,10 @@ from core.views import (
     GenericFilterSet,
     RoleFilter,
     SmartOrderingFilter,
+)
+from core.serializers import (
+    full_user_view_folder_ids,
+    has_full_user_view,
 )
 from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_respondent_scoped_folder_ids
 from iam.models import User, Role, UserGroup, RoleAssignment
@@ -1295,6 +1299,20 @@ class ObjectAuditTrailView(APIView):
     permission_classes = [IsAuthenticated]
 
     MAX_ENTRIES = 200
+    # What a user's trail shows to who has only the base view of the user: the
+    # fields the users API shows them. The rest needs the full view: account details,
+    # sign-ins, password changes, SCIM ids, group membership (logged with group
+    # names), fields since removed from the model, and any field added later.
+    USER_BASE_VIEW_LOG_FIELDS = (
+        "id",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "date_joined",
+        "is_third_party",
+        "folder",
+    )
 
     def get(self, request, format=None):
         from uuid import UUID
@@ -1332,32 +1350,67 @@ class ObjectAuditTrailView(APIView):
         ):
             raise PermissionDenied
 
-        entries = (
-            LogEntry.objects.filter(content_type=content_type, object_pk=str(object_id))
-            .select_related("actor")
-            .order_by("-timestamp")[: self.MAX_ENTRIES]
+        # The fields whose changes are shown; None shows them all.
+        shown = None
+        if model_class is User and not self._has_full_user_view(request, obj):
+            shown = self.USER_BASE_VIEW_LOG_FIELDS
+        entries = LogEntry.objects.filter(
+            content_type=content_type, object_pk=str(object_id)
         )
+        if shown is not None:
+            # Leave out, in the query, updates that touch no shown field: every
+            # sign-in logs one (last_login), so filtering after the limit could leave
+            # nothing of an active user's trail. auditlog keys changes by field name.
+            entries = entries.filter(
+                ~Q(action=LogEntry.Action.UPDATE) | Q(changes__has_any_keys=list(shown))
+            )
+        entries = entries.select_related("actor").order_by("-timestamp")[
+            : self.MAX_ENTRIES
+        ]
         fk_models = {
             f.name: f.related_model
             for f in model_class._meta.get_fields()
             if getattr(f, "many_to_one", False) and f.related_model
         }
         label_cache = {}
-        results = [
-            {
-                "id": entry.id,
-                "cid": entry.cid or None,
-                "action": entry.get_action_display(),
-                "actor": (entry.additional_data or {}).get("user_email")
-                or (entry.actor.email if entry.actor else None),
-                "timestamp": entry.timestamp,
-                "changes": self._mask(
-                    model_name, self._humanize(entry.changes, fk_models, label_cache)
-                ),
-            }
-            for entry in entries
-        ]
+        results = []
+        for entry in entries:
+            changes = self._mask(
+                model_name,
+                self._humanize(entry.changes, fk_models, label_cache),
+                shown,
+            )
+            # An update touching no shown field would still tell when the others
+            # changed. The query already leaves them out; this is the backstop.
+            if (
+                shown is not None
+                and entry.action == LogEntry.Action.UPDATE
+                and not changes
+            ):
+                continue
+            results.append(
+                {
+                    "id": entry.id,
+                    "cid": entry.cid or None,
+                    "action": entry.get_action_display(),
+                    "actor": (entry.additional_data or {}).get("user_email")
+                    or (entry.actor.email if entry.actor else None),
+                    "timestamp": entry.timestamp,
+                    "changes": changes,
+                }
+            )
         return Response(results)
+
+    @staticmethod
+    def _has_full_user_view(request, user) -> bool:
+        if user is not None:
+            return has_full_user_view(request, user)
+        # A deleted user has no row left to place, and users live in Global.
+        return (
+            full_user_view_folder_ids(request)
+            .filter(id=Folder.get_root_folder_id())
+            .exists()
+        )
 
     @staticmethod
     def _humanize(changes, fk_models, label_cache):
@@ -1389,11 +1442,17 @@ class ObjectAuditTrailView(APIView):
         return label_cache[key]
 
     @staticmethod
-    def _mask(model_name, changes):
+    def _mask(model_name, changes, shown):
+        if not isinstance(changes, dict):
+            return changes
+        if shown is not None:
+            changes = {
+                field: value for field, value in changes.items() if field in shown
+            }
         # Backstop for rows logged before "password" was excluded at registration
         # (iam/models.py); current writes never include it.
-        if model_name == "user" and isinstance(changes, dict) and "password" in changes:
-            return {**changes, "password": ["***", "***"]}
+        if model_name == "user" and "password" in changes:
+            changes["password"] = ["***", "***"]
         return changes
 
 

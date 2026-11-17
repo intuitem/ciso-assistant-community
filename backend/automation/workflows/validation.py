@@ -335,6 +335,68 @@ def validate_graph(version):
                 )
             )
 
+    errors.extend(_inline_errors(nodes))
+    return errors
+
+
+INLINE_NODE_TYPES = {
+    WorkflowNode.Type.TRIGGER,
+    WorkflowNode.Type.CONDITION,
+    WorkflowNode.Type.ACTION,
+    WorkflowNode.Type.END,
+}
+# Database-only steps: an inline run holds up the user's save.
+INLINE_ACTION_TYPES = {
+    "log",
+    "set_variables",
+    "date_offset",
+    "read_objects",
+    "create_object",
+    "update_object",
+}
+
+
+def _inline_errors(nodes):
+    errors = []
+    inline_triggers = []
+    for node in nodes:
+        if node.type != WorkflowNode.Type.TRIGGER:
+            continue
+        config = node.trigger_config or {}
+        inline = config.get("inline", False)
+        if not isinstance(inline, bool):
+            errors.append(
+                _error(
+                    "trigger_inline_invalid", "inline must be true or false", node=node
+                )
+            )
+        elif inline and config.get("type") != WorkflowNode.TriggerType.INTERNAL_EVENT:
+            errors.append(
+                _error(
+                    "trigger_inline_invalid",
+                    "Only event triggers can run immediately",
+                    node=node,
+                )
+            )
+        elif inline:
+            inline_triggers.append(node)
+    if not inline_triggers:
+        return errors
+    for node in nodes:
+        action_type = (node.action_config or {}).get("type")
+        if node.type not in INLINE_NODE_TYPES or (
+            node.type == WorkflowNode.Type.ACTION
+            and action_type not in INLINE_ACTION_TYPES
+        ):
+            errors.append(
+                _error(
+                    "trigger_inline_slow_step",
+                    "A workflow that runs immediately can only read, create or "
+                    "update objects, branch and set variables: this step would "
+                    "hold up the save that triggered it",
+                    node=node,
+                )
+            )
     return errors
 
 

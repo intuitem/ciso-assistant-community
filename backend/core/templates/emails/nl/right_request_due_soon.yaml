@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${request_count} verzoek(en) van betrokkenen te beantwoorden binnen ${days_remaining} dag(en)"
+body: |
+  Hallo,
+
+  De volgende verzoeken van betrokkenen vervallen binnen ${days_remaining} dag(en):
+
+  ${request_list}
+
+  Artikel 12(3) AVG vereist een antwoord binnen één maand na ontvangst. [Open CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

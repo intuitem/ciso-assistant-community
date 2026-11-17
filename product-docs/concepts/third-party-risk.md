@@ -23,6 +23,10 @@ The actual review of a third party is an **entity assessment**. It can:
 - Carry **labels**, to sort and filter assessments in the list. The list offers labels as an opt-in column and a filter, labels can be added or removed in bulk, and the CSV/Excel export of the list includes them. Only labels you are allowed to see appear, on screen and in the export.
 - Carry [custom fields](../features/custom-fields.md), when the feature is enabled.
 
+The entity assessment page summarises its questionnaire: a **Compliance** share (compliant plus half of partially compliant, over every applicable requirement) with the breakdown by result, and the **Maturity** score when the audit is scored. Each part follows the audit's [field visibility](../guides/customize-audit.md#field-visibility), and the summary needs permission to view the audit. An assessment without a questionnaire shows **No questionnaire attached**.
+
+The entity assessments list exports to CSV and Excel, like the other lists: one row per assessment with its entity and solutions (name and reference ID), questionnaire and framework, status, assignment status, completion, review progress, dates, criticality, conclusion and observation. Related objects you cannot view are masked.
+
 ### The third-party workspace
 
 The questionnaire behind an entity assessment is a real audit, and it lives in a folder of its own — a **third-party workspace** (an *enclave*, internally). The workspace is what makes the vendor's access safe: view rights granted there never reach up into the parent domain, so a representative sees their questionnaire and nothing else.
@@ -51,12 +55,26 @@ An entity's **tier** is its criticality on your organisation's scale, managed un
 
 The tier and the entity assessment answer different questions. The tier is a qualification: how much the vendor matters to you, and so how closely to follow it. The assessment is the vendor's posture: how well it protects what you entrust to it. A critical vendor can have an excellent posture.
 
+Each tier can carry a **Compliance target**: the questionnaire compliance a vendor of this tier is expected to reach, set on **Third parties > Criticality**. Leave it empty for no target.
+
 A tier is set in one of two ways:
 
 - **Assessed.** A tiering form is filled for the entity and accepted. The form computes a value from the answers, and its bands and knock-out rules turn that value into a tier. Two forms ship with the platform, one of them built on the EBIOS RM stakeholder criteria.
 - **Forced.** Someone who can edit the entity picks a tier directly, with an optional reason.
 
 The latest decision wins, whichever way it was made. Each change is kept in the entity's **Tier history**: the tier before and after, who made the change, when, and which response it came from.
+
+Solutions are tiered the same way, from a form whose subject is a solution (the **Solution tiering** library) or by hand, with their own **Tier history**. A vendor's tier can then follow its most critical active solution: the **From solutions to vendors** setting on the Criticality page is **Off**, **Suggest** (the vendor shows the tier its solutions call for) or **Raise automatically** (the vendor's tier is raised when a solution's tier changes or a solution is reactivated). A vendor's tier is never lowered automatically, and a raise shows in its history as **Raised by a solution**.
+
+### Vendor posture
+
+**Third parties > Overview** opens on the **Vendor posture** tab, which sets each vendor's latest questionnaire against its tier. Pick the **Posture metric** (**Compliance**, or **Score** on each questionnaire's own scale) and a view:
+
+- **Tier list** — vendors per tier, split into **Below target** and **Meets target** when the tier has a compliance target.
+- **Lanes** — one lane per tier, vendors placed by their compliance, with the tier's target drawn on the lane.
+- **Quadrant** — choose from which tier to **Act first from**. Vendors of those tiers below target land in **Act first**, those above in **Maintain**; lower tiers read **Improve when due** and **Low concern**.
+
+Unanswered requirements count against the vendor, and tier targets apply to compliance only. Clicking a tier opens the **Entity assessments** tab filtered on it.
 
 See [Tiering your vendors](../guides/vendor-tiering.md) for the walkthrough and how to adapt the forms to your method.
 
@@ -78,7 +96,7 @@ CISO Assistant supports two modes for getting the actual answers back from the v
 
 ### Online mode — the representative logs in
 
-This is the default workflow. You create a **representative** on the entity side, the platform issues credentials, and the representative logs into CISO Assistant directly to fill in the questionnaire. Their access is scoped: they only see the entity assessment(s) attached to their entity, and they land in a dedicated **third-party / auditee surface** — a separate route group with its own auditee dashboard, not the rest of your workspace.
+This is the default workflow. You create a **representative** on the entity side, the platform issues credentials, and the representative logs into CISO Assistant directly to fill in the questionnaire. Their access is scoped: they only see the entity assessment(s) attached to their entity, and they land on the respondent dashboard inside a simplified layout: a header with your logo, their questionnaires, a language picker and their profile. There is no sidebar, search, command palette or chat assistant, so they never see the rest of your workspace.
 
 This surface is gated by the **`auditee_mode`** [feature flag](../configuration/settings/feature-flags.md), which has to be on for the third-party login flow to be available.
 

@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from knox.models import AuthToken
 from core.models import User
 
-from iam.models import Folder, Role, RoleAssignment, UserGroup
+from iam.models import Folder, IdPGroup, Role, RoleAssignment, UserGroup
 from test_vars import GROUPS_PERMISSIONS, TEST_USER_EMAIL
 
 
@@ -317,6 +317,34 @@ class TestUserGroupMembership:
             else response.data
         )
         assert "d2member@tests.com" in [r["email"] for r in rows]
+
+    def test_group_filters_list_no_member_of_an_unreadable_group(self, app_config):
+        """Filtering users on a group must not list the members of a group the
+        caller can't read: a D1 manager gets D1's members, and nobody for D2's
+        user group or IdP group."""
+        _, d1_group, manager = self._setup_domain("D1")
+        d2, d2_group, _ = self._setup_domain("D2")
+        d1_member = User.objects.create_user("d1member@tests.com")
+        d1_group.user_set.add(d1_member)
+        d2_member = User.objects.create_user("d2member@tests.com")
+        d2_group.user_set.add(d2_member)
+        d2_idp_group = IdPGroup.objects.create(name="D2 directory", folder=d2)
+        d2_member.idp_groups.add(d2_idp_group)
+        client = _client_for(manager)
+
+        def emails(query):
+            response = client.get(reverse("users-list"), query)
+            assert response.status_code == status.HTTP_200_OK, response.content
+            rows = (
+                response.data["results"]
+                if isinstance(response.data, dict)
+                else response.data
+            )
+            return [row["email"] for row in rows]
+
+        assert emails({"user_groups": str(d1_group.id)}) == ["d1member@tests.com"]
+        assert emails({"user_groups": str(d2_group.id)}) == []
+        assert emails({"idp_groups": str(d2_idp_group.id)}) == []
 
     def test_cannot_rename_builtin_group_via_patch(self, app_config):
         """A builtin group's fields are immutable via the API even with

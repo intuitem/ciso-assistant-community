@@ -617,6 +617,11 @@ class QuickFormImporter:
             return f"[QUICK_FORM_ERROR] {error}"
         if error := outcome_rule_id_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
+        if any(
+            isinstance(rule, dict) and rule.get("kind") == "weakest_link"
+            for rule in self.quick_form_data.get("outcomes_definition") or []
+        ):
+            return "[QUICK_FORM_ERROR] A weakest-link rule applies to frameworks, not quick forms"
         from core.quick_form_apply import validate_on_accept_document
 
         if errors := validate_on_accept_document(self.quick_form_data):
@@ -910,7 +915,7 @@ class MetricDefinitionImporter:
             category=self.metric_definition_data.get("category", "quantitative"),
             unit=unit,
             choices_definition=self.metric_definition_data.get("choices_definition"),
-            higher_is_better=self.metric_definition_data.get("higher_is_better", True),
+            higher_is_better=self.metric_definition_data.get("higher_is_better"),
             default_target=self.metric_definition_data.get("default_target"),
             # A formula ships with its definition. Inputs name other
             # definitions by URN, resolved when an instance computes.
@@ -1149,6 +1154,7 @@ class LibraryImporter:
             for data in metric_definitions
             if isinstance(data, dict) and data.get("urn")
         }
+        seen_urns = set()
         for index, metric_definition_data in enumerate(metric_definitions):
             metric_definition_importer = MetricDefinitionImporter(
                 metric_definition_data, shipped
@@ -1158,6 +1164,13 @@ class LibraryImporter:
                 metric_definition_error := metric_definition_importer.is_valid()
             ) is not None:
                 import_errors.append((index, metric_definition_error))
+                continue
+            urn = str(metric_definition_data["urn"]).lower()
+            if urn in seen_urns:
+                import_errors.append(
+                    (index, "Duplicate URN (ref_id already used): {}".format(urn))
+                )
+            seen_urns.add(urn)
 
         self._metric_definitions = metric_definition_importers
 

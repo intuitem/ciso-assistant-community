@@ -55,6 +55,7 @@
 				past={data.pastOccurrences}
 				upcoming={data.upcomingOccurrences}
 				upcomingCount={data.upcomingCount}
+				failed={data.occurrencesFailed}
 			/>
 		</div>
 	{/snippet}

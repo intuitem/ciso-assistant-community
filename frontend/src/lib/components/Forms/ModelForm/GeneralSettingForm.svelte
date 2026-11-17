@@ -740,6 +740,12 @@
 					label={m.allowSelfValidation()}
 					helpText={m.allowSelfValidationHelpText()}
 				/>
+				<Checkbox
+					{form}
+					field="evidence_four_eyes"
+					label={m.evidenceFourEyes()}
+					helpText={m.evidenceFourEyesHelpText()}
+				/>
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>

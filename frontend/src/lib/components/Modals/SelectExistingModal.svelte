@@ -10,8 +10,13 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { page } from '$app/state';
 	import { refreshAll } from '$app/navigation';
+	import { setContext } from 'svelte';
 
 	const modalStore: ModalStore = getModalStore();
+
+	// This modal edits a field of an existing object, sent whole on save: its picker
+	// keeps the links the user cannot see.
+	setContext('formKeepsHiddenLinks', true);
 
 	// A lazy picker renders no options up front, so the card needs its own width.
 	const cBase =

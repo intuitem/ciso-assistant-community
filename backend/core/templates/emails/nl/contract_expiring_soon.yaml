@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${contract_count} contract(en) verlopen binnen ${days_remaining} dag(en)"
+body: |
+  Hallo,
+
+  De volgende contracten verlopen binnen ${days_remaining} dag(en):
+
+  ${contract_list}
+
+  Controleer de verlenging en de conformiteit van de leverancier: [Open CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

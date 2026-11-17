@@ -544,12 +544,21 @@ class FullRestoreView(APIView):
                             storage_path, ContentFile(file_bytes)
                         )
 
+                        other_bytes = bool(revision.attachment_hash) and (
+                            revision.attachment_hash != actual_hash
+                        )
                         revision.attachment = saved_path
                         revision.attachment_hash = actual_hash
-                        with disable_auditlog():
-                            revision.save(
-                                update_fields=["attachment", "attachment_hash"]
-                            )
+                        # Skip save() so restoring the reviewed bytes keeps the imported decision.
+                        EvidenceRevision.objects.filter(pk=revision.pk).update(
+                            attachment=saved_path, attachment_hash=actual_hash
+                        )
+                        if other_bytes and (
+                            revision.review_status
+                            != EvidenceRevision.ReviewStatus.PENDING
+                        ):
+                            revision.clear_review()
+                            revision.reopen_evidence_review()
 
                         stats["restored"] += 1
 
@@ -991,10 +1000,20 @@ class BatchUploadAttachmentsView(APIView):
                         storage_path, ContentFile(file_bytes)
                     )
 
+                    other_bytes = bool(revision.attachment_hash) and (
+                        revision.attachment_hash != actual_hash
+                    )
                     revision.attachment = saved_path
                     revision.attachment_hash = actual_hash
-                    with disable_auditlog():
-                        revision.save(update_fields=["attachment", "attachment_hash"])
+                    # Skip save() so restoring the reviewed bytes keeps the imported decision.
+                    EvidenceRevision.objects.filter(pk=revision.pk).update(
+                        attachment=saved_path, attachment_hash=actual_hash
+                    )
+                    if other_bytes and (
+                        revision.review_status != EvidenceRevision.ReviewStatus.PENDING
+                    ):
+                        revision.clear_review()
+                        revision.reopen_evidence_review()
 
                     stats["restored"] += 1
 

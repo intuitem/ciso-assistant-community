@@ -89,9 +89,10 @@ See [Schedule](triggers.md#schedule).
 
 ### On event
 
-- Any audited object: controls, findings, vulnerabilities, audits, requirement assessments, risk acceptances, validation flows, entities, users, tokens, and more.
+- Any audited object: controls, findings, vulnerabilities, audits, requirement assessments, requirement assignments, risk acceptances, validation flows, entities, users, tokens, and more.
 - Fires only for objects in the workflow's domain subtree, whatever the filters say. A folder filter outside the subtree is refused at publish.
 - Objects without a domain (users, tokens) live in the root: only a root workflow sees them.
+- Links set after creation (assignment actors, audit authors) arrive as `updated`, their new value is `add` or `delete`. Actors added, creation included: `actor`, **Only when changed**, `eq` `add`.
 - Filters: a run starts when **any** group matches, a group matches when **all** its conditions do. Quick chips: `status`, `folder`, `filtering_labels`.
 - **Only when changed**: off = state after the event ("status is done"), on = transition ("status just became done"). Use it to fire once.
 - One user action on one object = one run per trigger (**Coalesced**). A bulk edit still gives one run per object.
@@ -136,6 +137,7 @@ See [Triggers](triggers.md).
 - Several conditions on a branch: **AND** or **OR**.
 - **otherwise** cannot be deleted or reordered. Every branch must be wired.
 - Comparison follows the variable type (§7).
+- `in` against an empty list, or one with a trailing comma, matches an empty value. Add `neq` empty on the same branch.
 
 See [Condition](steps.md#condition).
 
@@ -192,6 +194,7 @@ See [Steps](steps.md).
 - Rows carry `id`, `name`, `created_at`, `updated_at` plus model fields. Filter on stored values (`active`), read back labels (`Active`).
 - `…_count` fields (`evidences_count`, `applied_controls_count`) filter and aggregate like numbers: "controls with no evidence" = `evidences_count` equals `0`.
 - Requirement assessments: only assessable ones. Risk scenario level filters ignore unrated scenarios.
+- Requirement assignments: `framework` (`urn`, `ref_id`, `name`) and `audit_folder` of the audit, empty when the run cannot see the audit. **Extra data to include** `users` (`id`, `email`, `is_third_party`) behind the actors: the user, a team's leader, deputies and members, an entity's representatives with an account. Out of reach, silently: users, teams and entities the run cannot view, and representatives without `view_representative` on the entity's domain. Grant in `audit_folder`, not the assignment's `folder`.
 - `document_revision.content` is truncated under `{{nodes…}}`: map it to a variable to pass the whole text.
 - **Extra data to include**: `quality_check` on audits and requirements (`errors`, `warnings`, `info`, `count`, `flagged`, `messages`, `text`). Branch on `flagged`, not `count`. Expensive: use it on a first-match read or a short page.
 
@@ -216,7 +219,7 @@ See [Read objects](actions.md#read-objects).
 - `timeline_entry` type: only `detection`, `mitigation`, `observation`.
 - `entity_score`: one reading per provider per day. Turn upsert on to correct same-day re-runs.
 - `task_template`: creates the occurrence too. Upsert re-dates it.
-- `validation_flow`: the requester is the run identity.
+- `validation_flow`: the requester is the run identity, unless `requester` names a user who can view and change validation flows in the domain.
 - `right_request`: opens in **New**.
 
 See [Create object](actions.md#create-object).
@@ -237,8 +240,7 @@ See [Create or update in bulk](actions.md#create-or-update-in-bulk).
 
 | Object | Status restriction |
 |---|---|
-| Evidence | `expired`, `missing` only |
-| Security exception | `expired`, `deprecated` only |
+| Evidence | Never `approved` or `rejected`: a review decides those |
 | Audit, risk assessment, entity assessment, findings binder | Planning states: `planned`, `in_progress`, `in_review`, `done`, `deprecated` |
 | Requirement assessment | Status, dates, observation. Never result or score |
 | Document revision | Content and change summary while still a draft |
@@ -299,7 +301,7 @@ See [HTTP request](actions.md#http-request).
 |---|---|
 | Provision domain | Finds or creates by name under the parent. Parent must be in the subtree. Optional default access groups |
 | Provision user | Matched by email, case-insensitive. Names overwrite only when non-empty. **Active** omitted = left alone, so a sync never re-activates an offboarded user |
-| Manage group membership | Reader, Approver, Analyst, Domain manager, Respondent. Domain in the subtree. Removing the last global admin is refused |
+| Manage group membership | Reader, Approver, Analyst, Domain manager, Respondent. User by email or id. Domain in the subtree. Removing the last global admin is refused |
 
 See [Identity steps](actions.md#identity-steps).
 
@@ -342,8 +344,8 @@ See [Action reference](actions.md).
 | `event_key` | `appliedcontrol.updated` |
 | `model`, `operation` | `appliedcontrol`, `created` / `updated` / `deleted` |
 | `object_id`, `object_repr` | Id, display name |
-| `changes.<field>` | `[old, new]` |
-| `new_values.<field>` | New value |
+| `changes.<field>` | `[old, new]`. A link (actors, authors): `{operation, objects}`, use `new_values` |
+| `new_values.<field>` | New value. `add` or `delete` for a link (actors, authors) |
 | `folder_id`, `actor_email`, `timestamp` | Domain, author when known, when |
 
 See [Payloads](expressions.md#payloads).

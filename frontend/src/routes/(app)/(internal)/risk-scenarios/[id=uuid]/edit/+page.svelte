@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
+	import { setContext } from 'svelte';
 
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '#lib/components/Forms/Form.svelte';
@@ -69,6 +70,8 @@
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto'
 	});
+	// This page edits an existing scenario: its pickers keep the links the user cannot see.
+	setContext('formKeepsHiddenLinks', true);
 
 	function modalMeasureCreateForm(field: string): void {
 		const modalComponent: ModalComponent = {

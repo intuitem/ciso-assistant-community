@@ -195,6 +195,56 @@ class TestAssetConsumer:
 
         assert record_data["asset_class"] == cls.id
 
+    @pytest.mark.parametrize("value", ["phasing_out", "Phasing out"])
+    def test_lifecycle_stage_resolves_name_or_label(self, base_context, value):
+        from core.models import Terminology
+
+        Terminology.create_default_asset_lifecycle_stages()
+        stage = Terminology.objects.get(
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE, name="phasing_out"
+        )
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "lifecycle_stage": value}, [1, 2, 3, 4]
+        )
+
+        assert error is None
+        assert record_data["lifecycle_stage"] == stage.id
+
+    def test_unknown_lifecycle_stage_warns_but_keeps_the_row(self, base_context):
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "lifecycle_stage": "zombie"}, [1, 2, 3, 4]
+        )
+
+        assert error is not None and error.is_warning is True
+        assert "Unknown lifecycle_stage" in error.error
+        assert "lifecycle_stage" not in record_data
+
+    def test_colliding_lifecycle_stages_match_exactly_or_warn(self, base_context):
+        from core.models import Terminology
+
+        Terminology.create_default_asset_lifecycle_stages()
+        custom = Terminology.objects.create(
+            name="Phasing out",
+            field_path=Terminology.FieldPath.ASSET_LIFECYCLE_STAGE,
+            is_visible=True,
+        )
+        consumer = AssetRecordConsumer(base_context)
+
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "lifecycle_stage": "Phasing out"}, [1, 2, 3, 4]
+        )
+        assert error is None
+        assert record_data["lifecycle_stage"] == custom.id
+
+        record_data, error = consumer.prepare_create(
+            {"name": "Y", "lifecycle_stage": "phasing out"}, [1, 2, 3, 4]
+        )
+        assert error is not None and error.is_warning is True
+        assert "Ambiguous lifecycle_stage" in error.error
+        assert "lifecycle_stage" not in record_data
+
     def test_missing_name_returns_error(self, base_context):
         consumer = AssetRecordConsumer(base_context)
         _, error = consumer.prepare_create({}, [1, 2, 3, 4])
@@ -1017,6 +1067,35 @@ class TestProcessingConsumer:
         assert error is None
         assert record_data["role"] == "privacy_data_processor"
         assert record_data["controllers"] == [client.id]
+
+    def test_nature_matches_name_or_exported_label(self, base_context):
+        from core.models import Terminology
+
+        Terminology.objects.update_or_create(
+            name="privacy_collection",
+            field_path=Terminology.FieldPath.PROCESSING_NATURE,
+            defaults={
+                "builtin": True,
+                "is_visible": True,
+                "translations": {"en": "Collection", "fr": "Collecte"},
+            },
+        )
+        nature_id = Terminology.objects.get(
+            name="privacy_collection",
+            field_path=Terminology.FieldPath.PROCESSING_NATURE,
+        ).id
+        consumer = ProcessingRecordConsumer(base_context)
+        for cell in ("privacy_collection", "Collection", "collecte, COLLECTION"):
+            record_data, error = consumer.prepare_create(
+                {"name": "HR", "processing_nature": cell}, None
+            )
+            assert error is None
+            assert record_data["nature"] == [nature_id]
+        record_data, error = consumer.prepare_create(
+            {"name": "HR", "processing_nature": "Collection, Teleportation"}, None
+        )
+        assert error.is_warning and "Teleportation" in error.error
+        assert record_data["nature"] == [nature_id]
 
     def test_role_is_trimmed_and_unknown_role_rejected(self, base_context):
         consumer = ProcessingRecordConsumer(base_context)

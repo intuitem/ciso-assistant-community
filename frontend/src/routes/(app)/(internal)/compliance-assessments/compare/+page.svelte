@@ -383,7 +383,7 @@
 														: diff.base.result === 'non_compliant'
 															? '#f87171'
 															: diff.base.result === 'not_applicable'
-																? '#000000'
+																? '#475569'
 																: '#d1d5db'}; color: {diff.base.result === 'not_applicable'
 													? 'white'
 													: 'black'};"
@@ -412,7 +412,7 @@
 														: diff.compare.result === 'non_compliant'
 															? '#f87171'
 															: diff.compare.result === 'not_applicable'
-																? '#000000'
+																? '#475569'
 																: '#d1d5db'}; color: {diff.compare.result === 'not_applicable'
 													? 'white'
 													: 'black'};"

@@ -12,6 +12,7 @@ from auditlog.registry import auditlog
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import uuid
+from datetime import timedelta
 
 
 class DpiaRequirementSource(models.TextChoices):
@@ -151,7 +152,6 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     dpia_required_set_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("DPIA requirement set at")
     )
-    has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
@@ -178,13 +178,10 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     def dpia_applies(self) -> bool:
         return self.role in self.DPIA_ROLES
 
-    def update_sensitive_data_flag(self):
-        """Update the has_sensitive_personal_data flag based on associated personal data"""
-        has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
-
-        if has_sensitive != self.has_sensitive_personal_data:
-            self.has_sensitive_personal_data = has_sensitive
-            self.save(update_fields=["has_sensitive_personal_data"])
+    @property
+    def has_sensitive_personal_data(self) -> bool:
+        # Reads the personal_data prefetch when the queryset has one
+        return any(pd.is_sensitive for pd in self.personal_data.all())
 
     def metrics(self):
         return {}
@@ -297,11 +294,6 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
         if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
         super().save(*args, **kwargs)
-
-        # Update the processing's sensitive data flag if needed
-        if self.is_sensitive and not self.processing.has_sensitive_personal_data:
-            self.processing.has_sensitive_personal_data = True
-            self.processing.save(update_fields=["has_sensitive_personal_data"])
 
     @classmethod
     def get_categories_count(cls, filters: dict = {}):
@@ -645,6 +637,30 @@ class DataBreach(NameDescriptionFolderMixin):
         ordering = ["-discovered_on"]
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
+
+    # Past the authority notification, whether or not its date was entered
+    NOTIFIED_OR_CLOSED_STATUSES = (
+        "privacy_authority_notified",
+        "privacy_subjects_notified",
+        "privacy_closed",
+    )
+
+    @property
+    def authority_notification_due(self):
+        # GDPR art. 33(1): 72h from awareness, unless unlikely to result in a risk
+        if self.risk_level == "privacy_no_risk" or not self.discovered_on:
+            return None
+        return self.discovered_on + timedelta(hours=72)
+
+    @property
+    def authority_notification_overdue(self) -> bool:
+        due = self.authority_notification_due
+        return bool(
+            due
+            and not self.authority_notified_on
+            and self.status not in self.NOTIFIED_OR_CLOSED_STATUSES
+            and timezone.now() > due
+        )
 
 
 class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
