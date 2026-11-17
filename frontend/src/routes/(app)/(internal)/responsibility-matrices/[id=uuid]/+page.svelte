@@ -511,13 +511,13 @@
 				<div class="actor-picker">
 					<i class="fa-solid fa-user-plus picker-icon"></i>
 					<div class="picker-select">
-						<!-- AutocompleteSelect reads its options and value once: remount it after each addition. -->
-						{#key matrixActors.length}
+						<!-- AutocompleteSelect reads its options and value once: remount it whenever the list changes. -->
+						{#key availableActors}
 							<AutocompleteSelect
 								form={actorPickerSuperForm}
 								field="actor"
 								options={availableActors}
-								label=""
+								translateOptions={false}
 								placeholder={m.addActor()}
 								portalDropdown
 							/>

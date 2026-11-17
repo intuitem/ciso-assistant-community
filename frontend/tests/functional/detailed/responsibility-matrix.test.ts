@@ -5,17 +5,8 @@
  */
 
 import { test, expect } from '../../utils/test-utils.js';
+import { BACKEND_API_URL, getAuthToken } from '../../utils/api.js';
 import { m } from '#paraglide/messages.js';
-import type { BrowserContext } from '@playwright/test';
-
-const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
-
-async function getAuthToken(context: BrowserContext): Promise<string> {
-	const cookies = await context.cookies();
-	const token = cookies.find((c) => c.name === 'token')?.value;
-	if (!token) throw new Error('No `token` cookie found — is the user logged in?');
-	return token;
-}
 
 test('the actor picker finds a team from the middle of its name', async ({
 	logedPage,
@@ -39,8 +30,11 @@ test('the actor picker finds a team from the middle of its name', async ({
 	const suffix = Date.now();
 	const network = `Network operations ${suffix}`;
 	const security = `Security ${suffix}`;
+	// Team names are user data: one that happens to be a message key must not be translated.
+	const keyLikeName = 'in_progress';
 	await create('teams', { name: network, folder: folderId });
 	await create('teams', { name: security, folder: folderId });
+	await create('teams', { name: keyLikeName, folder: folderId });
 	const matrix = await create('pmbok/responsibility-matrices', {
 		name: `Actor search ${suffix}`,
 		folder: folderId
@@ -50,15 +44,30 @@ test('the actor picker finds a team from the middle of its name', async ({
 	await page.waitForLoadState('networkidle');
 	await page.getByRole('button', { name: m.edit() }).click();
 
-	const picker = page.getByTestId('form-input-actor');
-	await picker.click();
-	await picker.getByRole('combobox').fill(`operations ${suffix}`);
+	const picker = page.getByRole('combobox', { name: m.addActor() });
+	const addButton = page.getByRole('button', { name: m.addActor() });
+	const addActor = async (search: string, name: string) => {
+		await picker.fill(search);
+		await page.getByRole('option', { name, exact: true }).click();
+		await addButton.click();
+		await expect(page.locator('main').getByText(name, { exact: true })).toBeVisible();
+	};
 
+	await picker.fill(`operations ${suffix}`);
 	await expect(page.getByRole('option', { name: network })).toBeVisible();
 	await expect(page.getByRole('option', { name: security })).toHaveCount(0);
 
-	await page.getByRole('option', { name: network }).click();
-	await page.getByRole('button', { name: m.addActor() }).click();
+	await addActor(`operations ${suffix}`, network);
+	await expect(addButton).toBeDisabled();
+	await picker.fill(`operations ${suffix}`);
+	await expect(page.getByRole('option', { name: network })).toHaveCount(0);
 
-	await expect(page.locator('main').getByText(network, { exact: true })).toBeVisible();
+	await addActor(security, security);
+
+	// Reordering columns keeps their count: the picker must still list readable options.
+	await page
+		.locator('[draggable="true"]', { hasText: security })
+		.dragTo(page.locator('[draggable="true"]', { hasText: network }));
+	await picker.fill(keyLikeName);
+	await expect(page.getByRole('option', { name: keyLikeName, exact: true }).first()).toBeVisible();
 });
