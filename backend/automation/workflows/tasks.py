@@ -363,7 +363,7 @@ def reap_undelivered_dispatches():
 
 
 @db_task()
-def dispatch_internal_event_task(log_entry_id, origin_depth=0):
+def dispatch_internal_event_task(log_entry_id, origin_depth=0, inline=None):
     from .events import dispatch_internal_event, payload_from_log_entry
 
     log_entry = (
@@ -379,4 +379,5 @@ def dispatch_internal_event_task(log_entry_id, origin_depth=0):
         payload,
         payload.get("folder_id"),
         origin_depth=origin_depth,
+        inline=inline,
     )

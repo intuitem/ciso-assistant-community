@@ -22857,7 +22857,7 @@ def emit_quick_form_event(response, action):
     A CUD event cannot express these: answering saves the row too. Deferred to commit.
     `quick_form_ref`/`_urn` travel with the id because a pk does not survive export.
     """
-    from automation.workflows.events import dispatch_internal_event
+    from automation.workflows.events import dispatch_named_event
 
     payload = {
         "id": str(response.id),
@@ -22879,11 +22879,7 @@ def emit_quick_form_event(response, action):
         else None,
         "decided_by": str(response.decided_by_id) if response.decided_by_id else None,
     }
-    transaction.on_commit(
-        lambda: dispatch_internal_event(
-            f"quickformresponse.{action}", payload, response.folder_id
-        )
-    )
+    dispatch_named_event(f"quickformresponse.{action}", payload, response.folder_id)
 
 
 def emit_quick_form_submitted(response):
@@ -23761,9 +23757,9 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         return qs
 
     def destroy(self, request, *args, **kwargs):
-        """Deletion is narrow by design. A draft may be deleted; a submitted or
-        in-review request may not — it is dropped, which leaves a record; a closed
-        one is administrator-only, because the decision has been made."""
+        """Deletion is narrow by design. A draft may be deleted; past that, only an
+        administrator may delete (e.g. test answers). Others drop the request, which
+        leaves a record."""
         response = self.get_object()
         if not response.is_deletable(request.user):
             return Response(

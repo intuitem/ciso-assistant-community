@@ -308,11 +308,6 @@
 					total: content.progress?.total_count ?? 0
 				})}
 			</span>
-			{#if content.score !== null && content.score !== undefined}
-				<span
-					><i class="fa-solid fa-star mr-1 text-surface-500"></i>{m.score()}: {content.score}</span
-				>
-			{/if}
 			{#if content.hidden_pages?.length}
 				<span class="text-surface-500"
 					><i class="fa-solid fa-eye-slash mr-1"></i>{m.quickFormHiddenPagesHint()}</span

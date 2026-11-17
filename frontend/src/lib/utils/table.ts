@@ -2465,8 +2465,8 @@ export const listViewFields = {
 		}
 	},
 	'quick-form-responses': {
-		head: ['ref_id', 'name', 'quickForm', 'status', 'respondents', 'dueDate', 'domain'],
-		body: ['ref_id', 'name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
+		head: ['ref_id', 'name', 'quickForm', 'status', 'score', 'respondents', 'dueDate', 'domain'],
+		body: ['ref_id', 'name', 'quick_form', 'status', 'score', 'respondents', 'due_date', 'folder'],
 		meta: ['id', 'status'],
 		filters: {
 			folder: DOMAIN_FILTER,
