@@ -214,3 +214,45 @@ def test_the_hold_wraps_the_audit_context():
     assert order.index(
         "automation.workflows.middleware.InlineWorkflowRunsMiddleware"
     ) < order.index("core.custom_middleware.AuditlogMiddleware")
+
+
+@pytest.mark.django_db
+def test_quick_form_events_hold_their_inline_dispatch_like_saves(
+    monkeypatch, django_capture_on_commit_callbacks
+):
+    import uuid
+    from types import SimpleNamespace
+
+    from core.views import emit_quick_form_event
+    from automation.workflows import events
+
+    calls = []
+    monkeypatch.setattr(
+        events,
+        "dispatch_internal_event",
+        lambda event_key, payload, folder_id, inline: calls.append(inline),
+    )
+    response = SimpleNamespace(
+        id=uuid.uuid4(),
+        ref_id="R-1",
+        name="Request",
+        quick_form_id=uuid.uuid4(),
+        quick_form=SimpleNamespace(ref_id="form", urn="urn:test:form"),
+        publication_id=None,
+        status="submitted",
+        resolution=None,
+        outcome_refs=[],
+        computed_values={},
+        score=None,
+        submitted_by_id=None,
+        decided_by_id=None,
+        folder_id=None,
+    )
+    with events.hold_inline_runs():
+        with django_capture_on_commit_callbacks(execute=True):
+            emit_quick_form_event(response, "submitted")
+        # Queued triggers at commit; the inline ones wait for the view (submit
+        # closes the response after emitting) and run outside the user's audit
+        # context, as InlineWorkflowRunsMiddleware does for a request.
+        assert calls == [False]
+    assert calls == [False, True]

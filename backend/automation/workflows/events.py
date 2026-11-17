@@ -16,8 +16,8 @@ Loop containment: runs carry a trigger_depth; changes made by a run at depth
 d dispatch events at depth d, which start instances at depth d+1, capped at
 MAX_TRIGGER_DEPTH.
 
-Inline ("Run immediately") triggers run in the process that saved, not on the
-worker. Within a request they wait for the view to return (see
+Inline ("Run immediately") triggers run in the process where the event
+happened, not on the worker. Within a request they wait for the view to return (see
 `hold_inline_runs` and middleware.py); elsewhere they run at commit.
 """
 
@@ -448,8 +448,9 @@ def _compare(condition, runtime):
 
 # ---------- inline runs ----------
 
-# Inline dispatches committed during a request, waiting for its view to return.
-# None outside a request (workers, commands): there they run at commit.
+# Inline dispatches (callables) committed during a request, waiting for its
+# view to return. None outside a request (workers, commands): there they run at
+# commit.
 _held_inline_dispatches = contextvars.ContextVar(
     "workflow_held_inline_dispatches", default=None
 )
@@ -471,20 +472,38 @@ def hold_inline_runs():
     finally:
         # Reset first: events the runs themselves fire are dispatched at once.
         _held_inline_dispatches.reset(token)
-        for log_entry_id, origin_depth in held:
-            _dispatch_inline(log_entry_id, origin_depth)
+        for dispatch, event in held:
+            run_inline(dispatch, event=event)
 
 
-def _dispatch_inline(log_entry_id, origin_depth):
-    from .tasks import dispatch_internal_event_task
-
+def run_inline(dispatch, *, event):
+    """Call `dispatch` (an inline dispatch, from a commit callback) now, or once
+    the request's view has returned when inside one. `event` names it in logs."""
+    held = _held_inline_dispatches.get()
+    if held is not None:
+        held.append((dispatch, event))
+        return
     try:
-        dispatch_internal_event_task.call_local(log_entry_id, origin_depth, True)
+        dispatch()
     except Exception:
         # The save is committed; a failed dispatch must not fail the request.
-        logger.error(
-            "inline event dispatch failed", log_entry=log_entry_id, exc_info=True
+        logger.error("inline event dispatch failed", event=event, exc_info=True)
+
+
+def dispatch_named_event(event_key, payload, folder_id):
+    """At commit, start the workflows listening to an event a model emits
+    itself (CUSTOM_EVENTS): inline triggers through run_inline, as a save's
+    are, the others right away."""
+    # Inline first: a failing queued dispatch must not stop it.
+    transaction.on_commit(
+        lambda: run_inline(
+            lambda: dispatch_internal_event(event_key, payload, folder_id, inline=True),
+            event=event_key,
         )
+    )
+    transaction.on_commit(
+        lambda: dispatch_internal_event(event_key, payload, folder_id, inline=False)
+    )
 
 
 # ---------- CUD producer (auditlog mirror) ----------
@@ -518,16 +537,16 @@ def forward_log_entry(sender, instance, created, **kwargs):
     origin_depth = current_trigger_depth.get()
     log_entry_id = instance.pk
 
-    def dispatch_inline():
-        held = _held_inline_dispatches.get()
-        if held is None:
-            _dispatch_inline(log_entry_id, origin_depth)
-        else:
-            held.append((log_entry_id, origin_depth))
-
     # Inline first: a failing enqueue below must not stop it.
     if True in inline_flags:
-        transaction.on_commit(dispatch_inline)
+        transaction.on_commit(
+            lambda: run_inline(
+                lambda: dispatch_internal_event_task.call_local(
+                    log_entry_id, origin_depth, True
+                ),
+                event=f"{key} (log entry {log_entry_id})",
+            )
+        )
     if False in inline_flags:
         transaction.on_commit(
             lambda: dispatch_internal_event_task(log_entry_id, origin_depth, False)
