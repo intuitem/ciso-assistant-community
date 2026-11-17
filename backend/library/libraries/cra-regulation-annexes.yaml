@@ -680,7 +680,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.9'
+      ref_id: 3.1.10
       description: Physical and virtual network interfaces
       translations:
         de:
@@ -689,7 +689,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.10
+      ref_id: 3.1.11
       description: Operating systems
       translations:
         de:
@@ -698,7 +698,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.11
+      ref_id: 3.1.12
       description: Routers, modems intended for the connection to the internet, and switches
       translations:
         de:
@@ -707,7 +707,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.12
+      ref_id: 3.1.13
       description: Microprocessors with security-related functionalities
       translations:
         de:
@@ -716,7 +716,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.13
+      ref_id: 3.1.14
       description: Microcontrollers with security-related functionalities
       translations:
         de:
@@ -725,7 +725,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.14
+      ref_id: 3.1.15
       description: Application specific integrated circuits (ASIC) and field-programmable gate arrays (FPGA)
         with security-related functionalities
       translations:
@@ -736,7 +736,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.15
+      ref_id: 3.1.16
       description: Smart home general purpose virtual assistants
       translations:
         de:
@@ -745,7 +745,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.16
+      ref_id: 3.1.17
       description: Smart home products with security functionalities, including smart door locks, security cameras,
         baby monitoring systems and alarm systems
       translations:
@@ -756,22 +756,22 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.17
+      ref_id: 3.1.18
       description: |-
-        Internet connected toys covered by Directive 2009/48/EC of the European Parliament and of the Council ( 4 ) that have social interactive features (e.g. speaking or filming) or that have location tracking features
+        Internet connected toys covered by Directive 2009/48/EC of the European Parliament and of the Council that have social interactive features (e.g. speaking or filming) or that have location tracking features
 
         (4) Directive 2009/48/EC of the European Parliament and of the Council of 18 June 2009 on the safety of toys (OJ L 170, 30.6.2009, p. 1).
       translations:
         de:
           description: |-
-            mit dem Internet verbundenes Spielzeug, das unter die Richtlinie 2009/48/EG des Europäischen Parlaments und des Rates ( 4 ) fällt und über Funktionen zur sozialen Interaktion (z. B. sprechen oder filmen) oder zur Ortung verfügt
+            mit dem Internet verbundenes Spielzeug, das unter die Richtlinie 2009/48/EG des Europäischen Parlaments und des Rates fällt und über Funktionen zur sozialen Interaktion (z. B. sprechen oder filmen) oder zur Ortung verfügt
 
             (4) Richtlinie 2009/48/EG des Europäischen Parlaments und des Rates vom 18. Juni 2009 über die Sicherheit von Spielzeug (ABl. L 170 vom 30.6.2009, S. 1).
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.18
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
-      ref_id: 3.1.18
+      ref_id: 3.1.19
       description: Personal wearable products to be worn or placed on a human body that have a health monitoring
         (such as tracking) purpose and to which Regulation (EU) 2017/745 or (EU) No 2017/746 do not apply, or
         personal wearable products that are intended for the use by and for children
@@ -852,13 +852,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
       ref_id: '4.2'
       description: |-
-        Smart meter gateways within smart metering systems as defined in Article 2, point (23) of Directive (EU) 2019/944 of the European Parliament and of the Council ( 5 ) and other devices for advanced security purposes, including for secure cryptoprocessing
+        Smart meter gateways within smart metering systems as defined in Article 2, point (23) of Directive (EU) 2019/944 of the European Parliament and of the Council and other devices for advanced security purposes, including for secure cryptoprocessing
 
         (5) Directive (EU) 2019/944 of the European Parliament and of the Council of 5 June 2019 on common rules for the internal market for electricity and amending Directive 2012/27/EU (OJ L 158, 14.6.2019, p. 125).
       translations:
         de:
           description: |-
-            Smart-Meter-Gateways in intelligenten Messsystemen im Sinne des Artikels 2 Nummer 23 der Richtlinie (EU) 2019/944 des Europäischen Parlaments und des Rates ( 5 ) sowie andere Geräte für fortgeschrittene Sicherheitszwecke, einschließlich der sicheren Kryptoverarbeitung
+            Smart-Meter-Gateways in intelligenten Messsystemen im Sinne des Artikels 2 Nummer 23 der Richtlinie (EU) 2019/944 des Europäischen Parlaments und des Rates sowie andere Geräte für fortgeschrittene Sicherheitszwecke, einschließlich der sicheren Kryptoverarbeitung
 
             (5) Richtlinie (EU) 2019/944 des Europäischen Parlaments und des Rates vom 5. Juni 2019 mit gemeinsamen Vorschriften für den Elektrizitätsbinnenmarkt und zur Änderung der Richtlinie 2012/27/EU (ABl. L 158 vom 14.6.2019, S. 125).
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4.3
@@ -1005,15 +1005,11 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
       description: |-
-        Hereby, … [name of manufacturer] declares that the product with digital elements type … [designation of type of product with digital element] is in compliance with Regulation (EU) 2024/2847 ( 6 ).
-
-        (6) OJ L, 2024/2847, 20.11.2024, ELI: <http://data.europa.eu/eli/reg/2024/2847/oj>.
+        Hereby, … [name of manufacturer] declares that the product with digital elements type … [designation of type of product with digital element] is in compliance with Regulation (EU) 2024/2847.
       translations:
         de:
           description: |-
-            Hiermit erklärt … [Name des Herstellers], dass der Typ des Produkts mit digitalen Elementen … [Bezeichnung des Typs des Produkts mit digitalen Elementen] der Verordnung (EU) 2024/2847 ( 6 ) entspricht.
-
-            (6) ABl. L, 2024/2847, 20.11.2024, ELI: <http://data.europa.eu/eli/reg/2024/2847/oj>.
+            Hiermit erklärt … [Name des Herstellers], dass der Typ des Produkts mit digitalen Elementen … [Bezeichnung des Typs des Produkts mit digitalen Elementen] der Verordnung (EU) 2024/2847 entspricht.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node89
       assessable: true
       depth: 2
@@ -1312,18 +1308,18 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
       ref_id: 8.1.4.1
-      description: 1. The manufacturer shall affix the CE marking to each individual product with digital elements
+      description: The manufacturer shall affix the CE marking to each individual product with digital elements
         that satisfies the applicable requirements set out in this Regulation.
       translations:
         de:
-          description: 1. Der Hersteller bringt die CE-Kennzeichnung an jedem einzelnen Produkt mit digitalen
+          description: Der Hersteller bringt die CE-Kennzeichnung an jedem einzelnen Produkt mit digitalen
             Elementen an, das den in dieser Verordnung festgelegten geltenden Anforderungen genügt.
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4.2
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
       ref_id: 8.1.4.2
-      description: 2. The manufacturer shall draw up a written EU declaration of conformity for each product
+      description: The manufacturer shall draw up a written EU declaration of conformity for each product
         with digital elements in accordance with Article 28 and keep it together with the technical documentation
         at the disposal of the national authorities for 10 years after the product with digital elements has
         been placed on the market or for the support period, whichever is longer. The EU declaration of conformity
@@ -1331,7 +1327,7 @@ objects:
         of conformity shall be made available to the relevant authorities upon request.
       translations:
         de:
-          description: 2. Der Hersteller stellt für jedes Produkt mit digitalen Elementen eine schriftliche
+          description: Der Hersteller stellt für jedes Produkt mit digitalen Elementen eine schriftliche
             EU-Konformitätserklärung gemäß Artikel 28 aus und hält sie zusammen mit der technischen Dokumentation
             für einen Zeitraum von zehn Jahren ab dem Inverkehrbringen des Produkts mit digitalen Elementen
             oder während des Unterstützungszeitraums, je nachdem, welcher Zeitraum länger ist, für die nationalen
