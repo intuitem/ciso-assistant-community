@@ -88,8 +88,8 @@
 	</div>
 	<div class="col-span-7 flex flex-col p-4 bg-surface-50-950 rounded-lg shadow">
 		<div class="flex flex-1 items-center justify-center">
-			{#if data?.data?.countries?.length > 0}
-				<WorldMap data={data.data.countries} />
+			{#if data?.data?.countries?.length > 0 || regions.length > 0}
+				<WorldMap data={data.data.countries ?? []} />
 			{:else}
 				<div class="text-surface-700-300">{m.noDataAvailable()}</div>
 			{/if}

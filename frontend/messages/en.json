@@ -3129,6 +3129,8 @@
 	"delete": "Delete",
 	"changeStatus": "Change status",
 	"changeDeletionPolicy": "Change deletion policy",
+	"changeRetention": "Change retention",
+	"batchTextLeaveEmptyToClear": "Leave empty to clear",
 	"changeIsSensitive": "Change sensitivity",
 	"changeTransferMechanism": "Change transfer mechanism",
 	"changeHealth": "Change health check",

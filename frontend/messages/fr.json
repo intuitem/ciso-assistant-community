@@ -3154,6 +3154,8 @@
 	"delete": "Supprimer",
 	"changeStatus": "Changer le statut",
 	"changeDeletionPolicy": "Changer la politique de suppression",
+	"changeRetention": "Changer la durée de conservation",
+	"batchTextLeaveEmptyToClear": "Laisser vide pour effacer",
 	"changeIsSensitive": "Changer la sensibilité",
 	"changeTransferMechanism": "Changer le mécanisme de transfert",
 	"changeHealth": "Changer le diagnostic",
