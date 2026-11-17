@@ -1094,6 +1094,25 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Children of a draft (no status) or deprecated assessment, left out of the analytics summary.
+export const INACTIVE_ASSESSMENT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'inactiveAssessment',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+export const NIS2_OVERDUE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'briefingNis2Overdue',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const TASK_OVERDUE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2066,6 +2085,7 @@ export const listViewFields = {
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
 			top_level: TOP_RISK_LEVEL_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2502,7 +2522,8 @@ export const listViewFields = {
 			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
 			requirement__assessable: IS_ASSESSABLE_FILTER,
 			result: REQUIREMENT_ASSESSMENT_RESULT_FILTER,
-			compliance_assessment__perimeter: PERIMETER_FILTER
+			compliance_assessment__perimeter: PERIMETER_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER
 		}
 	},
 	evidences: {
@@ -2525,6 +2546,7 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			status: EVIDENCE_STATUS_FILTER,
 			owner: EVIDENCE_OWNER_FILTER,
+			expiry_date: dateFilter('expiry_date'),
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -3508,6 +3530,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			findings_assessment: FINDINGS_BINDER_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
@@ -3557,6 +3580,7 @@ export const listViewFields = {
 			severity: INCIDENT_SEVERITY_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reported_at: dateFilter('reported_at', { isDateTime: true }),
+			nis2_overdue: NIS2_OVERDUE_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
