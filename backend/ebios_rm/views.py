@@ -17,6 +17,7 @@ from core.views import (
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
+from core.base_models import auto_ref_id_enabled
 from core.models import Asset, RiskAssessment, Terminology
 from core.utils import escape_excel_formula
 from openpyxl.styles import Alignment
@@ -203,7 +204,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             source,
             name=data["name"],
             description=data.get("description", source.description),
-            ref_id=data.get("ref_id", source.ref_id),
+            ref_id=data.get("ref_id", None if auto_ref_id_enabled() else source.ref_id),
             version=data.get("version", source.version),
             folder=target_folder,
             # a cross-domain clone copies the shared objects (assets, threats,

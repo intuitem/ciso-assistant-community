@@ -199,6 +199,10 @@ def _general_settings() -> dict:
     )
 
 
+def auto_ref_id_enabled() -> bool:
+    return bool(_general_settings().get("auto_ref_id"))
+
+
 def _ref_id_number(ref_id: str, prefix: str) -> int | None:
     """N of a ref_id shaped `<prefix>N` (prefix compared case-insensitively, as the
     uniqueness check does), None for anything else."""

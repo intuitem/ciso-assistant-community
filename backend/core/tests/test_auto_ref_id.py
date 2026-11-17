@@ -302,3 +302,32 @@ def test_legacy_generator_ignores_prefix_case(domains):
     QuantitativeRiskScenario.objects.create(name="q", quantitative_risk_study=study)
     set_prefixes({"quantitativeriskscenario": "qr"})
     assert QuantitativeRiskScenario.get_default_ref_id(study) == "qr.02"
+
+
+@pytest.mark.django_db
+def test_duplicated_control_gets_its_own_number(domains):
+    from rest_framework.test import APIClient
+
+    from core.apps import startup
+    from iam.models import User, UserGroup
+
+    startup(sender=None, **{})
+    admin = User.objects.create_user(email="admin@test.local")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+    client = APIClient()
+    client.force_authenticate(admin)
+    a = domains[0]
+    set_auto_ref_id(True)
+    source = AppliedControl.objects.create(name="c", folder=a)
+    response = client.post(
+        f"/api/applied-controls/{source.id}/duplicate/",
+        {
+            "name": "copy",
+            "description": "",
+            "folder": str(a.id),
+            "duplicate_evidences": False,
+        },
+        format="json",
+    )
+    assert response.status_code == 200, response.content
+    assert AppliedControl.objects.get(name="copy").ref_id == "AC.02"

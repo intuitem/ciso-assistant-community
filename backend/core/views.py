@@ -100,6 +100,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import UploadedFile
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.base_models import auto_ref_id_enabled
 from core.constants import LEGACY_TTP_LIBRARIES
 from core.permissions import FeatureFlagRequired
 from core.helpers import get_instance_metrics
@@ -7373,7 +7374,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
             name=data["name"],
             description=data["description"],
             folder=new_folder,
-            ref_id=applied_control.ref_id,
+            # A copy gets its own number when they are automatic.
+            ref_id=None if auto_ref_id_enabled() else applied_control.ref_id,
             category=applied_control.category,
             csf_function=applied_control.csf_function,
             priority=applied_control.priority,
@@ -13713,7 +13715,7 @@ class OrganisationObjectiveViewSet(ExportMixin, BaseModelViewSet):
             name=data["name"],
             description=data["description"],
             folder=new_folder,
-            ref_id=objective.ref_id,
+            ref_id=None if auto_ref_id_enabled() else objective.ref_id,
             observation=objective.observation,
             status=objective.status,
             health=objective.health,
