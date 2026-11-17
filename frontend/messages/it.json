@@ -1039,10 +1039,10 @@
 	"addDataRecipient": "Aggiungi destinatario dati",
 	"dataRecipients": "Destinatari dati",
 	"associatedDataRecipients": "Destinatario dati associato",
-	"dataContractor": "Contraente dati",
-	"addDataContractor": "Aggiungi contraente dati",
-	"dataContractors": "Contraenti dati",
-	"associatedDataContractors": "Contraenti dati associati",
+	"dataContractor": "Soggetto coinvolto nel trattamento",
+	"addDataContractor": "Aggiungi soggetto coinvolto nel trattamento",
+	"dataContractors": "Soggetti coinvolti nel trattamento",
+	"associatedDataContractors": "Soggetti coinvolti nel trattamento associati",
 	"deletionPolicy": "Politica di cancellazione",
 	"retentionPolicy": "Politica di conservazione",
 	"retention": "Conservazione",
@@ -1403,6 +1403,7 @@
 			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} Ora",
+				"countPlural=many": "{count} Ore",
 				"countPlural=other": "{count} Ore"
 			}
 		}
@@ -1413,6 +1414,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Minuto",
+				"countPlural=many": "{count} Minuti",
 				"countPlural=other": "{count} Minuti"
 			}
 		}
@@ -1423,6 +1425,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Giorno",
+				"countPlural=many": "{count} Giorni",
 				"countPlural=other": "{count} Giorni"
 			}
 		}
@@ -1433,6 +1436,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} oggetto non visibile.",
+				"countPlural=many": "{count} oggetti non visibili.",
 				"countPlural=other": "{count} oggetti non visibili."
 			}
 		}
@@ -1527,6 +1531,7 @@
 			"match": {
 				"count=0": "Nessun altro oggetto sarà influenzato.",
 				"countPlural=one": "{count} oggetto correlato non verrà eliminato ma perderà una o più relazioni.",
+				"countPlural=many": "{count} oggetti correlati non verranno eliminati ma perderanno una o più relazioni.",
 				"countPlural=other": "{count} oggetti correlati non verranno eliminati ma perderanno una o più relazioni."
 			}
 		}
@@ -2612,6 +2617,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} regole di esito",
+				"countPlural=many": "{count} regole di esito",
 				"countPlural=other": "{count} regole di esito"
 			}
 		}
@@ -2622,6 +2628,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} gruppi",
+				"countPlural=many": "{count} gruppi",
 				"countPlural=other": "{count} gruppi"
 			}
 		}
@@ -2636,6 +2643,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} livelli",
+				"countPlural=many": "{count} livelli",
 				"countPlural=other": "{count} livelli"
 			}
 		}
@@ -2707,6 +2715,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Valutabile · {count} figlio",
+				"countPlural=many": "Valutabile · {count} figli",
 				"countPlural=other": "Valutabile · {count} figli"
 			}
 		}
@@ -2717,6 +2726,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Gruppo · {count} figlio",
+				"countPlural=many": "Gruppo · {count} figli",
 				"countPlural=other": "Gruppo · {count} figli"
 			}
 		}
@@ -2745,6 +2755,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} figlio nascosto",
+				"countPlural=many": "{count} figli nascosti",
 				"countPlural=other": "{count} figli nascosti"
 			}
 		}
@@ -2773,6 +2784,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Mostrato quando {ref} = {count} risposte",
+				"countPlural=many": "Mostrato quando {ref} = {count} risposte",
 				"countPlural=other": "Mostrato quando {ref} = {count} risposte"
 			}
 		}
@@ -3327,7 +3339,7 @@
 	"privacyIdentificationNumbers": "Numeri identificativi",
 	"privacyImagesPhotos": "Immagini e foto",
 	"privacyInReview": "In revisione",
-	"privacyIndependentController": "Titolare indipendente",
+	"privacyIndependentController": "Titolare autonomo del trattamento",
 	"privacyIndividualRecipient": "Destinatario individuale",
 	"privacyInternalTeam": "Team/Dipartimento interno",
 	"privacyIpAddress": "Indirizzo IP",
@@ -4228,7 +4240,7 @@
 	"applyPreset": "Avvia un percorso",
 	"journey": "Percorso",
 	"journeys": "Percorsi",
-	"preset": "Preset",
+	"preset": "Percorso predefinito",
 	"presets": "Percorsi",
 	"appliedAt": "Applicato il",
 	"appliedBy": "Applicato da",
@@ -4329,7 +4341,7 @@
 	"requestQueue": "Coda delle richieste",
 	"computedOutcomes": "Esiti",
 	"dpias": "DPIA",
-	"dpiaScreeningStart": "Avvia lo screening DPIA",
+	"dpiaScreeningStart": "Avvia la valutazione preliminare DPIA",
 	"tier": "Livello",
 	"tiers": "Livelli",
 	"tierNote": "Motivo della modifica",
@@ -4416,13 +4428,13 @@
 	"bodyFormatHelpText": "OCSF è uno schema indipendente dal fornitore, supportato dalla maggior parte dei SIEM. Il formato Raw è quello nativo di CISO Assistant.",
 	"terminationForCauseProviderInBreachOfApplicableLawRegulationsOrContractualProvisions": "Risoluzione per giusta causa: violazione da parte del fornitore di leggi, regolamenti o disposizioni contrattuali applicabili",
 	"terminationForCauseProviderSWeaknessesRegardingTheManagementAndSecurityOfSensitiveDataOrInformation": "Risoluzione per giusta causa: carenze del fornitore nella gestione e nella sicurezza di dati o informazioni sensibili",
-	"addDatacontractor": "Aggiungi responsabile del trattamento",
+	"addDatacontractor": "Aggiungi soggetto coinvolto nel trattamento",
 	"addEntityassessment": "Aggiungi valutazione dell'entità",
-	"changeDatacontractor": "Modifica responsabile del trattamento",
+	"changeDatacontractor": "Modifica soggetto coinvolto nel trattamento",
 	"changeEntityassessment": "Modifica valutazione dell'entità",
-	"deleteDatacontractor": "Elimina responsabile del trattamento",
+	"deleteDatacontractor": "Elimina soggetto coinvolto nel trattamento",
 	"deleteEntityassessment": "Elimina valutazione dell'entità",
-	"viewDatacontractor": "Visualizza responsabile del trattamento",
+	"viewDatacontractor": "Visualizza soggetto coinvolto nel trattamento",
 	"viewEntityassessment": "Visualizza valutazione dell'entità",
 	"pickAnEntity": "Seleziona un'entità",
 	"subcontractingChain": "Catena di subfornitura (DORA, art. 28, par. 2)",
@@ -4540,6 +4552,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Quick Form",
+				"countPlural=many": "{count} Quick Form",
 				"countPlural=other": "{count} Quick Form"
 			}
 		}
@@ -4639,7 +4652,7 @@
 	"builderFormSettings": "Impostazioni del modulo",
 	"urnLockedQuickFormResponses": "Bloccato: questo modulo è già utilizzato dalle risposte.",
 	"tierInHistoryCannotDelete": "Questo livello compare nella cronologia dei livelli di criticità. Nascondilo invece di eliminarlo.",
-	"noDpiaScreeningForm": "Nessun modulo di valutazione preliminare DPIA caricato. Carica la libreria Pre-DPIA screening oppure un modulo personalizzato che stabilisca se è necessaria una DPIA.",
+	"noDpiaScreeningForm": "Nessun modulo di valutazione preliminare DPIA caricato. Carica la libreria «Pre-DPIA screening» oppure un modulo personalizzato che stabilisca se è necessaria una DPIA.",
 	"verdictMappingMalformed": "Una riga non contiene un esito sì/no",
 	"dpiaScreeningForms": "Moduli di valutazione preliminare DPIA",
 	"questionAnsweredInResponses": "Questa domanda è stata compilata in alcune risposte e non può essere eliminata",
@@ -5010,9 +5023,9 @@
 	"viewRightrequest": "Visualizza richiesta di esercizio dei diritti dell'interessato",
 	"dpia": "DPIA",
 	"addDpia": "Aggiungi DPIA",
-	"dpiasDescription": "Screening preliminare e valutazioni d'impatto sulla protezione dei dati (DPIA) basati sul registro dei trattamenti. Abilita le funzionalità Moduli e Richieste, necessarie al loro funzionamento.",
+	"dpiasDescription": "Valutazione preliminare e valutazioni d'impatto sulla protezione dei dati (DPIA) basate sul registro dei trattamenti. Abilita le funzionalità Moduli e Richieste, necessarie al loro funzionamento.",
 	"reasons": "Motivazioni",
-	"dpiaReasonsHelpText": "Motivo per cui viene svolta la DPIA: criteri di screening soddisfatti, inclusione in un elenco dei trattamenti per cui è obbligatoria oppure valutazione volontaria.",
+	"dpiaReasonsHelpText": "Motivo per cui viene svolta la DPIA: criteri della valutazione preliminare soddisfatti, inclusione in un elenco dei trattamenti per cui è obbligatoria oppure valutazione volontaria.",
 	"dpiaRiskMatrixHelpText": "Crea con questa matrice una valutazione dei rischi intrinseci al trattamento e una dei rischi derivanti da incidenti. La seconda viene inizializzata con i tre eventi temuti.",
 	"scopeBoundaries": "Limiti del perimetro",
 	"necessity": "Necessità",
@@ -5064,8 +5077,8 @@
 	"dpiaRiskRegistersCreated": "Registri dei rischi creati",
 	"dpiaRiskRegistersFailed": "Impossibile creare i registri dei rischi",
 	"printReport": "Stampa",
-	"dpiaScreening": "Screening DPIA",
-	"screening": "Screening",
+	"dpiaScreening": "Valutazione preliminare DPIA",
+	"screening": "Valutazione preliminare",
 	"privacyController": "Titolare del trattamento",
 	"processingRoleHelpText": "I trattamenti svolti in qualità di titolare o contitolare rientrano nel registro di cui all'art. 30, par. 1, GDPR; quelli svolti in qualità di responsabile o sub-responsabile rientrano nel registro di cui all'art. 30, par. 2, GDPR.",
 	"processingControllersHelpText": "Contitolari con cui si condivide il trattamento oppure clienti per conto dei quali si effettua il trattamento",
@@ -5073,8 +5086,8 @@
 	"controllerRegister": "Registro dei trattamenti del titolare",
 	"processorRegister": "Registro dei trattamenti del responsabile",
 	"processingCoControllers": "Contitolari del trattamento",
-	"dpiaScreenedOn": "Screening effettuato il {date}",
-	"dpiaNotScreenedYet": "Screening non ancora effettuato",
+	"dpiaScreenedOn": "Valutazione preliminare effettuata il {date}",
+	"dpiaNotScreenedYet": "Valutazione preliminare non ancora effettuata",
 	"noDpiaForm": "Nessun modulo DPIA caricato. Carica la libreria \"Data protection impact assessment (DPIA)\" oppure un modulo personalizzato che registri la DPIA di un trattamento, per avviarla o importarla.",
 	"reviewOutcomeUnknown": "Una regola di revisione fa riferimento a una regola assente dal modulo",
 	"reviewerDecides": "È stata dichiarata un'esenzione: decide il revisore",
@@ -5082,7 +5095,7 @@
 	"verdictRequired": "Indica se è necessaria una DPIA",
 	"dpiaSetManuallyOn": "Impostato manualmente il {date}",
 	"dpiaAdjustedOn": "Modificato all'accettazione il {date}",
-	"dpiaSourceAssessment": "Screening",
+	"dpiaSourceAssessment": "Valutazione preliminare",
 	"dpiaSourceOverride": "Modificato all'accettazione",
 	"dpiaSourceManual": "Manuale",
 	"setDpiaRequirementManually": "Imposta manualmente",
@@ -5091,7 +5104,7 @@
 	"dpiaRequiredNoDpiaYet": "DPIA necessaria, non ancora avviata",
 	"dpiaRequiredDpiaStarted": "DPIA necessaria, in corso",
 	"processingsCountLabel": "{count} trattamenti",
-	"dpiaScreeningsAwaitingReview": "{count} screening in attesa di revisione",
+	"dpiaScreeningsAwaitingReview": "{count} valutazioni preliminari in attesa di revisione",
 	"dpiaNoGaps": "Per tutti i trattamenti che richiedono una DPIA ne è stata avviata una.",
 	"dpiaRequiredSince": "Necessaria dal {date}",
 	"startDpia": "Avvia DPIA",
@@ -5699,6 +5712,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} framework",
+				"countPlural=many": "{count} framework",
 				"countPlural=other": "{count} framework"
 			}
 		}
@@ -5709,6 +5723,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} minaccia",
+				"countPlural=many": "{count} minacce",
 				"countPlural=other": "{count} minacce"
 			}
 		}
@@ -5719,6 +5734,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} controllo di riferimento",
+				"countPlural=many": "{count} controlli di riferimento",
 				"countPlural=other": "{count} controlli di riferimento"
 			}
 		}
@@ -5729,6 +5745,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} matrice di rischio",
+				"countPlural=many": "{count} matrici di rischio",
 				"countPlural=other": "{count} matrici di rischio"
 			}
 		}
@@ -5739,6 +5756,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} mappatura",
+				"countPlural=many": "{count} mappature",
 				"countPlural=other": "{count} mappature"
 			}
 		}
@@ -5749,6 +5767,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} percorso predefinito",
+				"countPlural=many": "{count} percorsi predefiniti",
 				"countPlural=other": "{count} percorsi predefiniti"
 			}
 		}
@@ -5759,6 +5778,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} definizione di metrica",
+				"countPlural=many": "{count} definizioni di metriche",
 				"countPlural=other": "{count} definizioni di metriche"
 			}
 		}
@@ -5813,7 +5833,17 @@
 	"lbPresetFailedToLoadDraftShort": "Impossibile caricare la bozza.",
 	"lbPresetFailedToSaveDraft": "Impossibile salvare la bozza: {detail}",
 	"lbPresetUnknownError": "Errore sconosciuto",
-	"lbPresetDeleteStepWithObjectsConfirm": "Eliminare il passaggio «{title}» e i relativi oggetti preconfigurati (totale: {count})?",
+	"lbPresetDeleteStepWithObjectsConfirm": [
+		{
+			"declarations": ["input count", "input title", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Eliminare il passaggio «{title}»? Verrà rimosso anche {count} oggetto preconfigurato.",
+				"countPlural=many": "Eliminare il passaggio «{title}»? Verranno rimossi anche {count} oggetti preconfigurati.",
+				"countPlural=other": "Eliminare il passaggio «{title}»? Verranno rimossi anche {count} oggetti preconfigurati."
+			}
+		}
+	],
 	"lbPresetDeleteStepConfirm": "Eliminare il passaggio «{title}»?",
 	"lbPresetSelectFramework": "Seleziona un framework…",
 	"lbPresetSelectMatrix": "Seleziona una matrice…",
@@ -5885,6 +5915,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Pagina · {count} domanda",
+				"countPlural=many": "Pagina · {count} domande",
 				"countPlural=other": "Pagina · {count} domande"
 			}
 		}
