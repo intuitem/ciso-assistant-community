@@ -12539,16 +12539,14 @@ class QuickFormResponse(
         """A draft can be deleted by whoever holds it. A submitted or in-review
         request cannot: it is abandoned by dropping it, which leaves a record.
 
-        A closed request is a record and is administrator-only — the decision has
-        been made and neither the requester nor the reviewer may erase it. Without a
-        user this returns the conservative answer, which is what the UI shows when it
+        An administrator may delete any request, e.g. to clean up test answers;
+        nobody else may erase a submitted, in-review or closed one. Without a user
+        this returns the conservative answer, which is what the UI shows when it
         does not know who is asking.
         """
         if self.status == self.Status.DRAFT:
             return True
-        if self.status == self.Status.CLOSED and user is not None:
-            return user.is_admin()
-        return False
+        return user is not None and user.is_admin()
 
     class Meta:
         verbose_name = _("Quick form response")

@@ -2583,6 +2583,17 @@ class ContentTypeListView(APIView):
 # Risk Assessment
 
 
+def inactive_assessment_filter(parent: str):
+    """Yes/no on the parent assessment being a draft (no status) or deprecated,
+    as the analytics summary leaves them out."""
+
+    def method(queryset, name, value):
+        inactive = inactive_parent(parent)
+        return queryset.filter(inactive) if value else queryset.exclude(inactive)
+
+    return df.BooleanFilter(method=method, label="Draft or deprecated assessment")
+
+
 class PerimeterFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(
         queryset=Folder.objects.all(),
@@ -8333,6 +8344,7 @@ class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
+    inactive_assessment = inactive_assessment_filter("risk_assessment")
     # Multi-value level filters: the matrix levels are dynamic (no fixed choices),
     # so we validate that values are integers without constraining them to a choice set.
     current_level = IntegerInFilter(field_name="current_level", widget=QueryArrayWidget)
@@ -17893,6 +17905,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         return Response(analytics_data, status=status.HTTP_200_OK)
 
 
+class RequirementAssessmentFilterSet(GenericFilterSet):
+    inactive_assessment = inactive_assessment_filter("compliance_assessment")
+
+    class Meta(GenericFilterSet.Meta):
+        model = RequirementAssessment
+        fields = {
+            "folder": ["exact"],
+            "folder__name": ["exact"],
+            "evidences": ["exact"],
+            "compliance_assessment": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+            "requirement__urn": ["exact"],
+            "requirement__ref_id": ["exact"],
+            "result": ["exact"],
+            "extended_result": ["exact"],
+            "compliance_assessment__ref_id": ["exact"],
+            "compliance_assessment__perimeter": ["exact"],
+            "compliance_assessment__perimeter__name": ["exact"],
+            "compliance_assessment__assets__ref_id": ["exact"],
+            "requirement__assessable": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+        }
+
+
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirement assessments to be viewed or edited.
@@ -17963,25 +18001,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
-    filterset_fields = {
-        "folder": ["exact"],
-        "folder__name": ["exact"],
-        "evidences": ["exact"],
-        "compliance_assessment": ["exact"],
-        "applied_controls": ["exact"],
-        "security_exceptions": ["exact"],
-        "requirement__urn": ["exact"],
-        "requirement__ref_id": ["exact"],
-        "result": ["exact"],
-        "extended_result": ["exact"],
-        "compliance_assessment__ref_id": ["exact"],
-        "compliance_assessment__perimeter": ["exact"],
-        "compliance_assessment__perimeter__name": ["exact"],
-        "compliance_assessment__assets__ref_id": ["exact"],
-        "requirement__assessable": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-    }
+    filterset_class = RequirementAssessmentFilterSet
     search_fields = [
         "requirement__name",
         "requirement__description",
@@ -19589,6 +19609,7 @@ class FindingFilterSet(GenericFilterSet):
     requirement_assessment = NullableModelChoiceFilter(
         queryset=RequirementAssessment.objects.all()
     )
+    inactive_assessment = inactive_assessment_filter("findings_assessment")
 
     class Meta:
         model = Finding
@@ -19761,28 +19782,40 @@ class FindingViewSet(BaseModelViewSet):
         return Response({"results": {"nodes": nodes, "links": links}})
 
 
+class IncidentFilterSet(GenericFilterSet):
+    nis2_overdue = df.BooleanFilter(method="filter_nis2_overdue", label="NIS2 overdue")
+
+    def filter_nis2_overdue(self, queryset, name, value):
+        late = nis2_overdue_incidents(queryset)
+        return late if value else queryset.exclude(pk__in=late.values("pk"))
+
+    class Meta(GenericFilterSet.Meta):
+        model = Incident
+        fields = {
+            "folder": ["exact"],
+            "status": ["exact"],
+            "severity": ["exact"],
+            "qualifications": ["exact"],
+            "detection": ["exact"],
+            "owners": ["exact"],
+            "entities": ["exact"],
+            "assets": ["exact"],
+            "vulnerabilities": ["exact"],
+            "applied_controls": ["exact"],
+            "task_templates": ["exact"],
+            "risk_scenarios": ["exact"],
+            "filtering_labels": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+            "reported_at": ["exact"],
+            "nis2_significant": ["exact"],
+        }
+
+
 class IncidentViewSet(ExportMixin, BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = {
-        "folder": ["exact"],
-        "status": ["exact"],
-        "severity": ["exact"],
-        "qualifications": ["exact"],
-        "detection": ["exact"],
-        "owners": ["exact"],
-        "entities": ["exact"],
-        "assets": ["exact"],
-        "vulnerabilities": ["exact"],
-        "applied_controls": ["exact"],
-        "task_templates": ["exact"],
-        "risk_scenarios": ["exact"],
-        "filtering_labels": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-        "reported_at": ["exact"],
-        "nis2_significant": ["exact"],
-    }
+    filterset_class = IncidentFilterSet
 
     def get_queryset(self):
         return (
@@ -22826,7 +22859,7 @@ def emit_quick_form_event(response, action):
     A CUD event cannot express these: answering saves the row too. Deferred to commit.
     `quick_form_ref`/`_urn` travel with the id because a pk does not survive export.
     """
-    from automation.workflows.events import dispatch_internal_event
+    from automation.workflows.events import dispatch_named_event
 
     payload = {
         "id": str(response.id),
@@ -22848,11 +22881,7 @@ def emit_quick_form_event(response, action):
         else None,
         "decided_by": str(response.decided_by_id) if response.decided_by_id else None,
     }
-    transaction.on_commit(
-        lambda: dispatch_internal_event(
-            f"quickformresponse.{action}", payload, response.folder_id
-        )
-    )
+    dispatch_named_event(f"quickformresponse.{action}", payload, response.folder_id)
 
 
 def emit_quick_form_submitted(response):
@@ -23730,9 +23759,9 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         return qs
 
     def destroy(self, request, *args, **kwargs):
-        """Deletion is narrow by design. A draft may be deleted; a submitted or
-        in-review request may not — it is dropped, which leaves a record; a closed
-        one is administrator-only, because the decision has been made."""
+        """Deletion is narrow by design. A draft may be deleted; past that, only an
+        administrator may delete (e.g. test answers). Others drop the request, which
+        leaves a record."""
         response = self.get_object()
         if not response.is_deletable(request.user):
             return Response(

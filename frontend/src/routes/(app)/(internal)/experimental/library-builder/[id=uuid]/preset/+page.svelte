@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 	import { onMount, onDestroy } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
@@ -8,6 +9,8 @@
 	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '#lib/utils/modelTargets.js';
 	import TranslationsEditor from '../../TranslationsEditor.svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
+
+	const modalStore = getModalStore();
 
 	const toastStore = getToastStore();
 
@@ -339,10 +342,18 @@
 		draft.steps = next;
 	}
 
-	function removeStep(i: number) {
+	// The scaffolds deleting step i takes with it. They hang off the step key: while
+	// another step keeps the key, they stay with that step and only this one goes.
+	function scaffoldsGoingWith(d: Draft, i: number): Scaffold[] {
+		const key = d.steps[i].key;
+		if (d.steps.some((s, idx) => idx !== i && s.key === key)) return [];
+		return d.scaffolded_objects.filter((s) => s.step_ref_id === key);
+	}
+
+	async function removeStep(i: number) {
 		if (!draft) return;
 		const step = draft.steps[i];
-		const owned = draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
+		const owned = scaffoldsGoingWith(draft, i);
 		const msg =
 			owned.length > 0
 				? m.lbPresetDeleteStepWithObjectsConfirm({
@@ -351,13 +362,27 @@
 						s: owned.length === 1 ? '' : 's'
 					})
 				: m.lbPresetDeleteStepConfirm({ title: step.title });
-		if (!confirm(msg)) return;
-		// Drop owned scaffolds
-		const ownedRefs = new Set(owned.map((s) => s.ref).filter(Boolean));
+		if (!(await confirmModal(modalStore, msg))) return;
+		// A save may have replaced the draft while the modal was open: keep the index if it
+		// still holds this key, else fall back to the key only when it is unique.
+		if (!draft) return;
+		const matches = draft.steps.flatMap((s, idx) => (s.key === step.key ? [idx] : []));
+		const at = matches.includes(i) ? i : matches.length === 1 ? matches[0] : -1;
+		if (at < 0) return;
+		// What goes with the step may have changed meanwhile: ask again with the current list
+		// rather than delete scaffolds the warning did not name, or orphan them.
+		const ownedNow = scaffoldsGoingWith(draft, at);
+		if (JSON.stringify(ownedNow) !== JSON.stringify(owned)) return removeStep(at);
+		if (ownedNow.length === 0) {
+			draft.steps = draft.steps.filter((_, idx) => idx !== at);
+			return;
+		}
+		// Drop owned scaffolds: the key is this step's alone, so they are all of its scaffolds.
+		const ownedRefs = new Set(ownedNow.map((s) => s.ref).filter(Boolean));
 		draft.scaffolded_objects = draft.scaffolded_objects.filter((s) => s.step_ref_id !== step.key);
 		// Clear target_ref on any step that focused on a deleted scaffold
 		draft.steps = draft.steps
-			.filter((_, idx) => idx !== i)
+			.filter((_, idx) => idx !== at)
 			.map((s) => (s.target_ref && ownedRefs.has(s.target_ref) ? { ...s, target_ref: null } : s));
 	}
 

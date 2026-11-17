@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import { LOCALE_MAP, language } from '#lib/utils/locales.js';
+
+	const modalStore = getModalStore();
 
 	interface Field {
 		key: string;
@@ -80,8 +83,10 @@
 				<button
 					type="button"
 					class="text-surface-400 hover:text-red-500 transition-colors"
-					onclick={() => {
-						if (confirm(m.removeLanguageConfirm({ lang: localeLabel(code) }))) {
+					onclick={async () => {
+						if (
+							await confirmModal(modalStore, m.removeLanguageConfirm({ lang: localeLabel(code) }))
+						) {
 							removeLanguage(code);
 						}
 					}}

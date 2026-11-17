@@ -50,7 +50,6 @@
 >
 	{#key data.activeVersion.id + data.activeVersion.status + canvasEpoch}
 		<WorkflowCanvas
-			workflowName={data.workflow.name}
 			workflowDescription={data.workflow.description}
 			initialVersionNumber={data.activeVersion.version_number}
 			graph={data.graph}

@@ -548,6 +548,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Wraps AuditlogMiddleware: see its docstring.
+    "automation.workflows.middleware.InlineWorkflowRunsMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "core.focus_middleware.FocusModeMiddleware",
