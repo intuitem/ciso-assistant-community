@@ -342,15 +342,18 @@
 		draft.steps = next;
 	}
 
+	// The scaffolds deleting step i takes with it. They hang off the step key: while
+	// another step keeps the key, they stay with that step and only this one goes.
+	function scaffoldsGoingWith(d: Draft, i: number): Scaffold[] {
+		const key = d.steps[i].key;
+		if (d.steps.some((s, idx) => idx !== i && s.key === key)) return [];
+		return d.scaffolded_objects.filter((s) => s.step_ref_id === key);
+	}
+
 	async function removeStep(i: number) {
 		if (!draft) return;
 		const step = draft.steps[i];
-		// Scaffolds hang off the step key: while another step keeps the key, they stay
-		// with that step and only this one goes.
-		const keyShared = draft.steps.some((s, idx) => idx !== i && s.key === step.key);
-		const owned = keyShared
-			? []
-			: draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
+		const owned = scaffoldsGoingWith(draft, i);
 		const msg =
 			owned.length > 0
 				? m.lbPresetDeleteStepWithObjectsConfirm({
@@ -366,18 +369,16 @@
 		const matches = draft.steps.flatMap((s, idx) => (s.key === step.key ? [idx] : []));
 		const at = matches.includes(i) ? i : matches.length === 1 ? matches[0] : -1;
 		if (at < 0) return;
-		// The warning named no scaffolds, or the key is still in use: keep them.
-		if (keyShared || matches.length > 1) {
+		// What goes with the step may have changed meanwhile: ask again with the current list
+		// rather than delete scaffolds the warning did not name, or orphan them.
+		const ownedNow = scaffoldsGoingWith(draft, at);
+		if (JSON.stringify(ownedNow) !== JSON.stringify(owned)) return removeStep(at);
+		if (ownedNow.length === 0) {
 			draft.steps = draft.steps.filter((_, idx) => idx !== at);
 			return;
 		}
-		// Drop owned scaffolds
-		const ownedRefs = new Set(
-			draft.scaffolded_objects
-				.filter((s) => s.step_ref_id === step.key)
-				.map((s) => s.ref)
-				.filter(Boolean)
-		);
+		// Drop owned scaffolds: the key is this step's alone, so they are all of its scaffolds.
+		const ownedRefs = new Set(ownedNow.map((s) => s.ref).filter(Boolean));
 		draft.scaffolded_objects = draft.scaffolded_objects.filter((s) => s.step_ref_id !== step.key);
 		// Clear target_ref on any step that focused on a deleted scaffold
 		draft.steps = draft.steps
