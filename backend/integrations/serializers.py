@@ -25,7 +25,7 @@ class IntegrationProviderSerializer(serializers.ModelSerializer):
 
 # Write-only credential keys that are kept from the stored row when a save
 # omits them (the edit form hides a secret once it is set).
-SECRET_CREDENTIAL_KEYS = ("api_token", "password")
+SECRET_CREDENTIAL_KEYS = ("api_token", "password", "client_secret")
 
 
 class ConnectionTestSerializer(serializers.Serializer):
@@ -181,7 +181,7 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
     def get_has_api_token(self, obj: IntegrationConfiguration) -> bool:
         return bool(
             obj.credentials
-            and (obj.credentials.get("api_token") or obj.credentials.get("password"))
+            and any(obj.credentials.get(key) for key in SECRET_CREDENTIAL_KEYS)
         )
 
     def get_has_webhook_secret(self, obj: IntegrationConfiguration) -> bool:
@@ -217,10 +217,10 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
         # Get the default representation
         ret = super().to_representation(instance)
 
-        # Never expose the full credentials, especially the API token, in GET responses.
+        # Never expose stored secrets in GET responses.
         if "credentials" in ret and isinstance(ret["credentials"], dict):
-            ret["credentials"].pop("api_token", None)  # Remove api_token if it exists
-            ret["credentials"].pop("password", None)  # Remove password if it exists
+            for key in SECRET_CREDENTIAL_KEYS:
+                ret["credentials"].pop(key, None)
 
         return ret
 
