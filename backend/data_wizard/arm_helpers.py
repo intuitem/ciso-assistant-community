@@ -8,10 +8,13 @@ Supports both French and English ARM exports with variant sheet/column names.
 """
 
 import logging
+import re
 import unicodedata
 from io import BytesIO
+from pathlib import PurePosixPath
+from zipfile import BadZipFile, ZipFile
 
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,7 @@ logger = logging.getLogger(__name__)
 SHEET_VARIANTS = {
     # Workshop 1 - Scope & Security Baseline
     "business_values": [
+        "1 - Base de valeurs métier - p",
         "1 - Base de valeurs métier",
         "1 - Valeurs métier",
         "1 - Business values",
@@ -40,6 +44,7 @@ SHEET_VARIANTS = {
         "1 - Feared events",
     ],
     "supporting_assets": [
+        "1 - Base de biens supports - p",
         "1 - Biens supports",
         "1 - Supporting assets",
     ],
@@ -53,6 +58,7 @@ SHEET_VARIANTS = {
         "1 - Mesures complémentaires",
         "1 - Complementary measures",
         "1 - Applied controls",
+        "1 - Mesures de sécurité isolée",
     ],
     # Workshop 2 - Risk Origins
     "roto_couples": [
@@ -65,15 +71,18 @@ SHEET_VARIANTS = {
     # Workshop 3 - Stakeholders & Strategic Scenarios
     "stakeholder_categories": [
         "3 - Catégories de partie prena",
+        "3 - Base de catégories de part",
         "3 - Stakeholder types",
     ],
     "stakeholders": [
         "3 - Base de parties prenantes",
+        "3 - Base des parties prenantes",
         "3 - Parties prenantes",
         "3 - Stakeholders",
     ],
     "stakeholder_danger_levels": [
         "3 - Niveau de danger des parti",
+        "3 - Menace des parties prenant",
         "3 - Stakeholders danger level",
     ],
     "strategic_scenarios": [
@@ -83,6 +92,7 @@ SHEET_VARIANTS = {
     # Workshop 4 - Operational Scenarios
     "elementary_actions": [
         "4 - Actions élémentaires",
+        "4 - Base d'actions élémentaire",
         "4 - Elementary actions",
     ],
 }
@@ -95,6 +105,7 @@ COLUMN_VARIANTS = {
     "ref_id": ["Réf.", "Ref.", "Ref", "Reference"],
     "abbreviation": ["Abrév.", "Abbrev.", "Abbreviation"],
     "justification": ["Justification"],
+    "status": ["Statut", "Status"],
     "selected_check": ["✓/❒", "✓", "Selected"],
     # Workshop 1
     "mission": ["Mission"],
@@ -109,6 +120,7 @@ COLUMN_VARIANTS = {
     "supporting_assets": ["Biens supports", "Supporting assets"],
     "parent_asset": ["Bien support parent", "Parent supporting asset", "Parent asset"],
     "feared_event": ["Évènement redouté", "Feared event"],
+    "feared_events": ["Évènements redoutés", "Feared events"],
     "retained_gravity": [
         "Gravité retenue",
         "Retained gravity",
@@ -210,6 +222,16 @@ MEASURE_SHEET_SIGNATURE = [
 ]
 
 
+CONTROL_STATUS = {
+    "implementee": "active",
+    "implemented": "active",
+    "en cours": "in_progress",
+    "in progress": "in_progress",
+    "a demarrer": "to_do",
+    "to start": "to_do",
+}
+
+
 def find_measure_sheets(workbook) -> list[str]:
     """Return workshop 1 sheet names holding security measures."""
     sheet, sheet_name = find_sheet(workbook, "complementary_measures")
@@ -229,6 +251,122 @@ def find_measure_sheets(workbook) -> list[str]:
 
     logger.info(f"[ARM] Detected security measure sheets: {matches}")
     return matches
+
+
+# Per-table ARM exports put each table alone in a "Sheet1" workbook, so the
+# table is identified from its header labels. First match wins.
+TABLE_SIGNATURES = [
+    (
+        "strategic_scenarios",
+        [("source de risque", "risk origin"), ("chemin d'attaque", "attack path")],
+    ),
+    (
+        "roto_couples",
+        [
+            ("source de risque", "risk origin"),
+            ("objectif vise", "target objective"),
+            ("motivation",),
+        ],
+    ),
+    (
+        "feared_events",
+        [
+            ("evenement redoute", "feared event"),
+            ("gravite retenue", "retained gravity", "retained severity"),
+        ],
+    ),
+    (
+        "stakeholder_danger_levels",
+        [
+            ("partie prenante", "stakeholder"),
+            ("dependance", "dependence", "dependency"),
+        ],
+    ),
+    ("stakeholders", [("nom", "name"), ("sources de risque", "risk origins")]),
+    (
+        "supporting_assets",
+        [
+            ("nom", "name"),
+            ("bien support parent", "parent supporting asset", "parent asset"),
+        ],
+    ),
+    ("elementary_actions", [("nom", "name"), ("vulnerabilites",)]),
+    ("business_values", [("nom", "name"), ("nature",), ("criteres de securite",)]),
+    (
+        "complementary_measures",
+        [("ref.", "ref"), ("nom", "name"), ("mesures de securite associees",)],
+    ),
+]
+
+MAX_ARCHIVE_SIZE = 50 * 1024 * 1024
+
+
+class ARMArchiveError(Exception):
+    pass
+
+
+def identify_table(sheet) -> str | None:
+    headers = {
+        normalize_label(cell.value)
+        for row in sheet.iter_rows(max_row=2)
+        for cell in row
+    }
+    for key, signature in TABLE_SIGNATURES:
+        if all(any(label in headers for label in group) for group in signature):
+            return key
+    return None
+
+
+def is_xlsx(file_content: bytes) -> bool:
+    try:
+        with ZipFile(BytesIO(file_content)) as archive:
+            return "[Content_Types].xml" in archive.namelist()
+    except BadZipFile:
+        return False
+
+
+def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
+    """Merge a zip of per-table ARM exports into one workbook named like a full export."""
+    workbook = Workbook()
+    workbook.remove(workbook.active)
+    unrecognized = []
+    try:
+        archive = ZipFile(BytesIO(file_content))
+    except BadZipFile as e:
+        raise ARMArchiveError("Not a zip archive") from e
+    with archive:
+        members = [
+            m
+            for m in archive.infolist()
+            if not m.is_dir()
+            and m.filename.lower().endswith(".xlsx")
+            and not PurePosixPath(m.filename).name.startswith(("._", "~$"))
+        ]
+        if sum(m.file_size for m in members) > MAX_ARCHIVE_SIZE:
+            raise ARMArchiveError("Archive is too large")
+        for member in members:
+            file_name = PurePosixPath(member.filename).name
+            try:
+                sheet = load_workbook(
+                    BytesIO(archive.read(member)), data_only=True
+                ).active
+            except Exception as e:
+                logger.warning(f"[ARM] Could not read {file_name}", exc_info=e)
+                unrecognized.append(file_name)
+                continue
+            key = identify_table(sheet)
+            if key is None:
+                unrecognized.append(file_name)
+                continue
+            rows = list(sheet.iter_rows(values_only=True))
+            target_name = SHEET_VARIANTS[key][0]
+            if target_name in workbook.sheetnames:
+                target, rows = workbook[target_name], rows[2:]
+            else:
+                target = workbook.create_sheet(target_name)
+            for row in rows:
+                target.append(row or [None])
+    return workbook, unrecognized
 
 
 def get_col(row: dict, col_key: str, default=None):
@@ -457,6 +595,25 @@ def extract_missions(workbook) -> str:
     return "\n".join(missions)
 
 
+MAX_NAME_LENGTH = 200
+
+
+def asset_entry(row, asset_type: str) -> dict:
+    name = get_col(row, "name").strip()
+    description = (get_col(row, "description") or "").strip()
+    if len(name) > MAX_NAME_LENGTH:
+        description = f"{name}\n\n{description}".strip()
+    return {
+        "name": name[:MAX_NAME_LENGTH],
+        "description": description,
+        "type": asset_type,
+    }
+
+
+def asset_names(text) -> list[str]:
+    return [name[:MAX_NAME_LENGTH] for name in parse_bullet_list(text or "")]
+
+
 def extract_primary_assets(workbook) -> list[dict]:
     """Extract primary assets from business values sheet."""
     assets = []
@@ -466,11 +623,9 @@ def extract_primary_assets(workbook) -> list[dict]:
             continue
         assets.append(
             {
-                "name": name.strip(),
-                "description": (get_col(row, "description") or "").strip(),
-                "type": "PR",
-                "supporting_asset_names": parse_bullet_list(
-                    get_col(row, "supporting_assets") or ""
+                **asset_entry(row, "PR"),
+                "supporting_asset_names": asset_names(
+                    get_col(row, "supporting_assets")
                 ),
             }
         )
@@ -484,42 +639,49 @@ def extract_supporting_assets(workbook) -> list[dict]:
         name = get_col(row, "name")
         if not name:
             continue
-        parent_name = (get_col(row, "parent_asset") or "").strip()
-        assets.append(
-            {
-                "name": name.strip(),
-                "description": (get_col(row, "description") or "").strip(),
-                "type": "SP",
-                "parent_name": parent_name if parent_name else None,
-            }
-        )
+        parent_name = (get_col(row, "parent_asset") or "").strip()[:MAX_NAME_LENGTH]
+        assets.append({**asset_entry(row, "SP"), "parent_name": parent_name or None})
     return assets
 
 
 def extract_feared_events(workbook, gravity_mapping: dict[str, int]) -> list[dict]:
     """Extract feared events from feared events sheet."""
-    feared_events = []
+    feared_events = {}
     for row in get_sheet_rows(workbook, "feared_events"):
         name = get_col(row, "feared_event")
-        if not name:
+        if not name or normalize_label(name) in ("na", "n/a"):
             continue
 
         gravity_text = get_col(row, "retained_gravity") or ""
         gravity = gravity_mapping.get(gravity_text.lower().strip(), -1)
-        asset_names = parse_bullet_list(get_col(row, "business_values") or "")
+        level = re.match(r"[gG](\d+)\b", gravity_text.strip())
+        if gravity == -1 and level:
+            gravity = int(level.group(1)) - 1
         selected_value = get_col(row, "selected_check") or ""
         is_selected = "✔" in str(selected_value) or "✓" in str(selected_value)
+        justification = (get_col(row, "impacts") or "").strip()
 
-        feared_events.append(
+        # ARM repeats a feared event once per business value it affects
+        event = feared_events.setdefault(
+            normalize_label(name),
             {
                 "name": name.strip(),
-                "justification": (get_col(row, "impacts") or "").strip(),
+                "justification": justification,
                 "gravity": gravity,
-                "asset_names": asset_names,
+                "asset_names": [],
                 "is_selected": is_selected,
-            }
+            },
         )
-    return feared_events
+        event["gravity"] = max(event["gravity"], gravity)
+        event["is_selected"] = event["is_selected"] or is_selected
+        if justification and justification not in event["justification"]:
+            event["justification"] = (
+                f"{event['justification']}\n{justification}".strip()
+            )
+        for asset_name in asset_names(get_col(row, "business_values")):
+            if asset_name not in event["asset_names"]:
+                event["asset_names"].append(asset_name)
+    return list(feared_events.values())
 
 
 def extract_applied_controls(workbook) -> list[dict]:
@@ -537,6 +699,9 @@ def extract_applied_controls(workbook) -> list[dict]:
                     "name": name.strip(),
                     "description": (get_col(row, "description") or "").strip(),
                     "ref_id": (get_col(row, "ref_id") or "").strip(),
+                    "status": CONTROL_STATUS.get(
+                        normalize_label(get_col(row, "status"))
+                    ),
                 }
             )
     return controls
@@ -555,8 +720,7 @@ def get_roto_sheet_data(workbook) -> list[dict]:
 
     logger.info(f"[RoTo] Sheet '{sheet_name}' found, dimensions: {sheet.dimensions}")
 
-    # RoTo sheet uses row 2 sub-headers (row 1 has merged headers)
-    sub_headers = [cell.value for cell in sheet[2]]
+    sub_headers = [sub.value or top.value for top, sub in zip(sheet[1], sheet[2])]
     logger.info(f"[RoTo] Sub-headers: {sub_headers}")
 
     rows = []
@@ -573,12 +737,48 @@ def get_roto_sheet_data(workbook) -> list[dict]:
     return rows
 
 
+ANSSI_COTATION = {
+    "motivation": ["Très peu motivé", "Peu motivé", "Assez motivé", "Fortement motivé"],
+    "resources": ["Limitées", "Significatives", "Importantes", "Illimitées"],
+}
+
+COTATION_SCALES = {
+    "motivation": ["2 - Échelle de motivation"],
+    "resources": ["2 - Échelle des ressources"],
+    "activity": ["2 - Échelle d'activité"],
+}
+
+
+def build_cotation_mapping(workbook, col_key: str) -> dict[str, int]:
+    mapping = {}
+    for name in COTATION_SCALES[col_key]:
+        if name not in workbook.sheetnames:
+            continue
+        for row in get_sheet_data(workbook, name):
+            level, label = get_col(row, "level"), get_col(row, "name")
+            if label and str(level).isdigit():
+                mapping[normalize_label(label)] = int(level)
+    if not mapping:
+        mapping = {
+            normalize_label(label): level
+            for level, label in enumerate(ANSSI_COTATION.get(col_key, []), start=1)
+        }
+    return mapping
+
+
 def extract_roto_couples(workbook) -> list[dict]:
     """Extract RoTo (Risk Origin / Target Objective) couples from ARM file."""
     rows = get_roto_sheet_data(workbook)
+    scales = {key: build_cotation_mapping(workbook, key) for key in COTATION_SCALES}
+
+    def cotation(row, key):
+        text = get_col(row, key) or ""
+        return scales[key].get(normalize_label(text)) or parse_plus_signs(text)
+
     logger.info(f"[RoTo Extract] get_roto_sheet_data returned {len(rows)} rows")
 
     roto_couples = []
+    seen = {}
     for row_idx, row in enumerate(rows):
         logger.debug(f"[RoTo Extract] Row {row_idx}: keys={list(row.keys())}")
 
@@ -591,9 +791,11 @@ def extract_roto_couples(workbook) -> list[dict]:
             )
             continue
 
-        motivation = parse_plus_signs(get_col(row, "motivation") or "")
-        resources = parse_plus_signs(get_col(row, "resources") or "")
-        activity = parse_plus_signs(get_col(row, "activity") or "")
+        feared_events = parse_bullet_list(get_col(row, "feared_events") or "")
+        key = (normalize_label(risk_origin), normalize_label(target_objective))
+        if key in seen:
+            seen[key]["feared_event_names"] += feared_events
+            continue
 
         retenu = get_col(row, "retained") or ""
         is_selected = "✔" in str(retenu) or "✓" in str(retenu)
@@ -602,13 +804,15 @@ def extract_roto_couples(workbook) -> list[dict]:
             {
                 "risk_origin": risk_origin.strip(),
                 "target_objective": target_objective.strip(),
-                "motivation": motivation,
-                "resources": resources,
-                "activity": activity,
+                "motivation": cotation(row, "motivation"),
+                "resources": cotation(row, "resources"),
+                "activity": cotation(row, "activity"),
                 "is_selected": is_selected,
                 "justification": (get_col(row, "justification") or "").strip(),
+                "feared_event_names": feared_events,
             }
         )
+        seen[key] = roto_couples[-1]
         logger.debug(
             f"[RoTo Extract] Row {row_idx}: ADDED '{risk_origin.strip()}' - '{target_objective.strip()}'"
         )
@@ -648,6 +852,14 @@ def get_stakeholder_danger_data(workbook) -> dict[str, dict]:
 
     sub_headers = [cell.value for cell in sheet[2]]
     header_to_col = {h.strip(): i for i, h in enumerate(sub_headers) if h}
+    category_col = next(
+        (
+            i
+            for i, cell in enumerate(sheet[1])
+            if normalize_label(cell.value) in ("categorie", "category")
+        ),
+        None,
+    )
 
     # Column name variants for stakeholder name
     stakeholder_col_variants = ["Partie prenante", "Stakeholder", "Name"]
@@ -670,7 +882,14 @@ def get_stakeholder_danger_data(workbook) -> dict[str, dict]:
         if not stakeholder_name:
             continue
 
-        assessment = {"dependency": 0, "penetration": 0, "maturity": 1, "trust": 1}
+        assessment = {
+            "dependency": 0,
+            "penetration": 0,
+            "maturity": 1,
+            "trust": 1,
+            "name": stakeholder_name.strip(),
+            "category": row_values[category_col] if category_col is not None else "",
+        }
 
         # Extract assessment values (check FR and EN header variants)
         for header, col_idx in header_to_col.items():
@@ -700,8 +919,15 @@ def extract_stakeholders(workbook) -> list[dict]:
     """Extract stakeholders (entities) from ARM file."""
     danger_data = get_stakeholder_danger_data(workbook)
 
+    rows = get_sheet_rows(workbook, "stakeholders")
+    if find_sheet(workbook, "stakeholders")[0] is None:
+        rows = [
+            {"Nom": d["name"], "Catégorie": d["category"], "✓/❒": "✔"}
+            for d in danger_data.values()
+        ]
+
     stakeholders = []
-    for row in get_sheet_rows(workbook, "stakeholders"):
+    for row in rows:
         name = get_col(row, "name")
         if not name:
             continue
@@ -714,6 +940,8 @@ def extract_stakeholders(workbook) -> list[dict]:
         risk_origins = parse_bullet_list(get_col(row, "risk_origins") or "")
         selected_value = get_col(row, "selected_check") or ""
         is_selected = "✔" in str(selected_value) or "✓" in str(selected_value)
+        if not is_selected:
+            continue
 
         stakeholders.append(
             {
@@ -795,8 +1023,14 @@ def extract_strategic_scenarios(workbook) -> list[dict]:
                 else None
             )
 
+        attack_path = {
+            "name": (str(get_val(attack_path_name_col) or "")).strip(),
+            "ref_id": (str(get_val(attack_path_ref_col) or "")).strip(),
+        }
         scenario_name = get_val(scenario_name_col)
         if not scenario_name:
+            if scenarios and attack_path["name"]:
+                scenarios[-1]["attack_paths"].append(attack_path)
             continue
 
         scenarios.append(
@@ -805,8 +1039,7 @@ def extract_strategic_scenarios(workbook) -> list[dict]:
                 "ref_id": (str(get_val(scenario_ref_col) or "")).strip(),
                 "risk_origin": (str(get_val(risk_origin_col) or "")).strip(),
                 "target_objective": (str(get_val(target_objective_col) or "")).strip(),
-                "attack_path_ref_id": (str(get_val(attack_path_ref_col) or "")).strip(),
-                "attack_path_name": (str(get_val(attack_path_name_col) or "")).strip(),
+                "attack_paths": [attack_path] if attack_path["name"] else [],
             }
         )
 
@@ -852,7 +1085,13 @@ def process_arm_file(file_content: bytes) -> dict:
     Returns:
         Dictionary with extracted data organized by type
     """
-    workbook = load_workbook(BytesIO(file_content), data_only=True)
+    if is_xlsx(file_content):
+        workbook, unrecognized = (
+            load_workbook(BytesIO(file_content), data_only=True),
+            [],
+        )
+    else:
+        workbook, unrecognized = workbook_from_archive(file_content)
 
     # Build gravity mapping first (needed for feared events)
     gravity_mapping = build_gravity_scale_mapping(workbook)
@@ -881,6 +1120,7 @@ def process_arm_file(file_content: bytes) -> dict:
     # Extract Workshop 4 data
     result["elementary_actions"] = extract_elementary_actions(workbook)
 
+    result["unrecognized_files"] = unrecognized
     result["missing_sheets"] = [
         key
         for key in SHEET_VARIANTS

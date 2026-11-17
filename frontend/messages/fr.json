@@ -2427,7 +2427,7 @@
 	"ebiosRM": "EBIOS RM",
 	"ebiosRMStudies": "Études EBIOS RM",
 	"ebiosRMStudyARM": "Étude EBIOS RM (format ARM)",
-	"ebiosRMStudyARMDescription": "Importer une étude EBIOS RM depuis un fichier Excel au format ARM.\n Notez qu'il s'agit d'un format propriétaire, que tous les objets EBIOS ne sont pas compatibles et certains imports peuvent être incomplets à cause d'entêtes ou onglets manquants.",
+	"ebiosRMStudyARMDescription": "Importer une étude EBIOS RM depuis un fichier Excel au format ARM : l'export complet de l'étude, ou un zip des exports par tableau.\n Notez qu'il s'agit d'un format propriétaire, que tous les objets EBIOS ne sont pas compatibles et certains imports peuvent être incomplets à cause d'entêtes ou onglets manquants.",
 	"ebiosRMStudyExcel": "Étude EBIOS RM (format CISO Assistant)",
 	"ebiosRMStudyExcelDescription": "Importer une étude EBIOS RM depuis un export Excel CISO Assistant. Cela permet de partager des études entre différentes instances ou de restaurer des études précédemment exportées.",
 	"ebiosRMStudyEgerieXML": "Étude EBIOS RM (format XML Egerie)",
