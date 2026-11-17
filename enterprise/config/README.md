@@ -47,8 +47,8 @@ Once complete, a `docker-compose.yml` file is automatically generated.
 | Question | Trial / local test | Production |
 | --- | --- | --- |
 | Deployment mode | `local` | `VM/Remote` |
-| Internet-facing host (ACME) | No | Yes if the server is publicly reachable under its domain, otherwise No |
-| Custom certificates | No (self-signed, the browser shows a warning) | Yes if your organization provides a certificate for the domain |
+| Internet-facing host (ACME) | No | Yes if the server is publicly reachable under its domain and you want Let's Encrypt, otherwise No |
+| Custom certificates | No (self-signed, the browser shows a warning) | Yes if your organization provides a certificate for the domain (only asked when ACME is No) |
 | FQDN/hostname | `localhost` | The domain users will type, e.g. `grc.company.com` |
 | Port | `8443` | `8443`, or `443` if nothing else listens on it |
 | Database | `sqlite` | `sqlite` for a small team, `postgresql` for a larger one |
@@ -60,7 +60,7 @@ Once complete, a `docker-compose.yml` file is automatically generated.
 Some tips:
 
 - **Use a domain name, not an IP address.** With an IP, browsers don't send the server name during the TLS handshake and the proxy can't serve the certificate. If you have no DNS entry yet, add one to each client's `/etc/hosts` (or `C:\Windows\System32\drivers\etc\hosts`).
-- **Let's Encrypt (ACME)** only works if the server is publicly reachable under that domain. With Caddy, use port `443` so the challenge can succeed. For an internal server, answer No and provide your company certificate, or keep the self-signed one.
+- **Let's Encrypt (ACME)** only works if the server is publicly reachable under that domain. With Caddy, use port `443` so the challenge can succeed. To use your company certificate, answer No to this question, then Yes to custom certificates. For an internal server, do the same or keep the self-signed one.
 - **Custom certificate paths** are relative to `enterprise/config`. The certificate file should contain the full chain (server certificate followed by intermediates).
 - **SQLite** is a good choice in production for a small team, or if you are not comfortable administering PostgreSQL: the whole database is a file in `db/`, backed up by copying that folder with the application stopped. Choose **PostgreSQL** for many concurrent users or if your team already operates it, and change its default password.
 - **Email** is needed for password reset links, invitations and notifications. The default `host.docker.internal:1025` only targets a local test mailer: replace it with your SMTP server (usually port `587` with TLS).
@@ -174,4 +174,4 @@ Database migrations are applied automatically on restart.
 | ----------------------- | ----------------------------------------------------------------------------- |
 | Application won't start | Run `docker compose logs backend` to check errors                             |
 | License error           | Check `LICENSE_SEATS` and `LICENSE_EXPIRATION` values in `docker-compose.yml` |
-| Backend can't reach memcached | Check `docker compose logs memcached`; the `memcached_socket` volume must be shared by `backend` and `huey` |
+| Login fails with HTTP 429 despite correct credentials | Memcached is unreachable, and logins are refused until it is back. Check `docker compose logs memcached`; the `memcached_socket` volume must be shared by `backend` and `huey` |
