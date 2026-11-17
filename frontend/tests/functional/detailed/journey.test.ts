@@ -181,8 +181,8 @@ test.describe('Journeys', () => {
 			const row = page.locator('tr').filter({ hasText: PRESET_NAME }).first();
 			const exists = await row.isVisible({ timeout: 3_000 }).catch(() => false);
 			if (exists) {
-				page.once('dialog', (dialog) => dialog.accept());
 				await row.getByRole('button', { name: /delete draft/i }).click();
+				await page.getByTestId('modal').getByRole('button', { name: 'Confirm' }).click();
 				await expect(page.locator('tr').filter({ hasText: PRESET_NAME })).not.toBeVisible({
 					timeout: 5_000
 				});

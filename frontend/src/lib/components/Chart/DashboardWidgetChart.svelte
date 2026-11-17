@@ -318,6 +318,7 @@
 		const baseXAxis = {
 			type: 'time',
 			axisLabel: {
+				hideOverlap: true,
 				formatter: function (value: number) {
 					return new Date(value).toLocaleDateString();
 				},

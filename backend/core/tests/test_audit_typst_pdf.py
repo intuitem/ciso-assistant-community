@@ -1,9 +1,11 @@
 """Smoke + redaction tests for the Typst audit posture PDF."""
 
+from io import BytesIO
+
 from django.urls import reverse
 from rest_framework import status
 
-import pymupdf
+from pypdf import PdfReader
 import pytest
 
 from core.generators import audit_context_for_typst, gen_audit_context
@@ -56,9 +58,9 @@ def _render(audit_obj, role, profile="full", lang="en"):
 def test_renders_a_pdf_for_the_auditor(audit):
     pdf, _ = _render(audit, "auditor")
     assert pdf[:5] == b"%PDF-", "output is not a PDF"
-    doc = pymupdf.open(stream=pdf, filetype="pdf")
-    assert doc.page_count >= 2
-    assert audit.name in doc[0].get_text()
+    doc = PdfReader(BytesIO(pdf)).pages
+    assert len(doc) >= 2
+    assert audit.name in doc[0].extract_text()
 
 
 @pytest.mark.django_db
@@ -78,7 +80,7 @@ def test_respondent_pdf_text_has_no_auditor_only_values(audit):
         req.save()
 
     pdf, payload = _render(audit, "respondent")
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "canary-observation" in text, "sanity: visible content must be rendered"
     if "status" in set(payload["hidden_fields"]):
         assert "Progress:" not in text
@@ -114,7 +116,7 @@ def test_attestation_profile_renders_and_drops_measurement(audit):
     pdf, payload = _render(audit, "auditor", profile="attestation")
     assert pdf[:5] == b"%PDF-"
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Signatures" in text, "attestation must carry a signature block"
 
     # Dropped by the profile even though the reader is an auditor: the values must
@@ -288,7 +290,7 @@ def test_long_observations_are_not_silently_dropped(audit):
         ra.save()
 
     pdf, _ = _render(audit, "auditor", profile="attestation")
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert text.count(marker) >= 1, "the end of a long observation was clipped"
 
 
@@ -323,11 +325,11 @@ def test_locale_templates_do_not_drift(audit):
     en_pdf, _ = _render(audit, "auditor", profile="attestation", lang="en")
     fr_pdf, _ = _render(audit, "auditor", profile="attestation", lang="fr")
 
-    en_doc = pymupdf.open(stream=en_pdf, filetype="pdf")
-    fr_doc = pymupdf.open(stream=fr_pdf, filetype="pdf")
-    assert en_doc.page_count == fr_doc.page_count
+    en_doc = PdfReader(BytesIO(en_pdf)).pages
+    fr_doc = PdfReader(BytesIO(fr_pdf)).pages
+    assert len(en_doc) == len(fr_doc)
 
-    fr_text = "".join(page.get_text() for page in fr_doc)
+    fr_text = "".join(page.extract_text() for page in fr_doc)
     for english_only in ("Detailed results", "Signatures", "Assessed entity"):
         if english_only == "Signatures":
             continue  # spelled the same in French
@@ -353,11 +355,11 @@ def test_turkish_template_does_not_drift_from_english(audit):
     en_pdf, _ = _render(audit, "auditor", profile="attestation", lang="en")
     tr_pdf, _ = _render(audit, "auditor", profile="attestation", lang="tr")
 
-    en_doc = pymupdf.open(stream=en_pdf, filetype="pdf")
-    tr_doc = pymupdf.open(stream=tr_pdf, filetype="pdf")
-    assert en_doc.page_count == tr_doc.page_count
+    en_doc = PdfReader(BytesIO(en_pdf)).pages
+    tr_doc = PdfReader(BytesIO(tr_pdf)).pages
+    assert len(en_doc) == len(tr_doc)
 
-    tr_text = "".join(page.get_text() for page in tr_doc)
+    tr_text = "".join(page.extract_text() for page in tr_doc)
     for english_only in ("Detailed results", "Assessed entity", "Signatures"):
         assert english_only not in tr_text, (
             "the Turkish template still has English chrome"
@@ -382,7 +384,7 @@ def test_turkish_requirement_status_values_are_localised(audit):
     assert statuses == {"Devam ediyor"}
 
     pdf = render_pdf(localized_template("audit_report", "tr"), payload, images=images)
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Devam ediyor" in text
     assert "In progress" not in text, "status fell back to English"
 
@@ -402,7 +404,7 @@ def test_french_result_badges_are_singular(audit):
         ra.save()
 
     pdf, _ = _render(audit, "auditor", profile="attestation", lang="fr")
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Conforme" in text
     assert "Conformes" not in text, "badge picked up the plural aggregate label"
 
@@ -426,7 +428,7 @@ def test_charts_are_not_rendered_when_the_profile_drops_them(audit):
 def test_cover_carries_generation_timestamp_and_document_id(audit):
     pdf, payload = _render(audit, "auditor", profile="attestation")
     assert payload["generated_at"], "traceability needs a full timestamp"
-    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert str(audit.id) in text, "the audit uuid identifies the render"
 
 
@@ -478,12 +480,12 @@ def test_posture_pdf_uses_the_custom_override(admin_client, audit):
     url = reverse("compliance-assessments-posture-pdf", kwargs={"pk": str(audit.pk)})
 
     attestation = admin_client.get(url, {"profile": "attestation"})
-    text = pymupdf.open(stream=attestation.content, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(attestation.content)).pages[0].extract_text()
     assert "custom-override-marker" in text
     assert audit.name in text
 
     full = admin_client.get(url)
-    text = pymupdf.open(stream=full.content, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(full.content)).pages[0].extract_text()
     assert "custom-override-marker" not in text, "override leaked to another profile"
 
 
@@ -496,8 +498,8 @@ def test_broken_override_falls_back_to_the_default(admin_client, audit):
 
     response = admin_client.get(url)
     assert response.status_code == status.HTTP_200_OK
-    doc = pymupdf.open(stream=response.content, filetype="pdf")
-    assert doc.page_count >= 2
+    doc = PdfReader(BytesIO(response.content)).pages
+    assert len(doc) >= 2
 
 
 def test_override_compile_is_killed_past_the_timeout(monkeypatch):
