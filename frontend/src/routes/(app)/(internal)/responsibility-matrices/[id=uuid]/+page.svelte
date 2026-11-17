@@ -1084,7 +1084,8 @@
 	.picker-icon {
 		display: grid;
 		place-items: center;
-		padding: 0 0.65rem;
+		width: 2.25rem;
+		flex-shrink: 0;
 		color: var(--color-surface-500);
 		font-size: 0.85rem;
 	}
@@ -1093,9 +1094,13 @@
 		min-width: 0;
 		font-size: 0.85rem;
 	}
-	.picker-select :global(.multiselect) {
-		border: 0;
-		background: transparent;
+	/* AutocompleteSelect forces its field look with !important Tailwind utilities, and a
+	   layered !important beats an unlayered one: the override has to sit in the same layer. */
+	@layer utilities {
+		.picker-select :global(.multiselect) {
+			background: transparent !important;
+			box-shadow: none !important;
+		}
 	}
 	.picker-btn {
 		padding: 0 0.85rem;
