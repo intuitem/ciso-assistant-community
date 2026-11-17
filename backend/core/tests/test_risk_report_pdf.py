@@ -363,8 +363,7 @@ def test_summary_rows_link_to_their_scenario_block():
         {"page": reader.get_page_number(dest[0].get_object())}
         for page in doc
         for annot in page.get("/Annots") or []
-        if (dest := annot.get_object().get("/A", {}).get("/D"))
-        and not isinstance(dest, str)
+        if (dest := annot.get_object().get("/Dest"))
     ]
     assert len(internal) == len(scenarios), "one link per summary row"
     detail_page = next(
