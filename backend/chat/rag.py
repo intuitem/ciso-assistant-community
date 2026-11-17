@@ -13,12 +13,23 @@ from django.contrib.auth.models import Permission
 
 from iam.models import Folder, RoleAssignment
 from chat.embedding_models import INFERENCE_LOCK, RERANKER_MODEL as _RERANKER_MODEL
-from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
+from qdrant_client.models import (
+    Document,
+    FieldCondition,
+    Filter,
+    Fusion,
+    FusionQuery,
+    MatchAny,
+    MatchValue,
+    Prefetch,
+)
 
 logger = structlog.get_logger(__name__)
 
 COLLECTION_NAME = "ciso_assistant"
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+BM25_VECTOR = "bm25"
+BM25_MODEL = "qdrant/bm25"
 
 # Cross-encoder re-ranker (cached singleton)
 _reranker = None
@@ -46,6 +57,40 @@ def get_qdrant_client():
     from qdrant_client import QdrantClient
 
     return QdrantClient(url=QDRANT_URL)
+
+
+def has_bm25(client) -> bool:
+    """Collections created before the keyword index stay vector-only until recreated."""
+    try:
+        sparse = client.get_collection(COLLECTION_NAME).config.params.sparse_vectors
+    except Exception as e:
+        logger.warning("qdrant_collection_info_failed", error=e)
+        return False
+    return BM25_VECTOR in (sparse or {})
+
+
+def _query_library(client, query, query_vector, query_filter, limit, hybrid):
+    if not hybrid:
+        return client.query_points(
+            collection_name=COLLECTION_NAME,
+            query=query_vector,
+            limit=limit,
+            query_filter=query_filter,
+        ).points
+    return client.query_points(
+        collection_name=COLLECTION_NAME,
+        prefetch=[
+            Prefetch(query=query_vector, filter=query_filter, limit=limit),
+            Prefetch(
+                query=Document(text=query, model=BM25_MODEL),
+                using=BM25_VECTOR,
+                filter=query_filter,
+                limit=limit,
+            ),
+        ],
+        query=FusionQuery(fusion=Fusion.RRF),
+        limit=limit,
+    ).points
 
 
 def get_accessible_folder_ids(user, codename: str = "view_folder") -> list[str]:
@@ -203,13 +248,15 @@ def search(
     source_type: str | None = None,
     object_type: str | None = None,
     scope=None,
+    frameworks: list[str] | None = None,
 ) -> list[dict]:
     """
     Permission-aware semantic search over the vector store.
 
     Searches two partitions and merges results:
     - User data (models, documents): filtered per object type by view_<model>
-    - Library knowledge (frameworks, threats): shared, no folder filter
+    - Library knowledge (frameworks, threats): shared, no folder filter;
+      ``frameworks`` (names) adds candidates from those frameworks
 
     Results are merged and sorted by score.
     """
@@ -253,16 +300,26 @@ def search(
                 FieldCondition(key="object_type", match=MatchValue(value=object_type))
             )
 
-        try:
-            library_results = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=query_vector,
-                limit=fetch_limit,
-                query_filter=Filter(must=library_conditions),
+        library_filters = [Filter(must=library_conditions)]
+        if frameworks:
+            library_filters.append(
+                Filter(
+                    must=[
+                        *library_conditions,
+                        FieldCondition(key="framework", match=MatchAny(any=frameworks)),
+                    ]
+                )
             )
-            all_results.extend(library_results.points)
-        except Exception as e:
-            logger.error("qdrant_library_search_failed", error=e)
+        hybrid = has_bm25(client)
+        for library_filter in library_filters:
+            try:
+                all_results.extend(
+                    _query_library(
+                        client, query, query_vector, library_filter, fetch_limit, hybrid
+                    )
+                )
+            except Exception as e:
+                logger.error("qdrant_library_search_failed", error=e)
 
     # Merge and deduplicate
     seen_ids = set()
