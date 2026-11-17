@@ -240,6 +240,7 @@ See [Create or update in bulk](actions.md#create-or-update-in-bulk).
 
 | Object | Status restriction |
 |---|---|
+| Evidence | Never `approved` or `rejected`: a review decides those |
 | Audit, risk assessment, entity assessment, findings binder | Planning states: `planned`, `in_progress`, `in_review`, `done`, `deprecated` |
 | Requirement assessment | Status, dates, observation. Never result or score |
 | Document revision | Content and change summary while still a draft |

@@ -15,8 +15,14 @@ Two halves:
 Loop containment: runs carry a trigger_depth; changes made by a run at depth
 d dispatch events at depth d, which start instances at depth d+1, capped at
 MAX_TRIGGER_DEPTH.
+
+Inline ("Run immediately") triggers run in the process that saved, not on the
+worker. Within a request they wait for the view to return (see
+`hold_inline_runs` and middleware.py); elsewhere they run at commit.
 """
 
+import contextlib
+import contextvars
 from datetime import timedelta
 
 from django.db import transaction
@@ -440,6 +446,47 @@ def _compare(condition, runtime):
     return False
 
 
+# ---------- inline runs ----------
+
+# Inline dispatches committed during a request, waiting for its view to return.
+# None outside a request (workers, commands): there they run at commit.
+_held_inline_dispatches = contextvars.ContextVar(
+    "workflow_held_inline_dispatches", default=None
+)
+
+
+@contextlib.contextmanager
+def hold_inline_runs():
+    """Start the inline runs committed inside the block once it exits.
+
+    A view keeps writing after the commit that fires the event: it may save
+    the instance it holds in memory, whose stale values would overwrite what
+    the run wrote, or add what the run should see (an evidence's first
+    revision). Held until the view returns, a run starts from what the request
+    saved and nothing in the request writes over it."""
+    held = []
+    token = _held_inline_dispatches.set(held)
+    try:
+        yield
+    finally:
+        # Reset first: events the runs themselves fire are dispatched at once.
+        _held_inline_dispatches.reset(token)
+        for log_entry_id, origin_depth in held:
+            _dispatch_inline(log_entry_id, origin_depth)
+
+
+def _dispatch_inline(log_entry_id, origin_depth):
+    from .tasks import dispatch_internal_event_task
+
+    try:
+        dispatch_internal_event_task.call_local(log_entry_id, origin_depth, True)
+    except Exception:
+        # The save is committed; a failed dispatch must not fail the request.
+        logger.error(
+            "inline event dispatch failed", log_entry=log_entry_id, exc_info=True
+        )
+
+
 # ---------- CUD producer (auditlog mirror) ----------
 
 
@@ -472,12 +519,11 @@ def forward_log_entry(sender, instance, created, **kwargs):
     log_entry_id = instance.pk
 
     def dispatch_inline():
-        try:
-            dispatch_internal_event_task.call_local(log_entry_id, origin_depth, True)
-        except Exception:
-            logger.error(
-                "inline event dispatch failed", log_entry=log_entry_id, exc_info=True
-            )
+        held = _held_inline_dispatches.get()
+        if held is None:
+            _dispatch_inline(log_entry_id, origin_depth)
+        else:
+            held.append((log_entry_id, origin_depth))
 
     # Inline first: a failing enqueue below must not stop it.
     if True in inline_flags:

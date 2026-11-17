@@ -109,9 +109,9 @@ Links set after creation (a requirement assignment's actors, an audit's authors)
 
 ### Run immediately
 
-Off, the run is queued for the background worker and starts a moment after the change. On, it runs as part of the save itself, so the user sees the result as soon as the page reloads. Use it to complete or correct the object just saved, for example to give new evidence a status other than Draft.
+Off, the run is queued for the background worker and starts a moment after the change. On, it runs before the server answers the request that saved the object, once that request has finished writing, so the user sees the result as soon as the page reloads. Use it to complete or correct the object just saved, for example to give new evidence a status other than Draft. The API response still shows the object as the request saved it, and the audit log records the run's changes like a queued run's, not as the user's.
 
-Because the save waits for the run, an immediate workflow may only contain conditions, variable steps, logs, date offsets, and reading, creating or updating objects. Publishing refuses any other step (HTTP request, email, AI, sub-workflow, loop, task or wait). If the run fails, the save still goes through and the failure is recorded on the run. Only immediate workflows run during the save: other workflows listening to the same event stay queued.
+Because the request waits for the run, an immediate workflow may only contain conditions, variable steps, logs, date offsets, and reading, creating or updating objects. Publishing refuses any other step (HTTP request, email, AI, sub-workflow, loop, task or wait). If the run fails, the save still goes through and the failure is recorded on the run. Only immediate workflows run with the request: other workflows listening to the same event stay queued.
 
 ### Filters
 

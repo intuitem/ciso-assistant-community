@@ -305,7 +305,7 @@ The object must be inside the workflow's subtree and changeable by the run ident
 | Model | Writable fields | Relations |
 |---|---|---|
 | `applied_control` | status, priority, effort, start_date, eta, expiry_date, description, ref_id, link, observation | owner, evidences, assets, filtering_labels |
-| `evidence` | status, expiry_date, description | owner, filtering_labels |
+| `evidence` | status (not `approved` or `rejected`), expiry_date, description | owner, filtering_labels |
 | `incident` | description, ref_id, link | owners, assets, applied_controls, filtering_labels |
 | `asset` | description, ref_id, reference_link, observation | owner, security_exceptions, filtering_labels |
 | `vulnerability` | status, severity, description, ref_id, eta, due_date | applied_controls, assets, security_exceptions, filtering_labels |
@@ -322,7 +322,7 @@ The object must be inside the workflow's subtree and changeable by the run ident
 | `managed_document` | description | |
 | `document_revision` | content, change_summary — while the revision is still being drafted | |
 
-Planning states are `planned`, `in_progress`, `in_review`, `done`, `deprecated`. Names are never writable. Results, scores, levels and decisions are never writable.
+Planning states are `planned`, `in_progress`, `in_review`, `done`, `deprecated`. Names are never writable. Results, scores, levels and decisions are never writable. Moving evidence off `approved` or `rejected` puts its latest file back in the review queue, as changing the status by hand does.
 
 A document revision's status is not writable either, and a submitted, validated or published revision's markdown cannot be touched at all — the same rule the document editor applies. Publishing deprecates the revision it replaces and repoints the document at the new one, which a field write would not do. A workflow writes the draft; someone publishes it, and the rewrite is recorded in the document's edit history under the identity the workflow runs as.
 

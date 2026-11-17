@@ -144,3 +144,73 @@ def test_only_inline_triggers_run_in_the_request(
     assert evidence.status == "in_review"
     assert [args[2] for args in queued] == [False]
     assert WorkflowInstance.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_a_held_run_survives_the_view_saving_its_stale_instance(
+    domain, django_capture_on_commit_callbacks
+):
+    from automation.workflows.events import hold_inline_runs
+
+    install("evidence-default-status", domain)
+    with hold_inline_runs():
+        with django_capture_on_commit_callbacks(execute=True):
+            evidence = Evidence.objects.create(name="Report", folder=domain)
+        assert Evidence.objects.get(id=evidence.id).status == "draft"
+        # A view saving the instance it holds, as RiskAssessmentViewSet's
+        # perform_create does after serializer.save().
+        evidence.description = "Annual report"
+        evidence.save()
+    evidence.refresh_from_db()
+    assert evidence.status == "in_review"
+    assert evidence.description == "Annual report"
+
+
+def _run_request(view, user):
+    from django.test import RequestFactory
+
+    from core.custom_middleware import AuditlogMiddleware
+    from automation.workflows.middleware import InlineWorkflowRunsMiddleware
+
+    request = RequestFactory().post("/api/evidences/")
+    request.user = user
+    return InlineWorkflowRunsMiddleware(AuditlogMiddleware(view))(request)
+
+
+@pytest.mark.django_db
+def test_runs_start_after_the_view_and_are_not_logged_as_the_user(
+    domain, django_capture_on_commit_callbacks
+):
+    from auditlog.models import LogEntry
+    from django.http import HttpResponse
+
+    from iam.models import User
+
+    install("evidence-default-status", domain)
+    requester = User.objects.create_user(email="requester@tests.local")
+    created = {}
+
+    def view(request):
+        with django_capture_on_commit_callbacks(execute=True):
+            created["evidence"] = Evidence.objects.create(name="Report", folder=domain)
+        assert Evidence.objects.get(id=created["evidence"].id).status == "draft"
+        return HttpResponse()
+
+    _run_request(view, requester)
+
+    evidence = Evidence.objects.get(id=created["evidence"].id)
+    assert evidence.status == "in_review"
+    entries = LogEntry.objects.get_for_object(evidence).order_by("pk")
+    assert entries.first().actor == requester
+    run_entry = entries.last()
+    assert run_entry.changes_dict["status"][1] == "in_review"
+    assert run_entry.actor is None
+
+
+def test_the_hold_wraps_the_audit_context():
+    from django.conf import settings
+
+    order = list(settings.MIDDLEWARE)
+    assert order.index(
+        "automation.workflows.middleware.InlineWorkflowRunsMiddleware"
+    ) < order.index("core.custom_middleware.AuditlogMiddleware")

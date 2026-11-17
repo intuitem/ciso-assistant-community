@@ -1496,7 +1496,8 @@ class ReadObjectsAction(BaseAction):
 class UpdateEntry:
     """One UPDATABLE_MODELS entry. Assessment verdicts (results, scores,
     treatments) stay off the registry; lifecycle statuses are the customer's
-    process, so any of the column's choices may be written.
+    process, so any of the column's choices may be written, except the
+    decisions a review records (evidence approved or rejected).
 
     ``fields`` is what a run may write; ``allowed_values`` narrows a field when
     a value would bypass logic outside save(). Plain columns only — anything
@@ -1555,6 +1556,25 @@ def _record_document_edit(revision, updated, before, instance):
     record_document_edit(revision, run_identity(instance), before.get("content"))
 
 
+# Approving or rejecting is a review: EvidenceRevision.record_review stamps the
+# reviewer, enforces four-eyes and notifies the owners, all outside save().
+_EVIDENCE_STATUSES = frozenset({"draft", "missing", "in_review", "expired"})
+
+
+def _reopen_evidence_review(evidence, updated, before, instance):
+    """What EvidenceWriteSerializer.update does on any other status change:
+    leaving approved or rejected undoes the decision, so the file is queued
+    for review again."""
+    if "status" not in updated or before.get("status") == evidence.status:
+        return
+    revision = evidence.last_revision
+    if (
+        revision is not None
+        and revision.review_status != EvidenceRevision.ReviewStatus.PENDING
+    ):
+        revision.clear_review()
+
+
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     # Triage, not judgment. A run may widen the reviewer pool, tighten the date and
     # leave a note; `status` and `resolution` are absent on purpose — the request
@@ -1591,7 +1611,9 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     "evidence": UpdateEntry(
         model=Evidence,
         fields=["status", "expiry_date", "description"],
+        allowed_values={"status": _EVIDENCE_STATUSES},
         m2m_fields={"owner": _ACTOR, "filtering_labels": _LABELS},
+        after_save=_reopen_evidence_review,
     ),
     "incident": UpdateEntry(
         model=Incident,

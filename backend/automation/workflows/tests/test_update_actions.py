@@ -11,6 +11,7 @@ from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
+    EvidenceRevision,
     Framework,
     Perimeter,
     RequirementAssessment,
@@ -266,6 +267,44 @@ class TestIntegrityGuardrail:
         evidence.refresh_from_db()
         assert evidence.status == "in_review"
 
+    @pytest.mark.parametrize("decision", ["approved", "rejected"])
+    def test_evidence_is_never_reviewed_by_a_workflow(self, decision):
+        domain = make_domain("Evidence decision")
+        evidence = Evidence.objects.create(name="Report", folder=domain)
+        flow = update_flow(
+            domain,
+            {
+                "model": "evidence",
+                "id": str(evidence.id),
+                "fields": {"status": decision},
+            },
+        )
+        assert start_instance(flow).status == WorkflowInstance.Status.FAILED
+        evidence.refresh_from_db()
+        assert evidence.status == "draft"
+
+    def test_leaving_a_decision_queues_the_file_again(self):
+        domain = make_domain("Evidence reopened")
+        evidence = Evidence.objects.create(name="Report", folder=domain)
+        revision = EvidenceRevision.objects.create(
+            evidence=evidence, link="https://example.com/report"
+        )
+        revision.record_review(publisher_user(), "approved")
+        flow = update_flow(
+            domain,
+            {
+                "model": "evidence",
+                "id": str(evidence.id),
+                "fields": {"status": "expired"},
+            },
+        )
+        assert start_instance(flow).status == WorkflowInstance.Status.COMPLETED
+        evidence.refresh_from_db()
+        revision.refresh_from_db()
+        assert evidence.status == "expired"
+        assert revision.review_status == EvidenceRevision.ReviewStatus.PENDING
+        assert revision.reviewed_by is None
+
     def test_risk_treatment_is_not_writable(self):
         assert "treatment" not in UPDATABLE_MODELS["risk_scenario"].fields
         assert not {"inherent_level", "current_level", "residual_level"} & set(
@@ -280,6 +319,9 @@ class TestIntegrityGuardrail:
         )
         assert "dismissed" in _writable_values(UPDATABLE_MODELS["finding"], "status")
         assert _writable_values(UPDATABLE_MODELS["evidence"], "description") is None
+        assert not {"approved", "rejected"} & _writable_values(
+            UPDATABLE_MODELS["evidence"], "status"
+        )
 
     def test_no_entry_may_write_name(self):
         assert not [key for key, e in UPDATABLE_MODELS.items() if "name" in e.fields]
