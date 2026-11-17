@@ -1,8 +1,9 @@
 """The incident report, rendered by Typst."""
 
+from io import BytesIO
 from datetime import datetime, timezone
 
-import pymupdf
+from pypdf import PdfReader
 import pytest
 from django.urls import reverse
 from rest_framework import status as http
@@ -113,7 +114,7 @@ def test_scope_sections_are_omitted_when_empty(incident):
     _entries(incident, ["detection"])
     pdf, payload = _render(incident)
     assert payload["incident"]["assets"] == []
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Affected assets" not in text
 
 
@@ -122,7 +123,7 @@ def test_cover_carries_traceability(incident):
     _entries(incident, ["detection"])
     pdf, payload = _render(incident)
     assert payload["generated_at"]
-    cover = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert str(incident.id) in cover
 
 
@@ -169,7 +170,7 @@ def test_incident_enums_are_localised(incident, lang, severity, status, detectio
     assert payload["incident"]["status_key"] == "ongoing"
     assert payload["incident"]["detection_key"] == "internally_detected"
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert severity in text and status in text and detection in text
 
 
@@ -196,9 +197,7 @@ def _summer_incident(incident_obj: Incident) -> Incident:
 
 
 def _pdf_text(content: bytes) -> str:
-    return "".join(
-        page.get_text() for page in pymupdf.open(stream=content, filetype="pdf")
-    )
+    return "".join(page.extract_text() for page in PdfReader(BytesIO(content)).pages)
 
 
 @pytest.mark.django_db
