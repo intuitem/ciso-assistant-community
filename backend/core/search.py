@@ -321,7 +321,7 @@ def global_search(request):
                     output_field=IntegerField(),
                 )
             )
-            pass  # TEMP
+            ordering.insert(0, "ref_id_rank")
         results = (
             qs.filter(q_filter)
             .order_by(*ordering)
