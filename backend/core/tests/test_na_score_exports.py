@@ -9,7 +9,12 @@ from openpyxl import load_workbook
 from rest_framework import status
 
 from core.generators import gen_audit_context
-from core.models import RequirementAssessment
+from core.models import (
+    ComplianceAssessment,
+    Framework,
+    RequirementAssessment,
+    StoredLibrary,
+)
 from core.tests.test_audit_typst_pdf import _tree
 from core.tests.test_audit_word_export import (  # noqa: F401  (fixtures)
     _load_framework,
@@ -43,9 +48,74 @@ def na_audit(app_config):  # noqa: F811
     return audit
 
 
-def _category(audit):
+def _category(audit, urn=CATEGORY_URN):
     context = gen_audit_context(audit.id, _tree(audit), "en", charts=False)
-    return context["category_scores"][CATEGORY_URN]
+    return context["category_scores"][urn]
+
+
+NESTED_PREFIX = "urn:intuitem:test:req_node:na-score-nested"
+NESTED_FRAMEWORK_YAML = f"""
+urn: urn:intuitem:test:library:na-score-nested
+locale: en
+ref_id: NA-SCORE-NESTED
+name: NA score nested
+description: Scored parent with scored children
+copyright: Test
+version: 1
+publication_date: 2025-01-01
+provider: test-provider
+packager: test-packager
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:na-score-nested
+    ref_id: NA-SCORE-NESTED
+    name: NA score nested
+    min_score: 0
+    max_score: 100
+    requirement_nodes:
+    - urn: {NESTED_PREFIX}:cat
+      assessable: false
+      depth: 1
+      ref_id: CAT
+      name: Category
+    - urn: {NESTED_PREFIX}:parent
+      assessable: true
+      depth: 2
+      ref_id: PARENT
+      parent_urn: {NESTED_PREFIX}:cat
+      name: Parent
+    - urn: {NESTED_PREFIX}:child-1
+      assessable: true
+      depth: 3
+      ref_id: CHILD-1
+      parent_urn: {NESTED_PREFIX}:parent
+      name: Child 1
+    - urn: {NESTED_PREFIX}:child-2
+      assessable: true
+      depth: 3
+      ref_id: CHILD-2
+      parent_urn: {NESTED_PREFIX}:parent
+      name: Child 2
+""".lstrip()
+
+
+@pytest.fixture
+def nested_audit(app_config):  # noqa: F811
+    stored, error = StoredLibrary.store_library_content(
+        NESTED_FRAMEWORK_YAML.encode("utf-8")
+    )
+    assert error is None, error
+    assert stored.load() is None
+    framework = Framework.objects.get(urn="urn:intuitem:test:framework:na-score-nested")
+    audit = _make_audit(framework, name="NA score nested")
+    audit.min_score = 0
+    audit.max_score = 100
+    audit.save()
+    audit.create_requirement_assessments()
+    _set(audit, "PARENT", is_scored=True, score=20, result="partially_compliant")
+    _set(audit, "CHILD-1", is_scored=True, score=80, result="compliant")
+    _set(audit, "CHILD-2", is_scored=True, score=80, result="compliant")
+    return audit
 
 
 @pytest.mark.django_db
@@ -85,6 +155,38 @@ class TestCategoryScores:
             category["average_score"]
             == na_audit.get_global_score()["implementation_score"]
         )
+
+    def test_sum_is_projected_onto_audit_scale(self, na_audit):
+        na_audit.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        na_audit.save()
+
+        category = _category(na_audit)
+
+        assert category["average_score"] == 60
+        assert category["scored_count"] == 2
+
+    @pytest.mark.parametrize(
+        "method,expected",
+        [
+            (ComplianceAssessment.CalculationMethod.AVG, 60),
+            (ComplianceAssessment.CalculationMethod.AVG_OF_AVG, 20),
+        ],
+    )
+    def test_scored_parent_counts_like_global_score(
+        self, nested_audit, method, expected
+    ):
+        nested_audit.score_calculation_method = method
+        nested_audit.save()
+
+        category = _category(nested_audit, f"{NESTED_PREFIX}:cat")
+
+        assert category["average_score"] == expected
+        assert (
+            category["average_score"]
+            == nested_audit.get_global_score()["implementation_score"]
+        )
+        assert category["scored_count"] == 3
+        assert category["item_count"] == 3
 
     def test_all_not_applicable_category_is_flagged(self, na_audit):
         RequirementAssessment.objects.filter(compliance_assessment=na_audit).update(

@@ -1035,74 +1035,81 @@ def gen_audit_context(
 
     def aggregate_category_scores(data, audit):
         """
-        Aggregate scores per top-level category from a tree annotated by
-        annotate_tree_with_aggregated_scores, so N/A follows the audit's rules.
+        Aggregate scores per top-level category with audit.get_scores_for, so
+        each category is scored like the audit's global score.
 
         Returns:
             dict: Dictionary with category URNs as keys and score information as values
         """
-        anchor_na = audit.anchor_na_to_target
+        na = RequirementAssessment.Result.NOT_APPLICABLE
+        ig = set(audit.selected_implementation_groups or [])
         ca_min = audit.min_score if audit.min_score is not None else 0
         ca_max = audit.max_score if audit.max_score is not None else 100
+        is_sum = (
+            audit.score_calculation_method == ComplianceAssessment.CalculationMethod.SUM
+        )
+        ras_by_urn = {
+            ra.requirement.urn: ra
+            for ra in RequirementAssessment.objects.filter(
+                compliance_assessment=audit, requirement__assessable=True
+            ).select_related("requirement", "compliance_assessment")
+            if not ig or ig & set(ra.requirement.implementation_groups or [])
+        }
 
-        def recursive_score_calculation(node_data):
-            # Initialize score tracking for this node
-            scores = {
-                "total_score": 0,  # Sum of all scores
-                "item_count": 0,  # Number of scoreable items
-                "scored_count": 0,  # Number of items that have been scored
-                "assessable_count": 0,
-                "not_applicable_count": 0,
-            }
+        def collect(node_data, group):
+            ra = ras_by_urn.get(node_data.get("urn"))
+            if ra is not None:
+                group.append(ra)
+            for child_data in (node_data.get("children") or {}).values():
+                collect(child_data, group)
+            return group
 
-            is_na = node_data.get("result") == "not_applicable"
-            if node_data.get("assessable", False) and node_data.get("ra_id"):
-                scores["assessable_count"] = 1
-                if is_na:
-                    scores["not_applicable_count"] = 1
-
-            if not node_data.get("children"):
-                if (node_data.get("is_scored", False) and not is_na) or (
-                    anchor_na and is_na and node_data.get("assessable", False)
-                ):
-                    scores["item_count"] = 1
-                if node_data.get("aggregated_score") is not None:
-                    scores["total_score"] = node_data["aggregated_score"]
-                    scores["scored_count"] = 1
-
-            # Recursively process children
-            for child_id, child_data in node_data.get("children", {}).items():
-                child_scores = recursive_score_calculation(child_data)
-
-                # Aggregate child scores
-                scores["total_score"] += child_scores["total_score"]
-                scores["item_count"] += child_scores["item_count"]
-                scores["scored_count"] += child_scores["scored_count"]
-                scores["assessable_count"] += child_scores["assessable_count"]
-                scores["not_applicable_count"] += child_scores["not_applicable_count"]
-
-            return scores
-
-        # Dictionary to store category scores
         category_scores = {}
-        for node_id, node_data in data.items():
-            # this acts only at the top level nodes since it's not crawling the children.
-            # TODO: we need a new param to control on which depth we want to report now that we have the depth map
-            scores = recursive_score_calculation(node_data)
+        for node_data in data.values():
+            # Top-level nodes only.
+            group = collect(node_data, [])
+            counted = []
+            for ra in group:
+                layers = audit.requirement_layer_scores(
+                    result=ra.result,
+                    is_scored=ra.is_scored,
+                    score=ra.score,
+                    documentation_score=ra.documentation_score,
+                    min_score=ra.requirement.min_score,
+                    max_score=ra.requirement.max_score,
+                )
+                if layers["implementation_score"] is not None:
+                    counted.append((ra, layers["implementation_score"]))
 
             average_score = 0
-            ratio = node_data.get("_aggregated_ratio")
-            if ratio is not None:
-                average_score = ca_min + ratio * (ca_max - ca_min)
+            score = audit.get_scores_for(group)["implementation_score"]
+            if score is not None and is_sum:
+                weighted_max = sum(
+                    (
+                        ra.requirement.max_score
+                        if ra.requirement.max_score is not None
+                        else ca_max
+                    )
+                    * (ra.requirement.weight or 1)
+                    for ra, _ in counted
+                )
+                if weighted_max:
+                    average_score = ca_min + score / weighted_max * (ca_max - ca_min)
+            elif score is not None:
+                average_score = score
 
             category_scores[node_data["urn"]] = {
                 "name": node_data["node_content"].split(":")[0],
-                "total_score": scores["total_score"],
-                "item_count": scores["item_count"],
-                "scored_count": scores["scored_count"],
+                "total_score": sum(value for _, value in counted),
+                "item_count": sum(
+                    1
+                    for ra in group
+                    if (ra.is_scored and ra.result != na)
+                    or (audit.anchor_na_to_target and ra.result == na)
+                ),
+                "scored_count": len(counted),
                 "average_score": round(average_score, 1),
-                "nothing_applicable": scores["not_applicable_count"]
-                == scores["assessable_count"],
+                "nothing_applicable": all(ra.result == na for ra in group),
             }
 
         return category_scores
