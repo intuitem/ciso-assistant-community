@@ -253,7 +253,35 @@ def test_consent_page_warns_about_self_registered_clients(client, knox_token):
     response = client.get(AUTHORIZE_URL, _authorize_params(oauth_client, "x" * 43))
     assert response.status_code == 200
     assert b"You are adding a new app." in response.content
-    assert REDIRECT_URI.encode() in response.content
+    assert b"an app on this computer" in response.content
+    assert REDIRECT_URI.encode() not in response.content
+
+
+def test_consent_page_shows_this_requests_redirect(client, knox_token):
+    # a reused registration: the port of this login differs from the saved one
+    oauth_client = _make_client(self_registered=True, skip_consent=False)
+    oauth_client.set_redirect_uris(
+        [
+            "http://127.0.0.1:49572/callback",
+            "https://app.example.com/cb?x=1",
+            "https://app.example.com:8443/other",
+        ]
+    )
+    oauth_client.save()
+    client.cookies["token"] = knox_token
+    params = _authorize_params(oauth_client, "x" * 43)
+
+    params["redirect_uri"] = "http://127.0.0.1:64900/callback"
+    local = client.get(AUTHORIZE_URL, params).content
+    assert b"an app on this computer" in local
+    assert b"49572" not in local and b"64900" not in local
+
+    params["redirect_uri"] = "https://app.example.com/cb?x=1"
+    remote = client.get(AUTHORIZE_URL, params).content
+    assert b"<code>https://app.example.com/cb?x=1</code>" in remote
+    assert b"/other" not in remote
+    assert b"an app on this computer" not in remote
+    assert b"127.0.0.1" not in remote
 
 
 @pytest.mark.parametrize(

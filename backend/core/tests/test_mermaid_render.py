@@ -1,9 +1,11 @@
 """Server-side Mermaid rendering for document PDFs."""
 
+from io import BytesIO
+
 import markdown
 from weasyprint import HTML
 
-import pymupdf
+from pypdf import PdfReader
 
 from core.typst_render import MERMAID_MAX_SOURCE_CHARS, render_mermaid_svg
 from doc_management import views as doc_views
@@ -25,7 +27,7 @@ def _markdown(source: str) -> str:
 
 def _pdf_text(content_html: str) -> str:
     pdf = HTML(string=content_html, url_fetcher=_safe_url_fetcher).write_pdf()
-    return "".join(page.get_text() for page in pymupdf.open(stream=pdf))
+    return "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
 
 
 class TestRenderMermaidSvg:

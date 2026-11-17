@@ -1,8 +1,9 @@
 """NIS2 incident deadlines and the GDPR 72h breach deadline."""
 
+from io import BytesIO
 from datetime import timedelta
 
-import pymupdf
+from pypdf import PdfReader
 import pytest
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -142,23 +143,27 @@ def test_notification_worksheets_render(folder, lang, nis2_title, apd_title):
         incident=incident,
         discovered_on=timezone.now() - timedelta(hours=80),
     )
-    nis2 = pymupdf.open(
-        stream=render_pdf(
-            "nis2_notification.typ",
-            nis2_notification_context(incident, [breach], lang),
+    nis2 = PdfReader(
+        BytesIO(
+            render_pdf(
+                "nis2_notification.typ",
+                nis2_notification_context(incident, [breach], lang),
+            )
         )
-    )
-    text = "".join(p.get_text() for p in nis2)
+    ).pages
+    text = "".join(p.extract_text() for p in nis2)
     assert nis2_title in text
     assert "Unpatched VPN appliance" in text
     assert "HR files exfiltrated" in text
 
-    apd = pymupdf.open(
-        stream=render_pdf(
-            "breach_notification.typ", breach_notification_context(breach, lang)
+    apd = PdfReader(
+        BytesIO(
+            render_pdf(
+                "breach_notification.typ", breach_notification_context(breach, lang)
+            )
         )
-    )
-    text = "".join(p.get_text() for p in apd)
+    ).pages
+    text = "".join(p.extract_text() for p in apd)
     assert apd_title in text
     assert "Ransomware" in text  # linked incident
 

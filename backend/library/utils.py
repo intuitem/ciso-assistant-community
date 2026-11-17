@@ -1154,6 +1154,7 @@ class LibraryImporter:
             for data in metric_definitions
             if isinstance(data, dict) and data.get("urn")
         }
+        seen_urns = set()
         for index, metric_definition_data in enumerate(metric_definitions):
             metric_definition_importer = MetricDefinitionImporter(
                 metric_definition_data, shipped
@@ -1163,6 +1164,13 @@ class LibraryImporter:
                 metric_definition_error := metric_definition_importer.is_valid()
             ) is not None:
                 import_errors.append((index, metric_definition_error))
+                continue
+            urn = str(metric_definition_data["urn"]).lower()
+            if urn in seen_urns:
+                import_errors.append(
+                    (index, "Duplicate URN (ref_id already used): {}".format(urn))
+                )
+            seen_urns.add(urn)
 
         self._metric_definitions = metric_definition_importers
 

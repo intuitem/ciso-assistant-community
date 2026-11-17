@@ -19,9 +19,11 @@
 
 	const isoDay = (d: Date) => d.toISOString().split('T')[0];
 	const today = isoDay(new Date());
+	const inDays = (n: number) => isoDay(new Date(Date.now() + n * 864e5));
+	const unfinished = 'status=planned&status=in_progress&status=in_review';
 	const fmt = (n: number | undefined) => (n ?? 0).toLocaleString(getLocale());
 
-	type Tier = 'now' | 'late' | 'housekeeping';
+	type Tier = 'now' | 'late' | 'soon' | 'housekeeping';
 	type Item = {
 		tier: Tier;
 		count: number;
@@ -36,6 +38,14 @@
 	let attention: Item[] = $derived(
 		(
 			[
+				featureflags.incidents !== false &&
+					featureflags.nis2 === true && {
+						tier: 'now',
+						count: metrics.operations?.nis2_overdue_incidents,
+						label: m.briefingNis2Overdue(),
+						hint: m.briefingNis2OverdueHint(),
+						href: '/incidents?nis2_overdue=true'
+					},
 				featureflags.incidents !== false && {
 					tier: 'now',
 					count: metrics.operations?.open_incidents,
@@ -44,12 +54,29 @@
 					href: '/incidents?status=new&status=ongoing&status=resolved',
 					trend: 'incidents_open'
 				},
+				// The SLA flag also hides the list's `state` filter: without it the link opens every vulnerability.
+				featureflags.vulnerabilities !== false &&
+					featureflags.vulnerability_sla !== false && {
+						tier: 'now',
+						count: metrics.operations?.overdue_vulnerabilities,
+						label: m.briefingOverdueVulnerabilities(),
+						hint: m.briefingOverdueVulnerabilitiesHint(),
+						href: '/vulnerabilities?state=overdue'
+					},
+				featureflags.privacy !== false &&
+					featureflags.right_requests !== false && {
+						tier: 'now',
+						count: metrics.privacy?.right_requests_due,
+						label: m.briefingRightRequestsDue(),
+						hint: m.briefingRightRequestsDueHint(),
+						href: `/right-requests?due_date__lte=${inDays(7)}&status=new&status=in_progress&status=on_hold`
+					},
 				{
 					tier: 'now',
 					count: metrics.controls?.eta_missed,
 					label: m.sumpageEtaMissed(),
 					hint: m.briefingEtaMissedHint(),
-					href: `/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&status=degraded&eta__lt=${today}`,
+					href: `/applied-controls/?status=to_do&status=in_progress&status=--&status=on_hold&status=degraded&eta__lt=${today}`,
 					trend: 'controls_eta_missed'
 				},
 				{
@@ -57,8 +84,22 @@
 					count: metrics.controls?.p1,
 					label: m.sumpageP1(),
 					hint: m.briefingP1Hint(),
-					href: '/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--',
+					href: '/applied-controls/?priority=1&status=to_do&status=degraded&status=on_hold&status=in_progress&status=--',
 					trend: 'controls_p1_pending'
+				},
+				featureflags.risk_acceptances !== false && {
+					tier: 'late',
+					count: metrics.risk?.expired_acceptances,
+					label: m.briefingExpiredAcceptances(),
+					hint: m.briefingExpiredAcceptancesHint(),
+					href: `/risk-acceptances?state=accepted&expiry_date__lt=${today}`
+				},
+				featureflags.exceptions !== false && {
+					tier: 'late',
+					count: metrics.risk?.expired_exceptions,
+					label: m.briefingExpiredExceptions(),
+					hint: m.briefingExpiredExceptionsHint(),
+					href: `/security-exceptions?status=approved&expiration_date__lt=${today}`
 				},
 				featureflags.tasks !== false && {
 					tier: 'late',
@@ -68,12 +109,33 @@
 					href: '/task-templates?overdue=true',
 					trend: 'task_templates_overdue'
 				},
+				featureflags.compliance !== false && {
+					tier: 'late',
+					count: metrics.compliance?.overdue_audits,
+					label: m.briefingOverdueAudits(),
+					hint: m.briefingPastDueHint(),
+					href: `/compliance-assessments?due_date__lt=${today}&${unfinished}`
+				},
+				featureflags.risk_management !== false && {
+					tier: 'late',
+					count: metrics.risk?.overdue_assessments,
+					label: m.briefingOverdueRiskAssessments(),
+					hint: m.briefingPastDueHint(),
+					href: `/risk-assessments?due_date__lt=${today}&${unfinished}`
+				},
+				featureflags.tprm !== false && {
+					tier: 'late',
+					count: metrics.third_party?.overdue_assessments,
+					label: m.briefingOverdueEntityAssessments(),
+					hint: m.briefingPastDueHint(),
+					href: `/entity-assessments?due_date__lt=${today}&${unfinished}`
+				},
 				featureflags.follow_up !== false && {
 					tier: 'late',
 					count: metrics.operations?.open_findings,
 					label: m.briefingOpenFindings(),
 					hint: m.briefingOpenFindingsHint(),
-					href: '/findings?status=--&status=identified&status=confirmed&status=assigned&status=in_progress',
+					href: '/findings?status=--&status=identified&status=confirmed&status=assigned&status=in_progress&inactive_assessment=false',
 					trend: 'findings_open'
 				},
 				{
@@ -83,6 +145,28 @@
 					hint: m.briefingExpiredEvidencesHint(),
 					href: '/evidences/?status=expired',
 					trend: 'evidence_expired'
+				},
+				{
+					tier: 'soon',
+					count: metrics.compliance?.expiring_evidences,
+					label: m.briefingExpiringEvidences(),
+					hint: m.briefingExpiringEvidencesHint(),
+					href: `/evidences/?expiry_date__gte=${today}&expiry_date__lte=${inDays(30)}&status=draft&status=missing&status=in_review&status=approved&status=rejected`
+				},
+				featureflags.tprm !== false &&
+					featureflags.contracts !== false && {
+						tier: 'soon',
+						count: metrics.third_party?.ending_contracts,
+						label: m.briefingEndingContracts(),
+						hint: m.briefingEndingContractsHint(),
+						href: `/contracts?status=active&end_date__gte=${today}&end_date__lte=${inDays(30)}`
+					},
+				{
+					tier: 'housekeeping',
+					count: metrics.compliance?.evidences_to_review,
+					label: m.briefingEvidencesToReview(),
+					hint: m.briefingEvidencesToReviewHint(),
+					href: '/evidences/review'
 				},
 				{
 					tier: 'housekeeping',
@@ -136,6 +220,16 @@
 			tile: 'bg-warning-500/15',
 			spark: 'text-warning-500'
 		},
+		soon: {
+			label: m.briefingTierSoon,
+			icon: 'fa-calendar-days',
+			number: 'text-primary-700-300',
+			card: 'border-primary-500/30',
+			band: 'bg-primary-500/8 border-primary-500/20',
+			heading: 'text-primary-800-200',
+			tile: 'bg-primary-500/10',
+			spark: 'text-primary-500'
+		},
 		housekeeping: {
 			label: m.briefingTierHousekeeping,
 			icon: 'fa-broom',
@@ -149,10 +243,14 @@
 	};
 
 	let groups = $derived(
-		(['now', 'late', 'housekeeping'] as Tier[])
+		(['now', 'late', 'soon', 'housekeeping'] as Tier[])
 			.map((tier) => ({ tier, items: attention.filter((i) => i.tier === tier) }))
 			.filter((g) => g.items.length)
 	);
+
+	// Three rows per group, the most urgent ones; the rest behind "+N more".
+	const CAP = 3;
+	let expanded: Partial<Record<Tier, boolean>> = $state({});
 
 	const results = [
 		'not_assessed',
@@ -324,7 +422,10 @@
 		<div class="stat">
 			<dt>{m.sumpageNonCompliantItems()}</dt>
 			<dd>
-				<a href="/requirement-assessments?result=non_compliant" class="stat-link">
+				<a
+					href="/requirement-assessments?result=non_compliant&inactive_assessment=false"
+					class="stat-link"
+				>
 					<span class="stat-number"
 						><AnimatedNumber value={metrics.compliance?.non_compliant_items ?? 0} countUp /></span
 					>
@@ -349,7 +450,7 @@
 					{/if}
 					{#if metrics.compliance?.partially_compliant_items}
 						<a
-							href="/requirement-assessments?result=partially_compliant"
+							href="/requirement-assessments?result=partially_compliant&inactive_assessment=false"
 							class="whitespace-nowrap rounded-full bg-warning-500/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-warning-800-200 hover:bg-warning-500/25"
 							>{m.briefingPartialCount({
 								count: fmt(metrics.compliance.partially_compliant_items)
@@ -362,7 +463,7 @@
 		<div class="stat">
 			<dt>{m.riskScenarios()}</dt>
 			<dd>
-				<a href="/risk-scenarios/" class="stat-link">
+				<a href="/risk-scenarios/?inactive_assessment=false" class="stat-link">
 					<span class="stat-number"><AnimatedNumber value={scenarios} countUp /></span>
 					<span class="stat-context"
 						>{m.briefingInAssessments({ count: fmt(metrics.risk?.assessments) })}</span
@@ -379,7 +480,7 @@
 					{/if}
 					{#if metrics.risk?.high_current}
 						<a
-							href="/risk-scenarios?top_level=current"
+							href="/risk-scenarios?top_level=current&inactive_assessment=false"
 							class="whitespace-nowrap rounded-full bg-error-500/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-error-700-300 hover:bg-error-500/20"
 							>{fmt(metrics.risk.high_current)} {m.briefingHighRisks()}</a
 						>
@@ -406,7 +507,7 @@
 								{style.label()}
 							</p>
 							<ul class="px-3.5 py-1">
-								{#each group.items as item, i (item.label)}
+								{#each expanded[group.tier] ? group.items : group.items.slice(0, CAP) as item, i (item.label)}
 									<li class={i > 0 ? 'border-t border-surface-100-900' : ''}>
 										<a href={item.href} class="row group">
 											<span
@@ -437,11 +538,36 @@
 									</li>
 								{/each}
 							</ul>
+							{#if group.items.length > CAP}
+								<button
+									type="button"
+									class="block w-full px-4 pb-2 text-right text-[12px] text-surface-500 hover:text-primary-600-400"
+									aria-expanded={!!expanded[group.tier]}
+									onclick={() => (expanded[group.tier] = !expanded[group.tier])}
+									>{expanded[group.tier]
+										? m.briefingShowLess()
+										: m.briefingMore({ count: group.items.length - CAP })}</button
+								>
+							{/if}
 						</div>
 					{/each}
 				</div>
 			{:else}
-				<p class="text-surface-600-400">{m.briefingAllClear()}</p>
+				<div
+					class="tier-card flex items-center gap-4 rounded-xl border border-success-500/30 bg-success-500/8 px-5 py-6"
+				>
+					<span
+						class="flex size-11 shrink-0 items-center justify-center rounded-full bg-success-500/15 text-success-700-300"
+					>
+						<i class="fa-solid fa-circle-check text-xl" aria-hidden="true"></i>
+					</span>
+					<span class="min-w-0">
+						<span class="block font-semibold text-success-800-200">{m.briefingAllClear()}</span>
+						<span class="block text-[13px] text-surface-600-400 mt-0.5"
+							>{m.briefingAllClearHint()}</span
+						>
+					</span>
+				</div>
 			{/if}
 		</div>
 
@@ -529,7 +655,7 @@
 								</span>
 							{/if}
 							<a
-								href="/risk-scenarios?top_level={row.key}"
+								href="/risk-scenarios?top_level={row.key}&inactive_assessment=false"
 								class="risk-box min-w-0 rounded-xl border px-3.5 py-3 {down
 									? 'col-start-1'
 									: ''} {riskTone[row.key].box}"

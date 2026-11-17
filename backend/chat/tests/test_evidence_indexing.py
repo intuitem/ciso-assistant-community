@@ -1,3 +1,4 @@
+import uuid
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -42,7 +43,7 @@ def _scope_with(role, folder):
 
 def _other_domain():
     return Folder.objects.create(
-        name="Other",
+        name=f"Other {uuid.uuid4()}",
         parent_folder=Folder.get_root_folder(),
         content_type=Folder.ContentType.DOMAIN,
     )
@@ -498,8 +499,10 @@ def test_catch_up_reads_each_revision_when_its_turn_comes(ingest, remove, eviden
     """A revision loaded ahead may change before it is reached: act on what it is then."""
     from chat.signals import index_missing_documents
 
-    for name in ("one.txt", "two.txt", "three.txt"):
-        _attach(EvidenceRevision.objects.create(evidence=evidence), name)
+    for version, name in enumerate(("one.txt", "two.txt", "three.txt"), start=1):
+        _attach(
+            EvidenceRevision.objects.create(evidence=evidence, version=version), name
+        )
     seen = []
 
     def index(revision):

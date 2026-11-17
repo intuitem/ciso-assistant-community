@@ -2,6 +2,7 @@
 	import { SvelteFlow, Background, useSvelteFlow, type Node, type Edge } from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 	import { setContext, onMount } from 'svelte';
+	import { safeTranslate, translateEventKey } from '#lib/utils/i18n.js';
 	import {
 		EDGE_STYLE,
 		EDGE_MARKER,
@@ -44,9 +45,10 @@
 		switch (node.type) {
 			case 'action': {
 				const c = node.action_config ?? {};
+				const type = c.type ? safeTranslate(c.type) : null;
 				if (['create_object', 'update_object', 'read_objects'].includes(c.type))
-					return c.model ? `${c.type} · ${c.model}` : c.type;
-				return c.type ?? null;
+					return c.model ? `${type} · ${safeTranslate(c.model)}` : type;
+				return type;
 			}
 			case 'subprocess':
 				return node.subprocess_workflow ?? null;
@@ -57,7 +59,7 @@
 			case 'trigger': {
 				const c = node.trigger_config ?? {};
 				if (c.type === 'schedule') return c.cron_expression || null;
-				if (c.type === 'internal_event') return c.event_key || null;
+				if (c.type === 'internal_event') return c.event_key ? translateEventKey(c.event_key) : null;
 				if (c.type === 'webhook') return 'webhook';
 				return null;
 			}

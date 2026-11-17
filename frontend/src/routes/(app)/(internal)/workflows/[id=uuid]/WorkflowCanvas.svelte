@@ -3,7 +3,7 @@
 	import { refreshAll, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { safeTranslate, translateEventKey } from '#lib/utils/i18n.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { setContext } from 'svelte';
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
@@ -42,7 +42,6 @@
 
 	interface Props {
 		graph: any;
-		workflowName: string;
 		workflowDescription?: string | null;
 		initialVersionNumber: number;
 		workflowId: string;
@@ -65,7 +64,6 @@
 
 	let {
 		graph,
-		workflowName,
 		workflowDescription = null,
 		initialVersionNumber,
 		workflowId,
@@ -130,27 +128,29 @@
 
 			case 'action': {
 				const config = domain.action_config ?? {};
+				const type = config.type ? safeTranslate(config.type) : null;
 				switch (config.type) {
 					case 'create_object':
 					case 'read_objects':
-						return config.model ? `${config.type} · ${config.model}` : config.type;
+					case 'update_object':
+						return config.model ? `${type} · ${safeTranslate(config.model)}` : type;
 					case 'http_request': {
 						const url = (config.url ?? '').replace(/^https?:\/\//, '');
 						const short = url.length > 30 ? `${url.slice(0, 30)}…` : url;
-						return short ? `${config.method ?? 'GET'} ${short}` : config.type;
+						return short ? `${config.method ?? 'GET'} ${short}` : type;
 					}
 					case 'provision_folder':
-						return config.name || config.type;
+						return config.name || type;
 					case 'provision_user':
-						return config.email || config.type;
+						return config.email || type;
 					case 'manage_group_membership':
 						return `${config.operation ?? 'add'} ${config.builtin_group ?? ''}`.trim();
 					case 'ai_extract': {
 						const fields = Object.keys(config.schema?.properties ?? {});
-						return fields.length ? `ai_extract · ${fields.join(', ')}` : config.type;
+						return fields.length ? `${type} · ${fields.join(', ')}` : type;
 					}
 					default:
-						return config.type ?? null;
+						return type;
 				}
 			}
 			case 'subprocess':
@@ -172,7 +172,7 @@
 					case 'schedule':
 						return config.cron_expression || null;
 					case 'internal_event':
-						return config.event_key || null;
+						return config.event_key ? translateEventKey(config.event_key) : null;
 					case 'webhook':
 						return 'webhook';
 					default:
@@ -1849,7 +1849,6 @@
 
 <div class="workflow-builder flex flex-col h-full gap-3">
 	<div class="flex items-center gap-3 shrink-0">
-		<h1 class="text-lg font-semibold text-surface-900-100">{workflowName}</h1>
 		<span class="badge {badge.class} text-xs" data-testid="version-badge">
 			v{versionNumber} · {badge.label()}
 		</span>
@@ -1874,7 +1873,7 @@
 			</Switch>
 			<div class="flex items-center gap-1" title={m.runTimeoutHint()}>
 				<i class="fa-solid fa-hourglass-half text-[10px] text-surface-500"></i>
-				<span class="text-[10px] uppercase tracking-wide text-surface-500">
+				<span class="text-[10px] uppercase tracking-wide text-surface-500 whitespace-nowrap">
 					{m.runTimeout()}
 				</span>
 				<input
@@ -1915,7 +1914,9 @@
 			</span>
 		{/if}
 		{#if workflowDescription}
-			<p class="text-sm text-surface-600-400 truncate">{workflowDescription}</p>
+			<p class="text-sm text-surface-600-400 truncate min-w-0 flex-1" title={workflowDescription}>
+				{workflowDescription}
+			</p>
 		{/if}
 		<div class="ml-auto flex items-center justify-end gap-2 shrink-0">
 			{#if !readonly}

@@ -355,15 +355,12 @@ ALSO_NEEDS = {
     # same: the decision is a POST on the version
     review_evidence.__name__: {actions.CREATE},
     # same: each step is a POST on the revision
-    **{
-        tool.__name__: {actions.CREATE}
-        for tool in (
-            submit_document_for_review,
-            approve_document,
-            request_document_changes,
-            publish_document,
-        )
-    },
+    submit_document_for_review.__name__: {actions.CREATE},
+    approve_document.__name__: {actions.CREATE},
+    request_document_changes.__name__: {actions.CREATE},
+    publish_document.__name__: {actions.CREATE},
+    # sets the content on the revision it creates
+    create_document.__name__: {actions.UPDATE},
 }
 
 
