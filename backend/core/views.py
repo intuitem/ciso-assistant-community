@@ -16951,25 +16951,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 {"folder": "You do not have permission to add a findings binder here"}
             )
 
-        # An audit can carry more than one binder, so get_or_create would raise
-        # MultipleObjectsReturned. Oldest wins, for a stable choice.
-        binder = (
-            FindingsAssessment.objects.filter(compliance_assessment=audit)
-            .order_by("created_at")
-            .first()
-        )
+        binder = FindingsAssessment.binder_of(audit)
         created = binder is None
         if created:
-            binder = FindingsAssessment.objects.create(
-                compliance_assessment=audit,
-                # Distinguishable at a glance from the audit it belongs to.
-                name=str(_("%(audit)s (findings)")) % {"audit": audit.name},
-                folder=audit.folder,
-                perimeter=audit.perimeter,
-                category=FindingsAssessment.Category.AUDIT,
-                description=str(_("Findings raised from %(audit)s"))
-                % {"audit": audit.name},
-            )
+            binder = FindingsAssessment.create_binder(audit)
         return Response(
             {"id": str(binder.id), "name": binder.name, "created": created},
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
